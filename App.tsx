@@ -7,12 +7,14 @@ import NetworkMap from './components/NetworkMap';
 import DiaryEntry from './components/DiaryEntry';
 import AudioPlayer from './components/AudioPlayer';
 import WhatIsGroveCarousel from './components/WhatIsGroveCarousel';
+import PromptHooks from './components/PromptHooks';
 import { SectionId, TerminalState } from './types';
 import { INITIAL_TERMINAL_MESSAGE } from './constants';
 import { generateArtifact } from './services/geminiService';
 
 const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<SectionId>(SectionId.STAKES);
+  const [externalQuery, setExternalQuery] = useState<{ display: string; query: string } | null>(null);
   
   const [terminalState, setTerminalState] = useState<TerminalState>({
     isOpen: false, // Default closed for cleaner first impression
@@ -64,6 +66,11 @@ const App: React.FC = () => {
     }));
   };
 
+  const handlePromptHook = (data: { display: string; query: string }) => {
+    setTerminalState(prev => ({ ...prev, isOpen: true }));
+    setExternalQuery(data);
+  };
+
   return (
     <div className="bg-paper min-h-screen">
       
@@ -72,6 +79,8 @@ const App: React.FC = () => {
         activeSection={activeSection} 
         terminalState={terminalState} 
         setTerminalState={setTerminalState} 
+        externalQuery={externalQuery}
+        onQueryHandled={() => setExternalQuery(null)}
       />
 
       {/* SECTION 1: THE STAKES (HERO) - Updated to 'Paper' aesthetic */}
@@ -85,8 +94,8 @@ const App: React.FC = () => {
           </div>
 
           <h1 className="font-display text-6xl md:text-8xl font-bold mb-8 leading-[0.9] text-ink tracking-tight">
-            The $380 Billion <br/> 
-            <span className="italic text-grove-forest">Bet Against You</span>
+            The $380 Billion Bet<br/> 
+            <span className="italic text-grove-forest">Against You.</span>
           </h1>
           
           <div className="w-16 h-1 bg-ink/10 mx-auto mb-10"></div>
@@ -98,14 +107,18 @@ const App: React.FC = () => {
           <p className="font-sans text-ink-muted text-lg max-w-xl mx-auto mb-16">
              They're building a world where intelligence is a utility you pay for monthly — forever. But their bet has a fundamental flaw.
           </p>
-          
-          <button 
-            onClick={() => document.getElementById(SectionId.RATCHET)?.scrollIntoView({ behavior: 'smooth' })} 
-            className="group flex items-center space-x-3 mx-auto px-8 py-3 bg-white border border-ink/10 rounded-full shadow-sm hover:shadow-md hover:border-grove-forest/30 transition-all duration-300"
-          >
-            <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink group-hover:text-grove-forest transition-colors">See the flaw</span>
-            <svg className="w-4 h-4 text-ink-muted group-hover:text-grove-forest group-hover:translate-y-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-          </button>
+
+          <div className="space-y-6">
+            <button 
+              onClick={() => document.getElementById(SectionId.RATCHET)?.scrollIntoView({ behavior: 'smooth' })} 
+              className="group flex items-center space-x-3 mx-auto px-8 py-3 bg-white border border-ink/10 rounded-full shadow-sm hover:shadow-md hover:border-grove-forest/30 transition-all duration-300"
+            >
+              <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink group-hover:text-grove-forest transition-colors">See the flaw</span>
+              <svg className="w-4 h-4 text-ink-muted group-hover:text-grove-forest group-hover:translate-y-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            </button>
+            <PromptHooks sectionId={SectionId.STAKES} onHookClick={handlePromptHook} />
+          </div>
+
         </div>
       </section>
 
@@ -142,15 +155,16 @@ const App: React.FC = () => {
           
           <ThesisGraph />
 
-          <div className="mt-16 text-center">
+          <div className="mt-16 text-center space-y-6">
              <button onClick={() => document.getElementById(SectionId.WHAT_IS_GROVE)?.scrollIntoView({ behavior: 'smooth' })} className="text-ink text-sm font-bold font-mono uppercase tracking-wider hover:text-grove-forest transition-colors flex items-center justify-center space-x-2 mx-auto border-b border-transparent hover:border-grove-forest pb-1">
                 <span>See the solution</span>
              </button>
+             <PromptHooks sectionId={SectionId.RATCHET} onHookClick={handlePromptHook} />
           </div>
         </section>
 
         {/* SECTION 3: WHAT IS THE GROVE (CAROUSEL) */}
-        <WhatIsGroveCarousel />
+        <WhatIsGroveCarousel onPromptHook={handlePromptHook} />
 
         {/* SECTION 4: ARCHITECTURE */}
         <section id={SectionId.ARCHITECTURE} className="min-h-screen py-24 flex flex-col justify-center border-t border-ink/5 max-w-5xl mx-auto content-z">
@@ -168,6 +182,7 @@ const App: React.FC = () => {
                    The Grove inverts this. Routine thinking runs locally, on hardware you own. Your agents know your history because that history lives with you.
                 </p>
              </div>
+             <PromptHooks sectionId={SectionId.ARCHITECTURE} onHookClick={handlePromptHook} />
           </div>
 
           <ArchitectureDiagram onArtifactRequest={handleArtifactRequest} />
@@ -182,9 +197,10 @@ const App: React.FC = () => {
              <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
                Traditional platforms monetize through extraction. The Grove inverts this. The Foundation funds infrastructure by taxing inefficiency — and the tax shrinks as communities mature.
              </p>
-             <p className="font-sans text-lg text-grove-clay font-medium italic">
+             <p className="font-sans text-lg text-grove-clay font-medium italic mb-8">
                "Progressive taxation in reverse. You pay more when you cost more. You pay less as you develop."
              </p>
+             <PromptHooks sectionId={SectionId.ECONOMICS} onHookClick={handlePromptHook} />
           </div>
           
           <EconomicsSlider />
@@ -196,7 +212,8 @@ const App: React.FC = () => {
           <div className="max-w-5xl mx-auto w-full">
              <div className="text-center mb-16">
                <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">04. The Difference</span>
-               <h2 className="font-display text-5xl font-bold text-ink">Tool vs. Staff</h2>
+               <h2 className="font-display text-5xl font-bold text-ink mb-8">Tool vs. Staff</h2>
+               <PromptHooks sectionId={SectionId.DIFFERENTIATION} onHookClick={handlePromptHook} />
              </div>
 
              {/* SPLIT SCREEN CONTRAST */}
@@ -272,9 +289,10 @@ const App: React.FC = () => {
                   <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
                     Your instance of The Grove connects to other instances. When an agent community solves a problem, the solution propagates. 
                   </p>
-                  <p className="font-serif text-lg text-ink/80 leading-relaxed">
+                  <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
                     This is the part that's hard to copy. Not the local inference. Not the hybrid architecture. The network of communities developing genuine capability.
                   </p>
+                  <PromptHooks sectionId={SectionId.NETWORK} onHookClick={handlePromptHook} className="justify-start" />
                </div>
                <div className="lg:col-span-7">
                   <NetworkMap />
@@ -317,9 +335,10 @@ const App: React.FC = () => {
              <div className="text-center mb-16">
                <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">06. Get Involved</span>
                <h2 className="font-display text-5xl font-bold text-ink mb-6">Join the Network</h2>
-               <p className="font-serif text-xl text-ink/70 max-w-2xl mx-auto">
+               <p className="font-serif text-xl text-ink/70 max-w-2xl mx-auto mb-8">
                  The Grove is in active development. The research is public. The code will be open.
                </p>
+               <PromptHooks sectionId={SectionId.GET_INVOLVED} onHookClick={handlePromptHook} />
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">

@@ -9,6 +9,10 @@ const getAIClient = () => {
     console.error("API_KEY is missing from environment variables.");
     throw new Error("API Key missing");
   }
+  // Sanity check for key format to help debugging
+  if (!apiKey.startsWith("AIza")) {
+     console.warn("Potential API Key configuration issue: Key does not start with 'AIza'.");
+  }
   return new GoogleGenAI({ apiKey });
 };
 
@@ -24,6 +28,7 @@ export const initChatSession = (systemInstruction: string) => {
     });
   } catch (error) {
     console.error("Failed to initialize chat session", error);
+    chatSession = null;
   }
 };
 
@@ -37,7 +42,9 @@ export const sendMessageStream = async (
   }
 
   if (!chatSession) {
-    return "Error: Terminal Offline.";
+    const errorMsg = "Error: Terminal Offline. Check API Configuration.";
+    onChunk(errorMsg);
+    return errorMsg;
   }
 
   try {
@@ -53,21 +60,42 @@ export const sendMessageStream = async (
       }
     }
     return fullText;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Stream error:", error);
-    return "Error: Connection interrupted.";
+    
+    let errorMsg = "Error: Connection interrupted.";
+    const errorMessage = error.message || error.toString();
+    
+    if (errorMessage.includes("API key not valid") || errorMessage.includes("API_KEY_INVALID")) {
+        console.warn(`API Key rejected. Ensure this domain is allowed in Google Cloud Console: ${window.location.origin}/*`);
+        // Specific advice for the most common production error
+        errorMsg = "SYSTEM ERROR: API Key Rejected. Check 'Application Restrictions' (HTTP Referrers) in Google Cloud Console to ensure this domain is allowed.";
+    } else if (errorMessage.includes("429")) {
+        errorMsg = "SYSTEM ERROR: Rate limit exceeded.";
+    } else if (errorMessage.includes("Failed to fetch")) {
+        errorMsg = "SYSTEM ERROR: Network connectivity issue.";
+    }
+
+    onChunk(errorMsg);
+    return errorMsg;
   }
 };
 
 export const generateArtifact = async (prompt: string, context: string): Promise<string> => {
-  const ai = getAIClient();
   try {
+    const ai = getAIClient();
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `Context: ${context}. \n\n Task: ${prompt}. \n\n Output format: detailed technical markdown or JSON/YAML where appropriate.`,
     });
     return response.text || "Artifact generation failed.";
-  } catch (error) {
-    return "Error: Unable to generate artifact.";
+  } catch (error: any) {
+    console.error("Artifact generation error", error);
+    const errorMessage = error.message || error.toString();
+    if (errorMessage.includes("API key not valid") || errorMessage.includes("API_KEY_INVALID")) {
+        console.warn(`API Key rejected. Ensure this domain is allowed in Google Cloud Console: ${window.location.origin}/*`);
+        return "SYSTEM ERROR: API Key Rejected. Check Domain Restrictions in Google Cloud Console.";
+    }
+    return "Error: Unable to generate artifact. Check API Configuration.";
   }
 };

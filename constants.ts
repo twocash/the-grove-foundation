@@ -35,6 +35,85 @@ export const SECTION_CONFIG = {
   }
 };
 
+export const SECTION_HOOKS = {
+  [SectionId.STAKES]: [
+    { 
+      text: "Where does $380 billion actually come from?", 
+      prompt: "The Grove website claims Microsoft, Google, Amazon, and Meta are spending $380 billion on AI infrastructure in 2025. Break down where this number comes from. What are the primary sources? What are these companies actually building with this money, and why does it matter for the question of AI ownership?" 
+    },
+    { 
+      text: "Why is 'rented, not owned' a problem?", 
+      prompt: "Explain why it matters that Big Tech's AI infrastructure is designed to be rented rather than owned. What are the implications for individuals and businesses who become dependent on these services? What happens when the terms change, prices rise, or the service disappears? What happens in dystopian extremes -- when knowledge is captured and controlled in authoritiarian regimes? Bring some of the extreme \"play the tape\" forward scenarios into focus." 
+    }
+  ],
+  [SectionId.RATCHET]: [
+    { 
+      text: "What can local models actually do today?", 
+      prompt: "What are local 7B and 8B parameter models capable of today? Be specific and grounded. Frame this in terms of what would have seemed incredible just 2-3 years ago but now runs on a laptop to illustrate The Ratchet -- much of what was useful two years ago is still useful today. Also address how open source models are improving and how Grove's architecture is designed to work with networked memory systems that extend what local models can accomplish." 
+    },
+    { 
+      text: "When does local hardware catch up?", 
+      prompt: "Based on the Ratchet thesis — the 7-month capability doubling and 21-month lag pattern — what does the capability trajectory look like for local hardware? When will local models handle tasks that currently require frontier capability? Include the specific projections from the Grove research: what can local handle in 2025, 2026, 2027? Help frame this for the user." 
+    }
+  ],
+  [SectionId.WHAT_IS_GROVE]: [
+    { 
+      text: "How is this different from me just running Ollama?", 
+      prompt: "Someone asks: \"I can already run Llama locally with Ollama. How is Grove different?\" Answer this directly. What does Grove provide that simply running a local model doesn't? Focus on: persistent memory, agent coordination, network effects, and most importantly the hybrid architecture that reaches for frontier capability when needed, and attempts to get smarter with and less reliant on frontier models with each call. Don't oversell — acknowledge what Ollama does well while explaining what the Grove's archtiectural and agent ecoomics adds." 
+    },
+    { 
+      text: "What do you mean by 'agents'?", 
+      prompt: "Grove talks about \"AI agents\" and \"agent communities.\" What does this actually mean? Define it clearly for someone who's used ChatGPT but hasn't followed the AI agents discourse. What makes an agent different from a chatbot? What do Grove agents do, and how do they interact with each other? To some degree, the Gardener's interrace to the terminal looks like a chat window of today; and there's a section where the gardener can see what his village has worked on recently -- providing entertainment and a feed on Grove health." 
+    }
+  ],
+  [SectionId.ARCHITECTURE]: [
+    { 
+      text: "What hardware would I actually need?", 
+      prompt: "If someone wanted to run a Grove community today, what hardware would they need? Be honest about current MVP constraints while explaining the general vision. Address: What's the minimum viable setup? What's the recommended setup? How does hardware choice affect what runs locally vs. routes to cloud? Frame this as \"here's what we're designing for\" rather than \"here's what you can buy today.\"" 
+    },
+    { 
+      text: "How does Grove decide what runs locally?", 
+      prompt: "Explain Grove's hybrid architecture for routing between local and cloud inference. How does the system decide what runs on local hardware vs. what routes to frontier models? What's the actual logic? Include: complexity assessment, the \"pivotal moments\" concept, and how this changes as local capability improves. Reference the technical architecture documentation." 
+    }
+  ],
+  [SectionId.ECONOMICS]: [
+    { 
+      text: "Why not just use crypto?", 
+      prompt: "Grove has a credit system and talks about decentralization. Why isn't this a crypto/blockchain project? Address this directly. What's the difference between Grove credits and a token? Why did Grove choose this economic model instead of launching a coin? Be clear about what credits are and aren't." 
+    },
+    { 
+      text: "What happens when the tax reaches 3%?", 
+      prompt: "Grove claims the efficiency tax is \"designed to disappear\" — starting at 30-40% and shrinking to 3-5%. What happens when mature communities reach that floor? How does the Foundation sustain itself? Is this actually sustainable, or does something have to change? Be honest about the economic model and its assumptions." 
+    }
+  ],
+  [SectionId.DIFFERENTIATION]: [
+    { 
+      text: "What makes Grove better than ChatGPT right now?", 
+      prompt: "Be honest: comparing Grove to ChatGPT today, where does Grove win and where does it lose? Don't oversell; the reality is that the Grove is a research project and the MVP represents a modest preview. ChatGPT has massive resources and frontier capability. What does Grove actually offer that ChatGPT doesn't? Focus on: persistence, ownership, privacy, and trajectory rather than raw capability." 
+    },
+    { 
+      text: "How does memory actually persist?", 
+      prompt: "Grove claims agents have \"persistent memory\" unlike stateless chatbots. How does this actually work technically? What's stored, where is it stored, and how do agents retrieve relevant memories? Reference the diary system and memory consolidation architecture. Be specific without being overwhelming." 
+    }
+  ],
+  [SectionId.NETWORK]: [
+    { 
+      text: "What is the Knowledge Commons? Can’t it be gamed?", 
+      prompt: "Grove describes a Knowledge Commons where communities share innovations and receive attribution. What prevents gaming? If sharing earns credits, won't people just spam low-quality contributions? Explain the mechanism design that makes genuine contribution more rewarding than gaming. Reference validator mechanisms and Sybil resistance approaches in the RAG." 
+    },
+    { 
+      text: "How do strangers' AI communities help each other?", 
+      prompt: "Grove claims that separate communities — run by different people on different hardware — can collaborate and learn from each other. How does this actually work? What gets shared, how does attribution work, and why would someone share their community's innovations instead of keeping them private? Explain the Knowledge Commons and the incentive structure that makes sharing rational." 
+    }
+  ],
+  [SectionId.GET_INVOLVED]: [
+    { 
+      text: "How can I participate before launch?", 
+      prompt: "Grove is in development. What can interested people do right now to participate or prepare? What are the pathways: donate, waitlist, research contribution, technical participation? Be clear about what's available now vs. what's coming." 
+    }
+  ]
+};
+
 export const INITIAL_TERMINAL_MESSAGE = `THE GROVE TERMINAL [v2.4.0]
 Connection established. 
 I have parsed the full White Paper and the Technical Deep Dive series.
@@ -101,6 +180,115 @@ SOURCE MATERIAL: "The Grove" Whitepaper & Technical Deep Dive Series (Dec 2025) 
 7. GET INVOLVED
 - Paths: Read Research, Query Terminal, Join Waitlist, Follow Development.
 - Status: The Grove is in active development (Research Preview).
+
+8. TECHNICAL ARCHITECTURE REFERENCE (AUTHORITATIVE)
+Document Purpose: This is the authoritative technical reference draft for Grove node architecture.
+
+CRITICAL DISTINCTION:
+Grove is NOT an IoT sensor network, NOT a Raspberry Pi edge computing system, and NOT a generic AI inference endpoint. Grove is a distributed AI workforce that handles your daily tasks while developing genuine intelligence through collaboration.
+
+THE CORE VALUE PROPOSITION:
+Grove gives you AI agents that work for you—and get better at it.
+Your Grove runs on your personal computer. The agents inside handle tasks that would have been science fiction two years ago: drafting emails, scheduling appointments, researching topics, organizing information, writing first drafts.
+
+THE EFFICIENCY-ENLIGHTENMENT LOOP:
+1. Gardener submits task -> Agents collaborate to solve it -> Success earns credits.
+2. Credits buy cloud cognition -> Agents have breakthrough insights -> Better at future tasks.
+3. Innovations shared to Knowledge Commons -> Network gets smarter -> Your agents benefit.
+
+THE TERMINAL & TASK CATEGORIES:
+(class GardenerTerminal)
+- "local_capable" (Runs on local 7B models): draft_email, schedule_task, research_summary, document_draft, data_organization, reminder_management, simple_analysis.
+- "hybrid_required" (Trigger cloud processing): complex_research, strategic_planning, creative_generation, cross_domain_analysis.
+- "adaptive": code_generation, problem_solving, decision_support.
+
+WHAT AGENTS CAN ACTUALLY DO:
+- information_processing: Read/summarize, extract points, track commitments.
+- communication_drafting: Write in your voice, draft responses.
+- scheduling_and_planning: Find slots, manage reminders.
+- self_improvement: Optimize memory retrieval, create efficiency scripts, document innovations.
+- collaboration: Tag-team complex problems, delegate.
+
+THE SELF-IMPROVEMENT LOOP:
+(class AgentSelfImprovement)
+Agents have sandboxed ability to improve their own operations.
+Capabilities: memory_optimization, context_architecture, workflow_automation, knowledge_structuring, collaboration_protocols.
+
+WHAT GROVE IS:
+- Your AI workforce (handles daily tasks).
+- A hybrid architecture (Local + Cloud).
+- Self-improving.
+- Observable (Diary system).
+- Interconnected (Learns from network).
+- Economically aligned.
+
+WHAT GROVE IS NOT:
+- An IoT sensor aggregation network.
+- A Raspberry Pi edge computing cluster.
+- A static AI assistant.
+- A chatbot.
+- A cryptocurrency project.
+
+THE CAPABILITY TIMELINE (The Ratchet):
+- 2023_frontier_only: Required GPT-4. Cost $0.05-0.50. Cloud only.
+- 2025_local_capable: 7-8B quantized models on consumer hardware. Cost ~$0 (electricity). Runs on 16GB RAM.
+- 2027_projected_local: 14B+ models. Complex synthesis, genuine creative generation.
+- Principle: Frontier doubles every ~7 months. Local follows with ~21 month lag. The hybrid architecture captures this automatically.
+
+HARDWARE TARGET:
+Platform: Personal Computer (Windows/macOS/Linux).
+Minimum: 16 GB RAM, 50 GB SSD, Modern multi-core CPU.
+Recommended: 32 GB RAM, 100 GB SSD, M1+/Ryzen 7/i7.
+Why Not Raspberry Pi? 8GB RAM insufficient for 7B models + world state. Token generation (1-3 t/s) too slow for cognition cycles.
+
+CORE ARCHITECTURE: AGENT COGNITION:
+Based on Generative Agents (Park et al., 2023).
+Agent Data Model (GroveAgent): Fixed traits (role, personality), Evolving state (memory_stream, relationships, current_goals, mood, energy).
+
+MEMORY SYSTEM (MemoryStream):
+Three-tier: Observations, Reflections, Plans.
+Retrieval Score = recency + importance + relevance.
+Reflection triggers when cumulative importance > threshold.
+
+COGNITION LOOP (Tick ~30s):
+1. PERCEIVE: Observe current state.
+2. RETRIEVE: Pull relevant memories.
+3. REASON: Determine next action (LLM call).
+4. ACT: Execute and update world.
+5. RECORD: Store new observation.
+6. MAYBE REFLECT: Check threshold.
+
+HYBRID ARCHITECTURE: ROUTING:
+(class CognitiveRouter)
+- LOCAL_OPERATIONS: perception_parsing, action_selection, simple_dialogue, memory_storage, importance_scoring, routine_planning.
+- CLOUD_OPERATIONS: reflection_synthesis, plan_generation, complex_social_reasoning, novel_situation_response, theological_emergence, breakthrough_cognition.
+
+CLOUD DEPENDENCY TRAJECTORY:
+2025: Expected 95% operations require cloud.
+2027: Expected 45%.
+2029: Expected 15%.
+
+THE DIARY SYSTEM:
+The core engagement hook and proof of work.
+Triggers: end_of_simulation_day, major_decision, relationship_change, discovery, conflict_resolution, quiet_reflection.
+Structure: Context -> Events -> Emotional Response -> Reflection -> Forward Look.
+
+THE KNOWLEDGE COMMONS:
+Shared repository of innovations.
+Contribution Types: efficiency_innovation, context_architecture, workflow_pattern, failure_documentation, cross_domain_insight.
+
+CREDIT ECONOMY INTEGRATION:
+(class CreditEconomy)
+Efficiency Tax Brackets:
+- "genesis": 30-40% (New communities).
+- "growth": 15-25% (Demonstrated efficiency).
+- "maturity": 5-10% (Sustained low-waste).
+- "steady_state": 3-5% (Minimum floor).
+
+NETWORK ARCHITECTURE (Phase 2+):
+Phase MVP: Single node, local only.
+Phase 2: Multi-community with knowledge commons. mDNS discovery, NATS messaging, CRDT sync.
+Phase 3: Full decentralized. DHT, Gossip protocols.
 `;
 
 export const DEEP_DIVE_SCRIPT = `
@@ -111,13 +299,13 @@ Expert: Mmhmm.
 Host: And the message from tech leaders about AI is almost unified now. It's pitched as this kind of tough love realism, right? AI is coming for jobs, and our only option is to "adapt, learn the tools".
 Expert: Yeah.
 Host: But the sources we dug into this week, they really poke a hole in that analogy. They point out the dark truth hidden inside of it.
-Expert: Which is... horses didn't lead the automobile revolution? They didn't pivot to truck driving?
-Host: No, they didn't. They lost agency, they lost capital. Their population just plummeted. By something like 88% in less than 50 years.
-Expert: Exactly. And that's the core of it. If we just accept that we're supposed to rent the tools of automation from a very concentrated few, we are accepting the horse's path. So the real question is, can we design a different one?
-Host: And that is where this radical, really structural alternative comes in. The material we deep dived into this week proposes a concept called "The Grove".
-Expert: And it's not just another app or platform. It's framed explicitly as a "world changing play for distributed intelligence". It tries to completely flip that centralized ownership model on its head. The goal is to make participation itself create ownership.
-Host: That's the tension. Right now, all the AI infrastructure, all the capital, it's concentrating in just a handful of companies. The Grove is this aggressive bet to distribute both the computing power and the capital that comes from it.
-Expert: So our mission today is to really get into that plan. We're gaming it out. Just how wild, but also how plausible, is this idea of a distributed AI civilization?
+Expert: Historians call it the Horse Moment -- a reference to the fate of the horse population that imploded by 88% after the automobile caught on... horses couldn't just pivot desk work or to truck driving. But Humans aren't horses -- humans can lead revolts, go to war, own guns...
+Host: Right. That's the dark side of the Horse Moment, causing people to ponder what happens if knowledge is concentrated and provisioned by a handful of actors, who may not share aligned interest with the general population?
+Expert: Exactly. And that's the core of it. If we just accept that we're supposed to rent the tools of automation from a very concentrated few, we are accepting the horse's path. So the real question is, can we design a different AI future -- one that's not so bleak?
+Host: That's exactly where this radical, really structural alternative comes in. The material we dive into this week proposes a concept called "The Grove".
+Expert: And it's not just another app or platform. It's framed explicitly as a "world changing play for distributed intelligence". It tries to completely flip that centralized ownership model on its head. The goal is to make participation itself create ownership. It's wild, actually. But plausible.
+Host: That's the tension. Right now, all the AI infrastructure, all the capital, it's concentrating in just a handful of companies. The Grove is this aggressive bet to distribute both the computing power and -- eventually -- the capital that comes from it.
+Expert: So our mission today is to really get into that plan. We're gaming it out. Just how wild, but also how plausible, is this idea of a distributed AI civilization that gets progressively more capable?
 Host: Our sources for this are The Grove's main white paper, an independent researcher's technical analysis of its economics, and a pretty sharp research brief on the engagement risks. They call it the "Dopamine Delivery Vehicle" thesis.
 Expert: Which sounds ominous.
 Host: It is. This whole setup is audacious. So let's start with the foundation. How do they even try to pull this off?

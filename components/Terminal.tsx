@@ -7,6 +7,8 @@ interface TerminalProps {
   activeSection: SectionId;
   terminalState: TerminalState;
   setTerminalState: React.Dispatch<React.SetStateAction<TerminalState>>;
+  externalQuery?: { display: string; query: string } | null;
+  onQueryHandled?: () => void;
 }
 
 const SYSTEM_PROMPT = `
@@ -59,7 +61,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
       const text = currentTextBuffer.join('\n');
       if (text.trim()) {
         elements.push(
-          <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 text-ink leading-relaxed font-serif text-sm">
+          <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 leading-relaxed font-serif text-sm">
             {parseInline(text)}
           </span>
         );
@@ -103,7 +105,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
   return <>{elements}</>;
 };
 
-const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTerminalState }) => {
+const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTerminalState, externalQuery, onQueryHandled }) => {
   const [input, setInput] = useState('');
   const [dynamicSuggestion, setDynamicSuggestion] = useState<string>('');
   const [currentTopic, setCurrentTopic] = useState<string>('');
@@ -131,15 +133,18 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
   }, [terminalState.messages, terminalState.isOpen]);
 
-  const handleSend = async (text: string = input) => {
-    if (!text.trim()) return;
+  const handleSend = async (manualQuery?: string, manualDisplay?: string) => {
+    const textToSend = manualQuery !== undefined ? manualQuery : input;
+    if (!textToSend.trim()) return;
+
+    const textToDisplay = manualDisplay !== undefined ? manualDisplay : textToSend;
 
     const displayId = Date.now().toString();
-    const displayText = isVerboseMode ? `${text} --verbose` : text;
+    const finalDisplayText = isVerboseMode ? `${textToDisplay} --verbose` : textToDisplay;
 
     setTerminalState(prev => ({
       ...prev,
-      messages: [...prev.messages, { id: displayId, role: 'user', text: displayText }],
+      messages: [...prev.messages, { id: displayId, role: 'user', text: finalDisplayText }],
       isLoading: true
     }));
     setInput('');
@@ -150,8 +155,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       messages: [...prev.messages, { id: botMessageId, role: 'model', text: '', isStreaming: true }]
     }));
 
+    // Add context to the prompt sent to API, but don't show in UI
+    const promptContext = `[Context: User is viewing the ${SECTION_CONFIG[activeSection]?.title || activeSection} section. Provide a substantive response that reinforces the section's message while adding depth.]`;
+    const apiPrompt = isVerboseMode 
+        ? `${promptContext} ${textToSend} --verbose. Give me the deep technical breakdown.` 
+        : `${promptContext} ${textToSend}`;
+
     let accumulatedRawText = "";
-    const apiPrompt = isVerboseMode ? `${text} --verbose. Give me the deep technical breakdown.` : text;
 
     await sendMessageStream(apiPrompt, (chunk) => {
       accumulatedRawText += chunk;
@@ -185,6 +195,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }));
   };
 
+  useEffect(() => {
+    if (externalQuery && onQueryHandled) {
+        handleSend(externalQuery.query, externalQuery.display);
+        onQueryHandled();
+    }
+  }, [externalQuery]);
+
   const toggleVerboseMode = () => setIsVerboseMode(prev => !prev);
   const handleSuggestion = (hint: string) => handleSend(hint);
   const toggleTerminal = () => setTerminalState(prev => ({ ...prev, isOpen: !prev.isOpen }));
@@ -212,7 +229,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           {/* Header */}
           <div className="p-6 border-b border-ink/5 flex justify-between items-center bg-white">
             <div className="flex items-center space-x-3">
-              <div className="font-display font-bold text-lg text-ink">The Companion</div>
+              <div className="font-display font-bold text-lg text-ink">The Terminal 🌱</div>
               {isVerboseMode && (
                 <span className="bg-grove-clay text-white px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm">
                    Scholar Mode
@@ -226,30 +243,35 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
           {/* Messages Area - Thread Style */}
           <div className="flex-1 overflow-y-auto p-6 space-y-8 terminal-scroll bg-white">
-            {terminalState.messages.map((msg, idx) => (
-              <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                
-                {/* Avatar / Label */}
-                <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
-                  {msg.role === 'user' ? 'You' : 'The Grove'}
-                </div>
+            {terminalState.messages.map((msg, idx) => {
+              // Check if message is a system error
+              const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
+              
+              return (
+                <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  
+                  {/* Avatar / Label */}
+                  <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
+                    {msg.role === 'user' ? 'You' : 'The Grove'}
+                  </div>
 
-                {/* Message Body */}
-                <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                  {msg.role === 'user' ? (
-                     <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
-                        {msg.text.replace(' --verbose', '')}
-                     </div>
-                  ) : (
-                     <div className="pl-4 border-l-2 border-grove-forest/30">
-                        <MarkdownRenderer content={msg.text} />
-                        {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
-                     </div>
-                  )}
-                </div>
+                  {/* Message Body */}
+                  <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                    {msg.role === 'user' ? (
+                      <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
+                          {msg.text.replace(' --verbose', '')}
+                      </div>
+                    ) : (
+                      <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
+                          <MarkdownRenderer content={msg.text} />
+                          {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                      </div>
+                    )}
+                  </div>
 
-              </div>
-            ))}
+                </div>
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
 

@@ -68,8 +68,8 @@ const AudioPlayer: React.FC = () => {
           speechConfig: {
             multiSpeakerVoiceConfig: {
               speakerVoiceConfigs: [
-                { speaker: 'Host', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Puck' } } },
-                { speaker: 'Expert', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Fenrir' } } }
+                { speaker: 'Host', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Orus' } } },
+                { speaker: 'Expert', voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } }
               ]
             }
           }
