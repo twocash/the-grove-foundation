@@ -1,6 +1,7 @@
 export enum SectionId {
   STAKES = 'stakes',
   RATCHET = 'ratchet',
+  WHAT_IS_GROVE = 'what_is_grove',
   ARCHITECTURE = 'architecture',
   ECONOMICS = 'economics',
   DIFFERENTIATION = 'differentiation',
