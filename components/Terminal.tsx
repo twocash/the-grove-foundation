@@ -52,7 +52,7 @@ const parseInline = (text: string) => {
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
   const lines = content.split('\n');
   const elements: React.ReactNode[] = [];
-  
+
   let currentListItems: string[] = [];
   let currentTextBuffer: string[] = [];
 
@@ -75,10 +75,10 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
       elements.push(
         <ul key={`list-${elements.length}`} className="mb-4 space-y-1 ml-4 list-none">
           {currentListItems.map((item, i) => (
-             <li key={i} className="pl-4 relative text-sm font-sans text-ink-muted">
-                <span className="absolute left-0 text-grove-clay top-1.5 w-1 h-1 rounded-full bg-grove-clay"></span>
-                <span>{parseInline(item)}</span>
-             </li>
+            <li key={i} className="pl-4 relative text-sm font-sans text-ink-muted">
+              <span className="absolute left-0 text-grove-clay top-1.5 w-1 h-1 rounded-full bg-grove-clay"></span>
+              <span>{parseInline(item)}</span>
+            </li>
           ))}
         </ul>
       );
@@ -89,7 +89,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
   lines.forEach((line) => {
     const trimmed = line.trim();
     const isList = trimmed.startsWith('* ') || trimmed.startsWith('- ');
-    
+
     if (isList) {
       flushText();
       currentListItems.push(line.replace(/^(\*|-)\s+/, ''));
@@ -110,17 +110,33 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [dynamicSuggestion, setDynamicSuggestion] = useState<string>('');
   const [currentTopic, setCurrentTopic] = useState<string>('');
   const [isVerboseMode, setIsVerboseMode] = useState<boolean>(false);
-  
+  const [ragContext, setRagContext] = useState<string>('');
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fullSystemPrompt = `${SYSTEM_PROMPT}\n\nCURRENT USER CONTEXT: Reading section "${activeSection}".`;
+    fetch('/api/context')
+      .then(res => res.json())
+      .then(data => {
+        if (data.context) {
+          console.log("Loaded Dynamic RAG Context");
+          setRagContext(data.context);
+        }
+      })
+      .catch(err => console.error("Failed to load RAG context:", err));
+  }, []);
+
+  useEffect(() => {
+    // Prefer dynamic context, fallback to static constant if fetch hasn't finished or failed
+    const knowledgeBase = ragContext || GROVE_KNOWLEDGE_BASE;
+    const fullSystemPrompt = `${SYSTEM_PROMPT}\n\nCURRENT USER CONTEXT: Reading section "${activeSection}".\n\n**DYNAMIC KNOWLEDGE BASE:**\n${knowledgeBase}`;
+
     initChatSession(fullSystemPrompt);
     const defaultHint = SECTION_CONFIG[activeSection]?.promptHint || "What is The Grove?";
     setDynamicSuggestion(defaultHint);
     setCurrentTopic('');
-  }, [activeSection]);
+  }, [activeSection, ragContext]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -157,9 +173,9 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
     // Add context to the prompt sent to API, but don't show in UI
     const promptContext = `[Context: User is viewing the ${SECTION_CONFIG[activeSection]?.title || activeSection} section. Provide a substantive response that reinforces the section's message while adding depth.]`;
-    const apiPrompt = isVerboseMode 
-        ? `${promptContext} ${textToSend} --verbose. Give me the deep technical breakdown.` 
-        : `${promptContext} ${textToSend}`;
+    const apiPrompt = isVerboseMode
+      ? `${promptContext} ${textToSend} --verbose. Give me the deep technical breakdown.`
+      : `${promptContext} ${textToSend}`;
 
     let accumulatedRawText = "";
 
@@ -172,7 +188,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
       setTerminalState(prev => ({
         ...prev,
-        messages: prev.messages.map(msg => 
+        messages: prev.messages.map(msg =>
           msg.id === botMessageId ? { ...msg, text: cleanText } : msg
         )
       }));
@@ -182,14 +198,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     const topicMatch = accumulatedRawText.match(/\[\[TOPIC:(.*?)\]\]/);
 
     if (breadcrumbMatch && breadcrumbMatch[1]) setDynamicSuggestion(breadcrumbMatch[1].trim());
-    else setDynamicSuggestion("Tell me more about the architecture."); 
-    
+    else setDynamicSuggestion("Tell me more about the architecture.");
+
     if (topicMatch && topicMatch[1]) setCurrentTopic(topicMatch[1].trim());
 
     setTerminalState(prev => ({
       ...prev,
       isLoading: false,
-      messages: prev.messages.map(msg => 
+      messages: prev.messages.map(msg =>
         msg.id === botMessageId ? { ...msg, isStreaming: false } : msg
       )
     }));
@@ -197,8 +213,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   useEffect(() => {
     if (externalQuery && onQueryHandled) {
-        handleSend(externalQuery.query, externalQuery.display);
-        onQueryHandled();
+      handleSend(externalQuery.query, externalQuery.display);
+      onQueryHandled();
     }
   }, [externalQuery]);
 
@@ -209,11 +225,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   return (
     <>
       {/* Floating Action Button - Clean Ink Style */}
-      <button 
+      <button
         onClick={toggleTerminal}
-        className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${
-          terminalState.isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
-        }`}
+        className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${terminalState.isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
+          }`}
       >
         {terminalState.isOpen ? (
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -225,14 +240,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       {/* Drawer - Library Marginalia Style */}
       <div className={`fixed inset-y-0 right-0 z-40 w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-500 ease-in-out shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full text-ink font-sans">
-          
+
           {/* Header */}
           <div className="p-6 border-b border-ink/5 flex justify-between items-center bg-white">
             <div className="flex items-center space-x-3">
               <div className="font-display font-bold text-lg text-ink">The Terminal 🌱</div>
               {isVerboseMode && (
                 <span className="bg-grove-clay text-white px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm">
-                   Scholar Mode
+                  Scholar Mode
                 </span>
               )}
             </div>
@@ -246,10 +261,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
             {terminalState.messages.map((msg, idx) => {
               // Check if message is a system error
               const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
-              
+
               return (
                 <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  
+
                   {/* Avatar / Label */}
                   <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
                     {msg.role === 'user' ? 'You' : 'The Grove'}
@@ -259,12 +274,12 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                     {msg.role === 'user' ? (
                       <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
-                          {msg.text.replace(' --verbose', '')}
+                        {msg.text.replace(' --verbose', '')}
                       </div>
                     ) : (
                       <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
-                          <MarkdownRenderer content={msg.text} />
-                          {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                        <MarkdownRenderer content={msg.text} />
+                        {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
                       </div>
                     )}
                   </div>
@@ -277,62 +292,61 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
           {/* Interactions Area */}
           <div className="p-6 border-t border-ink/5 bg-paper/50">
-             
-             {/* Suggested Action - Reference Card Style */}
-             <div className="mb-4">
-               <button 
-                 onClick={() => handleSuggestion(dynamicSuggestion)}
-                 className="w-full text-left p-4 bg-white border border-ink/5 rounded-sm hover:border-grove-forest/30 hover:shadow-sm transition-all group"
-               >
-                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-[9px] text-grove-clay font-bold uppercase tracking-widest">
-                       Suggested Inquiry
-                    </span>
-                    <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors font-mono">
-                       →
-                    </span>
-                 </div>
-                 <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
-                   "{dynamicSuggestion || "Start the sequence..."}"
-                 </div>
-               </button>
-             </div>
 
-             <div className="flex items-center space-x-3 mb-4">
-                {/* Verbose Toggle - Wax Seal Style */}
-                <button 
-                  onClick={toggleVerboseMode}
-                  className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${
-                    isVerboseMode 
-                      ? 'bg-grove-clay text-white shadow-sm' 
-                      : 'bg-transparent text-ink-muted border border-ink/10 hover:border-grove-clay hover:text-grove-clay'
+            {/* Suggested Action - Reference Card Style */}
+            <div className="mb-4">
+              <button
+                onClick={() => handleSuggestion(dynamicSuggestion)}
+                className="w-full text-left p-4 bg-white border border-ink/5 rounded-sm hover:border-grove-forest/30 hover:shadow-sm transition-all group"
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[9px] text-grove-clay font-bold uppercase tracking-widest">
+                    Suggested Inquiry
+                  </span>
+                  <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors font-mono">
+                    →
+                  </span>
+                </div>
+                <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
+                  "{dynamicSuggestion || "Start the sequence..."}"
+                </div>
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-3 mb-4">
+              {/* Verbose Toggle - Wax Seal Style */}
+              <button
+                onClick={toggleVerboseMode}
+                className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${isVerboseMode
+                    ? 'bg-grove-clay text-white shadow-sm'
+                    : 'bg-transparent text-ink-muted border border-ink/10 hover:border-grove-clay hover:text-grove-clay'
                   }`}
-                >
-                  {isVerboseMode ? 'Scholar Mode: ON' : 'Enable Scholar Mode'}
-                </button>
-                {currentTopic && <span className="text-[10px] font-mono text-ink-muted">Ref: {currentTopic}</span>}
-             </div>
+              >
+                {isVerboseMode ? 'Scholar Mode: ON' : 'Enable Scholar Mode'}
+              </button>
+              {currentTopic && <span className="text-[10px] font-mono text-ink-muted">Ref: {currentTopic}</span>}
+            </div>
 
-             {/* Input Area */}
-             <div className="relative">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Write a query..."
-                  className="w-full bg-white border border-ink/20 p-3 pl-4 pr-10 text-sm font-serif text-ink focus:outline-none focus:border-grove-forest focus:ring-1 focus:ring-grove-forest/20 transition-all rounded-sm placeholder:italic"
-                  disabled={terminalState.isLoading}
-                  autoComplete="off"
-                />
-                <button 
-                  onClick={() => handleSend()}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-grove-forest transition-colors"
-                >
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-             </div>
+            {/* Input Area */}
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Write a query..."
+                className="w-full bg-white border border-ink/20 p-3 pl-4 pr-10 text-sm font-serif text-ink focus:outline-none focus:border-grove-forest focus:ring-1 focus:ring-grove-forest/20 transition-all rounded-sm placeholder:italic"
+                disabled={terminalState.isLoading}
+                autoComplete="off"
+              />
+              <button
+                onClick={() => handleSend()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-grove-forest transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </button>
+            </div>
           </div>
 
         </div>

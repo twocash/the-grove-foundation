@@ -12,6 +12,7 @@ import { SectionId, TerminalState } from './types';
 import { INITIAL_TERMINAL_MESSAGE } from './constants';
 import { generateArtifact } from './services/geminiService';
 import AdminAudioConsole from './components/AdminAudioConsole';
+import AdminRAGConsole from './components/AdminRAGConsole';
 
 const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -82,8 +83,41 @@ const App: React.FC = () => {
     setExternalQuery(data);
   };
 
+  const AdminDashboard = () => {
+    const [tab, setTab] = useState<'audio' | 'rag'>('audio');
+
+    return (
+      <div className="min-h-screen bg-gray-50 p-12 font-sans text-gray-900">
+        <header className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="font-bold text-3xl">Antigravity Console</h1>
+            <p className="text-gray-500 text-sm mt-1">Project Control Plane</p>
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg">
+            <button
+              onClick={() => setTab('audio')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'audio' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Audio Studio
+            </button>
+            <button
+              onClick={() => setTab('rag')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'rag' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Knowledge Base
+            </button>
+          </div>
+        </header>
+
+        {tab === 'audio' ? <AdminAudioConsole /> : <AdminRAGConsole />}
+      </div>
+    );
+  };
+
   if (isAdmin) {
-    return <AdminAudioConsole />;
+    return <AdminDashboard />;
   }
 
   return (

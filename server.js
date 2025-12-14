@@ -125,6 +125,67 @@ app.post('/api/admin/manifest', async (req, res) => {
     }
 });
 
+// --- RAG / Knowledge Base API ---
+
+// 1. GET Combined Context (The "Brain" for the Terminal)
+app.get('/api/context', async (req, res) => {
+    try {
+        // Look for files in the 'knowledge/' folder
+        const [files] = await storage.bucket(BUCKET_NAME).getFiles({ prefix: 'knowledge/' });
+
+        // Filter for text/markdown only
+        const textFiles = files.filter(f => f.name.endsWith('.md') || f.name.endsWith('.txt'));
+
+        let combinedContext = "";
+
+        // Download and concat (simple, but effective)
+        for (const file of textFiles) {
+            const [content] = await file.download();
+            combinedContext += `\n\n--- SOURCE: ${file.name.replace('knowledge/', '')} ---\n${content.toString()}`;
+        }
+
+        // If bucket is empty, fallback to a default message so the app doesn't crash
+        if (!combinedContext) {
+            combinedContext = "Knowledge base is currently empty.";
+        }
+
+        res.json({ context: combinedContext });
+    } catch (error) {
+        console.error("Context fetch error:", error);
+        // Fail gracefully so the terminal still works
+        res.json({ context: "Error loading dynamic knowledge base." });
+    }
+});
+
+// 2. GET Knowledge List (For Admin UI)
+app.get('/api/admin/knowledge', async (req, res) => {
+    try {
+        const [files] = await storage.bucket(BUCKET_NAME).getFiles({ prefix: 'knowledge/' });
+        const fileList = files.map(f => ({
+            name: f.name.replace('knowledge/', ''), // Strip prefix for display
+            updated: f.metadata.updated,
+            size: f.metadata.size
+        })).filter(f => f.name !== ''); // Filter out the folder placeholder itself
+
+        res.json({ files: fileList });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 3. DELETE Knowledge File
+app.delete('/api/admin/knowledge/:filename', async (req, res) => {
+    try {
+        const filename = req.params.filename;
+        // Security: Ensure we only delete in the knowledge folder
+        await storage.bucket(BUCKET_NAME).file(`knowledge/${filename}`).delete();
+        res.json({ success: true });
+    } catch (error) {
+        console.error("Delete error:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
