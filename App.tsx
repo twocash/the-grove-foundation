@@ -13,6 +13,7 @@ import { INITIAL_TERMINAL_MESSAGE } from './constants';
 import { generateArtifact } from './services/geminiService';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
+import AdminNarrativeConsole from './components/AdminNarrativeConsole';
 
 const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -26,7 +27,7 @@ const App: React.FC = () => {
 
 
   const [activeSection, setActiveSection] = useState<SectionId>(SectionId.STAKES);
-  const [externalQuery, setExternalQuery] = useState<{ display: string; query: string } | null>(null);
+  const [externalQuery, setExternalQuery] = useState<{ nodeId?: string; display: string; query: string } | null>(null);
 
   const [terminalState, setTerminalState] = useState<TerminalState>({
     isOpen: false, // Default closed for cleaner first impression
@@ -78,13 +79,13 @@ const App: React.FC = () => {
     }));
   };
 
-  const handlePromptHook = (data: { display: string; query: string }) => {
+  const handlePromptHook = (data: { nodeId?: string; display: string; query: string }) => {
     setTerminalState(prev => ({ ...prev, isOpen: true }));
     setExternalQuery(data);
   };
 
   const AdminDashboard = () => {
-    const [tab, setTab] = useState<'audio' | 'rag'>('audio');
+    const [tab, setTab] = useState<'audio' | 'rag' | 'narrative'>('narrative');
 
     return (
       <div className="min-h-screen bg-gray-50 p-12 font-sans text-gray-900">
@@ -96,6 +97,12 @@ const App: React.FC = () => {
 
           {/* Tab Switcher */}
           <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg">
+            <button
+              onClick={() => setTab('narrative')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'narrative' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Narrative Engine
+            </button>
             <button
               onClick={() => setTab('audio')}
               className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'audio' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
@@ -111,7 +118,9 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {tab === 'audio' ? <AdminAudioConsole /> : <AdminRAGConsole />}
+        {tab === 'narrative' && <AdminNarrativeConsole />}
+        {tab === 'audio' && <AdminAudioConsole />}
+        {tab === 'rag' && <AdminRAGConsole />}
       </div>
     );
   };

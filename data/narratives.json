@@ -1,0 +1,94 @@
+{
+  "version": "1.0",
+  "nodes": {
+    "uni-entry": {
+      "id": "uni-entry",
+      "label": "Why would universities build this?",
+      "query": "The Grove whitepaper argues universities are the ideal anchor for distributed AI. Explain the 'Mission Alignment' and why commercial entities lack the necessary credibility.",
+      "sectionId": "network",
+      "isEntry": true,
+      "next": ["uni-elsevier-trap", "uni-buyer-coop"]
+    },
+    "uni-elsevier-trap": {
+      "id": "uni-elsevier-trap",
+      "label": "Explain the 'Elsevier Trap'",
+      "query": "The strategy warns we are 'walking into the Elsevier trap again'. Explain this historical parallel. How does 'Access to Cognition' compare to the 1990s 'Access to Knowledge' crisis?",
+      "contextSnippet": "The academic publishing consolidation of the 1990s created a system where universities now pay billions to access research they themselves produced. Elsevier's 37% profit margin exceeds Apple's.",
+      "next": ["uni-asymmetric-hedge"]
+    },
+    "uni-buyer-coop": {
+      "id": "uni-buyer-coop",
+      "label": "Can they afford the infrastructure?",
+      "query": "Explain the 'Buyer Cooperative' economic model proposed for the university network. How does aggregating demand create pricing power?",
+      "contextSnippet": "Healthcare Group Purchasing Organizations (GPOs) have saved the U.S. healthcare system hundreds of billions by negotiating as a bloc. The AI API market is ripe for this pressure.",
+      "next": ["uni-excess-capacity"]
+    },
+    "uni-asymmetric-hedge": {
+      "id": "uni-asymmetric-hedge",
+      "label": "What if the future is adversarial?",
+      "query": "Explain the concept of the 'Asymmetric Hedge'. Why is this network valuable in a benign future but essential in an adversarial one?",
+      "contextSnippet": "If the future is adversarial... this network is essential—a refuge for intellectual independence... ensuring inquiry cannot be choked by API policy changes.",
+      "next": ["uni-entry"]
+    },
+    "uni-excess-capacity": {
+      "id": "uni-excess-capacity",
+      "label": "What about existing campus infrastructure?",
+      "query": "Explain how universities can leverage existing data center capacity and computing resources. What is the 'excess capacity' argument?",
+      "next": ["uni-asymmetric-hedge", "uni-entry"]
+    },
+    "stakes-entry": {
+      "id": "stakes-entry",
+      "label": "What's the $380B infrastructure question?",
+      "query": "Explain the scale of AI infrastructure investment happening right now. What does $380 billion mean for the future of AI ownership?",
+      "sectionId": "stakes",
+      "isEntry": true,
+      "next": ["stakes-ownership", "stakes-ratchet"]
+    },
+    "stakes-ownership": {
+      "id": "stakes-ownership",
+      "label": "Who owns the AI we use?",
+      "query": "Break down the current ownership structure of AI infrastructure. Why does 'renting intelligence' matter?",
+      "next": ["stakes-ratchet"]
+    },
+    "stakes-ratchet": {
+      "id": "stakes-ratchet",
+      "label": "What is the capability ratchet?",
+      "query": "Explain the 'capability ratchet' - how AI systems become essential faster than institutions can adapt. What are the implications?",
+      "sectionId": "ratchet",
+      "isEntry": true,
+      "next": ["stakes-entry", "grove-what-is"]
+    },
+    "grove-what-is": {
+      "id": "grove-what-is",
+      "label": "What is Grove, exactly?",
+      "query": "Explain what Grove is in simple terms. How is it different from ChatGPT or other AI services?",
+      "sectionId": "what_is_grove",
+      "isEntry": true,
+      "next": ["grove-architecture", "grove-economics"]
+    },
+    "grove-architecture": {
+      "id": "grove-architecture",
+      "label": "How does the hybrid architecture work?",
+      "query": "Explain the Grove hybrid architecture - local agents running on owned hardware with cloud routing. How does this create resilience?",
+      "sectionId": "architecture",
+      "isEntry": true,
+      "next": ["grove-economics", "grove-differentiation"]
+    },
+    "grove-economics": {
+      "id": "grove-economics",
+      "label": "What is the efficiency tax?",
+      "query": "Explain the 'efficiency tax' concept in Grove's economic model. How does the credit system work?",
+      "sectionId": "economics",
+      "isEntry": true,
+      "next": ["grove-differentiation", "grove-architecture"]
+    },
+    "grove-differentiation": {
+      "id": "grove-differentiation",
+      "label": "How is Grove different from ChatGPT?",
+      "query": "Compare Grove to ChatGPT and other AI services. What are the fundamental differences in architecture, ownership, and philosophy?",
+      "sectionId": "differentiation",
+      "isEntry": true,
+      "next": ["uni-entry", "grove-what-is"]
+    }
+  }
+}

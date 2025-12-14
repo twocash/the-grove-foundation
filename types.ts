@@ -28,3 +28,27 @@ export interface ArchitectureNode {
   description: string;
   type: 'local' | 'cloud' | 'root';
 }
+
+// --- Narrative Engine Types ---
+
+export interface NarrativeNode {
+  id: string;              // Unique key (e.g., 'uni-hedge')
+  label: string;           // The UI button text (e.g., "What about adversarial futures?")
+
+  // The Prompt Logic
+  query: string;           // The actual instruction sent to Gemini
+  contextSnippet?: string; // Optional: Hardcoded context chunk to guarantee accuracy (RAG override)
+
+  // The Journey Logic
+  next: string[];          // Array of NarrativeNode IDs to suggest after this one completes
+
+  // Metadata
+  sectionId?: SectionId;   // If set, this node appears as a starter prompt for this section
+  isEntry?: boolean;       // Is this a starting point for a section?
+  sourceFile?: string;     // Traceability (e.g., 'Academic_Strategy.pdf')
+}
+
+export interface NarrativeGraph {
+  version: string;
+  nodes: Record<string, NarrativeNode>;
+}

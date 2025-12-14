@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { TerminalState, ChatMessage, SectionId } from '../types';
 import { sendMessageStream, initChatSession } from '../services/geminiService';
 import { SECTION_CONFIG, GROVE_KNOWLEDGE_BASE } from '../constants';
+import { useNarrative } from '../hooks/useNarrative';
 
 interface TerminalProps {
   activeSection: SectionId;
   terminalState: TerminalState;
   setTerminalState: React.Dispatch<React.SetStateAction<TerminalState>>;
-  externalQuery?: { display: string; query: string } | null;
+  externalQuery?: { nodeId?: string; display: string; query: string } | null;
   onQueryHandled?: () => void;
 }
 
@@ -111,9 +112,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [currentTopic, setCurrentTopic] = useState<string>('');
   const [isVerboseMode, setIsVerboseMode] = useState<boolean>(false);
   const [ragContext, setRagContext] = useState<string>('');
+  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Narrative graph hook for curated follow-ups
+  const { getNextNodes, getNode } = useNarrative();
 
   useEffect(() => {
     fetch('/api/context')
@@ -149,11 +154,16 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
   }, [terminalState.messages, terminalState.isOpen]);
 
-  const handleSend = async (manualQuery?: string, manualDisplay?: string) => {
+  const handleSend = async (manualQuery?: string, manualDisplay?: string, nodeId?: string) => {
     const textToSend = manualQuery !== undefined ? manualQuery : input;
     if (!textToSend.trim()) return;
 
     const textToDisplay = manualDisplay !== undefined ? manualDisplay : textToSend;
+
+    // Track current node for narrative-based follow-ups
+    if (nodeId) {
+      setCurrentNodeId(nodeId);
+    }
 
     const displayId = Date.now().toString();
     const finalDisplayText = isVerboseMode ? `${textToDisplay} --verbose` : textToDisplay;
@@ -213,7 +223,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   useEffect(() => {
     if (externalQuery && onQueryHandled) {
-      handleSend(externalQuery.query, externalQuery.display);
+      handleSend(externalQuery.query, externalQuery.display, externalQuery.nodeId);
       onQueryHandled();
     }
   }, [externalQuery]);
@@ -293,25 +303,45 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           {/* Interactions Area */}
           <div className="p-6 border-t border-ink/5 bg-paper/50">
 
-            {/* Suggested Action - Reference Card Style */}
-            <div className="mb-4">
-              <button
-                onClick={() => handleSuggestion(dynamicSuggestion)}
-                className="w-full text-left p-4 bg-white border border-ink/5 rounded-sm hover:border-grove-forest/30 hover:shadow-sm transition-all group"
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-[9px] text-grove-clay font-bold uppercase tracking-widest">
-                    Suggested Inquiry
-                  </span>
-                  <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors font-mono">
-                    →
-                  </span>
+            {/* Curated Narrative Follow-ups (when available) */}
+            {currentNodeId && getNextNodes(currentNodeId).length > 0 ? (
+              <div className="mb-4">
+                <div className="text-[9px] text-grove-clay font-bold uppercase tracking-widest mb-2">
+                  Continue the Journey
                 </div>
-                <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
-                  "{dynamicSuggestion || "Start the sequence..."}"
+                <div className="flex flex-wrap gap-2">
+                  {getNextNodes(currentNodeId).map(node => (
+                    <button
+                      key={node.id}
+                      onClick={() => handleSend(node.query, node.label, node.id)}
+                      className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-serif text-ink hover:border-grove-forest/30 hover:text-grove-forest hover:shadow-sm transition-all"
+                    >
+                      {node.label}
+                    </button>
+                  ))}
                 </div>
-              </button>
-            </div>
+              </div>
+            ) : (
+              /* Suggested Action - Reference Card Style (fallback) */
+              <div className="mb-4">
+                <button
+                  onClick={() => handleSuggestion(dynamicSuggestion)}
+                  className="w-full text-left p-4 bg-white border border-ink/5 rounded-sm hover:border-grove-forest/30 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[9px] text-grove-clay font-bold uppercase tracking-widest">
+                      Suggested Inquiry
+                    </span>
+                    <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors font-mono">
+                      →
+                    </span>
+                  </div>
+                  <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
+                    "{dynamicSuggestion || "Start the sequence..."}"
+                  </div>
+                </button>
+              </div>
+            )}
 
             <div className="flex items-center space-x-3 mb-4">
               {/* Verbose Toggle - Wax Seal Style */}
