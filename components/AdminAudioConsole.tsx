@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AUDIO_MANIFEST } from '../data/audioConfig';
+import { generateAudioBlob } from '../services/audioService';
 
 const AdminAudioConsole: React.FC = () => {
     const [selectedTrackId, setSelectedTrackId] = useState<string>(AUDIO_MANIFEST[0].id);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [status, setStatus] = useState<string>('');
 
     // Cloud State
     const [files, setFiles] = useState<any[]>([]);
@@ -21,35 +23,52 @@ const AdminAudioConsole: React.FC = () => {
             .catch(err => console.error("Failed to load files:", err));
     }, [refreshTrigger]);
 
-    const handleGenerate = async () => {
+    const handleGenerateAndUpload = async () => {
         if (!currentTrack) return;
         setIsGenerating(true);
+        setStatus('Initializing Client-Side Generation...');
 
-        // Default filename convention: trackId_timestamp.mp3
-        const filename = `${selectedTrackId}_${Date.now()}.mp3`;
+        // Default filename convention: trackId_timestamp.wav
+        // We use .wav because the client-side generator creates a WAV blob
+        const filename = `${selectedTrackId}_${Date.now()}.wav`;
 
         try {
-            const res = await fetch('/api/admin/generate', {
+            // 1. Generate in Browser (No Timeout Limit)
+            setStatus('Synthesizing Audio (Gemini)...');
+            const blob = await generateAudioBlob(script, currentTrack.voiceConfig);
+
+            console.log("Generated Blob Size:", blob.size, "Type:", blob.type);
+
+            if (blob.size === 0) {
+                throw new Error("Generated audio is empty (0 bytes).");
+            }
+
+            // 2. Upload to Server
+            setStatus(`Uploading (${(blob.size / 1024).toFixed(1)} KB)...`);
+
+            // Note: server.js expects 'filename' as a query param and raw body
+            const res = await fetch(`/api/admin/upload?filename=${filename}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    script,
-                    filename,
-                    voiceConfig: currentTrack.voiceConfig
-                })
+                headers: { 'Content-Type': blob.type || 'audio/wav' }, // Send actual type
+                body: blob
             });
 
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Server error');
+                const text = await res.text();
+                let err;
+                try { err = JSON.parse(text).error; } catch { err = text; }
+                throw new Error(err || 'Upload server error');
             }
 
             const data = await res.json();
-            alert(`Success! File generated: ${data.url}`);
+            setStatus('Success!');
+            alert(`Success! File generated & uploaded: ${data.url}`);
             setRefreshTrigger(prev => prev + 1); // Reload list
 
         } catch (e: any) {
-            alert("Generation failed: " + e.message || e);
+            console.error(e);
+            setStatus('Error: ' + e.message);
+            alert("Process failed: " + e.message);
         } finally {
             setIsGenerating(false);
         }
@@ -66,7 +85,7 @@ const AdminAudioConsole: React.FC = () => {
                 <header className="mb-12 border-b border-gray-200 pb-6 flex justify-between items-center">
                     <div>
                         <h1 className="font-bold text-3xl">Audio Admin Console</h1>
-                        <p className="text-gray-500 mt-2">Server-Side Generator & Cloud Library</p>
+                        <p className="text-gray-500 mt-2">Hybrid Generator: Client-Side Synthesis → Server-Side Storage</p>
                     </div>
                     <a href="/" className="text-xs font-mono uppercase tracking-widest hover:text-green-600">
                         ← Back to App
@@ -108,7 +127,7 @@ const AdminAudioConsole: React.FC = () => {
 
                             <div className="mb-8">
                                 <button
-                                    onClick={handleGenerate}
+                                    onClick={handleGenerateAndUpload}
                                     disabled={isGenerating}
                                     className="w-full px-6 py-4 bg-green-900 text-white font-mono text-sm uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50 flex justify-center items-center"
                                     style={{ backgroundColor: '#2f4f4f' }}
@@ -119,11 +138,14 @@ const AdminAudioConsole: React.FC = () => {
                                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            Synthesizing on Server...
+                                            {status}
                                         </>
                                     ) : 'Generate & Upload to Cloud'}
                                 </button>
-                                <p className="text-xs text-gray-400 mt-2 text-center">Uses Backend Credentials • Uploads directly to Bucket</p>
+                                <div className="flex justify-between mt-2">
+                                    <p className="text-xs text-gray-400">Gen: Client (No Timeout)</p>
+                                    <p className="text-xs text-gray-400">Store: Server (Secure)</p>
+                                </div>
                             </div>
 
                             <hr className="border-gray-100 my-6" />

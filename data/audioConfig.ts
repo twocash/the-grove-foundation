@@ -33,7 +33,7 @@ export const AUDIO_MANIFEST: AudioTrack[] = [
         title: 'The Grove: Official Audio Summary',
         description: 'Deep Dive Briefing on The Ratchet Effect and Distributed Intelligence.',
         voiceConfig: { host: 'Orus', expert: 'Kore' },
-        bucketUrl: 'https://storage.googleapis.com/grove-assets/deep-dive-main_1765661824758.mp3', // You will paste your bucket URL here after generation
+        bucketUrl: 'https://storage.googleapis.com/grove-assets/deep-dive-main_1765685212143.wav', // You will paste your bucket URL here after generation
         status: 'draft',
         transcript: `
 Host: If you've been following the conversation coming out of Silicon Valley lately, you know the vibe is... well, it's less technological revolution and more existential reckoning.
