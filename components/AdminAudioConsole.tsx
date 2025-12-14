@@ -1,191 +1,200 @@
 import React, { useState, useEffect } from 'react';
-import { AUDIO_MANIFEST } from '../data/audioConfig';
 import { generateAudioBlob } from '../services/audioService';
+import { AudioManifest, AudioTrack } from '../types';
+
+const AVAILABLE_VOICES = ['Kore', 'Orus', 'Gacrux', 'Umbriel'];
+const DEFAULT_MANIFEST: AudioManifest = { version: "1.0", placements: {}, tracks: {} };
 
 const AdminAudioConsole: React.FC = () => {
-    const [selectedTrackId, setSelectedTrackId] = useState<string>(AUDIO_MANIFEST[0].id);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [status, setStatus] = useState<string>('');
+    // App State
+    const [manifest, setManifest] = useState<AudioManifest>(DEFAULT_MANIFEST);
+    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState('');
 
-    // Cloud State
-    const [files, setFiles] = useState<any[]>([]);
-    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    // Editor State
+    const [selectedVoiceHost, setSelectedVoiceHost] = useState('Orus');
+    const [selectedVoiceExpert, setSelectedVoiceExpert] = useState('Kore');
+    const [script, setScript] = useState('');
+    const [title, setTitle] = useState('New Episode');
 
-    // Editable state
-    const currentTrack = AUDIO_MANIFEST.find(t => t.id === selectedTrackId);
-    const [script, setScript] = useState(currentTrack?.transcript || '');
-
-    // Load Cloud Files
+    // Load Manifest on Mount
     useEffect(() => {
-        fetch('/api/admin/files')
+        fetch('/api/manifest')
             .then(res => res.json())
-            .then(data => setFiles(data.files || []))
-            .catch(err => console.error("Failed to load files:", err));
-    }, [refreshTrigger]);
+            .then(data => {
+                console.log("Loaded manifest:", data);
+                setManifest(data);
+            })
+            .catch(err => console.error("Failed to load manifest", err));
+    }, []);
 
-    const handleGenerateAndUpload = async () => {
-        if (!currentTrack) return;
-        setIsGenerating(true);
-        setStatus('Initializing Client-Side Generation...');
-
-        // Default filename convention: trackId_timestamp.wav
-        // We use .wav because the client-side generator creates a WAV blob
-        const filename = `${selectedTrackId}_${Date.now()}.wav`;
+    const handleGenerateAndSave = async () => {
+        setLoading(true);
+        setStatus('Generating Audio...');
 
         try {
-            // 1. Generate in Browser (No Timeout Limit)
-            setStatus('Synthesizing Audio (Gemini)...');
-            const blob = await generateAudioBlob(script, currentTrack.voiceConfig);
+            // 1. Generate Audio (Client Side calls Gemini)
+            // We pass the styles/voices to the service
+            const blob = await generateAudioBlob(script, { host: selectedVoiceHost, expert: selectedVoiceExpert });
 
-            console.log("Generated Blob Size:", blob.size, "Type:", blob.type);
+            // 2. Upload File to GCS
+            setStatus('Uploading WAV...');
+            const trackId = `track_${Date.now()}`;
+            const filename = `${trackId}.wav`;
 
-            if (blob.size === 0) {
-                throw new Error("Generated audio is empty (0 bytes).");
-            }
-
-            // 2. Upload to Server
-            setStatus(`Uploading (${(blob.size / 1024).toFixed(1)} KB)...`);
-
-            // Note: server.js expects 'filename' as a query param and raw body
-            const res = await fetch(`/api/admin/upload?filename=${filename}`, {
+            const uploadRes = await fetch(`/api/admin/upload?filename=${filename}`, {
                 method: 'POST',
-                headers: { 'Content-Type': blob.type || 'audio/wav' }, // Send actual type
+                headers: { 'Content-Type': 'audio/wav' },
                 body: blob
             });
+            const uploadData = await uploadRes.json();
 
-            if (!res.ok) {
-                const text = await res.text();
-                let err;
-                try { err = JSON.parse(text).error; } catch { err = text; }
-                throw new Error(err || 'Upload server error');
-            }
+            if (!uploadData.url) throw new Error("Upload failed");
 
-            const data = await res.json();
-            setStatus('Success!');
-            alert(`Success! File generated & uploaded: ${data.url}`);
-            setRefreshTrigger(prev => prev + 1); // Reload list
+            // 3. Update Manifest Local State
+            const newTrack: AudioTrack = {
+                id: trackId,
+                title: title,
+                description: "Generated via Admin Console",
+                voiceConfig: { host: selectedVoiceHost, expert: selectedVoiceExpert },
+                transcript: script,
+                bucketUrl: uploadData.url,
+                createdAt: Date.now()
+            };
+
+            const updatedManifest = {
+                ...manifest,
+                tracks: { ...manifest.tracks, [trackId]: newTrack }
+            };
+
+            setManifest(updatedManifest);
+
+            // 4. Save Manifest to Server
+            setStatus('Saving Manifest...');
+            await fetch('/api/admin/manifest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedManifest)
+            });
+
+            setStatus('Success! Track Saved.');
+            alert("Track Generated & Manifest Updated!");
 
         } catch (e: any) {
-            console.error(e);
             setStatus('Error: ' + e.message);
-            alert("Process failed: " + e.message);
+            console.error(e);
+            alert("Error: " + e.message);
         } finally {
-            setIsGenerating(false);
+            setLoading(false);
         }
     };
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        alert("Copied URL to clipboard!");
+    const handleAssignPlacement = async (placementKey: string, trackId: string) => {
+        const updatedManifest = {
+            ...manifest,
+            placements: { ...manifest.placements, [placementKey]: trackId }
+        };
+        setManifest(updatedManifest);
+
+        // Auto-save on placement change
+        try {
+            await fetch('/api/admin/manifest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedManifest)
+            });
+        } catch (e) {
+            console.error("Failed to save placement", e);
+            alert("Failed to save placement");
+        }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 p-12 font-sans text-gray-900">
-            <div className="max-w-6xl mx-auto">
-                <header className="mb-12 border-b border-gray-200 pb-6 flex justify-between items-center">
-                    <div>
-                        <h1 className="font-bold text-3xl">Audio Admin Console</h1>
-                        <p className="text-gray-500 mt-2">Hybrid Generator: Client-Side Synthesis → Server-Side Storage</p>
+            <h1 className="text-3xl font-bold mb-8">Antigravity Audio Admin</h1>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                {/* CREATOR PANEL */}
+                <div className="bg-white p-6 rounded shadow border border-gray-200">
+                    <h2 className="font-bold text-xl mb-6">1. Create New Track</h2>
+
+                    <div className="mb-4">
+                        <label className="block text-xs font-mono uppercase text-gray-400">Title</label>
+                        <input className="w-full p-2 border rounded" value={title} onChange={e => setTitle(e.target.value)} />
                     </div>
-                    <a href="/" className="text-xs font-mono uppercase tracking-widest hover:text-green-600">
-                        ← Back to App
-                    </a>
-                </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Left Column: Configuration */}
-                    <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-sm shadow-sm border border-gray-200">
-                            <label className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-2">Select Track</label>
-                            <select
-                                value={selectedTrackId}
-                                onChange={(e) => {
-                                    setSelectedTrackId(e.target.value);
-                                    const t = AUDIO_MANIFEST.find(track => track.id === e.target.value);
-                                    if (t) setScript(t.transcript);
-                                }}
-                                className="w-full p-2 border border-gray-200 rounded-sm bg-gray-50 mb-4"
-                            >
-                                {AUDIO_MANIFEST.map(track => (
-                                    <option key={track.id} value={track.id}>{track.title} ({track.status})</option>
-                                ))}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-xs font-mono uppercase text-gray-400">Host Voice</label>
+                            <select className="w-full p-2 border rounded" value={selectedVoiceHost} onChange={e => setSelectedVoiceHost(e.target.value)}>
+                                {AVAILABLE_VOICES.map(v => <option key={v} value={v}>{v}</option>)}
                             </select>
-
-                            <label className="block text-xs font-mono uppercase tracking-widest text-gray-400 mb-2">Transcript</label>
-                            <textarea
-                                value={script}
-                                onChange={(e) => setScript(e.target.value)}
-                                className="w-full h-96 p-4 border border-gray-200 rounded-sm font-serif text-sm leading-relaxed focus:outline-none focus:border-green-600"
-                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-mono uppercase text-gray-400">Expert Voice</label>
+                            <select className="w-full p-2 border rounded" value={selectedVoiceExpert} onChange={e => setSelectedVoiceExpert(e.target.value)}>
+                                {AVAILABLE_VOICES.map(v => <option key={v} value={v}>{v}</option>)}
+                            </select>
                         </div>
                     </div>
 
-                    {/* Right Column: Action & Library */}
-                    <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-sm shadow-sm border border-gray-200">
-                            <h3 className="font-bold text-xl mb-6">Action & Library</h3>
+                    <div className="mb-6">
+                        <label className="block text-xs font-mono uppercase text-gray-400">Script</label>
+                        <textarea
+                            className="w-full h-64 p-2 border rounded font-mono text-xs"
+                            value={script}
+                            onChange={e => setScript(e.target.value)}
+                            placeholder="Host: Hello world..."
+                        />
+                    </div>
 
-                            <div className="mb-8">
-                                <button
-                                    onClick={handleGenerateAndUpload}
-                                    disabled={isGenerating}
-                                    className="w-full px-6 py-4 bg-green-900 text-white font-mono text-sm uppercase tracking-widest hover:bg-black transition-colors disabled:opacity-50 flex justify-center items-center"
-                                    style={{ backgroundColor: '#2f4f4f' }}
-                                >
-                                    {isGenerating ? (
-                                        <>
-                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            {status}
-                                        </>
-                                    ) : 'Generate & Upload to Cloud'}
-                                </button>
-                                <div className="flex justify-between mt-2">
-                                    <p className="text-xs text-gray-400">Gen: Client (No Timeout)</p>
-                                    <p className="text-xs text-gray-400">Store: Server (Secure)</p>
+                    <button
+                        onClick={handleGenerateAndSave}
+                        disabled={loading}
+                        className="w-full py-4 bg-green-800 text-white font-bold uppercase tracking-widest hover:bg-green-700 disabled:opacity-50"
+                    >
+                        {loading ? status : "Generate & Save to Library"}
+                    </button>
+                </div>
+
+                {/* MANAGEMENT PANEL */}
+                <div className="space-y-8">
+                    {/* Placements */}
+                    <div className="bg-white p-6 rounded shadow border border-gray-200">
+                        <h2 className="font-bold text-xl mb-4">2. Manage Placements</h2>
+                        <p className="text-xs text-gray-500 mb-4">Select which track plays in specific app slots.</p>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 border rounded">
+                            <span className="font-mono text-sm font-bold">deep-dive-main</span>
+                            <select
+                                className="p-2 border rounded text-sm max-w-[200px]"
+                                value={manifest.placements['deep-dive-main'] || ''}
+                                onChange={(e) => handleAssignPlacement('deep-dive-main', e.target.value)}
+                            >
+                                <option value="">(None)</option>
+                                {Object.values(manifest.tracks).map(t => (
+                                    <option key={t.id} value={t.id}>
+                                        {t.title} ({new Date(t.createdAt).toLocaleDateString()})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Library */}
+                    <div className="bg-white p-6 rounded shadow border border-gray-200">
+                        <h2 className="font-bold text-xl mb-4">Library ({Object.keys(manifest.tracks).length})</h2>
+                        <div className="max-h-96 overflow-y-auto space-y-2">
+                            {Object.values(manifest.tracks).sort((a, b) => b.createdAt - a.createdAt).map(track => (
+                                <div key={track.id} className="p-3 border rounded text-sm hover:bg-gray-50">
+                                    <div className="font-bold">{track.title}</div>
+                                    <div className="text-gray-400 text-xs truncate">{track.bucketUrl}</div>
+                                    <div className="mt-1 flex gap-2">
+                                        <span className="text-[10px] bg-blue-100 text-blue-800 px-2 rounded">Host: {track.voiceConfig.host}</span>
+                                        <span className="text-[10px] bg-purple-100 text-purple-800 px-2 rounded">Expert: {track.voiceConfig.expert}</span>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <hr className="border-gray-100 my-6" />
-
-                            <h4 className="text-xs font-bold text-gray-500 uppercase mb-4">Cloud Library (GCS)</h4>
-                            <div className="max-h-80 overflow-y-auto border border-gray-100 rounded-sm">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-gray-50 text-gray-500 font-mono text-xs uppercase">
-                                        <tr>
-                                            <th className="p-3">Filename</th>
-                                            <th className="p-3 text-right">Size</th>
-                                            <th className="p-3 text-right">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {files.length === 0 ? (
-                                            <tr><td colSpan={3} className="p-4 text-center text-gray-400">No files found.</td></tr>
-                                        ) : (
-                                            files.map((f, i) => (
-                                                <tr key={i} className="hover:bg-gray-50">
-                                                    <td className="p-3 truncate max-w-[200px]" title={f.name}>{f.name}</td>
-                                                    <td className="p-3 text-right font-mono text-xs">{(f.size / 1024 / 1024).toFixed(2)} MB</td>
-                                                    <td className="p-3 text-right">
-                                                        <button
-                                                            onClick={() => copyToClipboard(f.url)}
-                                                            className="text-xs text-blue-600 hover:text-blue-800 font-semibold"
-                                                        >
-                                                            Copy URL
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="bg-blue-50 p-4 mt-6 rounded-sm border border-blue-100 text-blue-800 text-xs">
-                                <strong>Next Step:</strong> Copy the URL of your generated file and paste it into <code>src/data/audioConfig.ts</code> locally, then commit.
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div>

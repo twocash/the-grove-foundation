@@ -78,6 +78,53 @@ app.post('/api/admin/upload', async (req, res) => {
     }
 });
 
+// --- Manifest API ---
+
+// GET Manifest (JSON)
+app.get('/api/manifest', async (req, res) => {
+    try {
+        const file = storage.bucket(BUCKET_NAME).file('manifest.json');
+        const [exists] = await file.exists();
+
+        if (!exists) {
+            // Return default empty structure if strictly new
+            return res.json({ version: "1.0", placements: {}, tracks: {} });
+        }
+
+        const [content] = await file.download();
+        res.json(JSON.parse(content.toString()));
+    } catch (error) {
+        console.error("Error reading manifest:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST Manifest (Save JSON)
+app.post('/api/admin/manifest', async (req, res) => {
+    try {
+        const manifestData = req.body; // Express.json() middleware handles this
+
+        // Validation: Ensure it looks like a manifest
+        if (!manifestData.tracks || !manifestData.placements) {
+            return res.status(400).json({ error: "Invalid manifest structure" });
+        }
+
+        const file = storage.bucket(BUCKET_NAME).file('manifest.json');
+
+        await file.save(JSON.stringify(manifestData, null, 2), {
+            contentType: 'application/json',
+            metadata: {
+                cacheControl: 'public, max-age=0, no-transform', // Important: Disable caching for the manifest so updates are instant
+            }
+        });
+
+        res.json({ success: true, message: "Manifest updated" });
+    } catch (error) {
+        console.error("Error saving manifest:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

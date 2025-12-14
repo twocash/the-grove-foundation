@@ -1,120 +1,128 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { AUDIO_MANIFEST, AUDIO_PLAYERS } from '../data/audioConfig';
+import { Play, Pause, Loader2 } from 'lucide-react';
+import { AudioManifest, AudioTrack } from '../types';
 
-// Default to the Main Village Hero player if no props provided
-const DEFAULT_PLAYER_ID = 'main-village-hero';
+// The ID of the placement this player is responsible for
+const PLACEMENT_ID = 'deep-dive-main';
 
+/**
+ * AudioPlayer Component (CMS + Classic Stye)
+ * Features: Fixed Header, Waveform, Minimal UI
+ */
 const AudioPlayer: React.FC = () => {
+  const [track, setTrack] = useState<AudioTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 1. Find Player Config
-  const playerConfig = AUDIO_PLAYERS.find(p => p.id === DEFAULT_PLAYER_ID);
-
-  // 2. Find Track from Player Config
-  const track = playerConfig
-    ? AUDIO_MANIFEST.find(t => t.id === playerConfig.trackId)
-    : null;
-
+  // FETCH MANIFEST ON MOUNT
   useEffect(() => {
-    if (!audioRef.current || !track?.bucketUrl) return;
+    const MANIFEST_URL = '/api/manifest';
 
-    const audio = audioRef.current;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-    const handleError = (e: any) => {
-      console.error("Audio Playback Error:", e);
-      console.error("Error Code:", audio.error?.code);
-      console.error("Error Message:", audio.error?.message);
-      setIsPlaying(false);
-      alert("Playback Failed: " + (audio.error?.message || "Unknown Error. Check Console."));
-    };
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-    };
-  }, [track]);
+    setLoading(true);
+    fetch(MANIFEST_URL)
+      .then(res => res.json())
+      .then((data: AudioManifest) => {
+        const trackId = data.placements[PLACEMENT_ID];
+        if (trackId && data.tracks[trackId]) {
+          setTrack(data.tracks[trackId]);
+        } else {
+          console.log("No track assigned to placement:", PLACEMENT_ID);
+        }
+      })
+      .catch(err => {
+        console.error("Audio config load failed", err);
+        setError("Failed to load");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Play prevented:", error);
-          setIsPlaying(false);
-        });
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.error("Playback failed", err);
+            setError("Error");
+          });
+        }
       }
+      setIsPlaying(!isPlaying);
     }
   };
 
-  if (!track) return null;
+  if (loading) {
+    return null; // Don't show header until loaded to prevent jump
+  }
+
+  if (!track) {
+    return null; // Don't show if no audio
+  }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3 px-6 flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3 px-6 flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.02)] print:hidden">
 
-      {/* Hidden Audio Element sourcing directly from Bucket */}
-      {track.bucketUrl ? (
-        <audio
-          ref={audioRef}
-          src={track.bucketUrl}
-          preload="auto"
-          crossOrigin="anonymous" // Helpful for CORS if needed, though GCS public usually fine
-        />
-      ) : (
-        // Fallback or warning if no URL is configured yet
-        <div className="hidden">No Audio Configured</div>
-      )}
-
+      {/* LEFT: Controls & Info */}
       <div className="flex items-center space-x-4">
         <button
           onClick={togglePlay}
-          disabled={!track.bucketUrl}
-          className={`w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-green-700 transition-colors shadow-sm ${!track.bucketUrl ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-green-700 transition-colors shadow-sm group"
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            <Pause className="w-4 h-4 fill-current" />
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <Play className="w-4 h-4 fill-current ml-0.5" />
           )}
         </button>
+
         <div className="flex flex-col">
           <span className="text-[9px] font-mono uppercase text-gray-400 tracking-[0.2em] mb-0.5">
-            {track.bucketUrl ? "Deep Dive Briefing" : "Briefing Offline"}
+            Deep Dive Briefing
           </span>
-          <span className="font-display font-bold text-gray-900 text-sm">
+          <span className="font-serif font-bold text-gray-900 text-sm leading-none">
             {track.title}
           </span>
         </div>
       </div>
 
-      <div className="hidden md:flex items-center space-x-1">
-        {/* Waveform Animation */}
-        {[...Array(16)].map((_, i) => (
+      {/* ERROR DISPLAY (If any) */}
+      {error && (
+        <div className="absolute left-1/2 transform -translate-x-1/2 text-red-500 text-[10px] font-mono uppercase tracking-widest bg-red-50 px-2 py-1 rounded">
+          Playback Error
+        </div>
+      )}
+
+      {/* RIGHT: Waveform Animation */}
+      <div className="hidden md:flex items-center space-x-1.5 h-8">
+        {[...Array(24)].map((_, i) => (
           <div
             key={i}
-            className={`w-0.5 bg-gray-200 rounded-full transition-all duration-300 ${isPlaying ? 'animate-pulse bg-green-700/60' : ''}`}
+            className={`w-0.5 rounded-full transition-all duration-300 ${isPlaying ? 'bg-green-600 animate-pulse' : 'bg-gray-200'
+              }`}
             style={{
-              height: isPlaying ? `${Math.random() * 20 + 8}px` : '4px',
-              animationDelay: `${i * 0.1}s`
+              height: isPlaying ? `${Math.max(4, Math.random() * 24)}px` : '4px',
+              animationDelay: `${i * 0.05}s`
             }}
-          ></div>
+          />
         ))}
       </div>
+
+      {/* Hidden Audio Element */}
+      <audio
+        ref={audioRef}
+        src={track.bucketUrl}
+        onEnded={() => setIsPlaying(false)}
+        onError={(e) => {
+          console.error("Audio Error", e);
+          setError("Err");
+        }}
+        className="hidden"
+      />
     </div>
   );
 };
