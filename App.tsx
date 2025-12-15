@@ -13,7 +13,8 @@ import { INITIAL_TERMINAL_MESSAGE } from './constants';
 import { generateArtifact } from './services/geminiService';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
-import AdminNarrativeConsole from './components/AdminNarrativeConsole';
+// V2 Narrative Console with 3-column layout
+import { NarrativeConsole as AdminNarrativeConsole } from './components/Admin';
 
 const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);

@@ -191,20 +191,180 @@ app.delete('/api/admin/knowledge/:filename', async (req, res) => {
     }
 });
 
-// --- Narrative Engine API ---
+// --- Narrative Engine API (v2) ---
 
-// GET Narrative Graph
+// Default personas for v2 schema (embedded for server-side migration)
+const DEFAULT_PERSONAS_V2 = {
+    'concerned-citizen': {
+        id: 'concerned-citizen',
+        publicLabel: 'Concerned Citizen',
+        description: "I'm worried about Big Tech's grip on AI",
+        icon: 'Home',
+        color: 'rose',
+        enabled: true,
+        toneGuidance: '[PERSONA: Concerned Citizen] Speak to their fears about Big Tech control.',
+        narrativeStyle: 'stakes-heavy',
+        arcEmphasis: { hook: 4, stakes: 4, mechanics: 2, evidence: 2, resolution: 3 },
+        openingPhase: 'hook',
+        defaultThreadLength: 4,
+        entryPoints: [],
+        suggestedThread: []
+    },
+    'academic': {
+        id: 'academic',
+        publicLabel: 'Academic',
+        description: 'I work in research, university, or policy',
+        icon: 'GraduationCap',
+        color: 'emerald',
+        enabled: true,
+        toneGuidance: '[PERSONA: Academic] Use precise language and cite sources.',
+        narrativeStyle: 'evidence-first',
+        arcEmphasis: { hook: 2, stakes: 3, mechanics: 3, evidence: 4, resolution: 3 },
+        openingPhase: 'stakes',
+        defaultThreadLength: 6,
+        entryPoints: [],
+        suggestedThread: []
+    },
+    'engineer': {
+        id: 'engineer',
+        publicLabel: 'Engineer',
+        description: 'I want to understand how it actually works',
+        icon: 'Settings',
+        color: 'blue',
+        enabled: true,
+        toneGuidance: '[PERSONA: Engineer] Get technical. Show the architecture.',
+        narrativeStyle: 'mechanics-deep',
+        arcEmphasis: { hook: 2, stakes: 2, mechanics: 4, evidence: 3, resolution: 2 },
+        openingPhase: 'mechanics',
+        defaultThreadLength: 5,
+        entryPoints: [],
+        suggestedThread: []
+    },
+    'geopolitical': {
+        id: 'geopolitical',
+        publicLabel: 'Geopolitical Analyst',
+        description: 'I think about power, nations, and systemic risk',
+        icon: 'Globe',
+        color: 'amber',
+        enabled: true,
+        toneGuidance: '[PERSONA: Geopolitical] Frame through power dynamics.',
+        narrativeStyle: 'stakes-heavy',
+        arcEmphasis: { hook: 3, stakes: 4, mechanics: 2, evidence: 3, resolution: 3 },
+        openingPhase: 'stakes',
+        defaultThreadLength: 5,
+        entryPoints: [],
+        suggestedThread: []
+    },
+    'big-ai-exec': {
+        id: 'big-ai-exec',
+        publicLabel: 'Big AI / Tech Exec',
+        description: 'I work at a major tech company or AI lab',
+        icon: 'Building2',
+        color: 'slate',
+        enabled: true,
+        toneGuidance: '[PERSONA: Tech Exec] Speak their language on business models.',
+        narrativeStyle: 'resolution-oriented',
+        arcEmphasis: { hook: 2, stakes: 3, mechanics: 3, evidence: 3, resolution: 4 },
+        openingPhase: 'stakes',
+        defaultThreadLength: 4,
+        entryPoints: [],
+        suggestedThread: []
+    },
+    'family-office': {
+        id: 'family-office',
+        publicLabel: 'Family Office / Investor',
+        description: 'I manage wealth and evaluate opportunities',
+        icon: 'Briefcase',
+        color: 'violet',
+        enabled: true,
+        toneGuidance: '[PERSONA: Investor] Focus on investment thesis.',
+        narrativeStyle: 'resolution-oriented',
+        arcEmphasis: { hook: 2, stakes: 3, mechanics: 2, evidence: 3, resolution: 4 },
+        openingPhase: 'stakes',
+        defaultThreadLength: 4,
+        entryPoints: [],
+        suggestedThread: []
+    }
+};
+
+const DEFAULT_GLOBAL_SETTINGS_V2 = {
+    defaultToneGuidance: '',
+    scholarModePromptAddition: 'Give me the deep technical breakdown.',
+    noLensBehavior: 'nudge-after-exchanges',
+    nudgeAfterExchanges: 3
+};
+
+// Helper: Check if schema is v1 format
+function isV1Schema(data) {
+    return data && data.version === "1.0" && typeof data.nodes === 'object';
+}
+
+// Helper: Check if schema is v2 format
+function isV2Schema(data) {
+    return data && data.version === "2.0" &&
+           typeof data.personas === 'object' &&
+           typeof data.cards === 'object' &&
+           typeof data.globalSettings === 'object';
+}
+
+// Helper: Migrate v1 node to v2 card
+function nodeToCard(node) {
+    return {
+        id: node.id,
+        label: node.label,
+        query: node.query,
+        contextSnippet: node.contextSnippet,
+        sectionId: node.sectionId,
+        next: node.next || [],
+        personas: ['all'],  // Default: visible to all personas
+        sourceDoc: node.sourceFile,
+        isEntry: node.isEntry,
+        createdAt: new Date().toISOString()
+    };
+}
+
+// Helper: Migrate v1 schema to v2
+function migrateV1ToV2(v1Data) {
+    const cards = {};
+    for (const [id, node] of Object.entries(v1Data.nodes || {})) {
+        cards[id] = nodeToCard(node);
+    }
+
+    return {
+        version: "2.0",
+        globalSettings: DEFAULT_GLOBAL_SETTINGS_V2,
+        personas: DEFAULT_PERSONAS_V2,
+        cards
+    };
+}
+
+// GET Narrative Graph (with auto-migration support)
 app.get('/api/narrative', async (req, res) => {
     try {
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
         const [exists] = await file.exists();
 
         if (!exists) {
-            return res.json({ version: "1.0", nodes: {} });
+            // Return empty v2 schema for new installations
+            return res.json({
+                version: "2.0",
+                globalSettings: DEFAULT_GLOBAL_SETTINGS_V2,
+                personas: DEFAULT_PERSONAS_V2,
+                cards: {}
+            });
         }
 
         const [content] = await file.download();
         const json = JSON.parse(content.toString());
+
+        // Auto-migrate v1 to v2 on read (doesn't save - client handles that)
+        if (isV1Schema(json)) {
+            console.log("Migrating v1 narrative schema to v2 format...");
+            const v2Schema = migrateV1ToV2(json);
+            return res.json(v2Schema);
+        }
+
+        // Already v2 or unknown format - return as-is
         res.json(json);
     } catch (error) {
         console.error("Error reading narrative graph:", error);
@@ -212,13 +372,28 @@ app.get('/api/narrative', async (req, res) => {
     }
 });
 
-// POST (Save) Narrative Graph
+// POST (Save) Narrative Graph (supports both v1 and v2)
 app.post('/api/admin/narrative', async (req, res) => {
     try {
         const graphData = req.body;
 
-        if (!graphData.nodes) {
-            return res.status(400).json({ error: "Invalid graph structure: 'nodes' is required." });
+        // Validate based on version
+        if (graphData.version === "2.0") {
+            // V2 schema validation
+            if (!graphData.personas || !graphData.cards || !graphData.globalSettings) {
+                return res.status(400).json({
+                    error: "Invalid v2 schema: 'personas', 'cards', and 'globalSettings' are required."
+                });
+            }
+            console.log(`Saving v2 narrative schema. Cards: ${Object.keys(graphData.cards).length}, Personas: ${Object.keys(graphData.personas).length}`);
+        } else if (graphData.version === "1.0" || graphData.nodes) {
+            // V1 schema validation (backwards compatibility)
+            if (!graphData.nodes) {
+                return res.status(400).json({ error: "Invalid v1 schema: 'nodes' is required." });
+            }
+            console.log(`Saving v1 narrative schema. Nodes: ${Object.keys(graphData.nodes).length}`);
+        } else {
+            return res.status(400).json({ error: "Unknown schema version. Expected '1.0' or '2.0'." });
         }
 
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
@@ -230,7 +405,6 @@ app.post('/api/admin/narrative', async (req, res) => {
             }
         });
 
-        console.log(`Narrative graph saved. Nodes: ${Object.keys(graphData.nodes).length}`);
         res.json({ success: true, message: "Narrative graph updated" });
     } catch (error) {
         console.error("Error saving narrative graph:", error);

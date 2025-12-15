@@ -20,7 +20,7 @@ export const useNarrative = () => {
   // Helper: Get entry points for a specific section
   const getSectionNodes = (sectionId: SectionId | string): NarrativeNode[] => {
     if (!graph) return [];
-    return Object.values(graph.nodes).filter(n => n.sectionId === sectionId);
+    return (Object.values(graph.nodes) as NarrativeNode[]).filter(n => n.sectionId === sectionId);
   };
 
   // Helper: Get next nodes for a given ID
