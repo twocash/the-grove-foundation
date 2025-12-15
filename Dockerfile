@@ -14,8 +14,8 @@ RUN npm install
 
 COPY . .
 
-# Run build with the environment variable
-RUN VITE_GEMINI_API_KEY=$GEMINI_API_KEY npm run build
+# Run build with the environment variable (pass both names for compatibility)
+RUN GEMINI_API_KEY=$GEMINI_API_KEY VITE_GEMINI_API_KEY=$GEMINI_API_KEY npm run build
 
 # Stage 2: Runner
 FROM node:20-alpine

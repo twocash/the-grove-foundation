@@ -4,8 +4,27 @@ import { sendMessageStream, initChatSession } from '../services/geminiService';
 import { SECTION_CONFIG, GROVE_KNOWLEDGE_BASE } from '../constants';
 import { useNarrative } from '../hooks/useNarrative';
 import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
-import { LensPicker, LensBadge, JourneyEnd, ThreadProgress } from './Terminal/index';
+import { useCustomLens } from '../hooks/useCustomLens';
+import { useRevealState } from '../hooks/useRevealState';
+import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard } from './Terminal/index';
 import { Card, Persona } from '../data/narratives-schema';
+import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
+import SimulationReveal from './Terminal/Reveals/SimulationReveal';
+import CustomLensOffer from './Terminal/Reveals/CustomLensOffer';
+import { TerminatorModePrompt, TerminatorModeOverlay, TerminatorResponseMetadata } from './Terminal/Reveals/TerminatorMode';
+import FounderStory from './Terminal/Reveals/FounderStory';
+import ConversionCTAPanel from './Terminal/ConversionCTA';
+import {
+  trackLensActivated,
+  trackSimulationRevealShown,
+  trackSimulationRevealAcknowledged,
+  trackTerminatorModeUnlocked,
+  trackTerminatorModeActivated,
+  trackFounderStoryViewed,
+  trackCtaViewed,
+  trackCtaClicked,
+  trackJourneyCompleted
+} from '../utils/funnelAnalytics';
 
 interface TerminalProps {
   activeSection: SectionId;
@@ -117,14 +136,29 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [ragContext, setRagContext] = useState<string>('');
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [showLensPicker, setShowLensPicker] = useState<boolean>(false);
+  const [showCustomLensWizard, setShowCustomLensWizard] = useState<boolean>(false);
   const [hasShownWelcome, setHasShownWelcome] = useState<boolean>(false);
   const [showNudge, setShowNudge] = useState<boolean>(false);
+  const [showSimulationReveal, setShowSimulationReveal] = useState<boolean>(false);
+  const [showCustomLensOffer, setShowCustomLensOffer] = useState<boolean>(false);
+  const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
+  const [showFounderStory, setShowFounderStory] = useState<boolean>(false);
+  const [showConversionCTA, setShowConversionCTA] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Legacy narrative hook for v1 compatibility
   const { getNextNodes } = useNarrative();
+
+  // Custom lens management
+  const {
+    customLenses,
+    saveCustomLens,
+    deleteCustomLens,
+    updateCustomLensUsage,
+    getCustomLens
+  } = useCustomLens();
 
   // New v2 narrative engine
   const {
@@ -145,7 +179,49 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     globalSettings
   } = useNarrativeEngine();
 
-  const activeLensData = getActiveLensData();
+  // Reveal state management
+  const {
+    revealState,
+    sessionState,
+    showSimulationReveal: shouldShowSimReveal,
+    showCustomLensOffer: shouldShowLensOffer,
+    showTerminatorPrompt: shouldShowTerminator,
+    showFounderPrompt: shouldShowFounder,
+    terminatorModeActive,
+    acknowledgeSimulationReveal,
+    dismissCustomLensOffer,
+    unlockTerminatorMode,
+    activateTerminatorMode,
+    deactivateTerminatorMode,
+    showFounderStory: markFounderStoryShown,
+    dismissFounderStory,
+    markCTAViewed,
+    incrementJourneysCompleted,
+    incrementTopicsExplored,
+    updateActiveMinutes,
+    setCustomLens: setRevealCustomLens,
+    getMinutesActive
+  } = useRevealState();
+
+  // Get active lens data (could be custom or archetypal)
+  const activeLensData = useMemo(() => {
+    const archetypeLens = getActiveLensData();
+    if (archetypeLens) return archetypeLens;
+
+    // Check if it's a custom lens
+    if (session.activeLens?.startsWith('custom-')) {
+      const customLens = getCustomLens(session.activeLens);
+      if (customLens) {
+        // Return custom lens as Persona-compatible object
+        return {
+          ...customLens,
+          // CustomLens already has all the Persona fields
+        } as unknown as Persona;
+      }
+    }
+    return null;
+  }, [getActiveLensData, session.activeLens, getCustomLens, customLenses]);
+
   const enabledPersonas = getEnabledPersonas();
 
   // Check if we should show lens picker on first open
@@ -164,7 +240,146 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     selectLens(personaId);
     setShowLensPicker(false);
     localStorage.setItem('grove-terminal-welcomed', 'true');
+
+    // Track lens activation
+    if (personaId) {
+      trackLensActivated(personaId, personaId.startsWith('custom-'));
+    }
+
+    // If selecting a custom lens, update its usage timestamp
+    if (personaId?.startsWith('custom-')) {
+      updateCustomLensUsage(personaId);
+    }
   };
+
+  // Handle opening custom lens wizard
+  const handleCreateCustomLens = () => {
+    setShowLensPicker(false);
+    setShowCustomLensWizard(true);
+  };
+
+  // Handle custom lens wizard completion
+  const handleCustomLensComplete = async (candidate: LensCandidate, userInputs: UserInputs) => {
+    const newLens = await saveCustomLens(candidate, userInputs);
+    selectLens(newLens.id);
+    setShowCustomLensWizard(false);
+    localStorage.setItem('grove-terminal-welcomed', 'true');
+  };
+
+  // Handle custom lens wizard cancel
+  const handleCustomLensCancel = () => {
+    setShowCustomLensWizard(false);
+    setShowLensPicker(true);
+  };
+
+  // Handle deleting a custom lens
+  const handleDeleteCustomLens = async (id: string) => {
+    // If deleting the active lens, clear it first
+    if (session.activeLens === id) {
+      selectLens(null);
+    }
+    await deleteCustomLens(id);
+  };
+
+  // Get current archetype ID for conversion routing
+  const currentArchetypeId = useMemo((): ArchetypeId | null => {
+    if (!activeLensData) return null;
+    // Map persona IDs to archetype IDs
+    const personaToArchetype: Record<string, ArchetypeId> = {
+      'academic': 'academic',
+      'engineer': 'engineer',
+      'concerned-citizen': 'concerned-citizen',
+      'geopolitical': 'geopolitical',
+      'big-ai-exec': 'big-ai-exec',
+      'family-office': 'family-office'
+    };
+    return personaToArchetype[activeLensData.id] || 'concerned-citizen';
+  }, [activeLensData]);
+
+  // Check for reveal triggers
+  useEffect(() => {
+    // Update active minutes periodically
+    const interval = setInterval(() => {
+      updateActiveMinutes();
+    }, 60000); // Every minute
+
+    return () => clearInterval(interval);
+  }, [updateActiveMinutes]);
+
+  // Trigger simulation reveal when conditions are met
+  useEffect(() => {
+    if (shouldShowSimReveal && !showSimulationReveal) {
+      setShowSimulationReveal(true);
+      if (currentArchetypeId) {
+        trackSimulationRevealShown(currentArchetypeId);
+      }
+    }
+  }, [shouldShowSimReveal, showSimulationReveal, currentArchetypeId]);
+
+  // Handle simulation reveal acknowledgment
+  const handleSimulationRevealContinue = () => {
+    if (currentArchetypeId) {
+      trackSimulationRevealAcknowledged(currentArchetypeId);
+    }
+    acknowledgeSimulationReveal();
+    setShowSimulationReveal(false);
+    // After simulation reveal, offer custom lens if applicable
+    if (shouldShowLensOffer) {
+      setShowCustomLensOffer(true);
+    }
+  };
+
+  // Handle custom lens offer
+  const handleAcceptCustomLensOffer = () => {
+    dismissCustomLensOffer();
+    setShowCustomLensOffer(false);
+    setShowCustomLensWizard(true);
+  };
+
+  const handleDeclineCustomLensOffer = () => {
+    dismissCustomLensOffer();
+    setShowCustomLensOffer(false);
+  };
+
+  // Handle terminator mode
+  const handleAcceptTerminatorMode = () => {
+    trackTerminatorModeActivated();
+    activateTerminatorMode();
+    setShowTerminatorPrompt(false);
+  };
+
+  const handleDeclineTerminatorMode = () => {
+    trackTerminatorModeUnlocked();
+    unlockTerminatorMode();
+    setShowTerminatorPrompt(false);
+  };
+
+  // Handle founder story
+  const handleFounderStoryContinue = () => {
+    dismissFounderStory();
+    setShowFounderStory(false);
+    // After founder story, show conversion CTA
+    setShowConversionCTA(true);
+    markCTAViewed();
+  };
+
+  // Check for terminator mode trigger
+  useEffect(() => {
+    if (shouldShowTerminator && !showTerminatorPrompt && !revealState.terminatorModeUnlocked) {
+      setShowTerminatorPrompt(true);
+    }
+  }, [shouldShowTerminator, showTerminatorPrompt, revealState.terminatorModeUnlocked]);
+
+  // Check for founder story trigger
+  useEffect(() => {
+    if (shouldShowFounder && !showFounderStory && !revealState.founderStoryShown) {
+      setShowFounderStory(true);
+      markFounderStoryShown();
+      if (currentArchetypeId) {
+        trackFounderStoryViewed(currentArchetypeId);
+      }
+    }
+  }, [shouldShowFounder, showFounderStory, revealState.founderStoryShown, markFounderStoryShown, currentArchetypeId]);
 
   // Load RAG context
   useEffect(() => {
@@ -358,12 +573,21 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-500 ease-in-out shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full text-ink font-sans">
 
-          {/* Show Lens Picker or Main Terminal */}
-          {showLensPicker ? (
+          {/* Show Custom Lens Wizard, Lens Picker, or Main Terminal */}
+          {showCustomLensWizard ? (
+            <CustomLensWizard
+              onComplete={handleCustomLensComplete}
+              onCancel={handleCustomLensCancel}
+            />
+          ) : showLensPicker ? (
             <LensPicker
               personas={enabledPersonas}
+              customLenses={customLenses}
               onSelect={handleLensSelect}
+              onCreateCustomLens={handleCreateCustomLens}
+              onDeleteCustomLens={handleDeleteCustomLens}
               currentLens={session.activeLens}
+              showCreateOption={true}
             />
           ) : (
             <>
@@ -558,6 +782,52 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
         </div>
       </div>
+
+      {/* Reveal Overlays */}
+      {showSimulationReveal && currentArchetypeId && (
+        <SimulationReveal
+          archetypeId={currentArchetypeId}
+          onContinue={handleSimulationRevealContinue}
+        />
+      )}
+
+      {showCustomLensOffer && (
+        <CustomLensOffer
+          onAccept={handleAcceptCustomLensOffer}
+          onDecline={handleDeclineCustomLensOffer}
+        />
+      )}
+
+      {showTerminatorPrompt && (
+        <TerminatorModePrompt
+          onActivate={handleAcceptTerminatorMode}
+          onDecline={handleDeclineTerminatorMode}
+        />
+      )}
+
+      {terminatorModeActive && <TerminatorModeOverlay />}
+
+      {showFounderStory && currentArchetypeId && (
+        <FounderStory
+          archetypeId={currentArchetypeId}
+          onContinue={handleFounderStoryContinue}
+        />
+      )}
+
+      {showConversionCTA && currentArchetypeId && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/30 backdrop-blur-sm">
+          <div className="w-full max-w-md mx-4">
+            <ConversionCTAPanel
+              archetypeId={currentArchetypeId}
+              customLensName={activeLensData?.name}
+              onCTAClick={(ctaId) => {
+                trackCtaClicked(currentArchetypeId, ctaId, 'modal');
+              }}
+              onDismiss={() => setShowConversionCTA(false)}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

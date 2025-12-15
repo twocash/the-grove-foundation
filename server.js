@@ -25,7 +25,11 @@ const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'grove-assets';
 // Initialize Clients
 const storage = new Storage();
 const apiKey = process.env.GEMINI_API_KEY;
-const genai = new GoogleGenAI({ apiKey });
+console.log('GEMINI_API_KEY configured:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT SET');
+
+// Explicitly set vertexai: false to ensure we use API key auth (Gemini API)
+// rather than service account auth (Vertex AI) which requires different scopes
+const genai = new GoogleGenAI({ apiKey, vertexai: false });
 
 // Configure Multer (Memory Storage for immediate processing)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -470,6 +474,117 @@ ${cleanText}`;
 
     } catch (error) {
         console.error("Generation failed:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- Custom Lens Generation API ---
+
+// System prompt for lens generation
+const LENS_GENERATOR_PROMPT = `You are generating personalized "lenses" for The Grove Terminal — an AI infrastructure exploration tool.
+
+Based on the user's responses, generate 3 distinct lens options. Each lens should feel like it truly understands the user's perspective and worldview.
+
+For EACH of the 3 lenses, provide:
+
+1. publicLabel: A 2-4 word evocative name that feels personal, not clinical
+   Examples: "The Reluctant Technologist", "The Systems Thinker", "The Pragmatic Optimist", "The Infrastructure Skeptic"
+
+2. description: 2-3 sentences capturing their worldview in second person ("You...")
+   Should feel like the Terminal "gets" them
+
+3. toneGuidance: 100-150 words instructing how the AI should speak to this person
+   Include: vocabulary level, emotional register, what to emphasize, what to avoid
+
+4. narrativeStyle: One of:
+   - "evidence-first" (lead with data and research)
+   - "stakes-heavy" (lead with implications and urgency)
+   - "mechanics-deep" (lead with how things work)
+   - "resolution-oriented" (lead with solutions and next steps)
+
+5. arcEmphasis: Rate each phase 1-4 (1=minimal, 4=heavy emphasis):
+   - hook: attention-grabbing opening
+   - stakes: why this matters
+   - mechanics: how it works
+   - evidence: proof and validation
+   - resolution: what to do next
+
+6. openingPhase: Which phase to start journeys with: "hook" | "stakes" | "mechanics"
+
+7. archetypeMapping: Which of these 6 archetypes they map CLOSEST to (user never sees this, it's for internal routing):
+   - "academic": Research-focused, institutional, evidence-driven
+   - "engineer": Technical, architecture-focused, builder mindset
+   - "concerned-citizen": Personal impact, agency, accessibility
+   - "geopolitical": Policy, systemic risk, institutional power
+   - "big-ai-exec": Strategic positioning, optionality, insider view
+   - "family-office": Patient capital, generational thinking, infrastructure
+
+Return ONLY a JSON array with exactly 3 lens objects. No markdown, no explanation, just the JSON array.
+Each lens should feel distinct but authentic to the user's inputs.`;
+
+// POST Generate Custom Lens Options
+app.post('/api/generate-lens', async (req, res) => {
+    try {
+        const { userInputs } = req.body;
+
+        if (!userInputs || !userInputs.motivation || !userInputs.futureOutlook || !userInputs.professionalRelationship) {
+            return res.status(400).json({ error: "Missing required user inputs" });
+        }
+
+        console.log("Generating custom lens options...");
+
+        // Build prompt with user responses
+        const prompt = `${LENS_GENERATOR_PROMPT}
+
+User's responses:
+- Motivation: ${userInputs.motivation}${userInputs.motivationOther ? ` (${userInputs.motivationOther})` : ''}
+- Concerns: ${userInputs.concerns || 'Not specified'}${userInputs.concernsOther ? ` (${userInputs.concernsOther})` : ''}
+- Future outlook: ${userInputs.futureOutlook}${userInputs.futureOutlookOther ? ` (${userInputs.futureOutlookOther})` : ''}
+- Professional relationship: ${userInputs.professionalRelationship}${userInputs.professionalRelationshipOther ? ` (${userInputs.professionalRelationshipOther})` : ''}
+- Worldview statement: ${userInputs.worldviewStatement || 'Not provided'}`;
+
+        const result = await genai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                temperature: 0.8  // Slightly higher for more creative/varied lenses
+            }
+        });
+
+        const responseText = result.text;
+        console.log("Lens generation complete.");
+
+        // Parse and validate the response
+        let lensOptions;
+        try {
+            lensOptions = JSON.parse(responseText);
+        } catch (parseErr) {
+            // Try to extract JSON array from response if wrapped in markdown
+            const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) {
+                throw new Error('Failed to parse lens options from AI response');
+            }
+            lensOptions = JSON.parse(jsonMatch[0]);
+        }
+
+        // Validate we got 3 options with required fields
+        if (!Array.isArray(lensOptions) || lensOptions.length !== 3) {
+            throw new Error('Expected exactly 3 lens options');
+        }
+
+        for (const lens of lensOptions) {
+            if (!lens.publicLabel || !lens.description || !lens.toneGuidance ||
+                !lens.narrativeStyle || !lens.arcEmphasis || !lens.openingPhase ||
+                !lens.archetypeMapping) {
+                throw new Error('Lens option missing required fields');
+            }
+        }
+
+        res.json({ lensOptions });
+
+    } catch (error) {
+        console.error("Lens generation failed:", error);
         res.status(500).json({ error: error.message });
     }
 });

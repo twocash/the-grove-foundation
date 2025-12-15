@@ -22,12 +22,16 @@
 │    ├── ArchitectureDiagram.tsx   (Visual system explanation)    │
 │    ├── EconomicsSlider.tsx       (Interactive economics viz)    │
 │    ├── Terminal.tsx              (AI chat interface)            │
+│    │    ├── LensPicker.tsx       (Persona/lens selection)       │
+│    │    ├── CustomLensWizard/    (5-step lens creator)          │
+│    │    ├── Reveals/             (Progressive reveal overlays)  │
+│    │    └── ConversionCTA/       (Archetype-specific CTAs)      │
 │    ├── PromptHooks.tsx           (Interactive prompt triggers)  │
 │    ├── AudioPlayer.tsx           (CMS-driven audio playback)    │
 │    └── Admin Dashboard                                          │
 │         ├── AdminAudioConsole.tsx    (TTS generation)           │
 │         ├── AdminRAGConsole.tsx      (Knowledge management)     │
-│         └── AdminNarrativeConsole.tsx (Narrative Engine) [NEW]  │
+│         └── AdminNarrativeConsole.tsx (Narrative Engine)        │
 ├─────────────────────────────────────────────────────────────────┤
 │                        BACKEND (Express/Node)                    │
 ├─────────────────────────────────────────────────────────────────┤
@@ -37,9 +41,10 @@
 │    ├── GET  /api/context           (RAG knowledge base)         │
 │    ├── GET  /api/admin/knowledge   (List knowledge files)       │
 │    ├── DELETE /api/admin/knowledge/:file                        │
-│    ├── GET  /api/narrative         (Narrative graph) [NEW]      │
-│    ├── POST /api/admin/narrative   (Save narrative) [NEW]       │
-│    └── POST /api/admin/generate-narrative (AI extract) [NEW]    │
+│    ├── GET  /api/narrative         (Narrative graph)            │
+│    ├── POST /api/admin/narrative   (Save narrative)             │
+│    ├── POST /api/admin/generate-narrative (AI extract)          │
+│    └── POST /api/generate-lens     (Custom lens generation)     │
 ├─────────────────────────────────────────────────────────────────┤
 │                     CLOUD SERVICES (GCP)                         │
 ├─────────────────────────────────────────────────────────────────┤
@@ -230,3 +235,54 @@ Tabs:
 - [x] Refactor PromptHooks for dynamic data
 - [x] Terminal graph-aware state
 - [x] Curated follow-up chips
+
+---
+
+## Completed Sprints: Custom Lens Creator & Reveal System
+
+### Sprint 5: Custom Lens Creator ✓
+- [x] `types/lens.ts` - LensCandidate, UserInputs, WizardState types
+- [x] `POST /api/generate-lens` - AI-powered lens generation endpoint
+- [x] `components/Terminal/CustomLensWizard/` - Multi-step wizard UI
+  - PrivacyStep, InputStep, GeneratingStep, SelectStep, ConfirmStep
+- [x] `hooks/useCustomLens.ts` - Custom lens persistence (localStorage with encryption)
+- [x] `utils/encryption.ts` - AES-256 encryption for sensitive lens data
+- [x] LensPicker integration with custom lens creation
+- [x] `utils/funnelAnalytics.ts` - Analytics tracking throughout wizard funnel
+
+### Sprint 6: Reveal System ✓
+- [x] `hooks/useRevealState.ts` - Reveal progression state management
+- [x] `utils/revealTiming.ts` - Timing-based reveal triggers
+- [x] `components/Terminal/Reveals/` - Reveal overlay components
+  - SimulationReveal - "You're in a simulation" dramatic reveal
+  - CustomLensOffer - Offer to create personalized lens
+  - TerminatorMode - Unlock advanced "no guardrails" mode
+  - FounderStory - Personal narrative from founder
+- [x] `components/Terminal/ConversionCTA/` - Archetype-specific CTAs
+- [x] Journey completion tracking with progressive reveals
+
+### Key Custom Lens Files
+
+| File | Purpose |
+|------|---------|
+| `types/lens.ts` | TypeScript types for lens wizard and candidates |
+| `hooks/useCustomLens.ts` | Custom lens CRUD with encrypted localStorage |
+| `hooks/useRevealState.ts` | Track reveal progression and session state |
+| `utils/funnelAnalytics.ts` | Wizard funnel analytics tracking |
+| `components/Terminal/CustomLensWizard/` | 5-step wizard components |
+| `components/Terminal/Reveals/` | Dramatic reveal overlays |
+| `components/Terminal/ConversionCTA/` | Archetype-specific conversion panels |
+
+### Custom Lens API
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| POST | `/api/generate-lens` | Generate 3 personalized lens options from user inputs |
+
+### Reveal Progression
+
+1. **Simulation Reveal** - After 3+ exchanges, shows "you're in a simulation" message
+2. **Custom Lens Offer** - After acknowledging simulation, offers personalized lens
+3. **Terminator Mode** - After 10+ minutes active, unlocks "no guardrails" mode
+4. **Founder Story** - After journey completion, shows personal narrative
+5. **Conversion CTA** - Final archetype-specific call-to-action
