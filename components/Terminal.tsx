@@ -210,6 +210,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
   }, [terminalState.isOpen, recordActivity]);
 
+  // Check for nudge when exchange count changes (fixes race condition)
+  useEffect(() => {
+    if (shouldNudge() && !showNudge && !session.activeLens) {
+      setShowNudge(true);
+    }
+  }, [session.exchangeCount, shouldNudge, showNudge, session.activeLens]);
+
   // Journey completion state
   const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
   const [journeyStartTime] = useState(Date.now());
@@ -432,12 +439,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
 
     // Increment exchange count for nudge logic
+    // (useEffect watches session.exchangeCount to trigger nudge)
     incrementExchangeCount();
-
-    // Check if we should show nudge after this exchange
-    if (shouldNudge() && !showNudge) {
-      setShowNudge(true);
-    }
 
     const displayId = Date.now().toString();
     // PRESERVED: Scholar Mode (--verbose) display logic
