@@ -669,18 +669,34 @@ But still stay grounded in the source material.`);
 }
 
 // Helper: Fetch RAG context from GCS
+// Note: Large context sizes can exhaust Gemini TPM (tokens per minute) quota
+// Current limit: 50KB to stay under ~12,500 tokens for system prompt
+const MAX_RAG_CONTEXT_BYTES = 50000;
+
 async function fetchRagContext() {
     try {
         const [files] = await storage.bucket(BUCKET_NAME).getFiles({ prefix: 'knowledge/' });
         const textFiles = files.filter(f => f.name.endsWith('.md') || f.name.endsWith('.txt'));
 
         let combinedContext = "";
+        let totalBytes = 0;
+
         for (const file of textFiles) {
             const [content] = await file.download();
+            const contentStr = content.toString();
+
+            // Stop if we'd exceed the limit
+            if (totalBytes + contentStr.length > MAX_RAG_CONTEXT_BYTES) {
+                console.log(`RAG context limit reached at ${totalBytes} bytes, skipping remaining files`);
+                break;
+            }
+
             const filename = file.name.replace('knowledge/', '');
-            combinedContext += `\n\n--- SOURCE: ${filename} ---\n${content.toString()}`;
+            combinedContext += `\n\n--- SOURCE: ${filename} ---\n${contentStr}`;
+            totalBytes += contentStr.length;
         }
 
+        console.log(`RAG context loaded: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens)`);
         return combinedContext || STATIC_KNOWLEDGE_BASE;
     } catch (error) {
         console.error("Failed to fetch RAG context:", error.message);
@@ -764,48 +780,80 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('X-Session-Id', chatSessionId);
 
-        // Stream the response
-        try {
-            const result = await session.chat.sendMessageStream({ message: userPrompt });
-            let fullText = '';
+        // Stream the response with retry logic for rate limits
+        const MAX_RETRIES = 3;
+        const BASE_DELAY_MS = 2000; // Start with 2 seconds
 
-            for await (const chunk of result) {
-                const text = chunk.text;
-                if (text) {
-                    fullText += text;
-                    // Send chunk as SSE event
-                    res.write(`data: ${JSON.stringify({ type: 'chunk', text })}\n\n`);
+        let lastError = null;
+
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            try {
+                if (attempt > 0) {
+                    const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1); // 2s, 4s, 8s
+                    console.log(`Rate limit retry ${attempt}/${MAX_RETRIES}, waiting ${delay}ms...`);
+                    res.write(`data: ${JSON.stringify({ type: 'status', message: 'Rate limit hit, retrying...' })}\n\n`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
+
+                const result = await session.chat.sendMessageStream({ message: userPrompt });
+                let fullText = '';
+
+                for await (const chunk of result) {
+                    const text = chunk.text;
+                    if (text) {
+                        fullText += text;
+                        // Send chunk as SSE event
+                        res.write(`data: ${JSON.stringify({ type: 'chunk', text })}\n\n`);
+                    }
+                }
+
+                // Send completion event with metadata
+                const breadcrumbMatch = fullText.match(/\[\[BREADCRUMB:(.*?)\]\]/);
+                const topicMatch = fullText.match(/\[\[TOPIC:(.*?)\]\]/);
+
+                res.write(`data: ${JSON.stringify({
+                    type: 'done',
+                    sessionId: chatSessionId,
+                    breadcrumb: breadcrumbMatch ? breadcrumbMatch[1].trim() : null,
+                    topic: topicMatch ? topicMatch[1].trim() : null
+                })}\n\n`);
+
+                res.end();
+                return; // Success, exit the retry loop
+
+            } catch (streamError) {
+                lastError = streamError;
+                const isRateLimit = streamError.status === 429 ||
+                                   streamError.message?.includes('429') ||
+                                   streamError.message?.includes('RESOURCE_EXHAUSTED') ||
+                                   streamError.message?.includes('quota');
+
+                if (isRateLimit && attempt < MAX_RETRIES - 1) {
+                    console.log(`Rate limit error (attempt ${attempt + 1}):`, streamError.message);
+                    continue; // Retry
+                }
+
+                // Not a rate limit error, or exhausted retries
+                console.error('Stream error:', streamError);
+                break;
             }
-
-            // Send completion event with metadata
-            const breadcrumbMatch = fullText.match(/\[\[BREADCRUMB:(.*?)\]\]/);
-            const topicMatch = fullText.match(/\[\[TOPIC:(.*?)\]\]/);
-
-            res.write(`data: ${JSON.stringify({
-                type: 'done',
-                sessionId: chatSessionId,
-                breadcrumb: breadcrumbMatch ? breadcrumbMatch[1].trim() : null,
-                topic: topicMatch ? topicMatch[1].trim() : null
-            })}\n\n`);
-
-            res.end();
-
-        } catch (streamError) {
-            console.error('Stream error:', streamError);
-
-            // Send error event
-            res.write(`data: ${JSON.stringify({
-                type: 'error',
-                error: streamError.message,
-                code: streamError.status || 500
-            })}\n\n`);
-
-            res.end();
-
-            // Remove broken session
-            chatSessions.delete(chatSessionId);
         }
+
+        // All retries failed or non-retryable error
+        const isRateLimit = lastError?.status === 429 || lastError?.message?.includes('429');
+        res.write(`data: ${JSON.stringify({
+            type: 'error',
+            error: isRateLimit
+                ? 'Rate limit exceeded. Please wait a moment and try again.'
+                : lastError?.message,
+            code: lastError?.status || 500,
+            isRateLimit
+        })}\n\n`);
+
+        res.end();
+
+        // Remove broken session
+        chatSessions.delete(chatSessionId);
 
     } catch (error) {
         console.error('Chat endpoint error:', error);
@@ -902,6 +950,36 @@ app.get('/api/chat/health', (req, res) => {
         apiKeyConfigured: !!apiKey,
         activeSessions: chatSessions.size
     });
+});
+
+// GET /api/health/ready - Deployment readiness check
+// Returns 200 only when all critical dependencies are configured
+// Used by Cloud Build to verify deployment before routing traffic
+app.get('/api/health/ready', async (req, res) => {
+    const checks = {
+        apiKey: !!apiKey,
+        apiKeyPrefix: apiKey ? apiKey.substring(0, 6) : null,
+        gcsBucket: !!BUCKET_NAME,
+        nodeEnv: process.env.NODE_ENV || 'development'
+    };
+
+    const allPassed = checks.apiKey && checks.gcsBucket;
+
+    if (allPassed) {
+        res.status(200).json({
+            status: 'ready',
+            checks,
+            timestamp: new Date().toISOString()
+        });
+    } else {
+        console.error('Readiness check failed:', checks);
+        res.status(503).json({
+            status: 'not_ready',
+            checks,
+            message: 'Missing required configuration. Check Cloud Run env vars.',
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 
 // --- Custom Lens Generation API ---
