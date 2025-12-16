@@ -125,6 +125,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [hasShownWelcome, setHasShownWelcome] = useState<boolean>(false);
   const [showNudge, setShowNudge] = useState<boolean>(false);
   const [nudgeDismissed, setNudgeDismissed] = useState<boolean>(false);
+  const [showLensChoice, setShowLensChoice] = useState<boolean>(false); // Choice between create vs predefined
   const [showSimulationReveal, setShowSimulationReveal] = useState<boolean>(false);
   const [showCustomLensOffer, setShowCustomLensOffer] = useState<boolean>(false);
   const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
@@ -693,15 +694,47 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               {/* Interactions Area */}
               <div className="p-6 border-t border-ink/5 bg-paper/50">
 
+                {/* Lens Choice Card - shown after user accepts nudge */}
+                {showLensChoice && !session.activeLens && (
+                  <div className="mb-4 bg-grove-forest/5 border border-grove-forest/20 rounded-lg p-4">
+                    <p className="text-sm font-serif text-ink mb-3">
+                      Do you want to create a personal lens, or choose a predefined one?
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          setShowLensChoice(false);
+                          setShowCustomLensWizard(true);
+                        }}
+                        className="px-4 py-2 bg-grove-forest text-white text-xs font-semibold rounded hover:bg-grove-forest/90 transition-colors"
+                      >
+                        Create your own lens
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowLensChoice(false);
+                          setShowLensPicker(true);
+                        }}
+                        className="px-4 py-2 bg-white border border-grove-forest/30 text-grove-forest text-xs font-semibold rounded hover:bg-grove-forest/5 transition-colors"
+                      >
+                        Choose a predefined lens
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* No-Lens Nudge - appears in interactions area so it's always visible */}
-                {showNudge && !session.activeLens && (
+                {showNudge && !showLensChoice && !session.activeLens && (
                   <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
                     <p className="text-sm font-serif text-amber-800 mb-3">
                       I notice you're exploring{currentTopic ? ` "${currentTopic}"` : ''}. Would you like to choose a lens for a more focused experience?
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => setShowLensPicker(true)}
+                        onClick={() => {
+                          setShowNudge(false);
+                          setShowLensChoice(true);
+                        }}
                         className="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded hover:bg-amber-700 transition-colors"
                       >
                         Yes, show lenses

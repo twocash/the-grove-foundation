@@ -319,7 +319,7 @@ const LensPicker: React.FC<LensPickerProps> = ({
       {/* Footer hint */}
       <div className="px-4 py-3 border-t border-ink/5 bg-paper/50">
         <p className="text-[10px] text-ink-muted text-center">
-          You can switch your lens anytime from the Terminal header
+          You can switch your lens anytime by clicking on your lens in the Terminal
         </p>
       </div>
     </div>
