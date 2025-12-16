@@ -904,6 +904,36 @@ app.get('/api/chat/health', (req, res) => {
     });
 });
 
+// GET /api/health/ready - Deployment readiness check
+// Returns 200 only when all critical dependencies are configured
+// Used by Cloud Build to verify deployment before routing traffic
+app.get('/api/health/ready', async (req, res) => {
+    const checks = {
+        apiKey: !!apiKey,
+        apiKeyPrefix: apiKey ? apiKey.substring(0, 6) : null,
+        gcsBucket: !!BUCKET_NAME,
+        nodeEnv: process.env.NODE_ENV || 'development'
+    };
+
+    const allPassed = checks.apiKey && checks.gcsBucket;
+
+    if (allPassed) {
+        res.status(200).json({
+            status: 'ready',
+            checks,
+            timestamp: new Date().toISOString()
+        });
+    } else {
+        console.error('Readiness check failed:', checks);
+        res.status(503).json({
+            status: 'not_ready',
+            checks,
+            message: 'Missing required configuration. Check Cloud Run env vars.',
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // --- Custom Lens Generation API ---
 
 // System prompt for lens generation
