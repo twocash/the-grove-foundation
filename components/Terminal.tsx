@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useRevealState } from '../hooks/useRevealState';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav } from './Terminal/index';
+import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { Card, Persona } from '../data/narratives-schema';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
@@ -124,6 +124,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [showCustomLensWizard, setShowCustomLensWizard] = useState<boolean>(false);
   const [hasShownWelcome, setHasShownWelcome] = useState<boolean>(false);
   const [showNudge, setShowNudge] = useState<boolean>(false);
+  const [nudgeDismissed, setNudgeDismissed] = useState<boolean>(false);
   const [showSimulationReveal, setShowSimulationReveal] = useState<boolean>(false);
   const [showCustomLensOffer, setShowCustomLensOffer] = useState<boolean>(false);
   const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
@@ -212,10 +213,20 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   // Check for nudge when exchange count changes (fixes race condition)
   useEffect(() => {
-    if (shouldNudge() && !showNudge && !session.activeLens) {
+    // Debug logging for nudge trigger
+    console.log('[Nudge Check]', {
+      shouldNudge: shouldNudge(),
+      showNudge,
+      nudgeDismissed,
+      activeLens: session.activeLens,
+      exchangeCount: session.exchangeCount
+    });
+
+    if (shouldNudge() && !showNudge && !nudgeDismissed && !session.activeLens) {
+      console.log('[Nudge] Showing nudge!');
       setShowNudge(true);
     }
-  }, [session.exchangeCount, shouldNudge, showNudge, session.activeLens]);
+  }, [session.exchangeCount, shouldNudge, showNudge, nudgeDismissed, session.activeLens]);
 
   // Journey completion state
   const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
@@ -660,7 +671,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                         Yes, show lenses
                       </button>
                       <button
-                        onClick={() => setShowNudge(false)}
+                        onClick={() => {
+                          setShowNudge(false);
+                          setNudgeDismissed(true);
+                        }}
                         className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded hover:bg-amber-50 transition-colors"
                       >
                         No, continue exploring
@@ -684,8 +698,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                           </div>
                         ) : (
                           <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
-                            <MarkdownRenderer content={msg.text} />
-                            {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                            {msg.isStreaming && !msg.text ? (
+                              /* Show loading messages while waiting for first chunk */
+                              <LoadingIndicator messages={globalSettings?.loadingMessages} />
+                            ) : (
+                              <>
+                                <MarkdownRenderer content={msg.text} />
+                                {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                              </>
+                            )}
                           </div>
                         )}
                       </div>
@@ -739,6 +760,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     currentPosition={currentPosition}
                     currentCard={getThreadCard(currentPosition)}
                     journeyTitle={activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey'}
+                    isFirstCard={currentPosition === 0}
                     onResume={() => {
                       const card = getThreadCard(currentPosition);
                       if (card) {

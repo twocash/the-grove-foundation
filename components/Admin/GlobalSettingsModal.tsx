@@ -1,6 +1,6 @@
 // GlobalSettingsModal - Modal for editing global narrative settings
-import React from 'react';
-import { GlobalSettings, NoLensBehavior } from '../../data/narratives-schema';
+import React, { useState } from 'react';
+import { GlobalSettings, NoLensBehavior, DEFAULT_LOADING_MESSAGES } from '../../data/narratives-schema';
 
 interface GlobalSettingsModalProps {
   settings: GlobalSettings;
@@ -31,8 +31,28 @@ const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
   onUpdate,
   onClose
 }) => {
+  const [newMessage, setNewMessage] = useState('');
+
   const handleFieldChange = (field: keyof GlobalSettings, value: unknown) => {
     onUpdate({ ...settings, [field]: value });
+  };
+
+  const loadingMessages = settings.loadingMessages || DEFAULT_LOADING_MESSAGES;
+
+  const addLoadingMessage = () => {
+    if (newMessage.trim()) {
+      handleFieldChange('loadingMessages', [...loadingMessages, newMessage.trim()]);
+      setNewMessage('');
+    }
+  };
+
+  const removeLoadingMessage = (index: number) => {
+    const updated = loadingMessages.filter((_, i) => i !== index);
+    handleFieldChange('loadingMessages', updated);
+  };
+
+  const resetLoadingMessages = () => {
+    handleFieldChange('loadingMessages', DEFAULT_LOADING_MESSAGES);
   };
 
   return (
@@ -134,6 +154,55 @@ const GlobalSettingsModal: React.FC<GlobalSettingsModalProps> = ({
               </p>
             </div>
           )}
+
+          {/* Loading Messages */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                Loading Animation Messages
+              </label>
+              <button
+                onClick={resetLoadingMessages}
+                className="text-xs text-gray-500 hover:text-gray-700"
+              >
+                Reset to defaults
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">
+              These messages cycle while waiting for AI response (e.g., "asking the villagers...")
+            </p>
+            <div className="space-y-2 mb-3">
+              {loadingMessages.map((msg, idx) => (
+                <div key={idx} className="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                  <span className="flex-1 text-sm font-mono text-gray-700">{msg}</span>
+                  <button
+                    onClick={() => removeLoadingMessage(idx)}
+                    className="text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addLoadingMessage()}
+                placeholder="Add new message..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              />
+              <button
+                onClick={addLoadingMessage}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Footer */}

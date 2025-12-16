@@ -11,6 +11,7 @@ interface JourneyCardProps {
   journeyTitle?: string;
   onResume: () => void;
   onExploreFreely?: () => void;
+  isFirstCard?: boolean; // Whether this is the first card (position 0)
 }
 
 const JourneyCard: React.FC<JourneyCardProps> = ({
@@ -19,7 +20,8 @@ const JourneyCard: React.FC<JourneyCardProps> = ({
   currentCard,
   journeyTitle = 'Your Journey',
   onResume,
-  onExploreFreely
+  onExploreFreely,
+  isFirstCard = false
 }) => {
   const totalCards = currentThread.length;
   const progress = totalCards > 0 ? ((currentPosition) / totalCards) * 100 : 0;
@@ -58,7 +60,7 @@ const JourneyCard: React.FC<JourneyCardProps> = ({
             </div>
           </div>
           <span className="text-xs font-semibold text-grove-forest bg-grove-forest/10 px-2 py-1 rounded ml-3 group-hover:bg-grove-forest group-hover:text-white transition-colors">
-            Resume
+            {isFirstCard ? 'Ask the Grove' : 'Resume'}
           </span>
         </div>
 
