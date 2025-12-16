@@ -19,9 +19,11 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@core": ["./src/core"],
+      "@core/*": ["./src/core/*"],
+      "@surface/*": ["./src/surface/*"],
+      "@foundation/*": ["./src/foundation/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

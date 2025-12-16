@@ -11,56 +11,59 @@
 
 ---
 
-## Architecture Summary
+## Architecture Summary (Post-Sprint 4)
+
+The codebase follows a three-layer architecture:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (React/Vite)                     │
-├─────────────────────────────────────────────────────────────────┤
-│  App.tsx ─────────────────────────────────────────────────────  │
-│    ├── WhatIsGroveCarousel.tsx   (Interactive concept slides)   │
-│    ├── ArchitectureDiagram.tsx   (Visual system explanation)    │
-│    ├── EconomicsSlider.tsx       (Interactive economics viz)    │
-│    ├── Terminal.tsx              (AI chat interface)            │
-│    │    ├── LensPicker.tsx       (Persona/lens selection)       │
-│    │    ├── CustomLensWizard/    (5-step lens creator)          │
-│    │    ├── Reveals/             (Progressive reveal overlays)  │
-│    │    └── ConversionCTA/       (Archetype-specific CTAs)      │
-│    ├── PromptHooks.tsx           (Interactive prompt triggers)  │
-│    ├── AudioPlayer.tsx           (CMS-driven audio playback)    │
-│    └── Admin Dashboard                                          │
-│         ├── AdminNarrativeConsole.tsx (Narrative Engine)        │
-│         ├── FeatureFlagPanel.tsx      (Feature flags)           │
-│         ├── TopicHubPanel.tsx         (Query routing)           │
-│         ├── AdminAudioConsole.tsx     (TTS generation)          │
-│         ├── AdminRAGConsole.tsx       (Knowledge management)    │
-│         └── EngagementConsole.tsx     (Engagement Bus monitor)  │
-├─────────────────────────────────────────────────────────────────┤
-│                        BACKEND (Express/Node)                    │
-├─────────────────────────────────────────────────────────────────┤
-│  server.js                                                       │
-│    ├── GET  /api/manifest          (Audio track manifest)       │
-│    ├── POST /api/admin/manifest    (Save audio manifest)        │
-│    ├── GET  /api/context           (RAG knowledge base)         │
-│    ├── GET  /api/admin/knowledge   (List knowledge files)       │
-│    ├── DELETE /api/admin/knowledge/:file                        │
-│    ├── GET  /api/narrative         (Narrative graph)            │
-│    ├── POST /api/admin/narrative   (Save narrative)             │
-│    ├── POST /api/admin/generate-narrative (AI extract)          │
-│    └── POST /api/generate-lens     (Custom lens generation)     │
-├─────────────────────────────────────────────────────────────────┤
-│                     CLOUD SERVICES (GCP)                         │
-├─────────────────────────────────────────────────────────────────┤
-│  Google Cloud Storage (grove-assets bucket)                      │
-│    ├── manifest.json       (Audio CMS data)                     │
-│    ├── narratives.json     (Narrative graph) [NEW]              │
-│    ├── knowledge/*.md      (RAG documents)                      │
-│    └── audio/*.wav         (Generated audio files)              │
+│                         EXPERIENCES                              │
 │                                                                  │
-│  Google Gemini API                                               │
-│    ├── gemini-2.0-flash    (Chat completions)                   │
-│    └── gemini-2.5-flash-preview-tts (Audio generation)          │
+│    ┌─────────────────────┐         ┌─────────────────────┐      │
+│    │      SURFACE        │         │     FOUNDATION      │      │
+│    │   /  (home)         │         │   /foundation/*     │      │
+│    │                     │         │                     │      │
+│    │  - Paper/Ink theme  │         │  - Obsidian/Glow    │      │
+│    │  - Terminal.tsx     │         │  - Admin consoles   │      │
+│    │  - User experience  │         │  - Operator tools   │      │
+│    └─────────────────────┘         └─────────────────────┘      │
+│              │                               │                   │
+└──────────────┼───────────────────────────────┼───────────────────┘
+               │     ┌─────────────────┐       │
+               └────►│     HOOKS       │◄──────┘
+                     │  (React glue)   │
+                     └────────┬────────┘
+                              │
+┌─────────────────────────────┼───────────────────────────────────┐
+│                      ┌──────▼──────┐                            │
+│                      │    CORE     │  (Pure TypeScript)         │
+│                      │             │  (No React deps)           │
+│                      │  - Schema   │  (No DOM APIs)             │
+│                      │  - Engine   │                            │
+│                      │  - Config   │                            │
+│                      └─────────────┘                            │
+│                          SUBSTRATE                              │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Directories
+
+| Directory | Purpose |
+|-----------|---------|
+| `src/core/` | Pure TypeScript types, engines, config (NO React) |
+| `src/surface/` | Surface experience (user-facing) |
+| `src/foundation/` | Foundation experience (admin consoles) |
+| `src/router/` | React Router configuration |
+| `hooks/` | React hooks bridging Core to UI |
+| `services/` | API clients |
+| `components/` | Legacy Surface components |
+
+### Path Aliases
+
+```typescript
+@core     → ./src/core
+@surface  → ./src/surface
+@foundation → ./src/foundation
 ```
 
 ---
@@ -70,8 +73,9 @@
 | Layer | Technology | Version |
 |-------|------------|---------|
 | Frontend | React | 19.2.3 |
+| Routing | React Router | 7.1.5 |
 | Build | Vite | 6.2.0 |
-| Styling | Tailwind CSS | 4.x (CDN) |
+| Styling | Tailwind CSS | 4.x (npm) |
 | Backend | Express | 4.21.2 |
 | Runtime | Node.js | 20 (Alpine) |
 | Cloud | GCP (Cloud Run, GCS) | - |
@@ -80,13 +84,45 @@
 
 ---
 
+## Routes
+
+| Route | Component | Purpose |
+|-------|-----------|---------|
+| `/` | SurfacePage | Main user experience |
+| `/foundation` | FoundationLayout | Admin dashboard |
+| `/foundation/narrative` | NarrativeArchitect | Persona/card management |
+| `/foundation/engagement` | EngagementBridge | Event bus monitoring |
+| `/foundation/knowledge` | KnowledgeVault | RAG document management |
+| `/foundation/tuner` | RealityTuner | Flags + Topic hubs |
+| `/foundation/audio` | AudioStudio | TTS generation |
+
+**Legacy Redirect:** `?admin=true` → `/foundation`
+
+---
+
 ## Key Files Reference
 
-### Core Application
-- `App.tsx` - Main React component, section navigation, admin dashboard
-- `Terminal.tsx` - AI chat interface with streaming, markdown rendering
-- `constants.ts` - Knowledge base, section hooks, system prompts
-- `types.ts` - TypeScript interfaces (SectionId, ChatMessage, NarrativeNode)
+### Core Module (`src/core/`)
+- `schema/base.ts` - SectionId, ChatMessage, NarrativeNode
+- `schema/narrative.ts` - Persona, Card, GlobalSettings, TopicHub
+- `schema/engagement.ts` - EngagementState, Events, Triggers
+- `schema/lens.ts` - CustomLens, Archetype, UserInputs
+- `engine/triggerEvaluator.ts` - Reveal trigger evaluation
+- `engine/topicRouter.ts` - Query-to-hub routing
+- `config/defaults.ts` - All DEFAULT_* values
+
+### Foundation Consoles (`src/foundation/consoles/`)
+- `NarrativeArchitect.tsx` - Persona/card management
+- `EngagementBridge.tsx` - Event bus monitor
+- `KnowledgeVault.tsx` - RAG management
+- `RealityTuner.tsx` - Feature flags + Topic hubs
+- `AudioStudio.tsx` - TTS generation
+
+### Surface Application
+- `src/surface/pages/SurfacePage.tsx` - Main page
+- `components/Terminal.tsx` - AI chat interface
+- `components/Terminal/CustomLensWizard/` - 5-step wizard
+- `components/Terminal/Reveals/` - Progressive reveals
 
 ### Services
 - `services/chatService.ts` - Server-side chat client (preferred for chat)
@@ -378,7 +414,94 @@ emit.revealDismissed(revealType, action)
 
 ### Admin Engagement Console
 
-Access via `?admin=true` → Engagement tab:
+Access via `/foundation/engagement`:
 - **Monitor**: Live metrics, event log, reveal queue status
 - **Triggers**: Enable/disable triggers, view conditions
 - **Simulate**: Manually emit events for testing
+
+---
+
+## Debugging Quick Reference
+
+**Full debugging guide:** `docs/DEBUGGING.md`
+
+### localStorage Keys (All User State)
+
+| Key | Purpose |
+|-----|---------|
+| `grove-engagement-state` | Engagement metrics, reveals shown |
+| `grove-event-history` | Last 100 events |
+| `grove-terminal-lens` | Active lens ID |
+| `grove-terminal-session` | Terminal session state |
+| `grove-custom-lenses` | Encrypted custom lens data |
+| `grove-streak-data` | Streak tracking |
+
+### Full Reset (Browser Console)
+
+```javascript
+Object.keys(localStorage).filter(k => k.startsWith('grove-')).forEach(k => localStorage.removeItem(k));
+location.reload();
+```
+
+### Common Issues
+
+| Symptom | First Check |
+|---------|-------------|
+| Cards not appearing | Schema loaded? Journey active? Card has `next[]`? |
+| Reveals not triggering | Engagement state metrics? Trigger enabled? Already shown? |
+| Streak missing | Feature flag enabled? localStorage has streak data? |
+| Custom lens not saving | Encryption key exists? API call succeeded? |
+| Foundation not loading | Route correct? Build succeeded? |
+
+### Debugging in Foundation
+
+| Console | Debug Capability |
+|---------|------------------|
+| `/foundation/engagement` | Live metrics, event history, trigger status |
+| `/foundation/tuner` | Feature flags, topic hub query testing |
+| `/foundation/narrative` | Card connections, persona filtering |
+
+### Key Data Flows
+
+**Message → Response:**
+```
+Terminal.handleSendMessage() → chatService.streamChat()
+  → server.js /api/chat → routeToHub() → Gemini API
+  → Stream to client → useEngagementEmit().exchangeSent()
+```
+
+**Reveal Trigger:**
+```
+emit('EXCHANGE_SENT') → EngagementBus.processEvent()
+  → updateState() → evaluateTriggers() → revealQueue
+  → useRevealQueue() → Terminal renders reveal
+```
+
+---
+
+## Completed Sprints: Surface/Foundation Migration (Sprints 9-12)
+
+### Sprint 9 (Routing + Tailwind): ✓
+- React Router v7 installed
+- Tailwind migrated from CDN to npm
+- Route-based navigation (`/`, `/foundation/*`)
+- Legacy `?admin=true` redirect
+
+### Sprint 10 (Foundation Layout): ✓
+- HUDHeader, NavSidebar, GridViewport components
+- Foundation design system (obsidian, holo-cyan)
+- DataPanel, GlowButton, MetricCard base components
+
+### Sprint 11 (Console Migration): ✓
+- NarrativeArchitect (from NarrativeConsole)
+- EngagementBridge (from EngagementConsole)
+- KnowledgeVault (from AdminRAGConsole)
+- RealityTuner (merged FeatureFlags + TopicHubs)
+- AudioStudio (from AdminAudioConsole)
+
+### Sprint 12 (Core Extraction): ✓
+- `src/core/schema/` - All type definitions
+- `src/core/engine/` - triggerEvaluator, topicRouter
+- `src/core/config/` - All defaults
+- Path aliases: `@core`, `@surface`, `@foundation`
+- Backward compatibility shims
