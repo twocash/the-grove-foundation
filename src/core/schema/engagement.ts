@@ -163,4 +163,8 @@ export interface EngagementBusAPI {
   onRevealQueue: (handler: RevealQueueHandler) => () => void;
   reset: () => void;
   getEventHistory: () => EngagementEvent[];
+  /** Update trigger configurations at runtime (admin/diagnostics) */
+  setTriggers: (triggers: TriggerConfig[]) => void;
+  /** Get current trigger configurations */
+  getTriggers: () => TriggerConfig[];
 }

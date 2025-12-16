@@ -1,0 +1,101 @@
+{
+  "version": "1.0",
+  "description": "Grove Terminal Topic Hub RAG Manifest - Declarative configuration for tiered context loading",
+  "defaultContext": {
+    "path": "_default/",
+    "maxBytes": 15000,
+    "files": [
+      "grove-overview.md",
+      "key-concepts.md",
+      "visionary-narrative.md"
+    ]
+  },
+  "hubs": {
+    "ratchet-effect": {
+      "title": "The Ratchet Effect",
+      "path": "hubs/ratchet-effect/",
+      "maxBytes": 40000,
+      "primaryFile": "Grove_Ratchet_Deep_Dive.md",
+      "supportingFiles": ["METR_research.md"],
+      "tags": ["ratchet", "capability propagation", "frontier to edge", "21 months", "seven month", "7 month"]
+    },
+    "infrastructure-bet": {
+      "title": "The $380B Infrastructure Bet",
+      "path": "hubs/infrastructure-bet/",
+      "maxBytes": 40000,
+      "primaryFile": "Grove_Economics_Deep_Dive.md",
+      "supportingFiles": ["Hyperscaler_Analysis.md"],
+      "tags": ["$380 billion", "hyperscaler", "datacenter", "infrastructure bet", "data center", "big tech spending"]
+    },
+    "cognitive-split": {
+      "title": "The Cognitive Split",
+      "path": "hubs/cognitive-split/",
+      "maxBytes": 35000,
+      "primaryFile": "Hierarchical_Reasoning_Grove_Brief.md",
+      "supportingFiles": [],
+      "tags": ["cognitive split", "hierarchical reasoning", "two-phase", "procedural strategic", "constant hum", "breakthrough"]
+    },
+    "observer-dynamic": {
+      "title": "The Observer Dynamic",
+      "path": "hubs/observer-dynamic/",
+      "maxBytes": 45000,
+      "primaryFile": "Grove_Simulation_Deep_Dive.md",
+      "supportingFiles": ["An_Ethical_Critique_Shannon_Vallor.md"],
+      "tags": ["observer", "gardener", "simulation", "diary", "diaries", "asymmetric knowledge", "dramatic irony", "theology", "agent experience", "watching", "village"],
+      "notes": "This hub covers the simulation layer, diary system, and ethical implications of the Observer/Gardener relationship"
+    },
+    "meta-philosophy": {
+      "title": "You Are Already Here",
+      "path": "hubs/meta-philosophy/",
+      "maxBytes": 25000,
+      "primaryFile": "you-are-already-here.md",
+      "supportingFiles": ["ARCHITECTURE_EVENT_DRIVEN.md"],
+      "tags": ["meta", "architecture", "inside", "already here", "recursive", "experience", "understanding", "terminal is grove", "proof of concept", "demonstration"],
+      "notes": "Special reveal content - surfaces when users demonstrate philosophical depth and readiness for recursive insight",
+      "triggerConditions": {
+        "description": "This hub should be weighted higher when engagement patterns indicate:",
+        "indicators": [
+          "Extended session duration (depth, not breadth)",
+          "Questions about Observer dynamic or architecture",
+          "Progressive revelation completion",
+          "Philosophical or recursive queries",
+          "Direct questions like 'what is this?' or 'how does this work?'"
+        ]
+      }
+    },
+    "diary-system": {
+      "title": "The Diary System",
+      "path": "hubs/diary-system/",
+      "maxBytes": 40000,
+      "primaryFile": "Grove_Diary_Deep_Dive.md",
+      "supportingFiles": ["Knowledge_Commons.md"],
+      "tags": ["diary", "diaries", "memory", "narrative", "voice", "character", "engagement", "tamagotchi", "newswire"]
+    },
+    "technical-arch": {
+      "title": "Technical Architecture",
+      "path": "hubs/technical-arch/",
+      "maxBytes": 45000,
+      "primaryFile": "Grove_Technical_Architecture.md",
+      "supportingFiles": ["Distributed_Systems.md"],
+      "tags": ["technical", "architecture", "implementation", "distributed", "NATS", "CRDT", "hybrid", "local model", "cloud"]
+    },
+    "governance": {
+      "title": "Governance & Knowledge Commons",
+      "path": "hubs/governance/",
+      "maxBytes": 35000,
+      "primaryFile": "Grove_Knowledge_Commons_Deep_Dive.md",
+      "supportingFiles": [],
+      "tags": ["governance", "foundation", "knowledge commons", "open source", "contributor", "efficiency tax", "sustainability"]
+    }
+  },
+  "_meta": {
+    "lastUpdated": "2024-12-16T00:00:00Z",
+    "totalHubs": 8,
+    "notes": [
+      "This manifest is loaded at runtime and cached",
+      "Cache invalidates on admin save (event-driven, not manual)",
+      "Tags must sync with TopicHub schema in src/core/config/defaults.ts",
+      "The meta-philosophy hub demonstrates the architecture - it IS what it describes"
+    ]
+  }
+}

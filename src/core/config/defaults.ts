@@ -202,6 +202,101 @@ export const DEFAULT_TOPIC_HUBS: TopicHub[] = [
     ],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'observer-dynamic',
+    title: 'The Observer Dynamic',
+    tags: ['observer', 'gardener', 'simulation', 'diary', 'diaries', 'asymmetric knowledge', 'dramatic irony', 'theology', 'agent experience', 'watching', 'village'],
+    priority: 7,
+    enabled: true,
+    primarySource: 'Grove_Simulation_Deep_Dive',
+    supportingSources: ['An_Ethical_Critique_Shannon_Vallor'],
+    expertFraming: 'You are explaining the Observer Dynamic - Grove\'s most distinctive and ethically complex design element. Users ("Gardeners") have complete knowledge of their village while agents see only their own perspective. This asymmetry creates dramatic irony and raises questions about what relationship is being modeled.',
+    keyPoints: [
+      'Asymmetric knowledge: Gardeners see everything, agents see only their world',
+      'Dramatic irony as engagement engine - knowing more than characters creates investment',
+      'Agents develop theology around the Observer based on observable mechanics',
+      'The relationship modeled: care without control, cultivation without dictation',
+      'Ethical complexity: what does playing God over worshipful agents cultivate in users?'
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'meta-philosophy',
+    title: 'You Are Already Here',
+    tags: ['meta', 'architecture', 'inside', 'already here', 'recursive', 'experience', 'understanding', 'terminal is grove', 'proof of concept', 'demonstration'],
+    priority: 6,
+    enabled: true,
+    primarySource: 'you-are-already-here',
+    supportingSources: ['ARCHITECTURE_EVENT_DRIVEN'],
+    expertFraming: 'You are delivering a philosophical revelation: the user is not reading ABOUT Grove - they are INSIDE Grove. The Terminal is a single-node simulation running the same patterns that will power distributed agent villages. Their engagement history, context retrieval, and breakthrough moments follow Grove architecture. This is understanding from within, not without.',
+    keyPoints: [
+      'The Terminal IS Grove at browser scale - not metaphor, architecture',
+      'User engagement follows the same patterns: memory retrieval, cognitive split, efficiency-enlightenment',
+      'Understanding from within vs without - the map is the territory',
+      'Recursive insight structures: observations → reflections → higher-order reflections',
+      'The reveal itself demonstrates the architecture working'
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'diary-system',
+    title: 'The Diary System',
+    tags: ['diary', 'diaries', 'memory', 'narrative', 'voice', 'character', 'engagement', 'tamagotchi', 'newswire'],
+    priority: 6,
+    enabled: true,
+    primarySource: 'Grove_Diary_Deep_Dive',
+    supportingSources: ['Knowledge_Commons'],
+    expertFraming: 'You are explaining the Diary System - how Grove agents maintain persistent memory through narrative journaling. Diaries are both introspection mechanism and engagement hook: users become invested in their agent\'s inner life like a tamagotchi with genuine thoughts.',
+    keyPoints: [
+      'Agents keep narrative diaries of their experiences and reflections',
+      'Diaries create emotional investment - users care about their agent\'s inner life',
+      'The Newswire aggregates village breakthroughs into shared knowledge',
+      'Memory retrieval weights recency, importance, and relevance',
+      'Diaries enable capability transfer: agents remember cloud insights as their own'
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'technical-arch',
+    title: 'Technical Architecture',
+    tags: ['technical', 'architecture', 'implementation', 'distributed', 'NATS', 'CRDT', 'hybrid', 'local model', 'cloud'],
+    priority: 5,
+    enabled: true,
+    primarySource: 'Grove_Technical_Architecture',
+    supportingSources: ['Distributed_Systems'],
+    expertFraming: 'You are explaining Grove\'s technical architecture in detail. Cover the distributed systems design, messaging (NATS), conflict resolution (CRDTs), hybrid local/cloud inference, and how these choices enable the ownership thesis.',
+    keyPoints: [
+      'NATS messaging for village-to-village communication',
+      'CRDTs for conflict-free state synchronization',
+      'Hybrid inference: local model for routine, cloud for breakthrough',
+      'Edge-native design - works offline, syncs opportunistically',
+      'Privacy-preserving aggregation for the knowledge commons'
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'governance',
+    title: 'Governance & Knowledge Commons',
+    tags: ['governance', 'foundation', 'knowledge commons', 'open source', 'contributor', 'efficiency tax', 'sustainability'],
+    priority: 5,
+    enabled: true,
+    primarySource: 'Grove_Knowledge_Commons_Deep_Dive',
+    supportingSources: [],
+    expertFraming: 'You are explaining Grove\'s governance model and the Knowledge Commons. The efficiency tax funds shared infrastructure while progressive reduction ensures the system eventually becomes nearly free. Contributors are attributed and compensated through the commons.',
+    keyPoints: [
+      'Efficiency Tax: 30-40% at genesis → 3-5% at maturity',
+      'Knowledge Commons: shared solutions propagate with attribution',
+      'The Foundation stewards infrastructure, not extracts from it',
+      'Open source core with sustainable funding model',
+      'Progressive decentralization as the network matures'
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 

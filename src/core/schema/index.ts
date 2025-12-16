@@ -95,3 +95,19 @@ export {
   PERSONA_TO_ARCHETYPE,
   getArchetypeForPersona
 } from './lens';
+
+// RAG (Retrieval-Augmented Generation) types
+export {
+  type HubsManifest,
+  type DefaultContextConfig,
+  type HubConfig,
+  type HubTriggerConditions,
+  type ManifestMeta,
+  type TieredContextResult,
+  type FileLoadResult,
+  type TieredContextOptions,
+  type ManifestCacheEntry,
+  type FileContentCacheEntry,
+  isValidHubsManifest,
+  isValidHubConfig
+} from './rag';

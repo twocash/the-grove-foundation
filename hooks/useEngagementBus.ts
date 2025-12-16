@@ -363,6 +363,10 @@ class EngagementBusSingleton {
     this.evaluateAndNotify();
   }
 
+  getTriggers(): TriggerConfig[] {
+    return [...this.triggers];
+  }
+
   // Cleanup
   destroy(): void {
     if (this.timeInterval) {
@@ -402,7 +406,9 @@ export function useEngagementBus(): EngagementBusAPI {
     onStateChange: bus.onStateChange.bind(bus),
     onRevealQueue: bus.onRevealQueue.bind(bus),
     reset: bus.reset.bind(bus),
-    getEventHistory: bus.getEventHistory.bind(bus)
+    getEventHistory: bus.getEventHistory.bind(bus),
+    setTriggers: bus.setTriggers.bind(bus),
+    getTriggers: bus.getTriggers.bind(bus)
   }), [bus]);
 
   return api;
