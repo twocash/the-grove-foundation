@@ -657,32 +657,6 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
               {/* Messages Area - Thread Style */}
               <div className="flex-1 overflow-y-auto p-6 space-y-8 terminal-scroll bg-white">
-                {/* No-Lens Nudge */}
-                {showNudge && !session.activeLens && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm font-serif text-amber-800 mb-3">
-                      I notice you're exploring{currentTopic ? ` "${currentTopic}"` : ''}. Would you like to switch to a specific lens for a more focused experience?
-                    </p>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setShowLensPicker(true)}
-                        className="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded hover:bg-amber-700 transition-colors"
-                      >
-                        Yes, show lenses
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowNudge(false);
-                          setNudgeDismissed(true);
-                        }}
-                        className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded hover:bg-amber-50 transition-colors"
-                      >
-                        No, continue exploring
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {terminalState.messages.map((msg) => {
                   const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
 
@@ -718,6 +692,32 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
               {/* Interactions Area */}
               <div className="p-6 border-t border-ink/5 bg-paper/50">
+
+                {/* No-Lens Nudge - appears in interactions area so it's always visible */}
+                {showNudge && !session.activeLens && (
+                  <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p className="text-sm font-serif text-amber-800 mb-3">
+                      I notice you're exploring{currentTopic ? ` "${currentTopic}"` : ''}. Would you like to choose a lens for a more focused experience?
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setShowLensPicker(true)}
+                        className="px-3 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded hover:bg-amber-700 transition-colors"
+                      >
+                        Yes, show lenses
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowNudge(false);
+                          setNudgeDismissed(true);
+                        }}
+                        className="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded hover:bg-amber-50 transition-colors"
+                      >
+                        No, continue exploring
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Journey End Options */}
                 {isJourneyEnd ? (
