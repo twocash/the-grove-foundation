@@ -122,6 +122,18 @@ export interface FeatureFlag {
 }
 
 // ============================================================================
+// SYSTEM PROMPT VERSIONING
+// ============================================================================
+
+export interface SystemPromptVersion {
+  id: string;              // "v1", "v2", etc.
+  content: string;         // The full system prompt text
+  label: string;           // User-provided description (e.g., "Warmer storytelling")
+  createdAt: string;       // ISO timestamp
+  isActive: boolean;       // Currently live version
+}
+
+// ============================================================================
 // GLOBAL SETTINGS
 // ============================================================================
 
@@ -135,6 +147,8 @@ export interface GlobalSettings {
   personaPromptVersions: PersonaPromptVersion[];
   topicHubs: TopicHub[];
   loadingMessages: string[];
+  systemPromptVersions: SystemPromptVersion[];  // Version history for system voice
+  activeSystemPromptId: string;                  // ID of currently active version
 }
 
 // ============================================================================

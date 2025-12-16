@@ -26,6 +26,7 @@ export {
   type EmotionalRegister,
   type PersonaPromptConfig,
   type PersonaPromptVersion,
+  type SystemPromptVersion,
   type TopicHub,
   type FeatureFlag,
   type GlobalSettings,

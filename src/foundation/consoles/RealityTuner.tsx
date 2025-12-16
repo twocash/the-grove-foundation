@@ -18,7 +18,11 @@ import {
   ToggleLeft,
   ToggleRight,
   Search,
-  AlertCircle
+  AlertCircle,
+  Mic,
+  History,
+  Check,
+  RotateCcw
 } from 'lucide-react';
 import {
   NarrativeSchemaV2,
@@ -27,6 +31,7 @@ import {
   DEFAULT_GLOBAL_SETTINGS,
   isV2Schema
 } from '../../../data/narratives-schema';
+import type { SystemPromptVersion } from '../../core/schema';
 import { DEFAULT_PERSONAS } from '../../../data/default-personas';
 import { testQueryMatch } from '../../../utils/topicRouter';
 
@@ -49,9 +54,28 @@ const RealityTuner: React.FC = () => {
     matchedTags: string[];
   } | null>(null);
 
+  // System Voice state
+  const [editingPrompt, setEditingPrompt] = useState('');
+  const [newVersionLabel, setNewVersionLabel] = useState('');
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+
   useEffect(() => {
     loadSchema();
   }, []);
+
+  // Load active prompt version when schema loads
+  useEffect(() => {
+    if (schema) {
+      const versions = schema.globalSettings.systemPromptVersions || [];
+      const activeId = schema.globalSettings.activeSystemPromptId;
+      const activeVersion = versions.find(v => v.id === activeId) || versions.find(v => v.isActive);
+
+      if (activeVersion) {
+        setEditingPrompt(activeVersion.content);
+        setSelectedVersionId(activeVersion.id);
+      }
+    }
+  }, [schema?.globalSettings.activeSystemPromptId]);
 
   const loadSchema = async () => {
     try {
@@ -167,6 +191,75 @@ const RealityTuner: React.FC = () => {
       score: result.score,
       matchedTags: result.matchedTags
     });
+  };
+
+  // System Voice operations
+  const getPromptVersions = (): SystemPromptVersion[] => {
+    return schema?.globalSettings.systemPromptVersions || [];
+  };
+
+  const getActiveVersionId = (): string | null => {
+    return schema?.globalSettings.activeSystemPromptId || null;
+  };
+
+  const saveNewVersion = () => {
+    if (!schema || !editingPrompt.trim() || !newVersionLabel.trim()) return;
+
+    const versions = getPromptVersions();
+    const nextVersionNum = versions.length + 1;
+    const newVersion: SystemPromptVersion = {
+      id: `v${nextVersionNum}`,
+      content: editingPrompt,
+      label: newVersionLabel,
+      createdAt: new Date().toISOString(),
+      isActive: true
+    };
+
+    // Mark all existing as inactive
+    const updatedVersions = versions.map(v => ({ ...v, isActive: false }));
+    updatedVersions.push(newVersion);
+
+    setSchema({
+      ...schema,
+      globalSettings: {
+        ...schema.globalSettings,
+        systemPromptVersions: updatedVersions,
+        activeSystemPromptId: newVersion.id
+      }
+    });
+
+    setSelectedVersionId(newVersion.id);
+    setNewVersionLabel('');
+    setStatus('New version created - save to deploy');
+  };
+
+  const selectVersion = (versionId: string) => {
+    const versions = getPromptVersions();
+    const version = versions.find(v => v.id === versionId);
+    if (version) {
+      setEditingPrompt(version.content);
+      setSelectedVersionId(versionId);
+    }
+  };
+
+  const activateVersion = (versionId: string) => {
+    if (!schema) return;
+
+    const versions = getPromptVersions().map(v => ({
+      ...v,
+      isActive: v.id === versionId
+    }));
+
+    setSchema({
+      ...schema,
+      globalSettings: {
+        ...schema.globalSettings,
+        systemPromptVersions: versions,
+        activeSystemPromptId: versionId
+      }
+    });
+
+    setStatus('Version activated - save to deploy');
   };
 
   const flags = schema?.globalSettings.featureFlags || [];
@@ -424,11 +517,122 @@ const RealityTuner: React.FC = () => {
   );
 
   // Render Settings Tab
-  const renderSettings = () => (
+  const renderSettings = () => {
+    const versions = getPromptVersions();
+    const activeVersionId = getActiveVersionId();
+
+    return (
     <div className="space-y-6">
       <p className="text-gray-400 text-sm font-sans">
         Global settings that affect the entire system behavior.
       </p>
+
+      {/* System Voice Panel */}
+      <DataPanel title="System Voice" icon={Mic}>
+        <div className="space-y-4">
+          <p className="text-xs text-gray-500">
+            The base system prompt that defines the Terminal's personality. Changes apply to new chat sessions.
+          </p>
+
+          {/* Active Prompt Editor */}
+          <div>
+            <label className="block text-xs text-gray-500 font-mono uppercase mb-2">
+              Active Prompt {selectedVersionId && `(${selectedVersionId})`}
+              {selectedVersionId === activeVersionId && (
+                <span className="ml-2 text-holo-lime">● LIVE</span>
+              )}
+            </label>
+            <textarea
+              value={editingPrompt}
+              onChange={(e) => setEditingPrompt(e.target.value)}
+              rows={12}
+              className="
+                w-full px-3 py-2 bg-obsidian border border-holo-cyan/20
+                rounded text-sm font-mono text-white resize-y
+                focus:outline-none focus:border-holo-cyan/50
+                leading-relaxed
+              "
+              placeholder="Enter system prompt..."
+            />
+          </div>
+
+          {/* Save as New Version */}
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={newVersionLabel}
+              onChange={(e) => setNewVersionLabel(e.target.value)}
+              placeholder="Version label (e.g., 'Warmer storytelling')"
+              className="
+                flex-1 px-3 py-2 bg-obsidian border border-holo-cyan/20
+                rounded text-sm font-mono text-white placeholder-gray-600
+                focus:outline-none focus:border-holo-cyan/50
+              "
+            />
+            <GlowButton
+              variant="primary"
+              icon={Save}
+              onClick={saveNewVersion}
+              disabled={!editingPrompt.trim() || !newVersionLabel.trim()}
+            >
+              Save as New Version
+            </GlowButton>
+          </div>
+
+          {/* Version History */}
+          {versions.length > 0 && (
+            <div className="mt-4">
+              <label className="block text-xs text-gray-500 font-mono uppercase mb-2">
+                <History size={12} className="inline mr-1" />
+                Version History
+              </label>
+              <div className="space-y-2 max-h-48 overflow-y-auto f-scrollbar">
+                {[...versions].reverse().map(version => (
+                  <div
+                    key={version.id}
+                    className={`
+                      p-3 rounded border transition-all cursor-pointer
+                      ${version.id === selectedVersionId
+                        ? 'bg-holo-cyan/10 border-holo-cyan/50'
+                        : 'bg-obsidian border-holo-cyan/10 hover:border-holo-cyan/30'
+                      }
+                    `}
+                    onClick={() => selectVersion(version.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-white">{version.id}</span>
+                        {version.id === activeVersionId && (
+                          <span className="text-xs bg-holo-lime/20 text-holo-lime px-2 py-0.5 rounded">
+                            LIVE
+                          </span>
+                        )}
+                      </div>
+                      {version.id !== activeVersionId && version.id === selectedVersionId && (
+                        <GlowButton
+                          variant="secondary"
+                          size="sm"
+                          icon={RotateCcw}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            activateVersion(version.id);
+                          }}
+                        >
+                          Activate
+                        </GlowButton>
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">{version.label}</div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {new Date(version.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </DataPanel>
 
       <DataPanel title="Nudge Configuration" icon={Settings}>
         <div className="space-y-4">
@@ -509,10 +713,15 @@ const RealityTuner: React.FC = () => {
             <span className="text-gray-500">Active Hubs</span>
             <span className="text-holo-lime">{hubs.filter(h => h.enabled).length}</span>
           </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">System Prompt Versions</span>
+            <span className="text-white">{versions.length}</span>
+          </div>
         </div>
       </DataPanel>
     </div>
   );
+  };
 
   return (
     <div className="space-y-6">
