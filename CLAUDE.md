@@ -29,9 +29,12 @@
 │    ├── PromptHooks.tsx           (Interactive prompt triggers)  │
 │    ├── AudioPlayer.tsx           (CMS-driven audio playback)    │
 │    └── Admin Dashboard                                          │
-│         ├── AdminAudioConsole.tsx    (TTS generation)           │
-│         ├── AdminRAGConsole.tsx      (Knowledge management)     │
-│         └── AdminNarrativeConsole.tsx (Narrative Engine)        │
+│         ├── AdminNarrativeConsole.tsx (Narrative Engine)        │
+│         ├── FeatureFlagPanel.tsx      (Feature flags)           │
+│         ├── TopicHubPanel.tsx         (Query routing)           │
+│         ├── AdminAudioConsole.tsx     (TTS generation)          │
+│         ├── AdminRAGConsole.tsx       (Knowledge management)    │
+│         └── EngagementConsole.tsx     (Engagement Bus monitor)  │
 ├─────────────────────────────────────────────────────────────────┤
 │                        BACKEND (Express/Node)                    │
 ├─────────────────────────────────────────────────────────────────┤
@@ -86,8 +89,28 @@
 - `types.ts` - TypeScript interfaces (SectionId, ChatMessage, NarrativeNode)
 
 ### Services
-- `services/geminiService.ts` - Gemini API wrapper, chat sessions, streaming
+- `services/chatService.ts` - Server-side chat client (preferred for chat)
+- `services/geminiService.ts` - Direct Gemini API (deprecated for chat, kept for artifacts)
 - `services/audioService.ts` - TTS generation, WAV header handling
+
+### Hooks (State Management)
+- `hooks/useNarrativeEngine.ts` - Primary v2 hook for lens/journey state
+- `hooks/useEngagementBus.ts` - Core engagement bus singleton (7 React hooks)
+- `hooks/useEngagementBridge.ts` - Backward-compatible bridge (replaces useRevealState)
+- `hooks/useCustomLens.ts` - Custom lens CRUD with encrypted localStorage
+- `hooks/useFeatureFlags.ts` - Feature flag access from globalSettings
+- `hooks/useStreakTracking.ts` - User-local streak data persistence
+
+### Types
+- `types.ts` - Legacy v1 types (SectionId, ChatMessage, NarrativeNode)
+- `types/lens.ts` - Custom lens and archetype types
+- `types/engagement.ts` - Engagement bus events, state, triggers
+
+### Utils
+- `utils/engagementTriggers.ts` - Declarative trigger configuration engine
+- `utils/threadGenerator.ts` - Journey thread generation
+- `utils/topicRouter.ts` - Topic hub query routing
+- `utils/encryption.ts` - AES-256 encryption for custom lens data
 
 ### Backend
 - `server.js` - Express API, GCS integration, all REST endpoints
@@ -194,10 +217,13 @@ gcloud builds submit --config cloudbuild.yaml
 
 Access admin dashboard: `?admin=true` query parameter
 
-Tabs:
-- **Audio** - TTS generation, track management
-- **RAG** - Knowledge base file management
-- **Narrative** - Graph editor (Sprint 3+)
+Tabs (6 total):
+- **Narrative Engine** - Personas, cards, journey management
+- **Flags** - Feature flag toggles
+- **Topic Hubs** - Query routing configuration
+- **Audio Studio** - TTS generation, track management
+- **Knowledge Base** - RAG document management
+- **Engagement** - Event bus monitor, trigger simulation
 
 ---
 
@@ -286,3 +312,73 @@ Tabs:
 3. **Terminator Mode** - After 10+ minutes active, unlocks "no guardrails" mode
 4. **Founder Story** - After journey completion, shows personal narrative
 5. **Conversion CTA** - Final archetype-specific call-to-action
+
+---
+
+## Completed Sprints: Engagement Bus (Sprint 8)
+
+### Sprint 8: Unified Engagement State Machine ✓
+
+**Problem Solved:** Three critical bugs in reveal system:
+1. Alternative triggers never fired (missing function params)
+2. React state timing issues (reveals checked before state updated)
+3. Scattered engagement metrics across multiple hooks
+
+**Architecture:** Event-driven singleton bus with declarative trigger configuration
+
+- [x] `types/engagement.ts` - Full type system (events, state, triggers, conditions)
+- [x] `hooks/useEngagementBus.ts` - Core singleton with 7 React hooks
+- [x] `hooks/useEngagementBridge.ts` - Backward-compatible bridge (replaces useRevealState)
+- [x] `utils/engagementTriggers.ts` - Declarative trigger configuration engine
+- [x] `components/Admin/EngagementConsole.tsx` - Admin UI for monitoring/simulating
+- [x] `docs/ENGAGEMENT_BUS_INTEGRATION.md` - Migration guide
+- [x] Terminal.tsx integration with event emissions
+
+### Key Engagement Bus Files
+
+| File | Purpose |
+|------|---------|
+| `types/engagement.ts` | Type definitions for events, state, triggers |
+| `hooks/useEngagementBus.ts` | Core singleton and 7 React hooks |
+| `hooks/useEngagementBridge.ts` | Drop-in replacement for useRevealState |
+| `utils/engagementTriggers.ts` | DEFAULT_TRIGGERS and evaluation engine |
+| `components/Admin/EngagementConsole.tsx` | Admin monitoring/simulation UI |
+
+### Event Types Emitted
+
+```typescript
+emit.exchangeSent(query, responseLength, cardId?)
+emit.journeyStarted(lensId, threadLength)
+emit.journeyCompleted(lensId, durationMinutes, cardsVisited)
+emit.topicExplored(topicId, topicLabel)
+emit.cardVisited(cardId, cardLabel, fromCard?)
+emit.lensSelected(lensId, isCustom, archetypeId?)
+emit.revealShown(revealType)
+emit.revealDismissed(revealType, action)
+```
+
+### Trigger Configuration (Declarative)
+
+```typescript
+{
+  id: 'simulation-reveal',
+  reveal: 'simulation',
+  priority: 100,
+  enabled: true,
+  conditions: {
+    OR: [
+      { field: 'journeysCompleted', value: { gte: 1 } },
+      { field: 'exchangeCount', value: { gte: 5 } },
+      { field: 'minutesActive', value: { gte: 3 } }
+    ]
+  },
+  requiresAcknowledgment: []
+}
+```
+
+### Admin Engagement Console
+
+Access via `?admin=true` → Engagement tab:
+- **Monitor**: Live metrics, event log, reveal queue status
+- **Triggers**: Enable/disable triggers, view conditions
+- **Simulate**: Manually emit events for testing

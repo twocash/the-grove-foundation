@@ -9,7 +9,7 @@ import { SECTION_CONFIG } from '../constants';
 import { useNarrative } from '../hooks/useNarrative';
 import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
-import { useRevealState } from '../hooks/useRevealState';
+import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
 import { useStreakTracking } from '../hooks/useStreakTracking';
@@ -167,7 +167,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     globalSettings
   } = useNarrativeEngine();
 
-  // Reveal state management
+  // Engagement Bus (unified state management replacing useRevealState)
   const {
     revealState,
     sessionState,
@@ -188,8 +188,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     incrementTopicsExplored,
     updateActiveMinutes,
     setCustomLens: setRevealCustomLens,
-    getMinutesActive
-  } = useRevealState();
+    getMinutesActive,
+    // NEW: Direct access to engagement bus for event emission
+    emit
+  } = useEngagementBridge();
 
   // Feature flags
   const showCustomLensInPicker = useFeatureFlag('custom-lens-in-picker');
@@ -271,9 +273,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     setShowLensPicker(false);
     localStorage.setItem('grove-terminal-welcomed', 'true');
 
-    // Track lens activation
+    // Track lens activation via analytics
     if (personaId) {
       trackLensActivated(personaId, personaId.startsWith('custom-'));
+      // Emit to Engagement Bus
+      emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
+      // Emit journey started event (lens selection initiates a new journey)
+      emit.journeyStarted(personaId, currentThread.length || 5); // Default thread length if not yet generated
     }
 
     // If selecting a custom lens, update its usage timestamp
@@ -448,11 +454,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     if (nodeId) {
       setCurrentNodeId(nodeId);
       addVisitedCard(nodeId);
+      // Emit card visited event to Engagement Bus
+      emit.cardVisited(nodeId, textToDisplay, currentNodeId || undefined);
     }
 
     // Increment exchange count for nudge logic
     // (useEffect watches session.exchangeCount to trigger nudge)
     incrementExchangeCount();
+    // Emit exchange sent event to Engagement Bus (response length will be updated after response)
+    emit.exchangeSent(textToSend, 0, nodeId);
 
     const displayId = Date.now().toString();
     // PRESERVED: Scholar Mode (--verbose) display logic
@@ -643,7 +653,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 currentThread={currentThread}
                 currentPosition={currentPosition}
                 getThreadCard={getThreadCard}
-                onRegenerate={regenerateThread}
+                onRegenerate={() => {
+                  regenerateThread();
+                  // Emit journey started event
+                  if (session.activeLens) {
+                    emit.journeyStarted(session.activeLens, currentThread.length);
+                  }
+                }}
                 onJumpToCard={(cardId) => {
                   const card = getThreadCard(currentThread.indexOf(cardId));
                   if (card) {

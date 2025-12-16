@@ -5,3 +5,4 @@ export { default as PersonaSettings } from './PersonaSettings';
 export { default as GlobalSettingsModal } from './GlobalSettingsModal';
 export { default as FeatureFlagPanel } from './FeatureFlagPanel';
 export { default as TopicHubPanel } from './TopicHubPanel';
+export { default as EngagementConsole } from './EngagementConsole';

@@ -134,7 +134,11 @@ interface Card {
 | `useNarrative.ts` | Legacy v1 hook for backwards compatibility |
 | `useNarrativeEngine.ts` | Primary v2 hook - lens selection, card filtering, session persistence |
 | `useCustomLens.ts` | Custom lens CRUD with encrypted localStorage |
-| `useRevealState.ts` | Reveal progression state management |
+| `useRevealState.ts` | DEPRECATED - Use `useEngagementBridge` instead |
+| `useEngagementBus.ts` | Core engagement bus singleton with 7 React hooks |
+| `useEngagementBridge.ts` | Backward-compatible bridge (replaces useRevealState) |
+| `useStreakTracking.ts` | User-local streak data persistence |
+| `useFeatureFlags.ts` | Feature flag access from globalSettings |
 
 ---
 
@@ -334,6 +338,191 @@ The admin dashboard (`?admin=true`) now has 5 tabs:
 ### Test Scripts
 - `scripts/test-api-payload.js` - Test Gemini API with various payload sizes
 - `scripts/test-proxy-limits.js` - Test server body parser limits
+
+---
+
+## Engagement Bus Architecture (Sprint 8) - COMPLETED
+
+### Problem Solved
+The previous reveal system had three critical bugs:
+1. **Alternative Triggers Never Fire**: `shouldShowSimulationReveal()` accepted 5 params but only received 2, blocking reveals for deeply-engaged users
+2. **React State Timing**: `incrementJourneysCompleted()` scheduled state updates, but reveal checks ran before React re-rendered
+3. **Scattered State**: Engagement metrics spread across multiple hooks with no unified tracking
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ENGAGEMENT BUS SINGLETON                      │
+├─────────────────────────────────────────────────────────────────┤
+│  EngagementBusSingleton (in-memory, persisted to localStorage)  │
+│    ├── state: EngagementState                                   │
+│    ├── eventHistory: EngagementEvent[]                          │
+│    ├── triggers: TriggerConfig[]                                │
+│    ├── revealQueue: RevealQueueItem[]                           │
+│    └── subscribers: Set<Handler>[]                              │
+├─────────────────────────────────────────────────────────────────┤
+│                         EVENT FLOW                               │
+│  User Action → emit() → processEvent() → updateState()          │
+│       → evaluateTriggers() → notifySubscribers()                │
+├─────────────────────────────────────────────────────────────────┤
+│                      REACT INTEGRATION                           │
+│  useEngagementBus()     - Full API access                       │
+│  useEngagementState()   - Read-only state with auto-updates     │
+│  useRevealQueue()       - Current reveal queue                  │
+│  useNextReveal()        - Next reveal to show (or null)         │
+│  useEngagementEmit()    - Convenience emitters                  │
+│  useRevealCheck(type)   - Check if specific reveal should show  │
+│  useEngagementBridge()  - Backward-compatible (Terminal.tsx)    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Types (types/engagement.ts)
+
+```typescript
+// Event Types
+type EngagementEventType =
+  | 'EXCHANGE_SENT'      // User sends a chat message
+  | 'JOURNEY_COMPLETED'  // User finishes a journey thread
+  | 'JOURNEY_STARTED'    // User starts a new journey
+  | 'TOPIC_EXPLORED'     // User explores a new topic
+  | 'CARD_VISITED'       // User clicks a narrative card
+  | 'TIME_MILESTONE'     // Time-based trigger (3, 5, 10, 15, 20, 30 min)
+  | 'LENS_SELECTED'      // User selects a lens
+  | 'REVEAL_SHOWN'       // A reveal was displayed
+  | 'REVEAL_DISMISSED';  // User acknowledged/dismissed a reveal
+
+// Engagement State (what we track)
+interface EngagementState {
+  sessionId: string;
+  sessionStartedAt: string;
+  lastActivityAt: string;
+  exchangeCount: number;
+  journeysCompleted: number;
+  journeysStarted: number;
+  topicsExplored: string[];
+  cardsVisited: string[];
+  minutesActive: number;
+  activeLensId: string | null;
+  hasCustomLens: boolean;
+  currentArchetypeId: ArchetypeId | null;
+  revealsShown: RevealType[];
+  revealsAcknowledged: RevealType[];
+  terminatorModeUnlocked: boolean;
+  terminatorModeActive: boolean;
+  activeJourney: ActiveJourney | null;
+}
+
+// Reveal Types
+type RevealType =
+  | 'simulation'
+  | 'customLensOffer'
+  | 'terminatorPrompt'
+  | 'founderStory'
+  | 'conversionCTA'
+  | 'journeyCompletion';
+```
+
+### Declarative Trigger Configuration (utils/engagementTriggers.ts)
+
+Triggers are defined declaratively, enabling future admin UI configuration:
+
+```typescript
+const DEFAULT_TRIGGERS: TriggerConfig[] = [
+  {
+    id: 'simulation-reveal',
+    reveal: 'simulation',
+    priority: 100,
+    enabled: true,
+    conditions: {
+      OR: [
+        { field: 'journeysCompleted', value: { gte: 1 } },
+        { field: 'exchangeCount', value: { gte: 5 } },
+        { field: 'minutesActive', value: { gte: 3 } }
+      ]
+    },
+    requiresAcknowledgment: []
+  },
+  // ... more triggers
+];
+```
+
+Supported condition operators: `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `includes`, `notIncludes`
+Compound conditions: `AND`, `OR`, `NOT`
+
+### Integration Points (Terminal.tsx)
+
+```typescript
+// Import the bridge hook (drop-in replacement for useRevealState)
+import { useEngagementBridge } from '../hooks/useEngagementBridge';
+
+// Use exactly like useRevealState, plus emit access
+const {
+  revealState,
+  sessionState,
+  showSimulationReveal,
+  // ... all legacy props
+  emit  // NEW: Direct event emission
+} = useEngagementBridge();
+
+// Emit events on user actions
+emit.exchangeSent(query, responseLength, cardId);
+emit.cardVisited(cardId, cardLabel, fromCard);
+emit.lensSelected(lensId, isCustom, archetypeId);
+emit.journeyStarted(lensId, threadLength);
+emit.journeyCompleted(lensId, durationMinutes, cardsVisited);
+```
+
+### Admin Console (components/Admin/EngagementConsole.tsx)
+
+Access via `?admin=true` → Engagement tab
+
+**Monitor Tab:**
+- Live metrics (exchanges, journeys, topics, minutes)
+- Reveal queue status
+- Reveals shown history
+- Event log (last 50 events)
+
+**Triggers Tab:**
+- Enable/disable triggers
+- View trigger conditions
+- (Future: Edit conditions via GUI)
+
+**Simulate Tab:**
+- Manually emit events for testing
+- Send Exchange, Complete Journey, Explore Topic
+- +3 Minutes time simulation
+- Select Custom Lens
+- Reset All state
+
+### Storage
+
+User-local storage keys:
+- `grove-engagement-state` - Full engagement state
+- `grove-event-history` - Last 100 events
+
+Session management:
+- New session generated after 30 min inactivity
+- Cross-session state preserved: revealsShown, revealsAcknowledged, hasCustomLens, terminatorModeUnlocked
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `types/engagement.ts` | Type definitions for events, state, triggers |
+| `hooks/useEngagementBus.ts` | Core singleton and 7 React hooks |
+| `hooks/useEngagementBridge.ts` | Backward-compatible bridge for Terminal.tsx |
+| `utils/engagementTriggers.ts` | DEFAULT_TRIGGERS and evaluation engine |
+| `components/Admin/EngagementConsole.tsx` | Admin monitoring/simulation UI |
+| `docs/ENGAGEMENT_BUS_INTEGRATION.md` | Migration guide |
+
+### Migration from useRevealState
+
+1. Replace import: `useRevealState` → `useEngagementBridge`
+2. Add event emissions at user action points
+3. Everything else works identically (backward compatible)
+
+See `docs/ENGAGEMENT_BUS_INTEGRATION.md` for full checklist.
 
 ---
 

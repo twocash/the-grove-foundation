@@ -14,7 +14,7 @@ import { generateArtifact } from './services/geminiService';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
 // V2 Narrative Console with 3-column layout
-import { NarrativeConsole as AdminNarrativeConsole, FeatureFlagPanel, TopicHubPanel } from './components/Admin';
+import { NarrativeConsole as AdminNarrativeConsole, FeatureFlagPanel, TopicHubPanel, EngagementConsole } from './components/Admin';
 import { NarrativeSchemaV2, GlobalSettings, FeatureFlag, TopicHub, DEFAULT_FEATURE_FLAGS, DEFAULT_TOPIC_HUBS, DEFAULT_GLOBAL_SETTINGS, isV2Schema, isV1Schema, nodeToCard } from './data/narratives-schema';
 import { DEFAULT_PERSONAS } from './data/default-personas';
 
@@ -88,7 +88,7 @@ const App: React.FC = () => {
   };
 
   const AdminDashboard = () => {
-    const [tab, setTab] = useState<'audio' | 'rag' | 'narrative' | 'flags' | 'hubs'>('narrative');
+    const [tab, setTab] = useState<'audio' | 'rag' | 'narrative' | 'flags' | 'hubs' | 'engagement'>('narrative');
     const [schema, setSchema] = useState<NarrativeSchemaV2 | null>(null);
     const [flagsLoading, setFlagsLoading] = useState(true);
     const [flagsSaving, setFlagsSaving] = useState(false);
@@ -242,6 +242,12 @@ const App: React.FC = () => {
             >
               Knowledge Base
             </button>
+            <button
+              onClick={() => setTab('engagement')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'engagement' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Engagement
+            </button>
           </div>
         </header>
 
@@ -322,6 +328,7 @@ const App: React.FC = () => {
         )}
         {tab === 'audio' && <AdminAudioConsole />}
         {tab === 'rag' && <AdminRAGConsole />}
+        {tab === 'engagement' && <EngagementConsole />}
       </div>
     );
   };
