@@ -1,0 +1,173 @@
+/* Tailwind CSS v4 Entry Point */
+@import "tailwindcss";
+
+/* ============================================================
+   THEME CONFIGURATION (Tailwind v4 CSS-based config)
+   ============================================================ */
+@theme {
+  /* ============================================================
+     SURFACE TOKENS (The Village - Paper/Ink aesthetic)
+     Preserved from original index.html CDN config
+     ============================================================ */
+  --color-paper: #FBFBF9;
+  --color-paper-dark: #F2F0E9;
+
+  --color-ink: #1C1C1C;
+  --color-ink-muted: #575757;
+  --color-ink-border: #E5E5E0;
+
+  --color-grove-cream: #FBFBF9;
+  --color-grove-dark: #1C1C1C;
+  --color-grove-forest: #2F5C3B;
+  --color-grove-accent: #2F5C3B;
+  --color-grove-clay: #D95D39;
+  --color-grove-light: #E5E5E0;
+
+  --color-terminal-bg: #FFFFFF;
+  --color-terminal-phosphor: #1C1C1C;
+  --color-terminal-border: #E5E5E0;
+  --color-terminal-highlight: #D95D39;
+
+  /* ============================================================
+     FOUNDATION TOKENS (The Control Plane - Holodeck aesthetic)
+     ============================================================ */
+  --color-obsidian: #0D0D0D;
+  --color-obsidian-raised: #141414;
+  --color-obsidian-elevated: #1A1A1A;
+  --color-obsidian-surface: #242424;
+
+  --color-holo-cyan: #00D4FF;
+  --color-holo-magenta: #FF00D4;
+  --color-holo-lime: #00FF88;
+  --color-holo-amber: #FFB800;
+  --color-holo-red: #FF4444;
+
+  /* ============================================================
+     FONTS
+     ============================================================ */
+  --font-serif: 'Lora', serif;
+  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   SURFACE STYLES (The Village)
+   Preserved from index.html CDN config
+   ============================================================ */
+
+/* Editorial Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E5E0;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D1D1CD;
+}
+
+/* Blinking cursor animation */
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Subtle Grain Texture for Surface */
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+.content-z {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   FOUNDATION STYLES (The Control Plane)
+   Dark-mode holodeck aesthetic
+   ============================================================ */
+
+/* Grid overlay for Foundation viewport */
+.f-grid-overlay {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+/* Holographic glow effects */
+.f-glow {
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+.f-glow-strong {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+/* Foundation scrollbar (darker) */
+.f-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.f-scrollbar::-webkit-scrollbar-track {
+  background: #0D0D0D;
+}
+.f-scrollbar::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+.f-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #00D4FF;
+}
+
+/* Foundation panel borders */
+.f-panel {
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  background-color: #141414;
+  transition: border-color 150ms ease-out, box-shadow 300ms ease-out;
+}
+.f-panel:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+/* Foundation status indicator pulse */
+.f-status-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Value flash animation for state changes */
+@keyframes value-flash {
+  0% { background-color: rgba(0, 212, 255, 0.3); }
+  100% { background-color: transparent; }
+}
+.f-value-changed {
+  animation: value-flash 500ms ease-out;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* Focus styles */
+.focus-ring:focus {
+  outline: 2px solid #00D4FF;
+  outline-offset: 2px;
+}
+.focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}

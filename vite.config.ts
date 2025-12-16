@@ -40,6 +40,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        '@core': path.resolve(__dirname, './src/core'),
+        '@surface': path.resolve(__dirname, './src/surface'),
+        '@foundation': path.resolve(__dirname, './src/foundation'),
       }
     }
   };

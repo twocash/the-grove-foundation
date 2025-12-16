@@ -575,8 +575,8 @@ setInterval(() => {
     }
 }, 5 * 60 * 1000); // Check every 5 minutes
 
-// Base system prompt for The Grove Terminal
-const TERMINAL_SYSTEM_PROMPT = `
+// Base system prompt for The Grove Terminal (fallback if GCS not configured)
+const FALLBACK_SYSTEM_PROMPT = `
 You are **The Grove Terminal**. You have two operating modes.
 
 **MODE A: DEFAULT (The Architect)**
@@ -596,6 +596,42 @@ At the very end of your response, strictly append these two tags:
 [[BREADCRUMB: <The single most interesting follow-up question>]]
 [[TOPIC: <A 2-3 word label for the current subject>]]
 `;
+
+// Helper: Fetch active system prompt from GCS narratives.json
+async function fetchActiveSystemPrompt() {
+    try {
+        const file = storage.bucket(BUCKET_NAME).file('narratives.json');
+        const [exists] = await file.exists();
+
+        if (!exists) {
+            console.log('No narratives.json found, using fallback system prompt');
+            return FALLBACK_SYSTEM_PROMPT;
+        }
+
+        const [content] = await file.download();
+        const narratives = JSON.parse(content.toString());
+
+        // Check for v2 schema with system prompt versions
+        if (narratives.version === "2.0" && narratives.globalSettings?.systemPromptVersions) {
+            const versions = narratives.globalSettings.systemPromptVersions;
+            const activeId = narratives.globalSettings.activeSystemPromptId;
+
+            // Find active version
+            const activeVersion = versions.find(v => v.id === activeId) || versions.find(v => v.isActive);
+
+            if (activeVersion?.content) {
+                console.log(`Using system prompt version: ${activeVersion.id} - "${activeVersion.label}"`);
+                return activeVersion.content;
+            }
+        }
+
+        console.log('No active system prompt version found, using fallback');
+        return FALLBACK_SYSTEM_PROMPT;
+    } catch (error) {
+        console.error('Error fetching system prompt from GCS:', error.message);
+        return FALLBACK_SYSTEM_PROMPT;
+    }
+}
 
 // Static knowledge base (fallback if GCS fetch fails)
 const STATIC_KNOWLEDGE_BASE = `
@@ -635,13 +671,14 @@ SOURCE MATERIAL: "The Grove" Whitepaper & Technical Deep Dive Series (Dec 2025) 
 // Helper: Build full system prompt with context
 function buildSystemPrompt(options = {}) {
     const {
+        baseSystemPrompt = FALLBACK_SYSTEM_PROMPT,
         personaTone = '',
         sectionContext = '',
         ragContext = '',
         terminatorMode = false
     } = options;
 
-    const parts = [TERMINAL_SYSTEM_PROMPT];
+    const parts = [baseSystemPrompt];
 
     if (personaTone) {
         parts.push(`\n**ACTIVE PERSONA LENS:**\n${personaTone}`);
@@ -734,9 +771,13 @@ app.post('/api/chat', async (req, res) => {
         let session = chatSessions.get(chatSessionId);
 
         if (!session) {
-            // Fetch RAG context for new sessions
-            const ragContext = await fetchRagContext();
+            // Fetch RAG context and active system prompt for new sessions
+            const [ragContext, baseSystemPrompt] = await Promise.all([
+                fetchRagContext(),
+                fetchActiveSystemPrompt()
+            ]);
             const systemPrompt = buildSystemPrompt({
+                baseSystemPrompt,
                 personaTone,
                 sectionContext,
                 ragContext,
@@ -891,9 +932,13 @@ app.post('/api/chat/init', async (req, res) => {
         // Generate session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-        // Fetch RAG context
-        const ragContext = await fetchRagContext();
+        // Fetch RAG context and active system prompt
+        const [ragContext, baseSystemPrompt] = await Promise.all([
+            fetchRagContext(),
+            fetchActiveSystemPrompt()
+        ]);
         const systemPrompt = buildSystemPrompt({
+            baseSystemPrompt,
             personaTone,
             sectionContext,
             ragContext,
