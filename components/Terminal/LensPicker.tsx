@@ -3,7 +3,7 @@
 // Extended to support custom lenses and "Create Your Own" option
 
 import React from 'react';
-import { Persona, PERSONA_COLORS, PersonaColor } from '../../data/narratives-schema';
+import { Persona, PERSONA_COLORS, PersonaColor, getPersonaColors } from '../../data/narratives-schema';
 import { CustomLens, isCustomLens } from '../../types/lens';
 
 // Lucide icon components (inline SVG for simplicity)
@@ -83,8 +83,8 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
   )
 };
 
-// Extended color mapping to include purple for custom lenses
-const EXTENDED_PERSONA_COLORS: Record<PersonaColor | 'purple', {
+// Extended color mapping for custom lenses - uses fig (earthy purple alternative)
+const EXTENDED_PERSONA_COLORS: Record<PersonaColor | 'custom', {
   bg: string;
   bgLight: string;
   text: string;
@@ -92,12 +92,12 @@ const EXTENDED_PERSONA_COLORS: Record<PersonaColor | 'purple', {
   dot: string;
 }> = {
   ...PERSONA_COLORS,
-  purple: {
-    bg: 'bg-purple-600',
-    bgLight: 'bg-purple-50',
-    text: 'text-purple-600',
-    border: 'border-purple-300',
-    dot: 'bg-purple-500'
+  custom: {
+    bg: 'bg-[#6B4B56]',       // Fig
+    bgLight: 'bg-[#6B4B56]/10',
+    text: 'text-[#6B4B56]',
+    border: 'border-[#6B4B56]/30',
+    dot: 'bg-[#6B4B56]'
   }
 };
 
@@ -125,8 +125,10 @@ const LensPicker: React.FC<LensPickerProps> = ({
     return Icon;
   };
 
-  const getColors = (color: PersonaColor | 'purple') => {
-    return EXTENDED_PERSONA_COLORS[color] || PERSONA_COLORS.violet;
+  const getColors = (color: PersonaColor | 'custom' | 'purple') => {
+    // Map legacy 'purple' to 'custom' (fig color)
+    const mappedColor = color === 'purple' ? 'custom' : color;
+    return EXTENDED_PERSONA_COLORS[mappedColor as keyof typeof EXTENDED_PERSONA_COLORS] || PERSONA_COLORS.fig;
   };
 
   return (
@@ -223,7 +225,7 @@ const LensPicker: React.FC<LensPickerProps> = ({
 
         {personas.map(persona => {
           const Icon = IconComponent(persona.icon);
-          const colors = PERSONA_COLORS[persona.color];
+          const colors = getPersonaColors(persona.color);
           const isSelected = currentLens === persona.id;
 
           return (
@@ -293,21 +295,21 @@ const LensPicker: React.FC<LensPickerProps> = ({
             <div className="border-t border-ink/5 my-3" />
             <button
               onClick={onCreateCustomLens}
-              className="w-full text-left p-4 rounded-lg border border-dashed border-ink/20 transition-all duration-200 group hover:border-purple-300 hover:bg-purple-50/50"
+              className="w-full text-left p-4 rounded-lg border border-dashed border-ink/20 transition-all duration-200 group hover:border-[#6B4B56]/40 hover:bg-[#6B4B56]/5"
             >
               <div className="flex items-start space-x-3">
-                <div className="p-2 rounded-lg bg-ink/5 group-hover:bg-purple-100 transition-colors">
-                  <ICONS.Sparkles className="w-5 h-5 text-ink/40 group-hover:text-purple-500" />
+                <div className="p-2 rounded-lg bg-ink/5 group-hover:bg-[#6B4B56]/10 transition-colors">
+                  <ICONS.Sparkles className="w-5 h-5 text-ink/40 group-hover:text-[#6B4B56]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-sans font-medium text-sm text-ink/70 group-hover:text-purple-600">
+                  <div className="font-sans font-medium text-sm text-ink/70 group-hover:text-[#6B4B56]">
                     Create your own lens
                   </div>
                   <div className="font-serif text-xs text-ink-muted italic mt-0.5">
                     "Build a lens that's uniquely yours"
                   </div>
                 </div>
-                <ICONS.Plus className="w-4 h-4 text-ink/30 group-hover:text-purple-500 self-center" />
+                <ICONS.Plus className="w-4 h-4 text-ink/30 group-hover:text-[#6B4B56] self-center" />
               </div>
             </button>
           </>

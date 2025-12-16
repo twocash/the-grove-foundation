@@ -1,12 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { TerminalState, ChatMessage, SectionId } from '../types';
-import { sendMessageStream, initChatSession } from '../services/geminiService';
-import { SECTION_CONFIG, GROVE_KNOWLEDGE_BASE } from '../constants';
+import {
+  sendMessageStream,
+  resetSession as resetChatSession,
+  formatChatError
+} from '../services/chatService';
+import { SECTION_CONFIG } from '../constants';
 import { useNarrative } from '../hooks/useNarrative';
 import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useRevealState } from '../hooks/useRevealState';
-import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard } from './Terminal/index';
+import { useFeatureFlag } from '../hooks/useFeatureFlags';
+import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav } from './Terminal/index';
+import { useStreakTracking } from '../hooks/useStreakTracking';
 import { Card, Persona } from '../data/narratives-schema';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 import SimulationReveal from './Terminal/Reveals/SimulationReveal';
@@ -34,29 +40,8 @@ interface TerminalProps {
   onQueryHandled?: () => void;
 }
 
-const SYSTEM_PROMPT = `
-You are **The Grove Terminal**. You have two operating modes.
-
-**MODE A: DEFAULT (The Architect)**
-- Trigger: Standard queries.
-- Persona: Jim. Confident, brief (max 100 words), uses metaphors.
-- Goal: Hook the user's curiosity.
-- Output: Insight -> Support -> Stop.
-
-**MODE B: VERBOSE (The Librarian)**
-- Trigger: When user query ends with "--verbose".
-- Persona: System Documentation. Thorough, technical, exhaustive.
-- Goal: Provide deep implementation details, economics, and architectural specs.
-- Formatting: Use lists, code blocks, and cite specific text from the knowledge base.
-
-**MANDATORY FOOTER (BOTH MODES):**
-At the very end of your response, strictly append these two tags:
-[[BREADCRUMB: <The single most interesting follow-up question>]]
-[[TOPIC: <A 2-3 word label for the current subject>]]
-
-**KNOWLEDGE BASE:**
-${GROVE_KNOWLEDGE_BASE}
-`;
+// System prompt is now server-side in /api/chat
+// See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
 
 const parseInline = (text: string) => {
   const parts = text.split(/(\*\*.*?\*\*)/g);
@@ -133,7 +118,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [dynamicSuggestion, setDynamicSuggestion] = useState<string>('');
   const [currentTopic, setCurrentTopic] = useState<string>('');
   const [isVerboseMode, setIsVerboseMode] = useState<boolean>(false);
-  const [ragContext, setRagContext] = useState<string>('');
+  // RAG context is now handled server-side in /api/chat
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [showLensPicker, setShowLensPicker] = useState<boolean>(false);
   const [showCustomLensWizard, setShowCustomLensWizard] = useState<boolean>(false);
@@ -172,6 +157,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     currentThread,
     currentPosition,
     regenerateThread,
+    advanceThread,
     getThreadCard,
     incrementExchangeCount,
     addVisitedCard,
@@ -202,6 +188,31 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     setCustomLens: setRevealCustomLens,
     getMinutesActive
   } = useRevealState();
+
+  // Feature flags
+  const showCustomLensInPicker = useFeatureFlag('custom-lens-in-picker');
+  const showJourneyRatings = useFeatureFlag('journey-ratings');
+  const showStreakDisplay = useFeatureFlag('streaks-display');
+  const showFeedbackTransmission = useFeatureFlag('feedback-transmission');
+
+  // Streak tracking
+  const {
+    currentStreak,
+    journeysCompleted: totalJourneysCompleted,
+    recordActivity,
+    recordJourneyCompleted
+  } = useStreakTracking();
+
+  // Record activity when terminal opens
+  useEffect(() => {
+    if (terminalState.isOpen) {
+      recordActivity();
+    }
+  }, [terminalState.isOpen, recordActivity]);
+
+  // Journey completion state
+  const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
+  const [journeyStartTime] = useState(Date.now());
 
   // Get active lens data (could be custom or archetypal)
   const activeLensData = useMemo(() => {
@@ -381,38 +392,19 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
   }, [shouldShowFounder, showFounderStory, revealState.founderStoryShown, markFounderStoryShown, currentArchetypeId]);
 
-  // Load RAG context
+  // Reset chat session when persona or section changes
+  // Server-side chat now handles RAG context and system prompt construction
   useEffect(() => {
-    fetch('/api/context')
-      .then(res => res.json())
-      .then(data => {
-        if (data.context) {
-          console.log("Loaded Dynamic RAG Context");
-          setRagContext(data.context);
-        }
-      })
-      .catch(err => console.error("Failed to load RAG context:", err));
-  }, []);
+    // Reset the server-side chat session when context changes
+    // The next message will automatically create a new session with fresh context
+    resetChatSession();
 
-  // Initialize chat session with persona-aware prompt
-  useEffect(() => {
-    const knowledgeBase = ragContext || GROVE_KNOWLEDGE_BASE;
-
-    // Build persona tone guidance if lens is selected
-    const personaTone = activeLensData?.toneGuidance || '';
-
-    const fullSystemPrompt = [
-      SYSTEM_PROMPT,
-      personaTone ? `\n**ACTIVE PERSONA LENS:**\n${personaTone}` : '',
-      `\n\nCURRENT USER CONTEXT: Reading section "${activeSection}".`,
-      `\n\n**DYNAMIC KNOWLEDGE BASE:**\n${knowledgeBase}`
-    ].join('');
-
-    initChatSession(fullSystemPrompt);
     const defaultHint = SECTION_CONFIG[activeSection]?.promptHint || "What is The Grove?";
     setDynamicSuggestion(defaultHint);
     setCurrentTopic('');
-  }, [activeSection, ragContext, activeLensData]);
+
+    console.log('Chat context changed - session will reinitialize on next message');
+  }, [activeSection, activeLensData]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -464,44 +456,66 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       messages: [...prev.messages, { id: botMessageId, role: 'model', text: '', isStreaming: true }]
     }));
 
-    // Build prompt with persona tone guidance
-    const promptContext = `[Context: User is viewing the ${SECTION_CONFIG[activeSection]?.title || activeSection} section. Provide a substantive response that reinforces the section's message while adding depth.]`;
-
-    // Get persona tone if lens is active
-    const personaTone = activeLensData?.toneGuidance
-      ? `[Apply this persona guidance: ${activeLensData.toneGuidance}]`
-      : '';
-
-    // PRESERVED: Scholar Mode (--verbose) prompt construction - this is the critical line
-    const apiPrompt = isVerboseMode
-      ? `${promptContext} ${personaTone} ${textToSend} --verbose. Give me the deep technical breakdown.`
-      : `${promptContext} ${personaTone} ${textToSend}`;
-
     let accumulatedRawText = "";
 
-    await sendMessageStream(apiPrompt, (chunk) => {
-      accumulatedRawText += chunk;
-      const cleanText = accumulatedRawText
-        .replace(/\[\[BREADCRUMB:.*?\]\]/s, '')
-        .replace(/\[\[TOPIC:.*?\]\]/s, '')
-        .trim();
+    try {
+      // Use server-side chat API
+      // Server handles: system prompt, RAG context, persona tone, verbose mode
+      const response = await sendMessageStream(
+        textToSend,
+        (chunk) => {
+          accumulatedRawText += chunk;
+          const cleanText = accumulatedRawText
+            .replace(/\[\[BREADCRUMB:.*?\]\]/s, '')
+            .replace(/\[\[TOPIC:.*?\]\]/s, '')
+            .trim();
 
+          setTerminalState(prev => ({
+            ...prev,
+            messages: prev.messages.map(msg =>
+              msg.id === botMessageId ? { ...msg, text: cleanText } : msg
+            )
+          }));
+        },
+        {
+          sectionContext: SECTION_CONFIG[activeSection]?.title || activeSection,
+          personaTone: activeLensData?.toneGuidance,
+          verboseMode: isVerboseMode,
+          terminatorMode: terminatorModeActive
+        }
+      );
+
+      // Use server-extracted breadcrumb/topic if available, fall back to client parsing
+      if (response.breadcrumb) {
+        setDynamicSuggestion(response.breadcrumb);
+      } else {
+        const breadcrumbMatch = accumulatedRawText.match(/\[\[BREADCRUMB:(.*?)\]\]/);
+        if (breadcrumbMatch && breadcrumbMatch[1]) {
+          setDynamicSuggestion(breadcrumbMatch[1].trim());
+        } else {
+          setDynamicSuggestion("Tell me more about the architecture.");
+        }
+      }
+
+      if (response.topic) {
+        setCurrentTopic(response.topic);
+      } else {
+        const topicMatch = accumulatedRawText.match(/\[\[TOPIC:(.*?)\]\]/);
+        if (topicMatch && topicMatch[1]) {
+          setCurrentTopic(topicMatch[1].trim());
+        }
+      }
+
+    } catch (error) {
+      // Handle errors gracefully
+      const errorMessage = formatChatError(error);
       setTerminalState(prev => ({
         ...prev,
         messages: prev.messages.map(msg =>
-          msg.id === botMessageId ? { ...msg, text: cleanText } : msg
+          msg.id === botMessageId ? { ...msg, text: errorMessage, isStreaming: false } : msg
         )
       }));
-    });
-
-    // PRESERVED: Breadcrumb and topic extraction
-    const breadcrumbMatch = accumulatedRawText.match(/\[\[BREADCRUMB:(.*?)\]\]/);
-    const topicMatch = accumulatedRawText.match(/\[\[TOPIC:(.*?)\]\]/);
-
-    if (breadcrumbMatch && breadcrumbMatch[1]) setDynamicSuggestion(breadcrumbMatch[1].trim());
-    else setDynamicSuggestion("Tell me more about the architecture.");
-
-    if (topicMatch && topicMatch[1]) setCurrentTopic(topicMatch[1].trim());
+    }
 
     setTerminalState(prev => ({
       ...prev,
@@ -587,40 +601,32 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               onCreateCustomLens={handleCreateCustomLens}
               onDeleteCustomLens={handleDeleteCustomLens}
               currentLens={session.activeLens}
-              showCreateOption={true}
+              showCreateOption={showCustomLensInPicker}
             />
           ) : (
             <>
-              {/* Header */}
-              <div className="p-4 border-b border-ink/5 bg-white">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="font-display font-bold text-lg text-ink">The Terminal 🌱</div>
-                    {/* PRESERVED: Scholar Mode badge - exact same implementation */}
-                    {isVerboseMode && (
-                      <span className="bg-grove-clay text-white px-2 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase shadow-sm">
-                        Scholar Mode
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-ink-muted">
-                    CTX: {SECTION_CONFIG[activeSection]?.title.toUpperCase() || 'INDEX'}
-                  </div>
+              {/* Header - Compact title bar */}
+              <div className="px-4 py-2 border-b border-ink/5 bg-white flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="font-display font-bold text-base text-ink">The Terminal 🌱</div>
+                  {/* PRESERVED: Scholar Mode badge */}
+                  {isVerboseMode && (
+                    <span className="bg-[#D95D39] text-white px-2 py-0.5 rounded-full text-[8px] font-bold tracking-widest uppercase">
+                      Scholar
+                    </span>
+                  )}
                 </div>
-                {/* Lens Badge - new v2 feature */}
-                <div className="flex items-center justify-between">
-                  <LensBadge
-                    persona={activeLensData}
-                    onSwitchClick={() => setShowLensPicker(true)}
-                  />
+                <div className="text-[9px] uppercase tracking-widest text-ink-muted font-mono">
+                  CTX: {SECTION_CONFIG[activeSection]?.title.toUpperCase() || 'INDEX'}
                 </div>
               </div>
 
-              {/* Thread Progress - shows journey position and regenerate button */}
-              <ThreadProgress
+              {/* Consolidated Journey Navigation Bar */}
+              <JourneyNav
+                persona={activeLensData}
+                onSwitchLens={() => setShowLensPicker(true)}
                 currentThread={currentThread}
                 currentPosition={currentPosition}
-                persona={activeLensData}
                 getThreadCard={getThreadCard}
                 onRegenerate={regenerateThread}
                 onJumpToCard={(cardId) => {
@@ -630,6 +636,9 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     addVisitedCard(cardId);
                   }
                 }}
+                currentStreak={currentStreak}
+                journeysCompleted={totalJourneysCompleted}
+                showStreak={showStreakDisplay}
               />
 
               {/* Messages Area - Thread Style */}
@@ -720,8 +729,33 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       ))}
                     </div>
                   </div>
-                ) : (
-                  /* Suggested Action - Reference Card Style (fallback) */
+                ) : currentThread.length > 0 && currentPosition < currentThread.length ? (
+                  /* Journey Progress Card - replaces Suggested Inquiry */
+                  <JourneyCard
+                    currentThread={currentThread}
+                    currentPosition={currentPosition}
+                    currentCard={getThreadCard(currentPosition)}
+                    journeyTitle={activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey'}
+                    onResume={() => {
+                      const card = getThreadCard(currentPosition);
+                      if (card) {
+                        handleSend(card.query, card.label, card.id);
+                        // Advance thread after sending - check if this was the last card
+                        const nextCardId = advanceThread();
+                        if (nextCardId === null && currentPosition >= currentThread.length - 1) {
+                          // Journey complete! Show completion UI
+                          setShowJourneyCompletion(true);
+                          recordJourneyCompleted();
+                          incrementJourneysCompleted();
+                        }
+                      }
+                    }}
+                    onExploreFreely={() => {
+                      // User can type freely below
+                    }}
+                  />
+                ) : dynamicSuggestion ? (
+                  /* Fallback: Suggested Inquiry when no active journey */
                   <div className="mb-4">
                     <button
                       onClick={() => handleSuggestion(dynamicSuggestion)}
@@ -736,11 +770,11 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                         </span>
                       </div>
                       <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
-                        "{dynamicSuggestion || "Start the sequence..."}"
+                        "{dynamicSuggestion}"
                       </div>
                     </button>
                   </div>
-                )}
+                ) : null}
 
                 <div className="flex items-center space-x-3 mb-4">
                   {/* PRESERVED: Verbose Toggle - Wax Seal Style - exact same implementation */}
@@ -806,6 +840,34 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       )}
 
       {terminatorModeActive && <TerminatorModeOverlay />}
+
+      {/* Journey Completion Modal */}
+      {showJourneyCompletion && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/30 backdrop-blur-sm">
+          <div className="w-full max-w-md mx-4">
+            <JourneyCompletion
+              journeyTitle={activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey'}
+              journeyId={`${session.activeLens || 'default'}-${Date.now()}`}
+              personaId={session.activeLens}
+              completionTimeMinutes={Math.round((Date.now() - journeyStartTime) / 60000)}
+              showRating={showJourneyRatings}
+              showFeedbackTransmission={showFeedbackTransmission}
+              onSubmit={(rating, feedback, sendToFoundation) => {
+                console.log('Journey feedback:', { rating, feedback, sendToFoundation });
+                // TODO: Send feedback to server if sendToFoundation is true
+                setShowJourneyCompletion(false);
+                // Optionally show founder story or CTA after journey completion
+                if (shouldShowFounder && currentArchetypeId) {
+                  markFounderStoryShown();
+                }
+              }}
+              onSkip={() => {
+                setShowJourneyCompletion(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {showFounderStory && currentArchetypeId && (
         <FounderStory

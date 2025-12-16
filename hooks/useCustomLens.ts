@@ -47,15 +47,15 @@ function generateLensId(): string {
 
 /**
  * Get a color for custom lenses that's visually distinct
- * Cycles through colors to avoid repetition
+ * Cycles through earthy colors to avoid repetition
  */
 function getCustomLensColor(existingLenses: CustomLens[]): PersonaColor {
-  // Use purple as primary custom lens color, but allow variety
-  const colors: PersonaColor[] = ['violet', 'emerald', 'amber', 'blue', 'rose'];
+  // Use fig as primary custom lens color, with earthy variety
+  const colors: PersonaColor[] = ['fig', 'moss', 'amber', 'slate', 'stone', 'clay'];
   const existingColors = existingLenses.map(l => l.color);
 
-  // Find first color not in use, or default to violet
-  return colors.find(c => !existingColors.includes(c)) || 'violet';
+  // Find first color not in use, or default to fig
+  return colors.find(c => !existingColors.includes(c)) || 'fig';
 }
 
 export function useCustomLens(): UseCustomLensReturn {

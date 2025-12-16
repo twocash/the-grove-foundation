@@ -1,14 +1,28 @@
 // PersonaSettings - Column 3 component for editing persona configuration
-import React from 'react';
-import { Persona, Card, PersonaColor, NarrativeStyle, OpeningPhase, PERSONA_COLORS } from '../../data/narratives-schema';
+// Extended in Sprint 7B with vocabulary level, emotional register, and version history
+import React, { useState } from 'react';
+import {
+  Persona,
+  Card,
+  PersonaColor,
+  NarrativeStyle,
+  OpeningPhase,
+  VocabularyLevel,
+  EmotionalRegister,
+  PersonaPromptVersion,
+  getPersonaColors
+} from '../../data/narratives-schema';
 
 interface PersonaSettingsProps {
   persona: Persona;
   allCards: Card[];
   onUpdate: (persona: Persona) => void;
+  versionHistory?: PersonaPromptVersion[];
+  onSaveVersion?: () => void;
+  onRollback?: (version: PersonaPromptVersion) => void;
 }
 
-const COLOR_OPTIONS: PersonaColor[] = ['emerald', 'amber', 'blue', 'rose', 'slate', 'violet'];
+const COLOR_OPTIONS: PersonaColor[] = ['forest', 'moss', 'amber', 'clay', 'slate', 'fig', 'stone'];
 const STYLE_OPTIONS: { value: NarrativeStyle; label: string }[] = [
   { value: 'evidence-first', label: 'Evidence First' },
   { value: 'stakes-heavy', label: 'Stakes Heavy' },
@@ -20,15 +34,37 @@ const PHASE_OPTIONS: { value: OpeningPhase; label: string }[] = [
   { value: 'stakes', label: 'Stakes' },
   { value: 'mechanics', label: 'Mechanics' },
 ];
+const VOCABULARY_OPTIONS: { value: VocabularyLevel; label: string; description: string }[] = [
+  { value: 'accessible', label: 'Accessible', description: 'Simple, everyday language' },
+  { value: 'technical', label: 'Technical', description: 'Industry terminology' },
+  { value: 'academic', label: 'Academic', description: 'Scholarly, precise language' },
+  { value: 'executive', label: 'Executive', description: 'Business-focused, strategic' },
+];
+const EMOTIONAL_OPTIONS: { value: EmotionalRegister; label: string; description: string }[] = [
+  { value: 'warm', label: 'Warm', description: 'Friendly, approachable' },
+  { value: 'neutral', label: 'Neutral', description: 'Balanced, professional' },
+  { value: 'urgent', label: 'Urgent', description: 'Pressing, important' },
+  { value: 'measured', label: 'Measured', description: 'Careful, considered' },
+];
 
 const PersonaSettings: React.FC<PersonaSettingsProps> = ({
   persona,
   allCards,
-  onUpdate
+  onUpdate,
+  versionHistory = [],
+  onSaveVersion,
+  onRollback
 }) => {
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+
   const handleFieldChange = (field: keyof Persona, value: unknown) => {
     onUpdate({ ...persona, [field]: value });
   };
+
+  // Get versions for this persona
+  const personaVersions = versionHistory
+    .filter(v => v.personaId === persona.id)
+    .sort((a, b) => b.version - a.version); // Most recent first
 
   const handleArcChange = (phase: keyof typeof persona.arcEmphasis, value: number) => {
     onUpdate({
@@ -112,7 +148,7 @@ const PersonaSettings: React.FC<PersonaSettingsProps> = ({
         </label>
         <div className="flex space-x-2">
           {COLOR_OPTIONS.map(color => {
-            const colors = PERSONA_COLORS[color];
+            const colors = getPersonaColors(color);
             const isSelected = persona.color === color;
             return (
               <button
@@ -143,6 +179,96 @@ const PersonaSettings: React.FC<PersonaSettingsProps> = ({
         <p className="text-xs text-gray-500 mt-1">
           This text is added to every prompt when this lens is active.
         </p>
+      </div>
+
+      {/* System Prompt Override (optional) */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          System Prompt Override
+          <span className="text-gray-400 font-normal ml-2">(optional)</span>
+        </label>
+        <textarea
+          value={persona.systemPrompt || ''}
+          onChange={(e) => handleFieldChange('systemPrompt', e.target.value || undefined)}
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="Leave empty to use default system prompt..."
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Custom system instruction that replaces the default. Leave empty for default behavior.
+        </p>
+      </div>
+
+      {/* Opening Template */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          Opening Template
+          <span className="text-gray-400 font-normal ml-2">(optional)</span>
+        </label>
+        <textarea
+          value={persona.openingTemplate || ''}
+          onChange={(e) => handleFieldChange('openingTemplate', e.target.value || undefined)}
+          rows={4}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="Custom welcome message for this persona..."
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Custom session start message. Use {'{{docCount}}'} for document count placeholder.
+        </p>
+      </div>
+
+      {/* Vocabulary Level */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          Vocabulary Level
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {VOCABULARY_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => handleFieldChange('vocabularyLevel', opt.value)}
+              className={`px-3 py-2 text-left rounded-lg border transition-all ${
+                persona.vocabularyLevel === opt.value
+                  ? 'border-green-500 bg-green-50 ring-1 ring-green-500'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className={`text-sm font-semibold ${
+                persona.vocabularyLevel === opt.value ? 'text-green-700' : 'text-gray-700'
+              }`}>
+                {opt.label}
+              </div>
+              <div className="text-xs text-gray-500">{opt.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Emotional Register */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          Emotional Register
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {EMOTIONAL_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => handleFieldChange('emotionalRegister', opt.value)}
+              className={`px-3 py-2 text-left rounded-lg border transition-all ${
+                persona.emotionalRegister === opt.value
+                  ? 'border-green-500 bg-green-50 ring-1 ring-green-500'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className={`text-sm font-semibold ${
+                persona.emotionalRegister === opt.value ? 'text-green-700' : 'text-gray-700'
+              }`}>
+                {opt.label}
+              </div>
+              <div className="text-xs text-gray-500">{opt.description}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Narrative Style */}
@@ -271,6 +397,90 @@ const PersonaSettings: React.FC<PersonaSettingsProps> = ({
             })
           )}
         </div>
+      </div>
+
+      {/* Version History Section */}
+      <div className="pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+              Version History
+            </label>
+            <p className="text-xs text-gray-500">
+              v{persona.promptVersion || 1} • {personaVersions.length} saved {personaVersions.length === 1 ? 'version' : 'versions'}
+            </p>
+          </div>
+          <div className="flex space-x-2">
+            {onSaveVersion && (
+              <button
+                onClick={onSaveVersion}
+                className="px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
+              >
+                Save Version
+              </button>
+            )}
+            {personaVersions.length > 0 && (
+              <button
+                onClick={() => setShowVersionHistory(!showVersionHistory)}
+                className="px-3 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                {showVersionHistory ? 'Hide History' : 'Show History'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Version List */}
+        {showVersionHistory && personaVersions.length > 0 && (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {personaVersions.map((version, index) => (
+              <div
+                key={`${version.personaId}-${version.version}`}
+                className={`p-3 rounded-lg border ${
+                  index === 0 ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-semibold text-gray-900">
+                      Version {version.version}
+                    </span>
+                    {index === 0 && (
+                      <span className="ml-2 text-[10px] font-bold text-green-600 uppercase">
+                        Current
+                      </span>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      {new Date(version.savedAt).toLocaleString()}
+                    </p>
+                  </div>
+                  {index !== 0 && onRollback && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Rollback to version ${version.version}? This will restore the prompt configuration from ${new Date(version.savedAt).toLocaleString()}.`)) {
+                          onRollback(version);
+                        }
+                      }}
+                      className="px-2 py-1 text-xs font-semibold text-amber-700 bg-amber-50 rounded hover:bg-amber-100 transition-colors"
+                    >
+                      Rollback
+                    </button>
+                  )}
+                </div>
+                <div className="mt-2 text-xs text-gray-600 font-mono line-clamp-2">
+                  {version.config.toneGuidance.substring(0, 100)}
+                  {version.config.toneGuidance.length > 100 && '...'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {showVersionHistory && personaVersions.length === 0 && (
+          <div className="text-center py-4 text-sm text-gray-500">
+            No version history yet. Save a version to enable rollback.
+          </div>
+        )}
       </div>
 
       {/* Icon Reference */}

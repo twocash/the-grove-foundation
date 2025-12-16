@@ -2,7 +2,7 @@
 // Displays next to Scholar Mode badge
 
 import React from 'react';
-import { Persona, PERSONA_COLORS } from '../../data/narratives-schema';
+import { Persona, getPersonaColors } from '../../data/narratives-schema';
 
 interface LensBadgeProps {
   persona: Persona | null;
@@ -28,7 +28,7 @@ const LensBadge: React.FC<LensBadgeProps> = ({ persona, onSwitchClick }) => {
     );
   }
 
-  const colors = PERSONA_COLORS[persona.color];
+  const colors = getPersonaColors(persona.color);
 
   return (
     <button

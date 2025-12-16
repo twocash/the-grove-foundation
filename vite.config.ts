@@ -4,8 +4,19 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
-  // Check multiple possible env var names for the API key
+
+  // API Key Configuration
+  // =====================
+  // CHAT: No longer needs client-side API key - uses server-side /api/chat
+  // TTS (Admin): Still requires client-side key for audioService.ts
+  //
+  // The key is ONLY needed for:
+  // - Admin TTS audio generation (audioService.ts)
+  // - Legacy generateArtifact (geminiService.ts - deprecated)
+  //
+  // TODO: Move TTS to server-side to eliminate client-side key exposure entirely
   const geminiApiKey = env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
+
   return {
     server: {
       port: 3000,
@@ -19,6 +30,10 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     define: {
+      // Expose API key for admin TTS feature only
+      // Main chat functionality uses server-side API via /api/chat
+      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(geminiApiKey),
+      // Legacy - kept for backwards compatibility during migration
       'process.env.API_KEY': JSON.stringify(geminiApiKey),
       'process.env.GEMINI_API_KEY': JSON.stringify(geminiApiKey)
     },

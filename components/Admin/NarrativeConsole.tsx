@@ -6,11 +6,13 @@ import {
   Card,
   Persona,
   GlobalSettings,
+  PersonaPromptVersion,
+  PersonaPromptConfig,
   DEFAULT_GLOBAL_SETTINGS,
   isV1Schema,
   isV2Schema,
   nodeToCard,
-  PERSONA_COLORS
+  getPersonaColors
 } from '../../data/narratives-schema';
 import { DEFAULT_PERSONAS } from '../../data/default-personas';
 import CardEditor from './CardEditor';
@@ -187,6 +189,80 @@ const NarrativeConsole: React.FC = () => {
     });
   };
 
+  // Version history operations for persona prompts
+  const savePersonaVersion = (personaId: string) => {
+    if (!schema) return;
+    const persona = schema.personas[personaId];
+    if (!persona) return;
+
+    const currentVersion = persona.promptVersion || 1;
+    const newVersion = currentVersion + 1;
+
+    // Create version snapshot
+    const versionSnapshot: PersonaPromptVersion = {
+      personaId,
+      version: currentVersion,
+      config: {
+        systemPrompt: persona.systemPrompt,
+        toneGuidance: persona.toneGuidance,
+        openingTemplate: persona.openingTemplate,
+        vocabularyLevel: persona.vocabularyLevel || 'accessible',
+        emotionalRegister: persona.emotionalRegister || 'warm',
+        arcEmphasis: { ...persona.arcEmphasis },
+        version: currentVersion,
+        updatedAt: new Date().toISOString()
+      },
+      savedAt: new Date().toISOString()
+    };
+
+    // Update schema with new version and add to history
+    const existingVersions = schema.globalSettings.personaPromptVersions || [];
+    setSchema({
+      ...schema,
+      personas: {
+        ...schema.personas,
+        [personaId]: {
+          ...persona,
+          promptVersion: newVersion
+        }
+      },
+      globalSettings: {
+        ...schema.globalSettings,
+        personaPromptVersions: [...existingVersions, versionSnapshot]
+      }
+    });
+
+    setStatus(`Saved version ${currentVersion} of ${persona.publicLabel}`);
+    setTimeout(() => setStatus(''), 3000);
+  };
+
+  const rollbackPersonaVersion = (version: PersonaPromptVersion) => {
+    if (!schema) return;
+    const persona = schema.personas[version.personaId];
+    if (!persona) return;
+
+    // Restore the persona config from the version snapshot
+    setSchema({
+      ...schema,
+      personas: {
+        ...schema.personas,
+        [version.personaId]: {
+          ...persona,
+          systemPrompt: version.config.systemPrompt,
+          toneGuidance: version.config.toneGuidance,
+          openingTemplate: version.config.openingTemplate,
+          vocabularyLevel: version.config.vocabularyLevel,
+          emotionalRegister: version.config.emotionalRegister,
+          arcEmphasis: { ...version.config.arcEmphasis },
+          promptVersion: version.version
+        }
+      }
+    });
+
+    setStatus(`Rolled back ${persona.publicLabel} to version ${version.version}`);
+    setTimeout(() => setStatus(''), 3000);
+  };
+
   // Filtered cards
   const filteredCards = useMemo(() => {
     if (!schema) return [];
@@ -286,7 +362,8 @@ const NarrativeConsole: React.FC = () => {
               Personas
             </div>
             {personas.map(persona => {
-              const colors = PERSONA_COLORS[persona.color];
+              // Handle legacy color names that may still be in stored data
+              const colors = getPersonaColors(persona.color);
               const cardCount = allCards.filter(c =>
                 c.personas.includes(persona.id) || c.personas.includes('all')
               ).length;
@@ -341,7 +418,7 @@ const NarrativeConsole: React.FC = () => {
             {viewMode === 'persona' && selectedPersona ? (
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <span className={`w-3 h-3 rounded-full ${PERSONA_COLORS[selectedPersona.color].dot}`} />
+                  <span className={`w-3 h-3 rounded-full ${getPersonaColors(selectedPersona.color).dot}`} />
                   <span className="font-semibold text-gray-900">{selectedPersona.publicLabel}</span>
                 </div>
                 <button
@@ -408,7 +485,7 @@ const NarrativeConsole: React.FC = () => {
                         return (
                           <span
                             key={pId}
-                            className={`px-2 py-0.5 text-[10px] font-semibold rounded ${PERSONA_COLORS[p.color].bgLight} ${PERSONA_COLORS[p.color].text}`}
+                            className={`px-2 py-0.5 text-[10px] font-semibold rounded ${getPersonaColors(p.color).bgLight} ${getPersonaColors(p.color).text}`}
                           >
                             {p.publicLabel.split(' ')[0]}
                           </span>
@@ -442,6 +519,9 @@ const NarrativeConsole: React.FC = () => {
               persona={selectedPersona}
               allCards={allCards}
               onUpdate={updatePersona}
+              versionHistory={schema?.globalSettings.personaPromptVersions || []}
+              onSaveVersion={() => savePersonaVersion(selectedPersona.id)}
+              onRollback={rollbackPersonaVersion}
             />
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">

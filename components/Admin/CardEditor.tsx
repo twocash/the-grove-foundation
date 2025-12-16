@@ -1,6 +1,6 @@
 // CardEditor - Column 3 component for editing individual cards
 import React from 'react';
-import { Card, Persona, PERSONA_COLORS } from '../../data/narratives-schema';
+import { Card, Persona, getPersonaColors } from '../../data/narratives-schema';
 import { SectionId } from '../../types';
 
 interface CardEditorProps {
@@ -182,7 +182,7 @@ const CardEditor: React.FC<CardEditorProps> = ({
           <div className="flex flex-wrap gap-2 mt-2">
             {personas.map(persona => {
               const isSelected = card.personas.includes(persona.id);
-              const colors = PERSONA_COLORS[persona.color];
+              const colors = getPersonaColors(persona.color);
               return (
                 <button
                   key={persona.id}

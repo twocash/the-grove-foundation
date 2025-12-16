@@ -2,7 +2,7 @@
 // Displays: "Step 2/5 in your journey" with progress dots and regenerate button
 
 import React from 'react';
-import { Card, Persona, PERSONA_COLORS } from '../../data/narratives-schema';
+import { Card, Persona, getPersonaColors } from '../../data/narratives-schema';
 
 interface ThreadProgressProps {
   currentThread: string[];
@@ -25,7 +25,7 @@ const ThreadProgress: React.FC<ThreadProgressProps> = ({
     return null;
   }
 
-  const colors = PERSONA_COLORS[persona.color];
+  const colors = getPersonaColors(persona.color);
   const totalSteps = currentThread.length;
   const currentStep = currentPosition + 1;
   const isComplete = currentPosition >= totalSteps - 1;

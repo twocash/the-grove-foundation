@@ -2,7 +2,7 @@
 // Offers: same lens/new topic, same topic/new lens, or change everything
 
 import React from 'react';
-import { Persona, Card, PERSONA_COLORS } from '../../data/narratives-schema';
+import { Persona, Card, getPersonaColors } from '../../data/narratives-schema';
 
 interface JourneyEndProps {
   currentLens: Persona | null;
@@ -59,7 +59,7 @@ const JourneyEnd: React.FC<JourneyEndProps> = ({
           </div>
           <div className="flex flex-wrap gap-2 pl-7">
             {suggestedLenses.slice(0, 3).map(persona => {
-              const colors = PERSONA_COLORS[persona.color];
+              const colors = getPersonaColors(persona.color);
               return (
                 <button
                   key={persona.id}

@@ -14,7 +14,9 @@ import { generateArtifact } from './services/geminiService';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
 // V2 Narrative Console with 3-column layout
-import { NarrativeConsole as AdminNarrativeConsole } from './components/Admin';
+import { NarrativeConsole as AdminNarrativeConsole, FeatureFlagPanel, TopicHubPanel } from './components/Admin';
+import { NarrativeSchemaV2, GlobalSettings, FeatureFlag, TopicHub, DEFAULT_FEATURE_FLAGS, DEFAULT_TOPIC_HUBS, DEFAULT_GLOBAL_SETTINGS, isV2Schema, isV1Schema, nodeToCard } from './data/narratives-schema';
+import { DEFAULT_PERSONAS } from './data/default-personas';
 
 const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -86,7 +88,119 @@ const App: React.FC = () => {
   };
 
   const AdminDashboard = () => {
-    const [tab, setTab] = useState<'audio' | 'rag' | 'narrative'>('narrative');
+    const [tab, setTab] = useState<'audio' | 'rag' | 'narrative' | 'flags' | 'hubs'>('narrative');
+    const [schema, setSchema] = useState<NarrativeSchemaV2 | null>(null);
+    const [flagsLoading, setFlagsLoading] = useState(true);
+    const [flagsSaving, setFlagsSaving] = useState(false);
+    const [flagsStatus, setFlagsStatus] = useState('');
+
+    // Load schema for flags and hubs tabs
+    useEffect(() => {
+      if (tab === 'flags' || tab === 'hubs') {
+        loadSchema();
+      }
+    }, [tab]);
+
+    const loadSchema = async () => {
+      setFlagsLoading(true);
+      try {
+        const res = await fetch('/api/narrative');
+        const data = await res.json();
+
+        let finalSchema: NarrativeSchemaV2;
+        if (isV2Schema(data)) {
+          finalSchema = data;
+        } else if (isV1Schema(data)) {
+          const cards: Record<string, any> = {};
+          for (const [id, node] of Object.entries(data.nodes as Record<string, any>)) {
+            cards[id] = nodeToCard(node);
+          }
+          finalSchema = {
+            version: "2.0",
+            globalSettings: DEFAULT_GLOBAL_SETTINGS,
+            personas: DEFAULT_PERSONAS,
+            cards
+          };
+        } else {
+          finalSchema = {
+            version: "2.0",
+            globalSettings: DEFAULT_GLOBAL_SETTINGS,
+            personas: DEFAULT_PERSONAS,
+            cards: {}
+          };
+        }
+
+        // Ensure featureFlags exist
+        if (!finalSchema.globalSettings.featureFlags) {
+          finalSchema.globalSettings.featureFlags = DEFAULT_FEATURE_FLAGS;
+        }
+
+        // Ensure topicHubs exist
+        if (!finalSchema.globalSettings.topicHubs) {
+          finalSchema.globalSettings.topicHubs = DEFAULT_TOPIC_HUBS;
+        }
+
+        setSchema(finalSchema);
+      } catch (err) {
+        console.error('Failed to load schema:', err);
+        setFlagsStatus('Error loading flags');
+      } finally {
+        setFlagsLoading(false);
+      }
+    };
+
+    const handleFlagToggle = (flagId: string, enabled: boolean) => {
+      if (!schema) return;
+
+      const updatedFlags = schema.globalSettings.featureFlags.map(flag =>
+        flag.id === flagId ? { ...flag, enabled } : flag
+      );
+
+      setSchema({
+        ...schema,
+        globalSettings: {
+          ...schema.globalSettings,
+          featureFlags: updatedFlags
+        }
+      });
+    };
+
+    const handleTopicHubsUpdate = (hubs: TopicHub[]) => {
+      if (!schema) return;
+      setSchema({
+        ...schema,
+        globalSettings: {
+          ...schema.globalSettings,
+          topicHubs: hubs
+        }
+      });
+    };
+
+    const saveFlagsToProduction = async () => {
+      if (!schema) return;
+      setFlagsSaving(true);
+      setFlagsStatus('Saving...');
+
+      try {
+        const res = await fetch('/api/admin/narrative', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(schema)
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setFlagsStatus('Saved to Production');
+          setTimeout(() => setFlagsStatus(''), 3000);
+        } else {
+          throw new Error(data.error);
+        }
+      } catch (err: any) {
+        setFlagsStatus('Error: ' + err.message);
+      } finally {
+        setFlagsSaving(false);
+      }
+    };
 
     return (
       <div className="min-h-screen bg-gray-50 p-12 font-sans text-gray-900">
@@ -105,6 +219,18 @@ const App: React.FC = () => {
               Narrative Engine
             </button>
             <button
+              onClick={() => setTab('flags')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'flags' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Flags
+            </button>
+            <button
+              onClick={() => setTab('hubs')}
+              className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'hubs' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              Topic Hubs
+            </button>
+            <button
               onClick={() => setTab('audio')}
               className={`px-6 py-2 rounded-md text-sm font-bold transition-all ${tab === 'audio' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}
             >
@@ -120,6 +246,80 @@ const App: React.FC = () => {
         </header>
 
         {tab === 'narrative' && <AdminNarrativeConsole />}
+        {tab === 'flags' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Feature Flags</h2>
+                <p className="text-xs text-gray-500">Control Terminal behavior without code deployment</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                {flagsStatus && (
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    flagsStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                  }`}>
+                    {flagsStatus}
+                  </span>
+                )}
+                <button
+                  onClick={saveFlagsToProduction}
+                  disabled={flagsSaving || flagsLoading}
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  {flagsSaving ? 'Saving...' : 'Save to Production'}
+                </button>
+              </div>
+            </div>
+            {flagsLoading ? (
+              <div className="p-8 text-center text-gray-500">Loading feature flags...</div>
+            ) : schema ? (
+              <FeatureFlagPanel
+                flags={schema.globalSettings.featureFlags || DEFAULT_FEATURE_FLAGS}
+                onToggle={handleFlagToggle}
+              />
+            ) : (
+              <div className="p-8 text-center text-gray-500">Failed to load flags</div>
+            )}
+          </div>
+        )}
+        {tab === 'hubs' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Topic Hubs</h2>
+                <p className="text-xs text-gray-500">Route specific queries to curated knowledge sources</p>
+              </div>
+              <div className="flex items-center space-x-3">
+                {flagsStatus && (
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    flagsStatus.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                  }`}>
+                    {flagsStatus}
+                  </span>
+                )}
+                <button
+                  onClick={saveFlagsToProduction}
+                  disabled={flagsSaving || flagsLoading}
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  {flagsSaving ? 'Saving...' : 'Save to Production'}
+                </button>
+              </div>
+            </div>
+            {flagsLoading ? (
+              <div className="p-8 text-center text-gray-500">Loading topic hubs...</div>
+            ) : schema ? (
+              <div className="h-[600px]">
+                <TopicHubPanel
+                  hubs={schema.globalSettings.topicHubs || DEFAULT_TOPIC_HUBS}
+                  onUpdate={handleTopicHubsUpdate}
+                />
+              </div>
+            ) : (
+              <div className="p-8 text-center text-gray-500">Failed to load hubs</div>
+            )}
+          </div>
+        )}
         {tab === 'audio' && <AdminAudioConsole />}
         {tab === 'rag' && <AdminRAGConsole />}
       </div>
