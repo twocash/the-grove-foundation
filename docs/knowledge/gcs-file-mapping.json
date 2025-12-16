@@ -1,0 +1,154 @@
+{
+  "_description": "Mapping from clean manifest names to actual GCS filenames (with hashes)",
+  "_generated": "2025-12-16",
+  "_notes": [
+    "Use this mapping when renaming GCS files to clean names",
+    "The 212KB full white paper is excluded from RAG context",
+    "Some manifest files don't have GCS equivalents yet (need creation)"
+  ],
+
+  "excluded": {
+    "reason": "Too large for RAG context (212KB)",
+    "gcsName": "The Grove A World-Changing Play for Distributed In 2c6780a78eef818eb98dd32985aa2182.md",
+    "bytes": 212826
+  },
+
+  "defaultContext": {
+    "_note": "These files will be AI-generated, not renamed from existing",
+    "grove-overview.md": { "source": "AI-generated from existing content", "targetBytes": 4000 },
+    "key-concepts.md": { "source": "AI-generated from existing content", "targetBytes": 5000 },
+    "visionary-narrative.md": { "source": "AI-generated from existing content", "targetBytes": 5000 }
+  },
+
+  "hubFiles": {
+    "ratchet-effect": {
+      "Grove_Ratchet_Deep_Dive.md": {
+        "gcsName": "The Grove Core Concepts The Ratchet Deep Dive 2c7780a78eef80e2acfbd49b84359d33.md",
+        "bytes": 20391
+      },
+      "Ratchet_Quantitative.md": {
+        "gcsName": "The Ratchet Quantitative Analysis 2c6780a78eef80ce84b4d5a3c0a18b7d.md",
+        "bytes": 6868
+      },
+      "Chinese_Open_Source_Ratchet.md": {
+        "gcsName": "Chinese Open-Source AI Ratchet Acceleration Eviden 2c9780a78eef80b499e1c7bd0eb962f7.md",
+        "bytes": 11253
+      },
+      "Edge_Intelligence_Structural.md": {
+        "gcsName": "Why Edge Intelligence Is the Structural Answer to 2c9780a78eef8061a56efa68c190cbe4.md",
+        "bytes": 22928
+      },
+      "Ratchet_Thesis.md": {
+        "gcsName": "The Ratchet Thesis 2c6780a78eef801384aef0e135d8109c.md",
+        "bytes": 3673
+      }
+    },
+
+    "infrastructure-bet": {
+      "Grove_Economics_Deep_Dive.md": {
+        "gcsName": "The Grove Economics Deep Dive 2c7780a78eef8109bd04c172e7ce8c88.md",
+        "bytes": 20659
+      },
+      "Distributed_Edge_Infrastructure.md": {
+        "gcsName": "Distributed Edge Infrastructure Implications for G 2c8780a78eef80dfa4b6fbefd38f0eec.md",
+        "bytes": 17276
+      },
+      "Grove_Infrastructure_Provider.md": {
+        "gcsName": "The Grove as Distributed Infrastructure Provider 2c8780a78eef800ab8edca41bcb5f5dd.md",
+        "bytes": 13947
+      }
+    },
+
+    "cognitive-split": {
+      "Grove_Everyday_AI.md": {
+        "gcsName": "The Grove as Everyday AI Infrastructure 2c7780a78eef806c8705dcd5605f6177.md",
+        "bytes": 5912
+      },
+      "_note": "Hierarchical_Reasoning_Grove_Brief.md needs to be extracted/created"
+    },
+
+    "observer-dynamic": {
+      "Grove_Simulation_Deep_Dive.md": {
+        "gcsName": "The Grove Simulation Deep Dive 2c7780a78eef801bae5cf150f185fc0b.md",
+        "bytes": 25512
+      }
+    },
+
+    "meta-philosophy": {
+      "you-are-already-here.md": {
+        "source": "docs/knowledge/you-are-already-here.md",
+        "bytes": 11238,
+        "note": "Already exists locally, needs upload to GCS"
+      },
+      "ARCHITECTURE_EVENT_DRIVEN.md": {
+        "source": "docs/ARCHITECTURE_EVENT_DRIVEN.md",
+        "bytes": 7576,
+        "note": "Already exists locally, needs upload to GCS"
+      }
+    },
+
+    "diary-system": {
+      "Grove_Diary_Deep_Dive.md": {
+        "gcsName": "The Grove Diary System Deep Dive 2c7780a78eef80d38ac8e257a3e9d00d.md",
+        "bytes": 13542
+      }
+    },
+
+    "technical-arch": {
+      "Grove_Technical_Architecture.md": {
+        "gcsName": "Grove Technical Architecture Reference 2c8780a78eef809990c9d57ff81e5b1a.md",
+        "bytes": 34042
+      },
+      "Grove_Distributed_Systems.md": {
+        "gcsName": "The Grove Distributed Systems Advances for Decentr 2c7780a78eef80008eb7e8630bed1f71.md",
+        "bytes": 14570
+      }
+    },
+
+    "governance": {
+      "_note": "Grove_Knowledge_Commons_Deep_Dive.md needs to be extracted/created from existing content"
+    },
+
+    "university-path": {
+      "Purdue_Strategic_Proposal.md": {
+        "gcsName": "Purdue Grove Strategic Proposal 2c6780a78eef804fa185e20d10ef1fb1.md",
+        "bytes": 9832
+      },
+      "Grove_Engagement_Research.md": {
+        "gcsName": "The Grove Engagement Research Brief 2c7780a78eef806c8fa2e6ab6f4dbe31.md",
+        "bytes": 33432
+      }
+    }
+  },
+
+  "unmapped": {
+    "_note": "GCS files not yet assigned to hubs",
+    "files": [
+      {
+        "gcsName": "The Grove Condensed A World Changing Play for Dist 2c7780a78eef803fa6efc0a79568e670.md",
+        "bytes": 59533,
+        "recommendation": "Use as source for Tier 1 AI generation"
+      },
+      {
+        "gcsName": "TL;DR Version The Grove Infrastructure for Distrib 2c6780a78eef80ec974cdddff1b7dc40.md",
+        "bytes": 12589,
+        "recommendation": "Use as source for Tier 1 AI generation"
+      },
+      {
+        "gcsName": "Grove White Paper Key Concepts, Novel Methods, and 2c6780a78eef80e1a38debb983d726b2.md",
+        "bytes": 9300,
+        "recommendation": "Use as source for key-concepts.md"
+      },
+      {
+        "gcsName": "The Grove Terminal A Deep Dive 2c7780a78eef8063b753fdc1d65fd720.md",
+        "bytes": 15843,
+        "recommendation": "Could go in meta-philosophy or technical-arch"
+      },
+      {
+        "gcsName": "The Grove A World Changing Play for Distributed In 2c7780a78eef80b6b4f7ceb3f3c94c73.md",
+        "bytes": 6900,
+        "recommendation": "Possible duplicate, investigate"
+      }
+    ]
+  }
+}

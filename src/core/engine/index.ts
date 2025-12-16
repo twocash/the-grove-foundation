@@ -18,3 +18,16 @@ export {
   buildHubEnhancedPrompt,
   testQueryMatch
 } from './topicRouter';
+
+// RAG Loader (Tiered Context)
+export {
+  buildTieredContext,
+  loadManifest,
+  invalidateManifestCache,
+  invalidateFileCache,
+  clearAllCaches,
+  fetchRagContextLegacy,
+  BUCKET_NAME,
+  KNOWLEDGE_PREFIX,
+  MANIFEST_PATH
+} from './ragLoader';

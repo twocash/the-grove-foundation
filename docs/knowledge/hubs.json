@@ -1,0 +1,133 @@
+{
+  "version": "1.0",
+  "description": "Grove Terminal Topic Hub RAG Manifest - Declarative configuration for tiered context loading",
+  "generatedAt": "2025-12-16T00:00:00Z",
+
+  "defaultContext": {
+    "path": "_default/",
+    "maxBytes": 15000,
+    "files": [
+      "grove-overview.md",
+      "key-concepts.md",
+      "visionary-narrative.md"
+    ]
+  },
+
+  "hubs": {
+    "ratchet-effect": {
+      "title": "The Ratchet Effect",
+      "path": "hubs/ratchet-effect/",
+      "maxBytes": 40000,
+      "primaryFile": "ratchet-deep-dive.md",
+      "supportingFiles": [
+        "ratchet-quantitative.md",
+        "edge-intelligence.md"
+      ],
+      "tags": ["ratchet", "capability propagation", "frontier to edge", "21 months", "seven month", "7 month", "doubling"]
+    },
+
+    "infrastructure-bet": {
+      "title": "The $380B Infrastructure Bet",
+      "path": "hubs/infrastructure-bet/",
+      "maxBytes": 40000,
+      "primaryFile": "economics-deep-dive.md",
+      "supportingFiles": [
+        "distributed-edge.md",
+        "infrastructure-provider.md"
+      ],
+      "tags": ["$380 billion", "hyperscaler", "datacenter", "infrastructure bet", "data center", "big tech spending", "capex"]
+    },
+
+    "cognitive-split": {
+      "title": "The Cognitive Split",
+      "path": "hubs/cognitive-split/",
+      "maxBytes": 30000,
+      "primaryFile": "everyday-ai.md",
+      "supportingFiles": [],
+      "tags": ["cognitive split", "hierarchical reasoning", "two-phase", "procedural strategic", "constant hum", "breakthrough", "local", "cloud"]
+    },
+
+    "observer-dynamic": {
+      "title": "The Observer Dynamic",
+      "path": "hubs/observer-dynamic/",
+      "maxBytes": 35000,
+      "primaryFile": "simulation-deep-dive.md",
+      "supportingFiles": [],
+      "tags": ["observer", "gardener", "simulation", "asymmetric knowledge", "dramatic irony", "theology", "agent experience", "watching", "village"]
+    },
+
+    "meta-philosophy": {
+      "title": "You Are Already Here",
+      "path": "hubs/meta-philosophy/",
+      "maxBytes": 25000,
+      "primaryFile": "you-are-already-here.md",
+      "supportingFiles": [
+        "architecture-event-driven.md"
+      ],
+      "tags": ["meta", "architecture", "inside", "already here", "recursive", "experience", "understanding", "terminal is grove", "proof of concept", "demonstration"],
+      "triggerConditions": {
+        "description": "Weight higher when engagement patterns indicate philosophical depth",
+        "indicators": [
+          "Extended session duration",
+          "Questions about Observer dynamic or architecture",
+          "Progressive revelation completion",
+          "Philosophical or recursive queries"
+        ]
+      }
+    },
+
+    "diary-system": {
+      "title": "The Diary System",
+      "path": "hubs/diary-system/",
+      "maxBytes": 25000,
+      "primaryFile": "diary-deep-dive.md",
+      "supportingFiles": [],
+      "tags": ["diary", "diaries", "memory", "narrative", "voice", "character", "engagement", "tamagotchi", "newswire"]
+    },
+
+    "technical-arch": {
+      "title": "Technical Architecture",
+      "path": "hubs/technical-arch/",
+      "maxBytes": 50000,
+      "primaryFile": "technical-architecture.md",
+      "supportingFiles": [
+        "distributed-systems.md"
+      ],
+      "tags": ["technical", "architecture", "implementation", "distributed", "NATS", "CRDT", "hybrid", "local model", "cloud"]
+    },
+
+    "governance": {
+      "title": "Governance & Knowledge Commons",
+      "path": "hubs/governance/",
+      "maxBytes": 35000,
+      "primaryFile": "engagement-research.md",
+      "supportingFiles": [],
+      "tags": ["governance", "foundation", "knowledge commons", "open source", "contributor", "efficiency tax", "sustainability"]
+    }
+  },
+
+  "_meta": {
+    "totalHubs": 8,
+    "notes": [
+      "This manifest is loaded at runtime and cached with 5-min TTL",
+      "Cache invalidates on admin save (event-driven, not manual)",
+      "Tags must sync with TopicHub schema in src/core/config/defaults.ts",
+      "The meta-philosophy hub demonstrates the architecture - it IS what it describes"
+    ],
+    "gcsFileMapping": {
+      "_note": "Mapping from clean manifest names to original GCS hashed filenames",
+      "ratchet-deep-dive.md": "The Grove Core Concepts The Ratchet Deep Dive 2c7780a78eef80e2acfbd49b84359d33.md",
+      "ratchet-quantitative.md": "The Ratchet Quantitative Analysis 2c6780a78eef80ce84b4d5a3c0a18b7d.md",
+      "edge-intelligence.md": "Why Edge Intelligence Is the Structural Answer to 2c9780a78eef8061a56efa68c190cbe4.md",
+      "economics-deep-dive.md": "The Grove Economics Deep Dive 2c7780a78eef8109bd04c172e7ce8c88.md",
+      "distributed-edge.md": "Distributed Edge Infrastructure Implications for G 2c8780a78eef80dfa4b6fbefd38f0eec.md",
+      "infrastructure-provider.md": "The Grove as Distributed Infrastructure Provider 2c8780a78eef800ab8edca41bcb5f5dd.md",
+      "everyday-ai.md": "The Grove as Everyday AI Infrastructure 2c7780a78eef806c8705dcd5605f6177.md",
+      "simulation-deep-dive.md": "The Grove Simulation Deep Dive 2c7780a78eef801bae5cf150f185fc0b.md",
+      "diary-deep-dive.md": "The Grove Diary System Deep Dive 2c7780a78eef80d38ac8e257a3e9d00d.md",
+      "technical-architecture.md": "Grove Technical Architecture Reference 2c8780a78eef809990c9d57ff81e5b1a.md",
+      "distributed-systems.md": "The Grove Distributed Systems Advances for Decentr 2c7780a78eef80008eb7e8630bed1f71.md",
+      "engagement-research.md": "The Grove Engagement Research Brief 2c7780a78eef806c8fa2e6ab6f4dbe31.md"
+    }
+  }
+}

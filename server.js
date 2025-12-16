@@ -488,6 +488,9 @@ app.post('/api/admin/narrative', async (req, res) => {
             }
         });
 
+        // Invalidate RAG manifest cache (topicHubs may have changed)
+        invalidateManifestCache();
+
         res.json({ success: true, message: "Narrative graph updated" });
     } catch (error) {
         console.error("Error saving narrative graph:", error);
@@ -597,6 +600,25 @@ At the very end of your response, strictly append these two tags:
 [[TOPIC: <A 2-3 word label for the current subject>]]
 `;
 
+// Helper: Fetch narratives.json from GCS (for topicHubs, personas, etc.)
+async function fetchNarratives() {
+    try {
+        const file = storage.bucket(BUCKET_NAME).file('narratives.json');
+        const [exists] = await file.exists();
+
+        if (!exists) {
+            console.log('No narratives.json found');
+            return null;
+        }
+
+        const [content] = await file.download();
+        return JSON.parse(content.toString());
+    } catch (error) {
+        console.error('Error fetching narratives:', error.message);
+        return null;
+    }
+}
+
 // Helper: Fetch active system prompt from GCS narratives.json
 async function fetchActiveSystemPrompt() {
     try {
@@ -705,12 +727,263 @@ But still stay grounded in the source material.`);
     return parts.join('');
 }
 
-// Helper: Fetch RAG context from GCS
-// Note: Large context sizes can exhaust Gemini TPM (tokens per minute) quota
-// Current limit: 50KB to stay under ~12,500 tokens for system prompt
-const MAX_RAG_CONTEXT_BYTES = 50000;
+// ============================================================================
+// TIERED RAG CONTEXT LOADER
+// Tier 1: Default context (~15KB) - always loaded
+// Tier 2: Hub-specific context (~20-40KB) - loaded when query matches hub tags
+// ============================================================================
 
-async function fetchRagContext() {
+const MANIFEST_PATH = 'knowledge/hubs.json';
+const MANIFEST_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const FILE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_TIER1_BUDGET = 15000;
+const DEFAULT_TIER2_BUDGET = 40000;
+
+// Caches
+let hubsManifestCache = null; // { manifest, loadedAt, expiresAt }
+const fileContentCache = new Map(); // path -> { content, bytes, loadedAt }
+
+/**
+ * Invalidate the manifest cache (call on admin save events)
+ */
+function invalidateManifestCache() {
+    console.log('[RAG] Manifest cache invalidated');
+    hubsManifestCache = null;
+}
+
+/**
+ * Load the hubs manifest from GCS (cached)
+ */
+async function loadHubsManifest() {
+    const now = Date.now();
+
+    if (hubsManifestCache && now < hubsManifestCache.expiresAt) {
+        return hubsManifestCache.manifest;
+    }
+
+    try {
+        const file = storage.bucket(BUCKET_NAME).file(MANIFEST_PATH);
+        const [exists] = await file.exists();
+
+        if (!exists) {
+            console.warn('[RAG] Manifest not found at', MANIFEST_PATH);
+            return null;
+        }
+
+        const [content] = await file.download();
+        const manifest = JSON.parse(content.toString());
+
+        hubsManifestCache = {
+            manifest,
+            loadedAt: now,
+            expiresAt: now + MANIFEST_CACHE_TTL_MS
+        };
+
+        console.log(`[RAG] Manifest loaded: ${Object.keys(manifest.hubs || {}).length} hubs`);
+        return manifest;
+    } catch (error) {
+        console.error('[RAG] Failed to load manifest:', error.message);
+        return null;
+    }
+}
+
+/**
+ * Load a file from GCS with caching
+ */
+async function loadKnowledgeFile(filePath) {
+    const now = Date.now();
+    const fullPath = filePath.startsWith('knowledge/') ? filePath : `knowledge/${filePath}`;
+
+    const cached = fileContentCache.get(fullPath);
+    if (cached && now - cached.loadedAt < FILE_CACHE_TTL_MS) {
+        return { content: cached.content, bytes: cached.bytes };
+    }
+
+    try {
+        const file = storage.bucket(BUCKET_NAME).file(fullPath);
+        const [exists] = await file.exists();
+
+        if (!exists) {
+            console.warn(`[RAG] File not found: ${fullPath}`);
+            return null;
+        }
+
+        const [content] = await file.download();
+        const contentStr = content.toString();
+        const bytes = Buffer.byteLength(contentStr, 'utf8');
+
+        fileContentCache.set(fullPath, { content: contentStr, bytes, loadedAt: now });
+        return { content: contentStr, bytes };
+    } catch (error) {
+        console.error(`[RAG] Failed to load ${fullPath}:`, error.message);
+        return null;
+    }
+}
+
+/**
+ * Resolve clean file name to GCS path using manifest mapping
+ */
+function resolveFilePath(cleanName, hubPath, manifest) {
+    const mapping = manifest._meta?.gcsFileMapping;
+    if (mapping && mapping[cleanName]) {
+        return mapping[cleanName]; // Mapped to hashed name in root
+    }
+    return `${hubPath}${cleanName}`; // Clean name in hub folder
+}
+
+/**
+ * Route query to a hub based on tag matching
+ */
+function routeQueryToHub(query, topicHubs) {
+    if (!topicHubs || topicHubs.length === 0) return null;
+
+    const queryLower = query.toLowerCase();
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const hub of topicHubs) {
+        if (!hub.enabled) continue;
+
+        let score = 0;
+        const matchedTags = [];
+
+        for (const tag of hub.tags || []) {
+            if (queryLower.includes(tag.toLowerCase())) {
+                matchedTags.push(tag);
+                const wordCount = tag.split(' ').length;
+                score += wordCount * 2;
+            }
+        }
+
+        if (matchedTags.length > 0) {
+            score = score * (hub.priority / 5);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = { hub, matchedTags };
+            }
+        }
+    }
+
+    return bestMatch;
+}
+
+/**
+ * Build tiered RAG context
+ * @param {string} message - User's query for hub routing
+ * @param {Array} topicHubs - TopicHub definitions from globalSettings
+ */
+async function fetchRagContext(message = '', topicHubs = []) {
+    const manifest = await loadHubsManifest();
+
+    // Fallback to legacy behavior if no manifest
+    if (!manifest) {
+        return await fetchRagContextLegacy();
+    }
+
+    const result = {
+        context: '',
+        tier1Bytes: 0,
+        tier2Bytes: 0,
+        matchedHub: null,
+        filesLoaded: []
+    };
+
+    const contextParts = [];
+
+    // -------------------------------------------------------------------------
+    // TIER 1: Default Context (always loaded)
+    // -------------------------------------------------------------------------
+    const tier1Budget = manifest.defaultContext?.maxBytes || DEFAULT_TIER1_BUDGET;
+    let tier1Bytes = 0;
+
+    console.log(`[RAG] Loading Tier 1 (budget: ${tier1Budget} bytes)`);
+
+    for (const filename of manifest.defaultContext?.files || []) {
+        const filePath = `${manifest.defaultContext.path}${filename}`;
+        const fileData = await loadKnowledgeFile(filePath);
+
+        if (!fileData) continue;
+
+        if (tier1Bytes + fileData.bytes > tier1Budget) {
+            console.log(`[RAG] Tier 1 budget exceeded, skipping ${filename}`);
+            break;
+        }
+
+        contextParts.push(`\n\n--- ${filename} ---\n${fileData.content}`);
+        tier1Bytes += fileData.bytes;
+        result.filesLoaded.push(filePath);
+    }
+
+    result.tier1Bytes = tier1Bytes;
+    console.log(`[RAG] Tier 1 loaded: ${tier1Bytes} bytes from ${result.filesLoaded.length} files`);
+
+    // -------------------------------------------------------------------------
+    // TIER 2: Hub Context (loaded if query matches)
+    // -------------------------------------------------------------------------
+    if (message && topicHubs.length > 0) {
+        const match = routeQueryToHub(message, topicHubs);
+
+        if (match) {
+            const hubId = match.hub.id;
+            const hubConfig = manifest.hubs?.[hubId];
+
+            if (hubConfig) {
+                const tier2Budget = hubConfig.maxBytes || DEFAULT_TIER2_BUDGET;
+                let tier2Bytes = 0;
+
+                console.log(`[RAG] Loading Tier 2: ${hubId} (budget: ${tier2Budget} bytes)`);
+                result.matchedHub = hubId;
+
+                // Load primary file
+                const primaryPath = resolveFilePath(hubConfig.primaryFile, hubConfig.path, manifest);
+                const primaryData = await loadKnowledgeFile(primaryPath);
+
+                if (primaryData && tier2Bytes + primaryData.bytes <= tier2Budget) {
+                    contextParts.push(`\n\n--- [${hubConfig.title}] ${hubConfig.primaryFile} ---\n${primaryData.content}`);
+                    tier2Bytes += primaryData.bytes;
+                    result.filesLoaded.push(primaryPath);
+                }
+
+                // Load supporting files
+                for (const supportFile of hubConfig.supportingFiles || []) {
+                    const supportPath = resolveFilePath(supportFile, hubConfig.path, manifest);
+                    const supportData = await loadKnowledgeFile(supportPath);
+
+                    if (!supportData) continue;
+
+                    if (tier2Bytes + supportData.bytes > tier2Budget) {
+                        console.log(`[RAG] Tier 2 budget exceeded, skipping ${supportFile}`);
+                        break;
+                    }
+
+                    contextParts.push(`\n\n--- [${hubConfig.title}] ${supportFile} ---\n${supportData.content}`);
+                    tier2Bytes += supportData.bytes;
+                    result.filesLoaded.push(supportPath);
+                }
+
+                result.tier2Bytes = tier2Bytes;
+                console.log(`[RAG] Tier 2 loaded: ${tier2Bytes} bytes`);
+            } else {
+                console.warn(`[RAG] Hub ${hubId} matched but not in manifest`);
+            }
+        } else {
+            console.log(`[RAG] No hub matched for query`);
+        }
+    }
+
+    result.context = contextParts.join('');
+    const totalBytes = result.tier1Bytes + result.tier2Bytes;
+    console.log(`[RAG] Total context: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens)`);
+
+    return result.context || STATIC_KNOWLEDGE_BASE;
+}
+
+/**
+ * Legacy RAG loader (fallback if no manifest)
+ */
+async function fetchRagContextLegacy() {
+    const MAX_BYTES = 50000;
+
     try {
         const [files] = await storage.bucket(BUCKET_NAME).getFiles({ prefix: 'knowledge/' });
         const textFiles = files.filter(f => f.name.endsWith('.md') || f.name.endsWith('.txt'));
@@ -722,9 +995,8 @@ async function fetchRagContext() {
             const [content] = await file.download();
             const contentStr = content.toString();
 
-            // Stop if we'd exceed the limit
-            if (totalBytes + contentStr.length > MAX_RAG_CONTEXT_BYTES) {
-                console.log(`RAG context limit reached at ${totalBytes} bytes, skipping remaining files`);
+            if (totalBytes + contentStr.length > MAX_BYTES) {
+                console.log(`[RAG-Legacy] Context limit reached at ${totalBytes} bytes`);
                 break;
             }
 
@@ -733,10 +1005,10 @@ async function fetchRagContext() {
             totalBytes += contentStr.length;
         }
 
-        console.log(`RAG context loaded: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens)`);
+        console.log(`[RAG-Legacy] Context loaded: ${totalBytes} bytes`);
         return combinedContext || STATIC_KNOWLEDGE_BASE;
     } catch (error) {
-        console.error("Failed to fetch RAG context:", error.message);
+        console.error("[RAG-Legacy] Failed to fetch:", error.message);
         return STATIC_KNOWLEDGE_BASE;
     }
 }
@@ -771,9 +1043,13 @@ app.post('/api/chat', async (req, res) => {
         let session = chatSessions.get(chatSessionId);
 
         if (!session) {
-            // Fetch RAG context and active system prompt for new sessions
+            // Fetch narratives first to get topicHubs for RAG routing
+            const narratives = await fetchNarratives();
+            const topicHubs = narratives?.globalSettings?.topicHubs || DEFAULT_TOPIC_HUBS;
+
+            // Fetch RAG context (tiered, using message for hub routing) and system prompt
             const [ragContext, baseSystemPrompt] = await Promise.all([
-                fetchRagContext(),
+                fetchRagContext(message, topicHubs),
                 fetchActiveSystemPrompt()
             ]);
             const systemPrompt = buildSystemPrompt({
