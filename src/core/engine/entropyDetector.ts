@@ -204,26 +204,41 @@ export function shouldInject(
   entropy: EntropyResult,
   state: EntropyState
 ): boolean {
+  // Verbose logging for debugging
+  console.log('[Entropy shouldInject] Checking conditions:', {
+    score: entropy.score,
+    classification: entropy.classification,
+    dominantCluster: entropy.dominantCluster,
+    cooldownRemaining: state.cooldownRemaining,
+    injectionCount: state.injectionCount,
+    maxInjections: ENTROPY_LIMITS.MAX_INJECTIONS_PER_SESSION
+  });
+
   // Check cooldown
   if (state.cooldownRemaining > 0) {
+    console.log('[Entropy shouldInject] BLOCKED: Cooldown active', state.cooldownRemaining);
     return false;
   }
 
   // Check max injections
   if (state.injectionCount >= ENTROPY_LIMITS.MAX_INJECTIONS_PER_SESSION) {
+    console.log('[Entropy shouldInject] BLOCKED: Max injections reached', state.injectionCount);
     return false;
   }
 
   // Check classification
   if (entropy.classification !== 'high') {
+    console.log('[Entropy shouldInject] BLOCKED: Classification not high', entropy.classification);
     return false;
   }
 
   // Need a dominant cluster to route to a journey
   if (!entropy.dominantCluster) {
+    console.log('[Entropy shouldInject] BLOCKED: No dominant cluster');
     return false;
   }
 
+  console.log('[Entropy shouldInject] APPROVED: All conditions met');
   return true;
 }
 
