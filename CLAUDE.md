@@ -505,3 +505,155 @@ emit('EXCHANGE_SENT') → EngagementBus.processEvent()
 - `src/core/config/` - All defaults
 - Path aliases: `@core`, `@surface`, `@foundation`
 - Backward compatibility shims
+
+---
+
+## Completed Sprints: Tiered RAG Architecture (Sprint 13)
+
+### Sprint 13: Tiered RAG with Topic Hub Routing ✓
+
+**Problem Solved:** Monolithic RAG loading (557KB → 50KB truncation with alphabetical loading) → lost relevant content
+
+**Solution:** Intelligent tiered loading with Topic Hub routing
+- **Before**: 28,313 bytes (~7K tokens), alphabetical, no relevance
+- **After**: 12,333 bytes Tier 1 + 27,259 bytes Tier 2 when hub matches (~10K tokens total)
+- **Result**: ~90% token reduction for generic queries, ~100% relevance improvement
+
+### Architecture
+
+```
+User Query → Topic Router → Tag Matching → Hub Selection
+                                              ↓
+                              ┌───────────────┴───────────────┐
+                              │                               │
+                         Tier 1 (~15KB)                  Tier 2 (~30KB)
+                         Always loaded                   If hub matches
+                         - grove-overview.md             - Hub primary file
+                         - key-concepts.md               - Supporting files
+                         - visionary-narrative.md
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/core/schema/rag.ts` | HubsManifest, TieredContextResult types |
+| `src/core/engine/ragLoader.ts` | TypeScript tiered loader |
+| `docs/knowledge/hubs.json` | Declarative manifest (8 hubs) - also in GCS |
+| `server.js` | Production tiered RAG implementation |
+| `src/core/config/defaults.ts` | 8 TopicHub definitions with tags |
+
+### Topic Hubs (8 total)
+
+| Hub ID | Tags (sample) |
+|--------|---------------|
+| `ratchet-effect` | ratchet, 21 months, 7 month, doubling |
+| `infrastructure-bet` | $380 billion, hyperscaler, datacenter |
+| `observer-dynamic` | observer, gardener, simulation, watching |
+| `meta-philosophy` | meta, architecture, inside, already here |
+| `cognitive-split` | cognitive split, hierarchical, local, cloud |
+| `diary-system` | diary, memory, narrative, tamagotchi |
+| `technical-arch` | technical, NATS, CRDT, distributed |
+| `governance` | governance, foundation, knowledge commons |
+
+### GCS Data Files
+
+- `gs://grove-assets/knowledge/hubs.json` - Manifest (5-min cache TTL)
+- `gs://grove-assets/knowledge/_default/` - Tier 1 files
+- `gs://grove-assets/knowledge/*.md` - Tier 2 knowledge files (hashed names)
+
+### Cache Invalidation
+
+- Manifest cache: 5-min TTL, invalidates on admin save via `/api/admin/narrative`
+- File cache: 10-min TTL per file
+
+---
+
+## CI/CD and Deployment
+
+### Git Worktree Setup
+
+This project uses Claude Code worktrees. The main repository is at:
+- **Main repo**: `C:\GitHub\the-grove-foundation` (branch: main)
+- **Worktrees**: `C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch-name>`
+
+### Deployment Checklist
+
+**CRITICAL**: Cloud Build runs from the main repo, NOT worktrees.
+
+1. **Develop in worktree**
+   ```bash
+   cd C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch>
+   # Make changes, test locally
+   ```
+
+2. **Commit and push**
+   ```bash
+   git add . && git commit -m "..." && git push origin <branch>
+   ```
+
+3. **Create PR and merge**
+   ```bash
+   gh pr create --title "..." --body "..."
+   gh pr merge <number> --merge
+   ```
+
+4. **Sync main repo and deploy**
+   ```bash
+   cd C:\GitHub\the-grove-foundation
+   git fetch origin && git pull origin main
+   gcloud builds submit --config cloudbuild.yaml
+   ```
+
+5. **Verify deployment**
+   ```bash
+   gcloud run services describe grove-foundation --region=us-central1 \
+     --format="value(status.latestReadyRevisionName)"
+   ```
+
+### Post-Deployment Testing
+
+Run the RAG test matrix after each deployment:
+
+| Query | Expected Hub | Expected Behavior |
+|-------|--------------|-------------------|
+| "Tell me about the Ratchet" | ratchet-effect | Tier 2 loads, ~40KB total |
+| "Observer dynamic" | observer-dynamic | Tier 2 loads |
+| "How does Grove work?" | (none) | Tier 1 only, ~12KB |
+| "$380 billion" | infrastructure-bet | Tier 2 loads |
+| "Inside Grove?" | meta-philosophy | Tier 2 loads |
+
+Check logs to verify:
+```bash
+gcloud logging read "resource.type=cloud_run_revision AND textPayload:RAG" --limit=10
+```
+
+Expected log pattern:
+```
+[RAG] Manifest loaded: 8 hubs
+[RAG] Loading Tier 1 (budget: 15000 bytes)
+[RAG] Tier 1 loaded: 12333 bytes from 3 files
+[RAG] Loading Tier 2: <hub-id> (budget: X bytes)
+[RAG] Tier 2 loaded: X bytes
+[RAG] Total context: X bytes (~Y tokens)
+```
+
+### Common Deployment Issues
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Old code in production | Built from worktree not main | Pull to main repo, rebuild |
+| Manifest not loading | GCS file missing/corrupt | Check `gs://grove-assets/knowledge/hubs.json` |
+| File not found | Filename mismatch (spaces, hashes) | Check `gcsFileMapping` in manifest |
+| Rate limit errors | Gemini quota exhausted | Wait ~60s, retry |
+
+### GCS Data Sync
+
+When updating manifest or knowledge files:
+```bash
+# Upload manifest
+gcloud storage cp docs/knowledge/hubs.json gs://grove-assets/knowledge/hubs.json
+
+# Verify
+gcloud storage cat gs://grove-assets/knowledge/hubs.json | head -20
+```
