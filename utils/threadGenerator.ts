@@ -72,24 +72,62 @@ function orderByNarrativeArc(
   });
 }
 
+// Default arc emphasis for custom lenses (balanced)
+const DEFAULT_ARC_EMPHASIS: Persona['arcEmphasis'] = {
+  hook: 3,
+  stakes: 3,
+  mechanics: 3,
+  evidence: 3,
+  resolution: 3
+};
+
 /**
  * Generate an optimal thread sequence for a persona
+ * For custom lenses (starting with 'custom-'), uses cards marked as 'all'
  */
 export function generateThread(
   personaId: string,
-  schema: NarrativeSchemaV2
+  schema: NarrativeSchemaV2,
+  archetypeId?: string // Optional archetype mapping for custom lenses
 ): string[] {
-  const persona = schema.personas[personaId];
-  if (!persona) return [];
+  // Try to get the persona from schema
+  let persona = schema.personas[personaId];
+
+  // For custom lenses, try to use the archetype mapping
+  if (!persona && archetypeId) {
+    persona = schema.personas[archetypeId];
+  }
 
   const allCards = Object.values(schema.cards);
 
   // Filter cards visible to this persona
-  const personaCards = allCards.filter(card =>
-    card.personas.includes(personaId) || card.personas.includes('all')
-  );
+  // For custom lenses without a matching persona, use cards marked 'all'
+  const personaCards = persona
+    ? allCards.filter(card =>
+        card.personas.includes(personaId) || card.personas.includes('all')
+      )
+    : allCards.filter(card => card.personas.includes('all'));
 
   if (personaCards.length === 0) return [];
+
+  // If no persona found, create a default one for thread generation
+  if (!persona) {
+    persona = {
+      id: personaId,
+      publicLabel: 'Custom Journey',
+      description: '',
+      icon: 'User',
+      color: 'forest',
+      enabled: true,
+      toneGuidance: '',
+      narrativeStyle: 'balanced' as const,
+      arcEmphasis: DEFAULT_ARC_EMPHASIS,
+      openingPhase: 'hook',
+      defaultThreadLength: 5,
+      entryPoints: [],
+      suggestedThread: []
+    };
+  }
 
   // 1. Start with persona's configured entry points or find suitable ones
   let entryCard: Card | undefined;

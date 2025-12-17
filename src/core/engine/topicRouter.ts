@@ -2,6 +2,7 @@
 // Topic routing logic - no React dependencies
 
 import { TopicHub } from '../schema';
+import { CLUSTER_JOURNEY_MAP } from './entropyDetector';
 
 // ============================================================================
 // TYPES
@@ -137,6 +138,31 @@ export function testQueryMatch(query: string, hubs: TopicHub[]): {
     hub: best.hub,
     score: best.score,
     matchedTags: best.matchedTags
+  };
+}
+
+/**
+ * Route a query to a journey ID via topic hub matching
+ * Returns the journey ID if a matching cluster is found, null otherwise
+ */
+export function routeToJourney(
+  query: string,
+  hubs: TopicHub[]
+): { journeyId: string; hubId: string; hubTitle: string } | null {
+  const hub = routeToHub(query, hubs);
+  if (!hub) return null;
+
+  // Map hub ID to cluster key
+  // Hub IDs like 'ratchet-effect' map to cluster 'ratchet'
+  const clusterKey = hub.id.split('-')[0];
+  const journeyId = CLUSTER_JOURNEY_MAP[clusterKey];
+
+  if (!journeyId) return null;
+
+  return {
+    journeyId,
+    hubId: hub.id,
+    hubTitle: hub.title
   };
 }
 

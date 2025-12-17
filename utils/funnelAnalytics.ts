@@ -175,6 +175,51 @@ export const trackJourneyCompleted = (
   });
 };
 
+// Cognitive Bridge events
+export const trackCognitiveBridgeShown = (
+  journeyId: string,
+  topicCluster: string,
+  entropyScore: number
+): void => {
+  trackFunnelEvent('cognitive_bridge_shown', {
+    journeyId,
+    topicCluster,
+    entropyScore
+  });
+};
+
+export const trackCognitiveBridgeAccepted = (
+  journeyId: string,
+  topicCluster: string
+): void => {
+  trackFunnelEvent('cognitive_bridge_accepted', {
+    journeyId,
+    topicCluster
+  });
+};
+
+export const trackCognitiveBridgeDismissed = (
+  journeyId: string,
+  topicCluster: string
+): void => {
+  trackFunnelEvent('cognitive_bridge_dismissed', {
+    journeyId,
+    topicCluster
+  });
+};
+
+export const trackEntropyHighDetected = (
+  entropyScore: number,
+  dominantCluster: string | null,
+  exchangeCount: number
+): void => {
+  trackFunnelEvent('entropy_high_detected', {
+    entropyScore,
+    dominantCluster,
+    exchangeCount
+  });
+};
+
 // Get analytics report (for admin/debugging)
 export const getAnalyticsReport = (): {
   totalEvents: number;
@@ -223,6 +268,10 @@ export default {
   trackCtaClicked,
   trackConversionCompleted,
   trackJourneyCompleted,
+  trackCognitiveBridgeShown,
+  trackCognitiveBridgeAccepted,
+  trackCognitiveBridgeDismissed,
+  trackEntropyHighDetected,
   getAnalyticsReport,
   clearAnalytics
 };
