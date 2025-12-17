@@ -194,13 +194,20 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   // === Persona/Lens Methods ===
 
   const selectLens = useCallback((personaId: string | null) => {
-    setSession(prev => ({
-      ...prev,
-      activeLens: personaId,
-      exchangeCount: 0, // Reset exchange count on lens change
-      currentThread: [],
-      currentPosition: 0
-    }));
+    setSession(prev => {
+      // FIX: Prevent thread reset if selecting the same lens
+      if (prev.activeLens === personaId) {
+        return prev;
+      }
+      // Only wipe state if it's actually a new lens
+      return {
+        ...prev,
+        activeLens: personaId,
+        exchangeCount: 0, // Reset exchange count on lens change
+        currentThread: [],
+        currentPosition: 0
+      };
+    });
   }, []);
 
   const getPersona = useCallback((personaId: string): Persona | undefined => {
