@@ -965,7 +965,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       // User can type freely below
                     }}
                   />
-                ) : dynamicSuggestion && terminalState.messages.some(m => m.role === 'user') ? (
+                ) : dynamicSuggestion && terminalState.messages.filter(m => m.id !== 'init' && m.role === 'user').length > 0 ? (
                   /* Fallback: Suggested Inquiry - only shown after user has sent at least one message */
                   <div className="mb-4">
                     <button
