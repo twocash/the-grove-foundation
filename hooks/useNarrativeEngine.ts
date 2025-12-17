@@ -1,5 +1,5 @@
 // useNarrativeEngine - Core state management for Narrative Engine v2
-// Handles lens selection, card filtering, and session persistence
+// Handles lens selection, card filtering, session persistence, and entropy state
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
@@ -16,10 +16,22 @@ import {
 } from '../data/narratives-schema';
 import { DEFAULT_PERSONAS } from '../data/default-personas';
 import { generateThread as generateArcThread } from '../utils/threadGenerator';
+import {
+  EntropyState,
+  EntropyResult,
+  DEFAULT_ENTROPY_STATE,
+  calculateEntropy,
+  shouldInject,
+  updateEntropyState,
+  dismissEntropy,
+  getJourneyForCluster,
+  type EntropyMessage
+} from '../src/core/engine/entropyDetector';
 
 // LocalStorage keys
 const STORAGE_KEY_LENS = 'grove-terminal-lens';
 const STORAGE_KEY_SESSION = 'grove-terminal-session';
+const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
 
 interface UseNarrativeEngineReturn {
   // Data
@@ -55,6 +67,14 @@ interface UseNarrativeEngineReturn {
   shouldNudge: () => boolean;
   resetSession: () => void;
 
+  // Entropy / Cognitive Bridge methods
+  entropyState: EntropyState;
+  evaluateEntropy: (message: string, history: EntropyMessage[]) => EntropyResult;
+  checkShouldInject: (entropy: EntropyResult) => boolean;
+  recordEntropyInjection: (entropy: EntropyResult) => void;
+  recordEntropyDismiss: () => void;
+  getJourneyIdForCluster: (cluster: string) => string | null;
+
   // Settings
   globalSettings: GlobalSettings;
 }
@@ -62,6 +82,7 @@ interface UseNarrativeEngineReturn {
 export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   const [schema, setSchema] = useState<NarrativeSchemaV2 | null>(null);
   const [session, setSession] = useState<TerminalSession>(DEFAULT_TERMINAL_SESSION);
+  const [entropyState, setEntropyState] = useState<EntropyState>(DEFAULT_ENTROPY_STATE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -144,6 +165,31 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
       console.error('Failed to persist session:', err);
     }
   }, [session]);
+
+  // Load entropy state from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedEntropy = localStorage.getItem(STORAGE_KEY_ENTROPY);
+      if (storedEntropy) {
+        const parsed = JSON.parse(storedEntropy) as Partial<EntropyState>;
+        setEntropyState(prev => ({
+          ...prev,
+          ...parsed
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to restore entropy state:', err);
+    }
+  }, []);
+
+  // Persist entropy state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_ENTROPY, JSON.stringify(entropyState));
+    } catch (err) {
+      console.error('Failed to persist entropy state:', err);
+    }
+  }, [entropyState]);
 
   // === Persona/Lens Methods ===
 
@@ -332,8 +378,41 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
 
   const resetSession = useCallback(() => {
     setSession(DEFAULT_TERMINAL_SESSION);
+    setEntropyState(DEFAULT_ENTROPY_STATE);
     localStorage.removeItem(STORAGE_KEY_LENS);
     localStorage.removeItem(STORAGE_KEY_SESSION);
+    localStorage.removeItem(STORAGE_KEY_ENTROPY);
+  }, []);
+
+  // === Entropy / Cognitive Bridge Methods ===
+
+  const evaluateEntropy = useCallback((
+    message: string,
+    history: EntropyMessage[]
+  ): EntropyResult => {
+    const topicHubs = schema?.globalSettings.topicHubs || [];
+    return calculateEntropy(message, history, topicHubs, session.exchangeCount);
+  }, [schema, session.exchangeCount]);
+
+  const checkShouldInject = useCallback((entropy: EntropyResult): boolean => {
+    return shouldInject(entropy, entropyState);
+  }, [entropyState]);
+
+  const recordEntropyInjection = useCallback((entropy: EntropyResult) => {
+    setEntropyState(prev => updateEntropyState(
+      prev,
+      entropy,
+      true, // didInject
+      session.exchangeCount
+    ));
+  }, [session.exchangeCount]);
+
+  const recordEntropyDismiss = useCallback(() => {
+    setEntropyState(prev => dismissEntropy(prev, session.exchangeCount));
+  }, [session.exchangeCount]);
+
+  const getJourneyIdForCluster = useCallback((cluster: string): string | null => {
+    return getJourneyForCluster(cluster);
   }, []);
 
   // === Settings ===
@@ -364,6 +443,13 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     addVisitedCard,
     shouldNudge,
     resetSession,
+    // Entropy / Cognitive Bridge
+    entropyState,
+    evaluateEntropy,
+    checkShouldInject,
+    recordEntropyInjection,
+    recordEntropyDismiss,
+    getJourneyIdForCluster,
     globalSettings
   };
 };

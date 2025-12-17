@@ -12,6 +12,7 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
+import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { Card, Persona } from '../data/narratives-schema';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
@@ -131,6 +132,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
   const [showFounderStory, setShowFounderStory] = useState<boolean>(false);
   const [showConversionCTA, setShowConversionCTA] = useState<boolean>(false);
+  // Cognitive Bridge state
+  const [bridgeState, setBridgeState] = useState<{
+    visible: boolean;
+    journeyId: string | null;
+    topicMatch: string | null;
+    afterMessageId: string | null;  // Message ID after which to show the bridge
+  }>({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -164,7 +172,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     incrementExchangeCount,
     addVisitedCard,
     shouldNudge,
-    globalSettings
+    globalSettings,
+    // Entropy / Cognitive Bridge
+    entropyState,
+    evaluateEntropy,
+    checkShouldInject,
+    recordEntropyInjection,
+    recordEntropyDismiss,
+    getJourneyIdForCluster
   } = useNarrativeEngine();
 
   // Engagement Bus (unified state management replacing useRevealState)
@@ -424,12 +439,19 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     // The next message will automatically create a new session with fresh context
     resetChatSession();
 
-    const defaultHint = SECTION_CONFIG[activeSection]?.promptHint || "What is The Grove?";
-    setDynamicSuggestion(defaultHint);
+    // Dynamic initial suggestion from schema entry points
+    const entryCards = getEntryPoints(null); // Get all entry points (no persona filter)
+    if (entryCards.length > 0) {
+      const randomCard = entryCards[Math.floor(Math.random() * entryCards.length)];
+      setDynamicSuggestion(randomCard.label);
+    } else {
+      const defaultHint = SECTION_CONFIG[activeSection]?.promptHint || "What is The Grove?";
+      setDynamicSuggestion(defaultHint);
+    }
     setCurrentTopic('');
 
     console.log('Chat context changed - session will reinitialize on next message');
-  }, [activeSection, activeLensData]);
+  }, [activeSection, activeLensData, getEntryPoints]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -443,6 +465,16 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       }
     }
   }, [terminalState.messages, terminalState.isOpen, showLensPicker]);
+
+  // Debug: Log thread state changes
+  useEffect(() => {
+    console.log('[Thread State]', {
+      activeLens: session.activeLens,
+      threadLength: currentThread.length,
+      position: currentPosition,
+      firstCard: currentThread.length > 0 ? getThreadCard(0)?.label : null
+    });
+  }, [session.activeLens, currentThread, currentPosition, getThreadCard]);
 
   const handleSend = async (manualQuery?: string, manualDisplay?: string, nodeId?: string) => {
     const textToSend = manualQuery !== undefined ? manualQuery : input;
@@ -518,7 +550,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         if (breadcrumbMatch && breadcrumbMatch[1]) {
           setDynamicSuggestion(breadcrumbMatch[1].trim());
         } else {
-          setDynamicSuggestion("Tell me more about the architecture.");
+          // Dynamic fallback: pick a random entry-point card from the schema
+          const entryCards = getEntryPoints(null); // Get all entry points (no persona filter)
+          if (entryCards.length > 0) {
+            const randomCard = entryCards[Math.floor(Math.random() * entryCards.length)];
+            setDynamicSuggestion(randomCard.label);
+          } else {
+            setDynamicSuggestion("What is The Grove, and what problem does it solve?");
+          }
         }
       }
 
@@ -529,6 +568,70 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         if (topicMatch && topicMatch[1]) {
           setCurrentTopic(topicMatch[1].trim());
         }
+      }
+
+      // === Cognitive Bridge / Entropy Evaluation ===
+      // Only evaluate if user is in freestyle mode (no active lens/journey)
+      // Note: We count messages AFTER this exchange, so add 1 to current count
+      // (incrementExchangeCount was called at start but React state is async)
+      const currentExchangeCount = Math.floor((terminalState.messages.length + 1) / 2);
+
+      console.log('[Entropy Debug] Preconditions:', {
+        activeLens: session.activeLens,
+        threadLength: currentThread.length,
+        messageCount: terminalState.messages.length,
+        calculatedExchanges: currentExchangeCount,
+        entropyState
+      });
+
+      if (!session.activeLens && currentThread.length === 0) {
+        // Build history from messages for entropy calculation
+        const history = terminalState.messages.map(m => ({
+          role: m.role as 'user' | 'model',
+          text: m.text
+        }));
+
+        // Evaluate entropy for this exchange - use calculated count, not stale state
+        const entropy = evaluateEntropy(textToSend, history);
+        // Override with correct exchange count since evaluateEntropy uses stale session.exchangeCount
+        let adjustedScore = entropy.score;
+        // If we have 3+ exchanges but the score doesn't include the +30 bonus, add it
+        if (currentExchangeCount >= 3 && entropy.score < 30) {
+          adjustedScore += 30;
+        }
+        const adjustedClassification = adjustedScore >= 60 ? 'high' : adjustedScore >= 30 ? 'medium' : 'low';
+
+        console.log('[Entropy]', {
+          originalScore: entropy.score,
+          adjustedScore,
+          classification: adjustedClassification,
+          cluster: entropy.dominantCluster,
+          matchedTags: entropy.matchedTags,
+          exchangeCount: currentExchangeCount,
+          message: textToSend.substring(0, 50)
+        });
+
+        // Check if we should show the Cognitive Bridge (use adjusted classification)
+        const adjustedEntropy = { ...entropy, score: adjustedScore, classification: adjustedClassification as 'low' | 'medium' | 'high' };
+        const shouldShow = checkShouldInject(adjustedEntropy);
+        console.log('[Entropy] shouldInject:', shouldShow, 'hasDominantCluster:', !!entropy.dominantCluster);
+
+        if (shouldShow && entropy.dominantCluster) {
+          const journeyId = getJourneyIdForCluster(entropy.dominantCluster);
+          console.log('[Entropy] Journey mapping:', { cluster: entropy.dominantCluster, journeyId });
+          if (journeyId) {
+            setBridgeState({
+              visible: true,
+              journeyId,
+              topicMatch: entropy.dominantCluster,
+              afterMessageId: botMessageId
+            });
+            recordEntropyInjection(adjustedEntropy);
+            console.log('[Entropy] Bridge ACTIVATED');
+          }
+        }
+      } else {
+        console.log('[Entropy] Skipped - not in freestyle mode');
       }
 
     } catch (error) {
@@ -676,32 +779,66 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               <div className="flex-1 overflow-y-auto p-6 space-y-8 terminal-scroll bg-white">
                 {terminalState.messages.map((msg) => {
                   const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
+                  const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
 
                   return (
-                    <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                      <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
-                        {msg.role === 'user' ? 'You' : 'The Grove'}
+                    <React.Fragment key={msg.id}>
+                      <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                        <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
+                          {msg.role === 'user' ? 'You' : 'The Grove'}
+                        </div>
+                        <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                          {msg.role === 'user' ? (
+                            <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
+                              {msg.text.replace(' --verbose', '')}
+                            </div>
+                          ) : (
+                            <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
+                              {msg.isStreaming && !msg.text ? (
+                                /* Show loading messages while waiting for first chunk */
+                                <LoadingIndicator messages={globalSettings?.loadingMessages} />
+                              ) : (
+                                <>
+                                  <MarkdownRenderer content={msg.text} />
+                                  {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
-                        {msg.role === 'user' ? (
-                          <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
-                            {msg.text.replace(' --verbose', '')}
-                          </div>
-                        ) : (
-                          <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
-                            {msg.isStreaming && !msg.text ? (
-                              /* Show loading messages while waiting for first chunk */
-                              <LoadingIndicator messages={globalSettings?.loadingMessages} />
-                            ) : (
-                              <>
-                                <MarkdownRenderer content={msg.text} />
-                                {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                      {/* Cognitive Bridge - inline injection after triggering message */}
+                      {showBridgeAfterThis && bridgeState.journeyId && bridgeState.topicMatch && (
+                        <CognitiveBridge
+                          journeyId={bridgeState.journeyId}
+                          topicMatch={bridgeState.topicMatch}
+                          onAccept={() => {
+                            // Map topic clusters to appropriate personas
+                            // Each cluster has a "best fit" persona based on content alignment
+                            const clusterToPersona: Record<string, string> = {
+                              'ratchet': 'engineer',      // Technical AI capability concepts
+                              'economics': 'family-office', // Financial/investment focus
+                              'architecture': 'engineer',   // Technical architecture
+                              'knowledge-commons': 'academic', // Research/publication focus
+                              'observer': 'concerned-citizen'  // Meta/philosophical themes
+                            };
+
+                            const cluster = bridgeState.topicMatch;
+                            const targetPersona = cluster ? clusterToPersona[cluster] : null;
+
+                            if (targetPersona) {
+                              selectLens(targetPersona);
+                              // Thread will auto-generate via useEffect when activeLens changes
+                            }
+                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
+                          }}
+                          onDismiss={() => {
+                            recordEntropyDismiss();
+                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
+                          }}
+                        />
+                      )}
+                    </React.Fragment>
                   );
                 })}
                 <div ref={messagesEndRef} />
@@ -803,7 +940,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     </div>
                   </div>
                 ) : currentThread.length > 0 && currentPosition < currentThread.length ? (
-                  /* Journey Progress Card - replaces Suggested Inquiry */
+                  /* Journey Progress Card - dynamically shows journey cards from schema */
                   <JourneyCard
                     currentThread={currentThread}
                     currentPosition={currentPosition}
@@ -828,8 +965,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       // User can type freely below
                     }}
                   />
-                ) : dynamicSuggestion ? (
-                  /* Fallback: Suggested Inquiry when no active journey */
+                ) : dynamicSuggestion && terminalState.messages.length > 0 ? (
+                  /* Fallback: Suggested Inquiry - only shown after user has sent at least one message */
                   <div className="mb-4">
                     <button
                       onClick={() => handleSuggestion(dynamicSuggestion)}

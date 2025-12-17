@@ -114,18 +114,16 @@ export const SECTION_HOOKS = {
   ]
 };
 
-export const INITIAL_TERMINAL_MESSAGE = `THE GROVE TERMINAL [v2.4.0]
-Connection established. 
-I have parsed the full White Paper and the Technical Deep Dive series.
+export const INITIAL_TERMINAL_MESSAGE = `Welcome to the Terminal.
 
-I can discuss:
-> The $380 Billion Infrastructure Bet
-> The "Ratchet Effect" (Frontier vs Local)
-> The Cognitive Split (Hum vs Breakthrough)
-> The "Efficiency Tax"
-> The Network (Civilization that Learns)
+The Grove's core thesis—distributed AI infrastructure as an alternative to centralized compute—is mapped here. We've indexed the White Paper and Technical Deep Dives.
 
-Current Context: Global Override`;
+You might start with:
+→ What is the Grove, and what problem does it solve?
+→ The Ratchet Effect: why local hardware catches up
+→ How agents earn their own cognitive enhancement
+
+Or ask anything. The map will emerge.`;
 
 export const ARCHITECTURE_NODES = [
   {

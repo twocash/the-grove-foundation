@@ -257,7 +257,12 @@ export type FunnelEventType =
   | 'cta_viewed'
   | 'cta_clicked'
   | 'invitation_sent'
-  | 'lens_shared';
+  | 'lens_shared'
+  // Cognitive Bridge events
+  | 'cognitive_bridge_shown'
+  | 'cognitive_bridge_accepted'
+  | 'cognitive_bridge_dismissed'
+  | 'entropy_high_detected';
 
 export interface FunnelEvent {
   eventType: FunnelEventType;
