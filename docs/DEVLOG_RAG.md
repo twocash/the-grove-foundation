@@ -501,5 +501,93 @@ npm run build           # Success (17.48s)
 
 ---
 
+## Production Deployment & Testing (2025-12-16)
+
+### Deployment Process Issues Encountered
+
+**Problem:** Code was merged to GitHub but production was running old code.
+
+**Root Cause:** Cloud Build was triggered from the worktree directory which hadn't pulled the latest merged code from origin/main. The worktree had committed and pushed changes, but the deployment source was stale.
+
+**Solution:**
+1. Always deploy from the main repository (`C:\GitHub\the-grove-foundation`)
+2. After merging PR, pull latest to main repo before running `gcloud builds submit`
+
+### Deployment Steps (Documented for CI/CD)
+
+```bash
+# 1. In worktree: commit and push
+cd C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch>
+git add . && git commit -m "..." && git push origin <branch>
+
+# 2. Create and merge PR
+gh pr create --title "..." --body "..."
+gh pr merge <number> --merge
+
+# 3. IN MAIN REPO (NOT WORKTREE): sync and deploy
+cd C:\GitHub\the-grove-foundation
+git fetch origin && git pull origin main
+gcloud builds submit --config cloudbuild.yaml
+
+# 4. Verify new revision
+gcloud run services describe grove-foundation --region=us-central1 \
+  --format="value(status.latestReadyRevisionName)"
+```
+
+### Production Test Results
+
+**Test Date:** 2025-12-16 23:30 UTC
+**Revision:** grove-foundation-00072-q48
+
+| Query | Hub Matched | Tier 1 | Tier 2 | Total | Status |
+|-------|-------------|--------|--------|-------|--------|
+| "Tell me about the Ratchet" | ratchet-effect | 12,333 | 27,259 | 39,592 | ✅ PASS |
+| "How does Grove work?" | (none) | 12,333 | 0 | 12,333 | ✅ PASS |
+
+### Bug Fix: Double-Space in GCS Filename
+
+**Issue:** `edge-intelligence.md` file not found
+**Cause:** GCS filename has double space before hash, manifest had single space
+- Manifest: `Why Edge Intelligence Is the Structural Answer to 2c9...`
+- GCS: `Why Edge Intelligence Is the Structural Answer to  2c9...` (double space)
+
+**Fix:** Updated `docs/knowledge/hubs.json` to match GCS filename exactly
+**PR:** #2 (merged)
+
+### Log Verification
+
+After successful deployment, logs show:
+```
+[RAG] Manifest loaded: 8 hubs
+[RAG] Loading Tier 1 (budget: 15000 bytes)
+[RAG] Tier 1 loaded: 12333 bytes from 3 files
+[RAG] Loading Tier 2: ratchet-effect (budget: 40000 bytes)
+[RAG] Tier 2 loaded: 27259 bytes
+[RAG] Total context: 39592 bytes (~9898 tokens)
+```
+
+### Lessons Learned
+
+1. **Always deploy from main repo** - Worktrees don't automatically sync with remote after merge
+2. **Check logs for `[RAG]` prefix** - New tiered loader has distinct log format
+3. **Watch for filename edge cases** - GCS filenames can have unexpected whitespace
+4. **Rate limits are transient** - 429 errors resolve within ~60 seconds
+
+---
+
+## Sprint 13 Complete ✅
+
+**Production Status:** LIVE and WORKING
+
+**Commits:**
+- `22ffcfd` - Feat: Tiered RAG architecture with Topic Hub routing
+- `ed2540d` - Fix: Double-space in edge-intelligence.md GCS filename mapping
+
+**PRs:**
+- #1 - Main implementation (merged)
+- #2 - Filename fix (merged)
+
+---
+
 ## End of Sprint
 
