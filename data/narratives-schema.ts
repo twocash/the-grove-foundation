@@ -372,7 +372,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 };
 
 export const DEFAULT_TERMINAL_SESSION: TerminalSession = {
-  activeLens: null,
+  activeLens: 'freestyle',  // Default to freestyle persona instead of null
   scholarMode: false,
   currentThread: [],
   currentPosition: 0,
