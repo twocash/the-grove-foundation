@@ -139,9 +139,12 @@ export function calculateEntropy(
   }
 
   // 2. Technical vocabulary from TopicHubs (+15 per match, capped at 3)
+  // V2.1 hubs use `status: 'active'`, legacy hubs use `enabled: true`
   let tagMatches = 0;
   for (const hub of topicHubs) {
-    if (!hub.enabled) continue;
+    // Skip disabled hubs: V2.1 uses status, legacy uses enabled
+    const isEnabled = hub.enabled !== false && (!('status' in hub) || (hub as { status?: string }).status === 'active');
+    if (!isEnabled) continue;
     for (const tag of hub.tags) {
       if (tagMatches >= 3) break; // Cap at 3 matches to prevent runaway scores
       const tagLower = tag.toLowerCase();

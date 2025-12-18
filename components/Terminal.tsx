@@ -58,12 +58,18 @@ const parseInline = (text: string) => {
   });
 };
 
-const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
+interface MarkdownRendererProps {
+  content: string;
+  onPromptClick?: (prompt: string) => void;
+}
+
+const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptClick }) => {
   const lines = content.split('\n');
   const elements: React.ReactNode[] = [];
 
   let currentListItems: string[] = [];
   let currentTextBuffer: string[] = [];
+  let currentPrompts: string[] = [];
 
   const flushText = () => {
     if (currentTextBuffer.length > 0) {
@@ -95,21 +101,55 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
     }
   };
 
+  const flushPrompts = () => {
+    if (currentPrompts.length > 0) {
+      elements.push(
+        <div key={`prompts-${elements.length}`} className="mb-3 space-y-1">
+          {currentPrompts.map((prompt, i) => (
+            <button
+              key={i}
+              onClick={() => onPromptClick?.(prompt)}
+              disabled={!onPromptClick}
+              className={`block w-full text-left text-sm font-serif transition-all ${
+                onPromptClick
+                  ? 'text-grove-forest hover:text-grove-clay hover:translate-x-1 active:translate-x-2 cursor-pointer'
+                  : 'text-ink-muted cursor-default'
+              }`}
+            >
+              <span className="text-grove-clay mr-2">→</span>
+              {prompt}
+            </button>
+          ))}
+        </div>
+      );
+      currentPrompts = [];
+    }
+  };
+
   lines.forEach((line) => {
     const trimmed = line.trim();
     const isList = trimmed.startsWith('* ') || trimmed.startsWith('- ');
+    const isPrompt = trimmed.startsWith('→ ') || trimmed.startsWith('-> ');
 
-    if (isList) {
+    if (isPrompt) {
       flushText();
+      flushList();
+      const promptText = trimmed.replace(/^(→|->)\s+/, '');
+      currentPrompts.push(promptText);
+    } else if (isList) {
+      flushText();
+      flushPrompts();
       currentListItems.push(line.replace(/^(\*|-)\s+/, ''));
     } else {
       flushList();
+      flushPrompts();
       currentTextBuffer.push(line);
     }
   });
 
   flushText();
   flushList();
+  flushPrompts();
 
   return <>{elements}</>;
 };
@@ -807,7 +847,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                                 <LoadingIndicator messages={globalSettings?.loadingMessages} />
                               ) : (
                                 <>
-                                  <MarkdownRenderer content={msg.text} />
+                                  <MarkdownRenderer
+                                    content={msg.text}
+                                    onPromptClick={(prompt) => handleSend(prompt)}
+                                  />
                                   {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
                                 </>
                               )}
