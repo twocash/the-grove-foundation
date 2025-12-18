@@ -598,4 +598,160 @@ State updates → Trigger evaluation → Reveal queue
 
 ---
 
-*Last Updated: 2025-12-16 | Sprint 4 Complete*
+## 11. V2.1 Schema Migration Issues
+
+> **Case Study (2025-12-18):** CognitiveBridge "Start Journey" button clicked but nothing happened.
+
+### The Problem Chain
+
+When migrating from V2.0 to V2.1 schema format, we encountered a cascading failure:
+
+```
+1. Schema validation silently failed (isV2Schema returned false)
+   └── V2.1 has journeys/nodes, not personas/cards
+   └── Old isV2Schema only checked for personas/cards
+
+2. Hook received null schema
+   └── useNarrativeEngine saw !isV2Schema → returned null
+   └── CognitiveBridge.onAccept got schema?.journeys = undefined
+
+3. First fix applied to WRONG FILE
+   └── Fixed src/core/schema/narrative.ts
+   └── But hooks import from data/narratives-schema.ts!
+   └── Production unchanged despite "successful" deploy
+
+4. Second fix caused production crash
+   └── isV2Schema now returned true for V2.1
+   └── BUT hook methods still did Object.values(schema.cards)
+   └── V2.1 has cards=undefined → "Cannot convert undefined to object"
+```
+
+### V2.0 vs V2.1 Schema Structure
+
+| Field | V2.0 | V2.1 |
+|-------|------|------|
+| `version` | "2.0" | "2.1" |
+| `personas` | Required | Optional/undefined |
+| `cards` | Required | Optional/undefined |
+| `journeys` | N/A | Required |
+| `nodes` | N/A | Required |
+| `hubs` | N/A | Required |
+
+### The Two Schema Files Problem
+
+**CRITICAL:** There are TWO copies of schema definitions:
+
+| File | Used By | Purpose |
+|------|---------|---------|
+| `src/core/schema/narrative.ts` | Foundation consoles | Core types (NOT used by Terminal) |
+| `data/narratives-schema.ts` | `useNarrativeEngine.ts` | Runtime validation (USED by Terminal) |
+
+The `useNarrativeEngine` hook imports from `data/narratives-schema.ts`:
+```typescript
+import { isV2Schema, ... } from '../data/narratives-schema';
+```
+
+**Any schema fixes MUST update `data/narratives-schema.ts` to affect Terminal behavior.**
+
+### Required Null Checks for V2.1
+
+When schema is V2.1, these fields are `undefined`:
+- `schema.personas`
+- `schema.cards`
+
+All hook methods must guard against this:
+
+```typescript
+// BAD - crashes on V2.1
+const getCard = (cardId: string) => {
+  return schema.cards[cardId];  // TypeError!
+};
+
+// GOOD - handles V2.1
+const getCard = (cardId: string) => {
+  if (!schema?.cards) return undefined;
+  return schema.cards[cardId];
+};
+```
+
+### Affected Methods in useNarrativeEngine.ts
+
+| Method | V2.0 Assumption | V2.1 Fix |
+|--------|-----------------|----------|
+| `getPersona()` | `schema.personas[id]` | `schema.personas?.[id] ?? DEFAULT_PERSONAS[id]` |
+| `getCard()` | `schema.cards[id]` | `if (!schema?.cards) return undefined` |
+| `getPersonaCards()` | `Object.values(schema.cards)` | `if (!schema?.cards) return []` |
+| `getEntryPoints()` | `schema.personas[id]` | `if (schema.personas)` check |
+| `getNextCards()` | `schema.cards[id]` | `if (!schema?.cards) return []` |
+| `getSectionCards()` | `Object.values(schema.cards)` | `if (!schema?.cards) return []` |
+| `getSuggestedThread()` | `schema.personas[id]` | `schema.personas?.[id]` |
+
+### Console Debug Output
+
+When investigating V2.1 issues, check console for:
+
+```javascript
+// Schema validation logging (added in fix)
+[Schema] isV2Schema checking: {
+  version: "2.1",
+  hasJourneys: true,
+  hasNodes: true,
+  hasPersonas: false,
+  hasCards: false
+}
+
+// CognitiveBridge journey lookup
+[CognitiveBridge] onAccept clicked {
+  journeyId: "ratchet-journey",
+  schemaHasJourneys: true,  // Should be true for V2.1
+  schemaHasNodes: true,     // Should be true for V2.1
+  journeyKeys: ["ratchet-journey", ...],
+  nodeKeys: ["ratchet-entry", ...]
+}
+```
+
+### Quick Fix Checklist
+
+When V2.1 schema issues occur:
+
+```
+□ 1. Verify schema version from API
+   curl https://grove-foundation-....run.app/api/narrative | jq '.version'
+
+□ 2. Check CORRECT schema file has fix
+   data/narratives-schema.ts (NOT src/core/schema/narrative.ts)
+
+□ 3. Check isV2Schema handles both versions
+   Look for: if (obj.version === "2.1") { ... }
+
+□ 4. Check all Object.values() calls have null guards
+   grep -n "Object.values(schema" hooks/useNarrativeEngine.ts
+
+□ 5. Verify build hash changed
+   curl -s https://... | grep -o 'index-[A-Za-z0-9_-]*\.js'
+```
+
+### Prevention: Type Safety
+
+The ideal fix is to make TypeScript enforce null checks:
+
+```typescript
+// In NarrativeSchemaV2 type definition:
+interface NarrativeSchemaV2 {
+  version: "2.0" | "2.1";
+  globalSettings: GlobalSettings;
+  // V2.0 fields - optional in V2.1
+  personas?: Record<string, Persona>;
+  cards?: Record<string, Card>;
+  // V2.1 fields - optional in V2.0
+  journeys?: Record<string, Journey>;
+  nodes?: Record<string, JourneyNode>;
+  hubs?: Record<string, TopicHub>;
+}
+```
+
+This makes all field access require `?.` operator, catching issues at compile time.
+
+---
+
+*Last Updated: 2025-12-18 | V2.1 Schema Migration*
