@@ -57,6 +57,12 @@ const ICONS: Record<string, React.FC<{ className?: string }>> = {
       <circle cx="12" cy="12" r="3"/>
     </svg>
   ),
+  Compass: ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </svg>
+  ),
   Sparkles: ({ className }) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
@@ -259,35 +265,6 @@ const LensPicker: React.FC<LensPickerProps> = ({
             </button>
           );
         })}
-
-        {/* "Just Exploring" Option */}
-        <button
-          onClick={() => onSelect(null)}
-          className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group
-            ${currentLens === null
-              ? 'bg-ink/5 border-ink/20 border-2'
-              : 'bg-white border-ink/10 hover:border-ink/20 hover:shadow-sm'
-            }`}
-        >
-          <div className="flex items-start space-x-3">
-            <div className={`p-2 rounded-lg ${currentLens === null ? 'bg-ink' : 'bg-ink/5 group-hover:bg-ink/10'} transition-colors`}>
-              <ICONS.Eye className={`w-5 h-5 ${currentLens === null ? 'text-white' : 'text-ink/60'}`} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className={`font-sans font-semibold text-sm ${currentLens === null ? 'text-ink' : 'text-ink'}`}>
-                Just exploring
-              </div>
-              <div className="font-serif text-xs text-ink-muted italic mt-0.5">
-                "I'll browse without a specific lens"
-              </div>
-            </div>
-            {currentLens === null && (
-              <div className="bg-ink text-white text-[9px] font-bold uppercase px-2 py-1 rounded">
-                Active
-              </div>
-            )}
-          </div>
-        </button>
 
         {/* "Create Your Own" Option - subtle placement at end */}
         {showCreateOption && onCreateCustomLens && (

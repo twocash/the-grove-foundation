@@ -58,7 +58,7 @@ export const DEFAULT_REVEAL_STATE: RevealState = {
 // ============================================================================
 
 export const DEFAULT_TERMINAL_SESSION: TerminalSession = {
-  activeLens: null,
+  activeLens: 'freestyle',  // Default to freestyle persona instead of null
   scholarMode: false,
   currentThread: [],
   currentPosition: 0,
@@ -68,7 +68,7 @@ export const DEFAULT_TERMINAL_SESSION: TerminalSession = {
 
 export const DEFAULT_EXTENDED_SESSION: ExtendedTerminalSession = {
   sessionId: '',
-  activeLens: null,
+  activeLens: 'freestyle',  // Default to freestyle persona instead of null
   isCustomLens: false,
   scholarMode: false,
   currentThread: [],
