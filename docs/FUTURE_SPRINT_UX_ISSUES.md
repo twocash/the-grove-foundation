@@ -107,4 +107,132 @@
 
 ---
 
+## Implementation Plan: Option C (Journeys Primary, Lenses as Filters)
+
+> **Status**: Planned for future sprint
+> **Complexity**: High (architectural change)
+> **Prerequisite**: V2.1 journeys working correctly
+
+### Current Architecture
+
+```
+User Opens Terminal
+       ↓
+   LensPicker          (Pick persona/lens)
+       ↓
+   Thread Generated    (Based on lens arcEmphasis)
+       ↓
+   Navigation          (Cards filtered by lens)
+       ↓
+   CognitiveBridge     (Entropy-based journey suggestions)
+```
+
+### Target Architecture (Option C)
+
+```
+User Opens Terminal
+       ↓
+   JourneyPicker       (Pick V2.1 journey OR freestyle)
+       ↓
+   Journey Mode        (Journey nodes drive navigation)
+       ↓
+   Optional: LensPicker (Lens as tone filter, not content filter)
+       ↓
+   Navigation          (Journey nodes + lens tone)
+       ↓
+   Journey Completion  (What's next options)
+```
+
+### Key Changes Required
+
+#### 1. New Component: JourneyPicker
+**File:** `components/Terminal/JourneyPicker.tsx`
+
+```typescript
+interface JourneyPickerProps {
+  journeys: Journey[];          // From schema.journeys
+  onSelect: (journeyId: string | null) => void;
+  freestyleLens: Persona;       // The new 'freestyle' persona
+}
+```
+
+Features:
+- Grid of journey cards showing title, description, estimated time
+- "Freestyle" option (uses freestyle persona with no journey)
+- Visual indicators: icon, color, status (active/draft)
+
+#### 2. Terminal.tsx Flow Changes
+**File:** `components/Terminal.tsx`
+
+1. On first open, show `JourneyPicker` instead of `LensPicker`
+2. Add state: `activeJourney: string | null`
+3. When journey selected:
+   - Load journey nodes from schema
+   - Set `currentNodeId` to journey's `entryNode`
+   - Optionally show "Choose a tone" (lens as filter)
+4. Journey progress tracked via nodes, not thread
+
+#### 3. useNarrativeEngine Changes
+**File:** `hooks/useNarrativeEngine.ts`
+
+New methods:
+```typescript
+selectJourney: (journeyId: string | null) => void;
+getJourney: (journeyId: string) => Journey | undefined;
+getActiveJourneyData: () => Journey | null;
+getJourneyNodes: (journeyId: string) => JourneyNode[];
+```
+
+State additions:
+```typescript
+activeJourney: string | null;   // V2.1 journey ID
+journeyPosition: number;        // Progress in journey
+```
+
+#### 4. Lens Becomes Tone Filter Only
+When both journey and lens are active:
+- Journey nodes determine **what** content is shown
+- Lens determines **how** content is presented (tone, vocabulary)
+- System prompt includes: journey.linkedHub expertFraming + persona.toneGuidance
+
+#### 5. Session Storage Changes
+**Keys:**
+- `grove-terminal-journey` - Active journey ID
+- `grove-terminal-lens` - Optional lens ID (filter only)
+- `grove-terminal-journey-position` - Progress in journey
+
+### Migration Strategy
+
+1. **Phase 1**: Add JourneyPicker as alternative to LensPicker
+   - Feature flag: `journey-first-navigation`
+   - Both paths work simultaneously
+
+2. **Phase 2**: Default to JourneyPicker for new users
+   - Existing lens users retain current flow
+   - New users get journey-first flow
+
+3. **Phase 3**: Unify UX
+   - LensPicker becomes "Choose Your Tone" (optional step)
+   - All users see journeys as primary navigation
+
+### Files to Create/Modify
+
+| File | Action | Description |
+|------|--------|-------------|
+| `components/Terminal/JourneyPicker.tsx` | Create | Journey selection UI |
+| `components/Terminal.tsx` | Modify | Flow logic, state management |
+| `hooks/useNarrativeEngine.ts` | Modify | Journey state, methods |
+| `data/narratives-schema.ts` | Modify | Export Journey types |
+| `types/engagement.ts` | Modify | Add journey events |
+
+### Estimated Effort
+
+- JourneyPicker component: ~2 hours
+- Terminal.tsx flow changes: ~3 hours
+- useNarrativeEngine additions: ~2 hours
+- Testing & integration: ~2 hours
+- **Total**: ~9 hours
+
+---
+
 *Last Updated: 2025-12-18*
