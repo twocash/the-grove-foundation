@@ -216,6 +216,11 @@ export function suggestNewTopics(
   schema: NarrativeSchemaV2,
   maxSuggestions: number = 2
 ): Card[] {
+  // V2.1 schemas don't have personas/cards
+  if (!schema.personas || !schema.cards) {
+    return [];
+  }
+
   const persona = schema.personas[currentLensId];
   if (!persona) return [];
 
@@ -250,6 +255,11 @@ export function detectBestLens(
   recentCardIds: string[],
   schema: NarrativeSchemaV2
 ): string | null {
+  // V2.1 schemas don't have personas/cards
+  if (!schema.personas || !schema.cards) {
+    return null;
+  }
+
   const personas = Object.values(schema.personas).filter(p => p.enabled);
   if (personas.length === 0) return null;
 
