@@ -296,15 +296,36 @@ export function isV1Schema(data: unknown): data is NarrativeGraphV1 {
 }
 
 /**
- * Check if data is v2 format
+ * Check if data is v2 format (supports both V2.0 and V2.1)
  */
 export function isV2Schema(data: unknown): data is NarrativeSchemaV2 {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
-  return obj.version === "2.0" &&
-         typeof obj.personas === 'object' &&
-         typeof obj.cards === 'object' &&
-         typeof obj.globalSettings === 'object';
+
+  // Debug log for schema validation
+  console.log('[Schema] isV2Schema checking:', {
+    version: obj.version,
+    hasJourneys: 'journeys' in obj,
+    hasNodes: 'nodes' in obj,
+    hasPersonas: 'personas' in obj,
+    hasCards: 'cards' in obj
+  });
+
+  // V2.0: requires personas and cards
+  if (obj.version === "2.0") {
+    return typeof obj.personas === 'object' &&
+           typeof obj.cards === 'object' &&
+           typeof obj.globalSettings === 'object';
+  }
+
+  // V2.1: uses journeys and nodes instead of personas/cards
+  if (obj.version === "2.1") {
+    return typeof obj.globalSettings === 'object' &&
+           typeof obj.journeys === 'object' &&
+           typeof obj.nodes === 'object';
+  }
+
+  return false;
 }
 
 /**
