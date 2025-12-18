@@ -91,23 +91,163 @@ export interface PersonaPromptVersion {
 }
 
 // ============================================================================
-// TOPIC HUBS
+// TOPIC HUBS (Unified Registry Model)
 // ============================================================================
 
+/**
+ * Hub lifecycle status for plugin management
+ */
+export type HubStatus = 'active' | 'draft' | 'archived';
+
+/**
+ * TopicHub - Unified registry entry combining routing metadata and file paths
+ *
+ * This interface merges what was previously split between:
+ * - globalSettings.topicHubs (routing: tags, priority, enabled)
+ * - hubs.json (files: path, primaryFile, supportingFiles)
+ *
+ * The result is a Single Source of Truth for hub configuration.
+ */
 export interface TopicHub {
+  id: string;
+  title: string;
+
+  // Routing configuration (for query matching)
+  tags: string[];
+  priority: number;
+  enabled: boolean;
+
+  // File path configuration (for RAG loading)
+  path: string;                   // e.g., "hubs/ratchet-effect/"
+  primaryFile: string;            // e.g., "ratchet-deep-dive.md"
+  supportingFiles: string[];      // Additional files in this hub
+  maxBytes: number;               // Tier 2 budget for this hub
+
+  // Expert framing (injected into prompts)
+  expertFraming: string;
+  keyPoints: string[];
+  commonMisconceptions?: string[];
+  personaOverrides?: Record<string, string>;
+
+  // Plugin lifecycle
+  status: HubStatus;
+
+  // Metadata
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Legacy TopicHub for backward compatibility during migration
+ * @deprecated Use TopicHub instead
+ */
+export interface TopicHubLegacy {
   id: string;
   title: string;
   tags: string[];
   priority: number;
   enabled: boolean;
-  primarySource: string;
-  supportingSources: string[];
+  primarySource: string;          // Old field name (was descriptive text)
+  supportingSources: string[];    // Old field name (was descriptive text)
   expertFraming: string;
   keyPoints: string[];
   commonMisconceptions?: string[];
   personaOverrides?: Record<string, string>;
   createdAt: string;
   updatedAt: string;
+}
+
+// ============================================================================
+// JOURNEYS
+// ============================================================================
+
+/**
+ * Journey status for plugin lifecycle management
+ * - 'active': Visible to users, fully functional
+ * - 'draft': Only visible in Foundation admin, for AI Gardener preparation
+ */
+export type JourneyStatus = 'active' | 'draft';
+
+/**
+ * Journey - A narrative container that links cards to a knowledge hub
+ *
+ * Journeys provide the "foreign key" relationship between the UI flow
+ * (cards, personas) and the RAG context (hubs).
+ *
+ * The `status` field supports the AI Gardener workflow:
+ * - Gardener creates journeys in 'draft' status
+ * - Admin reviews and promotes to 'active' status
+ */
+export interface Journey {
+  id: string;
+  title: string;
+  description: string;
+
+  // Entry point into the journey
+  entryNode: string;              // Card ID where journey starts
+
+  // Target "Aha" moment - the insight this journey builds toward
+  targetAha: string;              // The key insight users should reach
+
+  // Link to knowledge hub (enables "Deterministic Mode" RAG loading)
+  linkedHubId?: string;           // Foreign key to TopicHub.id
+
+  // Journey metrics
+  estimatedMinutes: number;       // Expected time to complete
+
+  // Visual metadata
+  icon?: string;                  // Lucide icon name
+  color?: string;                 // Tailwind color class
+
+  // Plugin lifecycle (for AI Gardener support)
+  status: JourneyStatus;          // 'active' | 'draft'
+
+  // Metadata
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// JOURNEY NODES (V2.1)
+// ============================================================================
+
+/**
+ * JourneyNode - A narrative node that belongs to a specific journey
+ *
+ * Unlike Cards (which are persona-scoped), JourneyNodes are journey-scoped
+ * and include sequencing information for linear narrative progression.
+ */
+export interface JourneyNode {
+  id: string;
+  label: string;                  // Lewis-style provocative question
+  query: string;                  // LLM prompt instruction
+  contextSnippet?: string;        // Verbatim RAG override
+
+  // Section linkage
+  sectionId?: string;             // Visual grouping
+
+  // Journey association (THE KEY FIELD for Deterministic RAG)
+  journeyId: string;              // Foreign key to Journey.id
+
+  // Sequence within journey
+  sequenceOrder?: number;         // 1, 2, 3... for linear progression
+
+  // Navigation
+  primaryNext?: string;           // Main continuation node
+  alternateNext?: string[];       // Branch options
+}
+
+// ============================================================================
+// DEFAULT CONTEXT (Tier 1)
+// ============================================================================
+
+/**
+ * DefaultContext - Configuration for always-loaded Tier 1 RAG files
+ */
+export interface DefaultContext {
+  path: string;                   // e.g., "_default/"
+  maxBytes: number;               // Budget for Tier 1 (default: 15000)
+  files: string[];                // Files to always load
 }
 
 // ============================================================================
@@ -152,14 +292,33 @@ export interface GlobalSettings {
 }
 
 // ============================================================================
-// FULL SCHEMA V2
+// FULL SCHEMA V2.1 (Unified Registry Model)
 // ============================================================================
 
+/**
+ * NarrativeSchemaV2 - The Single Source of Truth
+ *
+ * Version 2.1 adds:
+ * - `hubs`: Top-level registry of TopicHub entries (replaces hubs.json)
+ * - `journeys`: Narrative containers linking cards to hubs
+ * - `defaultContext`: Tier 1 RAG configuration
+ * - `gcsFileMapping`: Clean names to hashed GCS filenames
+ *
+ * This eliminates the "Split Brain" problem where routing config lived
+ * in globalSettings.topicHubs while file paths lived in hubs.json.
+ */
 export interface NarrativeSchemaV2 {
-  version: "2.0";
+  version: "2.0" | "2.1";
   globalSettings: GlobalSettings;
   personas: Record<string, Persona>;
   cards: Record<string, Card>;
+
+  // NEW in V2.1: Top-level registries (replaces hubs.json)
+  hubs?: Record<string, TopicHub>;          // The unified hub registry
+  journeys?: Record<string, Journey>;       // Journey containers
+  nodes?: Record<string, JourneyNode>;      // Journey-aware narrative nodes
+  defaultContext?: DefaultContext;          // Tier 1 RAG config
+  gcsFileMapping?: Record<string, string>;  // Clean name → hashed GCS name
 }
 
 // ============================================================================
@@ -208,10 +367,18 @@ export function isV1Schema(data: unknown): data is NarrativeGraphV1 {
 export function isV2Schema(data: unknown): data is NarrativeSchemaV2 {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
-  return obj.version === "2.0" &&
+  return (obj.version === "2.0" || obj.version === "2.1") &&
          typeof obj.personas === 'object' &&
          typeof obj.cards === 'object' &&
          typeof obj.globalSettings === 'object';
+}
+
+/**
+ * Check if schema has the unified registry (V2.1 features)
+ */
+export function hasUnifiedRegistry(data: unknown): boolean {
+  if (!isV2Schema(data)) return false;
+  return data.version === "2.1" && !!data.hubs;
 }
 
 export function nodeToCard(node: NarrativeNodeV1): Card {

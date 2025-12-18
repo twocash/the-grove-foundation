@@ -35,9 +35,11 @@ const __dirname = path.dirname(__filename);
 const BUCKET_NAME = 'grove-assets';
 const KNOWLEDGE_PREFIX = 'knowledge/';
 
-// Load mapping file - use the final manifest, not draft
-const MAPPING_PATH = path.join(__dirname, '../docs/knowledge/gcs-file-mapping.json');
-const MANIFEST_PATH = path.join(__dirname, '../docs/knowledge/hubs.json');
+// Load from unified registry (V2.1 narratives.json)
+// This replaces the separate hubs.json manifest
+const MANIFEST_PATH = path.join(__dirname, '../data/narratives.json');
+// Fallback to legacy hubs.json if unified registry doesn't exist
+const LEGACY_MANIFEST_PATH = path.join(__dirname, '../docs/knowledge/hubs.json');
 
 // Files to exclude from RAG
 const EXCLUDED_PATTERNS = [
@@ -91,11 +93,24 @@ async function main() {
   const gcsFiles = await listGCSFiles(storage);
   console.log(`Found ${gcsFiles.length} files in GCS\n`);
 
-  // Load manifest
-  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+  // Load manifest - try unified V2.1 first, fallback to legacy
+  let manifest: any;
+  let isUnifiedRegistry = false;
 
-  // Load explicit file mapping from manifest
-  loadExplicitMapping(manifest);
+  if (fs.existsSync(MANIFEST_PATH)) {
+    manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+    isUnifiedRegistry = manifest.version === '2.1' && manifest.hubs;
+    console.log(`Loaded unified registry V${manifest.version}: ${Object.keys(manifest.hubs || {}).length} hubs\n`);
+  } else if (fs.existsSync(LEGACY_MANIFEST_PATH)) {
+    manifest = JSON.parse(fs.readFileSync(LEGACY_MANIFEST_PATH, 'utf8'));
+    console.log(`Loaded legacy hubs.json: ${Object.keys(manifest.hubs || {}).length} hubs\n`);
+  } else {
+    console.error('ERROR: No manifest found at', MANIFEST_PATH, 'or', LEGACY_MANIFEST_PATH);
+    process.exit(1);
+  }
+
+  // Load explicit file mapping from manifest (handles both formats)
+  loadExplicitMapping(manifest, isUnifiedRegistry);
 
   switch (mode) {
     case '--validate':
@@ -366,10 +381,20 @@ function buildFuzzyLookup(files: GCSFile[]): Map<string, GCSFile> {
 // Global explicit mapping loaded from manifest
 let gcsFileMapping: Record<string, string> = {};
 
-function loadExplicitMapping(manifest: any): void {
-  if (manifest._meta?.gcsFileMapping) {
+/**
+ * Load file mapping from manifest (handles both unified V2.1 and legacy formats)
+ * - V2.1 format: mapping is at manifest.gcsFileMapping
+ * - Legacy format: mapping is at manifest._meta.gcsFileMapping
+ */
+function loadExplicitMapping(manifest: any, isUnifiedRegistry: boolean = false): void {
+  if (isUnifiedRegistry && manifest.gcsFileMapping) {
+    // Unified V2.1 format - mapping at top level
+    gcsFileMapping = manifest.gcsFileMapping;
+    console.log(`Loaded explicit mapping (V2.1): ${Object.keys(gcsFileMapping).length} files`);
+  } else if (manifest._meta?.gcsFileMapping) {
+    // Legacy hubs.json format - mapping in _meta
     gcsFileMapping = manifest._meta.gcsFileMapping;
-    console.log(`Loaded explicit mapping for ${Object.keys(gcsFileMapping).length} files`);
+    console.log(`Loaded explicit mapping (legacy): ${Object.keys(gcsFileMapping).length} files`);
   }
 }
 

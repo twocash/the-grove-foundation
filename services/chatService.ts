@@ -22,6 +22,7 @@ export interface ChatOptions {
   personaTone?: string;
   verboseMode?: boolean;
   terminatorMode?: boolean;
+  journeyId?: string;  // V2.1: Journey ID for Deterministic RAG Mode
 }
 
 export interface ChatResponse {
@@ -51,7 +52,8 @@ export async function initChatSession(options: Omit<ChatOptions, 'sessionId' | '
       body: JSON.stringify({
         sectionContext: options.sectionContext,
         personaTone: options.personaTone,
-        terminatorMode: options.terminatorMode ?? false
+        terminatorMode: options.terminatorMode ?? false,
+        journeyId: options.journeyId ?? null  // V2.1: For Deterministic RAG on init
       })
     });
 
@@ -85,7 +87,8 @@ export async function sendMessageStream(
     sectionContext: options.sectionContext,
     personaTone: options.personaTone,
     verboseMode: options.verboseMode ?? false,
-    terminatorMode: options.terminatorMode ?? false
+    terminatorMode: options.terminatorMode ?? false,
+    journeyId: options.journeyId ?? null  // V2.1: Pass to server for Deterministic RAG
   };
 
   return new Promise((resolve, reject) => {

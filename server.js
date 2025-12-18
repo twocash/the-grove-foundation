@@ -728,63 +728,35 @@ But still stay grounded in the source material.`);
 }
 
 // ============================================================================
-// TIERED RAG CONTEXT LOADER
+// TIERED RAG CONTEXT LOADER (Unified Registry Model - V2.1)
+//
+// The unified registry stores all hub config in narratives.json:
+// - narratives.hubs: Hub registry with file paths
+// - narratives.defaultContext: Tier 1 configuration
+// - narratives.gcsFileMapping: Clean names to hashed GCS filenames
+// - narratives.journeys: Journey definitions with linkedHubId
+//
 // Tier 1: Default context (~15KB) - always loaded
-// Tier 2: Hub-specific context (~20-40KB) - loaded when query matches hub tags
+// Tier 2: Hub-specific context (~20-40KB) - loaded based on:
+//   - Deterministic Mode: If activeJourneyId provided, load linkedHubId
+//   - Discovery Mode: If no journey, route query to best matching hub tags
 // ============================================================================
 
-const MANIFEST_PATH = 'knowledge/hubs.json';
-const MANIFEST_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const FILE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const DEFAULT_TIER1_BUDGET = 15000;
 const DEFAULT_TIER2_BUDGET = 40000;
 
-// Caches
-let hubsManifestCache = null; // { manifest, loadedAt, expiresAt }
+// File content cache (persists across requests)
 const fileContentCache = new Map(); // path -> { content, bytes, loadedAt }
 
 /**
- * Invalidate the manifest cache (call on admin save events)
+ * Invalidate the narratives cache (call on admin save events)
+ * @deprecated Hub manifest is now part of narratives.json - use fetchNarratives() cache
  */
 function invalidateManifestCache() {
-    console.log('[RAG] Manifest cache invalidated');
-    hubsManifestCache = null;
-}
-
-/**
- * Load the hubs manifest from GCS (cached)
- */
-async function loadHubsManifest() {
-    const now = Date.now();
-
-    if (hubsManifestCache && now < hubsManifestCache.expiresAt) {
-        return hubsManifestCache.manifest;
-    }
-
-    try {
-        const file = storage.bucket(BUCKET_NAME).file(MANIFEST_PATH);
-        const [exists] = await file.exists();
-
-        if (!exists) {
-            console.warn('[RAG] Manifest not found at', MANIFEST_PATH);
-            return null;
-        }
-
-        const [content] = await file.download();
-        const manifest = JSON.parse(content.toString());
-
-        hubsManifestCache = {
-            manifest,
-            loadedAt: now,
-            expiresAt: now + MANIFEST_CACHE_TTL_MS
-        };
-
-        console.log(`[RAG] Manifest loaded: ${Object.keys(manifest.hubs || {}).length} hubs`);
-        return manifest;
-    } catch (error) {
-        console.error('[RAG] Failed to load manifest:', error.message);
-        return null;
-    }
+    console.log('[RAG] Cache invalidation requested (no-op, narratives handles caching)');
+    // File cache can be cleared if needed
+    fileContentCache.clear();
 }
 
 /**
@@ -821,28 +793,34 @@ async function loadKnowledgeFile(filePath) {
 }
 
 /**
- * Resolve clean file name to GCS path using manifest mapping
+ * Resolve clean file name to GCS path using the unified registry's gcsFileMapping
+ * @param {string} cleanName - Clean file name (e.g., "ratchet-deep-dive.md")
+ * @param {string} hubPath - Hub path prefix (e.g., "hubs/ratchet-effect/")
+ * @param {Object} gcsFileMapping - Mapping from narratives.gcsFileMapping
  */
-function resolveFilePath(cleanName, hubPath, manifest) {
-    const mapping = manifest._meta?.gcsFileMapping;
-    if (mapping && mapping[cleanName]) {
-        return mapping[cleanName]; // Mapped to hashed name in root
+function resolveFilePath(cleanName, hubPath, gcsFileMapping = {}) {
+    if (gcsFileMapping && gcsFileMapping[cleanName]) {
+        return gcsFileMapping[cleanName]; // Mapped to hashed name in root
     }
     return `${hubPath}${cleanName}`; // Clean name in hub folder
 }
 
 /**
- * Route query to a hub based on tag matching
+ * Route query to a hub based on tag matching (Discovery Mode)
+ * @param {string} query - User's query
+ * @param {Object} hubs - Hub registry (Record<string, TopicHub>) from unified schema
  */
-function routeQueryToHub(query, topicHubs) {
-    if (!topicHubs || topicHubs.length === 0) return null;
+function routeQueryToHub(query, hubs) {
+    if (!hubs || Object.keys(hubs).length === 0) return null;
 
     const queryLower = query.toLowerCase();
     let bestMatch = null;
     let bestScore = 0;
 
-    for (const hub of topicHubs) {
+    for (const [hubId, hub] of Object.entries(hubs)) {
+        // Skip disabled or non-active hubs
         if (!hub.enabled) continue;
+        if (hub.status && hub.status !== 'active') continue;
 
         let score = 0;
         const matchedTags = [];
@@ -859,7 +837,7 @@ function routeQueryToHub(query, topicHubs) {
             score = score * (hub.priority / 5);
             if (score > bestScore) {
                 bestScore = score;
-                bestMatch = { hub, matchedTags };
+                bestMatch = { hubId, hub, matchedTags };
             }
         }
     }
@@ -868,23 +846,31 @@ function routeQueryToHub(query, topicHubs) {
 }
 
 /**
- * Build tiered RAG context
- * @param {string} message - User's query for hub routing
- * @param {Array} topicHubs - TopicHub definitions from globalSettings
+ * Build tiered RAG context (Unified Registry Model)
+ *
+ * Supports two modes:
+ * - Deterministic Mode: If activeJourneyId provided, load the journey's linkedHubId
+ * - Discovery Mode: Route query to best matching hub via tag matching
+ *
+ * @param {string} message - User's query for hub routing (Discovery Mode)
+ * @param {Object} narratives - Full unified narratives.json schema (V2.1)
+ * @param {string} activeJourneyId - Optional journey ID for Deterministic Mode
  */
-async function fetchRagContext(message = '', topicHubs = []) {
-    const manifest = await loadHubsManifest();
-
-    // Fallback to legacy behavior if no manifest
-    if (!manifest) {
+async function fetchRagContext(message = '', narratives = null, activeJourneyId = null) {
+    // Fallback to legacy behavior if no unified registry
+    if (!narratives || !narratives.hubs) {
+        console.log('[RAG] No unified registry, falling back to legacy loader');
         return await fetchRagContextLegacy();
     }
+
+    const { hubs, journeys, defaultContext, gcsFileMapping } = narratives;
 
     const result = {
         context: '',
         tier1Bytes: 0,
         tier2Bytes: 0,
         matchedHub: null,
+        mode: 'none', // 'deterministic', 'discovery', or 'none'
         filesLoaded: []
     };
 
@@ -893,13 +879,13 @@ async function fetchRagContext(message = '', topicHubs = []) {
     // -------------------------------------------------------------------------
     // TIER 1: Default Context (always loaded)
     // -------------------------------------------------------------------------
-    const tier1Budget = manifest.defaultContext?.maxBytes || DEFAULT_TIER1_BUDGET;
+    const tier1Budget = defaultContext?.maxBytes || DEFAULT_TIER1_BUDGET;
     let tier1Bytes = 0;
 
     console.log(`[RAG] Loading Tier 1 (budget: ${tier1Budget} bytes)`);
 
-    for (const filename of manifest.defaultContext?.files || []) {
-        const filePath = `${manifest.defaultContext.path}${filename}`;
+    for (const filename of defaultContext?.files || []) {
+        const filePath = `${defaultContext.path}${filename}`;
         const fileData = await loadKnowledgeFile(filePath);
 
         if (!fileData) continue;
@@ -918,62 +904,77 @@ async function fetchRagContext(message = '', topicHubs = []) {
     console.log(`[RAG] Tier 1 loaded: ${tier1Bytes} bytes from ${result.filesLoaded.length} files`);
 
     // -------------------------------------------------------------------------
-    // TIER 2: Hub Context (loaded if query matches)
+    // TIER 2: Hub Context
     // -------------------------------------------------------------------------
-    if (message && topicHubs.length > 0) {
-        const match = routeQueryToHub(message, topicHubs);
+    let targetHubId = null;
+    let targetHub = null;
 
-        if (match) {
-            const hubId = match.hub.id;
-            const hubConfig = manifest.hubs?.[hubId];
-
-            if (hubConfig) {
-                const tier2Budget = hubConfig.maxBytes || DEFAULT_TIER2_BUDGET;
-                let tier2Bytes = 0;
-
-                console.log(`[RAG] Loading Tier 2: ${hubId} (budget: ${tier2Budget} bytes)`);
-                result.matchedHub = hubId;
-
-                // Load primary file
-                const primaryPath = resolveFilePath(hubConfig.primaryFile, hubConfig.path, manifest);
-                const primaryData = await loadKnowledgeFile(primaryPath);
-
-                if (primaryData && tier2Bytes + primaryData.bytes <= tier2Budget) {
-                    contextParts.push(`\n\n--- [${hubConfig.title}] ${hubConfig.primaryFile} ---\n${primaryData.content}`);
-                    tier2Bytes += primaryData.bytes;
-                    result.filesLoaded.push(primaryPath);
-                }
-
-                // Load supporting files
-                for (const supportFile of hubConfig.supportingFiles || []) {
-                    const supportPath = resolveFilePath(supportFile, hubConfig.path, manifest);
-                    const supportData = await loadKnowledgeFile(supportPath);
-
-                    if (!supportData) continue;
-
-                    if (tier2Bytes + supportData.bytes > tier2Budget) {
-                        console.log(`[RAG] Tier 2 budget exceeded, skipping ${supportFile}`);
-                        break;
-                    }
-
-                    contextParts.push(`\n\n--- [${hubConfig.title}] ${supportFile} ---\n${supportData.content}`);
-                    tier2Bytes += supportData.bytes;
-                    result.filesLoaded.push(supportPath);
-                }
-
-                result.tier2Bytes = tier2Bytes;
-                console.log(`[RAG] Tier 2 loaded: ${tier2Bytes} bytes`);
-            } else {
-                console.warn(`[RAG] Hub ${hubId} matched but not in manifest`);
-            }
-        } else {
-            console.log(`[RAG] No hub matched for query`);
+    // Mode 1: DETERMINISTIC - Journey specifies linkedHubId
+    if (activeJourneyId && journeys?.[activeJourneyId]) {
+        const journey = journeys[activeJourneyId];
+        if (journey.linkedHubId && hubs[journey.linkedHubId]) {
+            targetHubId = journey.linkedHubId;
+            targetHub = hubs[targetHubId];
+            result.mode = 'deterministic';
+            console.log(`[RAG] Deterministic Mode: Journey "${activeJourneyId}" → Hub "${targetHubId}"`);
         }
+    }
+
+    // Mode 2: DISCOVERY - Route query to best matching hub
+    if (!targetHub && message && Object.keys(hubs).length > 0) {
+        const match = routeQueryToHub(message, hubs);
+        if (match) {
+            targetHubId = match.hubId;
+            targetHub = match.hub;
+            result.mode = 'discovery';
+            console.log(`[RAG] Discovery Mode: Query matched hub "${targetHubId}" (tags: ${match.matchedTags.join(', ')})`);
+        }
+    }
+
+    // Load Tier 2 if we have a target hub
+    if (targetHub) {
+        const tier2Budget = targetHub.maxBytes || DEFAULT_TIER2_BUDGET;
+        let tier2Bytes = 0;
+
+        console.log(`[RAG] Loading Tier 2: ${targetHubId} (budget: ${tier2Budget} bytes)`);
+        result.matchedHub = targetHubId;
+
+        // Load primary file
+        const primaryPath = resolveFilePath(targetHub.primaryFile, targetHub.path, gcsFileMapping);
+        const primaryData = await loadKnowledgeFile(primaryPath);
+
+        if (primaryData && tier2Bytes + primaryData.bytes <= tier2Budget) {
+            contextParts.push(`\n\n--- [${targetHub.title}] ${targetHub.primaryFile} ---\n${primaryData.content}`);
+            tier2Bytes += primaryData.bytes;
+            result.filesLoaded.push(primaryPath);
+        }
+
+        // Load supporting files
+        for (const supportFile of targetHub.supportingFiles || []) {
+            const supportPath = resolveFilePath(supportFile, targetHub.path, gcsFileMapping);
+            const supportData = await loadKnowledgeFile(supportPath);
+
+            if (!supportData) continue;
+
+            if (tier2Bytes + supportData.bytes > tier2Budget) {
+                console.log(`[RAG] Tier 2 budget exceeded, skipping ${supportFile}`);
+                break;
+            }
+
+            contextParts.push(`\n\n--- [${targetHub.title}] ${supportFile} ---\n${supportData.content}`);
+            tier2Bytes += supportData.bytes;
+            result.filesLoaded.push(supportPath);
+        }
+
+        result.tier2Bytes = tier2Bytes;
+        console.log(`[RAG] Tier 2 loaded: ${tier2Bytes} bytes`);
+    } else {
+        console.log(`[RAG] No hub matched - Tier 1 only`);
     }
 
     result.context = contextParts.join('');
     const totalBytes = result.tier1Bytes + result.tier2Bytes;
-    console.log(`[RAG] Total context: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens)`);
+    console.log(`[RAG] Total context: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens), mode: ${result.mode}`);
 
     return result.context || STATIC_KNOWLEDGE_BASE;
 }
@@ -1022,7 +1023,8 @@ app.post('/api/chat', async (req, res) => {
             sectionContext,
             personaTone,
             verboseMode = false,
-            terminatorMode = false
+            terminatorMode = false,
+            journeyId = null  // NEW: Optional journey ID for Deterministic RAG Mode
         } = req.body;
 
         if (!message) {
@@ -1043,13 +1045,14 @@ app.post('/api/chat', async (req, res) => {
         let session = chatSessions.get(chatSessionId);
 
         if (!session) {
-            // Fetch narratives first to get topicHubs for RAG routing
+            // Fetch narratives (unified registry with hubs, journeys, etc.)
             const narratives = await fetchNarratives();
-            const topicHubs = narratives?.globalSettings?.topicHubs || DEFAULT_TOPIC_HUBS;
 
-            // Fetch RAG context (tiered, using message for hub routing) and system prompt
+            // Fetch RAG context using unified registry
+            // - If journeyId provided: Deterministic Mode (load linkedHubId)
+            // - Otherwise: Discovery Mode (route by query tags)
             const [ragContext, baseSystemPrompt] = await Promise.all([
-                fetchRagContext(message, topicHubs),
+                fetchRagContext(message, narratives, journeyId),
                 fetchActiveSystemPrompt()
             ]);
             const systemPrompt = buildSystemPrompt({
@@ -1195,7 +1198,8 @@ app.post('/api/chat/init', async (req, res) => {
         const {
             sectionContext,
             personaTone,
-            terminatorMode = false
+            terminatorMode = false,
+            journeyId = null  // NEW: Optional journey ID for Deterministic RAG Mode
         } = req.body;
 
         if (!apiKey) {
@@ -1208,9 +1212,13 @@ app.post('/api/chat/init', async (req, res) => {
         // Generate session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+        // Fetch narratives (unified registry) for RAG context
+        const narratives = await fetchNarratives();
+
         // Fetch RAG context and active system prompt
+        // Init doesn't have a message yet, so we rely on journeyId for Deterministic Mode
         const [ragContext, baseSystemPrompt] = await Promise.all([
-            fetchRagContext(),
+            fetchRagContext('', narratives, journeyId),
             fetchActiveSystemPrompt()
         ]);
         const systemPrompt = buildSystemPrompt({
