@@ -157,6 +157,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   // New v2 narrative engine
   const {
+    schema,  // V2.1: Access schema for node->journey lookup
     session,
     selectLens,
     getActiveLensData,
@@ -518,6 +519,12 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     try {
       // Use server-side chat API
       // Server handles: system prompt, RAG context, persona tone, verbose mode
+      // V2.1: Determine journeyId for Deterministic RAG Mode
+      // Priority: 1) Current node's journeyId, 2) null (Discovery Mode)
+      const currentJourneyId = currentNodeId && schema?.nodes
+        ? (schema.nodes as Record<string, { journeyId?: string }>)[currentNodeId]?.journeyId ?? null
+        : null;
+
       const response = await sendMessageStream(
         textToSend,
         (chunk) => {
@@ -538,7 +545,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           sectionContext: SECTION_CONFIG[activeSection]?.title || activeSection,
           personaTone: activeLensData?.toneGuidance,
           verboseMode: isVerboseMode,
-          terminatorMode: terminatorModeActive
+          terminatorMode: terminatorModeActive,
+          journeyId: currentJourneyId  // V2.1: Pass to server for Deterministic RAG
         }
       );
 

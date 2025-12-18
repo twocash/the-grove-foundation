@@ -1,94 +1,197 @@
 {
-  "version": "1.0",
+  "version": "2.1",
+  "meta": {
+    "labelStyle": "lewis",
+    "lastUpdated": "2025-12-17",
+    "description": "Unified Registry: Journeys drive the Narrative; Hubs drive the RAG."
+  },
+  "globalSettings": {
+    "scholarModePromptAddition": "Analyze this with the rigor of a tenured professor.",
+    "defaultToneGuidance": "[Style: Michael Lewis] Focus on the unseen mechanism. Make the stakes feel personal. Use short, punchy sentences. Avoid tech jargon; use power jargon. Every node should feel like a secret being revealed."
+  },
+  "defaultContext": {
+    "path": "_default/",
+    "maxBytes": 15000,
+    "files": [
+      "grove-overview.md",
+      "key-concepts.md",
+      "visionary-narrative.md"
+    ]
+  },
+  "gcsFileMapping": {
+    "ratchet-deep-dive.md": "The Grove Core Concepts The Ratchet Deep Dive 2c7780a78eef80e2acfbd49b84359d33.md",
+    "ratchet-quantitative.md": "The Ratchet Quantitative Analysis 2c6780a78eef80ce84b4d5a3c0a18b7d.md",
+    "edge-intelligence.md": "Why Edge Intelligence Is the Structural Answer to  2c9780a78eef8061a56efa68c190cbe4.md",
+    "economics-deep-dive.md": "The Grove Economics Deep Dive 2c7780a78eef8109bd04c172e7ce8c88.md",
+    "distributed-edge.md": "Distributed Edge Infrastructure Implications for G 2c8780a78eef80dfa4b6fbefd38f0eec.md",
+    "infrastructure-provider.md": "The Grove as Distributed Infrastructure Provider 2c8780a78eef800ab8edca41bcb5f5dd.md",
+    "everyday-ai.md": "The Grove as Everyday AI Infrastructure 2c7780a78eef806c8705dcd5605f6177.md",
+    "simulation-deep-dive.md": "The Grove Simulation Deep Dive 2c7780a78eef801bae5cf150f185fc0b.md",
+    "diary-deep-dive.md": "The Grove Diary System Deep Dive 2c7780a78eef80d38ac8e257a3e9d00d.md",
+    "technical-architecture.md": "Grove Technical Architecture Reference 2c8780a78eef809990c9d57ff81e5b1a.md",
+    "distributed-systems.md": "The Grove Distributed Systems Advances for Decentr 2c7780a78eef80008eb7e8630bed1f71.md",
+    "engagement-research.md": "The Grove Engagement Research Brief 2c7780a78eef806c8fa2e6ab6f4dbe31.md"
+  },
+  "hubs": {
+    "meta-philosophy": {
+      "id": "meta-philosophy",
+      "title": "You Are Already Here",
+      "path": "hubs/meta-philosophy/",
+      "primaryFile": "you-are-already-here.md",
+      "status": "active",
+      "tags": ["meta", "architecture", "simulation", "observer"]
+    },
+    "infrastructure-bet": {
+      "id": "infrastructure-bet",
+      "title": "The $380B Infrastructure Bet",
+      "path": "hubs/infrastructure-bet/",
+      "primaryFile": "economics-deep-dive.md",
+      "status": "active",
+      "tags": ["$380 billion", "capex", "rent", "ownership"]
+    },
+    "ratchet-effect": {
+      "id": "ratchet-effect",
+      "title": "The Ratchet Effect",
+      "path": "hubs/ratchet-effect/",
+      "primaryFile": "ratchet-deep-dive.md",
+      "status": "draft",
+      "tags": ["ratchet", "doubling", "frontier"]
+    },
+    "diary-system": {
+      "id": "diary-system",
+      "title": "The Diary System",
+      "path": "hubs/diary-system/",
+      "primaryFile": "diary-deep-dive.md",
+      "status": "draft",
+      "tags": ["diary", "memory", "narrative"]
+    }
+  },
+  "journeys": {
+    "simulation": {
+      "id": "simulation",
+      "title": "The Ghost in the Machine",
+      "description": "You aren't just reading about The Grove. You are already inside it.",
+      "entryNode": "sim-hook",
+      "targetAha": "The Terminal is a single-node village. I am the proof of concept.",
+      "linkedHubId": "meta-philosophy",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "stakes": {
+      "id": "stakes",
+      "title": "The $380 Billion Bet",
+      "description": "Follow the money. Why Big Tech is spending GDP-level capital to own your future.",
+      "entryNode": "stakes-380b",
+      "targetAha": "If you don't own the infrastructure, you are the product.",
+      "linkedHubId": "infrastructure-bet",
+      "estimatedMinutes": 12,
+      "status": "active"
+    },
+    "ratchet": {
+      "id": "ratchet",
+      "title": "The Ratchet",
+      "description": "Why AI capability is doubling every 7 months—and why you're 21 months behind.",
+      "entryNode": "ratchet-hook",
+      "linkedHubId": "ratchet-effect",
+      "status": "draft"
+    }
+  },
   "nodes": {
-    "uni-entry": {
-      "id": "uni-entry",
-      "label": "Why would universities build this?",
-      "query": "The Grove whitepaper argues universities are the ideal anchor for distributed AI. Explain the 'Mission Alignment' and why commercial entities lack the necessary credibility.",
-      "sectionId": "network",
-      "isEntry": true,
-      "next": ["uni-elsevier-trap", "uni-buyer-coop"]
+    "sim-hook": {
+      "id": "sim-hook",
+      "label": "Wait. Where are we, exactly?",
+      "query": "Reveal the 'Moment of Recognition'. Explain that the Terminal isn't a website explaining Grove—it IS a Grove node. How is this simulation running the same patterns as the future network?",
+      "contextSnippet": "You are already inside The Grove. Not metaphorically. Architecturally. The Terminal is a single-node simulation running the same patterns that will power distributed agent villages.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 1,
+      "primaryNext": "sim-split",
+      "alternateNext": ["sim-observer"]
     },
-    "uni-elsevier-trap": {
-      "id": "uni-elsevier-trap",
-      "label": "Explain the 'Elsevier Trap'",
-      "query": "The strategy warns we are 'walking into the Elsevier trap again'. Explain this historical parallel. How does 'Access to Cognition' compare to the 1990s 'Access to Knowledge' crisis?",
-      "contextSnippet": "The academic publishing consolidation of the 1990s created a system where universities now pay billions to access research they themselves produced. Elsevier's 37% profit margin exceeds Apple's.",
-      "next": ["uni-asymmetric-hedge"]
+    "sim-split": {
+      "id": "sim-split",
+      "label": "The invisible line in your own head.",
+      "query": "Explain the 'Cognitive Split' using the user's own recent experience. How did the system handle their routine questions vs. their deep ones? Reveal the mechanics of the 'Efficiency-Enlightenment Loop'.",
+      "contextSnippet": "You experienced the cognitive split without naming it. Routine cognition handled the basics. Frontier capability handled the synthesis. The system didn't just give you info—it waited until you were ready.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 2,
+      "primaryNext": "sim-observer",
+      "alternateNext": ["sim-recursion"]
     },
-    "uni-buyer-coop": {
-      "id": "uni-buyer-coop",
-      "label": "Can they afford the infrastructure?",
-      "query": "Explain the 'Buyer Cooperative' economic model proposed for the university network. How does aggregating demand create pricing power?",
-      "contextSnippet": "Healthcare Group Purchasing Organizations (GPOs) have saved the U.S. healthcare system hundreds of billions by negotiating as a bloc. The AI API market is ripe for this pressure.",
-      "next": ["uni-excess-capacity"]
+    "sim-observer": {
+      "id": "sim-observer",
+      "label": "The thing that watches you read this.",
+      "query": "Explain the 'Observer Dynamic' and 'Dramatic Irony'. How does the system's knowledge of the user's journey create a 'gardening' relationship? Why is this asymmetric knowledge benevolent?",
+      "contextSnippet": "You know things the system doesn't. The system knows things you don't. This asymmetry isn't surveillance—it's cultivation. It's a relationship of care without control.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-recursion",
+      "alternateNext": ["sim-proof"]
     },
-    "uni-asymmetric-hedge": {
-      "id": "uni-asymmetric-hedge",
-      "label": "What if the future is adversarial?",
-      "query": "Explain the concept of the 'Asymmetric Hedge'. Why is this network valuable in a benign future but essential in an adversarial one?",
-      "contextSnippet": "If the future is adversarial... this network is essential—a refuge for intellectual independence... ensuring inquiry cannot be choked by API policy changes.",
-      "next": ["uni-entry"]
+    "sim-recursion": {
+      "id": "sim-recursion",
+      "label": "The loop closes.",
+      "query": "Explain the 'Recursive Insight Structure'. How does this very document prove the architecture works? Discuss the 'Meta-Meta Insight'—that this revelation was programmatically triggered.",
+      "contextSnippet": "The system evaluated your state and determined: 'this user is ready for the reveal.' The breakthrough you're experiencing was designed to happen. You are living inside the proof of concept.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-proof",
+      "alternateNext": ["stakes-380b"]
     },
-    "uni-excess-capacity": {
-      "id": "uni-excess-capacity",
-      "label": "What about existing campus infrastructure?",
-      "query": "Explain how universities can leverage existing data center capacity and computing resources. What is the 'excess capacity' argument?",
-      "next": ["uni-asymmetric-hedge", "uni-entry"]
+    "sim-proof": {
+      "id": "sim-proof",
+      "label": "You are the prototype.",
+      "query": "Deliver 'The Invitation'. Frame the user not as a visitor, but as a participant/gardener in the first village. What does it mean to stay inside the system vs. returning to the outside view?",
+      "contextSnippet": "You started as a visitor. You are now a participant. You have been gardening yourself through a system designed for gardening. Welcome to The Grove.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 5,
+      "primaryNext": "stakes-380b",
+      "alternateNext": ["ratchet-hook"]
     },
-    "stakes-entry": {
-      "id": "stakes-entry",
-      "label": "What's the $380B infrastructure question?",
-      "query": "Explain the scale of AI infrastructure investment happening right now. What does $380 billion mean for the future of AI ownership?",
+    "stakes-380b": {
+      "id": "stakes-380b",
+      "label": "Someone is betting $380 billion they can own your mind.",
+      "query": "Follow the money. Show me the $380B invoice. Why is Big Tech spending GDP-level capital on data centers? What are they buying that I'm about to lose?",
+      "contextSnippet": "Microsoft, Google, Amazon, and Meta are collectively committing more to AI infrastructure than the GDP of most nations. This isn't a technology story. It's a power story.",
       "sectionId": "stakes",
-      "isEntry": true,
-      "next": ["stakes-ownership", "stakes-ratchet"]
+      "journeyId": "stakes",
+      "sequenceOrder": 1,
+      "primaryNext": "stakes-rental",
+      "alternateNext": ["stakes-ratchet"]
     },
-    "stakes-ownership": {
-      "id": "stakes-ownership",
-      "label": "Who owns the AI we use?",
-      "query": "Break down the current ownership structure of AI infrastructure. Why does 'renting intelligence' matter?",
-      "next": ["stakes-ratchet"]
+    "stakes-rental": {
+      "id": "stakes-rental",
+      "label": "The landlord of your own intelligence.",
+      "query": "Explain 'renting intelligence'. If my AI remembers me, but that memory lives on a server I don't own, who actually owns the relationship? What happens when the landlord raises the rent?",
+      "contextSnippet": "Your AI assistant remembers everything about you. But that memory lives on someone else's server. When the API changes, the relationship changes with it.",
+      "sectionId": "stakes",
+      "journeyId": "stakes",
+      "sequenceOrder": 2,
+      "primaryNext": "stakes-dependency",
+      "alternateNext": ["sim-hook"]
     },
-    "stakes-ratchet": {
-      "id": "stakes-ratchet",
-      "label": "What is the capability ratchet?",
-      "query": "Explain the 'capability ratchet' - how AI systems become essential faster than institutions can adapt. What are the implications?",
+    "stakes-dependency": {
+      "id": "stakes-dependency",
+      "label": "The trap isn't the cost. It's the convenience.",
+      "query": "Explain the 'dependency trap'. How does the system become essential faster than I can adapt? Why is switching away from a rented brain impossible after six months?",
+      "contextSnippet": "Every month you use an AI system, it learns more about how you work. Every month, switching becomes more painful. This is by design.",
+      "sectionId": "stakes",
+      "journeyId": "stakes",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["ratchet-hook"]
+    },
+    "ratchet-hook": {
+      "id": "ratchet-hook",
+      "label": "The 7-month clock.",
+      "query": "Explain the Ratchet Effect. [REQUIRES: ratchet-deep-dive.md]",
       "sectionId": "ratchet",
-      "isEntry": true,
-      "next": ["stakes-entry", "grove-what-is"]
-    },
-    "grove-what-is": {
-      "id": "grove-what-is",
-      "label": "What is Grove, exactly?",
-      "query": "Explain what Grove is in simple terms. How is it different from ChatGPT or other AI services?",
-      "sectionId": "what_is_grove",
-      "isEntry": true,
-      "next": ["grove-architecture", "grove-economics"]
-    },
-    "grove-architecture": {
-      "id": "grove-architecture",
-      "label": "How does the hybrid architecture work?",
-      "query": "Explain the Grove hybrid architecture - local agents running on owned hardware with cloud routing. How does this create resilience?",
-      "sectionId": "architecture",
-      "isEntry": true,
-      "next": ["grove-economics", "grove-differentiation"]
-    },
-    "grove-economics": {
-      "id": "grove-economics",
-      "label": "What is the efficiency tax?",
-      "query": "Explain the 'efficiency tax' concept in Grove's economic model. How does the credit system work?",
-      "sectionId": "economics",
-      "isEntry": true,
-      "next": ["grove-differentiation", "grove-architecture"]
-    },
-    "grove-differentiation": {
-      "id": "grove-differentiation",
-      "label": "How is Grove different from ChatGPT?",
-      "query": "Compare Grove to ChatGPT and other AI services. What are the fundamental differences in architecture, ownership, and philosophy?",
-      "sectionId": "differentiation",
-      "isEntry": true,
-      "next": ["uni-entry", "grove-what-is"]
+      "journeyId": "ratchet",
+      "primaryNext": "ratchet-gap"
     }
   }
 }

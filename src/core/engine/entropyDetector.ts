@@ -48,36 +48,45 @@ const REFERENCE_PHRASES = [
 ];
 
 // Topic clusters map to structured journeys
+// V2.1: Aligned with hub tags from narratives.json
 export const TOPIC_CLUSTERS: Record<string, string[]> = {
   'ratchet': [
-    'doubling', 'lag', '21 months', '7 months', 'frontier', 'capability',
-    'metr', 'propagation', 'edge', 'local model', 'catching up'
+    // ratchet-effect hub tags + expanded vocabulary
+    'doubling', 'ratchet', 'frontier', '21 months', '7 months', 'capability',
+    'metr', 'propagation', 'edge', 'local model', 'catching up', 'lag'
   ],
   'economics': [
-    'efficiency tax', 'credits', 'enlightenment', 'incentives', 'cloud costs',
-    'sink', 'genesis', 'maturity', 'floor', 'tax rate', '$380', 'billion'
+    // infrastructure-bet hub tags + expanded vocabulary
+    '$380', 'billion', 'capex', 'rent', 'ownership', 'efficiency tax',
+    'credits', 'enlightenment', 'incentives', 'cloud costs', 'sink',
+    'genesis', 'maturity', 'floor', 'tax rate', 'hyperscaler', 'datacenter'
   ],
   'architecture': [
+    // Technical architecture concepts
     'hybrid', 'split', 'local model', 'cloud', 'pivotal', 'routine', 'cognitive',
-    'hum', 'breakthrough', 'routing', 'tier', 'village'
+    'hum', 'breakthrough', 'routing', 'tier', 'village', 'crdt', 'nats', 'distributed'
   ],
   'knowledge-commons': [
+    // Knowledge commons and governance concepts
     'publishing', 'attribution', 'validation', 'innovation', 'propagation',
-    'commons', 'network', 'sharing', 'collective', 'civilization'
+    'commons', 'network', 'sharing', 'collective', 'civilization', 'governance'
   ],
   'observer': [
-    'terminal', 'cosmology', 'diary', 'agents', 'village', 'simulation',
-    'gardener', 'watching', 'asymmetric', 'theology', 'recursive'
+    // meta-philosophy hub tags + expanded vocabulary
+    'meta', 'architecture', 'simulation', 'observer', 'terminal', 'cosmology',
+    'diary', 'agents', 'village', 'gardener', 'watching', 'asymmetric',
+    'theology', 'recursive', 'already here', 'inside'
   ]
 };
 
 // Cluster to journey mapping
+// V2.1: Maps to actual journey IDs in narratives.json
 export const CLUSTER_JOURNEY_MAP: Record<string, string> = {
-  'ratchet': 'journey-ratchet',
-  'economics': 'journey-economics',
-  'architecture': 'journey-architecture',
-  'knowledge-commons': 'journey-commons',
-  'observer': 'journey-observer'
+  'ratchet': 'ratchet',           // → linkedHubId: 'ratchet-effect'
+  'economics': 'stakes',          // → linkedHubId: 'infrastructure-bet'
+  'architecture': 'stakes',       // Technical architecture relates to stakes journey
+  'knowledge-commons': 'stakes',  // Knowledge commons relates to stakes journey
+  'observer': 'simulation'        // → linkedHubId: 'meta-philosophy'
 };
 
 // Scoring thresholds
