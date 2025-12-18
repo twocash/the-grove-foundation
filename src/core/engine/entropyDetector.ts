@@ -91,8 +91,9 @@ export const CLUSTER_JOURNEY_MAP: Record<string, string> = {
 
 // Scoring thresholds
 export const ENTROPY_THRESHOLDS = {
-  LOW: 30,      // Below this: stay in freestyle
-  MEDIUM: 60,   // At or above this: trigger injection
+  LOW: 30,      // Below this: stay in freestyle ('low' classification)
+  MEDIUM: 60,   // At or above this: 'high' classification
+  // Note: 30-59 = 'medium' classification - triggers injection
 };
 
 // Cooldown and limits
@@ -238,9 +239,10 @@ export function shouldInject(
     return false;
   }
 
-  // Check classification
-  if (entropy.classification !== 'high') {
-    console.log('[Entropy shouldInject] BLOCKED: Classification not high', entropy.classification);
+  // Check classification - trigger on 'medium' or 'high'
+  // (MEDIUM threshold = 60 indicates readiness for guided journey)
+  if (entropy.classification === 'low') {
+    console.log('[Entropy shouldInject] BLOCKED: Classification is low', entropy.classification);
     return false;
   }
 
