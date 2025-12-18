@@ -368,6 +368,9 @@ export function isV2Schema(data: unknown): data is NarrativeSchemaV2 {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
 
+  // Debug log (BUILD 2025-12-18T18:25Z)
+  console.log('[Schema] isV2Schema checking version:', obj.version, 'hasJourneys:', 'journeys' in obj);
+
   // V2.0 requires personas and cards
   if (obj.version === "2.0") {
     return typeof obj.personas === 'object' &&

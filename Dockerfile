@@ -1,6 +1,9 @@
 # Stage 1: Builder
 FROM node:20-alpine as builder
 
+# Cache bust argument to force fresh builds
+ARG CACHEBUST=1
+
 # Argument for Vite build time variable
 ARG GEMINI_API_KEY
 # Vite expects VITE_ prefix usually, but our config uses specific replacements.
