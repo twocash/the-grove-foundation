@@ -24,11 +24,26 @@ export const useNarrative = () => {
   };
 
   // Helper: Get next nodes for a given ID
+  // Handles both V1 (next[]) and V2.1 (primaryNext + alternateNext[])
   const getNextNodes = (nodeId: string): NarrativeNode[] => {
     if (!graph || !graph.nodes[nodeId]) return [];
-    return graph.nodes[nodeId].next
+    const node = graph.nodes[nodeId] as NarrativeNode & { primaryNext?: string; alternateNext?: string[] };
+
+    // V2.1 structure: primaryNext + alternateNext
+    if (node.primaryNext !== undefined || node.alternateNext !== undefined) {
+      const nextIds: string[] = [];
+      if (node.primaryNext) nextIds.push(node.primaryNext);
+      if (node.alternateNext) nextIds.push(...node.alternateNext);
+      return nextIds
+        .map(id => graph.nodes[id])
+        .filter(Boolean) as NarrativeNode[];
+    }
+
+    // V1 structure: next[]
+    if (!node.next) return [];
+    return node.next
       .map(id => graph.nodes[id])
-      .filter(Boolean); // Filter out broken links
+      .filter(Boolean);
   };
 
   // Helper: Get a specific node by ID
