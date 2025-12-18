@@ -212,7 +212,8 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
 
   const getPersona = useCallback((personaId: string): Persona | undefined => {
     if (!schema) return DEFAULT_PERSONAS[personaId];
-    return schema.personas[personaId];
+    // V2.1 may not have personas - fall back to defaults
+    return schema.personas?.[personaId] ?? DEFAULT_PERSONAS[personaId];
   }, [schema]);
 
   const getEnabledPersonas = useCallback((): Persona[] => {
@@ -228,12 +229,12 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   // === Card Methods ===
 
   const getCard = useCallback((cardId: string): Card | undefined => {
-    if (!schema) return undefined;
+    if (!schema?.cards) return undefined;
     return schema.cards[cardId];
   }, [schema]);
 
   const getPersonaCards = useCallback((personaId: string | null): Card[] => {
-    if (!schema) return [];
+    if (!schema?.cards) return [];
     const cards = Object.values(schema.cards) as Card[];
 
     if (!personaId) {
@@ -247,14 +248,14 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   }, [schema]);
 
   const getEntryPoints = useCallback((personaId: string | null): Card[] => {
-    if (!schema) return [];
+    if (!schema?.cards) return [];
 
-    if (personaId) {
+    if (personaId && schema.personas) {
       const persona = schema.personas[personaId];
       if (persona?.entryPoints?.length) {
         // Use persona's configured entry points
         return persona.entryPoints
-          .map(id => schema.cards[id])
+          .map(id => schema.cards![id])
           .filter(Boolean);
       }
     }
@@ -265,17 +266,17 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   }, [schema, getPersonaCards]);
 
   const getNextCards = useCallback((cardId: string): Card[] => {
-    if (!schema) return [];
+    if (!schema?.cards) return [];
     const card = schema.cards[cardId];
     if (!card?.next?.length) return [];
 
     return card.next
-      .map(id => schema.cards[id])
+      .map(id => schema.cards![id])
       .filter(Boolean);
   }, [schema]);
 
   const getSectionCards = useCallback((sectionId: string): Card[] => {
-    if (!schema) return [];
+    if (!schema?.cards) return [];
     return (Object.values(schema.cards) as Card[]).filter(card => card.sectionId === sectionId);
   }, [schema]);
 
@@ -283,14 +284,15 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
 
   const getSuggestedThread = useCallback((personaId: string): string[] => {
     if (!schema) return [];
-    const persona = schema.personas[personaId];
+    const persona = schema.personas?.[personaId];
 
     // First check for manually curated thread
     if (persona?.suggestedThread?.length) {
       return persona.suggestedThread;
     }
 
-    // Use arc-based thread generator for intelligent ordering
+    // Use arc-based thread generator for intelligent ordering (requires cards)
+    if (!schema.cards) return [];
     return generateArcThread(personaId, schema);
   }, [schema]);
 
