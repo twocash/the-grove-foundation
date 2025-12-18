@@ -738,8 +738,45 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     return getNextNodes(currentNodeId);
   }, [currentNodeId, getNextCards, getNextNodes]);
 
-  // Journey end detection - no next nodes available
-  const isJourneyEnd = currentNodeId && nextNodes.length === 0;
+  // V2.1 Journey context - get current journey info if in a V2.1 journey
+  const v21JourneyContext = useMemo(() => {
+    if (!currentNodeId || !schema) return null;
+
+    // Check if this is a V2.1 schema with nodes
+    const nodes = schema.nodes as Record<string, { journeyId?: string; primaryNext?: string; alternateNext?: string[]; sequenceOrder?: number }> | undefined;
+    const journeys = (schema as { journeys?: Record<string, { id: string; title: string; description?: string }> }).journeys;
+
+    if (!nodes || !journeys) return null;
+
+    const currentNode = nodes[currentNodeId];
+    if (!currentNode?.journeyId) return null;
+
+    const journey = journeys[currentNode.journeyId];
+    if (!journey) return null;
+
+    // Check if we have next nodes defined (even if they don't exist yet)
+    const hasPendingNext = !!currentNode.primaryNext || (currentNode.alternateNext && currentNode.alternateNext.length > 0);
+
+    // Count total nodes in this journey
+    const journeyNodes = Object.values(nodes).filter(n => n.journeyId === currentNode.journeyId);
+    const totalNodes = journeyNodes.length;
+    const currentOrder = currentNode.sequenceOrder || 1;
+
+    return {
+      journeyId: currentNode.journeyId,
+      journeyTitle: journey.title,
+      journeyDescription: journey.description,
+      hasPendingNext,
+      pendingNextId: currentNode.primaryNext,
+      totalNodes,
+      currentPosition: currentOrder,
+      isIncomplete: hasPendingNext && nextNodes.length === 0  // Has next reference but node doesn't exist
+    };
+  }, [currentNodeId, schema, nextNodes.length]);
+
+  // Journey end detection - no next nodes available AND not in an incomplete V2.1 journey
+  // Don't show JourneyEnd if we're in a V2.1 journey that's just missing node definitions
+  const isJourneyEnd = currentNodeId && nextNodes.length === 0 && !v21JourneyContext?.isIncomplete;
 
   // Get suggested lenses for journey end (personas with overlapping cards)
   const suggestedLenses = useMemo((): Persona[] => {
@@ -940,8 +977,35 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               {/* Interactions Area */}
               <div className="p-6 border-t border-ink/5 bg-paper/50">
 
-                {/* Journey End Options */}
-                {isJourneyEnd ? (
+                {/* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */}
+                {v21JourneyContext?.isIncomplete ? (
+                  <div className="mb-4 bg-paper/50 border border-ink/10 rounded-lg p-4">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-grove-forest mb-2">
+                      Journey: {v21JourneyContext.journeyTitle}
+                    </div>
+                    <div className="text-xs text-ink-muted mb-3">
+                      You've reached the current edge of this journey ({v21JourneyContext.currentPosition}/{v21JourneyContext.totalNodes} nodes explored).
+                      More content is being developed.
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          // Continue exploring the topic freely
+                          setCurrentNodeId(null);
+                        }}
+                        className="px-3 py-2 bg-grove-forest/10 border border-grove-forest/20 rounded-sm text-xs font-sans text-grove-forest hover:bg-grove-forest/20 transition-all"
+                      >
+                        Continue Exploring Freely
+                      </button>
+                      <button
+                        onClick={() => setShowLensPicker(true)}
+                        className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
+                      >
+                        Try a Different Lens
+                      </button>
+                    </div>
+                  </div>
+                ) : isJourneyEnd ? (
                   <div className="mb-4">
                     <JourneyEnd
                       currentLens={activeLensData}
