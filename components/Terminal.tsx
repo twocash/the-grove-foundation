@@ -220,6 +220,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     checkShouldInject,
     recordEntropyInjection,
     recordEntropyDismiss,
+    tickEntropyCooldown,
     getJourneyIdForCluster
   } = useNarrativeEngine();
 
@@ -290,6 +291,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   // Journey completion state
   const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
   const [journeyStartTime] = useState(Date.now());
+  const [completedJourneyTitle, setCompletedJourneyTitle] = useState<string | null>(null);
 
   // Get active lens data (could be custom or archetypal)
   const activeLensData = useMemo(() => {
@@ -525,6 +527,31 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
     // Track current node for narrative-based follow-ups
     if (nodeId) {
+      // V2.1: Detect journey transitions (crossing from one journey to another)
+      // This triggers journey completion when user follows a link to a different journey
+      if (currentNodeId && schema?.nodes) {
+        const prevNode = (schema.nodes as Record<string, { journeyId?: string }>)[currentNodeId];
+        const nextNode = (schema.nodes as Record<string, { journeyId?: string }>)[nodeId];
+        const prevJourneyId = prevNode?.journeyId;
+        const nextJourneyId = nextNode?.journeyId;
+
+        if (prevJourneyId && nextJourneyId && prevJourneyId !== nextJourneyId) {
+          // Journey transition detected! Complete the previous journey
+          console.log('[Journey] Transition detected:', { from: prevJourneyId, to: nextJourneyId });
+          const completedJourney = schema?.journeys?.[prevJourneyId];
+          if (completedJourney) {
+            // Record journey completion
+            recordJourneyCompleted();
+            incrementJourneysCompleted();
+            emit.journeyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000), session.visitedCards.length);
+            trackJourneyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000));
+            // Set title and show completion modal
+            setCompletedJourneyTitle(completedJourney.title || 'Your Journey');
+            setShowJourneyCompletion(true);
+          }
+        }
+      }
+
       setCurrentNodeId(nodeId);
       addVisitedCard(nodeId);
       // Emit card visited event to Engagement Bus
@@ -692,6 +719,9 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         )
       }));
     }
+
+    // Always tick entropy cooldown after each exchange (regardless of mode)
+    tickEntropyCooldown();
 
     setTerminalState(prev => ({
       ...prev,
@@ -1117,7 +1147,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/30 backdrop-blur-sm">
           <div className="w-full max-w-md mx-4">
             <JourneyCompletion
-              journeyTitle={activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey'}
+              journeyTitle={completedJourneyTitle || (activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey')}
               journeyId={`${session.activeLens || 'default'}-${Date.now()}`}
               personaId={session.activeLens}
               completionTimeMinutes={Math.round((Date.now() - journeyStartTime) / 60000)}
@@ -1127,6 +1157,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 console.log('Journey feedback:', { rating, feedback, sendToFoundation });
                 // TODO: Send feedback to server if sendToFoundation is true
                 setShowJourneyCompletion(false);
+                setCompletedJourneyTitle(null);
                 // Optionally show founder story or CTA after journey completion
                 if (shouldShowFounder && currentArchetypeId) {
                   markFounderStoryShown();
@@ -1134,6 +1165,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               }}
               onSkip={() => {
                 setShowJourneyCompletion(false);
+                setCompletedJourneyTitle(null);
               }}
             />
           </div>

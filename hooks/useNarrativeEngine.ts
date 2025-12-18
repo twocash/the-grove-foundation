@@ -73,6 +73,7 @@ interface UseNarrativeEngineReturn {
   checkShouldInject: (entropy: EntropyResult) => boolean;
   recordEntropyInjection: (entropy: EntropyResult) => void;
   recordEntropyDismiss: () => void;
+  tickEntropyCooldown: () => void;  // Decrement cooldown on each exchange
   getJourneyIdForCluster: (cluster: string) => string | null;
 
   // Settings
@@ -425,6 +426,14 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     setEntropyState(prev => dismissEntropy(prev, session.exchangeCount));
   }, [session.exchangeCount]);
 
+  // Decrement cooldown on every exchange (called regardless of freestyle mode)
+  const tickEntropyCooldown = useCallback(() => {
+    setEntropyState(prev => ({
+      ...prev,
+      cooldownRemaining: Math.max(0, prev.cooldownRemaining - 1)
+    }));
+  }, []);
+
   const getJourneyIdForCluster = useCallback((cluster: string): string | null => {
     return getJourneyForCluster(cluster);
   }, []);
@@ -463,6 +472,7 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     checkShouldInject,
     recordEntropyInjection,
     recordEntropyDismiss,
+    tickEntropyCooldown,
     getJourneyIdForCluster,
     globalSettings
   };
