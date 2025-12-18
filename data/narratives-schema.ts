@@ -11,7 +11,7 @@ import { SectionId } from '../types';
 // Forest #2F5C3B, Moss #7EA16B, Clay #D95D39, Harvest Gold #E0A83B
 // Taupe Stone #9C9285, Fig #6B4B56, Slate Blue #526F8A, Frost Blue #A8C2C7
 export type PersonaColor = 'forest' | 'moss' | 'amber' | 'clay' | 'slate' | 'fig' | 'stone';
-export type NarrativeStyle = 'evidence-first' | 'stakes-heavy' | 'mechanics-deep' | 'resolution-oriented';
+export type NarrativeStyle = 'evidence-first' | 'stakes-heavy' | 'mechanics-deep' | 'resolution-oriented' | 'balanced';
 export type OpeningPhase = 'hook' | 'stakes' | 'mechanics';
 export type NoLensBehavior = 'nudge-after-exchanges' | 'never-nudge' | 'force-selection';
 

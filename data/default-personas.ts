@@ -1,9 +1,32 @@
 // Default Personas for Narrative Engine v2
-// These are the 6 core lenses through which users can experience The Grove
+// These are the 7 core lenses through which users can experience The Grove
 
 import { Persona, GlobalSettings, DEFAULT_GLOBAL_SETTINGS } from './narratives-schema';
 
 export const DEFAULT_PERSONAS: Record<string, Persona> = {
+  'freestyle': {
+    id: 'freestyle',
+    publicLabel: 'Freestyle',
+    description: 'Explore freely without a specific lens',
+    icon: 'Compass',
+    color: 'slate',
+    enabled: true,
+    toneGuidance: `[PERSONA: Freestyle Explorer]
+You are speaking with a curious explorer who wants to navigate freely. Adapt your tone and depth based on their questions - if they ask technical questions, go deep; if they ask philosophical questions, engage thoughtfully. Don't push any particular narrative arc. Let the conversation flow naturally and respond to what genuinely interests them. Surface interesting connections and possibilities without forcing a structure. Be a knowledgeable companion, not a tour guide with an agenda.`,
+    narrativeStyle: 'balanced',
+    arcEmphasis: {
+      hook: 3,
+      stakes: 3,
+      mechanics: 3,
+      evidence: 3,
+      resolution: 3
+    },
+    openingPhase: 'hook',
+    defaultThreadLength: 5,
+    entryPoints: [],
+    suggestedThread: []
+  },
+
   'concerned-citizen': {
     id: 'concerned-citizen',
     publicLabel: 'Concerned Citizen',

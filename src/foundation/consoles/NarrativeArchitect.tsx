@@ -177,7 +177,7 @@ const NarrativeArchitect: React.FC = () => {
 
   // Filtered cards
   const filteredCards = useMemo(() => {
-    if (!schema) return [];
+    if (!schema?.cards) return [];
     let cards = Object.values(schema.cards) as Card[];
 
     if (viewMode === 'persona' && selectedPersonaId) {
@@ -198,10 +198,11 @@ const NarrativeArchitect: React.FC = () => {
     return cards;
   }, [schema, viewMode, selectedPersonaId, searchQuery]);
 
-  const selectedCard = selectedCardId && schema ? schema.cards[selectedCardId] : null;
-  const selectedPersona = selectedPersonaId && schema ? schema.personas[selectedPersonaId] : null;
-  const personas = schema ? (Object.values(schema.personas) as Persona[]) : [];
-  const allCards = schema ? (Object.values(schema.cards) as Card[]) : [];
+  const selectedCard = selectedCardId && schema?.cards ? schema.cards[selectedCardId] : null;
+  const selectedPersona = selectedPersonaId && schema?.personas ? schema.personas[selectedPersonaId] : null;
+  // V2.1 schemas may not have personas/cards - fall back to DEFAULT_PERSONAS
+  const personas = schema?.personas ? (Object.values(schema.personas) as Persona[]) : Object.values(DEFAULT_PERSONAS) as Persona[];
+  const allCards = schema?.cards ? (Object.values(schema.cards) as Card[]) : [];
 
   if (loading) {
     return (
