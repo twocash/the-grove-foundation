@@ -90,6 +90,11 @@ export function generateThread(
   schema: NarrativeSchemaV2,
   archetypeId?: string // Optional archetype mapping for custom lenses
 ): string[] {
+  // V2.1 schemas don't have personas/cards - thread generation not applicable
+  if (!schema.personas || !schema.cards) {
+    return [];
+  }
+
   // Try to get the persona from schema
   let persona = schema.personas[personaId];
 
@@ -175,6 +180,11 @@ export function suggestLenses(
   currentLensId: string | null,
   schema: NarrativeSchemaV2
 ): string[] {
+  // V2.1 schemas don't have personas/cards
+  if (!schema.personas || !schema.cards) {
+    return [];
+  }
+
   const personas = Object.values(schema.personas);
 
   // Calculate overlap score for each persona
