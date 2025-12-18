@@ -83,7 +83,21 @@ const RealityTuner: React.FC = () => {
       const data = await res.json();
 
       if (isV2Schema(data)) {
-        setSchema(data);
+        // V2.1 schemas may not have featureFlags/topicHubs in globalSettings
+        // Ensure they exist for the UI to work
+        const normalizedSchema: NarrativeSchemaV2 = {
+          ...data,
+          globalSettings: {
+            ...DEFAULT_GLOBAL_SETTINGS,
+            ...data.globalSettings,
+            // Ensure arrays exist
+            featureFlags: data.globalSettings?.featureFlags || DEFAULT_GLOBAL_SETTINGS.featureFlags,
+            topicHubs: data.globalSettings?.topicHubs || DEFAULT_GLOBAL_SETTINGS.topicHubs,
+            systemPromptVersions: data.globalSettings?.systemPromptVersions || [],
+            loadingMessages: data.globalSettings?.loadingMessages || DEFAULT_GLOBAL_SETTINGS.loadingMessages
+          }
+        };
+        setSchema(normalizedSchema);
       } else {
         setSchema({
           version: "2.0",
