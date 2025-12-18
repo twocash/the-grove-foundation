@@ -21,41 +21,28 @@ interface CognitiveBridgeProps {
 }
 
 // Default journey metadata when not provided
+// V2.1: Updated to match narratives.json journey IDs
 const DEFAULT_JOURNEY_INFO: Record<string, JourneyInfo> = {
-  'journey-ratchet': {
-    id: 'journey-ratchet',
+  'simulation': {
+    id: 'simulation',
+    title: 'The Ghost in the Machine',
+    nodeCount: 5,
+    estimatedMinutes: 8,
+    coverTopics: ['Meta-philosophy', 'Observer dynamic', 'Cognitive split', 'Recursive insight']
+  },
+  'stakes': {
+    id: 'stakes',
+    title: 'The $380 Billion Bet',
+    nodeCount: 3,
+    estimatedMinutes: 12,
+    coverTopics: ['Infrastructure investment', 'Ownership vs rental', 'Dependency trap']
+  },
+  'ratchet': {
+    id: 'ratchet',
     title: 'The Ratchet Effect',
-    nodeCount: 5,
-    estimatedMinutes: 8,
-    coverTopics: ['Capability doubling', '21-month lag', 'Frontier vs Local', 'Hardware trajectory']
-  },
-  'journey-economics': {
-    id: 'journey-economics',
-    title: 'Grove Economics',
-    nodeCount: 6,
-    estimatedMinutes: 10,
-    coverTopics: ['Efficiency Tax', 'Credit economy', 'Self-obsolescence', 'Incentive alignment']
-  },
-  'journey-architecture': {
-    id: 'journey-architecture',
-    title: 'Hybrid Architecture',
-    nodeCount: 5,
-    estimatedMinutes: 8,
-    coverTopics: ['Cognitive split', 'Local vs Cloud', 'Routing logic', 'Memory transfer']
-  },
-  'journey-commons': {
-    id: 'journey-commons',
-    title: 'The Knowledge Commons',
-    nodeCount: 4,
+    nodeCount: 2,
     estimatedMinutes: 6,
-    coverTopics: ['Innovation sharing', 'Attribution', 'Network effects', 'Collective intelligence']
-  },
-  'journey-observer': {
-    id: 'journey-observer',
-    title: 'The Observer Dynamic',
-    nodeCount: 5,
-    estimatedMinutes: 8,
-    coverTopics: ['Gardener role', 'Asymmetric knowledge', 'Agent theology', 'Dramatic irony']
+    coverTopics: ['Capability doubling', '21-month lag', 'Frontier to edge']
   }
 };
 

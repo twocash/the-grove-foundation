@@ -864,22 +864,50 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                           journeyId={bridgeState.journeyId}
                           topicMatch={bridgeState.topicMatch}
                           onAccept={() => {
-                            // Map topic clusters to appropriate personas
-                            // Each cluster has a "best fit" persona based on content alignment
-                            const clusterToPersona: Record<string, string> = {
-                              'ratchet': 'engineer',      // Technical AI capability concepts
-                              'economics': 'family-office', // Financial/investment focus
-                              'architecture': 'engineer',   // Technical architecture
-                              'knowledge-commons': 'academic', // Research/publication focus
-                              'observer': 'concerned-citizen'  // Meta/philosophical themes
-                            };
+                            // V2.1: Start the actual journey from the schema
+                            console.log('[CognitiveBridge] onAccept clicked', {
+                              journeyId: bridgeState.journeyId,
+                              schemaHasJourneys: !!schema?.journeys,
+                              schemaHasNodes: !!schema?.nodes,
+                              journeyKeys: schema?.journeys ? Object.keys(schema.journeys) : [],
+                              nodeKeys: schema?.nodes ? Object.keys(schema.nodes).slice(0, 5) : []
+                            });
 
-                            const cluster = bridgeState.topicMatch;
-                            const targetPersona = cluster ? clusterToPersona[cluster] : null;
+                            const journey = schema?.journeys?.[bridgeState.journeyId!];
+                            const entryNodeId = journey?.entryNode;
+                            const entryNode = entryNodeId && schema?.nodes
+                              ? (schema.nodes as Record<string, { id: string; label: string; query: string }>)[entryNodeId]
+                              : null;
 
-                            if (targetPersona) {
-                              selectLens(targetPersona);
-                              // Thread will auto-generate via useEffect when activeLens changes
+                            console.log('[CognitiveBridge] Journey lookup', {
+                              journey: journey ? { id: journey.id, title: journey.title, entryNode: journey.entryNode } : null,
+                              entryNodeId,
+                              entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
+                            });
+
+                            if (entryNode) {
+                              console.log('[CognitiveBridge] Starting journey with entry node:', entryNode.id);
+                              // Start the journey by sending the entry node's query
+                              handleSend(entryNode.query, entryNode.label, entryNode.id);
+                              // Emit journey started event
+                              emit.journeyStarted(bridgeState.journeyId!, journey?.estimatedMinutes || 5);
+                            } else {
+                              console.log('[CognitiveBridge] FALLBACK - no entry node found');
+                              // Fallback: Map topic clusters to appropriate personas (legacy behavior)
+                              const clusterToPersona: Record<string, string> = {
+                                'ratchet': 'engineer',      // Technical AI capability concepts
+                                'economics': 'family-office', // Financial/investment focus
+                                'architecture': 'engineer',   // Technical architecture
+                                'knowledge-commons': 'academic', // Research/publication focus
+                                'observer': 'concerned-citizen'  // Meta/philosophical themes
+                              };
+
+                              const cluster = bridgeState.topicMatch;
+                              const targetPersona = cluster ? clusterToPersona[cluster] : null;
+
+                              if (targetPersona) {
+                                selectLens(targetPersona);
+                              }
                             }
                             setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
                           }}
@@ -1016,27 +1044,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       // User can type freely below
                     }}
                   />
-                ) : dynamicSuggestion && terminalState.messages.filter(m => m.id !== 'init' && m.role === 'user').length > 0 ? (
-                  /* Fallback: Suggested Inquiry - only shown after user has sent at least one message */
-                  <div className="mb-4">
-                    <button
-                      onClick={() => handleSuggestion(dynamicSuggestion)}
-                      className="w-full text-left p-4 bg-white border border-ink/5 rounded-sm hover:border-grove-forest/30 hover:shadow-sm transition-all group"
-                    >
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-[9px] text-grove-clay font-bold uppercase tracking-widest">
-                          Suggested Inquiry
-                        </span>
-                        <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors font-mono">
-                          →
-                        </span>
-                      </div>
-                      <div className="font-serif text-ink italic text-sm group-hover:text-grove-forest transition-colors">
-                        "{dynamicSuggestion}"
-                      </div>
-                    </button>
-                  </div>
-                ) : null}
+) : null}
+                {/* Suggested Inquiry button removed - was taking up real estate without clear value */}
 
                 <div className="flex items-center space-x-3 mb-4">
                   {/* PRESERVED: Verbose Toggle - Wax Seal Style - exact same implementation */}
