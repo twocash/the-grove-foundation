@@ -160,6 +160,22 @@ npm run build
 
 ---
 
+## 2025-12-18 | V2.1 Journey Plan Refresh
+
+### Session Start
+- **Branch**: `work`
+- **Git Status**: Clean prior to edits
+- **Objective**: Replace legacy Surface/Foundation migration plan with V2.1 journey restoration documents and align sprint plan.
+
+### Work Completed
+- Rewrote repo audit to focus on V2.0/V2.1 dual-model risks and runtime boundaries.【F:docs/REPO_AUDIT.md†L1-L31】
+- Authored V2.1 journey restoration spec, architecture, migration map, and ADR updates aligned to journey/node runtime.【F:docs/SPEC.md†L1-L43】【F:docs/ARCHITECTURE.md†L1-L29】【F:docs/MIGRATION_MAP.md†L1-L20】【F:docs/DECISIONS.md†L1-L17】
+- Created two-sprint plan with execution prompt for coding agents to deliver the V2.1 refactor in phases.【F:docs/SPRINTS.md†L1-L38】
+
+### Notes
+- No automated tests run (documentation-only work).【F:docs/SPEC.md†L40-L54】
+- Git remote is not configured; pushing to origin will require adding the remote URL before `git push`.【d8b710†L1-L1】
+
 ## Template for Future Entries
 
 ```markdown
@@ -687,3 +703,7 @@ Sprint 4 is structurally complete. Optional cleanup tasks:
 ---
 
 *Sprint 4 Complete. Core module extracted with backward compatibility.*
+
+## 2025-12-18 23:27:59Z
+- Reviewed V2.1 migration open items and current V2.0 dependencies to scope audit deliverables. Sources: docs/V21_MIGRATION_OPEN_ITEMS.md, hooks/useNarrativeEngine.ts, components/Terminal.tsx.
+- Planned documentation updates (REPO_AUDIT, SPEC, ARCHITECTURE, MIGRATION_MAP, DECISIONS, SPRINTS) to align with V2.1 journey graph plan.
