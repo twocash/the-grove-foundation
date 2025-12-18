@@ -397,7 +397,12 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     message: string,
     history: EntropyMessage[]
   ): EntropyResult => {
-    const topicHubs = schema?.globalSettings.topicHubs || [];
+    // V2.1: Prefer top-level hubs, fall back to globalSettings.topicHubs for backwards compatibility
+    const v21Hubs = schema?.hubs
+      ? Object.values(schema.hubs).filter(h => h.status === 'active')
+      : [];
+    const legacyHubs = schema?.globalSettings.topicHubs || [];
+    const topicHubs = v21Hubs.length > 0 ? v21Hubs : legacyHubs;
     return calculateEntropy(message, history, topicHubs, session.exchangeCount);
   }, [schema, session.exchangeCount]);
 
