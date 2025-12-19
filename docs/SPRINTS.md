@@ -1,140 +1,144 @@
-# SPRINT PLAN - V2.1 Migration
+# SPRINT PLAN - Cognitive Simulator
 
-> **Status:** ✅ ALL SPRINTS COMPLETE
-> **Completed:** 2025-12-18
+> **Status:** 🟢 SPRINTS 1-5 COMPLETE | 🟡 SPRINT 6 IN PROGRESS
+> **Last Updated:** 2025-12-19
 
-## Sprint Strategy
-- **Sprint Count:** 2 (moderate refactor touching engine, UI, admin).
-- **Definition of Done (per sprint):** Code merged with passing smoke checks, docs updated, and journey UI verified manually.
+## Sprint History
 
----
+### Sprints 1-3: V2.1 Migration ✅ COMPLETE
+See `docs/V21_MIGRATION_OPEN_ITEMS.md` for details.
+- V2.0 thread system replaced with V2.1 journey/node navigation
+- Dead code removed (threadGenerator, JourneyEnd, ThreadProgress)
+- Admin aligned with V2.1 schema
 
-## Sprint 1: Journey Engine + Terminal Refactor ✅ COMPLETE
+### Sprint 4: The Entropy Engine (Logic) ✅ COMPLETE
 
-- **Epic:** Replace V2.0 threads with V2.1 journey navigation in engine and Terminal.
-- **Stories:**
-  1. ✅ **Engine V2.1-only loader** – Enforce schema loading without persona/card backfill; expose journey/node APIs; remove thread generator import.
-     - Acceptance: `useNarrativeEngine` surface includes journey state/methods only; localStorage payload excludes thread arrays.
-     - Result: Added `startJourney`, `advanceNode`, `exitJourney`, `getJourney`, `getNode`, `getNextNodes`
-  2. ✅ **Terminal journey panel** – Swap thread-based UI for node-based journey display with primary/alternate navigation; remove suggested topics/lenses and JourneyEnd usage.
-     - Acceptance: Journey panel shows current node label/context and advances via buttons; freestyle chat remains functional.
-     - Result: Removed suggestedTopics, suggestedLenses, JourneyEnd; added inline Journey Complete panel
-  3. ✅ **Session persistence update** – Migrate session schema to journey fields and ensure entropy bridge still ticks/injects journeys.
-     - Acceptance: localStorage keys present without thread data; entropy cooldown/injection works post-migration.
-     - Result: Session now uses `activeJourneyId`, `currentNodeId`, `visitedNodes`
-- **Done Criteria:** ✅ Terminal runs without thread-related errors; engine exports journey-only API; documentation updated.
+**Goal:** Implement the "brain" of the simulator—detecting conversation depth.
 
----
+**Deliverables:**
+1. ✅ **Entropy Detector Module:** `src/core/engine/entropyDetector.ts`
+   - Scoring logic: +30 depth, +15 vocab, +20 markers, +25 chaining
+   - Classification thresholds: LOW (<30), MEDIUM (30-59), HIGH (≥60)
+   - Cluster mapping to journey IDs
 
-## Sprint 2: Admin Alignment + Cleanup ✅ COMPLETE
+2. ✅ **State Management:** `useNarrativeEngine.ts`
+   - `entropyState` added to session management
+   - `evaluateEntropy()`, `checkShouldInject()`, `recordEntropyInjection()`, `recordEntropyDismiss()`
+   - Persists to `localStorage: grove-terminal-entropy`
 
-- **Epic:** Align admin tools and storage paths to V2.1 and remove remaining V2.0 artifacts.
-- **Stories:**
-  1. ✅ **Admin V2.1 view/editor** – Replace card grid with journey/node/hub view (even read-only) and save V2.1 payloads without card backfill.
-     - Acceptance: Admin journey data loads/saves without converting to cards; UI no longer crashes on V2.1 schema.
-     - Result: NarrativeArchitect now shows Journeys/Nodes tabs for V2.1 schemas (read-only)
-  2. ✅ **Dead code removal** – Delete `utils/threadGenerator.ts` and `components/Terminal/JourneyEnd.tsx`; remove imports/usages across repo.
-     - Acceptance: Build succeeds without deleted modules; no thread-related references remain.
-     - Result: Deleted threadGenerator.ts, JourneyEnd.tsx, ThreadProgress.tsx
-  3. ✅ **Docs/telemetry cleanup** – Update docs to reflect V2.1-only runtime and note removed session fields; ensure analytics events align with journey start/completion (no lens-change triggers).
-     - Acceptance: Updated docs merged; analytics journey events fire on journey start/completion only.
-     - Result: V21_MIGRATION_OPEN_ITEMS.md updated to reflect completion
-- **Done Criteria:** ✅ Admin saves V2.1 structures; repo free of V2.0 thread artifacts; docs current.
+3. ✅ **Router Upgrade:** `src/core/engine/entropyDetector.ts`
+   - `TOPIC_CLUSTERS` vocabulary for each domain
+   - `CLUSTER_JOURNEY_MAP`: ratchet→ratchet, economics→stakes, observer→simulation
+
+**Verification:** ✅ `npm run build` passes, entropy scoring works in dev
 
 ---
 
-## Files Changed Summary
+### Sprint 5: The Cognitive Bridge (UI) ✅ COMPLETE
+
+**Goal:** Implement the visual injection that makes hybrid cognition visible.
+
+**Deliverables:**
+1. ✅ **Bridge Component:** `components/Terminal/CognitiveBridge.tsx`
+   - 800ms "Resolving connection..." animation
+   - Journey card with title, node count, duration, topics
+   - Accept/Dismiss handlers with keyboard support (Escape)
+
+2. ✅ **Terminal Integration:** `components/Terminal.tsx` (~L943-1000)
+   - `bridgeState` tracks current injection context
+   - Conditional rendering after model response when `shouldInject()` true
+   - Bridge appears inline between chat messages
+
+3. ✅ **Action Handlers:**
+   - `onAccept`: Calls `startJourney(journeyId)`, sends entry node query
+   - `onDismiss`: Triggers 5-exchange cooldown via `dismissEntropy()`
+
+**Verification:** ✅ Bridge appears on high-entropy queries, animation smooth, journey starts correctly
+
+---
+
+### Sprint 6: Analytics & Tuning 🟡 IN PROGRESS
+
+**Goal:** Measure system performance and refine parameters based on real behavior.
+
+**Stories:**
+
+1. ⬜ **Funnel Tracking**
+   - Add events: `bridge_shown`, `bridge_accepted`, `bridge_dismissed`
+   - Track: `journeyId`, `entropyScore`, `cluster`, `timeToDecision`
+   - Wire to existing `funnelAnalytics.ts` infrastructure
+
+2. ⬜ **Parameter Tuning**
+   - Isolate thresholds in `constants.ts` for rapid iteration
+   - Evaluate: Is MEDIUM (30) too low? Is HIGH (60) right?
+   - A/B test potential: entropy_threshold_variant
+
+3. ⬜ **Content Alignment**
+   - Verify `DEFAULT_JOURNEY_INFO` in CognitiveBridge.tsx matches V2.1 schema
+   - Ensure all three journeys (ratchet, stakes, simulation) have complete metadata
+   - Identify gaps: clusters that trigger but lack appropriate journeys
+
+4. ⬜ **Dynamic Journey Metadata** (Stretch)
+   - Pull journey info from schema instead of hardcoded defaults
+   - Update CognitiveBridge to use `schema.journeys[journeyId]`
+
+**Acceptance Criteria:**
+- [ ] Analytics events firing in console/backend
+- [ ] Tuning config isolated in `constants.ts`
+- [ ] Journey metadata validated against schema
+- [ ] Documented baseline metrics for activation/acceptance/completion rates
+
+**Commands:**
+```bash
+npm run dev     # Manual testing
+npm run build   # Type safety verification
+```
+
+---
+
+## Files Changed Summary (Sprints 4-6)
 
 | File | Sprint | Change |
 |------|--------|--------|
-| `hooks/useNarrativeEngine.ts` | 1 | V2.1 journey methods, deprecated thread shims |
-| `components/Terminal.tsx` | 1 | Removed V2.0 artifacts, inline journey panel |
-| `components/Terminal/index.ts` | 2 | Removed JourneyEnd, ThreadProgress exports |
-| `utils/threadGenerator.ts` | 2 | **DELETED** |
-| `components/Terminal/JourneyEnd.tsx` | 2 | **DELETED** |
-| `components/Terminal/ThreadProgress.tsx` | 2 | **DELETED** |
-| `src/foundation/consoles/NarrativeArchitect.tsx` | 2 | V2.1 Journey/Node view |
-| `data/narratives-schema.ts` | 1 | V2.1 types added |
-| `docs/V21_MIGRATION_OPEN_ITEMS.md` | 2 | Updated to completion status |
-| `docs/SPRINTS.md` | 2 | Marked complete |
+| `src/core/engine/entropyDetector.ts` | 4 | NEW: Entropy scoring, classification, cluster routing |
+| `hooks/useNarrativeEngine.ts` | 4 | ADD: Entropy state management, evaluation methods |
+| `components/Terminal/CognitiveBridge.tsx` | 5 | NEW: Bridge UI component |
+| `components/Terminal.tsx` | 5 | ADD: Bridge integration (~L943-1000) |
+| `utils/funnelAnalytics.ts` | 6 | ADD: Bridge tracking events (pending) |
+| `constants.ts` | 6 | ADD: Tunable thresholds (pending) |
 
 ---
 
 ## Tripwires Enforced
 
-- ✅ Do not reintroduce `threadGenerator` or thread-based session fields.
-- ✅ Ensure lens switching does not reset journey state.
-- ✅ V2.1 schemas preserved without card backfill in admin.
+- ✅ Terminal.tsx modifications are injection-only (no refactors)
+- ✅ Entropy state persists across page refresh
+- ✅ Cooldown logic prevents over-injection
+- ✅ Journey IDs in cluster map match V2.1 schema
+- ⬜ Analytics events follow existing funnel patterns
 
 ---
 
-## Build Verification
+## Success Metrics (Sprint 6)
 
-```bash
-npm run build
-# ✓ 2415 modules transformed, built in ~28s
-```
-
----
-
-## Sprint 3: Production Fixes + Architecture Hardening ✅ COMPLETE
-
-> **Completed:** 2025-12-18 (same session continuation)
-
-### Issues Fixed
-
-| Issue | Root Cause | Fix |
-|-------|------------|-----|
-| **System Voice not applied** | Server checked `version === "2.0"` but schema was V2.1 | Semantic check: `isModernSchema()` |
-| **Ratchet deep-dive not loading** | Hub `status: "draft"` skipped by server; tags didn't match "7-month clock" | Set `status: "active"`, added tags: "7 month", "7-month", "clock" |
-| **Brittle version checks** | Hardcoded `"2.0"`, `"2.1"` strings throughout codebase | Semantic schema detection |
-
-### Architecture: Semantic Schema Detection
-
-**Problem:** Every version bump required finding and updating multiple version string checks.
-
-**Solution:** Detect schema type by structure, not version strings:
-
-```typescript
-// OLD (brittle)
-if (narratives.version === "2.0") { ... }
-if (narratives.version === "2.1") { ... }
-
-// NEW (semantic)
-if (isModernSchema(narratives)) { ... }  // Has globalSettings
-if (hasJourneys(narratives)) { ... }     // Journey-based navigation
-if (hasCards(narratives)) { ... }        // Card-based navigation
-```
-
-**New Helpers (server.js + narratives-schema.ts):**
-
-| Function | Checks For |
-|----------|------------|
-| `isModernSchema(data)` | Has `globalSettings` (v2+) |
-| `hasJourneys(data)` | Has `journeys` + `nodes` |
-| `hasCards(data)` | Has `cards` + `personas` |
-| `isLegacySchema(data)` | Has `nodes` only (v1) |
-
-**Single constant for new schemas:**
-```typescript
-const CURRENT_SCHEMA_VERSION = "2.1";
-```
-
-### Files Changed
-
-| File | Change |
-|------|--------|
-| `server.js` | Semantic schema detection, V2+ system prompt support |
-| `data/narratives-schema.ts` | `isModernSchema()`, `hasJourneys()`, `hasCards()`, `CURRENT_SCHEMA_VERSION` |
-| `data/narratives.json` | Ratchet hub tags, status fixes, GCS sync |
-
-### PRs Merged
-
-- PR #25: V2.1 Narrative Engine Migration
-- PR #26: Config: Activate ratchet-effect and diary-system hubs
-- PR #27: Fix System Voice + RAG routing for V2.1
-- PR #28: Refactor: Semantic schema detection
+| Metric | Definition | Baseline | Target |
+|--------|------------|----------|--------|
+| Activation Rate | % HIGH entropy → bridge shown | TBD | Measure |
+| Acceptance Rate | % bridge shown → accepted | TBD | >30% |
+| Completion Rate | % accepted → journey completed | TBD | >50% |
+| Return Rate | % completers → start another | TBD | Measure |
 
 ---
 
-*Completed: 2025-12-18 by Claude (modest-vaughan worktree)*
+## Next Phase: Knowledge Commons Integration
+
+After Sprint 6 analytics establish baseline, potential enhancements:
+
+1. **Expand Cluster Vocabulary:** Add terms from underrepresented hubs
+2. **New Journeys:** Create journeys for `knowledge-commons` and `governance` clusters
+3. **Attribution Preview:** Show source citations in journey nodes
+4. **Refinery Connection:** Link journey content to validated L1-Hubs
+
+---
+
+*Last Updated: 2025-12-19*

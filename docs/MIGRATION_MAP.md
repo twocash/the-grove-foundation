@@ -1,109 +1,126 @@
-# MIGRATION MAP - V2.1 Implementation
+# Migration Map: Cognitive Simulator
 
-> **Status:** ✅ MIGRATION COMPLETE
-> **Completed:** 2025-12-18
+## Current State (Post-Sprint 5)
 
-This document tracks the V2.0 → V2.1 migration. All items below have been implemented.
+### Implemented ✅
+- **Entropy Detection:** `entropyDetector.ts` scores conversation complexity
+- **Cognitive Bridge:** Inline injection with 800ms animation
+- **Journey Routing:** Clusters map to V2.1 journeys
+- **State Persistence:** Entropy state survives page refresh
+- **Cooldown Logic:** 5 exchanges after dismiss, max 2 per session
 
----
+### Static → Dynamic Transition Complete
+| Before | After |
+|--------|-------|
+| Linear conversation, no depth awareness | Entropy scoring detects complexity |
+| User manually discovers journeys | System proactively offers relevant paths |
+| Simple keyword highlighting | Cluster detection + journey routing |
 
-## Deletions / Deprecations ✅
+## Deprecations Applied
 
 | Item | Status | Notes |
 |------|--------|-------|
-| `utils/threadGenerator.ts` | ✅ DELETED | Thread-based scoring obsolete under V2.1 |
-| `components/Terminal/JourneyEnd.tsx` | ✅ DELETED | Replaced with inline Journey Complete panel |
-| `components/Terminal/ThreadProgress.tsx` | ✅ DELETED | Progress now via journey node position |
-| V2.0 session fields | ✅ DEPRECATED | `currentThread`, `currentPosition` kept as shims only |
+| `utils/threadGenerator.ts` | ✅ DELETED | Replaced by V2.1 journey navigation |
+| `components/Terminal/JourneyEnd.tsx` | ✅ DELETED | Replaced by JourneyCompletion.tsx |
+| `components/Terminal/ThreadProgress.tsx` | ✅ DELETED | Progress via journey node position |
+| Static "Suggested Topics" | ✅ REMOVED | Replaced by entropy-driven bridge |
+| V2.0 session fields | ✅ DEPRECATED | Shims kept for backward compat |
 
----
+## Architecture Evolution
 
-## Engine Refactor ✅
+### Phase 1: Static Chat (Pre-Sprint 4)
+```
+User Input → Pattern Match → Response
+                   ↓
+          Static Suggestions
+```
 
-| Item | Status | Implementation |
-|------|--------|----------------|
-| V2.1 schema loading | ✅ DONE | `useNarrativeEngine` preserves V2.1 without backfill |
-| Journey APIs | ✅ DONE | `startJourney`, `advanceNode`, `exitJourney`, `getNode`, `getJourney`, `getNextNodes` |
-| Journey state persistence | ✅ DONE | `activeJourneyId`, `currentNodeId`, `visitedNodes` in session |
-| Entropy bridge | ✅ PRESERVED | Triggers `startJourney()` when hub detected |
+### Phase 2: Cognitive Simulator (Current)
+```
+User Input → Entropy Scoring → Classification
+                   ↓
+        ┌─────────┴─────────┐
+        │                   │
+    LOW/MEDIUM            HIGH
+        │                   │
+        ▼                   ▼
+   Normal Chat      Cognitive Bridge
+                          │
+                    ┌─────┴─────┐
+                    │           │
+                 Accept      Dismiss
+                    │           │
+                    ▼           ▼
+              Start Journey  Cooldown
+```
 
----
+### Phase 3: Knowledge Commons (Future)
+```
+Entropy → Bridge → Journey → Commons Attribution
+                              │
+                       ┌──────┴──────┐
+                       │             │
+                  L1-Hub Links   Citation Preview
+```
 
-## Terminal UI Changes ✅
+## Data Contract
 
-| Item | Status | Implementation |
-|------|--------|----------------|
-| `suggestedTopics` | ✅ REMOVED | No longer in Terminal.tsx |
-| `suggestedLenses` | ✅ REMOVED | No longer in Terminal.tsx |
-| Thread progress UI | ✅ REMOVED | ThreadProgress.tsx deleted |
-| JourneyEnd | ✅ REPLACED | Inline Journey Complete panel added |
-| Navigation buttons | ✅ DONE | "Continue the Journey" chips for primaryNext/alternateNext |
-
----
-
-## Admin Updates ✅
-
-| Item | Status | Implementation |
-|------|--------|----------------|
-| Stop card backfill | ✅ DONE | NarrativeArchitect preserves V2.1 schema directly |
-| Journey/Node view | ✅ DONE | V2.1 schemas show Journeys/Nodes tabs (read-only) |
-| V2.0 compatibility | ✅ PRESERVED | Cards/Personas tabs for V2.0 schemas |
-
----
-
-## Data Contracts ✅
-
-### API Schema (`/api/narrative`)
+### Entropy State (localStorage: `grove-terminal-entropy`)
 ```typescript
-// V2.1 canonical shape:
-{
-  version: "2.1",
-  globalSettings: GlobalSettings,
-  journeys: Record<string, Journey>,
-  nodes: Record<string, JourneyNode>,
-  hubs: Record<string, TopicHub>
+interface EntropyState {
+  lastScore: number;
+  lastClassification: 'low' | 'medium' | 'high';
+  injectionCount: number;           // Max: 2 per session
+  cooldownRemaining: number;        // Decrements each exchange
+  lastInjectionExchange: number;
 }
 ```
 
-### Session State (localStorage)
+### Cluster → Journey Mapping
 ```typescript
-interface TerminalSession {
-  activeLens: string | null;
-  scholarMode: boolean;
-
-  // V2.1 Journey State
-  activeJourneyId: string | null;
-  currentNodeId: string | null;
-  visitedNodes: string[];
-
-  // Deprecated (kept for backward compat)
-  currentThread: string[];
-  currentPosition: number;
-  visitedCards: string[];
-  exchangeCount: number;
-}
+const CLUSTER_JOURNEY_MAP = {
+  'ratchet': 'ratchet',           // Capability propagation
+  'economics': 'stakes',          // Infrastructure bet
+  'architecture': 'stakes',       // Technical architecture
+  'knowledge-commons': 'stakes',  // Knowledge sharing
+  'observer': 'simulation'        // Meta-philosophy
+};
 ```
 
-### localStorage Keys
-| Key | Content |
-|-----|---------|
-| `grove-terminal-lens` | Active lens ID |
-| `grove-terminal-session` | Session state with journey fields |
-| `grove-engagement-state` | Engagement metrics |
-| `grove-entropy-state` | Entropy/bridge cooldowns |
+## Integration Checklist
+
+### Sprint 4-5 (Complete)
+- [x] Entropy detector module created
+- [x] Scoring logic implemented
+- [x] Classification thresholds defined
+- [x] Cluster vocabulary populated
+- [x] Journey mapping established
+- [x] useNarrativeEngine entropy methods added
+- [x] localStorage persistence working
+- [x] CognitiveBridge component created
+- [x] 800ms animation implemented
+- [x] Terminal integration complete
+- [x] Accept/Dismiss handlers wired
+- [x] Cooldown logic functional
+
+### Sprint 6 (In Progress)
+- [ ] Analytics events added
+- [ ] Funnel tracking wired
+- [ ] Thresholds isolated to constants
+- [ ] Journey metadata validated
+- [ ] Baseline metrics documented
+
+## Key Files Reference
+
+| File | Purpose |
+|------|---------|
+| `src/core/engine/entropyDetector.ts` | Scoring, classification, cluster routing |
+| `hooks/useNarrativeEngine.ts` | State management, entropy evaluation |
+| `components/Terminal/CognitiveBridge.tsx` | Bridge UI component |
+| `components/Terminal.tsx` (~L943) | Bridge injection point |
+| `data/narratives.json` | Journey/node/hub definitions |
+| `utils/funnelAnalytics.ts` | Analytics event tracking |
 
 ---
 
-## Key Architectural Decisions
-
-1. **Lenses ≠ Journeys**: Lenses are tonal modifiers only. Changing lens does NOT reset journey progress.
-
-2. **Node Navigation**: Journeys define paths via `primaryNext` and `alternateNext` on each node.
-
-3. **Cognitive Bridge**: Entropy detection triggers `startJourney()` to begin a relevant journey.
-
-4. **Admin Read-Only**: V2.1 admin console is read-only for journeys/nodes (editing to be added in future sprint).
-
----
-
-*Completed: 2025-12-18 by Claude (modest-vaughan worktree)*
+*Last Updated: 2025-12-19*

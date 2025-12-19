@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { Storage } from '@google-cloud/storage';
 import { GoogleGenAI } from '@google/genai';
@@ -1655,6 +1656,45 @@ User's responses:
 
     } catch (error) {
         console.error("Lens generation failed:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- Telemetry API ---
+
+// Log captured concepts to a JSONL stream (for Auto-Hub generation)
+app.post('/api/telemetry/concepts', async (req, res) => {
+    try {
+        const { concepts, context, source_node, timestamp } = req.body;
+
+        if (!concepts || !Array.isArray(concepts)) {
+            return res.status(400).json({ error: "Invalid payload" });
+        }
+
+        const logEntry = {
+            ts: timestamp || new Date().toISOString(),
+            concepts,
+            node: source_node,
+            // Clean newlines from context to keep JSONL strict
+            ctx: context ? context.replace(/[\n\r]+/g, ' ') : ''
+        };
+
+        const logLine = JSON.stringify(logEntry) + '\n';
+        const dataDir = path.join(__dirname, 'data');
+        const logPath = path.join(dataDir, 'concept-stream.jsonl');
+
+        // Ensure data directory exists
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+
+        // Append to file (async)
+        await fs.promises.appendFile(logPath, logLine);
+
+        console.log(`[Telemetry] Logged ${concepts.length} concepts: ${concepts.slice(0, 3).join(', ')}${concepts.length > 3 ? '...' : ''}`);
+        res.json({ success: true, count: concepts.length });
+    } catch (error) {
+        console.error("Telemetry error:", error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -1,47 +1,147 @@
-# SPEC: V2.1 Journey Graph Restoration
+# SPEC: The Cognitive Simulator (Phase 2)
 
-## Goals
-- Replace V2.0 thread/card navigation with authored V2.1 journeys and nodes as the single source of truth.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】
-- Keep lenses as tonal modifiers sourced from `DEFAULT_PERSONAS`, decoupled from journey flow.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L137-L155】
-- Preserve the Cognitive Bridge/entropy hook to offer journey entry points without reintroducing thread generation.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L137-L155】【F:hooks/useNarrativeEngine.ts†L397-L477】
+> **Goal:** Enhance the Terminal from a reactive chatbot into a proactive simulator that detects conversation depth ("entropy") and offers structured deep-dives ("journeys").
 
-## Non-goals
-- No new knowledge base content or topic hubs beyond existing schema defaults; focus is navigation refactor.【F:data/narratives-schema.ts†L107-L178】
-- No redesign of marketing sections outside the Terminal/Admin surfaces.【F:App.tsx†L1-L90】
+## 1. Core Thesis
 
-## Current-State Inventory
-- `useNarrativeEngine` loads `/api/narrative`, falls back to V2.0 personas/cards, and exposes thread APIs (`currentThread`, `advanceThread`, `regenerateThread`).【F:hooks/useNarrativeEngine.ts†L90-L479】
-- Terminal consumes thread APIs, renders `JourneyEnd`, `suggestedTopics`, and lens suggestions tied to V2.0 card entrypoints.【F:components/Terminal.tsx†L200-L324】【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】
-- Migration notes flag `utils/threadGenerator.ts` and `components/Terminal/JourneyEnd.tsx` as deletions; they remain referenced (thread generator import).【F:hooks/useNarrativeEngine.ts†L18-L32】【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L87-L134】
-- AdminDashboard reconstructs V2.0 schemas for flags/hubs, preserving legacy card structures in saves.【F:App.tsx†L90-L200】
+The UX mirrors Grove's **Hybrid Cognition** architecture:
 
-## Target Architecture & Dependency Rules
-- Narrative data: adopt V2.1 journeys/nodes/hubs only; personas come from `DEFAULT_PERSONAS` for tone (no schema personas/cards at runtime).【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L137-L155】【F:hooks/useNarrativeEngine.ts†L214-L334】
-- Hook API: expose journey-centric state (`activeJourneyId`, `currentNodeId`, `visitedNodes`) and navigation (`startJourney`, `advanceNode`, `exitJourney`) without thread functions.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】
-- Terminal UI: render current node context, primary/alternate transitions, and completion actions instead of thread progress or V2.0 suggestions.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L108】
-- Admin: read/write V2.1 journeys/nodes/hubs, avoiding card regeneration on load/save paths.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】
+1. **Local (Freestyle):** Fast, low-latency, surface-level answers. (Simulates local compute)
+2. **Bridge (Entropy):** System detects complexity overload or specific technical depth.
+3. **Cloud (Journey):** System "calls out" to a structured, high-context path. (Simulates cloud injection)
 
-## Migration Plan (High-Level)
-1. Delete/retire V2.0-only artifacts: `utils/threadGenerator.ts`, `components/Terminal/JourneyEnd.tsx`, and thread-specific session fields.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L87-L108】
-2. Refactor `useNarrativeEngine` to load V2.1 schema strictly, surface journey/node helpers, and persist journey state in session storage (no thread generation).【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L73-L86】【F:hooks/useNarrativeEngine.ts†L90-L349】
-3. Rewire Terminal to consume journey/node APIs, remove suggested topics/lenses, and show node context plus navigation buttons tied to `primaryNext`/`alternateNext`.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】【F:components/Terminal.tsx†L200-L324】
-4. Adjust Admin journey tooling to display V2.1 journeys/nodes and ensure save pipeline writes V2.1-compatible payloads without V2.0 backfill.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】【F:App.tsx†L90-L200】
+The Terminal makes this architecture *visible*. When the system detects conversation complexity ("entropy") reaching a threshold, it surfaces a Cognitive Bridge—a moment where the user sees the transition from local/freestyle to cloud/structured cognition happening.
 
-## UI / System Design Spec
-- Terminal Journey Panel: shows active journey title, current node label, context snippet, and buttons for primary/alternate transitions; completion offers Freestyle/new journey options.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L108】
-- Lens Picker: retains existing UI but treated as tone selector; switching lenses must not reset journey state.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L137-L155】【F:hooks/useNarrativeEngine.ts†L197-L229】
-- Cognitive Bridge: continues to evaluate entropy and suggest journeys; injections trigger `startJourney` with entry nodes.【F:hooks/useNarrativeEngine.ts†L397-L477】
-- Admin Journey View: replace card grid with journey list + node viewer/editor suitable for V2.1 fields (id, label, query, contextSnippet, primaryNext, alternateNext).【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】
+## 2. Current Implementation Status
 
-## Acceptance Criteria
-- Engine: `useNarrativeEngine` no longer exposes thread APIs and initializes V2.1 journey state on load (activeJourneyId/currentNodeId null until start).【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L73-L86】
-- Terminal: UI renders node-based journey view and navigation; V2.0 suggestions and JourneyEnd removed from runtime UI; freestyle chat still works with entropy injections.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L108】【F:components/Terminal.tsx†L157-L324】
-- Admin: Journey data loads/saves without V2.0 card backfill, and users can at least view V2.1 journey/node structures without crashes.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】【F:App.tsx†L90-L200】
-- Data integrity: persisted session/local storage no longer stores thread arrays/positions; journey state persistence is compatible with V2.1 fields only.【F:hooks/useNarrativeEngine.ts†L134-L193】【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L73-L86】
+### 2.1 Entropy Detection ✅ IMPLEMENTED
 
-## Test Plan
-- Unit/logic: adjust/add hook tests around journey navigation (start/advance/exit) once available.
-- Integration/manual:
-  - `npm run dev` then verify Terminal journey panel renders and advances via primary/alternate paths.【F:package.json†L6-L10】
-  - Trigger entropy suggestion (chat relevant topic) and confirm bridge starts correct journey without generating threads.【F:hooks/useNarrativeEngine.ts†L397-L477】
-  - Validate Admin journey view loads without V2.0 card conversions and saves cleanly via `/api/admin/narrative`.【F:App.tsx†L90-L200】
+- **Location:** `src/core/engine/entropyDetector.ts`
+- **Trigger:** Analyzes every user message via `useNarrativeEngine.evaluateEntropy()`
+- **Scoring Inputs:**
+  - `exchangeCount` (≥3 exchanges = +30 pts)
+  - `vocabulary` (Matches `TopicHub` tags = +15 pts/term, capped at 3)
+  - `depthMarkers` (e.g., "why exactly", "mechanism" = +20 pts)
+  - `chaining` (e.g., "you mentioned earlier" = +25 pts)
+- **Thresholds:**
+  - `Low (<30)`: Stay in Freestyle
+  - `Medium (30-59)`: Monitor, eligible for injection
+  - `High (≥60)`: Strong injection candidate
+- **Cluster Detection:** Identifies dominant topic cluster from full conversation history
+
+### 2.2 The Cognitive Bridge ✅ IMPLEMENTED
+
+- **Location:** `components/Terminal/CognitiveBridge.tsx`
+- **Behavior:**
+  - Appears inline after the model's response when `shouldInject()` returns true
+  - **Latency Sim:** Shows "Resolving connection..." with pulsing animation for 800ms
+  - **Content:** Displays Journey Title, Node Count, Duration, and covered topics
+  - **Actions:** [Start Journey] (Loads journey) vs. [Continue Freestyle] (Dismisses)
+- **Cooldown:** 5 exchanges after dismissal. Max 2 injections per session.
+
+### 2.3 Routing Strategy ✅ IMPLEMENTED
+
+Maps dominant conversation topics to V2.1 Journey IDs:
+- `ratchet` cluster → `ratchet` journey
+- `economics` cluster → `stakes` journey
+- `architecture` cluster → `stakes` journey
+- `knowledge-commons` cluster → `stakes` journey
+- `observer` cluster → `simulation` journey
+
+## 3. Phase 2 Functional Requirements
+
+### 3.1 Analytics Instrumentation (Sprint 6)
+
+Add tracking events to measure cognitive bridge effectiveness:
+
+| Event | Trigger | Data |
+|-------|---------|------|
+| `bridge_shown` | Bridge renders in chat | `journeyId`, `entropyScore`, `cluster` |
+| `bridge_accepted` | User clicks "Start Journey" | `journeyId`, `timeToDecision` |
+| `bridge_dismissed` | User clicks "Continue Freestyle" or Escape | `journeyId`, `timeToDecision` |
+| `journey_started_from_bridge` | Journey begins after bridge accept | `journeyId`, `entryNodeId` |
+
+### 3.2 Threshold Tuning (Sprint 6)
+
+Current thresholds may need adjustment based on observed behavior:
+
+```typescript
+// Current (may need tuning)
+ENTROPY_THRESHOLDS = {
+  LOW: 30,      // Below this: stay in freestyle
+  MEDIUM: 60,   // At or above: injection eligible
+}
+
+// Tunable constants (isolate in constants.ts)
+ENTROPY_LIMITS = {
+  MAX_INJECTIONS_PER_SESSION: 2,
+  COOLDOWN_EXCHANGES: 5,
+}
+```
+
+### 3.3 Dynamic Journey Metadata (Future)
+
+Replace hardcoded `DEFAULT_JOURNEY_INFO` in CognitiveBridge.tsx with schema-driven metadata:
+
+```typescript
+// Current: Hardcoded in CognitiveBridge.tsx
+const DEFAULT_JOURNEY_INFO: Record<string, JourneyInfo> = { ... }
+
+// Target: Pull from schema
+const journeyInfo = useMemo(() => {
+  const journey = schema?.journeys?.[journeyId];
+  return journey ? {
+    id: journey.id,
+    title: journey.title,
+    nodeCount: journey.nodeIds?.length || 0,
+    estimatedMinutes: journey.estimatedMinutes || 6,
+    coverTopics: journey.coverTopics || []
+  } : DEFAULT_JOURNEY_INFO[journeyId];
+}, [schema, journeyId]);
+```
+
+## 4. Technical Constraints
+
+- **No Refactors:** Do not rewrite `Terminal.tsx`. Inject the bridge via conditional rendering at existing injection point (~L943).
+- **Persistence:** Entropy state (`score`, `cooldown`) persists across page refresh via `localStorage: grove-terminal-entropy`.
+- **Type Safety:** Strict usage of `EntropyState`, `EntropyResult`, `JourneyInfo` interfaces.
+- **Backward Compat:** Session schema changes must include defaults for existing sessions.
+
+## 5. Success Metrics
+
+| Metric | Definition | Target |
+|--------|------------|--------|
+| Activation Rate | % of HIGH entropy conversations where bridge appears | Measure baseline |
+| Acceptance Rate | % of shown bridges where user accepts | >30% |
+| Completion Rate | % of accepted journeys completed (all nodes) | >50% |
+| Return Rate | % of journey completers who return for another journey | Measure baseline |
+
+## 6. Knowledge Commons Connection
+
+Each Journey the Terminal offers corresponds to a validated knowledge cluster in Grove's architecture:
+
+| Journey ID | Knowledge Domain | Commons Equivalent |
+|------------|------------------|-------------------|
+| `ratchet` | Capability propagation thesis | L1-Hub: The Ratchet |
+| `stakes` | Credit economy and efficiency tax | L1-Hub: Economics |
+| `simulation` | Agent cognition and Observer dynamic | L1-Hub: Simulation |
+
+When we build new Journeys, we're performing the same operation that Grove communities will perform: validating knowledge, structuring it for consumption, and making it available for adoption.
+
+## 7. Test Plan
+
+### Unit/Logic
+- Entropy scoring: Verify "why exactly" triggers +20 depth score
+- Cooldown: Verify decrement on each exchange, reset on injection/dismiss
+- Cluster detection: Verify dominant cluster identification from conversation history
+
+### Integration/Manual
+- `npm run dev` then type 3+ messages with technical vocabulary
+- Verify Bridge appears with 800ms animation
+- Verify "Start Journey" transitions to Journey mode
+- Verify "Continue Freestyle" triggers 5-exchange cooldown
+- Verify max 2 injections per session limit
+
+### Analytics (Sprint 6)
+- Verify events fire in console/analytics backend
+- Verify funnel: `bridge_shown` → `bridge_accepted` → `journey_started_from_bridge`
