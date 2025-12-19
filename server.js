@@ -14,6 +14,7 @@ try {
     console.warn("PDF parsing not available:", e.message);
 }
 import { NARRATIVE_ARCHITECT_PROMPT } from './data/prompts.js';
+import { Octokit } from '@octokit/rest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +22,17 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 8080;
 const BUCKET_NAME = process.env.GCS_BUCKET_NAME || 'grove-assets';
+
+// GitHub configuration for sync-back
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO_OWNER = process.env.GITHUB_REPO_OWNER;
+const GITHUB_REPO_NAME = process.env.GITHUB_REPO_NAME;
+const GITHUB_BASE_BRANCH = process.env.GITHUB_BASE_BRANCH || 'main';
+const GITHUB_SYNC_ENABLED = !!(GITHUB_TOKEN && GITHUB_REPO_OWNER && GITHUB_REPO_NAME);
+
+console.log('GitHub Sync:', GITHUB_SYNC_ENABLED ?
+  `Enabled (${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME})` :
+  'Disabled (missing env vars)');
 
 // Initialize Clients
 const storage = new Storage();
@@ -33,6 +45,195 @@ const genai = new GoogleGenAI({ apiKey, vertexai: false });
 
 // Configure Multer (Memory Storage for immediate processing)
 const upload = multer({ storage: multer.memoryStorage() });
+
+// ============================================================================
+// GitHub Sync-Back Helper
+// ============================================================================
+
+/**
+ * syncToGitHub - Sync config to GitHub rolling PR
+ *
+ * @param {string} configName - Config type (e.g., 'narratives')
+ * @param {string} jsonContent - JSON content to commit
+ * @param {string} actor - Actor performing the save (optional)
+ * @returns {Promise<Object>} { success, prUrl?, prNumber?, branchName?, error? }
+ */
+async function syncToGitHub(configName, jsonContent, actor = 'admin') {
+  if (!GITHUB_SYNC_ENABLED) {
+    return {
+      success: false,
+      error: 'GitHub sync disabled (missing env vars)'
+    };
+  }
+
+  const octokit = new Octokit({ auth: GITHUB_TOKEN });
+  const owner = GITHUB_REPO_OWNER;
+  const repo = GITHUB_REPO_NAME;
+  const baseBranch = GITHUB_BASE_BRANCH;
+  const branchName = `bot/config/${configName}`;
+  const filePath = `data/${configName}.json`;
+
+  try {
+    // Get base branch reference
+    const { data: baseRef } = await octokit.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${baseBranch}`
+    });
+    const baseSha = baseRef.object.sha;
+
+    // Check if bot branch exists
+    let branchExists = false;
+    let branchSha = null;
+    try {
+      const { data: branchRef } = await octokit.git.getRef({
+        owner,
+        repo,
+        ref: `heads/${branchName}`
+      });
+      branchExists = true;
+      branchSha = branchRef.object.sha;
+    } catch (err) {
+      if (err.status !== 404) throw err;
+    }
+
+    // Create branch if it doesn't exist
+    if (!branchExists) {
+      await octokit.git.createRef({
+        owner,
+        repo,
+        ref: `refs/heads/${branchName}`,
+        sha: baseSha
+      });
+      branchSha = baseSha;
+      console.log(`[GitSync] Created branch: ${branchName}`);
+    }
+
+    // Get current file SHA if it exists (for update)
+    let currentFileSha = null;
+    let currentContent = null;
+    try {
+      const { data: fileData } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path: filePath,
+        ref: branchName
+      });
+      currentFileSha = fileData.sha;
+      currentContent = Buffer.from(fileData.content, 'base64').toString('utf8');
+    } catch (err) {
+      if (err.status !== 404) throw err;
+    }
+
+    // Check if content has actually changed (avoid empty commits)
+    if (currentContent && currentContent.trim() === jsonContent.trim()) {
+      console.log(`[GitSync] No changes detected, skipping commit`);
+      // Still ensure PR exists
+      const prResult = await ensurePR(octokit, owner, repo, branchName, baseBranch, configName);
+      return {
+        success: true,
+        ...prResult,
+        branchName,
+        message: 'No changes (PR already exists)'
+      };
+    }
+
+    // Create or update file
+    const commitMessage = `Update ${configName} registry [${actor}]`;
+    try {
+      await octokit.repos.createOrUpdateFileContents({
+        owner,
+        repo,
+        path: filePath,
+        message: commitMessage,
+        content: Buffer.from(jsonContent).toString('base64'),
+        branch: branchName,
+        sha: currentFileSha || undefined
+      });
+      console.log(`[GitSync] Committed to ${branchName}: ${filePath}`);
+    } catch (err) {
+      // Retry once on conflict (re-fetch SHA)
+      if (err.status === 409 || err.status === 422) {
+        console.log(`[GitSync] Conflict detected, retrying with fresh SHA...`);
+        const { data: freshFile } = await octokit.repos.getContent({
+          owner,
+          repo,
+          path: filePath,
+          ref: branchName
+        });
+        await octokit.repos.createOrUpdateFileContents({
+          owner,
+          repo,
+          path: filePath,
+          message: commitMessage,
+          content: Buffer.from(jsonContent).toString('base64'),
+          branch: branchName,
+          sha: freshFile.sha
+        });
+        console.log(`[GitSync] Retry succeeded`);
+      } else {
+        throw err;
+      }
+    }
+
+    // Ensure PR exists
+    const prResult = await ensurePR(octokit, owner, repo, branchName, baseBranch, configName);
+
+    return {
+      success: true,
+      ...prResult,
+      branchName
+    };
+
+  } catch (error) {
+    console.error('[GitSync] Error:', error.message);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
+ * ensurePR - Ensure an open PR exists for the branch
+ */
+async function ensurePR(octokit, owner, repo, head, base, configName) {
+  // Check for existing open PR
+  const { data: existingPRs } = await octokit.pulls.list({
+    owner,
+    repo,
+    head: `${owner}:${head}`,
+    base,
+    state: 'open'
+  });
+
+  if (existingPRs.length > 0) {
+    const pr = existingPRs[0];
+    console.log(`[GitSync] PR already exists: #${pr.number}`);
+    return {
+      prUrl: pr.html_url,
+      prNumber: pr.number
+    };
+  }
+
+  // Create new PR
+  const { data: newPR } = await octokit.pulls.create({
+    owner,
+    repo,
+    title: `[Bot] Sync ${configName} registry`,
+    head,
+    base,
+    body: `Automated sync of \`${configName}.json\` from runtime.\n\n` +
+          `This PR accumulates changes from Admin saves.\n\n` +
+          `**Merge this PR** to sync runtime changes back to source.`
+  });
+
+  console.log(`[GitSync] Created PR: #${newPR.number}`);
+  return {
+    prUrl: newPR.html_url,
+    prNumber: newPR.number
+  };
+}
 
 // Middleware for JSON bodies (increased limit for large context payloads)
 app.use(express.json({ limit: '10mb' }));
@@ -498,8 +699,10 @@ app.post('/api/admin/narrative', async (req, res) => {
         }
 
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
+        const jsonContent = JSON.stringify(graphData, null, 2);
 
-        await file.save(JSON.stringify(graphData, null, 2), {
+        // PHASE 1: Immediate runtime write to GCS (critical path)
+        await file.save(jsonContent, {
             contentType: 'application/json',
             metadata: {
                 cacheControl: 'public, max-age=0, no-transform',
@@ -509,7 +712,23 @@ app.post('/api/admin/narrative', async (req, res) => {
         // Invalidate RAG manifest cache (topicHubs may have changed)
         invalidateManifestCache();
 
-        res.json({ success: true, message: "Narrative graph updated" });
+        // PHASE 2: Sync-back to GitHub (best-effort, does not fail runtime save)
+        let gitSync = null;
+        try {
+            gitSync = await syncToGitHub('narratives', jsonContent, 'admin');
+        } catch (syncError) {
+            console.error('[GitSync] Unexpected error:', syncError);
+            gitSync = {
+                success: false,
+                error: syncError.message
+            };
+        }
+
+        res.json({
+            success: true,
+            message: "Saved to Runtime",
+            gitSync
+        });
     } catch (error) {
         console.error("Error saving narrative graph:", error);
         res.status(500).json({ error: error.message });

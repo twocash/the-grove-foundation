@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.14.0",
     "@google/genai": "^1.33.0",
+    "@octokit/rest": "^22.0.1",
     "express": "^4.21.2",
     "lucide-react": "^0.561.0",
     "multer": "^2.0.2",

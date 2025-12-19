@@ -45,6 +45,8 @@ const NarrativeArchitect: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
+  const [prUrl, setPrUrl] = useState<string | null>(null);
+  const [prNumber, setPrNumber] = useState<number | null>(null);
 
   // Navigation state
   const [viewMode, setViewMode] = useState<ViewMode>('library');
@@ -125,6 +127,8 @@ const NarrativeArchitect: React.FC = () => {
     if (!schema) return;
     setSaving(true);
     setStatus('Saving...');
+    setPrUrl(null);
+    setPrNumber(null);
 
     try {
       const res = await fetch('/api/admin/narrative', {
@@ -135,8 +139,21 @@ const NarrativeArchitect: React.FC = () => {
       const data = await res.json();
 
       if (data.success) {
-        setStatus('Saved');
-        setTimeout(() => setStatus(''), 3000);
+        // Handle gitSync metadata
+        if (data.gitSync?.success && data.gitSync.prUrl) {
+          setStatus('Saved to Runtime');
+          setPrUrl(data.gitSync.prUrl);
+          setPrNumber(data.gitSync.prNumber || null);
+        } else if (data.gitSync?.success === false) {
+          setStatus('Saved to Runtime (Git Sync Failed)');
+        } else {
+          setStatus('Saved to Runtime');
+        }
+        setTimeout(() => {
+          setStatus('');
+          setPrUrl(null);
+          setPrNumber(null);
+        }, 5000);
       } else {
         throw new Error(data.error);
       }
@@ -306,11 +323,23 @@ const NarrativeArchitect: React.FC = () => {
         </div>
         <div className="flex items-center gap-3">
           {status && (
-            <span className={`text-xs font-mono px-3 py-1 rounded ${
-              status.includes('Error') ? 'bg-holo-red/20 text-holo-red' : 'bg-holo-lime/20 text-holo-lime'
-            }`}>
-              {status}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-mono px-3 py-1 rounded ${
+                status.includes('Error') ? 'bg-holo-red/20 text-holo-red' : 'bg-holo-lime/20 text-holo-lime'
+              }`}>
+                {status}
+              </span>
+              {prUrl && (
+                <a
+                  href={prUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono px-3 py-1 rounded bg-holo-cyan/20 text-holo-cyan hover:bg-holo-cyan/30 transition-colors"
+                >
+                  View PR #{prNumber}
+                </a>
+              )}
+            </div>
           )}
           <GlowButton
             variant="primary"
