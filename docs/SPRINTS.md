@@ -77,4 +77,64 @@ npm run build
 
 ---
 
+## Sprint 3: Production Fixes + Architecture Hardening ✅ COMPLETE
+
+> **Completed:** 2025-12-18 (same session continuation)
+
+### Issues Fixed
+
+| Issue | Root Cause | Fix |
+|-------|------------|-----|
+| **System Voice not applied** | Server checked `version === "2.0"` but schema was V2.1 | Semantic check: `isModernSchema()` |
+| **Ratchet deep-dive not loading** | Hub `status: "draft"` skipped by server; tags didn't match "7-month clock" | Set `status: "active"`, added tags: "7 month", "7-month", "clock" |
+| **Brittle version checks** | Hardcoded `"2.0"`, `"2.1"` strings throughout codebase | Semantic schema detection |
+
+### Architecture: Semantic Schema Detection
+
+**Problem:** Every version bump required finding and updating multiple version string checks.
+
+**Solution:** Detect schema type by structure, not version strings:
+
+```typescript
+// OLD (brittle)
+if (narratives.version === "2.0") { ... }
+if (narratives.version === "2.1") { ... }
+
+// NEW (semantic)
+if (isModernSchema(narratives)) { ... }  // Has globalSettings
+if (hasJourneys(narratives)) { ... }     // Journey-based navigation
+if (hasCards(narratives)) { ... }        // Card-based navigation
+```
+
+**New Helpers (server.js + narratives-schema.ts):**
+
+| Function | Checks For |
+|----------|------------|
+| `isModernSchema(data)` | Has `globalSettings` (v2+) |
+| `hasJourneys(data)` | Has `journeys` + `nodes` |
+| `hasCards(data)` | Has `cards` + `personas` |
+| `isLegacySchema(data)` | Has `nodes` only (v1) |
+
+**Single constant for new schemas:**
+```typescript
+const CURRENT_SCHEMA_VERSION = "2.1";
+```
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `server.js` | Semantic schema detection, V2+ system prompt support |
+| `data/narratives-schema.ts` | `isModernSchema()`, `hasJourneys()`, `hasCards()`, `CURRENT_SCHEMA_VERSION` |
+| `data/narratives.json` | Ratchet hub tags, status fixes, GCS sync |
+
+### PRs Merged
+
+- PR #25: V2.1 Narrative Engine Migration
+- PR #26: Config: Activate ratchet-effect and diary-system hubs
+- PR #27: Fix System Voice + RAG routing for V2.1
+- PR #28: Refactor: Semantic schema detection
+
+---
+
 *Completed: 2025-12-18 by Claude (modest-vaughan worktree)*
