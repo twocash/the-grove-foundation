@@ -11,10 +11,10 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensPicker, LensBadge, JourneyEnd, ThreadProgress, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
+import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
-import { Card, Persona } from '../data/narratives-schema';
+import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 import SimulationReveal from './Terminal/Reveals/SimulationReveal';
 import CustomLensOffer from './Terminal/Reveals/CustomLensOffer';
@@ -182,7 +182,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Legacy narrative hook for v1 compatibility
-  const { getNextNodes } = useNarrative();
+  const { getNextNodes: getLegacyNextNodes } = useNarrative();
 
   // Custom lens management
   const {
@@ -193,16 +193,27 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     getCustomLens
   } = useCustomLens();
 
-  // New v2 narrative engine
+  // V2.1 Narrative Engine
   const {
-    schema,  // V2.1: Access schema for node->journey lookup
+    schema,
     session,
     selectLens,
     getActiveLensData,
     getEnabledPersonas,
-    getPersonaCards,
     getEntryPoints,
     getNextCards,
+    // V2.1 Journey Navigation
+    startJourney,
+    advanceNode,
+    exitJourney,
+    getJourney,
+    getNode,
+    getNextNodes,
+    activeJourneyId,
+    currentNodeId: engineCurrentNodeId,
+    visitedNodes,
+    addVisitedNode,
+    // Legacy (deprecated but kept for backward compatibility)
     currentThread,
     currentPosition,
     regenerateThread,
@@ -728,15 +739,18 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const handleSuggestion = (hint: string) => handleSend(hint);
   const toggleTerminal = () => setTerminalState(prev => ({ ...prev, isOpen: !prev.isOpen }));
 
-  // Get next nodes - prefer v2 engine, fall back to v1
+  // Get next nodes - prefer V2.1 engine nodes, then V2.0 cards, fall back to V1
   const nextNodes = useMemo(() => {
     if (!currentNodeId) return [];
-    // Try v2 cards first
+    // V2.1: Try journey nodes first
+    const v21Next = getNextNodes(currentNodeId);
+    if (v21Next.length > 0) return v21Next;
+    // V2.0: Try cards
     const v2Next = getNextCards(currentNodeId);
     if (v2Next.length > 0) return v2Next;
-    // Fall back to v1 nodes
-    return getNextNodes(currentNodeId);
-  }, [currentNodeId, getNextCards, getNextNodes]);
+    // V1: Fall back to legacy nodes
+    return getLegacyNextNodes(currentNodeId);
+  }, [currentNodeId, getNextNodes, getNextCards, getLegacyNextNodes]);
 
   // V2.1 Journey context - get current journey info if in a V2.1 journey
   const v21JourneyContext = useMemo(() => {
@@ -774,26 +788,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     };
   }, [currentNodeId, schema, nextNodes.length]);
 
-  // Journey end detection - no next nodes available AND not in an incomplete V2.1 journey
-  // Don't show JourneyEnd if we're in a V2.1 journey that's just missing node definitions
+  // V2.1 Journey end detection - no next nodes available AND not in an incomplete journey
   const isJourneyEnd = currentNodeId && nextNodes.length === 0 && !v21JourneyContext?.isIncomplete;
-
-  // Get suggested lenses for journey end (personas with overlapping cards)
-  const suggestedLenses = useMemo((): Persona[] => {
-    if (!isJourneyEnd) return [];
-    const currentLensId = session.activeLens;
-    return enabledPersonas
-      .filter(p => p.id !== currentLensId)
-      .slice(0, 3);
-  }, [isJourneyEnd, session.activeLens, enabledPersonas]);
-
-  // Get suggested topics for journey end
-  const suggestedTopics = useMemo((): Card[] => {
-    if (!isJourneyEnd || !session.activeLens) return [];
-    return getEntryPoints(session.activeLens)
-      .filter(card => !session.visitedCards.includes(card.id))
-      .slice(0, 2);
-  }, [isJourneyEnd, session.activeLens, getEntryPoints, session.visitedCards]);
 
   return (
     <>
@@ -936,12 +932,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                               entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
                             });
 
-                            if (entryNode) {
-                              console.log('[CognitiveBridge] Starting journey with entry node:', entryNode.id);
-                              // Start the journey by sending the entry node's query
+                            if (journey && entryNode) {
+                              console.log('[CognitiveBridge] Starting journey with startJourney():', bridgeState.journeyId);
+                              // V2.1: Use engine's startJourney to set active journey state
+                              startJourney(bridgeState.journeyId!);
+                              // Send the entry node's query to kick off the conversation
                               handleSend(entryNode.query, entryNode.label, entryNode.id);
                               // Emit journey started event
-                              emit.journeyStarted(bridgeState.journeyId!, journey?.estimatedMinutes || 5);
+                              emit.journeyStarted(bridgeState.journeyId!, journey.estimatedMinutes || 5);
                             } else {
                               console.log('[CognitiveBridge] FALLBACK - no entry node found');
                               // Fallback: Map topic clusters to appropriate personas (legacy behavior)
@@ -1006,19 +1004,31 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     </div>
                   </div>
                 ) : isJourneyEnd ? (
-                  <div className="mb-4">
-                    <JourneyEnd
-                      currentLens={activeLensData}
-                      visitedCards={session.visitedCards}
-                      suggestedTopics={suggestedTopics}
-                      suggestedLenses={suggestedLenses}
-                      onSelectTopic={(card) => handleSend(card.query, card.label, card.id)}
-                      onSelectLens={(personaId) => {
-                        selectLens(personaId);
-                        setCurrentNodeId(null);
-                      }}
-                      onChangeEverything={() => setShowLensPicker(true)}
-                    />
+                  /* V2.1 Journey Complete Panel - replaces JourneyEnd component */
+                  <div className="mb-4 bg-paper/50 border border-grove-forest/20 rounded-lg p-4">
+                    <div className="text-[10px] font-mono uppercase tracking-widest text-grove-forest mb-2">
+                      Journey Complete
+                    </div>
+                    <div className="text-xs text-ink-muted mb-3">
+                      You've explored this path. What's next?
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => {
+                          exitJourney();
+                          setCurrentNodeId(null);
+                        }}
+                        className="px-3 py-2 bg-grove-forest/10 border border-grove-forest/20 rounded-sm text-xs font-sans text-grove-forest hover:bg-grove-forest/20 transition-all"
+                      >
+                        Explore Freely
+                      </button>
+                      <button
+                        onClick={() => setShowLensPicker(true)}
+                        className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
+                      >
+                        Try a Different Lens
+                      </button>
+                    </div>
                   </div>
                 ) : nextNodes.length > 0 ? (
                   /* Curated Narrative Follow-ups */

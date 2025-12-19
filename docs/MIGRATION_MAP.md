@@ -1,23 +1,109 @@
-# MIGRATION MAP
+# MIGRATION MAP - V2.1 Implementation
 
-## Deletions / Deprecations
-- Remove `utils/threadGenerator.ts` and all imports (thread-based scoring obsolete under V2.1).【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L87-L98】【F:hooks/useNarrativeEngine.ts†L18-L32】
-- Remove `components/Terminal/JourneyEnd.tsx` and any references from Terminal UI.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L98-L108】
-- Drop V2.0 session fields (`currentThread`, `currentPosition`, `visitedCards` as card ids) in favor of journey/node tracking.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】【F:hooks/useNarrativeEngine.ts†L284-L359】
+> **Status:** ✅ MIGRATION COMPLETE
+> **Completed:** 2025-12-18
 
-## Engine Refactor
-- Enforce V2.1 schema loading in `useNarrativeEngine`; disallow persona/card backfill and default to journey/node structures only.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L73-L86】【F:hooks/useNarrativeEngine.ts†L90-L133】
-- Replace thread APIs with journey APIs: `startJourney(journeyId)`, `advanceNode(choiceIndex)`, `exitJourney`, `getNode`, `getJourney`, `getNextNodes` derived from node edges.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】
-- Persist journey state (`activeJourneyId`, `currentNodeId`, `visitedNodes`) plus entropy and lens; keep entropy bridge intact.【F:hooks/useNarrativeEngine.ts†L134-L193】【F:hooks/useNarrativeEngine.ts†L397-L477】
+This document tracks the V2.0 → V2.1 migration. All items below have been implemented.
 
-## Terminal UI Changes
-- Remove `suggestedTopics`, `suggestedLenses`, thread progress, and JourneyEnd usage; replace with journey panel showing current node label/contextSnippet and navigation buttons for primary/alternate edges.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L108】【F:components/Terminal.tsx†L157-L324】
-- Align chat handling so node-triggered prompts call API and then `advanceNode` without assuming thread indices.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L56-L86】【F:components/Terminal.tsx†L157-L324】
+---
 
-## Admin Updates
-- Stop reconstructing V2.0 cards on schema load/save; operate directly on journeys/nodes/hubs in admin tabs.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】【F:App.tsx†L90-L200】
-- Provide journey/node view/editor (even minimal read-only) to validate V2.1 data integrity before saves.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L109-L185】
+## Deletions / Deprecations ✅
 
-## Data Contracts
-- Storage payload from `/api/narrative` should match V2.1 shape: `version`, `globalSettings`, `journeys`, `nodes`, `hubs`; personas from `DEFAULT_PERSONAS` locally only.【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L14-L108】【F:hooks/useNarrativeEngine.ts†L214-L334】
-- LocalStorage keys remain (`grove-terminal-lens`, `grove-terminal-session`, entropy key) but session payload drops thread data in favor of journey state.【F:hooks/useNarrativeEngine.ts†L134-L193】【F:docs/V21_MIGRATION_OPEN_ITEMS.md†L73-L86】
+| Item | Status | Notes |
+|------|--------|-------|
+| `utils/threadGenerator.ts` | ✅ DELETED | Thread-based scoring obsolete under V2.1 |
+| `components/Terminal/JourneyEnd.tsx` | ✅ DELETED | Replaced with inline Journey Complete panel |
+| `components/Terminal/ThreadProgress.tsx` | ✅ DELETED | Progress now via journey node position |
+| V2.0 session fields | ✅ DEPRECATED | `currentThread`, `currentPosition` kept as shims only |
+
+---
+
+## Engine Refactor ✅
+
+| Item | Status | Implementation |
+|------|--------|----------------|
+| V2.1 schema loading | ✅ DONE | `useNarrativeEngine` preserves V2.1 without backfill |
+| Journey APIs | ✅ DONE | `startJourney`, `advanceNode`, `exitJourney`, `getNode`, `getJourney`, `getNextNodes` |
+| Journey state persistence | ✅ DONE | `activeJourneyId`, `currentNodeId`, `visitedNodes` in session |
+| Entropy bridge | ✅ PRESERVED | Triggers `startJourney()` when hub detected |
+
+---
+
+## Terminal UI Changes ✅
+
+| Item | Status | Implementation |
+|------|--------|----------------|
+| `suggestedTopics` | ✅ REMOVED | No longer in Terminal.tsx |
+| `suggestedLenses` | ✅ REMOVED | No longer in Terminal.tsx |
+| Thread progress UI | ✅ REMOVED | ThreadProgress.tsx deleted |
+| JourneyEnd | ✅ REPLACED | Inline Journey Complete panel added |
+| Navigation buttons | ✅ DONE | "Continue the Journey" chips for primaryNext/alternateNext |
+
+---
+
+## Admin Updates ✅
+
+| Item | Status | Implementation |
+|------|--------|----------------|
+| Stop card backfill | ✅ DONE | NarrativeArchitect preserves V2.1 schema directly |
+| Journey/Node view | ✅ DONE | V2.1 schemas show Journeys/Nodes tabs (read-only) |
+| V2.0 compatibility | ✅ PRESERVED | Cards/Personas tabs for V2.0 schemas |
+
+---
+
+## Data Contracts ✅
+
+### API Schema (`/api/narrative`)
+```typescript
+// V2.1 canonical shape:
+{
+  version: "2.1",
+  globalSettings: GlobalSettings,
+  journeys: Record<string, Journey>,
+  nodes: Record<string, JourneyNode>,
+  hubs: Record<string, TopicHub>
+}
+```
+
+### Session State (localStorage)
+```typescript
+interface TerminalSession {
+  activeLens: string | null;
+  scholarMode: boolean;
+
+  // V2.1 Journey State
+  activeJourneyId: string | null;
+  currentNodeId: string | null;
+  visitedNodes: string[];
+
+  // Deprecated (kept for backward compat)
+  currentThread: string[];
+  currentPosition: number;
+  visitedCards: string[];
+  exchangeCount: number;
+}
+```
+
+### localStorage Keys
+| Key | Content |
+|-----|---------|
+| `grove-terminal-lens` | Active lens ID |
+| `grove-terminal-session` | Session state with journey fields |
+| `grove-engagement-state` | Engagement metrics |
+| `grove-entropy-state` | Entropy/bridge cooldowns |
+
+---
+
+## Key Architectural Decisions
+
+1. **Lenses ≠ Journeys**: Lenses are tonal modifiers only. Changing lens does NOT reset journey progress.
+
+2. **Node Navigation**: Journeys define paths via `primaryNext` and `alternateNext` on each node.
+
+3. **Cognitive Bridge**: Entropy detection triggers `startJourney()` to begin a relevant journey.
+
+4. **Admin Read-Only**: V2.1 admin console is read-only for journeys/nodes (editing to be added in future sprint).
+
+---
+
+*Completed: 2025-12-18 by Claude (modest-vaughan worktree)*
