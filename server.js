@@ -461,14 +461,25 @@ app.post('/api/admin/narrative', async (req, res) => {
         const graphData = req.body;
 
         // Validate based on version
-        if (graphData.version === "2.0") {
-            // V2 schema validation
-            if (!graphData.personas || !graphData.cards || !graphData.globalSettings) {
+        if (graphData.version?.startsWith("2.")) {
+            // V2+ schema validation (2.0 or 2.1)
+            if (!graphData.globalSettings) {
                 return res.status(400).json({
-                    error: "Invalid v2 schema: 'personas', 'cards', and 'globalSettings' are required."
+                    error: "Invalid v2+ schema: 'globalSettings' is required."
                 });
             }
-            console.log(`Saving v2 narrative schema. Cards: ${Object.keys(graphData.cards).length}, Personas: ${Object.keys(graphData.personas).length}`);
+            // V2.0 requires personas/cards, V2.1 uses journeys/nodes
+            if (graphData.version === "2.0" && (!graphData.personas || !graphData.cards)) {
+                return res.status(400).json({
+                    error: "Invalid v2.0 schema: 'personas' and 'cards' are required."
+                });
+            }
+            if (graphData.version === "2.1" && (!graphData.journeys || !graphData.nodes)) {
+                return res.status(400).json({
+                    error: "Invalid v2.1 schema: 'journeys' and 'nodes' are required."
+                });
+            }
+            console.log(`Saving v${graphData.version} narrative schema.`);
         } else if (graphData.version === "1.0" || graphData.nodes) {
             // V1 schema validation (backwards compatibility)
             if (!graphData.nodes) {
@@ -476,7 +487,7 @@ app.post('/api/admin/narrative', async (req, res) => {
             }
             console.log(`Saving v1 narrative schema. Nodes: ${Object.keys(graphData.nodes).length}`);
         } else {
-            return res.status(400).json({ error: "Unknown schema version. Expected '1.0' or '2.0'." });
+            return res.status(400).json({ error: "Unknown schema version. Expected '1.0', '2.0', or '2.1'." });
         }
 
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
@@ -633,8 +644,8 @@ async function fetchActiveSystemPrompt() {
         const [content] = await file.download();
         const narratives = JSON.parse(content.toString());
 
-        // Check for v2 schema with system prompt versions
-        if (narratives.version === "2.0" && narratives.globalSettings?.systemPromptVersions) {
+        // Check for v2+ schema with system prompt versions
+        if (narratives.version?.startsWith("2.") && narratives.globalSettings?.systemPromptVersions) {
             const versions = narratives.globalSettings.systemPromptVersions;
             const activeId = narratives.globalSettings.activeSystemPromptId;
 
