@@ -377,17 +377,32 @@ const DEFAULT_GLOBAL_SETTINGS_V2 = {
     topicHubs: DEFAULT_TOPIC_HUBS
 };
 
-// Helper: Check if schema is v1 format
-function isV1Schema(data) {
-    return data && data.version === "1.0" && typeof data.nodes === 'object';
+// ============================================================================
+// SCHEMA VERSION DETECTION (Semantic, not string-based)
+// ============================================================================
+// Instead of checking version strings, we detect schema type by structure.
+// This is more robust as new versions can be added without changing checks.
+
+const CURRENT_SCHEMA_VERSION = "2.1"; // Used when creating new schemas
+
+// Helper: Check if schema is legacy v1 format (nodes-only, no globalSettings)
+function isLegacySchema(data) {
+    return data && typeof data.nodes === 'object' && !data.globalSettings;
 }
 
-// Helper: Check if schema is v2 format
-function isV2Schema(data) {
-    return data && data.version === "2.0" &&
-           typeof data.personas === 'object' &&
-           typeof data.cards === 'object' &&
-           typeof data.globalSettings === 'object';
+// Helper: Check if schema is modern format (has globalSettings)
+function isModernSchema(data) {
+    return data && typeof data.globalSettings === 'object';
+}
+
+// Helper: Check if schema uses journey-based navigation (v2.1+)
+function hasJourneys(data) {
+    return data && typeof data.journeys === 'object' && typeof data.nodes === 'object';
+}
+
+// Helper: Check if schema uses card-based navigation (v2.0)
+function hasCards(data) {
+    return data && typeof data.cards === 'object' && typeof data.personas === 'object';
 }
 
 // Helper: Migrate v1 node to v2 card
@@ -414,7 +429,7 @@ function migrateV1ToV2(v1Data) {
     }
 
     return {
-        version: "2.0",
+        version: "2.0", // Migration target is 2.0 (card-based)
         globalSettings: DEFAULT_GLOBAL_SETTINGS_V2,
         personas: DEFAULT_PERSONAS_V2,
         cards
@@ -428,26 +443,27 @@ app.get('/api/narrative', async (req, res) => {
         const [exists] = await file.exists();
 
         if (!exists) {
-            // Return empty v2 schema for new installations
+            // Return empty modern schema for new installations
             return res.json({
-                version: "2.0",
+                version: CURRENT_SCHEMA_VERSION,
                 globalSettings: DEFAULT_GLOBAL_SETTINGS_V2,
-                personas: DEFAULT_PERSONAS_V2,
-                cards: {}
+                journeys: {},
+                nodes: {},
+                hubs: {}
             });
         }
 
         const [content] = await file.download();
         const json = JSON.parse(content.toString());
 
-        // Auto-migrate v1 to v2 on read (doesn't save - client handles that)
-        if (isV1Schema(json)) {
-            console.log("Migrating v1 narrative schema to v2 format...");
-            const v2Schema = migrateV1ToV2(json);
-            return res.json(v2Schema);
+        // Auto-migrate legacy schema on read (doesn't save - client handles that)
+        if (isLegacySchema(json)) {
+            console.log("Migrating legacy schema to modern format...");
+            const modernSchema = migrateV1ToV2(json);
+            return res.json(modernSchema);
         }
 
-        // Already v2 or unknown format - return as-is
+        // Modern schema - return as-is
         res.json(json);
     } catch (error) {
         console.error("Error reading narrative graph:", error);
@@ -455,39 +471,30 @@ app.get('/api/narrative', async (req, res) => {
     }
 });
 
-// POST (Save) Narrative Graph (supports both v1 and v2)
+// POST (Save) Narrative Graph (semantic validation)
 app.post('/api/admin/narrative', async (req, res) => {
     try {
         const graphData = req.body;
 
-        // Validate based on version
-        if (graphData.version?.startsWith("2.")) {
-            // V2+ schema validation (2.0 or 2.1)
-            if (!graphData.globalSettings) {
-                return res.status(400).json({
-                    error: "Invalid v2+ schema: 'globalSettings' is required."
-                });
+        // Validate schema structure (semantic, not version-string based)
+        if (isModernSchema(graphData)) {
+            // Modern schema - must have globalSettings
+            // Journey-based schemas need journeys+nodes, card-based need cards+personas
+            if (hasJourneys(graphData)) {
+                console.log(`Saving journey-based schema (v${graphData.version || 'unknown'}).`);
+            } else if (hasCards(graphData)) {
+                console.log(`Saving card-based schema (v${graphData.version || 'unknown'}).`);
+            } else {
+                // Has globalSettings but no navigation structure - allow for settings-only saves
+                console.log(`Saving settings-only schema (v${graphData.version || 'unknown'}).`);
             }
-            // V2.0 requires personas/cards, V2.1 uses journeys/nodes
-            if (graphData.version === "2.0" && (!graphData.personas || !graphData.cards)) {
-                return res.status(400).json({
-                    error: "Invalid v2.0 schema: 'personas' and 'cards' are required."
-                });
-            }
-            if (graphData.version === "2.1" && (!graphData.journeys || !graphData.nodes)) {
-                return res.status(400).json({
-                    error: "Invalid v2.1 schema: 'journeys' and 'nodes' are required."
-                });
-            }
-            console.log(`Saving v${graphData.version} narrative schema.`);
-        } else if (graphData.version === "1.0" || graphData.nodes) {
-            // V1 schema validation (backwards compatibility)
-            if (!graphData.nodes) {
-                return res.status(400).json({ error: "Invalid v1 schema: 'nodes' is required." });
-            }
-            console.log(`Saving v1 narrative schema. Nodes: ${Object.keys(graphData.nodes).length}`);
+        } else if (isLegacySchema(graphData)) {
+            // Legacy v1 schema - nodes without globalSettings
+            console.log(`Saving legacy schema. Nodes: ${Object.keys(graphData.nodes).length}`);
         } else {
-            return res.status(400).json({ error: "Unknown schema version. Expected '1.0', '2.0', or '2.1'." });
+            return res.status(400).json({
+                error: "Invalid schema: must have either 'globalSettings' (modern) or 'nodes' (legacy)."
+            });
         }
 
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
@@ -644,8 +651,8 @@ async function fetchActiveSystemPrompt() {
         const [content] = await file.download();
         const narratives = JSON.parse(content.toString());
 
-        // Check for v2+ schema with system prompt versions
-        if (narratives.version?.startsWith("2.") && narratives.globalSettings?.systemPromptVersions) {
+        // Check for modern schema with system prompt versions (semantic check)
+        if (isModernSchema(narratives) && narratives.globalSettings?.systemPromptVersions) {
             const versions = narratives.globalSettings.systemPromptVersions;
             const activeId = narratives.globalSettings.activeSystemPromptId;
 
