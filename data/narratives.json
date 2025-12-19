@@ -39,7 +39,12 @@
       "path": "hubs/meta-philosophy/",
       "primaryFile": "you-are-already-here.md",
       "status": "active",
-      "tags": ["meta", "architecture", "simulation", "observer"]
+      "tags": [
+        "meta",
+        "architecture",
+        "simulation",
+        "observer"
+      ]
     },
     "infrastructure-bet": {
       "id": "infrastructure-bet",
@@ -47,23 +52,36 @@
       "path": "hubs/infrastructure-bet/",
       "primaryFile": "economics-deep-dive.md",
       "status": "active",
-      "tags": ["$380 billion", "capex", "rent", "ownership"]
+      "tags": [
+        "$380 billion",
+        "capex",
+        "rent",
+        "ownership"
+      ]
     },
     "ratchet-effect": {
       "id": "ratchet-effect",
       "title": "The Ratchet Effect",
       "path": "hubs/ratchet-effect/",
       "primaryFile": "ratchet-deep-dive.md",
-      "status": "draft",
-      "tags": ["ratchet", "doubling", "frontier"]
+      "status": "active",
+      "tags": [
+        "ratchet",
+        "doubling",
+        "frontier"
+      ]
     },
     "diary-system": {
       "id": "diary-system",
       "title": "The Diary System",
       "path": "hubs/diary-system/",
       "primaryFile": "diary-deep-dive.md",
-      "status": "draft",
-      "tags": ["diary", "memory", "narrative"]
+      "status": "active",
+      "tags": [
+        "diary",
+        "memory",
+        "narrative"
+      ]
     }
   },
   "journeys": {
@@ -93,7 +111,7 @@
       "description": "Why AI capability is doubling every 7 months—and why you're 21 months behind.",
       "entryNode": "ratchet-hook",
       "linkedHubId": "ratchet-effect",
-      "status": "draft"
+      "status": "active"
     }
   },
   "nodes": {
@@ -106,7 +124,9 @@
       "journeyId": "simulation",
       "sequenceOrder": 1,
       "primaryNext": "sim-split",
-      "alternateNext": ["sim-observer"]
+      "alternateNext": [
+        "sim-observer"
+      ]
     },
     "sim-split": {
       "id": "sim-split",
@@ -117,7 +137,9 @@
       "journeyId": "simulation",
       "sequenceOrder": 2,
       "primaryNext": "sim-observer",
-      "alternateNext": ["sim-recursion"]
+      "alternateNext": [
+        "sim-recursion"
+      ]
     },
     "sim-observer": {
       "id": "sim-observer",
@@ -128,7 +150,9 @@
       "journeyId": "simulation",
       "sequenceOrder": 3,
       "primaryNext": "sim-recursion",
-      "alternateNext": ["sim-proof"]
+      "alternateNext": [
+        "sim-proof"
+      ]
     },
     "sim-recursion": {
       "id": "sim-recursion",
@@ -139,7 +163,9 @@
       "journeyId": "simulation",
       "sequenceOrder": 4,
       "primaryNext": "sim-proof",
-      "alternateNext": ["stakes-380b"]
+      "alternateNext": [
+        "stakes-380b"
+      ]
     },
     "sim-proof": {
       "id": "sim-proof",
@@ -150,7 +176,9 @@
       "journeyId": "simulation",
       "sequenceOrder": 5,
       "primaryNext": "stakes-380b",
-      "alternateNext": ["ratchet-hook"]
+      "alternateNext": [
+        "ratchet-hook"
+      ]
     },
     "stakes-380b": {
       "id": "stakes-380b",
@@ -161,7 +189,9 @@
       "journeyId": "stakes",
       "sequenceOrder": 1,
       "primaryNext": "stakes-rental",
-      "alternateNext": ["stakes-ratchet"]
+      "alternateNext": [
+        "stakes-ratchet"
+      ]
     },
     "stakes-rental": {
       "id": "stakes-rental",
@@ -172,7 +202,9 @@
       "journeyId": "stakes",
       "sequenceOrder": 2,
       "primaryNext": "stakes-dependency",
-      "alternateNext": ["sim-hook"]
+      "alternateNext": [
+        "sim-hook"
+      ]
     },
     "stakes-dependency": {
       "id": "stakes-dependency",
@@ -183,7 +215,9 @@
       "journeyId": "stakes",
       "sequenceOrder": 3,
       "primaryNext": "sim-hook",
-      "alternateNext": ["ratchet-hook"]
+      "alternateNext": [
+        "ratchet-hook"
+      ]
     },
     "ratchet-hook": {
       "id": "ratchet-hook",
