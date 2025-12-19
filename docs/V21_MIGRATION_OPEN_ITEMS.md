@@ -1,20 +1,31 @@
-# V2.1 Migration: Open Items for Guided UX Fix
+# V2.1 Migration: Completed
 
 > **Date**: 2025-12-18
-> **Status**: Architecture analysis complete, ready for comprehensive refactor
-> **Context**: AI agent drift during V2.0→V2.1 migration created hybrid code that should be cleaned up
+> **Status**: ✅ MIGRATION COMPLETE
+> **Context**: V2.1 Journey/Node architecture now canonical; V2.0 Thread/Card artifacts removed
 
-## Current State Summary
+## Migration Summary
 
-The codebase has **dual-model support** that should be deprecated. V2.1 is the canonical schema, but V2.0 artifacts remain throughout, causing:
-- Token burn from compatibility checks
-- Confusing UX flows (JourneyEnd forcing lens changes mid-journey)
-- Broken admin consoles (NarrativeArchitect designed for V2.0 cards/personas)
+The V2.1 migration has been completed across two sprints:
+
+### Sprint 1: Journey Engine + Terminal Refactor ✅
+- **useNarrativeEngine.ts**: Removed threadGenerator import, added V2.1 journey methods (`startJourney`, `advanceNode`, `exitJourney`, `getJourney`, `getNode`, `getNextNodes`)
+- **Terminal.tsx**: Removed `suggestedTopics`, `suggestedLenses`, `JourneyEnd`; added inline Journey Complete panel
+- **Session state**: Now uses `activeJourneyId`, `currentNodeId`, `visitedNodes` (deprecated fields kept as shims)
+- **TRIPWIRE enforced**: Lens switching does NOT reset journey state
+
+### Sprint 2: Admin Alignment + Cleanup ✅
+- **Dead code removed**: `utils/threadGenerator.ts`, `components/Terminal/JourneyEnd.tsx`, `components/Terminal/ThreadProgress.tsx`
+- **NarrativeArchitect.tsx**: Updated to V2.1-aware UI (Journeys/Nodes view for V2.1 schemas, Cards/Personas for V2.0)
+- **Schema loading**: V2.1 schemas preserved without card backfill
+- **Documentation**: Updated to reflect V2.1-only runtime
+
+---
 
 ## V2.1 Canonical Model
 
 ```typescript
-// What SHOULD drive the experience:
+// Current canonical schema structure:
 {
   version: "2.1",
   globalSettings: { ... },      // Feature flags, prompts, loading messages
@@ -40,105 +51,28 @@ The codebase has **dual-model support** that should be deprecated. V2.1 is the c
 }
 ```
 
-## V2.0 Legacy (Should Be Removed)
+---
 
-```typescript
-// What's STILL in the code but shouldn't drive V2.1:
-{
-  version: "2.0",
-  personas: Record<string, Persona>,  // IN SCHEMA - should only be DEFAULT_PERSONAS
-  cards: Record<string, Card>         // Replaced by nodes
-}
-```
+## Files Changed
+
+| File | Change | Status |
+|------|--------|--------|
+| `hooks/useNarrativeEngine.ts` | V2.1 journey methods, deprecated thread shims | ✅ Complete |
+| `components/Terminal.tsx` | Removed V2.0 artifacts, inline journey panel | ✅ Complete |
+| `components/Terminal/index.ts` | Removed JourneyEnd, ThreadProgress exports | ✅ Complete |
+| `utils/threadGenerator.ts` | **DELETED** | ✅ Removed |
+| `components/Terminal/JourneyEnd.tsx` | **DELETED** | ✅ Removed |
+| `components/Terminal/ThreadProgress.tsx` | **DELETED** | ✅ Removed |
+| `src/foundation/consoles/NarrativeArchitect.tsx` | V2.1 Journey/Node view | ✅ Complete |
+| `data/narratives-schema.ts` | V2.1 types added | ✅ Complete |
 
 ---
 
-## Open Items: Files to Refactor
-
-### Priority 1: Terminal.tsx (Critical Path)
-
-**Current issues:**
-- `suggestedTopics` - calls `getEntryPoints()` which uses V2.0 cards
-- `suggestedLenses` - suggests lens changes mid-journey
-- `JourneyEnd` component - forces lens selection, breaks journey flow
-- `currentThread` / `currentPosition` - V2.0 thread concept, not V2.1 node navigation
-- `getNextCards()` - tries V2.0 cards before V2.1 nodes
-
-**Target state:**
-- Remove `suggestedTopics`, `suggestedLenses`
-- Remove or radically simplify `JourneyEnd`
-- Navigation driven by V2.1 `nodes[id].primaryNext` / `alternateNext`
-- Progress tracked by journey node position, not thread index
-
-### Priority 2: useNarrativeEngine.ts
-
-**Current issues:**
-- Loads `schema.cards` and `schema.personas` from API
-- Falls back to V2.0 structure when V2.1 detected
-- `getPersonaCards()`, `getEntryPoints()` - V2.0 concepts
-- `currentThread`, `regenerateThread()` - V2.0 thread generation
-
-**Target state:**
-- Remove card/persona loading from schema
-- Use `DEFAULT_PERSONAS` for lenses (tone filters only)
-- Add `getJourney()`, `getJourneyNodes()`, `getNode()`
-- Journey state: `activeJourney`, `visitedNodes`, `currentNodeId`
-
-### Priority 3: threadGenerator.ts
-
-**Current issues:**
-- Entire file is V2.0 concept (generate threads from persona arcEmphasis)
-- `suggestNewTopics()` - uses cards
-- `detectBestLens()` - uses cards
-
-**Target state:**
-- **DELETE THIS FILE** or gut it completely
-- V2.1 journeys define their own node sequences via `primaryNext`/`alternateNext`
-
-### Priority 4: JourneyEnd.tsx
-
-**Current issues:**
-- Shows "Same Topic, New Lens" which kills journey
-- Shows "Same Lens, New Topic" which requires V2.0 cards
-- Designed for V2.0 card-based exploration
-
-**Target state:**
-- **DELETE or replace** with V2.1 journey completion component
-- Options should be: "Continue Journey", "Start New Journey", "Freestyle"
-
-### Priority 5: Admin Consoles
-
-**NarrativeArchitect.tsx:**
-- Built for V2.0 cards/personas
-- Crashes on V2.1 (fixed with guards, but fundamentally wrong tool)
-- Needs V2.1 Journey/Node editor instead
-
-**RealityTuner.tsx:**
-- Works with V2.1 after normalization fix
-- Still references V2.0 fallback schema
-
----
-
-## Files with V2.0 Dependencies
-
-| File | V2.0 Artifacts | Action |
-|------|----------------|--------|
-| `components/Terminal.tsx` | suggestedTopics, suggestedLenses, JourneyEnd, currentThread | Refactor |
-| `hooks/useNarrativeEngine.ts` | getPersonaCards, getEntryPoints, threadGenerator usage | Refactor |
-| `utils/threadGenerator.ts` | Entire file is V2.0 | Delete |
-| `components/Terminal/JourneyEnd.tsx` | Card-based suggestions | Delete/Replace |
-| `components/Admin/NarrativeConsole.tsx` | V2.0 card editor | Legacy, ignore |
-| `src/foundation/consoles/NarrativeArchitect.tsx` | V2.0 card/persona editor | Replace with V2.1 editor |
-| `data/narratives-schema.ts` | NarrativeSchemaV2 includes cards/personas | Keep for types, remove runtime usage |
-| `App.tsx` | V2.0 fallback schema | Update fallback |
-
----
-
-## What SHOULD Remain
+## What Remains (By Design)
 
 ### DEFAULT_PERSONAS (Lenses as Tone Filters)
 ```typescript
-// In data/default-personas.ts - KEEP THIS
+// In data/default-personas.ts - KEPT
 const DEFAULT_PERSONAS = {
   'freestyle': { toneGuidance: "...", ... },
   'concerned-citizen': { toneGuidance: "...", ... },
@@ -147,52 +81,71 @@ const DEFAULT_PERSONAS = {
 ```
 Lenses modify HOW content is presented (tone, vocabulary), not WHAT content is shown.
 
-### LensPicker Component
-Keep but rename conceptually to "tone picker". User can change lens without affecting journey progress.
+### V2.0 Backward Compatibility (Shims)
+The following are kept as deprecated shims for backward compatibility:
+- `currentThread`, `currentPosition` in session state
+- `regenerateThread()`, `advanceThread()`, `getThreadCard()` methods
+- `getPersonaCards()`, `getEntryPoints()`, `getNextCards()` for V2.0 schemas
 
 ### Entropy/Cognitive Bridge
-Keep - this correctly suggests V2.1 journeys based on conversation entropy.
+Correctly suggests V2.1 journeys based on conversation entropy.
 
 ---
 
-## Proposed Refactor Steps
+## Key Architecture Decisions
 
-### Phase 1: Remove Dead Code
-1. Delete `utils/threadGenerator.ts`
-2. Delete `components/Terminal/JourneyEnd.tsx`
-3. Remove `suggestedTopics`, `suggestedLenses` from Terminal.tsx
-4. Remove `getPersonaCards`, `getEntryPoints` usage
+### 1. Lens ≠ Journey
+Lenses are tonal modifiers only. Changing a lens mid-journey does NOT reset journey progress.
 
-### Phase 2: Simplify useNarrativeEngine
-1. Remove card/persona schema loading
-2. Add journey-focused methods:
-   - `getJourney(id)` → Journey
-   - `getNode(id)` → Node
-   - `getNextNodes(nodeId)` → Node[] (from primaryNext/alternateNext)
-3. Update session state:
-   - Remove `currentThread`, `currentPosition`
-   - Add `activeJourney`, `currentNodeId`, `visitedNodes`
+### 2. Journey State
+```typescript
+interface JourneySessionState {
+  activeJourneyId: string | null;   // Current journey (null = freestyle)
+  currentNodeId: string | null;     // Current position in journey
+  visitedNodes: string[];           // Nodes visited in this session
+}
+```
 
-### Phase 3: Update Terminal Navigation
-1. Navigation driven by `nodes[id].primaryNext` / `alternateNext`
-2. Journey progress shown as "Node X of Y"
-3. Journey completion triggers "What's Next" (start new journey, freestyle)
+### 3. Node Navigation
+```typescript
+// V2.1 node structure
+interface JourneyNode {
+  id: string;
+  journeyId: string;
+  primaryNext?: string;       // Main continuation
+  alternateNext?: string[];   // Branch options
+}
+```
 
-### Phase 4: Admin Console
-1. Create V2.1 Journey Editor (or update NarrativeArchitect)
-2. Edit journeys, nodes, hubs directly
-3. Remove V2.0 card/persona editing UI
+### 4. Admin Console
+- V2.1 schemas show Journeys/Nodes tabs (read-only)
+- V2.0 schemas show Cards/Personas tabs (editable)
+- No automatic card backfill from V2.1 schemas
 
 ---
 
-## Deployment Verification
+## Testing Checklist
 
-**Current production state (as of 2025-12-18):**
-- Revision: `grove-foundation-00093-vhw`
-- Main branch: `c4386e7`
-- All worktree changes merged to main
+- [x] Build passes: `npm run build`
+- [x] V2.1 journey navigation works in Terminal
+- [x] Lens switching preserves journey state
+- [x] Cognitive Bridge triggers `startJourney()`
+- [x] Journey completion shows inline panel
+- [x] NarrativeArchitect loads V2.1 without crash
+- [x] V2.0 schemas still functional (backward compat)
 
-**To verify:**
+---
+
+## Deployment Notes
+
+After merging, deploy with:
+```bash
+cd C:\GitHub\the-grove-foundation
+git fetch origin && git pull origin main
+gcloud builds submit --config cloudbuild.yaml
+```
+
+Verify:
 ```bash
 gcloud run services describe grove-foundation --region=us-central1 \
   --format="value(status.latestReadyRevisionName)"
@@ -200,17 +153,4 @@ gcloud run services describe grove-foundation --region=us-central1 \
 
 ---
 
-## Next Session Checklist
-
-- [ ] Start fresh Claude Code session
-- [ ] Pull latest main: `git pull origin main`
-- [ ] Review this document
-- [ ] Execute Phase 1: Remove dead code
-- [ ] Execute Phase 2: Simplify useNarrativeEngine
-- [ ] Execute Phase 3: Update Terminal navigation
-- [ ] Test V2.1 journey flow end-to-end
-- [ ] Deploy and verify
-
----
-
-*Last Updated: 2025-12-18 by Claude (beautiful-shamir worktree)*
+*Completed: 2025-12-18 by Claude (modest-vaughan worktree)*

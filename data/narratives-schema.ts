@@ -101,6 +101,55 @@ export const DEFAULT_PERSONA_PROMPT_CONFIG: Omit<PersonaPromptConfig, 'toneGuida
 };
 
 // ============================================================================
+// V2.1 JOURNEY TYPES
+// ============================================================================
+
+export type JourneyStatus = 'active' | 'draft';
+
+export interface Journey {
+  id: string;
+  title: string;
+  description: string;
+  entryNode: string;              // Node ID where journey starts
+  targetAha: string;              // The key insight users should reach
+  linkedHubId?: string;           // Foreign key to TopicHub.id
+  estimatedMinutes: number;       // Expected time to complete
+  icon?: string;                  // Lucide icon name
+  color?: string;                 // Tailwind color class
+  status: JourneyStatus;          // 'active' | 'draft'
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JourneyNode {
+  id: string;
+  label: string;                  // User-facing question/prompt
+  query: string;                  // LLM prompt instruction
+  contextSnippet?: string;        // Verbatim RAG override
+  sectionId?: string;             // Visual grouping
+  journeyId: string;              // Foreign key to Journey.id
+  sequenceOrder?: number;         // 1, 2, 3... for linear progression
+  primaryNext?: string;           // Main continuation node
+  alternateNext?: string[];       // Branch options
+}
+
+// ============================================================================
+// V2.1 SESSION STATE (replaces thread-based state)
+// ============================================================================
+
+export interface JourneySessionState {
+  activeJourneyId: string | null;   // Current journey (null = freestyle)
+  currentNodeId: string | null;     // Current position in journey
+  visitedNodes: string[];           // Nodes visited in this session
+}
+
+export const DEFAULT_JOURNEY_SESSION: JourneySessionState = {
+  activeJourneyId: null,
+  currentNodeId: null,
+  visitedNodes: []
+};
+
+// ============================================================================
 // TOPIC HUBS
 // ============================================================================
 
@@ -238,27 +287,41 @@ export interface GlobalSettings {
 }
 
 // ============================================================================
-// FULL SCHEMA V2
+// FULL SCHEMA V2 (supports both 2.0 and 2.1)
 // ============================================================================
 
 export interface NarrativeSchemaV2 {
-  version: "2.0";
+  version: "2.0" | "2.1";
   globalSettings: GlobalSettings;
-  personas: Record<string, Persona>;
-  cards: Record<string, Card>;
+
+  // V2.0 fields (personas/cards)
+  personas?: Record<string, Persona>;
+  cards?: Record<string, Card>;
+
+  // V2.1 fields (journeys/nodes/hubs)
+  journeys?: Record<string, Journey>;
+  nodes?: Record<string, JourneyNode>;
+  hubs?: Record<string, TopicHub>;
 }
 
 // ============================================================================
-// TERMINAL SESSION STATE
+// TERMINAL SESSION STATE (V2.1 - Journey-based)
 // ============================================================================
 
 export interface TerminalSession {
-  activeLens: string | null;     // Persona ID or null for "no lens"
-  scholarMode: boolean;          // Existing toggle - preserved from v1
-  currentThread: string[];       // Card IDs in current journey
-  currentPosition: number;       // Index in thread
-  visitedCards: string[];        // For "don't repeat" logic
-  exchangeCount: number;         // For nudge-after-exchanges logic
+  activeLens: string | null;       // Persona ID or null for "no lens"
+  scholarMode: boolean;            // Existing toggle - preserved from v1
+
+  // V2.1 Journey State (replaces currentThread/currentPosition)
+  activeJourneyId: string | null;  // Current journey (null = freestyle)
+  currentNodeId: string | null;    // Current position in journey
+  visitedNodes: string[];          // Nodes visited in current journey
+
+  // Legacy fields (deprecated, kept for backward compatibility)
+  currentThread: string[];         // @deprecated - use activeJourneyId/currentNodeId
+  currentPosition: number;         // @deprecated - use currentNodeId
+  visitedCards: string[];          // For "don't repeat" logic
+  exchangeCount: number;           // For nudge-after-exchanges logic
 }
 
 // ============================================================================
@@ -374,6 +437,13 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
 export const DEFAULT_TERMINAL_SESSION: TerminalSession = {
   activeLens: 'freestyle',  // Default to freestyle persona instead of null
   scholarMode: false,
+
+  // V2.1 Journey State
+  activeJourneyId: null,
+  currentNodeId: null,
+  visitedNodes: [],
+
+  // Legacy fields (deprecated)
   currentThread: [],
   currentPosition: 0,
   visitedCards: [],

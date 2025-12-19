@@ -1,5 +1,6 @@
-// useNarrativeEngine - Core state management for Narrative Engine v2
-// Handles lens selection, card filtering, session persistence, and entropy state
+// useNarrativeEngine - Core state management for Narrative Engine v2.1
+// Handles lens selection, journey navigation, session persistence, and entropy state
+// V2.1: Journey/Node graph traversal replaces thread generation
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
@@ -8,6 +9,8 @@ import {
   Card,
   Persona,
   GlobalSettings,
+  Journey,
+  JourneyNode,
   DEFAULT_TERMINAL_SESSION,
   DEFAULT_GLOBAL_SETTINGS,
   isV1Schema,
@@ -15,7 +18,6 @@ import {
   nodeToCard
 } from '../data/narratives-schema';
 import { DEFAULT_PERSONAS } from '../data/default-personas';
-import { generateThread as generateArcThread } from '../utils/threadGenerator';
 import {
   EntropyState,
   EntropyResult,
@@ -40,30 +42,46 @@ interface UseNarrativeEngineReturn {
   loading: boolean;
   error: string | null;
 
-  // Persona/Lens methods
+  // Persona/Lens methods (tone modifiers, decoupled from journey flow)
   selectLens: (personaId: string | null) => void;
   getPersona: (personaId: string) => Persona | undefined;
   getEnabledPersonas: () => Persona[];
   getActiveLensData: () => Persona | null;
 
-  // Card methods
+  // V2.1 Journey Navigation (replaces thread methods)
+  startJourney: (journeyId: string) => void;
+  advanceNode: (choiceIndex?: number) => void;  // 0 = primary, 1+ = alternates
+  exitJourney: () => void;
+  getJourney: (journeyId: string) => Journey | undefined;
+  getNode: (nodeId: string) => JourneyNode | undefined;
+  getNextNodes: (nodeId: string) => JourneyNode[];
+  activeJourneyId: string | null;
+  currentNodeId: string | null;
+  visitedNodes: string[];
+
+  // Card methods (kept for backward compatibility with V2.0 schemas)
   getCard: (cardId: string) => Card | undefined;
   getPersonaCards: (personaId: string | null) => Card[];
   getEntryPoints: (personaId: string | null) => Card[];
   getNextCards: (cardId: string) => Card[];
   getSectionCards: (sectionId: string) => Card[];
 
-  // Thread methods
-  getSuggestedThread: (personaId: string) => string[];
+  // Legacy thread methods (deprecated - kept for Terminal.tsx compatibility during migration)
+  /** @deprecated Use V2.1 journey methods instead */
   currentThread: string[];
+  /** @deprecated Use V2.1 journey methods instead */
   currentPosition: number;
+  /** @deprecated Use startJourney instead */
   regenerateThread: () => void;
+  /** @deprecated Use advanceNode instead */
   advanceThread: () => string | null;
+  /** @deprecated Use getNode instead */
   getThreadCard: (position: number) => Card | null;
 
   // Session methods
   incrementExchangeCount: () => void;
   addVisitedCard: (cardId: string) => void;
+  addVisitedNode: (nodeId: string) => void;
   shouldNudge: () => boolean;
   resetSession: () => void;
 
@@ -73,7 +91,7 @@ interface UseNarrativeEngineReturn {
   checkShouldInject: (entropy: EntropyResult) => boolean;
   recordEntropyInjection: (entropy: EntropyResult) => void;
   recordEntropyDismiss: () => void;
-  tickEntropyCooldown: () => void;  // Decrement cooldown on each exchange
+  tickEntropyCooldown: () => void;
   getJourneyIdForCluster: (cluster: string) => string | null;
 
   // Settings
@@ -193,20 +211,20 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   }, [entropyState]);
 
   // === Persona/Lens Methods ===
+  // V2.1: Lenses are TONAL MODIFIERS only - switching does NOT reset journey state
 
   const selectLens = useCallback((personaId: string | null) => {
     setSession(prev => {
-      // FIX: Prevent thread reset if selecting the same lens
       if (prev.activeLens === personaId) {
         return prev;
       }
-      // Only wipe state if it's actually a new lens
+      // V2.1 TRIPWIRE: Lens switching must NOT reset journey state
+      // Only update the lens and exchange count
       return {
         ...prev,
         activeLens: personaId,
-        exchangeCount: 0, // Reset exchange count on lens change
-        currentThread: [],
-        currentPosition: 0
+        exchangeCount: 0 // Reset exchange count on lens change
+        // NOTE: activeJourneyId, currentNodeId, visitedNodes are PRESERVED
       };
     });
   }, []);
@@ -281,80 +299,135 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     return (Object.values(schema.cards) as Card[]).filter(card => card.sectionId === sectionId);
   }, [schema]);
 
-  // === Thread Methods ===
+  // === V2.1 Journey Methods ===
 
-  const getSuggestedThread = useCallback((personaId: string): string[] => {
-    if (!schema) return [];
-    const persona = schema.personas?.[personaId];
-
-    // First check for manually curated thread
-    if (persona?.suggestedThread?.length) {
-      return persona.suggestedThread;
-    }
-
-    // Use arc-based thread generator for intelligent ordering (requires cards)
-    if (!schema.cards) return [];
-    return generateArcThread(personaId, schema);
+  /**
+   * Get a journey by ID from the schema
+   */
+  const getJourney = useCallback((journeyId: string): Journey | undefined => {
+    if (!schema?.journeys) return undefined;
+    return schema.journeys[journeyId];
   }, [schema]);
 
-  // Generate thread when lens changes or on demand
-  const regenerateThread = useCallback(() => {
-    if (!session.activeLens || !schema) {
-      setSession(prev => ({
-        ...prev,
-        currentThread: [],
-        currentPosition: 0
-      }));
+  /**
+   * Get a node by ID from the schema
+   */
+  const getNode = useCallback((nodeId: string): JourneyNode | undefined => {
+    if (!schema?.nodes) return undefined;
+    return schema.nodes[nodeId];
+  }, [schema]);
+
+  /**
+   * Get next nodes for navigation (primary + alternates)
+   */
+  const getNextNodes = useCallback((nodeId: string): JourneyNode[] => {
+    if (!schema?.nodes) return [];
+    const node = schema.nodes[nodeId];
+    if (!node) return [];
+
+    const nextIds: string[] = [];
+    if (node.primaryNext) nextIds.push(node.primaryNext);
+    if (node.alternateNext) nextIds.push(...node.alternateNext);
+
+    return nextIds
+      .map(id => schema.nodes![id])
+      .filter(Boolean) as JourneyNode[];
+  }, [schema]);
+
+  /**
+   * Start a journey - sets active journey and current node to entry point
+   */
+  const startJourney = useCallback((journeyId: string) => {
+    const journey = getJourney(journeyId);
+    if (!journey) {
+      console.warn(`[V2.1] Journey not found: ${journeyId}`);
       return;
     }
 
-    const newThread = generateArcThread(session.activeLens, schema);
+    console.log(`[V2.1] Starting journey: ${journeyId}, entry: ${journey.entryNode}`);
+
     setSession(prev => ({
       ...prev,
-      currentThread: newThread,
-      currentPosition: 0,
-      visitedCards: [] // Reset visited cards on regenerate
+      activeJourneyId: journeyId,
+      currentNodeId: journey.entryNode,
+      visitedNodes: [journey.entryNode]
     }));
-  }, [session.activeLens, schema]);
+  }, [getJourney]);
 
-  // Auto-generate thread when lens is selected
-  useEffect(() => {
-    if (session.activeLens && schema && session.currentThread.length === 0) {
-      const thread = generateArcThread(session.activeLens, schema);
-      setSession(prev => ({
-        ...prev,
-        currentThread: thread,
-        currentPosition: 0
-      }));
+  /**
+   * Advance to the next node in the journey
+   * @param choiceIndex - 0 for primary, 1+ for alternates
+   */
+  const advanceNode = useCallback((choiceIndex: number = 0) => {
+    if (!session.currentNodeId || !schema?.nodes) return;
+
+    const currentNode = schema.nodes[session.currentNodeId];
+    if (!currentNode) return;
+
+    // Build list of next options: primary first, then alternates
+    const nextOptions: string[] = [];
+    if (currentNode.primaryNext) nextOptions.push(currentNode.primaryNext);
+    if (currentNode.alternateNext) nextOptions.push(...currentNode.alternateNext);
+
+    const nextNodeId = nextOptions[choiceIndex];
+    if (!nextNodeId) {
+      console.log('[V2.1] Journey complete - no more nodes');
+      return;
     }
-  }, [session.activeLens, schema]);
 
-  // Advance to next position in thread
+    console.log(`[V2.1] Advancing to node: ${nextNodeId} (choice: ${choiceIndex})`);
+
+    setSession(prev => ({
+      ...prev,
+      currentNodeId: nextNodeId,
+      visitedNodes: prev.visitedNodes.includes(nextNodeId)
+        ? prev.visitedNodes
+        : [...prev.visitedNodes, nextNodeId]
+    }));
+  }, [session.currentNodeId, schema]);
+
+  /**
+   * Exit the current journey (return to freestyle mode)
+   */
+  const exitJourney = useCallback(() => {
+    console.log('[V2.1] Exiting journey');
+    setSession(prev => ({
+      ...prev,
+      activeJourneyId: null,
+      currentNodeId: null,
+      visitedNodes: []
+    }));
+  }, []);
+
+  // === Legacy Thread Methods (Deprecated - shims for Terminal.tsx compatibility) ===
+
+  /** @deprecated V2.1 no longer uses thread generation */
+  const regenerateThread = useCallback(() => {
+    console.warn('[V2.1] regenerateThread is deprecated. Use startJourney instead.');
+    // No-op in V2.1
+  }, []);
+
+  /** @deprecated V2.1 uses advanceNode instead */
   const advanceThread = useCallback((): string | null => {
-    if (session.currentPosition >= session.currentThread.length - 1) {
-      return null; // End of thread
+    console.warn('[V2.1] advanceThread is deprecated. Use advanceNode instead.');
+    // Shim: if in a journey, advance to primary next
+    if (session.currentNodeId && schema?.nodes) {
+      const currentNode = schema.nodes[session.currentNodeId];
+      if (currentNode?.primaryNext) {
+        advanceNode(0);
+        return currentNode.primaryNext;
+      }
     }
+    return null;
+  }, [session.currentNodeId, schema, advanceNode]);
 
-    const nextPosition = session.currentPosition + 1;
-    const nextCardId = session.currentThread[nextPosition];
-
-    setSession(prev => ({
-      ...prev,
-      currentPosition: nextPosition,
-      visitedCards: prev.visitedCards.includes(nextCardId)
-        ? prev.visitedCards
-        : [...prev.visitedCards, nextCardId]
-    }));
-
-    return nextCardId;
-  }, [session.currentPosition, session.currentThread]);
-
-  // Get card at specific thread position
+  /** @deprecated V2.1 uses getNode instead */
   const getThreadCard = useCallback((position: number): Card | null => {
-    if (!schema || position < 0 || position >= session.currentThread.length) {
-      return null;
+    // Shim: try to get from V2.0 cards if available
+    if (schema?.cards && session.currentThread[position]) {
+      return schema.cards[session.currentThread[position]] || null;
     }
-    return schema.cards[session.currentThread[position]] || null;
+    return null;
   }, [schema, session.currentThread]);
 
   // === Session Methods ===
@@ -372,6 +445,15 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
       visitedCards: prev.visitedCards.includes(cardId)
         ? prev.visitedCards
         : [...prev.visitedCards, cardId]
+    }));
+  }, []);
+
+  const addVisitedNode = useCallback((nodeId: string) => {
+    setSession(prev => ({
+      ...prev,
+      visitedNodes: prev.visitedNodes.includes(nodeId)
+        ? prev.visitedNodes
+        : [...prev.visitedNodes, nodeId]
     }));
   }, []);
 
@@ -443,29 +525,50 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   const globalSettings = schema?.globalSettings || DEFAULT_GLOBAL_SETTINGS;
 
   return {
+    // Data
     schema,
     session,
     loading,
     error,
+
+    // Persona/Lens methods
     selectLens,
     getPersona,
     getEnabledPersonas,
     getActiveLensData,
+
+    // V2.1 Journey Navigation (primary API)
+    startJourney,
+    advanceNode,
+    exitJourney,
+    getJourney,
+    getNode,
+    getNextNodes,
+    activeJourneyId: session.activeJourneyId,
+    currentNodeId: session.currentNodeId,
+    visitedNodes: session.visitedNodes,
+
+    // Card methods (V2.0 backward compatibility)
     getCard,
     getPersonaCards,
     getEntryPoints,
     getNextCards,
     getSectionCards,
-    getSuggestedThread,
+
+    // Legacy thread methods (deprecated)
     currentThread: session.currentThread,
     currentPosition: session.currentPosition,
     regenerateThread,
     advanceThread,
     getThreadCard,
+
+    // Session methods
     incrementExchangeCount,
     addVisitedCard,
+    addVisitedNode,
     shouldNudge,
     resetSession,
+
     // Entropy / Cognitive Bridge
     entropyState,
     evaluateEntropy,
@@ -474,6 +577,8 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     recordEntropyDismiss,
     tickEntropyCooldown,
     getJourneyIdForCluster,
+
+    // Settings
     globalSettings
   };
 };
