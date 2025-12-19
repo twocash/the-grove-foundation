@@ -22,26 +22,27 @@ interface CognitiveBridgeProps {
 
 // Default journey metadata when not provided
 // V2.1: Updated to match narratives.json journey IDs
+// Last validated: Sprint 6 (2025-12-19)
 const DEFAULT_JOURNEY_INFO: Record<string, JourneyInfo> = {
   'simulation': {
     id: 'simulation',
     title: 'The Ghost in the Machine',
-    nodeCount: 5,
+    nodeCount: 5,  // sim-hook, sim-split, sim-observer, sim-recursion, sim-proof
     estimatedMinutes: 8,
     coverTopics: ['Meta-philosophy', 'Observer dynamic', 'Cognitive split', 'Recursive insight']
   },
   'stakes': {
     id: 'stakes',
     title: 'The $380 Billion Bet',
-    nodeCount: 3,
+    nodeCount: 3,  // stakes-380b, stakes-thermodynamic, stakes-dependency
     estimatedMinutes: 12,
     coverTopics: ['Infrastructure investment', 'Ownership vs rental', 'Dependency trap']
   },
   'ratchet': {
     id: 'ratchet',
-    title: 'The Ratchet Effect',
-    nodeCount: 2,
-    estimatedMinutes: 6,
+    title: 'The Ratchet',
+    nodeCount: 1,  // ratchet-hook (ratchet-gap pending creation)
+    estimatedMinutes: 5,  // Adjusted for current content
     coverTopics: ['Capability doubling', '21-month lag', 'Frontier to edge']
   }
 };

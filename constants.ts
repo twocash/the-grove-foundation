@@ -420,3 +420,23 @@ Host: So the question for you to think about is this. If we could observe the bi
 Expert: Think about what we could learn from watching civilization build itself from scratch.
 Host: We'll talk to you next time.
 `;
+
+// Entropy detection configuration for Cognitive Bridge
+// Centralized tuning parameters for entropy scoring and injection behavior
+export const ENTROPY_CONFIG = {
+  THRESHOLDS: {
+    LOW: 30,      // Below this: 'low' classification (stay in freestyle)
+    MEDIUM: 60,   // At or above this: 'high' classification (trigger injection)
+  },
+  LIMITS: {
+    MAX_INJECTIONS_PER_SESSION: 2,  // Maximum bridge injections per session
+    COOLDOWN_EXCHANGES: 5,          // Exchanges to wait before next injection
+  },
+  SCORING: {
+    EXCHANGE_DEPTH_BONUS: 30,       // Bonus for 3+ exchanges
+    TAG_MATCH_POINTS: 15,           // Points per TopicHub tag match
+    MAX_TAG_MATCHES: 3,             // Cap on tag matches counted
+    DEPTH_MARKER_POINTS: 20,        // Bonus for depth marker presence
+    REFERENCE_CHAIN_POINTS: 25,     // Bonus for referencing prior context
+  }
+};

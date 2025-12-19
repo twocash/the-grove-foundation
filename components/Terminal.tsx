@@ -30,7 +30,10 @@ import {
   trackFounderStoryViewed,
   trackCtaViewed,
   trackCtaClicked,
-  trackJourneyCompleted
+  trackJourneyCompleted,
+  trackCognitiveBridgeShown,
+  trackCognitiveBridgeAccepted,
+  trackCognitiveBridgeDismissed
 } from '../utils/funnelAnalytics';
 
 interface TerminalProps {
@@ -45,13 +48,25 @@ interface TerminalProps {
 // See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
 
 const parseInline = (text: string) => {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
+  // Regex: Matches **bold**, *italic*, or _italic_
+  // Capturing group keeps the delimiters in the parts array for mapping
+  const parts = text.split(/(\*\*.*?\*\*|\*[^*]+\*|_[^_]+_)/g);
+
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
         <strong key={i} className="text-grove-clay font-bold">
           {part.slice(2, -2)}
         </strong>
+      );
+    }
+    // Handle italics (*...* or _..._)
+    if ((part.startsWith('*') && part.endsWith('*') && part.length > 2) ||
+        (part.startsWith('_') && part.endsWith('_') && part.length > 2)) {
+      return (
+        <em key={i} className="italic text-ink">
+          {part.slice(1, -1)}
+        </em>
       );
     }
     return part;
@@ -176,7 +191,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     journeyId: string | null;
     topicMatch: string | null;
     afterMessageId: string | null;  // Message ID after which to show the bridge
-  }>({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
+    shownAt: number | null;         // Timestamp when bridge was shown (for timing analytics)
+    entropyScore: number | null;    // Entropy score that triggered the bridge
+    exchangeCount: number | null;   // Exchange count when bridge triggered
+  }>({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -639,6 +657,29 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         }
       }
 
+      // === Concept Mining Telemetry ===
+      // Extract bolded terms (High Value concepts) and log to server
+      const conceptMatches = accumulatedRawText.match(/\*\*(.*?)\*\*/g);
+      if (conceptMatches) {
+        const uniqueConcepts = Array.from(new Set(
+          conceptMatches.map(m => m.slice(2, -2).trim())
+        )).filter(c => c.length > 0);
+
+        if (uniqueConcepts.length > 0) {
+          fetch('/api/telemetry/concepts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              concepts: uniqueConcepts,
+              // Capture a snippet of context for the Hub Generator
+              context: accumulatedRawText.substring(0, 300) + (accumulatedRawText.length > 300 ? '...' : ''),
+              source_node: nodeId || currentNodeId,
+              timestamp: new Date().toISOString()
+            })
+          }).catch(err => console.warn('[Telemetry] Concept log failed', err));
+        }
+      }
+
       // === Cognitive Bridge / Entropy Evaluation ===
       // Only evaluate if user is in freestyle mode (no active lens/journey)
       // Note: We count messages AFTER this exchange, so add 1 to current count
@@ -690,13 +731,24 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           const journeyId = getJourneyIdForCluster(entropy.dominantCluster);
           console.log('[Entropy] Journey mapping:', { cluster: entropy.dominantCluster, journeyId });
           if (journeyId) {
+            const shownAt = Date.now();
             setBridgeState({
               visible: true,
               journeyId,
               topicMatch: entropy.dominantCluster,
-              afterMessageId: botMessageId
+              afterMessageId: botMessageId,
+              shownAt,
+              entropyScore: adjustedScore,
+              exchangeCount: currentExchangeCount
             });
             recordEntropyInjection(adjustedEntropy);
+            // Track bridge shown event
+            trackCognitiveBridgeShown({
+              journeyId,
+              entropyScore: adjustedScore,
+              cluster: entropy.dominantCluster,
+              exchangeCount: currentExchangeCount
+            });
             console.log('[Entropy] Bridge ACTIVATED');
           }
         }
@@ -911,9 +963,17 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                           journeyId={bridgeState.journeyId}
                           topicMatch={bridgeState.topicMatch}
                           onAccept={() => {
+                            // Track timing for analytics
+                            const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
+                            trackCognitiveBridgeAccepted({
+                              journeyId: bridgeState.journeyId!,
+                              timeToDecisionMs
+                            });
+
                             // V2.1: Start the actual journey from the schema
                             console.log('[CognitiveBridge] onAccept clicked', {
                               journeyId: bridgeState.journeyId,
+                              timeToDecisionMs,
                               schemaHasJourneys: !!schema?.journeys,
                               schemaHasNodes: !!schema?.nodes,
                               journeyKeys: schema?.journeys ? Object.keys(schema.journeys) : [],
@@ -958,11 +1018,17 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                                 selectLens(targetPersona);
                               }
                             }
-                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
+                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
                           }}
                           onDismiss={() => {
+                            // Track timing for analytics
+                            const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
+                            trackCognitiveBridgeDismissed({
+                              journeyId: bridgeState.journeyId!,
+                              timeToDecisionMs
+                            });
                             recordEntropyDismiss();
-                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null });
+                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
                           }}
                         />
                       )}

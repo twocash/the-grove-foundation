@@ -3,6 +3,7 @@
 // to determine when to offer structured journeys
 
 import { TopicHub } from '../schema';
+import { ENTROPY_CONFIG } from '../../../constants';
 
 // ============================================================================
 // TYPES
@@ -89,17 +90,17 @@ export const CLUSTER_JOURNEY_MAP: Record<string, string> = {
   'observer': 'simulation'        // → linkedHubId: 'meta-philosophy'
 };
 
-// Scoring thresholds
+// Scoring thresholds - imported from constants.ts for centralized tuning
 export const ENTROPY_THRESHOLDS = {
-  LOW: 30,      // Below this: stay in freestyle ('low' classification)
-  MEDIUM: 60,   // At or above this: 'high' classification
+  LOW: ENTROPY_CONFIG.THRESHOLDS.LOW,      // Below this: stay in freestyle ('low' classification)
+  MEDIUM: ENTROPY_CONFIG.THRESHOLDS.MEDIUM,   // At or above this: 'high' classification
   // Note: 30-59 = 'medium' classification - triggers injection
 };
 
-// Cooldown and limits
+// Cooldown and limits - imported from constants.ts for centralized tuning
 export const ENTROPY_LIMITS = {
-  MAX_INJECTIONS_PER_SESSION: 2,
-  COOLDOWN_EXCHANGES: 5,
+  MAX_INJECTIONS_PER_SESSION: ENTROPY_CONFIG.LIMITS.MAX_INJECTIONS_PER_SESSION,
+  COOLDOWN_EXCHANGES: ENTROPY_CONFIG.LIMITS.COOLDOWN_EXCHANGES,
 };
 
 // Default entropy state
@@ -118,11 +119,11 @@ export const DEFAULT_ENTROPY_STATE: EntropyState = {
 /**
  * Calculate entropy score for a message in context
  *
- * Scoring breakdown:
- * - +30: exchangeCount >= 3 (depth threshold)
- * - +15: each TopicHub tag match (technical vocabulary)
- * - +20: depth marker present (sophisticated inquiry)
- * - +25: reference chaining (building on context)
+ * Scoring breakdown (from ENTROPY_CONFIG.SCORING):
+ * - +EXCHANGE_DEPTH_BONUS: exchangeCount >= 3 (depth threshold)
+ * - +TAG_MATCH_POINTS: each TopicHub tag match (technical vocabulary)
+ * - +DEPTH_MARKER_POINTS: depth marker present (sophisticated inquiry)
+ * - +REFERENCE_CHAIN_POINTS: reference chaining (building on context)
  */
 export function calculateEntropy(
   message: string,
@@ -133,13 +134,14 @@ export function calculateEntropy(
   let score = 0;
   const matchedTags: string[] = [];
   const messageLower = message.toLowerCase();
+  const { SCORING } = ENTROPY_CONFIG;
 
-  // 1. Exchange depth bonus (+30 if >= 3 exchanges)
+  // 1. Exchange depth bonus (if >= 3 exchanges)
   if (exchangeCount >= 3) {
-    score += 30;
+    score += SCORING.EXCHANGE_DEPTH_BONUS;
   }
 
-  // 2. Technical vocabulary from TopicHubs (+15 per match, capped at 3)
+  // 2. Technical vocabulary from TopicHubs (per match, capped)
   // V2.1 hubs use `status: 'active'`, legacy hubs use `enabled: true`
   let tagMatches = 0;
   for (const hub of topicHubs) {
@@ -147,30 +149,30 @@ export function calculateEntropy(
     const isEnabled = hub.enabled !== false && (!('status' in hub) || (hub as { status?: string }).status === 'active');
     if (!isEnabled) continue;
     for (const tag of hub.tags) {
-      if (tagMatches >= 3) break; // Cap at 3 matches to prevent runaway scores
+      if (tagMatches >= SCORING.MAX_TAG_MATCHES) break; // Cap to prevent runaway scores
       const tagLower = tag.toLowerCase();
       if (messageLower.includes(tagLower) && !matchedTags.includes(tag)) {
         matchedTags.push(tag);
-        score += 15;
+        score += SCORING.TAG_MATCH_POINTS;
         tagMatches++;
       }
     }
   }
 
-  // 3. Depth markers (+20 if any present)
+  // 3. Depth markers (if any present)
   const hasDepthMarker = DEPTH_MARKERS.some(marker =>
     messageLower.includes(marker)
   );
   if (hasDepthMarker) {
-    score += 20;
+    score += SCORING.DEPTH_MARKER_POINTS;
   }
 
-  // 4. Reference chaining (+25 if references previous content)
+  // 4. Reference chaining (if references previous content)
   const hasReference = REFERENCE_PHRASES.some(phrase =>
     messageLower.includes(phrase)
   );
   if (hasReference) {
-    score += 25;
+    score += SCORING.REFERENCE_CHAIN_POINTS;
   }
 
   // 5. Identify dominant cluster from full conversation

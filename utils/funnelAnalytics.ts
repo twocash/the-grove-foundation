@@ -176,35 +176,37 @@ export const trackJourneyCompleted = (
 };
 
 // Cognitive Bridge events
-export const trackCognitiveBridgeShown = (
-  journeyId: string,
-  topicCluster: string,
-  entropyScore: number
-): void => {
+export const trackCognitiveBridgeShown = (data: {
+  journeyId: string;
+  entropyScore: number;
+  cluster: string;
+  exchangeCount: number;
+}): void => {
   trackFunnelEvent('cognitive_bridge_shown', {
-    journeyId,
-    topicCluster,
-    entropyScore
+    journeyId: data.journeyId,
+    topicCluster: data.cluster,
+    entropyScore: data.entropyScore,
+    exchangeCount: data.exchangeCount
   });
 };
 
-export const trackCognitiveBridgeAccepted = (
-  journeyId: string,
-  topicCluster: string
-): void => {
+export const trackCognitiveBridgeAccepted = (data: {
+  journeyId: string;
+  timeToDecisionMs: number;
+}): void => {
   trackFunnelEvent('cognitive_bridge_accepted', {
-    journeyId,
-    topicCluster
+    journeyId: data.journeyId,
+    timeToDecisionMs: data.timeToDecisionMs
   });
 };
 
-export const trackCognitiveBridgeDismissed = (
-  journeyId: string,
-  topicCluster: string
-): void => {
+export const trackCognitiveBridgeDismissed = (data: {
+  journeyId: string;
+  timeToDecisionMs: number;
+}): void => {
   trackFunnelEvent('cognitive_bridge_dismissed', {
-    journeyId,
-    topicCluster
+    journeyId: data.journeyId,
+    timeToDecisionMs: data.timeToDecisionMs
   });
 };
 
