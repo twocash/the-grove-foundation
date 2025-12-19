@@ -287,11 +287,11 @@ export interface GlobalSettings {
 }
 
 // ============================================================================
-// FULL SCHEMA V2 (supports both 2.0 and 2.1)
+// FULL SCHEMA (Modern - has globalSettings)
 // ============================================================================
 
 export interface NarrativeSchemaV2 {
-  version: "2.0" | "2.1";
+  version: string;  // Semantic versioning, e.g., "2.0", "2.1", "2.2"
   globalSettings: GlobalSettings;
 
   // V2.0 fields (personas/cards)
@@ -352,14 +352,53 @@ export interface NarrativeGraphV1 {
 /**
  * Check if data is v1 format
  */
-export function isV1Schema(data: unknown): data is NarrativeGraphV1 {
+// ============================================================================
+// SCHEMA DETECTION (Semantic, not version-string based)
+// ============================================================================
+// We detect schema type by structure, not version strings.
+// This is more robust as new versions can be added without changing checks.
+
+export const CURRENT_SCHEMA_VERSION = "2.1";
+
+/**
+ * Check if schema is legacy format (nodes-only, no globalSettings)
+ */
+export function isLegacySchema(data: unknown): data is NarrativeGraphV1 {
   if (typeof data !== 'object' || data === null) return false;
   const obj = data as Record<string, unknown>;
-  return obj.version === "1.0" && typeof obj.nodes === 'object';
+  return typeof obj.nodes === 'object' && !('globalSettings' in obj);
 }
 
 /**
- * Check if data is v2 format (supports both V2.0 and V2.1)
+ * Check if schema is modern format (has globalSettings)
+ */
+export function isModernSchema(data: unknown): boolean {
+  if (typeof data !== 'object' || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return typeof obj.globalSettings === 'object';
+}
+
+/**
+ * Check if schema uses journey-based navigation
+ */
+export function hasJourneys(data: unknown): boolean {
+  if (typeof data !== 'object' || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return typeof obj.journeys === 'object' && typeof obj.nodes === 'object';
+}
+
+/**
+ * Check if schema uses card-based navigation
+ */
+export function hasCards(data: unknown): boolean {
+  if (typeof data !== 'object' || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return typeof obj.cards === 'object' && typeof obj.personas === 'object';
+}
+
+/**
+ * Check if data is v2+ format (modern schema with globalSettings)
+ * @deprecated Use isModernSchema() for semantic check
  */
 export function isV2Schema(data: unknown): data is NarrativeSchemaV2 {
   if (typeof data !== 'object' || data === null) return false;
@@ -374,21 +413,15 @@ export function isV2Schema(data: unknown): data is NarrativeSchemaV2 {
     hasCards: 'cards' in obj
   });
 
-  // V2.0: requires personas and cards
-  if (obj.version === "2.0") {
-    return typeof obj.personas === 'object' &&
-           typeof obj.cards === 'object' &&
-           typeof obj.globalSettings === 'object';
-  }
+  // Semantic check: modern schema has globalSettings
+  return isModernSchema(data);
+}
 
-  // V2.1: uses journeys and nodes instead of personas/cards
-  if (obj.version === "2.1") {
-    return typeof obj.globalSettings === 'object' &&
-           typeof obj.journeys === 'object' &&
-           typeof obj.nodes === 'object';
-  }
-
-  return false;
+/**
+ * @deprecated Use isLegacySchema() for semantic check
+ */
+export function isV1Schema(data: unknown): data is NarrativeGraphV1 {
+  return isLegacySchema(data);
 }
 
 /**
