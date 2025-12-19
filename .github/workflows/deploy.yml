@@ -17,7 +17,6 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
   SERVICE_NAME: grove-foundation
-  GAR_LOCATION: us-central1
 
 jobs:
   deploy:
@@ -44,7 +43,7 @@ jobs:
           project_id: ${{ env.PROJECT_ID }}
 
       - name: Configure Docker for GCR
-        run: gcloud auth configure-docker --quiet
+        run: gcloud auth configure-docker gcr.io --quiet
 
       - name: Build Docker image
         run: |
@@ -67,7 +66,7 @@ jobs:
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
             --update-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest \
-            --set-env-vars GCS_BUCKET_NAME=grove-assets
+            --set-env-vars "GCS_BUCKET_NAME=grove-assets,GITHUB_TOKEN=${{ secrets.GH_PAT_FOR_SYNC }},GITHUB_REPO_OWNER=twocash,GITHUB_REPO_NAME=the-grove-foundation"
 
       - name: Verify deployment
         run: |
