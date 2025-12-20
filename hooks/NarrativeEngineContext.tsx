@@ -61,6 +61,41 @@ const captureReferrer = (): string | null => {
   return null;
 };
 
+// v0.12e: Check if user arrived with any identifying URL params
+const hasIdentifyingParams = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return !!(params.get('r') || params.get('lens') || params.get('share'));
+};
+
+// v0.12e: Force clear stale localStorage for fresh first-time experience
+// Called when user arrives with no identifying params - ensures clean slate
+const ensureCleanFirstVisit = (): void => {
+  if (typeof window === 'undefined') return;
+
+  // If user has identifying URL params, don't clear - they're intentional
+  if (hasIdentifyingParams()) return;
+
+  // If user has NO identifying params but HAS localStorage, it's stale
+  // Clear it to ensure fresh first-time experience
+  try {
+    const hasAnyState = localStorage.getItem(STORAGE_KEY_WELCOMED) ||
+                        localStorage.getItem(STORAGE_KEY_LENS) ||
+                        localStorage.getItem(STORAGE_KEY_SESSION);
+
+    if (hasAnyState) {
+      console.log('[v0.12e] Clearing stale localStorage for fresh experience');
+      localStorage.removeItem(STORAGE_KEY_WELCOMED);
+      localStorage.removeItem(STORAGE_KEY_LENS);
+      localStorage.removeItem(STORAGE_KEY_SESSION);
+      localStorage.removeItem(STORAGE_KEY_ENTROPY);
+      // Keep referrer if they previously had one - that's intentional tracking
+    }
+  } catch (e) {
+    console.error('Failed to clear stale localStorage:', e);
+  }
+};
+
 // v0.12e: Check if this is a returning user (has any localStorage state)
 const isReturningUser = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -201,17 +236,21 @@ function migrateV1ToV2(v1Data: { version: string; nodes: Record<string, any> }):
 }
 
 export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // v0.12e: CRITICAL - Clean stale state BEFORE any localStorage reads
+  // This ensures fresh first-time experience for users with no URL params
+  const [isFirstTimeUser] = useState(() => {
+    ensureCleanFirstVisit(); // Clear stale state for users with no URL params
+    return !isReturningUser();
+  });
+
   const [schema, setSchema] = useState<NarrativeSchemaV2 | null>(null);
   const [session, setSession] = useState<TerminalSession>(() => ({
     ...DEFAULT_TERMINAL_SESSION,
-    activeLens: getInitialLens()
+    activeLens: getInitialLens() // Now reads from cleaned localStorage
   }));
   const [entropyState, setEntropyState] = useState<EntropyState>(DEFAULT_ENTROPY_STATE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // v0.12e: Track first-time users and referrers
-  const [isFirstTimeUser] = useState(() => !isReturningUser());
   const [urlLensId] = useState(() => {
     if (typeof window === 'undefined') return null;
     const params = new URLSearchParams(window.location.search);
