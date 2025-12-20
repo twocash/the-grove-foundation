@@ -116,6 +116,19 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </button>
+
+          {/* Scroll indicator */}
+          <div className="mt-12">
+            <button
+              onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+              className="text-ink-muted hover:text-grove-forest transition-colors animate-bounce"
+              aria-label="Continue scrolling"
+            >
+              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>
