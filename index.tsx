@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 import './styles/globals.css';
 // Use the new router-enabled App from src/
 import App from './src/App';
+// v0.14.1: Shared state provider for NarrativeEngine
+import { NarrativeEngineProvider } from './hooks/NarrativeEngineContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,6 +15,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <NarrativeEngineProvider>
+      <App />
+    </NarrativeEngineProvider>
   </React.StrictMode>
 );
