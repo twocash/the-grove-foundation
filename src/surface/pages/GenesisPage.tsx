@@ -141,13 +141,9 @@ const GenesisPage: React.FC = () => {
         />
       </div>
 
-      {/* SCREEN 2: The Problem (Quantum-Reactive) */}
+      {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
       <div ref={el => { screenRefs.current[1] = el; }}>
-        <ProblemStatement
-          quotes={reality.problem.quotes}
-          tension={reality.problem.tension}
-          trigger={quantumTrigger}
-        />
+        <ProblemStatement />
       </div>
 
       {/* SCREEN 3: Product Reveal */}
