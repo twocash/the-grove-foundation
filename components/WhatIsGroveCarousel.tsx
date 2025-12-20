@@ -25,13 +25,13 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
           </div>
           <div className="md:w-1/2">
              <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed mb-6">
-               Not a chatbot. Not a tool you rent by the month. A network of AI agents that develop, remember, and coordinate — running on hardware you own.
+               Not a chatbot. Not a monthly subscription. A network of AI agents that remember, develop, and coordinate—running on hardware you own.
              </p>
              <p className="font-sans text-ink-muted text-lg leading-relaxed mb-4">
-               They solve problems. They learn from each other. They document what they discover. And unlike every AI service you use today, they don't disappear when you close the tab.
+               They solve problems. They learn from each other. They document what they discover. Unlike every AI service you use today, they don't disappear when you close the tab.
              </p>
              <p className="font-sans text-ink-muted text-lg leading-relaxed font-semibold">
-               They work 24/7 to improve their own internal systems to be more self-sufficient and capable.
+               They work around the clock to improve their own systems—getting smarter, more efficient, more yours.
              </p>
              <div className="mt-8 text-grove-clay font-mono text-xs uppercase tracking-widest cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
                But why does ownership matter? →
@@ -65,7 +65,7 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
           </div>
           
           <p className="text-center font-sans text-ink font-medium max-w-3xl mx-auto">
-             To some economists, the rise of AI looks like humanity’s “horse moment”: after the car arrived, the horse population collapsed 88% in fifty years.
+             To some economists, this looks like humanity's "horse moment." After the automobile arrived, the horse population collapsed 88% in fifty years.
           </p>
         </div>
       )
@@ -82,10 +82,10 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
            </div>
            <div className="md:w-1/2 text-white/90">
               <p className="font-serif text-xl leading-relaxed mb-6 border-l-4 border-grove-clay pl-6">
-                 Horses lacked agency. Humans don’t—but humans <i>do</i> own guns and topple governments.
+                 Horses lacked agency. Humans don't. Humans own guns and topple governments.
               </p>
               <p className="font-sans text-white/70 leading-relaxed mb-6">
-                 The real risk isn’t job displacement; it’s how people respond when economic shocks outpace institutions. Horses didn’t revolt. Humans have, many times.
+                 The real risk isn't job displacement—it's how populations respond when economic shocks outpace institutions. Horses didn't revolt. Humans have, many times.
               </p>
               <p className="font-serif text-xl font-bold text-white">
                  That’s why getting this transition right isn’t optional—it’s existential.
@@ -100,21 +100,14 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
       content: (
         <div className="flex flex-col justify-center h-full max-w-5xl mx-auto px-8 text-center">
            <h2 className="font-sans text-xl md:text-2xl text-white/60 mb-8 font-light">
-              The question isn't whether AI will automate labor. That’s already happening.
+              The question isn't whether AI will automate labor. That's already happening.
            </h2>
            <h3 className="font-display font-bold text-4xl md:text-6xl text-white mb-10 leading-tight">
-              The question is: <br/>
-              <span className="text-grove-clay italic">who owns the infrastructure that controls “knowledge”?</span>
+              <span className="text-grove-clay italic">Who owns the infrastructure that controls knowledge?</span>
            </h3>
-           <div className="font-serif text-lg text-white/80 max-w-3xl mx-auto leading-relaxed space-y-4 text-left">
+           <div className="font-serif text-lg text-white/80 max-w-3xl mx-auto leading-relaxed space-y-4">
               <p>
-                The current trajectory is concentration. Four companies spending $380 billion this year to build AI infrastructure they'll rent back to you.
-              </p>
-              <p className="text-sm md:text-base text-white/70">
-                By their own admission—this tech could eliminate <a href="https://www.axios.com/2025/05/28/ai-jobs-white-collar-unemployment-anthropic" target="_blank" rel="noreferrer" className="underline hover:text-white decoration-grove-clay underline-offset-2">half of entry-level white-collar jobs within five years</a>, spike unemployment to 20%, and fundamentally restructure what humans do for a living. Amodei’s own projections suggest <a href="https://www.axios.com/2025/05/28/ai-jobs-white-collar-unemployment-anthropic" target="_blank" rel="noreferrer" className="underline hover:text-white decoration-grove-clay underline-offset-2">tens of millions of U.S. white collar jobs at risk</a>. 
-              </p>
-              <p className="text-sm md:text-base text-white/70">
-                Altman says AI is already <a href="https://stratechery.com/2025/an-interview-with-openai-ceo-sam-altman-about-building-a-consumer-tech-company/" target="_blank" rel="noreferrer" className="underline hover:text-white decoration-grove-clay underline-offset-2">handling over 50% of the coding work</a> at many companies. <a href="https://fortune.com/2025/11/03/jobs-openings-plunge-thanks-to-ai-gen-z-taking-35k-healthcare-jobs-stanford-report-unemployment-career-advice/" target="_blank" rel="noreferrer" className="underline hover:text-white decoration-grove-clay underline-offset-2">Job postings have fallen 32% since ChatGPT launched</a>. Programming employment has hit <a href="https://www.washingtonpost.com/business/2025/03/14/programming-jobs-lost-artificial-intelligence/" target="_blank" rel="noreferrer" className="underline hover:text-white decoration-grove-clay underline-offset-2">its lowest level since 1980</a>.
+                The current trajectory is concentration. Four companies spending $380 billion to build infrastructure they'll rent back to everyone else.
               </p>
            </div>
            <p className="font-mono text-sm text-grove-clay mt-8 uppercase tracking-[0.2em] font-bold">
@@ -132,26 +125,23 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
               <h2 className="font-display font-bold text-3xl md:text-5xl text-ink mb-4">
                  The only structural answer to labor displacement is <span className="text-grove-forest">capital distribution.</span>
               </h2>
-              <p className="font-serif text-lg md:text-xl text-ink-muted max-w-4xl mx-auto">
-                 Instead of concentrated AI infrastructure owned by the few, The Grove proposes distributed AI infrastructure, where participation creates widespread ownership, in a hybrid-cognition model where The Grove gets smarter as frontier models push new boundaries.
-              </p>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               <div className="p-6 md:p-8 border-t-2 border-grove-forest bg-white shadow-sm hover:shadow-md transition-shadow">
                  <div className="text-4xl mb-4">💻</div>
                  <h4 className="font-display font-bold text-xl text-ink mb-2">Own the Hardware</h4>
-                 <p className="font-sans text-ink-muted text-sm leading-relaxed">Your computer runs AI agents locally. Not rented cloud instances — physical infrastructure you own and control.</p>
+                 <p className="font-sans text-ink-muted text-sm leading-relaxed">Your computer runs AI agents locally. Not rented cloud instances—physical infrastructure you own and control.</p>
               </div>
               <div className="p-6 md:p-8 border-t-2 border-grove-forest bg-white shadow-sm hover:shadow-md transition-shadow">
                  <div className="text-4xl mb-4">🧠</div>
                  <h4 className="font-display font-bold text-xl text-ink mb-2">Own the Intelligence</h4>
-                 <p className="font-sans text-ink-muted text-sm leading-relaxed">Your “village” of agents develop memory, relationships, new capabilities and deliver all sorts of AI services. This all belongs to you, not a platform.</p>
+                 <p className="font-sans text-ink-muted text-sm leading-relaxed">Your village of agents develops memory, relationships, capabilities. This belongs to you, not a platform.</p>
               </div>
               <div className="p-6 md:p-8 border-t-2 border-grove-forest bg-white shadow-sm hover:shadow-md transition-shadow">
                  <div className="text-4xl mb-4">🕸️</div>
                  <h4 className="font-display font-bold text-xl text-ink mb-2">Own the Network</h4>
-                 <p className="font-sans text-ink-muted text-sm leading-relaxed">When your community solves problems, you own a piece of the value created. From cheaper access to frontier models, to eventually receiving dollars for commercial work solving problems for major corporations.</p>
+                 <p className="font-sans text-ink-muted text-sm leading-relaxed">When your community solves problems, you own a piece of the value created. Eventually, real dollars for commercial work.</p>
               </div>
            </div>
         </div>
@@ -173,11 +163,11 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
            </h2>
            
            <p className="font-serif text-xl md:text-2xl text-ink/80 leading-relaxed mb-8 max-w-2xl">
-              Your Grove is cultivating distributed intelligence, where what emerges might serve you — or it might serve a paying client, or its broader community of gardeners. And you own a piece of what you helped grow.
+              Your Grove cultivates distributed intelligence. What emerges might serve you—or a paying client, or the broader community. You own a piece of what you helped grow.
            </p>
 
            <p className="font-sans text-sm text-ink-muted max-w-xl mb-12 leading-relaxed">
-             Grove communities develop at their own pace. Agents form relationships, solve problems, document discoveries, improve cognition systems. Some agents optimize for efficiency. Others explore creativity, or coordination, and some might explore areas no one anticipated. The network learns from all of them.
+             Communities develop at their own pace. Agents form relationships, solve problems, document discoveries, improve their own systems. Some optimize for efficiency. Others explore creativity, or coordination. The network learns from all of them.
            </p>
            
            <button 

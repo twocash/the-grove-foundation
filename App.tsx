@@ -11,6 +11,7 @@ import PromptHooks from './components/PromptHooks';
 import { SectionId, TerminalState } from './types';
 import { INITIAL_TERMINAL_MESSAGE } from './constants';
 import { generateArtifact } from './services/geminiService';
+import { trackPromptHookClicked } from './utils/funnelAnalytics';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
 // V2 Narrative Console with 3-column layout
@@ -82,7 +83,12 @@ const App: React.FC = () => {
     }));
   };
 
-  const handlePromptHook = (data: { nodeId?: string; display: string; query: string }) => {
+  const handlePromptHook = (data: { nodeId?: string; display: string; query: string }, sectionId?: SectionId) => {
+    trackPromptHookClicked({
+      sectionId: sectionId || 'unknown',
+      hookText: data.display,
+      nodeId: data.nodeId
+    });
     setTerminalState(prev => ({ ...prev, isOpen: true }));
     setExternalQuery(data);
   };
@@ -361,17 +367,21 @@ const App: React.FC = () => {
 
           <h1 className="font-display text-6xl md:text-8xl font-bold mb-8 leading-[0.9] text-ink tracking-tight">
             The $380 Billion Bet<br />
-            <span className="italic text-grove-forest">Against You.</span>
+            <span className="italic text-grove-forest">Against Ownership.</span>
           </h1>
 
           <div className="w-16 h-1 bg-ink/10 mx-auto mb-10"></div>
 
           <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed max-w-2xl mx-auto mb-8">
-            Microsoft, Google, Amazon, and Meta are spending $380 billion this year to build AI infrastructure designed to be <span className="font-semibold border-b border-ink/20">rented, not owned</span>.
+            Four companies are spending $380 billion this year on AI infrastructure. Not to sell you AI. To <span className="font-semibold border-b border-ink/20">rent it to you—forever</span>.
+          </p>
+
+          <p className="font-sans text-ink-muted text-lg max-w-xl mx-auto mb-6">
+            They're building the mainframes of the 2020s. Massive, centralized, and designed so you'll never stop paying.
           </p>
 
           <p className="font-sans text-ink-muted text-lg max-w-xl mx-auto mb-16">
-            They're building a world where intelligence is a utility you pay for monthly — forever. But their bet has a fundamental flaw.
+            But capability doesn't stay locked up. It propagates. What costs $1,000 today costs $10 in eighteen months. The question isn't whether AI becomes cheap and local. The question is who builds the infrastructure to capture that shift.
           </p>
 
           <div className="space-y-6">
@@ -382,7 +392,7 @@ const App: React.FC = () => {
               <span className="font-mono text-xs font-bold uppercase tracking-widest text-ink group-hover:text-grove-forest transition-colors">See the flaw</span>
               <svg className="w-4 h-4 text-ink-muted group-hover:text-grove-forest group-hover:translate-y-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
             </button>
-            <PromptHooks sectionId={SectionId.STAKES} onHookClick={handlePromptHook} />
+            <PromptHooks sectionId={SectionId.STAKES} onHookClick={(data) => handlePromptHook(data, SectionId.STAKES)} />
           </div>
 
         </div>
@@ -401,19 +411,19 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
               <div className="md:col-span-8">
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  Today's smart money assumes the frontier stays out of reach — that whoever controls the biggest data centers controls AI. They're building moats.
+                  The smart money assumes the frontier stays forever out of reach. Build the biggest data center, win AI. But they're missing the pattern.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  But AI capability doesn't stay locked up. It actually propagates.
+                  AI capability doubles roughly every seven months. Local hardware follows the same curve—with a 21-month lag. The gap stays constant at about 8×. But the absolute capability of local hardware keeps climbing.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  AI capability doubles every 7 months. Local hardware follows the same curve — with a 21-month lag. The gap between frontier and local stays constant at roughly 8x. But the absolute capability of local hardware keeps rising.
+                  What required a data center in 2023 runs on a laptop in 2025. What requires GPT-5 today will run on consumer hardware you own by 2027.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  In 21 months, what required a data center runs on hardware you own. The question isn't whether this happens — the data shows it already is. The question is who builds the infrastructure to capture it.
+                  This is The Ratchet. Not a theory—a documented pattern from METR research. Frontier models set the benchmark; local models catch up. The gap persists, but the floor rises.
                 </p>
                 <p className="font-serif text-lg text-ink leading-relaxed font-bold">
-                  That's the bet. Not against AI — a bet that distributed, sovereign AI will emerge triumphant.
+                  You don't need to beat the frontier. You need infrastructure that captures capability as it propagates downward.
                 </p>
               </div>
             </div>
@@ -425,30 +435,33 @@ const App: React.FC = () => {
             <button onClick={() => document.getElementById(SectionId.WHAT_IS_GROVE)?.scrollIntoView({ behavior: 'smooth' })} className="text-ink text-sm font-bold font-mono uppercase tracking-wider hover:text-grove-forest transition-colors flex items-center justify-center space-x-2 mx-auto border-b border-transparent hover:border-grove-forest pb-1">
               <span>See the solution</span>
             </button>
-            <PromptHooks sectionId={SectionId.RATCHET} onHookClick={handlePromptHook} />
+            <PromptHooks sectionId={SectionId.RATCHET} onHookClick={(data) => handlePromptHook(data, SectionId.RATCHET)} />
           </div>
         </section>
 
         {/* SECTION 3: WHAT IS THE GROVE (CAROUSEL) */}
-        <WhatIsGroveCarousel onPromptHook={handlePromptHook} />
+        <WhatIsGroveCarousel onPromptHook={(data) => handlePromptHook(data, SectionId.WHAT_IS_GROVE)} />
 
         {/* SECTION 4: ARCHITECTURE */}
         <section id={SectionId.ARCHITECTURE} className="min-h-screen py-24 flex flex-col justify-center border-t border-ink/5 max-w-5xl mx-auto content-z">
           <div className="mb-16 text-center max-w-3xl mx-auto">
             <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">02. The Architecture</span>
-            <h2 className="font-display text-4xl font-bold text-ink mb-8">Distributed Computing Won Once. <br />It Will Win Again.</h2>
+            <h2 className="font-display text-4xl font-bold text-ink mb-8">Your thinking. Your hardware. Your history.</h2>
             <div className="font-serif text-lg text-ink/80 mb-12 space-y-6">
               <p>
-                Every conversation you've ever had with ChatGPT lives on someone else's servers. Every question you've asked Claude, every document you've uploaded, every half-formed idea you've explored — it belongs to a company that could change its terms, raise its prices, or disappear tomorrow.
+                Every conversation you've had with ChatGPT lives on someone else's servers. Every question, every document, every half-formed idea—owned by a company that could change its terms tomorrow.
               </p>
               <p className="font-bold text-grove-forest text-xl font-display italic">
                 You're not a user. You're a tenant.
               </p>
               <p>
-                The Grove inverts this. Routine thinking runs locally, on hardware you own. Your agents know your history because that history lives with you.
+                Grove inverts this. Routine thinking runs locally, on hardware you own. Your agents know your history because that history lives with you.
+              </p>
+              <p>
+                Cloud capability is available when needed—for complex synthesis, for breakthrough moments. But the expensive insight becomes durable local memory. Capability transfers. Over time, you need the cloud less.
               </p>
             </div>
-            <PromptHooks sectionId={SectionId.ARCHITECTURE} onHookClick={handlePromptHook} />
+            <PromptHooks sectionId={SectionId.ARCHITECTURE} onHookClick={(data) => handlePromptHook(data, SectionId.ARCHITECTURE)} />
           </div>
 
           <ArchitectureDiagram onArtifactRequest={handleArtifactRequest} />
@@ -459,14 +472,20 @@ const App: React.FC = () => {
         <section id={SectionId.ECONOMICS} className="min-h-screen py-24 flex flex-col justify-center border-t border-ink/5 max-w-5xl mx-auto content-z">
           <div className="mb-16 text-center max-w-3xl mx-auto">
             <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">03. The Economics</span>
-            <h2 className="font-display text-4xl font-bold text-ink mb-6">A Business Model Designed to Disappear</h2>
-            <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
-              Traditional platforms monetize through extraction. The Grove inverts this. The Foundation funds infrastructure by taxing inefficiency — and the tax shrinks as communities mature.
+            <h2 className="font-display text-4xl font-bold text-ink mb-6">A business model that shrinks.</h2>
+            <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
+              Traditional platforms grow by extracting more from users. Grove inverts this.
+            </p>
+            <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
+              New communities need more cloud help—so they pay a higher efficiency tax (30-40%). As communities demonstrate they can accomplish more with less cloud support, the tax shrinks. Mature communities pay 3-5%.
+            </p>
+            <p className="font-serif text-lg text-ink font-bold leading-relaxed mb-6">
+              The Foundation's revenue decreases as the network succeeds. That's the point.
             </p>
             <p className="font-sans text-lg text-grove-clay font-medium italic mb-8">
               "Progressive taxation in reverse. You pay more when you cost more. You pay less as you develop."
             </p>
-            <PromptHooks sectionId={SectionId.ECONOMICS} onHookClick={handlePromptHook} />
+            <PromptHooks sectionId={SectionId.ECONOMICS} onHookClick={(data) => handlePromptHook(data, SectionId.ECONOMICS)} />
           </div>
 
           <EconomicsSlider />
@@ -479,7 +498,7 @@ const App: React.FC = () => {
             <div className="text-center mb-16">
               <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">04. The Difference</span>
               <h2 className="font-display text-5xl font-bold text-ink mb-8">Tool vs. Staff</h2>
-              <PromptHooks sectionId={SectionId.DIFFERENTIATION} onHookClick={handlePromptHook} />
+              <PromptHooks sectionId={SectionId.DIFFERENTIATION} onHookClick={(data) => handlePromptHook(data, SectionId.DIFFERENTIATION)} />
             </div>
 
             {/* SPLIT SCREEN CONTRAST */}
@@ -551,14 +570,14 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center mb-16">
               <div className="lg:col-span-5">
                 <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">05. The Network</span>
-                <h2 className="font-display text-4xl font-bold text-ink mb-6">A Civilization That Learns</h2>
+                <h2 className="font-display text-4xl font-bold text-ink mb-6">A civilization that learns.</h2>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
-                  Your instance of The Grove connects to other instances. When an agent community solves a problem, the solution propagates.
+                  Your Grove connects to other Groves. When an agent community solves a problem, the solution can propagate. Attribution flows back to the source.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-6">
-                  This is the part that's hard to copy. Not the local inference. Not the hybrid architecture. The network of communities developing genuine capability.
+                  This is the part that's hard to copy. Not the local inference—that's commodity. Not the hybrid architecture—that's engineering. The network of communities developing genuine capability and sharing what works.
                 </p>
-                <PromptHooks sectionId={SectionId.NETWORK} onHookClick={handlePromptHook} className="justify-start" />
+                <PromptHooks sectionId={SectionId.NETWORK} onHookClick={(data) => handlePromptHook(data, SectionId.NETWORK)} className="justify-start" />
               </div>
               <div className="lg:col-span-7">
                 <NetworkMap />
@@ -600,11 +619,14 @@ const App: React.FC = () => {
           <div className="max-w-5xl mx-auto w-full">
             <div className="text-center mb-16">
               <span className="font-mono text-ink-muted uppercase tracking-widest text-xs block mb-4">06. Get Involved</span>
-              <h2 className="font-display text-5xl font-bold text-ink mb-6">Join the Network</h2>
-              <p className="font-serif text-xl text-ink/70 max-w-2xl mx-auto mb-8">
-                The Grove is in active development. The research is public. The code will be open.
+              <h2 className="font-display text-5xl font-bold text-ink mb-6">The Terminal is open.</h2>
+              <p className="font-serif text-xl text-ink/70 max-w-2xl mx-auto mb-4">
+                Grove is in active development. The research is public. The architecture is documented. And you can explore everything here.
               </p>
-              <PromptHooks sectionId={SectionId.GET_INVOLVED} onHookClick={handlePromptHook} />
+              <p className="font-serif text-lg text-ink/60 max-w-2xl mx-auto mb-8">
+                This isn't a waitlist. The Terminal has access to the complete white paper, technical deep dives, and advisory council analysis. Ask anything. The map will emerge.
+              </p>
+              <PromptHooks sectionId={SectionId.GET_INVOLVED} onHookClick={(data) => handlePromptHook(data, SectionId.GET_INVOLVED)} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">

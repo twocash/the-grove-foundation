@@ -222,6 +222,20 @@ export const trackEntropyHighDetected = (
   });
 };
 
+// Prompt hook clicks from landing page
+export const trackPromptHookClicked = (data: {
+  sectionId: string;
+  hookText: string;
+  nodeId?: string;
+}): void => {
+  trackFunnelEvent('prompt_hook_clicked', {
+    sectionId: data.sectionId,
+    hookText: data.hookText,
+    nodeId: data.nodeId || null,
+    source: 'landing_page'
+  });
+};
+
 // Get analytics report (for admin/debugging)
 export const getAnalyticsReport = (): {
   totalEvents: number;
@@ -274,6 +288,7 @@ export default {
   trackCognitiveBridgeAccepted,
   trackCognitiveBridgeDismissed,
   trackEntropyHighDetected,
+  trackPromptHookClicked,
   getAnalyticsReport,
   clearAnalytics
 };
