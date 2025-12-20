@@ -50,16 +50,29 @@ interface TerminalProps {
 // System prompt is now server-side in /api/chat
 // See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
 
-const parseInline = (text: string) => {
+const parseInline = (text: string, onBoldClick?: (phrase: string) => void) => {
   // Regex: Matches **bold**, *italic*, or _italic_
   // Capturing group keeps the delimiters in the parts array for mapping
   const parts = text.split(/(\*\*.*?\*\*|\*[^*]+\*|_[^_]+_)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
+      const phrase = part.slice(2, -2);
+      // Make bold text clickable when handler provided
+      if (onBoldClick) {
+        return (
+          <button
+            key={i}
+            onClick={() => onBoldClick(phrase)}
+            className="text-grove-clay font-bold hover:underline hover:decoration-grove-clay/50 hover:decoration-2 underline-offset-2 cursor-pointer transition-all active:scale-[0.98]"
+          >
+            {phrase}
+          </button>
+        );
+      }
       return (
         <strong key={i} className="text-grove-clay font-bold">
-          {part.slice(2, -2)}
+          {phrase}
         </strong>
       );
     }
@@ -95,7 +108,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptCl
       if (text.trim()) {
         elements.push(
           <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 leading-relaxed font-serif text-sm">
-            {parseInline(text)}
+            {parseInline(text, onPromptClick)}
           </span>
         );
       }
@@ -110,7 +123,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptCl
           {currentListItems.map((item, i) => (
             <li key={i} className="pl-4 relative text-sm font-sans text-ink-muted">
               <span className="absolute left-0 text-grove-clay top-1.5 w-1 h-1 rounded-full bg-grove-clay"></span>
-              <span>{parseInline(item)}</span>
+              <span>{parseInline(item, onPromptClick)}</span>
             </li>
           ))}
         </ul>
@@ -973,7 +986,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                                 <>
                                   <MarkdownRenderer
                                     content={msg.text}
-                                    onPromptClick={(prompt) => handleSend(prompt)}
+                                    onPromptClick={handleSuggestion}
                                   />
                                   {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
                                 </>
