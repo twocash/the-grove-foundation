@@ -61,7 +61,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
         {/* Ratchet explanation */}
         <div className="space-y-6 text-center mb-12">
           <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed">
-            AI capability doubles every 7 months.
+            AI capability doubles every seven months.
           </p>
           <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed">
             Today's data center becomes tomorrow's laptop.
