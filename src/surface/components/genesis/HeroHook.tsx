@@ -62,7 +62,7 @@ export const HeroHook: React.FC<HeroHookProps> = ({ onScrollNext }) => {
         </div>
 
         {/* Scroll indicator - floating seedling */}
-        <div className="mt-16">
+        <div className="mt-16 flex justify-center">
           <ScrollIndicator onClick={handleScrollClick} />
         </div>
       </div>

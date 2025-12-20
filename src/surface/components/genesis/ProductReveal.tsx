@@ -234,7 +234,7 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
           </button>
 
           {/* Scroll indicator - floating seedling */}
-          <div className="mt-16">
+          <div className="mt-16 flex justify-center">
             <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
           </div>
         </div>
