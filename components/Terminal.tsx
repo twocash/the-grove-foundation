@@ -1122,20 +1122,21 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     </div>
                   </div>
                 ) : nextNodes.length > 0 ? (
-                  /* Curated Narrative Follow-ups */
+                  /* Curated Narrative Follow-ups - Clickable Suggestion Chips */
                   <div className="mb-4">
                     <div className="text-[9px] text-grove-clay font-bold uppercase tracking-widest mb-2">
                       Continue the Journey
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-1.5">
                       {nextNodes.map(node => (
-                        <button
+                        <SuggestionChip
                           key={node.id}
-                          onClick={() => handleSend(node.query, node.label, node.id)}
-                          className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-serif text-ink hover:border-grove-forest/30 hover:text-grove-forest hover:shadow-sm transition-all"
-                        >
-                          {node.label}
-                        </button>
+                          prompt={node.label}
+                          onClick={() => {
+                            trackSuggestionClicked(node.label, node.id);
+                            handleSend(node.query, node.label, node.id);
+                          }}
+                        />
                       ))}
                     </div>
                   </div>
