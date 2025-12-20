@@ -72,23 +72,23 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
     },
     {
       id: 'horses',
-      theme: 'dark',
+      theme: 'light',
       content: (
         <div className="flex flex-col md:flex-row items-center justify-center h-full max-w-6xl mx-auto px-8 gap-16">
            <div className="md:w-1/2">
-              <h2 className="font-display font-bold text-5xl md:text-7xl text-white mb-6 leading-tight">
+              <h2 className="font-display font-bold text-5xl md:text-7xl text-ink mb-6 leading-tight">
                  Horses don't lead revolutions.
               </h2>
            </div>
-           <div className="md:w-1/2 text-white/90">
+           <div className="md:w-1/2 text-ink/90">
               <p className="font-serif text-xl leading-relaxed mb-6 border-l-4 border-grove-clay pl-6">
                  Horses lacked agency. Humans don't. Humans own guns and topple governments.
               </p>
-              <p className="font-sans text-white/70 leading-relaxed mb-6">
+              <p className="font-sans text-ink/70 leading-relaxed mb-6">
                  The real risk isn't job displacement—it's how populations respond when economic shocks outpace institutions. Horses didn't revolt. Humans have, many times.
               </p>
-              <p className="font-serif text-xl font-bold text-white">
-                 That’s why getting this transition right isn’t optional—it’s existential.
+              <p className="font-serif text-xl font-bold text-ink">
+                 That's why getting this transition right isn't optional—it's existential.
               </p>
            </div>
         </div>
@@ -96,16 +96,16 @@ const WhatIsGroveCarousel: React.FC<CarouselProps> = ({ onPromptHook }) => {
     },
     {
       id: 'question',
-      theme: 'dark',
+      theme: 'light',
       content: (
         <div className="flex flex-col justify-center h-full max-w-5xl mx-auto px-8 text-center">
-           <h2 className="font-sans text-xl md:text-2xl text-white/60 mb-8 font-light">
+           <h2 className="font-sans text-xl md:text-2xl text-ink/60 mb-8 font-light">
               The question isn't whether AI will automate labor. That's already happening.
            </h2>
-           <h3 className="font-display font-bold text-4xl md:text-6xl text-white mb-10 leading-tight">
+           <h3 className="font-display font-bold text-4xl md:text-6xl text-ink mb-10 leading-tight">
               <span className="text-grove-clay italic">Who owns the infrastructure that controls knowledge?</span>
            </h3>
-           <div className="font-serif text-lg text-white/80 max-w-3xl mx-auto leading-relaxed space-y-4">
+           <div className="font-serif text-lg text-ink/80 max-w-3xl mx-auto leading-relaxed space-y-4">
               <p>
                 The current trajectory is concentration. Four companies spending $380 billion to build infrastructure they'll rent back to everyone else.
               </p>

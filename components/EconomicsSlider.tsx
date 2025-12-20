@@ -9,6 +9,7 @@ const TAX_BRACKETS = [
 
 const EconomicsSlider: React.FC = () => {
   const [sliderValue, setSliderValue] = useState(0);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const getStageInfo = (val: number) => {
     if (val < 25) return { 
@@ -65,14 +66,26 @@ const EconomicsSlider: React.FC = () => {
            </div>
         </div>
 
-        <input 
-          type="range" 
-          min="0" 
-          max="100" 
-          value={sliderValue} 
-          onChange={(e) => setSliderValue(parseInt(e.target.value))}
-          className="w-full h-1 bg-ink/10 rounded-lg appearance-none cursor-pointer accent-grove-clay"
-        />
+        <div className="relative">
+          {!hasInteracted && (
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs font-mono text-grove-clay animate-pulse">
+              ↔ Drag to explore
+            </div>
+          )}
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={sliderValue}
+            onChange={(e) => {
+              setSliderValue(parseInt(e.target.value));
+              if (!hasInteracted) setHasInteracted(true);
+            }}
+            className={`w-full h-2 bg-ink/10 rounded-lg appearance-none cursor-pointer accent-grove-clay transition-all ${
+              !hasInteracted ? 'animate-pulse ring-2 ring-grove-clay/30 ring-offset-2' : ''
+            }`}
+          />
+        </div>
         <div className="flex justify-between text-xs font-mono text-ink-muted mt-3">
           <span>GENESIS</span>
           <span>STEADY STATE</span>

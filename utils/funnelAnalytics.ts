@@ -227,11 +227,15 @@ export const trackPromptHookClicked = (data: {
   sectionId: string;
   hookText: string;
   nodeId?: string;
+  variantId?: string;
+  experimentId?: string;
 }): void => {
   trackFunnelEvent('prompt_hook_clicked', {
     sectionId: data.sectionId,
     hookText: data.hookText,
     nodeId: data.nodeId || null,
+    variantId: data.variantId || null,
+    experimentId: data.experimentId || null,
     source: 'landing_page'
   });
 };

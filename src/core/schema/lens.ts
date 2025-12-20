@@ -262,7 +262,9 @@ export type FunnelEventType =
   | 'cognitive_bridge_shown'
   | 'cognitive_bridge_accepted'
   | 'cognitive_bridge_dismissed'
-  | 'entropy_high_detected';
+  | 'entropy_high_detected'
+  // Landing page events
+  | 'prompt_hook_clicked';
 
 export interface FunnelEvent {
   eventType: FunnelEventType;

@@ -9,7 +9,7 @@ const TIMELINE_EVENTS = [
   { time: '6:00 PM', event: 'Consolidation', type: 'Local', desc: 'Memory updated for tomorrow.', icon: '🌙' }
 ];
 
-const ArchitectureDiagram: React.FC<{ onArtifactRequest: () => void }> = ({ onArtifactRequest }) => {
+const ArchitectureDiagram: React.FC<{ onArtifactRequest: (data: { display: string; query: string }) => void }> = ({ onArtifactRequest }) => {
   const [activeStep, setActiveStep] = useState<number | null>(null);
 
   return (
@@ -103,8 +103,11 @@ const ArchitectureDiagram: React.FC<{ onArtifactRequest: () => void }> = ({ onAr
          <p className="font-serif italic text-ink/60 mb-6 max-w-2xl mx-auto">
            "The agent remembers the insight as their own. The infrastructure fades away."
          </p>
-         <button 
-           onClick={onArtifactRequest}
+         <button
+           onClick={() => onArtifactRequest({
+             display: "Generate Technical Routing Spec",
+             query: "Generate a detailed technical routing specification for Grove's hybrid local/cloud architecture. Include decision criteria for when to route to local vs cloud, latency thresholds, and cost optimization rules."
+           })}
            className="text-xs font-mono text-ink-muted hover:text-grove-forest underline decoration-dotted underline-offset-4"
          >
            Generate Technical Routing Spec

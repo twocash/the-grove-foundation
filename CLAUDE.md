@@ -90,6 +90,7 @@ The codebase follows a three-layer architecture:
 |-------|-----------|---------|
 | `/` | SurfacePage | Main user experience |
 | `/foundation` | FoundationLayout | Admin dashboard |
+| `/foundation/genesis` | Genesis | Metrics & A/B testing dashboard |
 | `/foundation/narrative` | NarrativeArchitect | Persona/card management |
 | `/foundation/engagement` | EngagementBridge | Event bus monitoring |
 | `/foundation/knowledge` | KnowledgeVault | RAG document management |
@@ -566,6 +567,82 @@ User Query → Topic Router → Tag Matching → Hub Selection
 
 - Manifest cache: 5-min TTL, invalidates on admin save via `/api/admin/narrative`
 - File cache: 10-min TTL per file
+
+---
+
+## Completed Sprints: A/B Testing & Genesis Dashboard (Sprint 14)
+
+### Sprint 14: A/B Testing Infrastructure + Genesis Dashboard ✓
+
+**Features Added:**
+- Deterministic A/B variant selection based on session ID
+- Hook variant support for prompt hooks across all sections
+- CTA variant support for Get Involved buttons
+- Genesis dashboard for metrics visualization
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/core/schema/ab-testing.ts` | HookVariant, ABTest, VariantSelection types |
+| `utils/abTesting.ts` | selectVariant(), getSessionId(), getHookVariant() |
+| `utils/genesisMetrics.ts` | aggregateGenesisMetrics(), getVariantPerformance() |
+| `src/foundation/consoles/Genesis.tsx` | Genesis dashboard with 3 tabs |
+
+### A/B Testing Architecture
+
+```
+Session ID (localStorage) + Element ID
+         ↓
+    Hash Function (deterministic)
+         ↓
+    Weight-based Selection
+         ↓
+    Same variant every time for same user
+```
+
+### Variant Configuration
+
+Variants are defined in `constants.ts`:
+
+```typescript
+// Hook variants in SECTION_HOOKS
+{
+  text: "What is the Ratchet Effect?",
+  prompt: "...",
+  variants: [
+    { id: "ratchet-1a", text: "What is the Ratchet Effect?", weight: 50 },
+    { id: "ratchet-1b", text: "Explain the Ratchet", weight: 50 }
+  ]
+}
+
+// CTA variants in CTA_VARIANTS
+{
+  readResearch: {
+    id: 'cta-read-research',
+    variants: [
+      { id: 'read-1a', text: 'Read on Notion', weight: 50 },
+      { id: 'read-1b', text: 'View White Paper', weight: 50 }
+    ]
+  }
+}
+```
+
+### Genesis Dashboard
+
+Access via `/foundation/genesis`:
+
+| Tab | Purpose |
+|-----|---------|
+| Overview | Core metrics grid, top hooks, section engagement |
+| Variants | Variant performance table, click distribution |
+| Funnel | Wizard conversion funnel visualization |
+
+### Telemetry Integration
+
+`trackPromptHookClicked()` now includes:
+- `variantId` - Which variant was shown
+- `experimentId` - Which experiment the variant belongs to
 
 ---
 

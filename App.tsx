@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Terminal from './components/Terminal';
 import ThesisGraph from './components/ThesisGraph';
 import ArchitectureDiagram from './components/ArchitectureDiagram';
 import EconomicsSlider from './components/EconomicsSlider';
 import NetworkMap from './components/NetworkMap';
-import DiaryEntry from './components/DiaryEntry';
 import AudioPlayer from './components/AudioPlayer';
 import WhatIsGroveCarousel from './components/WhatIsGroveCarousel';
 import PromptHooks from './components/PromptHooks';
 import { SectionId, TerminalState } from './types';
-import { INITIAL_TERMINAL_MESSAGE } from './constants';
-import { generateArtifact } from './services/geminiService';
+import { INITIAL_TERMINAL_MESSAGE, CTA_VARIANTS } from './constants';
 import { trackPromptHookClicked } from './utils/funnelAnalytics';
+import { getSessionId, selectVariant } from './utils/abTesting';
 import AdminAudioConsole from './components/AdminAudioConsole';
 import AdminRAGConsole from './components/AdminRAGConsole';
 // V2 Narrative Console with 3-column layout
@@ -41,6 +40,15 @@ const App: React.FC = () => {
     isLoading: false
   });
 
+  // Select CTA variants deterministically per session
+  const ctaVariants = useMemo(() => {
+    const sessionId = getSessionId();
+    return {
+      readResearch: selectVariant(CTA_VARIANTS.readResearch.variants, sessionId, CTA_VARIANTS.readResearch.id),
+      openTerminal: selectVariant(CTA_VARIANTS.openTerminal.variants, sessionId, CTA_VARIANTS.openTerminal.id)
+    };
+  }, []);
+
   // Intersection Observer to track active section
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,27 +69,6 @@ const App: React.FC = () => {
 
     return () => observer.disconnect();
   }, []);
-
-  const handleArtifactRequest = async () => {
-    setTerminalState(prev => ({ ...prev, isOpen: true, isLoading: true }));
-    const reqId = Date.now().toString();
-    setTerminalState(prev => ({
-      ...prev,
-      messages: [...prev.messages, { id: reqId, role: 'user', text: "Generate System Specification for a Local Node." }]
-    }));
-
-    const artifact = await generateArtifact(
-      "Generate a JSON specification for a Grove Local Node using Raspberry Pi 5 specs and local Llama 3. Include specific Distributed Systems choices from the whitepaper.",
-      "Architecture Section"
-    );
-
-    const respId = (Date.now() + 1).toString();
-    setTerminalState(prev => ({
-      ...prev,
-      isLoading: false,
-      messages: [...prev.messages, { id: respId, role: 'model', text: artifact }]
-    }));
-  };
 
   const handlePromptHook = (data: { nodeId?: string; display: string; query: string }, sectionId?: SectionId) => {
     trackPromptHookClicked({
@@ -361,7 +348,7 @@ const App: React.FC = () => {
         <div className="content-z relative z-10 max-w-4xl mx-auto">
           <div className="mb-6">
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-grove-clay border-b border-grove-clay/30 pb-1">
-              Research Preview v2.4
+              Research Preview v0.09
             </span>
           </div>
 
@@ -411,19 +398,19 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
               <div className="md:col-span-8">
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  The smart money assumes the frontier stays forever out of reach. Build the biggest data center, win AI. But they're missing the pattern.
+                  Today's smart money assumes that, with enough capital, the frontier stays out of reach — that whoever controls the biggest data centers controls AI. They're building moats.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  AI capability doubles roughly every seven months. Local hardware follows the same curve—with a 21-month lag. The gap stays constant at about 8×. But the absolute capability of local hardware keeps climbing.
+                  But AI capability doesn't stay locked up. It actually propagates.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  What required a data center in 2023 runs on a laptop in 2025. What requires GPT-5 today will run on consumer hardware you own by 2027.
+                  AI capability doubles every seven months. Local hardware follows the same curve — with a 21-month lag. This gap between "frontier" and "local" capability stays constant at roughly 8x at a fraction of the cost, and provides a sovereign ownership model. Plus, the absolute capability of local hardware keeps rising.
                 </p>
                 <p className="font-serif text-lg text-ink/80 leading-relaxed mb-4">
-                  This is The Ratchet. Not a theory—a documented pattern from METR research. Frontier models set the benchmark; local models catch up. The gap persists, but the floor rises.
+                  In 21 months, what required a data center runs on hardware you own. The question isn't whether this will happen — the data shows it already is happening. The question is who builds the infrastructure to systematically harness this phenomenon.
                 </p>
                 <p className="font-serif text-lg text-ink leading-relaxed font-bold">
-                  You don't need to beat the frontier. You need infrastructure that captures capability as it propagates downward.
+                  That's the bet. Not against AI — a bet that distributed, sovereign AI will emerge triumphant.
                 </p>
               </div>
             </div>
@@ -464,7 +451,7 @@ const App: React.FC = () => {
             <PromptHooks sectionId={SectionId.ARCHITECTURE} onHookClick={(data) => handlePromptHook(data, SectionId.ARCHITECTURE)} />
           </div>
 
-          <ArchitectureDiagram onArtifactRequest={handleArtifactRequest} />
+          <ArchitectureDiagram onArtifactRequest={(data) => handlePromptHook(data, SectionId.ARCHITECTURE)} />
 
         </section>
 
@@ -558,7 +545,7 @@ const App: React.FC = () => {
             <div className="bg-white p-10 rounded-sm border border-ink/5 shadow-lg max-w-4xl mx-auto text-center relative">
               <span className="absolute top-4 left-6 text-6xl text-ink/5 font-serif">“</span>
               <p className="font-serif italic text-xl md:text-2xl text-ink leading-relaxed relative z-10">
-                Day one, ChatGPT is more capable. Day one, The Grove is more persistent, more personal, more yours. And the gap closes — not because The Grove gets funding, but because capability propagates.
+                Day one, ChatGPT is magically more capable. Day one, The Grove is more persistent, more personal (and most importantly) all yours. But the Grove closes the gap, ratcheting ever forward, thousands of communities sharing the fruits of the Knowledge Commons — not because The Grove gets funding, but because capability propagates.
               </p>
             </div>
           </div>
@@ -585,10 +572,36 @@ const App: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-              {/* Diary Entry */}
+              {/* Elena Vignette */}
               <div>
                 <h4 className="font-mono text-xs uppercase tracking-widest text-ink-muted mb-6 text-center">Documented Breakthroughs</h4>
-                <DiaryEntry />
+                <div className="bg-paper-dark p-8 rounded-sm border border-ink/5">
+                  <p className="font-serif text-ink/80 leading-relaxed mb-4">
+                    Elena stared at the simulation logs. The agent communities had been underperforming for weeks—until yesterday.
+                  </p>
+                  <p className="font-serif text-ink/80 leading-relaxed mb-4">
+                    "They changed the reward structure themselves," she muttered.
+                  </p>
+                  <p className="font-serif text-ink/80 leading-relaxed mb-4">
+                    The breakthrough wasn't in the agents' behavior. It was in how they'd learned to <em>evaluate</em> behavior. One community had stopped optimizing for the metric Elena designed and started optimizing for something emergent—a composite that weighted collaboration, efficiency, and novelty in ways she hadn't anticipated.
+                  </p>
+                  <p className="font-serif text-ink/80 leading-relaxed mb-4">
+                    She pulled up the paper she'd bookmarked months ago. The researchers had shown that optimal incentives aren't designed—they're discovered through observed outcomes. The Grove wasn't supposed to work this way yet. But the agents had figured it out themselves.
+                  </p>
+                  <p className="font-serif text-ink font-semibold leading-relaxed">
+                    Elena smiled. The cobra wouldn't bite today.
+                  </p>
+                  <p className="font-mono text-xs text-ink-muted mt-6">
+                    Research: <a
+                      href="https://www.nature.com/articles/s41467-025-66009-y"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-grove-forest transition-colors"
+                    >
+                      Lu et al., "Discovery of the reward function for embodied RL agents," Nature Communications (2025)
+                    </a>
+                  </p>
+                </div>
               </div>
 
               {/* Three Layers */}
@@ -637,8 +650,8 @@ const App: React.FC = () => {
                 <h3 className="font-display font-bold text-xl text-ink mb-2">Read the Research</h3>
                 <p className="font-sans text-sm text-ink-muted mb-6">The complete white paper, technical deep dives, and advisory council analysis.</p>
                 <div className="flex space-x-4">
-                  <a href="https://yummy-twig-79e.notion.site/The-Grove-A-World-Changing-Play-for-Distributed-Intelligence-2c7780a78eef80b6b4f7ceb3f3c94c73" target="_blank" rel="noreferrer" className="px-4 py-2 border border-ink/10 bg-paper hover:bg-white text-ink text-xs font-mono uppercase tracking-wider rounded-sm transition-colors">
-                    Read on Notion
+                  <a href="https://yummy-twig-79e.notion.site/The-Grove-A-World-Changing-Play-for-Distributed-Intelligence-2c7780a78eef80b6b4f7ceb3f3c94c73" target="_blank" rel="noreferrer" className="px-4 py-2 border border-ink/10 bg-paper hover:bg-white text-ink text-xs font-mono uppercase tracking-wider rounded-sm transition-colors" data-variant-id={ctaVariants.readResearch.id}>
+                    {ctaVariants.readResearch.text}
                   </a>
                 </div>
               </div>
@@ -652,15 +665,16 @@ const App: React.FC = () => {
                 <button
                   onClick={() => setTerminalState(prev => ({ ...prev, isOpen: true }))}
                   className="px-4 py-2 bg-grove-forest text-white text-xs font-mono uppercase tracking-wider hover:bg-ink transition-colors rounded-sm"
+                  data-variant-id={ctaVariants.openTerminal.id}
                 >
-                  Open Terminal
+                  {ctaVariants.openTerminal.text}
                 </button>
               </div>
             </div>
 
             {/* Footer */}
             <div className="border-t border-ink/10 pt-12 text-center">
-              <p className="font-mono text-xs text-ink-muted mb-2">The Grove Research Preview v2.4</p>
+              <p className="font-mono text-xs text-ink-muted mb-2">The Grove Research Preview v0.09</p>
               <p className="font-serif text-sm text-ink/50">© 2025 The Grove Foundation</p>
             </div>
           </div>

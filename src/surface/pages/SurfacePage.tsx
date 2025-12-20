@@ -90,7 +90,7 @@ const SurfacePage: React.FC = () => {
         <div className="content-z relative z-10 max-w-4xl mx-auto">
           <div className="mb-6">
             <span className="font-mono text-xs uppercase tracking-[0.2em] text-grove-clay border-b border-grove-clay/30 pb-1">
-              Research Preview v2.4
+              Research Preview v0.09
             </span>
           </div>
 
@@ -368,7 +368,7 @@ const SurfacePage: React.FC = () => {
 
             {/* Footer */}
             <div className="border-t border-ink/10 pt-12 text-center">
-              <p className="font-mono text-xs text-ink-muted mb-2">The Grove Research Preview v2.4</p>
+              <p className="font-mono text-xs text-ink-muted mb-2">The Grove Research Preview v0.09</p>
               <p className="font-serif text-sm text-ink/50">© 2025 The Grove Foundation</p>
             </div>
           </div>

@@ -13,6 +13,7 @@ const EngagementBridge = lazy(() => import('../foundation/consoles/EngagementBri
 const KnowledgeVault = lazy(() => import('../foundation/consoles/KnowledgeVault'));
 const RealityTuner = lazy(() => import('../foundation/consoles/RealityTuner'));
 const AudioStudio = lazy(() => import('../foundation/consoles/AudioStudio'));
+const Genesis = lazy(() => import('../foundation/consoles/Genesis'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -90,6 +91,14 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<ConsoleLoadingFallback />}>
             <AudioStudio />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'genesis',
+        element: (
+          <Suspense fallback={<ConsoleLoadingFallback />}>
+            <Genesis />
           </Suspense>
         ),
       },

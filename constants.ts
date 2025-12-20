@@ -39,83 +39,165 @@ export const SECTION_HOOKS = {
   [SectionId.STAKES]: [
     {
       text: "What does $380 billion actually buy?",
-      prompt: "Explain where the $380B figure comes from. Break down what these companies are building—data centers, custom chips, infrastructure—and why this concentration matters for the question of AI ownership."
+      prompt: "Explain where the $380B figure comes from. Break down what these companies are building—data centers, custom chips, infrastructure—and why this concentration matters for the question of AI ownership.",
+      variants: [
+        { id: "stakes-1a", text: "What does $380 billion actually buy?", weight: 50 },
+        { id: "stakes-1b", text: "Where is all that money going?", weight: 50 }
+      ]
     },
     {
       text: "Why does 'rented, not owned' matter?",
-      prompt: "Articulate the stakes of renting vs. owning AI infrastructure. What happens when knowledge itself becomes a subscription? Consider both near-term risks (price changes, terms of service) and long-term implications (who controls what populations can think and learn?)."
+      prompt: "Articulate the stakes of renting vs. owning AI infrastructure. What happens when knowledge itself becomes a subscription? Consider both near-term risks (price changes, terms of service) and long-term implications (who controls what populations can think and learn?).",
+      variants: [
+        { id: "stakes-2a", text: "Why does 'rented, not owned' matter?", weight: 50 },
+        { id: "stakes-2b", text: "What's wrong with renting AI?", weight: 50 }
+      ]
     }
   ],
   [SectionId.RATCHET]: [
     {
       text: "What can local models actually do today?",
-      prompt: "Be specific about current 7B and 8B model capabilities. What tasks would have seemed impossible two years ago but now run locally? How does Grove's memory architecture extend what these models accomplish?"
+      prompt: "Be specific about current 7B and 8B model capabilities. What tasks would have seemed impossible two years ago but now run locally? How does Grove's memory architecture extend what these models accomplish?",
+      variants: [
+        { id: "ratchet-1a", text: "What can local models actually do today?", weight: 50 },
+        { id: "ratchet-1b", text: "What runs on my laptop right now?", weight: 50 }
+      ]
     },
     {
       text: "When does local hardware catch up?",
-      prompt: "Walk through the Ratchet projections. What does the 7-month doubling and 21-month lag mean for capability timelines? What runs locally in 2026? 2027?"
+      prompt: "Walk through the Ratchet projections. What does the 7-month doubling and 21-month lag mean for capability timelines? What runs locally in 2026? 2027?",
+      variants: [
+        { id: "ratchet-2a", text: "When does local hardware catch up?", weight: 50 },
+        { id: "ratchet-2b", text: "How fast is the gap closing?", weight: 50 }
+      ]
     }
   ],
   [SectionId.WHAT_IS_GROVE]: [
     {
       text: "How is this different from running Ollama?",
-      prompt: "Someone says: 'I can already run Llama locally. How is Grove different?' Answer directly. What does Grove provide that simply running a local model doesn't? Focus on persistent memory, agent coordination, network effects, and the hybrid architecture that reaches for frontier capability when needed."
+      prompt: "Someone says: 'I can already run Llama locally. How is Grove different?' Answer directly. What does Grove provide that simply running a local model doesn't? Focus on persistent memory, agent coordination, network effects, and the hybrid architecture that reaches for frontier capability when needed.",
+      variants: [
+        { id: "grove-1a", text: "How is this different from running Ollama?", weight: 50 },
+        { id: "grove-1b", text: "I already run local models. What's new?", weight: 50 }
+      ]
     },
     {
       text: "What do you mean by 'agents'?",
-      prompt: "Define AI agents clearly for someone who's used ChatGPT but hasn't followed the agent discourse. What makes an agent different from a chatbot? What do Grove agents actually do?"
+      prompt: "Define AI agents clearly for someone who's used ChatGPT but hasn't followed the agent discourse. What makes an agent different from a chatbot? What do Grove agents actually do?",
+      variants: [
+        { id: "grove-2a", text: "What do you mean by 'agents'?", weight: 50 },
+        { id: "grove-2b", text: "Agents vs chatbots—what's the difference?", weight: 50 }
+      ]
     }
   ],
   [SectionId.ARCHITECTURE]: [
     {
       text: "What hardware would I actually need?",
-      prompt: "Be honest about current MVP constraints while explaining the target. What's minimum viable? What's recommended? How does hardware choice affect what runs locally vs. routes to cloud?"
+      prompt: "Be honest about current MVP constraints while explaining the target. What's minimum viable? What's recommended? How does hardware choice affect what runs locally vs. routes to cloud?",
+      variants: [
+        { id: "arch-1a", text: "What hardware would I actually need?", weight: 50 },
+        { id: "arch-1b", text: "Can my computer run this?", weight: 50 }
+      ]
     },
     {
       text: "How does Grove decide what runs locally?",
-      prompt: "Explain the hybrid architecture routing logic. How does the system decide between local inference and cloud calls? What are 'pivotal moments'? How does this change as local capability improves?"
+      prompt: "Explain the hybrid architecture routing logic. How does the system decide between local inference and cloud calls? What are 'pivotal moments'? How does this change as local capability improves?",
+      variants: [
+        { id: "arch-2a", text: "How does Grove decide what runs locally?", weight: 50 },
+        { id: "arch-2b", text: "When does it reach for the cloud?", weight: 50 }
+      ]
     }
   ],
   [SectionId.ECONOMICS]: [
     {
       text: "Why not just use crypto?",
-      prompt: "Grove has a credit system and talks about decentralization. Why isn't this a blockchain project? What's the difference between Grove credits and a token? Why did Grove choose this model?"
+      prompt: "Grove has a credit system and talks about decentralization. Why isn't this a blockchain project? What's the difference between Grove credits and a token? Why did Grove choose this model?",
+      variants: [
+        { id: "econ-1a", text: "Why not just use crypto?", weight: 50 },
+        { id: "econ-1b", text: "Is this a token?", weight: 50 }
+      ]
     },
     {
       text: "What happens when the tax reaches 3%?",
-      prompt: "When mature communities hit the efficiency floor, how does the Foundation sustain itself? Is this actually sustainable? Be honest about the economic model and its assumptions."
+      prompt: "When mature communities hit the efficiency floor, how does the Foundation sustain itself? Is this actually sustainable? Be honest about the economic model and its assumptions.",
+      variants: [
+        { id: "econ-2a", text: "What happens when the tax reaches 3%?", weight: 50 },
+        { id: "econ-2b", text: "How does the Foundation survive success?", weight: 50 }
+      ]
     }
   ],
   [SectionId.DIFFERENTIATION]: [
     {
       text: "What makes Grove better than ChatGPT right now?",
-      prompt: "Be honest. Where does Grove win and where does it lose today? Focus on persistence, ownership, privacy, and trajectory rather than raw capability."
+      prompt: "Be honest. Where does Grove win and where does it lose today? Focus on persistence, ownership, privacy, and trajectory rather than raw capability.",
+      variants: [
+        { id: "diff-1a", text: "What makes Grove better than ChatGPT right now?", weight: 50 },
+        { id: "diff-1b", text: "Why not just use ChatGPT?", weight: 50 }
+      ]
     },
     {
       text: "How does memory actually persist?",
-      prompt: "Explain the technical reality of persistent agent memory. What's stored, where, how do agents retrieve relevant memories? Reference the diary system."
+      prompt: "Explain the technical reality of persistent agent memory. What's stored, where, how do agents retrieve relevant memories? Reference the diary system.",
+      variants: [
+        { id: "diff-2a", text: "How does memory actually persist?", weight: 50 },
+        { id: "diff-2b", text: "Do agents really remember?", weight: 50 }
+      ]
     }
   ],
   [SectionId.NETWORK]: [
     {
       text: "What is the Knowledge Commons? Can't it be gamed?",
-      prompt: "If sharing earns credits, won't people spam low-quality contributions? Explain the mechanism design that makes genuine contribution more rewarding than gaming."
+      prompt: "If sharing earns credits, won't people spam low-quality contributions? Explain the mechanism design that makes genuine contribution more rewarding than gaming.",
+      variants: [
+        { id: "net-1a", text: "What is the Knowledge Commons? Can't it be gamed?", weight: 50 },
+        { id: "net-1b", text: "How do you prevent spam?", weight: 50 }
+      ]
     },
     {
       text: "How do strangers' AI communities help each other?",
-      prompt: "Explain how separate communities—run by different people—can collaborate and learn from each other. What gets shared? How does attribution work?"
+      prompt: "Explain how separate communities—run by different people—can collaborate and learn from each other. What gets shared? How does attribution work?",
+      variants: [
+        { id: "net-2a", text: "How do strangers' AI communities help each other?", weight: 50 },
+        { id: "net-2b", text: "Why would anyone share their innovations?", weight: 50 }
+      ]
     }
   ],
   [SectionId.GET_INVOLVED]: [
     {
       text: "Where should I start?",
-      prompt: "I'm new to Grove. What's the most important thing to understand first? Give me a 90-second orientation and then suggest where to go deeper based on what seems most interesting."
+      prompt: "I'm new to Grove. What's the most important thing to understand first? Give me a 90-second orientation and then suggest where to go deeper based on what seems most interesting.",
+      variants: [
+        { id: "involve-1a", text: "Where should I start?", weight: 50 },
+        { id: "involve-1b", text: "Give me the 90-second version", weight: 50 }
+      ]
     },
     {
       text: "What can I do before launch?",
-      prompt: "Grove is in development. What can interested people do right now? Research contribution? Technical participation? What's available now vs. coming?"
+      prompt: "Grove is in development. What can interested people do right now? Research contribution? Technical participation? What's available now vs. coming?",
+      variants: [
+        { id: "involve-2a", text: "What can I do before launch?", weight: 50 },
+        { id: "involve-2b", text: "How can I get involved now?", weight: 50 }
+      ]
     }
   ]
+};
+
+// CTA variants for A/B testing
+export const CTA_VARIANTS = {
+  readResearch: {
+    id: 'cta-read-research',
+    variants: [
+      { id: 'read-1a', text: 'Read on Notion', weight: 50 },
+      { id: 'read-1b', text: 'View White Paper', weight: 50 }
+    ]
+  },
+  openTerminal: {
+    id: 'cta-open-terminal',
+    variants: [
+      { id: 'terminal-1a', text: 'Open Terminal', weight: 50 },
+      { id: 'terminal-1b', text: 'Start Exploring', weight: 50 }
+    ]
+  }
 };
 
 export const INITIAL_TERMINAL_MESSAGE = `The Terminal.
