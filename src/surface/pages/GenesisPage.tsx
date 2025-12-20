@@ -46,7 +46,7 @@ const GenesisPage: React.FC = () => {
   const screenRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const [terminalState, setTerminalState] = useState<TerminalState>({
-    isOpen: false,
+    isOpen: true,  // v0.12e: Terminal open by default to showcase experience
     messages: [
       { id: 'init', role: 'model', text: INITIAL_TERMINAL_MESSAGE }
     ],

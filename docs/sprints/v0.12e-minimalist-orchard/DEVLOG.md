@@ -1,169 +1,123 @@
 # Development Log — v0.12e Minimalist Orchard
 
-## Sprint Status: PLANNED
+## Sprint Status: COMPLETE
 
 ## Objective
-Evolve Surface design system to "Minimalist Orchard" aesthetic. Make Genesis the default landing experience. **Critically: Architect Genesis components for dynamic content injection, enabling the "Chameleon" adaptive surface in v0.13.**
+Make the first-time experience bulletproof: terminal open by default, URL lens highlighting, referrer tracking, and guaranteed welcome flow for new users.
 
 ## Strategic Context
-> "The Medium is the Message"
+> "Show the Orchard, Not the Seed"
 
-This sprint is not aesthetic polish — it's **infrastructure for the Chameleon**.
-
-- Sci-Fi UI = cockpit = rigid, can't be rewritten
-- Paper UI = manuscript = made to be rewritten
-
-The warm bone background and serif typography create a "living document" aesthetic where content morphing feels natural.
-
----
-
-## Pre-Sprint Checklist
-- [x] REPO_AUDIT.md — Current state documented
-- [x] SPEC.md — Goals, strategic context, acceptance criteria
-- [x] DECISIONS.md — 7 ADRs including Chameleon prep
-- [x] SPRINTS.md — Stories with exact line numbers
-- [x] TARGET_CONTENT.md — Exact CSS/config values
-- [x] EXECUTION_PROMPT.md — 6-phase instructions
-- [ ] Baseline build passes
+When someone visits The Grove (especially via a shared link), they should immediately see the full experience with the terminal open. If they came with a specific lens, that lens should be highlighted and ready for selection.
 
 ---
 
 ## Execution Log
 
-### Phase 1: Typography Update
-**Status:** Not started
+### Phase 1: Terminal Open by Default
+**Status:** Complete
 
-| Story | Status | Notes |
-|-------|--------|-------|
-| 1.1 Font imports | ⬜ | |
-| 1.2 CSS font families | ⬜ | |
-| 1.3 Tailwind font config | ⬜ | |
-
-**Build gate:** ⬜
-
----
-
-### Phase 2: Color Update
-**Status:** Not started
-
-| Story | Status | Notes |
-|-------|--------|-------|
-| 2.1 CSS color tokens | ⬜ | |
-| 2.2 Tailwind color config | ⬜ | |
-
-**Build gate:** ⬜
-
----
-
-### Phase 3: Typography Features
-**Status:** Not started
-
-| Story | Status | Notes |
-|-------|--------|-------|
-| 3.1 Smart typography CSS | ⬜ | |
-
-**Build gate:** ⬜
-
----
-
-### Phase 4: Genesis Default
-**Status:** Not started
-
-| Story | Status | Notes |
-|-------|--------|-------|
-| 4.1 SurfaceRouter default | ⬜ | |
-| 4.2 Flag in schema | ⬜ | |
-| 4.3 Flag in JSON | ⬜ | |
-
-**Build gate:** ⬜
-
----
-
-### Phase 5: Chameleon Prep
-**Status:** Not started
-
-| Story | Status | Notes |
-|-------|--------|-------|
-| 5.1 HeroHook content prop | ⬜ | |
-| 5.2 ProblemStatement quotes prop | ⬜ | |
-| 5.3 Export interfaces | ⬜ | |
-
-**Build gate:** ⬜
-
----
-
-### Phase 6: Verification
-**Status:** Not started
-
-| Test | Status | Notes |
+| Task | Status | Notes |
 |------|--------|-------|
-| Genesis loads at `/` | ⬜ | |
-| Classic at `?experience=classic` | ⬜ | |
-| Terminal typography | ⬜ | |
-| Foundation unchanged | ⬜ | |
-| Console errors | ⬜ | |
-| Component props work | ⬜ | |
+| Change isOpen default to true | ✅ | GenesisPage.tsx line 49 |
+
+**Build gate:** ✅
 
 ---
 
-## Issues Encountered
+### Phase 2: Referrer Tracking
+**Status:** Complete
 
-*None yet*
+| Task | Status | Notes |
+|------|--------|-------|
+| Add STORAGE_KEY_REFERRER | ✅ | localStorage key |
+| Create captureReferrer() | ✅ | Stores ?r= param with timestamp |
+| Create isReturningUser() | ✅ | Checks for existing Grove state |
+| Create getStoredReferrer() | ✅ | Retrieves stored referrer data |
+| Add referrer to context | ✅ | Exposed via useNarrativeEngine |
+| Add isFirstTimeUser to context | ✅ | For conditional flows |
 
----
-
-## Files Modified
-
-| File | Change Type | Commit |
-|------|-------------|--------|
-| | | |
-
----
-
-## Post-Sprint
-
-### Acceptance Criteria Status
-- [ ] AC-1: Tenor Sans loads
-- [ ] AC-2: EB Garamond loads
-- [ ] AC-3: Font fallbacks work
-- [ ] AC-4: JetBrains Mono unchanged
-- [ ] AC-5: Background is warm bone
-- [ ] AC-6: Text is forest charcoal
-- [ ] AC-7: Accent is hunter green
-- [ ] AC-8: Foundation unchanged
-- [ ] AC-9: Line height 1.65
-- [ ] AC-10: Smart quotes render
-- [ ] AC-11: optimizeLegibility set
-- [ ] AC-12: `/` loads Genesis
-- [ ] AC-13: `?experience=classic` loads Classic
-- [ ] AC-14: Flag shows true
-- [ ] AC-15: HeroHook accepts content prop
-- [ ] AC-16: ProblemStatement accepts quotes prop
-- [ ] AC-17: Default content renders
-- [ ] AC-18: Build passes
-- [ ] AC-19: No console errors
-- [ ] AC-20: Terminal functional
+**Build gate:** ✅
 
 ---
 
-## Next Sprint: v0.13 "The Chameleon"
+### Phase 3: URL Lens Highlighting
+**Status:** Complete
 
-With the Paper Canvas established, v0.13 implements:
+| Task | Status | Notes |
+|------|--------|-------|
+| Add urlLensId to NarrativeEngineContext | ✅ | Captures ?lens= param |
+| Add highlightedLens prop to LensGrid | ✅ | Visual treatment |
+| Add highlightedLens prop to LensPicker | ✅ | Pass-through |
+| Add "Shared with you" badge | ✅ | Clay orange styling |
+| Wire urlLensId through Terminal | ✅ | Complete chain |
 
-1. **Lens Content Map** — JSON mapping ArchetypeId to content variations
-2. **Reactive Surface** — GenesisPage listens to `useNarrativeEngine().activeLens`
-3. **Morphing Effect** — Un-type/re-type animation when lens changes
+**Build gate:** ✅
 
-The manuscript aesthetic makes this feel natural — like editing a living document.
+---
 
-### Content Variations Preview
-```typescript
-// Example: Engineer lens
-{ headline: "THE ARCHITECTURE.", subtext: ["Latency is the mind killer.", "Control yours."] }
+### Phase 4: First-Time User Welcome
+**Status:** Complete
 
-// Example: Academic lens  
-{ headline: "THE RESEARCH.", subtext: ["Beyond the walled gardens.", "Open inquiry."] }
+| Task | Status | Notes |
+|------|--------|-------|
+| Update welcome logic for URL lens | ✅ | Shows LensPicker if ?lens= present |
+| Welcome interstitial for new users | ✅ | No URL = welcome flow |
+| localStorage state detection | ✅ | isReturningUser() utility |
 
-// Example: Skeptic lens
-{ headline: "THE QUESTION.", subtext: ["Who owns your intelligence?", "You should."] }
-```
+**Build gate:** ✅
+
+---
+
+## Files Changed
+
+| File | Change Type | Purpose |
+|------|-------------|---------|
+| `src/surface/pages/GenesisPage.tsx` | MODIFY | Terminal open by default |
+| `hooks/NarrativeEngineContext.tsx` | MODIFY | Referrer tracking, urlLensId, isFirstTimeUser |
+| `components/Terminal.tsx` | MODIFY | URL lens logic, pass highlightedLens |
+| `components/Terminal/LensGrid.tsx` | MODIFY | highlightedLens visual treatment |
+| `components/Terminal/LensPicker.tsx` | MODIFY | highlightedLens prop |
+
+---
+
+## User Flow
+
+### First Visit (No Referrer, No State)
+1. Terminal opens automatically
+2. Welcome interstitial displayed
+3. User selects lens, starts exploring
+
+### Visit with URL Lens (?lens=academic)
+1. Terminal opens automatically
+2. LensPicker displayed (not welcome)
+3. "Academic" lens highlighted with "Shared with you" badge
+4. User clicks to select, starts exploring
+
+### Visit with Referrer (?r=friend123)
+1. Referrer code stored in localStorage with timestamp
+2. Used for future social graph / seeding features
+3. Terminal opens, normal welcome flow
+
+### Returning User
+1. Terminal opens
+2. Previous lens restored from localStorage
+3. Normal terminal experience
+
+---
+
+## Known Issues
+None encountered during sprint.
+
+---
+
+## Post-Sprint Notes
+
+The "minimalist orchard" approach ensures every visitor sees the full experience immediately. The terminal-first design means:
+- No hidden features
+- No scroll-to-find UX
+- Immediate engagement with the core product
+
+The referrer tracking infrastructure prepares for future social graph features where users can earn "grove seedings" for bringing others to the platform.
+
+**Completed:** 2025-12-20

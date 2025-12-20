@@ -267,7 +267,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     recordEntropyInjection,
     recordEntropyDismiss,
     tickEntropyCooldown,
-    getJourneyIdForCluster
+    getJourneyIdForCluster,
+    // v0.12e: First-time user detection and URL lens
+    isFirstTimeUser,
+    urlLensId
   } = useNarrativeEngine();
 
   // Engagement Bus (unified state management replacing useRevealState)
@@ -351,16 +354,21 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   const enabledPersonas = getEnabledPersonas();
 
-  // Check if we should show welcome interstitial on first open
+  // Check if we should show welcome interstitial or lens picker on first open
   useEffect(() => {
     const hasBeenWelcomed = localStorage.getItem('grove-terminal-welcomed') === 'true';
 
     if (terminalState.isOpen && !hasBeenWelcomed && !hasShownWelcome) {
-      // Show welcome interstitial instead of injecting chat message
-      setShowWelcomeInterstitial(true);
+      // v0.12e: If there's a URL lens, show LensPicker (with lens highlighted)
+      // Otherwise, show welcome interstitial for first-time users
+      if (urlLensId) {
+        setShowLensPicker(true);
+      } else {
+        setShowWelcomeInterstitial(true);
+      }
       setHasShownWelcome(true);
     }
-  }, [terminalState.isOpen, hasShownWelcome]);
+  }, [terminalState.isOpen, hasShownWelcome, urlLensId]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
@@ -955,6 +963,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               onCreateCustomLens={handleCreateCustomLens}
               onDeleteCustomLens={handleDeleteCustomLens}
               currentLens={session.activeLens}
+              highlightedLens={urlLensId}
               showCreateOption={showCustomLensInPicker}
             />
           ) : (

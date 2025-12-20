@@ -14,6 +14,7 @@ interface LensPickerProps {
   onCreateCustomLens?: () => void;
   onDeleteCustomLens?: (id: string) => void;
   currentLens?: string | null;
+  highlightedLens?: string | null;  // v0.12e: URL lens to highlight
   showCreateOption?: boolean;
 }
 
@@ -24,6 +25,7 @@ const LensPicker: React.FC<LensPickerProps> = ({
   onCreateCustomLens,
   onDeleteCustomLens,
   currentLens,
+  highlightedLens,
   showCreateOption = true
 }) => {
   return (
@@ -47,6 +49,7 @@ const LensPicker: React.FC<LensPickerProps> = ({
           personas={personas}
           customLenses={customLenses}
           currentLens={currentLens}
+          highlightedLens={highlightedLens}
           onSelect={onSelect}
           onCreateCustomLens={onCreateCustomLens}
           onDeleteCustomLens={onDeleteCustomLens}

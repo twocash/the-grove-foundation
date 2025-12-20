@@ -35,6 +35,57 @@ import { deserializeLens } from '../src/utils/lensSerializer';
 const STORAGE_KEY_LENS = 'grove-terminal-lens';
 const STORAGE_KEY_SESSION = 'grove-terminal-session';
 const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
+const STORAGE_KEY_REFERRER = 'grove-referrer';
+const STORAGE_KEY_WELCOMED = 'grove-terminal-welcomed';
+
+// v0.12e: Track referrer code from ?r= parameter
+const captureReferrer = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const referrer = params.get('r');
+  if (referrer) {
+    try {
+      // Store referrer with timestamp for future social graph tracking
+      const referrerData = {
+        code: referrer,
+        capturedAt: new Date().toISOString(),
+        landingUrl: window.location.href
+      };
+      localStorage.setItem(STORAGE_KEY_REFERRER, JSON.stringify(referrerData));
+      console.log('[v0.12e] Referrer captured:', referrer);
+    } catch (e) {
+      console.error('Failed to store referrer:', e);
+    }
+    return referrer;
+  }
+  return null;
+};
+
+// v0.12e: Check if this is a returning user (has any localStorage state)
+const isReturningUser = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    // User is returning if they have any Grove-specific localStorage
+    const hasWelcomed = localStorage.getItem(STORAGE_KEY_WELCOMED) === 'true';
+    const hasLens = !!localStorage.getItem(STORAGE_KEY_LENS);
+    const hasSession = !!localStorage.getItem(STORAGE_KEY_SESSION);
+    return hasWelcomed || hasLens || hasSession;
+  } catch (e) {
+    return false;
+  }
+};
+
+// v0.12e: Get stored referrer data
+const getStoredReferrer = (): { code: string; capturedAt: string; landingUrl: string } | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_REFERRER);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {
+    console.error('Failed to read referrer:', e);
+  }
+  return null;
+};
 
 // v0.14: Handle shared reality URL (?share=...)
 const getInitialShare = (): string | null => {
@@ -127,6 +178,10 @@ interface NarrativeEngineContextType {
   tickEntropyCooldown: () => void;
   getJourneyIdForCluster: (cluster: string) => string | null;
   globalSettings: GlobalSettings;
+  // v0.12e: First-time user detection and referrer tracking
+  isFirstTimeUser: boolean;
+  urlLensId: string | null;
+  referrer: { code: string; capturedAt: string; landingUrl: string } | null;
 }
 
 const NarrativeEngineContext = createContext<NarrativeEngineContextType | null>(null);
@@ -154,6 +209,20 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
   const [entropyState, setEntropyState] = useState<EntropyState>(DEFAULT_ENTROPY_STATE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // v0.12e: Track first-time users and referrers
+  const [isFirstTimeUser] = useState(() => !isReturningUser());
+  const [urlLensId] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('lens');
+  });
+  const [referrer] = useState(() => {
+    // Capture new referrer first (if present in URL)
+    captureReferrer();
+    // Then return stored referrer (may be newly captured or previous)
+    return getStoredReferrer();
+  });
 
   // Load schema from API on mount
   useEffect(() => {
@@ -510,7 +579,11 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     recordEntropyDismiss,
     tickEntropyCooldown,
     getJourneyIdForCluster,
-    globalSettings
+    globalSettings,
+    // v0.12e: First-time user detection and referrer tracking
+    isFirstTimeUser,
+    urlLensId,
+    referrer
   };
 
   return (

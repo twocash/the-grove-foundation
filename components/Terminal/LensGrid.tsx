@@ -110,6 +110,7 @@ interface LensGridProps {
   personas: Persona[];
   customLenses?: CustomLens[];
   currentLens?: string | null;
+  highlightedLens?: string | null;  // v0.12e: URL lens to highlight
   onSelect: (personaId: string | null) => void;
   onCreateCustomLens?: () => void;
   onDeleteCustomLens?: (id: string) => void;
@@ -120,6 +121,7 @@ const LensGrid: React.FC<LensGridProps> = ({
   personas,
   customLenses = [],
   currentLens,
+  highlightedLens,
   onSelect,
   onCreateCustomLens,
   onDeleteCustomLens,
@@ -214,23 +216,32 @@ const LensGrid: React.FC<LensGridProps> = ({
         const Icon = IconComponent(persona.icon);
         const colors = getPersonaColors(persona.color);
         const isSelected = currentLens === persona.id;
+        const isHighlighted = highlightedLens === persona.id && !isSelected;
 
         return (
           <button
             key={persona.id}
             onClick={() => onSelect(persona.id)}
-            className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group
+            className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group relative
               ${isSelected
                 ? `${colors.bgLight} ${colors.border} border-2`
-                : 'bg-white border-ink/10 hover:border-ink/20 hover:shadow-sm'
+                : isHighlighted
+                  ? `bg-grove-clay/5 border-grove-clay/40 border-2 ring-2 ring-grove-clay/20 ring-offset-1`
+                  : 'bg-white border-ink/10 hover:border-ink/20 hover:shadow-sm'
               }`}
           >
+            {/* v0.12e: URL lens highlight badge */}
+            {isHighlighted && (
+              <div className="absolute -top-2 left-4 bg-grove-clay text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded">
+                Shared with you
+              </div>
+            )}
             <div className="flex items-start space-x-3">
-              <div className={`p-2 rounded-lg ${isSelected ? colors.bg : 'bg-ink/5 group-hover:bg-ink/10'} transition-colors`}>
-                <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-ink/60'}`} />
+              <div className={`p-2 rounded-lg ${isSelected ? colors.bg : isHighlighted ? 'bg-grove-clay/20' : 'bg-ink/5 group-hover:bg-ink/10'} transition-colors`}>
+                <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : isHighlighted ? 'text-grove-clay' : 'text-ink/60'}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <div className={`font-sans font-semibold text-sm ${isSelected ? colors.text : 'text-ink'}`}>
+                <div className={`font-sans font-semibold text-sm ${isSelected ? colors.text : isHighlighted ? 'text-grove-clay' : 'text-ink'}`}>
                   {persona.publicLabel}
                 </div>
                 <div className="font-serif text-xs text-ink-muted italic mt-0.5 line-clamp-2">
