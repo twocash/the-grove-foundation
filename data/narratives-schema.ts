@@ -267,6 +267,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Auto-Generate Journeys',
     description: 'Generate first journey for custom persona users based on first question',
     enabled: true
+  },
+  {
+    id: 'genesis-landing',
+    name: 'Genesis Landing Experience',
+    description: 'Show the new Jobs-style landing page instead of Classic',
+    enabled: false
   }
 ];
 

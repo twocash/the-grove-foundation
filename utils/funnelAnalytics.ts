@@ -240,6 +240,31 @@ export const trackPromptHookClicked = (data: {
   });
 };
 
+// Genesis experience events
+export const trackGenesisExperienceLoaded = (): void => {
+  trackFunnelEvent('genesis_experience_loaded', {
+    experience: 'genesis',
+    source: 'landing'
+  });
+};
+
+export const trackGenesisScrollDepth = (screenNumber: number, screenName: string): void => {
+  trackFunnelEvent('genesis_scroll_depth', {
+    screenNumber,
+    screenName,
+    experience: 'genesis'
+  });
+};
+
+export const trackGenesisCTAClicked = (ctaId: string, screenNumber: number, screenName: string): void => {
+  trackFunnelEvent('genesis_cta_clicked', {
+    ctaId,
+    screenNumber,
+    screenName,
+    experience: 'genesis'
+  });
+};
+
 // Get analytics report (for admin/debugging)
 export const getAnalyticsReport = (): {
   totalEvents: number;
@@ -293,6 +318,9 @@ export default {
   trackCognitiveBridgeDismissed,
   trackEntropyHighDetected,
   trackPromptHookClicked,
+  trackGenesisExperienceLoaded,
+  trackGenesisScrollDepth,
+  trackGenesisCTAClicked,
   getAnalyticsReport,
   clearAnalytics
 };

@@ -29,14 +29,14 @@ const ConsoleLoadingFallback: React.FC = () => (
   </div>
 );
 
-// Surface will be imported directly (not lazy) since it's the main experience
-import SurfacePage from '../surface/pages/SurfacePage';
+// Surface Router handles Classic/Genesis experience switching
+import SurfaceRouter from '../surface/pages/SurfaceRouter';
 
 export const routes: RouteObject[] = [
-  // Surface (main experience)
+  // Surface (main experience - routes between Classic and Genesis)
   {
     path: '/',
-    element: <SurfacePage />,
+    element: <SurfaceRouter />,
   },
 
   // Foundation (admin/control plane)

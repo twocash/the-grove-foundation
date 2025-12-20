@@ -264,7 +264,11 @@ export type FunnelEventType =
   | 'cognitive_bridge_dismissed'
   | 'entropy_high_detected'
   // Landing page events
-  | 'prompt_hook_clicked';
+  | 'prompt_hook_clicked'
+  // Genesis experience events
+  | 'genesis_experience_loaded'
+  | 'genesis_scroll_depth'
+  | 'genesis_cta_clicked';
 
 export interface FunnelEvent {
   eventType: FunnelEventType;
