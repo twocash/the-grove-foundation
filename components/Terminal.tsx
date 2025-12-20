@@ -47,6 +47,15 @@ interface TerminalProps {
   onQueryHandled?: () => void;
 }
 
+// First-time welcome message - shown before LensPicker on first Terminal open
+const FIRST_TIME_WELCOME = `Welcome to your Grove.
+
+This Terminal is where you interact with your AI village — trained on your data, running on your hardware, owned by you.
+
+Think of it as ChatGPT, but private. Your Grove never leaves your machine. That's **intellectual independence**: AI that enriches *you*, not corporate shareholders.
+
+**One thing to try:** Lenses let you explore the same knowledge from different perspectives — skeptic, enthusiast, or your own custom view.`;
+
 // System prompt is now server-side in /api/chat
 // See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
 
@@ -349,16 +358,30 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   const enabledPersonas = getEnabledPersonas();
 
-  // Check if we should show lens picker on first open
+  // Check if we should show welcome message and lens picker on first open
   useEffect(() => {
-    const hasSelectedLens = localStorage.getItem('grove-terminal-lens') !== null ||
-                            localStorage.getItem('grove-terminal-welcomed') === 'true';
+    const hasBeenWelcomed = localStorage.getItem('grove-terminal-welcomed') === 'true';
 
-    if (terminalState.isOpen && !hasSelectedLens && !hasShownWelcome) {
-      setShowLensPicker(true);
+    if (terminalState.isOpen && !hasBeenWelcomed && !hasShownWelcome) {
+      // Inject welcome message into chat
+      setTerminalState(prev => ({
+        ...prev,
+        messages: [...prev.messages, {
+          id: 'welcome-' + Date.now(),
+          role: 'model',
+          text: FIRST_TIME_WELCOME
+        }]
+      }));
+
+      // Small delay before showing LensPicker
+      setTimeout(() => {
+        setShowLensPicker(true);
+      }, 500);
+
       setHasShownWelcome(true);
+      localStorage.setItem('grove-terminal-welcomed', 'true');
     }
-  }, [terminalState.isOpen, hasShownWelcome]);
+  }, [terminalState.isOpen, hasShownWelcome, setTerminalState]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {

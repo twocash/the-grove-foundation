@@ -72,8 +72,14 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
           </p>
         </div>
 
-        {/* Deep dive links */}
+        {/* Deep dive links - ordered for narrative arc: Vision → Ratchet → Economics */}
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+          <button
+            onClick={() => handleDeepDive('vision')}
+            className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
+          >
+            The Vision
+          </button>
           <button
             onClick={() => handleDeepDive('ratchet')}
             className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
@@ -86,12 +92,6 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
           >
             The Economics
           </button>
-          <button
-            onClick={() => handleDeepDive('vision')}
-            className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
-          >
-            The Vision
-          </button>
         </div>
 
         {/* Terminal CTA */}
@@ -103,7 +103,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
             onClick={handleExplore}
             className="px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
           >
-            Explore
+            Consult the Grove
           </button>
 
           {/* Scroll indicator - floating seedling */}

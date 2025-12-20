@@ -1,9 +1,9 @@
 // components/Terminal/TerminalControls.tsx
 // Controls bar below input - lens badge, journey progress, streak
-// v0.12: Part of Terminal UX modernization
+// v0.12c: Lens selector redesigned as pill button [🔎 Lens Name ▾]
 
 import React from 'react';
-import { Persona, getPersonaColors } from '../../data/narratives-schema';
+import { Persona } from '../../data/narratives-schema';
 
 interface TerminalControlsProps {
   persona: Persona | null;
@@ -24,30 +24,18 @@ const TerminalControls: React.FC<TerminalControlsProps> = ({
   showStreak,
   showJourney
 }) => {
-  const colors = persona ? getPersonaColors(persona.color) : null;
-
   return (
     <div className="flex items-center justify-between px-4 py-2 border-t border-ink/5 bg-paper/50">
-      {/* Lens Badge */}
+      {/* Lens Selector Pill */}
       <button
         onClick={onSwitchLens}
-        className="flex items-center space-x-2 group"
+        className="flex items-center space-x-1.5 px-3 py-1 border border-ink/20 rounded-full hover:border-grove-forest hover:text-grove-forest transition-colors"
       >
-        {persona ? (
-          <>
-            <span className={`w-2 h-2 rounded-full ${colors?.dot || 'bg-ink/30'}`} />
-            <span className="text-[11px] font-sans font-medium text-ink">
-              {persona.publicLabel}
-            </span>
-          </>
-        ) : (
-          <span className="text-[11px] font-sans text-ink-muted">
-            Choose a lens
-          </span>
-        )}
-        <span className="text-[9px] text-ink-muted group-hover:text-grove-forest transition-colors">
-          ↔
+        <span className="text-xs">🔎</span>
+        <span className="text-[11px] font-sans font-medium text-ink">
+          {persona?.publicLabel || 'Choose Lens'}
         </span>
+        <span className="text-[9px] text-ink-muted">▾</span>
       </button>
 
       {/* Journey Progress */}

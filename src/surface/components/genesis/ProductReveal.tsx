@@ -1,7 +1,7 @@
 // src/surface/components/genesis/ProductReveal.tsx
 // Screen 3: The Product Reveal - "thousand songs in your pocket" moment
 // DESIGN: Organic, warm, garden metaphor - NOT futuristic
-// ANIMATION: "STEP INTO THE GROVE" → YOUR sprouts up and knocks THE away → "STEP INTO YOUR GROVE"
+// HEADLINE: "STEP INTO YOUR GROVE" - static with orange emphasis on "YOUR GROVE"
 
 import React, { useEffect, useRef, useState } from 'react';
 import ScrollIndicator from './ScrollIndicator';
@@ -28,13 +28,12 @@ const pillars = [
   }
 ];
 
-// Animation phases
-type AnimationPhase = 'hidden' | 'pixelating' | 'revealed' | 'sprouting' | 'knocking' | 'settled';
+// Animation phases - simplified to just hidden/visible
+type AnimationPhase = 'hidden' | 'visible';
 
 export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [phase, setPhase] = useState<AnimationPhase>('hidden');
-  const [pixelProgress, setPixelProgress] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,45 +53,10 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
     return () => observer.disconnect();
   }, []);
 
-  // Animation sequence
+  // Simple fade-in when visible
   useEffect(() => {
     if (!isVisible) return;
-
-    // Phase 1: Start pixelating
-    setPhase('pixelating');
-
-    // Animate pixel progress
-    let progress = 0;
-    const pixelInterval = setInterval(() => {
-      progress += 0.05;
-      setPixelProgress(Math.min(progress, 1));
-      if (progress >= 1) {
-        clearInterval(pixelInterval);
-        setPhase('revealed');
-      }
-    }, 50);
-
-    // Phase 2: After reveal, pause then sprout
-    const sproutTimer = setTimeout(() => {
-      setPhase('sprouting');
-    }, 1500);
-
-    // Phase 3: Knock THE away
-    const knockTimer = setTimeout(() => {
-      setPhase('knocking');
-    }, 2200);
-
-    // Phase 4: Settle
-    const settleTimer = setTimeout(() => {
-      setPhase('settled');
-    }, 2800);
-
-    return () => {
-      clearInterval(pixelInterval);
-      clearTimeout(sproutTimer);
-      clearTimeout(knockTimer);
-      clearTimeout(settleTimer);
-    };
+    setPhase('visible');
   }, [isVisible]);
 
   const handleCTAClick = () => {
@@ -103,88 +67,23 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
     }
   };
 
-  // Calculate blur based on pixel progress (starts blurry, becomes clear)
-  const textBlur = phase === 'pixelating' ? `blur(${(1 - pixelProgress) * 8}px)` : 'blur(0px)';
-  const textOpacity = phase === 'hidden' ? 0 : Math.min(pixelProgress * 1.5, 1);
-
   return (
     <section ref={sectionRef} className="min-h-screen bg-paper py-24 px-6 flex flex-col items-center justify-center relative overflow-hidden">
       <div className="max-w-4xl mx-auto text-center">
 
-        {/* Animated Headline */}
-        <div className="relative h-24 sm:h-28 md:h-36 mb-8 flex items-center justify-center">
-          {/* "STEP INTO" - static after reveal */}
-          <span
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight transition-all duration-500"
-            style={{
-              filter: textBlur,
-              opacity: textOpacity,
-              transform: phase === 'hidden' ? 'translateY(20px)' : 'translateY(0)'
-            }}
-          >
-            STEP INTO{' '}
-          </span>
-
-          {/* Word container for THE/YOUR swap - simple fade transition */}
-          <span className="relative inline-block">
-            {/* THE - fades out */}
-            <span
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight transition-opacity duration-500 ease-out"
-              style={{
-                filter: textBlur,
-                opacity: phase === 'sprouting' || phase === 'knocking' || phase === 'settled' ? 0 : textOpacity,
-              }}
-            >
-              THE
-            </span>
-
-            {/* YOUR - fades in at same position */}
-            <span
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight absolute left-0 top-0 transition-opacity duration-700 ease-out"
-              style={{
-                opacity: phase === 'sprouting' || phase === 'knocking' || phase === 'settled' ? 1 : 0,
-              }}
-            >
-              YOUR
-            </span>
-          </span>
-
-          {/* GROVE - static after reveal */}
-          <span
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight transition-all duration-500"
-            style={{
-              filter: textBlur,
-              opacity: textOpacity,
-              transform: phase === 'hidden' ? 'translateY(20px)' : 'translateY(0)'
-            }}
-          >
-            {' '}GROVE
-          </span>
+        {/* Headline - Static with color emphasis */}
+        <div className="mb-8">
+          <h2 className={`font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-center transition-all duration-700 ${
+            phase === 'visible' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <span className="text-grove-forest">STEP INTO </span>
+            <span className="text-grove-clay">YOUR GROVE</span>
+          </h2>
         </div>
 
-        {/* Sparkle effect during sprouting */}
-        {(phase === 'sprouting' || phase === 'knocking') && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(6)].map((_, i) => (
-              <span
-                key={i}
-                className="absolute text-grove-forest/40 animate-ping"
-                style={{
-                  left: `${30 + Math.random() * 40}%`,
-                  top: `${20 + Math.random() * 30}%`,
-                  animationDelay: `${i * 100}ms`,
-                  animationDuration: '1s'
-                }}
-              >
-                ✦
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Rest of content - fades in after headline settles */}
-        <div className={`transition-all duration-1000 delay-500 ${
-          phase === 'settled' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        {/* Rest of content - fades in with headline */}
+        <div className={`transition-all duration-1000 delay-300 ${
+          phase === 'visible' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
           {/* One-liner */}
           <div className="mb-12">
@@ -230,7 +129,7 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
             onClick={handleCTAClick}
             className="px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors focus:outline-none focus:ring-2 focus:ring-grove-forest/50"
           >
-            See it in action
+            Consult the Grove
           </button>
 
           {/* Scroll indicator - floating seedling */}

@@ -77,7 +77,7 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
                 onClick={handleGoDeeper}
                 className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
               >
-                Go deeper
+                Consult the Grove
               </button>
               <button
                 onClick={handleKeepExploring}
