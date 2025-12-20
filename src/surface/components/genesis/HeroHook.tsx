@@ -26,12 +26,14 @@ interface HeroHookProps {
   onScrollNext?: () => void;
   content?: HeroContent;  // Optional - enables Chameleon in v0.13
   trigger?: any;  // v0.13: Triggers animation restart on lens change
+  isCollapsing?: boolean;  // v0.14: Show tuning animation during LLM generation
 }
 
 export const HeroHook: React.FC<HeroHookProps> = ({
   onScrollNext,
   content = DEFAULT_CONTENT,
-  trigger
+  trigger,
+  isCollapsing = false
 }) => {
   const [visibleSubtext, setVisibleSubtext] = useState<number[]>([]);
 
@@ -70,6 +72,7 @@ export const HeroHook: React.FC<HeroHookProps> = ({
             text={content.headline}
             trigger={trigger}
             className="block"
+            isGenerating={isCollapsing}
           />
         </h1>
 

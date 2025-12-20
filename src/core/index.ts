@@ -11,3 +11,9 @@ export * from './engine';
 
 // Config (defaults and constants)
 export * from './config';
+
+// Transformers (v0.14: Reality Projector)
+export * from './transformers';
+
+// Cache (v0.14: Reality Projector)
+export * from './cache';

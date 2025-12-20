@@ -1,8 +1,11 @@
 // src/surface/components/effects/WaveformCollapse.tsx
 // Typewriter animation: un-type -> pause -> re-type
-// v0.13: The Quantum Interface
+// v0.14: Reality Projector - tuning phase visual
 
 import React, { useState, useEffect, useRef } from 'react';
+
+// Tuning glyphs for generation indicator
+const TUNING_GLYPHS = ['▓', '▒', '░', '▒'];
 
 interface WaveformCollapseProps {
   text: string;
@@ -12,6 +15,7 @@ interface WaveformCollapseProps {
   backspaceSpeed?: number;
   typeSpeed?: number;
   pauseDuration?: number;
+  isGenerating?: boolean;  // v0.14: Show tuning animation during LLM generation
 }
 
 type Phase = 'idle' | 'collapsing' | 'observing' | 'forming';
@@ -23,13 +27,25 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
   delay = 0,
   backspaceSpeed = 15,
   typeSpeed = 40,
-  pauseDuration = 400
+  pauseDuration = 400,
+  isGenerating = false
 }) => {
   const [display, setDisplay] = useState(text);
   const [phase, setPhase] = useState<Phase>('idle');
   const [targetText, setTargetText] = useState(text);
+  const [tuningIndex, setTuningIndex] = useState(0);
   const previousTrigger = useRef(trigger);
   const isFirstRender = useRef(true);
+
+  // Tuning glyph animation during generation
+  useEffect(() => {
+    if (isGenerating) {
+      const interval = setInterval(() => {
+        setTuningIndex(prev => (prev + 1) % TUNING_GLYPHS.length);
+      }, 200);
+      return () => clearInterval(interval);
+    }
+  }, [isGenerating]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -86,14 +102,18 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
     }
   }, [phase, display, targetText, backspaceSpeed, typeSpeed, pauseDuration]);
 
+  const showCursor = phase !== 'idle' || isGenerating;
+
   return (
     <span className={className}>
       {display}
-      {phase !== 'idle' && (
+      {showCursor && (
         <span
-          className="inline-block w-[0.5em] h-[1em] bg-grove-forest ml-0.5 animate-pulse align-middle"
+          className="inline-block w-[0.5em] h-[1em] ml-0.5 align-middle text-grove-forest"
           aria-hidden="true"
-        />
+        >
+          {isGenerating ? TUNING_GLYPHS[tuningIndex] : '▌'}
+        </span>
       )}
     </span>
   );

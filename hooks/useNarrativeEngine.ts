@@ -29,24 +29,55 @@ import {
   getJourneyForCluster,
   type EntropyMessage
 } from '../src/core/engine/entropyDetector';
+import { deserializeLens } from '../src/utils/lensSerializer';
 
 // LocalStorage keys
 const STORAGE_KEY_LENS = 'grove-terminal-lens';
 const STORAGE_KEY_SESSION = 'grove-terminal-session';
 const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
 
-// v0.13: Quantum Deep Linking - Check URL params for initial lens
+// v0.14: Handle shared reality URL (?share=...)
+const getInitialShare = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  const shareParam = new URLSearchParams(window.location.search).get('share');
+  if (!shareParam) return null;
+
+  const config = deserializeLens(shareParam);
+  if (!config) return null;
+
+  // Create ephemeral lens in sessionStorage
+  const ephemeralId = `shared-${Date.now()}`;
+  try {
+    sessionStorage.setItem(`grove-ephemeral-${ephemeralId}`, JSON.stringify({
+      ...config,
+      id: ephemeralId,
+      isEphemeral: true,
+      createdAt: new Date().toISOString()
+    }));
+    console.log('[v0.14] Shared reality hydrated:', ephemeralId);
+  } catch (e) {
+    console.error('Failed to store ephemeral lens:', e);
+    return null;
+  }
+  return ephemeralId;
+};
+
+// v0.13/v0.14: Quantum Deep Linking - Check URL params for initial lens
 const getInitialLens = (): string | null => {
   if (typeof window === 'undefined') return null;
 
-  // 1. Quantum Deep Link (Highest Priority)
+  // 1. Shared Reality (Highest Priority - v0.14)
+  const shared = getInitialShare();
+  if (shared) return shared;
+
+  // 2. Quantum Deep Link (?lens=engineer)
   const params = new URLSearchParams(window.location.search);
   const lensParam = params.get('lens');
   if (lensParam && DEFAULT_PERSONAS[lensParam]) {
     return lensParam;
   }
 
-  // 2. Local Storage (History)
+  // 3. Local Storage (History)
   try {
     const storedLens = localStorage.getItem(STORAGE_KEY_LENS);
     if (storedLens) return storedLens;
@@ -67,6 +98,7 @@ interface UseNarrativeEngineReturn {
   // Persona/Lens methods (tone modifiers, decoupled from journey flow)
   selectLens: (personaId: string | null) => void;
   getPersona: (personaId: string) => Persona | undefined;
+  getPersonaById: (id: string) => Persona | undefined;  // v0.14: includes ephemeral lenses
   getEnabledPersonas: () => Persona[];
   getActiveLensData: () => Persona | null;
 
@@ -270,6 +302,25 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     if (!session.activeLens) return null;
     return getPersona(session.activeLens) || null;
   }, [session.activeLens, getPersona]);
+
+  // v0.14: Get persona by ID, including ephemeral lenses from sessionStorage
+  const getPersonaById = useCallback((id: string): Persona | undefined => {
+    // 1. Check default personas (archetypes)
+    if (DEFAULT_PERSONAS[id]) return DEFAULT_PERSONAS[id];
+
+    // 2. Check schema personas
+    if (schema?.personas?.[id]) return schema.personas[id];
+
+    // 3. Check ephemeral lenses from sessionStorage (shared links)
+    try {
+      const ephemeral = sessionStorage.getItem(`grove-ephemeral-${id}`);
+      if (ephemeral) return JSON.parse(ephemeral) as Persona;
+    } catch (e) {
+      console.error('Failed to read ephemeral lens:', e);
+    }
+
+    return undefined;
+  }, [schema]);
 
   // === Card Methods ===
 
@@ -560,6 +611,7 @@ export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
     // Persona/Lens methods
     selectLens,
     getPersona,
+    getPersonaById,
     getEnabledPersonas,
     getActiveLensData,
 

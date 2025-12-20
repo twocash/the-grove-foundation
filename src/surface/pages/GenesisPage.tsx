@@ -37,8 +37,8 @@ const GENESIS_SCREENS = [
 ];
 
 const GenesisPage: React.FC = () => {
-  // Quantum Interface - lens-reactive content
-  const { reality, quantumTrigger } = useQuantumInterface();
+  // Quantum Interface - lens-reactive content (v0.14: includes isCollapsing for tuning visual)
+  const { reality, quantumTrigger, isCollapsing } = useQuantumInterface();
 
   const [activeSection] = useState<SectionId>(SectionId.STAKES);
   const [externalQuery, setExternalQuery] = useState<{ nodeId?: string; display: string; query: string } | null>(null);
@@ -137,6 +137,7 @@ const GenesisPage: React.FC = () => {
         <HeroHook
           content={reality.hero}
           trigger={quantumTrigger}
+          isCollapsing={isCollapsing}
         />
       </div>
 

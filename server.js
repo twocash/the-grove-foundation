@@ -1711,6 +1711,67 @@ app.post('/api/telemetry/concepts', async (req, res) => {
     }
 });
 
+// ============================================================================
+// Reality Collapse API (v0.14)
+// ============================================================================
+
+const REALITY_COLLAPSE_PROMPT = `You are the Grove's Reality Collapser. Generate content for a persona.
+
+CONSTRAINTS:
+- HERO HEADLINE: [2-4 WORDS]. [ABSTRACT NOUN]. ALL CAPS, period.
+- HERO SUBTEXT: Line 1 "Not X. Not Y. Not Z." / Line 2 single word like "Yours."
+- TENSION: Line 1 what THEY do / Line 2 what WE do
+- QUOTES: 3 quotes, author ALL CAPS, short title
+
+OUTPUT JSON ONLY:
+{"hero":{"headline":"...","subtext":["...",".."]},"problem":{"quotes":[{"text":"...","author":"...","title":"..."}],"tension":["...","..."]}}`;
+
+app.post('/api/collapse', async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const { persona } = req.body;
+    if (!persona?.toneGuidance) {
+      return res.status(400).json({ error: 'Missing toneGuidance', fallback: true });
+    }
+
+    const sanitizedTone = persona.toneGuidance.substring(0, 1000).replace(/[<>{}```]/g, '');
+    const prompt = `${REALITY_COLLAPSE_PROMPT}
+
+PERSONA: ${persona.publicLabel || 'Custom'}
+TONE: ${sanitizedTone}
+STYLE: ${persona.narrativeStyle || 'balanced'}
+
+Generate collapsed reality. JSON only.`;
+
+    console.log('[Collapse] Generating for:', persona.publicLabel || 'Custom');
+
+    const result = await genai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: { responseMimeType: 'application/json', temperature: 0.7 }
+    });
+
+    let reality;
+    try {
+      reality = JSON.parse(result.text);
+    } catch {
+      const match = result.text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('No JSON in response');
+      reality = JSON.parse(match[0]);
+    }
+
+    if (!reality.hero?.headline || !reality.problem?.quotes) {
+      throw new Error('Invalid structure');
+    }
+
+    console.log(`[Collapse] Done in ${Date.now() - startTime}ms`);
+    res.json({ reality, cached: false, generationTimeMs: Date.now() - startTime });
+  } catch (error) {
+    console.error('[Collapse] Error:', error.message);
+    res.status(500).json({ error: error.message, fallback: true });
+  }
+});
+
 // SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
