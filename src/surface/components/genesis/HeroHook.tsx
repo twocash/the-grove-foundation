@@ -1,10 +1,11 @@
 // src/surface/components/genesis/HeroHook.tsx
 // Screen 1: The Hook - Full viewport emotional hit
 // DESIGN: Organic, warm, paper-textured - NOT futuristic
-// v0.12e: Added content prop interface for Chameleon (v0.13)
+// v0.13: Quantum Interface - headline morphs with lens change
 
 import React, { useEffect, useState } from 'react';
 import ScrollIndicator from './ScrollIndicator';
+import { WaveformCollapse } from '../effects/WaveformCollapse';
 
 // Content interface for Chameleon (v0.13)
 export interface HeroContent {
@@ -24,16 +25,20 @@ const DEFAULT_CONTENT: HeroContent = {
 interface HeroHookProps {
   onScrollNext?: () => void;
   content?: HeroContent;  // Optional - enables Chameleon in v0.13
+  trigger?: any;  // v0.13: Triggers animation restart on lens change
 }
 
 export const HeroHook: React.FC<HeroHookProps> = ({
   onScrollNext,
-  content = DEFAULT_CONTENT
+  content = DEFAULT_CONTENT,
+  trigger
 }) => {
   const [visibleSubtext, setVisibleSubtext] = useState<number[]>([]);
 
-  // Fade-in sequence for subtext
+  // Reset and re-animate on content/trigger change
   useEffect(() => {
+    setVisibleSubtext([]);  // Reset visibility
+
     const timers: NodeJS.Timeout[] = [];
     content.subtext.forEach((_, index) => {
       const timer = setTimeout(() => {
@@ -42,7 +47,7 @@ export const HeroHook: React.FC<HeroHookProps> = ({
       timers.push(timer);
     });
     return () => timers.forEach(clearTimeout);
-  }, [content.subtext]);
+  }, [content.subtext, trigger]);
 
   const handleScrollClick = () => {
     if (onScrollNext) {
@@ -59,9 +64,13 @@ export const HeroHook: React.FC<HeroHookProps> = ({
       <div className="absolute inset-0 bg-grain opacity-50 pointer-events-none" />
 
       <div className="text-center max-w-2xl relative z-10">
-        {/* Main headline - from props */}
+        {/* Main headline - morphs with lens via WaveformCollapse */}
         <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-grove-forest mb-8 tracking-tight">
-          {content.headline}
+          <WaveformCollapse
+            text={content.headline}
+            trigger={trigger}
+            className="block"
+          />
         </h1>
 
         {/* Subtext with fade-in sequence - from props */}

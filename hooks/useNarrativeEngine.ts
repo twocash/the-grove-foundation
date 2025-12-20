@@ -35,6 +35,28 @@ const STORAGE_KEY_LENS = 'grove-terminal-lens';
 const STORAGE_KEY_SESSION = 'grove-terminal-session';
 const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
 
+// v0.13: Quantum Deep Linking - Check URL params for initial lens
+const getInitialLens = (): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  // 1. Quantum Deep Link (Highest Priority)
+  const params = new URLSearchParams(window.location.search);
+  const lensParam = params.get('lens');
+  if (lensParam && DEFAULT_PERSONAS[lensParam]) {
+    return lensParam;
+  }
+
+  // 2. Local Storage (History)
+  try {
+    const storedLens = localStorage.getItem(STORAGE_KEY_LENS);
+    if (storedLens) return storedLens;
+  } catch (e) {
+    console.error('Failed to read stored lens:', e);
+  }
+
+  return null;
+};
+
 interface UseNarrativeEngineReturn {
   // Data
   schema: NarrativeSchemaV2 | null;
@@ -100,7 +122,11 @@ interface UseNarrativeEngineReturn {
 
 export const useNarrativeEngine = (): UseNarrativeEngineReturn => {
   const [schema, setSchema] = useState<NarrativeSchemaV2 | null>(null);
-  const [session, setSession] = useState<TerminalSession>(DEFAULT_TERMINAL_SESSION);
+  // v0.13: Initialize with deep-linked lens (prevents Flash of Default Reality)
+  const [session, setSession] = useState<TerminalSession>(() => ({
+    ...DEFAULT_TERMINAL_SESSION,
+    activeLens: getInitialLens()
+  }));
   const [entropyState, setEntropyState] = useState<EntropyState>(DEFAULT_ENTROPY_STATE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

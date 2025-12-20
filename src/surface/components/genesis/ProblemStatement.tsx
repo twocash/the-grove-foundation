@@ -32,22 +32,35 @@ const DEFAULT_QUOTES: Quote[] = [
   }
 ];
 
+// Default tension text (v0.13)
+const DEFAULT_TENSION = [
+  "They're building the future of intelligence.",
+  "And they're telling you to get comfortable being a guest in it."
+];
+
 interface ProblemStatementProps {
   className?: string;
   quotes?: Quote[];  // Optional - enables Chameleon in v0.13
+  tension?: string[];  // v0.13: Dynamic tension text
+  trigger?: any;  // v0.13: Triggers animation restart on lens change
 }
 
 export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   className = '',
-  quotes = DEFAULT_QUOTES  // Use prop or default
+  quotes = DEFAULT_QUOTES,
+  tension = DEFAULT_TENSION,
+  trigger
 }) => {
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [showTension, setShowTension] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const tensionRef = useRef<HTMLDivElement>(null);
 
-  // Animate quote cards on scroll
+  // Reset and re-animate on content/trigger change
   useEffect(() => {
+    setVisibleCards(new Set());  // Reset card visibility
+    setShowTension(false);  // Reset tension visibility
+
     const observers: IntersectionObserver[] = [];
 
     // Reset refs array to match current quotes length
@@ -91,7 +104,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
     }
 
     return () => observers.forEach(obs => obs.disconnect());
-  }, [quotes]); // Re-run effect if quotes change (important for Chameleon)
+  }, [quotes, trigger]); // Re-run effect on quotes or trigger change
 
   return (
     <section className={`min-h-screen bg-paper py-24 px-6 ${className}`}>
@@ -116,21 +129,25 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           ))}
         </div>
 
-        {/* Tension Statement */}
+        {/* Tension Statement - NOW DYNAMIC */}
         <div
           ref={tensionRef}
           className={`text-center max-w-2xl mx-auto transition-all duration-1000 ${
             showTension ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed mb-4">
-            They're building the future of intelligence.
-          </p>
-          <p className="font-serif text-xl md:text-2xl text-ink leading-relaxed mb-8">
-            And they're telling you to get comfortable being a guest in it.
-          </p>
+          {tension.map((line, index) => (
+            <p
+              key={index}
+              className={`font-serif text-xl md:text-2xl text-ink leading-relaxed ${
+                index === tension.length - 1 ? 'mb-8' : 'mb-4'
+              }`}
+            >
+              {line}
+            </p>
+          ))}
 
-          {/* The hook question */}
+          {/* The hook question - stays static */}
           <p className="font-serif text-2xl md:text-3xl text-grove-clay font-semibold">
             What if there was another way?
           </p>

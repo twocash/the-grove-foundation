@@ -23,6 +23,9 @@ import {
   CallToAction
 } from '../components/genesis';
 
+// Quantum Interface - lens-reactive content (v0.13)
+import { useQuantumInterface } from '../hooks/useQuantumInterface';
+
 // Screen definitions for tracking
 const GENESIS_SCREENS = [
   { id: 'hero-hook', name: 'HeroHook' },
@@ -34,6 +37,9 @@ const GENESIS_SCREENS = [
 ];
 
 const GenesisPage: React.FC = () => {
+  // Quantum Interface - lens-reactive content
+  const { reality, quantumTrigger } = useQuantumInterface();
+
   const [activeSection] = useState<SectionId>(SectionId.STAKES);
   const [externalQuery, setExternalQuery] = useState<{ nodeId?: string; display: string; query: string } | null>(null);
   const [viewedScreens, setViewedScreens] = useState<Set<number>>(new Set([0])); // Screen 1 is always viewed on load
@@ -126,14 +132,21 @@ const GenesisPage: React.FC = () => {
         onQueryHandled={() => setExternalQuery(null)}
       />
 
-      {/* SCREEN 1: The Hook */}
+      {/* SCREEN 1: The Hook (Quantum-Reactive) */}
       <div ref={el => { screenRefs.current[0] = el; }}>
-        <HeroHook />
+        <HeroHook
+          content={reality.hero}
+          trigger={quantumTrigger}
+        />
       </div>
 
-      {/* SCREEN 2: The Problem */}
+      {/* SCREEN 2: The Problem (Quantum-Reactive) */}
       <div ref={el => { screenRefs.current[1] = el; }}>
-        <ProblemStatement />
+        <ProblemStatement
+          quotes={reality.problem.quotes}
+          tension={reality.problem.tension}
+          trigger={quantumTrigger}
+        />
       </div>
 
       {/* SCREEN 3: Product Reveal */}
