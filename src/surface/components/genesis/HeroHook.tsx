@@ -1,27 +1,48 @@
 // src/surface/components/genesis/HeroHook.tsx
 // Screen 1: The Hook - Full viewport emotional hit
 // DESIGN: Organic, warm, paper-textured - NOT futuristic
+// v0.12e: Added content prop interface for Chameleon (v0.13)
 
 import React, { useEffect, useState } from 'react';
 import ScrollIndicator from './ScrollIndicator';
 
-interface HeroHookProps {
-  onScrollNext?: () => void;
+// Content interface for Chameleon (v0.13)
+export interface HeroContent {
+  headline: string;
+  subtext: string[];
 }
 
-export const HeroHook: React.FC<HeroHookProps> = ({ onScrollNext }) => {
-  const [showSubtext1, setShowSubtext1] = useState(false);
-  const [showSubtext2, setShowSubtext2] = useState(false);
+// Default content (preserves current behavior)
+const DEFAULT_CONTENT: HeroContent = {
+  headline: "YOUR AI.",
+  subtext: [
+    "Not rented. Not surveilled. Not theirs.",
+    "Yours."
+  ]
+};
+
+interface HeroHookProps {
+  onScrollNext?: () => void;
+  content?: HeroContent;  // Optional - enables Chameleon in v0.13
+}
+
+export const HeroHook: React.FC<HeroHookProps> = ({
+  onScrollNext,
+  content = DEFAULT_CONTENT
+}) => {
+  const [visibleSubtext, setVisibleSubtext] = useState<number[]>([]);
 
   // Fade-in sequence for subtext
   useEffect(() => {
-    const timer1 = setTimeout(() => setShowSubtext1(true), 600);
-    const timer2 = setTimeout(() => setShowSubtext2(true), 1400);
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+    const timers: NodeJS.Timeout[] = [];
+    content.subtext.forEach((_, index) => {
+      const timer = setTimeout(() => {
+        setVisibleSubtext(prev => [...prev, index]);
+      }, 600 + (index * 800));
+      timers.push(timer);
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [content.subtext]);
 
   const handleScrollClick = () => {
     if (onScrollNext) {
@@ -38,27 +59,27 @@ export const HeroHook: React.FC<HeroHookProps> = ({ onScrollNext }) => {
       <div className="absolute inset-0 bg-grain opacity-50 pointer-events-none" />
 
       <div className="text-center max-w-2xl relative z-10">
-        {/* Main headline */}
-        <h1 className="font-serif text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-grove-forest mb-8 tracking-tight">
-          YOUR AI.
+        {/* Main headline - from props */}
+        <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold text-grove-forest mb-8 tracking-tight">
+          {content.headline}
         </h1>
 
-        {/* Subtext with fade-in sequence */}
+        {/* Subtext with fade-in sequence - from props */}
         <div className="space-y-4 mb-8">
-          <p
-            className={`font-serif text-xl sm:text-2xl md:text-3xl text-ink transition-opacity duration-700 ${
-              showSubtext1 ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            Not rented. Not surveilled. Not theirs.
-          </p>
-          <p
-            className={`font-serif text-2xl sm:text-3xl md:text-4xl text-ink font-semibold transition-opacity duration-700 ${
-              showSubtext2 ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            Yours.
-          </p>
+          {content.subtext.map((text, index) => (
+            <p
+              key={index}
+              className={`font-serif ${
+                index === content.subtext.length - 1
+                  ? 'text-2xl sm:text-3xl md:text-4xl font-semibold'
+                  : 'text-xl sm:text-2xl md:text-3xl'
+              } text-ink transition-opacity duration-700 ${
+                visibleSubtext.includes(index) ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {text}
+            </p>
+          ))}
         </div>
 
         {/* Scroll indicator - floating seedling */}

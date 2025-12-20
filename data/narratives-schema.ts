@@ -272,7 +272,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     id: 'genesis-landing',
     name: 'Genesis Landing Experience',
     description: 'Show the new Jobs-style landing page instead of Classic',
-    enabled: false
+    enabled: true
   },
   {
     id: 'terminal-minimize',

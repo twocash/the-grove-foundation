@@ -7,24 +7,24 @@
 @theme {
   /* ============================================================
      SURFACE TOKENS (The Village - Paper/Ink aesthetic)
-     Preserved from original index.html CDN config
+     v0.12e: Minimalist Orchard palette (warm bone, forest charcoal)
      ============================================================ */
-  --color-paper: #FBFBF9;
-  --color-paper-dark: #F2F0E9;
+  --color-paper: #F9F8F4;
+  --color-paper-dark: #F0EFE9;
 
-  --color-ink: #1C1C1C;
-  --color-ink-muted: #575757;
+  --color-ink: #1A2421;
+  --color-ink-muted: #4A5A50;
   --color-ink-border: #E5E5E0;
 
-  --color-grove-cream: #FBFBF9;
-  --color-grove-dark: #1C1C1C;
-  --color-grove-forest: #2F5C3B;
-  --color-grove-accent: #2F5C3B;
+  --color-grove-cream: #F9F8F4;
+  --color-grove-dark: #1A2421;
+  --color-grove-forest: #355E3B;
+  --color-grove-accent: #355E3B;
   --color-grove-clay: #D95D39;
   --color-grove-light: #E5E5E0;
 
   --color-terminal-bg: #FFFFFF;
-  --color-terminal-phosphor: #1C1C1C;
+  --color-terminal-phosphor: #1A2421;
   --color-terminal-border: #E5E5E0;
   --color-terminal-highlight: #D95D39;
 
@@ -45,10 +45,36 @@
   /* ============================================================
      FONTS
      ============================================================ */
-  --font-serif: 'Lora', serif;
-  --font-display: 'Playfair Display', serif;
+  --font-serif: 'EB Garamond', 'Lora', serif;
+  --font-display: 'Tenor Sans', 'Playfair Display', sans-serif;
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================
+   SMART TYPOGRAPHY (Minimalist Orchard v0.12e)
+   ============================================================ */
+body {
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Editorial line height for readability */
+.prose, p, .font-serif {
+  line-height: 1.65;
+}
+
+/* Headings - Tenor Sans */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Body Copy - EB Garamond */
+p {
+  font-family: var(--font-serif);
 }
 
 /* ============================================================

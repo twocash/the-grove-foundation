@@ -15,28 +15,28 @@ const config: Config = {
       colors: {
         // ============================================================
         // SURFACE TOKENS (The Village - Paper/Ink aesthetic)
-        // Preserved from index.html CDN config
+        // v0.12e: Minimalist Orchard palette (warm bone, forest charcoal)
         // ============================================================
         paper: {
-          DEFAULT: '#FBFBF9',
-          dark: '#F2F0E9',
+          DEFAULT: '#F9F8F4',
+          dark: '#F0EFE9',
         },
         ink: {
-          DEFAULT: '#1C1C1C',
-          muted: '#575757',
+          DEFAULT: '#1A2421',
+          muted: '#4A5A50',
           border: '#E5E5E0',
         },
         grove: {
-          cream: '#FBFBF9',
-          dark: '#1C1C1C',
-          forest: '#2F5C3B',
-          accent: '#2F5C3B',
+          cream: '#F9F8F4',
+          dark: '#1A2421',
+          forest: '#355E3B',
+          accent: '#355E3B',
           clay: '#D95D39',
           light: '#E5E5E0',
         },
         terminal: {
           bg: '#FFFFFF',
-          phosphor: '#1C1C1C',
+          phosphor: '#1A2421',
           border: '#E5E5E0',
           highlight: '#D95D39',
         },
@@ -65,9 +65,9 @@ const config: Config = {
       },
 
       fontFamily: {
-        // Surface fonts
-        serif: ['Lora', 'serif'],
-        display: ['Playfair Display', 'serif'],
+        // Surface fonts (v0.12e: Minimalist Orchard)
+        serif: ['EB Garamond', 'Lora', 'serif'],
+        display: ['Tenor Sans', 'Playfair Display', 'sans-serif'],
         // Shared fonts
         sans: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],

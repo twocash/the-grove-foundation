@@ -1,17 +1,20 @@
 // src/surface/components/genesis/ProblemStatement.tsx
 // Screen 2: The Problem - CEO quotes establishing stakes
 // DESIGN: Paper card aesthetic, organic feel - NOT futuristic
+// v0.12e: Added quotes prop interface for Chameleon (v0.13)
 
 import React, { useEffect, useRef, useState } from 'react';
 import ScrollIndicator from './ScrollIndicator';
 
-interface Quote {
+// Quote interface (export for reuse in Chameleon)
+export interface Quote {
   text: string;
   author: string;
   title: string;
 }
 
-const quotes: Quote[] = [
+// Default quotes (preserves current behavior)
+const DEFAULT_QUOTES: Quote[] = [
   {
     text: "AI is the most profound technology humanity has ever worked on... People will need to adapt.",
     author: "SUNDAR PICHAI",
@@ -31,9 +34,13 @@ const quotes: Quote[] = [
 
 interface ProblemStatementProps {
   className?: string;
+  quotes?: Quote[];  // Optional - enables Chameleon in v0.13
 }
 
-export const ProblemStatement: React.FC<ProblemStatementProps> = ({ className = '' }) => {
+export const ProblemStatement: React.FC<ProblemStatementProps> = ({
+  className = '',
+  quotes = DEFAULT_QUOTES  // Use prop or default
+}) => {
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [showTension, setShowTension] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -42,6 +49,9 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({ className = 
   // Animate quote cards on scroll
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
+
+    // Reset refs array to match current quotes length
+    cardRefs.current = cardRefs.current.slice(0, quotes.length);
 
     cardRefs.current.forEach((ref, index) => {
       if (!ref) return;
@@ -81,7 +91,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({ className = 
     }
 
     return () => observers.forEach(obs => obs.disconnect());
-  }, []);
+  }, [quotes]); // Re-run effect if quotes change (important for Chameleon)
 
   return (
     <section className={`min-h-screen bg-paper py-24 px-6 ${className}`}>
