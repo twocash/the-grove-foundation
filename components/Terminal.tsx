@@ -12,6 +12,7 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, TerminalControls, SuggestionChip } from './Terminal/index';
+import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
@@ -46,15 +47,6 @@ interface TerminalProps {
   externalQuery?: { nodeId?: string; display: string; query: string } | null;
   onQueryHandled?: () => void;
 }
-
-// First-time welcome message - shown before LensPicker on first Terminal open
-const FIRST_TIME_WELCOME = `Welcome to your Grove.
-
-This Terminal is where you interact with your AI village — trained on your data, running on your hardware, owned by you.
-
-Think of it as ChatGPT, but private. Your Grove never leaves your machine. That's **intellectual independence**: AI that enriches *you*, not corporate shareholders.
-
-**One thing to try:** Lenses let you explore the same knowledge from different perspectives — skeptic, enthusiast, or your own custom view.`;
 
 // System prompt is now server-side in /api/chat
 // See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
@@ -205,6 +197,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [showLensPicker, setShowLensPicker] = useState<boolean>(false);
   const [showCustomLensWizard, setShowCustomLensWizard] = useState<boolean>(false);
+  const [showWelcomeInterstitial, setShowWelcomeInterstitial] = useState<boolean>(false);
   const [hasShownWelcome, setHasShownWelcome] = useState<boolean>(false);
   // Note: showNudge, nudgeDismissed, showLensChoice removed - all users now have a lens (min: freestyle)
   const [showSimulationReveal, setShowSimulationReveal] = useState<boolean>(false);
@@ -358,30 +351,16 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   const enabledPersonas = getEnabledPersonas();
 
-  // Check if we should show welcome message and lens picker on first open
+  // Check if we should show welcome interstitial on first open
   useEffect(() => {
     const hasBeenWelcomed = localStorage.getItem('grove-terminal-welcomed') === 'true';
 
     if (terminalState.isOpen && !hasBeenWelcomed && !hasShownWelcome) {
-      // Inject welcome message into chat
-      setTerminalState(prev => ({
-        ...prev,
-        messages: [...prev.messages, {
-          id: 'welcome-' + Date.now(),
-          role: 'model',
-          text: FIRST_TIME_WELCOME
-        }]
-      }));
-
-      // Small delay before showing LensPicker
-      setTimeout(() => {
-        setShowLensPicker(true);
-      }, 500);
-
+      // Show welcome interstitial instead of injecting chat message
+      setShowWelcomeInterstitial(true);
       setHasShownWelcome(true);
-      localStorage.setItem('grove-terminal-welcomed', 'true');
     }
-  }, [terminalState.isOpen, hasShownWelcome, setTerminalState]);
+  }, [terminalState.isOpen, hasShownWelcome]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
@@ -407,6 +386,30 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   // Handle opening custom lens wizard
   const handleCreateCustomLens = () => {
     setShowLensPicker(false);
+    setShowCustomLensWizard(true);
+  };
+
+  // Handle lens selection from welcome interstitial
+  const handleWelcomeLensSelect = (personaId: string | null) => {
+    selectLens(personaId);
+    setShowWelcomeInterstitial(false);
+    localStorage.setItem('grove-terminal-welcomed', 'true');
+
+    // Track lens activation
+    if (personaId) {
+      trackLensActivated(personaId, personaId.startsWith('custom-'));
+      emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
+      emit.journeyStarted(personaId, currentThread.length || 5);
+    }
+
+    if (personaId?.startsWith('custom-')) {
+      updateCustomLensUsage(personaId);
+    }
+  };
+
+  // Handle Create Your Own from welcome interstitial
+  const handleWelcomeCreateCustomLens = () => {
+    setShowWelcomeInterstitial(false);
     setShowCustomLensWizard(true);
   };
 
@@ -929,11 +932,20 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full text-ink font-sans">
 
-          {/* Show Custom Lens Wizard, Lens Picker, or Main Terminal */}
+          {/* Show Custom Lens Wizard, Welcome Interstitial, Lens Picker, or Main Terminal */}
           {showCustomLensWizard ? (
             <CustomLensWizard
               onComplete={handleCustomLensComplete}
               onCancel={handleCustomLensCancel}
+            />
+          ) : showWelcomeInterstitial ? (
+            <WelcomeInterstitial
+              personas={enabledPersonas}
+              customLenses={customLenses}
+              onSelect={handleWelcomeLensSelect}
+              onCreateCustomLens={handleWelcomeCreateCustomLens}
+              onDeleteCustomLens={handleDeleteCustomLens}
+              showCreateOption={showCustomLensInPicker}
             />
           ) : showLensPicker ? (
             <LensPicker

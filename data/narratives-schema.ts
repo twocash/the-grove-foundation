@@ -242,7 +242,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     id: 'custom-lens-in-picker',
     name: 'Show "Create Your Own" in Lens Picker',
     description: 'Users see custom lens option immediately in the lens picker',
-    enabled: false
+    enabled: true
   },
   {
     id: 'journey-ratings',

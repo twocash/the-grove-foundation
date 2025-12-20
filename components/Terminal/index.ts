@@ -1,6 +1,9 @@
 // Terminal components barrel export
 // V2.2: Added TerminalPill for minimize-to-pill functionality (v0.12)
+// V2.3: Added LensGrid and WelcomeInterstitial for welcome/switching split (v0.12d)
 export { default as LensPicker } from './LensPicker';
+export { default as LensGrid } from './LensGrid';
+export { default as WelcomeInterstitial } from './WelcomeInterstitial';
 export { default as LensBadge } from './LensBadge';
 export { default as CustomLensWizard } from './CustomLensWizard';
 export { default as JourneyCard } from './JourneyCard';
