@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator } from './Terminal/index';
+import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, TerminalControls, SuggestionChip } from './Terminal/index';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
@@ -33,7 +33,10 @@ import {
   trackJourneyCompleted,
   trackCognitiveBridgeShown,
   trackCognitiveBridgeAccepted,
-  trackCognitiveBridgeDismissed
+  trackCognitiveBridgeDismissed,
+  trackTerminalMinimized,
+  trackTerminalExpanded,
+  trackSuggestionClicked
 } from '../utils/funnelAnalytics';
 
 interface TerminalProps {
@@ -119,21 +122,23 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptCl
   const flushPrompts = () => {
     if (currentPrompts.length > 0) {
       elements.push(
-        <div key={`prompts-${elements.length}`} className="mb-3 space-y-1">
+        <div key={`prompts-${elements.length}`} className="mb-3 space-y-1.5">
           {currentPrompts.map((prompt, i) => (
-            <button
-              key={i}
-              onClick={() => onPromptClick?.(prompt)}
-              disabled={!onPromptClick}
-              className={`block w-full text-left text-sm font-serif transition-all ${
-                onPromptClick
-                  ? 'text-grove-forest hover:text-grove-clay hover:translate-x-1 active:translate-x-2 cursor-pointer'
-                  : 'text-ink-muted cursor-default'
-              }`}
-            >
-              <span className="text-grove-clay mr-2">→</span>
-              {prompt}
-            </button>
+            onPromptClick ? (
+              <SuggestionChip
+                key={i}
+                prompt={prompt}
+                onClick={onPromptClick}
+              />
+            ) : (
+              <div
+                key={i}
+                className="px-4 py-2.5 text-sm font-serif text-ink-muted"
+              >
+                <span className="text-grove-clay mr-2">→</span>
+                {prompt}
+              </div>
+            )
           ))}
         </div>
       );
@@ -281,6 +286,11 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const showJourneyRatings = useFeatureFlag('journey-ratings');
   const showStreakDisplay = useFeatureFlag('streaks-display');
   const showFeedbackTransmission = useFeatureFlag('feedback-transmission');
+  const enableMinimize = useFeatureFlag('terminal-minimize');
+  const enableControlsBelow = useFeatureFlag('terminal-controls-below');
+
+  // Minimize state - derived from terminalState with fallback
+  const isMinimized = terminalState.isMinimized ?? false;
 
   // Streak tracking
   const {
@@ -788,8 +798,20 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   // PRESERVED: Scholar Mode toggle - exact same implementation
   const toggleVerboseMode = () => setIsVerboseMode(prev => !prev);
-  const handleSuggestion = (hint: string) => handleSend(hint);
+  const handleSuggestion = (hint: string) => {
+    trackSuggestionClicked(hint);
+    handleSend(hint);
+  };
   const toggleTerminal = () => setTerminalState(prev => ({ ...prev, isOpen: !prev.isOpen }));
+  const handleClose = () => setTerminalState(prev => ({ ...prev, isOpen: false }));
+  const handleMinimize = () => {
+    setTerminalState(prev => ({ ...prev, isMinimized: true }));
+    trackTerminalMinimized();
+  };
+  const handleExpand = () => {
+    setTerminalState(prev => ({ ...prev, isMinimized: false }));
+    trackTerminalExpanded();
+  };
 
   // Get next nodes - prefer V2.1 engine nodes, then V2.0 cards, fall back to V1
   const nextNodes = useMemo(() => {
@@ -845,21 +867,30 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   return (
     <>
-      {/* Floating Action Button - Clean Ink Style */}
-      <button
-        onClick={toggleTerminal}
-        className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${terminalState.isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
-          }`}
-      >
-        {terminalState.isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        ) : (
-          <span className="font-mono text-xl font-bold">{`>_`}</span>
-        )}
-      </button>
+      {/* Minimized Pill - shown when terminal is open but minimized */}
+      {terminalState.isOpen && isMinimized && enableMinimize && (
+        <div className="terminal-slide-up">
+          <TerminalPill isLoading={terminalState.isLoading} onExpand={handleExpand} />
+        </div>
+      )}
 
-      {/* Drawer - Library Marginalia Style */}
-      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-500 ease-in-out shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      {/* Floating Action Button - hidden when minimized */}
+      {!(terminalState.isOpen && isMinimized && enableMinimize) && (
+        <button
+          onClick={toggleTerminal}
+          className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${terminalState.isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
+            }`}
+        >
+          {terminalState.isOpen ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          ) : (
+            <span className="font-mono text-xl font-bold">{`>_`}</span>
+          )}
+        </button>
+      )}
+
+      {/* Drawer - Library Marginalia Style (hidden when minimized) */}
+      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-500 ease-in-out shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full text-ink font-sans">
 
           {/* Show Custom Lens Wizard, Lens Picker, or Main Terminal */}
@@ -880,47 +911,41 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
             />
           ) : (
             <>
-              {/* Header - Compact title bar */}
-              <div className="px-4 py-2 border-b border-ink/5 bg-white flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                  <div className="font-display font-bold text-base text-ink">The Terminal 🌱</div>
-                  {/* PRESERVED: Scholar Mode badge */}
-                  {isVerboseMode && (
-                    <span className="bg-[#D95D39] text-white px-2 py-0.5 rounded-full text-[8px] font-bold tracking-widest uppercase">
-                      Scholar
-                    </span>
-                  )}
-                </div>
-                <div className="text-[9px] uppercase tracking-widest text-ink-muted font-mono">
-                  CTX: {SECTION_CONFIG[activeSection]?.title.toUpperCase() || 'INDEX'}
-                </div>
-              </div>
-
-              {/* Consolidated Journey Navigation Bar */}
-              <JourneyNav
-                persona={activeLensData}
-                onSwitchLens={() => setShowLensPicker(true)}
-                currentThread={currentThread}
-                currentPosition={currentPosition}
-                getThreadCard={getThreadCard}
-                onRegenerate={() => {
-                  regenerateThread();
-                  // Emit journey started event
-                  if (session.activeLens) {
-                    emit.journeyStarted(session.activeLens, currentThread.length);
-                  }
-                }}
-                onJumpToCard={(cardId) => {
-                  const card = getThreadCard(currentThread.indexOf(cardId));
-                  if (card) {
-                    handleSend(card.query, card.label);
-                    addVisitedCard(cardId);
-                  }
-                }}
-                currentStreak={currentStreak}
-                journeysCompleted={totalJourneysCompleted}
-                showStreak={showStreakDisplay}
+              {/* Header - Clean title bar with minimize/close */}
+              <TerminalHeader
+                onMinimize={handleMinimize}
+                onClose={handleClose}
+                isScholarMode={isVerboseMode}
+                showMinimize={enableMinimize}
               />
+
+              {/* Consolidated Journey Navigation Bar - hidden when controls below enabled */}
+              {!enableControlsBelow && (
+                <JourneyNav
+                  persona={activeLensData}
+                  onSwitchLens={() => setShowLensPicker(true)}
+                  currentThread={currentThread}
+                  currentPosition={currentPosition}
+                  getThreadCard={getThreadCard}
+                  onRegenerate={() => {
+                    regenerateThread();
+                    // Emit journey started event
+                    if (session.activeLens) {
+                      emit.journeyStarted(session.activeLens, currentThread.length);
+                    }
+                  }}
+                  onJumpToCard={(cardId) => {
+                    const card = getThreadCard(currentThread.indexOf(cardId));
+                    if (card) {
+                      handleSend(card.query, card.label);
+                      addVisitedCard(cardId);
+                    }
+                  }}
+                  currentStreak={currentStreak}
+                  journeysCompleted={totalJourneysCompleted}
+                  showStreak={showStreakDisplay}
+                />
+              )}
 
               {/* Messages Area - Thread Style */}
               <div className="flex-1 overflow-y-auto p-6 space-y-8 terminal-scroll bg-white">
@@ -1177,6 +1202,19 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                   </button>
                 </div>
+
+                {/* Controls below input - shows when feature flag enabled */}
+                {enableControlsBelow && (
+                  <TerminalControls
+                    persona={activeLensData}
+                    onSwitchLens={() => setShowLensPicker(true)}
+                    currentPosition={currentPosition}
+                    totalSteps={currentThread.length}
+                    currentStreak={currentStreak}
+                    showStreak={showStreakDisplay}
+                    showJourney={currentThread.length > 0}
+                  />
+                )}
               </div>
             </>
           )}

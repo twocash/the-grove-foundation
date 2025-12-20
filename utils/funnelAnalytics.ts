@@ -265,6 +265,22 @@ export const trackGenesisCTAClicked = (ctaId: string, screenNumber: number, scre
   });
 };
 
+// Terminal UX v0.12 events
+export const trackTerminalMinimized = (): void => {
+  trackFunnelEvent('terminal_minimized', {});
+};
+
+export const trackTerminalExpanded = (): void => {
+  trackFunnelEvent('terminal_expanded', {});
+};
+
+export const trackSuggestionClicked = (prompt: string, messageId?: string): void => {
+  trackFunnelEvent('suggestion_clicked', {
+    prompt,
+    messageId: messageId || null
+  });
+};
+
 // Get analytics report (for admin/debugging)
 export const getAnalyticsReport = (): {
   totalEvents: number;

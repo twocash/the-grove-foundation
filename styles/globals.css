@@ -160,6 +160,41 @@
 }
 
 /* ============================================================
+   TERMINAL ANIMATIONS (v0.12)
+   ============================================================ */
+
+/* Terminal slide animations */
+.terminal-slide-up {
+  animation: terminal-slide-up 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.terminal-slide-down {
+  animation: terminal-slide-down 250ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes terminal-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes terminal-slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
    UTILITY CLASSES
    ============================================================ */
 

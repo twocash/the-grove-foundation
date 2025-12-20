@@ -29,6 +29,7 @@ export interface ChatMessage {
 
 export interface TerminalState {
   isOpen: boolean;
+  isMinimized?: boolean;
   messages: ChatMessage[];
   isLoading: boolean;
 }
