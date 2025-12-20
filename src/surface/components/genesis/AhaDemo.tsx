@@ -3,6 +3,7 @@
 // DESIGN: Paper card aesthetic - NOT dark terminal
 
 import React, { useState, useEffect } from 'react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface AhaDemoProps {
   onGoDeeper?: () => void;
@@ -74,12 +75,9 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <button
                 onClick={handleGoDeeper}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
+                className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
               >
                 Go deeper
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
               </button>
               <button
                 onClick={handleKeepExploring}
@@ -96,17 +94,9 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
           This is what AI feels like when it's yours.
         </p>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator - floating seedling */}
         <div className="text-center">
-          <button
-            onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-            className="text-ink-muted hover:text-grove-forest transition-colors animate-bounce"
-            aria-label="Continue scrolling"
-          >
-            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </button>
+          <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
         </div>
       </div>
     </section>

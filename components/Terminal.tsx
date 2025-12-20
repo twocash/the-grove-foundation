@@ -903,7 +903,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       )}
 
       {/* Drawer - Library Marginalia Style (hidden when minimized) */}
-      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-500 ease-in-out shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full text-ink font-sans">
 
           {/* Show Custom Lens Wizard, Lens Picker, or Main Terminal */}

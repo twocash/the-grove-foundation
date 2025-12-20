@@ -3,6 +3,7 @@
 // DESIGN: Organic, warm, paper-textured - NOT futuristic
 
 import React, { useEffect, useState } from 'react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface HeroHookProps {
   onScrollNext?: () => void;
@@ -60,28 +61,10 @@ export const HeroHook: React.FC<HeroHookProps> = ({ onScrollNext }) => {
           </p>
         </div>
 
-        {/* Scroll indicator - organic leaf/seed style */}
-        <button
-          onClick={handleScrollClick}
-          className="mt-16 text-ink-muted hover:text-grove-forest transition-colors focus:outline-none focus:ring-2 focus:ring-grove-forest/20 rounded-full p-2"
-          aria-label="Scroll to next section"
-        >
-          <div className="animate-bounce">
-            <svg
-              className="w-8 h-8"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M19 14l-7 7m0 0l-7-7m7 7V3"
-              />
-            </svg>
-          </div>
-        </button>
+        {/* Scroll indicator - floating seedling */}
+        <div className="mt-16">
+          <ScrollIndicator onClick={handleScrollClick} />
+        </div>
       </div>
     </section>
   );

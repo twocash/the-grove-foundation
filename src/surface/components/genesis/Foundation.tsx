@@ -3,6 +3,7 @@
 // DESIGN: Clean, confident, minimal - paper background
 
 import React, { useEffect, useRef, useState } from 'react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface FoundationProps {
   onOpenTerminal?: (query: string) => void;
@@ -75,30 +76,21 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
           <button
             onClick={() => handleDeepDive('ratchet')}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
+            className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
           >
             The Ratchet
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </button>
           <button
             onClick={() => handleDeepDive('economics')}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
+            className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
           >
             The Economics
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </button>
           <button
             onClick={() => handleDeepDive('vision')}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
+            className="px-6 py-3 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
           >
             The Vision
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </button>
         </div>
 
@@ -109,25 +101,14 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
           </p>
           <button
             onClick={handleExplore}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
+            className="px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
           >
             Explore
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </button>
 
-          {/* Scroll indicator */}
+          {/* Scroll indicator - floating seedling */}
           <div className="mt-12">
-            <button
-              onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-              className="text-ink-muted hover:text-grove-forest transition-colors animate-bounce"
-              aria-label="Continue scrolling"
-            >
-              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </button>
+            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
           </div>
         </div>
       </div>

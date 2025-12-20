@@ -55,6 +55,8 @@ const CognitiveBridge: React.FC<CognitiveBridgeProps> = ({
   journeyInfo: providedInfo
 }) => {
   const [isResolving, setIsResolving] = useState(true);
+  const [displayedText, setDisplayedText] = useState('');
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
 
   // Get journey info from props or defaults
   const journeyInfo = providedInfo || DEFAULT_JOURNEY_INFO[journeyId] || {
@@ -65,11 +67,30 @@ const CognitiveBridge: React.FC<CognitiveBridgeProps> = ({
     coverTopics: [topicMatch]
   };
 
+  // Warm invitation text
+  const invitationText = `I'd love to take you on a guided journey about "${journeyInfo.title}" — we'll explore ${journeyInfo.coverTopics.slice(0, 3).join(', ')}. Or keep asking anything. I'm here to help!`;
+
   // 800ms loading animation to simulate "cloud latency"
   useEffect(() => {
     const timer = setTimeout(() => setIsResolving(false), 800);
     return () => clearTimeout(timer);
   }, []);
+
+  // Typing animation
+  useEffect(() => {
+    if (!isResolving && !isTypingComplete) {
+      let i = 0;
+      const timer = setInterval(() => {
+        setDisplayedText(invitationText.slice(0, i + 1));
+        i++;
+        if (i >= invitationText.length) {
+          clearInterval(timer);
+          setIsTypingComplete(true);
+        }
+      }, 20);
+      return () => clearInterval(timer);
+    }
+  }, [isResolving, isTypingComplete, invitationText]);
 
   // Handle Escape key to dismiss
   useEffect(() => {
@@ -91,48 +112,51 @@ const CognitiveBridge: React.FC<CognitiveBridgeProps> = ({
           <span>Resolving connection...</span>
         </div>
       ) : (
-        // Journey card
-        <div className="space-y-3 animate-in fade-in duration-300">
-          {/* Context message */}
-          <p className="font-serif text-sm text-ink/80">
-            This connects to the{' '}
-            <strong className="text-grove-forest">{journeyInfo.title}</strong>{' '}
-            sequence. To fully map this dependency, I can switch to a structured path.
+        // Typed invitation + journey card
+        <div className="space-y-3">
+          {/* Typed invitation message */}
+          <p className="font-serif text-sm text-ink/80 leading-relaxed">
+            {displayedText}
+            {!isTypingComplete && <span className="inline-block w-0.5 h-3.5 bg-grove-forest/60 ml-0.5 animate-pulse" />}
           </p>
 
-          {/* Journey preview card */}
-          <div className="bg-white border border-ink/10 rounded-sm p-4 shadow-sm">
-            <h4 className="font-sans font-bold text-ink text-sm mb-1">
-              {journeyInfo.title}
-            </h4>
-            <p className="font-mono text-[10px] text-ink-muted mb-2">
-              {journeyInfo.nodeCount} nodes • ~{journeyInfo.estimatedMinutes} min
-            </p>
-            <p className="font-sans text-xs text-ink/60">
-              Covers: {journeyInfo.coverTopics.join(', ')}
-            </p>
-          </div>
+          {/* Journey preview card - only shows after typing complete */}
+          {isTypingComplete && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="bg-white border border-ink/10 rounded-sm p-4 shadow-sm mb-3">
+                <h4 className="font-sans font-bold text-ink text-sm mb-1">
+                  {journeyInfo.title}
+                </h4>
+                <p className="font-mono text-[10px] text-ink-muted mb-2">
+                  {journeyInfo.nodeCount} nodes • ~{journeyInfo.estimatedMinutes} min
+                </p>
+                <p className="font-sans text-xs text-ink/60">
+                  Covers: {journeyInfo.coverTopics.join(', ')}
+                </p>
+              </div>
 
-          {/* Action buttons */}
-          <div className="flex space-x-3">
-            <button
-              onClick={onAccept}
-              className="px-4 py-2 bg-grove-forest text-white text-xs font-mono uppercase tracking-wider hover:bg-ink transition-colors rounded-sm"
-            >
-              Start Journey
-            </button>
-            <button
-              onClick={onDismiss}
-              className="px-4 py-2 border border-ink/20 text-ink-muted text-xs font-mono uppercase tracking-wider hover:border-ink/40 hover:text-ink transition-colors rounded-sm"
-            >
-              Continue Freestyle
-            </button>
-          </div>
+              {/* Action buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={onAccept}
+                  className="px-4 py-2 bg-grove-forest text-white text-xs font-mono uppercase tracking-wider hover:bg-ink transition-colors rounded-sm"
+                >
+                  Start Journey
+                </button>
+                <button
+                  onClick={onDismiss}
+                  className="px-4 py-2 border border-ink/20 text-ink-muted text-xs font-mono uppercase tracking-wider hover:border-ink/40 hover:text-ink transition-colors rounded-sm"
+                >
+                  Keep exploring
+                </button>
+              </div>
 
-          {/* Keyboard hint */}
-          <p className="text-[9px] text-ink-muted/60 font-mono">
-            Press Esc to dismiss
-          </p>
+              {/* Keyboard hint */}
+              <p className="text-[9px] text-ink-muted/60 font-mono mt-2">
+                Press Esc to dismiss
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

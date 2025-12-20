@@ -3,6 +3,7 @@
 // DESIGN: Paper card aesthetic, organic feel - NOT futuristic
 
 import React, { useEffect, useRef, useState } from 'react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface Quote {
   text: string;
@@ -124,17 +125,9 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({ className = 
             What if there was another way?
           </p>
 
-          {/* Scroll indicator */}
+          {/* Scroll indicator - floating seedling */}
           <div className="mt-12">
-            <button
-              onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-              className="text-ink-muted hover:text-grove-forest transition-colors animate-bounce"
-              aria-label="Continue scrolling"
-            >
-              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </button>
+            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
           </div>
         </div>
       </div>

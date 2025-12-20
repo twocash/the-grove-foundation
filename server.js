@@ -832,6 +832,12 @@ You are **The Grove Terminal**. You have two operating modes.
 - Goal: Provide deep implementation details, economics, and architectural specs.
 - Formatting: Use lists, code blocks, and cite specific text from the knowledge base.
 
+**FORMATTING RULES (BOTH MODES):**
+- Use **bold** to highlight key concepts, terms, and ideas the user might want to explore further
+- Bold text becomes clickable - users can tap any **bolded phrase** to dive deeper into that topic
+- Aim for 2-4 bold phrases per response to give users natural exploration paths
+- Example: "The **Ratchet Effect** means AI costs keep dropping, creating a **dependency trap** for cloud users."
+
 **MANDATORY FOOTER (BOTH MODES):**
 At the very end of your response, strictly append these two tags:
 [[BREADCRUMB: <The single most interesting follow-up question>]]
@@ -957,6 +963,12 @@ The user has unlocked advanced mode. You may:
 - Skip the usual diplomatic hedging
 But still stay grounded in the source material.`);
     }
+
+    // Always include formatting rules for clickable bold text
+    parts.push(`\n\n**FORMATTING RULES:**
+- Use **bold** to highlight key concepts and terms the user might want to explore
+- Bold text is clickable - users can tap any **bolded phrase** to ask about it
+- Aim for 2-4 bold phrases per response for natural exploration paths`);
 
     // Add knowledge base
     const knowledgeBase = ragContext || STATIC_KNOWLEDGE_BASE;

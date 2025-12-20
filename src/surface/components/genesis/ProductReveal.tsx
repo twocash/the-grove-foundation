@@ -4,6 +4,7 @@
 // ANIMATION: "STEP INTO THE GROVE" → YOUR sprouts up and knocks THE away → "STEP INTO YOUR GROVE"
 
 import React, { useEffect, useRef, useState } from 'react';
+import ScrollIndicator from './ScrollIndicator';
 
 interface ProductRevealProps {
   onOpenTerminal?: () => void;
@@ -124,33 +125,24 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
             STEP INTO{' '}
           </span>
 
-          {/* Word container for THE/YOUR swap */}
-          <span className="relative inline-block w-32 sm:w-40 md:w-48">
-            {/* THE - gets knocked away */}
+          {/* Word container for THE/YOUR swap - simple fade transition */}
+          <span className="relative inline-block">
+            {/* THE - fades out */}
             <span
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight absolute left-0 transition-all duration-500 ease-out"
+              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight transition-opacity duration-500 ease-out"
               style={{
                 filter: textBlur,
-                opacity: phase === 'knocking' || phase === 'settled' ? 0 : textOpacity,
-                transform: phase === 'knocking' || phase === 'settled'
-                  ? 'translateX(80px) translateY(-60px) rotate(25deg)'
-                  : 'translateX(0) translateY(0) rotate(0deg)',
+                opacity: phase === 'sprouting' || phase === 'knocking' || phase === 'settled' ? 0 : textOpacity,
               }}
             >
               THE
             </span>
 
-            {/* YOUR - sprouts up from below */}
+            {/* YOUR - fades in at same position */}
             <span
-              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight absolute left-0 transition-all duration-700 ease-out"
+              className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-grove-forest tracking-tight absolute left-0 top-0 transition-opacity duration-700 ease-out"
               style={{
                 opacity: phase === 'sprouting' || phase === 'knocking' || phase === 'settled' ? 1 : 0,
-                transform: phase === 'sprouting'
-                  ? 'translateY(40px) scale(0.8)'
-                  : phase === 'knocking' || phase === 'settled'
-                    ? 'translateY(0) scale(1)'
-                    : 'translateY(80px) scale(0.5)',
-                textShadow: phase === 'sprouting' ? '0 4px 12px rgba(47, 92, 59, 0.3)' : 'none'
               }}
             >
               YOUR
@@ -236,35 +228,14 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
           {/* CTA Button */}
           <button
             onClick={handleCTAClick}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors focus:outline-none focus:ring-2 focus:ring-grove-forest/50"
+            className="px-8 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors focus:outline-none focus:ring-2 focus:ring-grove-forest/50"
           >
             See it in action
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
           </button>
 
-          {/* Scroll indicator */}
+          {/* Scroll indicator - floating seedling */}
           <div className="mt-16">
-            <button
-              onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-              className="text-ink-muted hover:text-grove-forest transition-colors animate-bounce"
-              aria-label="Continue scrolling"
-            >
-              <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </button>
+            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
           </div>
         </div>
       </div>
