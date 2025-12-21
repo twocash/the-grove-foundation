@@ -17,15 +17,15 @@ Priority 3: DEFAULT_REALITY (when no lens is selected)
 
 ## Available Lenses (7 total)
 
-| Lens ID | Label | Current Status |
-|---------|-------|----------------|
-| `freestyle` | Freestyle | No custom reality (uses default) |
-| `concerned-citizen` | Concerned Citizen | No custom reality (uses default) |
-| `academic` | Academic | ✅ Has custom reality |
-| `engineer` | Engineer | ✅ Has custom reality |
-| `geopolitical` | Geopolitical Analyst | No custom reality (uses default) |
-| `big-ai-exec` | Big AI / Tech Exec | No custom reality (uses default) |
-| `family-office` | Family Office / Investor | ✅ Has custom reality |
+| Lens ID | Label | Headline | Status |
+|---------|-------|----------|--------|
+| `freestyle` | Freestyle | `OWN YOUR AI.` | ✅ |
+| `concerned-citizen` | Concerned Citizen | `ADAPT? ADAPT AND OWN.` | ✅ |
+| `academic` | Academic | `THE EPISTEMIC COMMONS.` | ✅ |
+| `engineer` | Engineer | `LOCAL HUMS. CLOUD BREAKS THROUGH.` | ✅ |
+| `geopolitical` | Geopolitical Analyst | `SOVEREIGN INTELLIGENCE.` | ✅ |
+| `big-ai-exec` | Big AI / Tech Exec | `THE EDGE HEDGE.` | ✅ |
+| `family-office` | Family Office / Investor | `THE EDGE HEDGE.` | ✅ |
 
 ---
 
@@ -34,8 +34,8 @@ Priority 3: DEFAULT_REALITY (when no lens is selected)
 ```typescript
 interface LensReality {
   hero: {
-    headline: string;    // "LATENCY IS THE MIND KILLER."
-    subtext: string[];   // ["Not rented. Not surveilled.", "Yours."]
+    headline: string;    // "OWN YOUR AI."
+    subtext: string[];   // ["Don't rent it.", "Grow your own."]
   };
   problem: {
     quotes: Array<{
@@ -50,86 +50,105 @@ interface LensReality {
 
 ---
 
-## Rhetorical Constraints
+## Rhetorical Guidelines
 
-All headlines must follow the Grove's design language:
+**The goal: hit the right note, fit the space, make it land.**
+
+These are guidelines, not formulas. The best headlines break patterns when breaking them works.
 
 ### Hero Headline
-- **Format:** `[2-4 WORDS]. [ABSTRACT NOUN]. [PERIOD].`
-- **Style:** ALL CAPS, ends with period
-- **Max Length:** 40 characters
-- **Examples:**
-  - `LATENCY IS THE MIND KILLER.`
-  - `THE EPISTEMIC COMMONS.`
-  - `COMPOUNDING INTELLIGENCE.`
+- **Constraint:** ≤40 characters, ALL CAPS, ends with period
+- **Goal:** Visceral. Memorable. Says something THIS persona cares about.
+- **Anti-pattern:** Formulas like "[NOUN] IS THE [NOUN]." get stale fast.
+
+**Good examples:**
+```
+OWN YOUR AI.                        // Direct, personal
+ADAPT? ADAPT AND OWN.               // Counters their framing
+LOCAL HUMS. CLOUD BREAKS THROUGH.   // Describes the architecture poetically
+THE EDGE HEDGE.                     // Rhymes, memorable, business-coded
+SOVEREIGN INTELLIGENCE.             // One phrase does all the work
+```
 
 ### Hero Subtext
-- **Line 1:** "Not [X]. Not [Y]. Not [Z]." (what it ISN'T)
-- **Line 2:** Single word/phrase of what it IS (e.g., "Yours." / "Open.")
+- **Constraint:** 2 lines, complete the thought
+- **Goal:** Line 1 sets up tension or context. Line 2 lands the point.
+- **Anti-pattern:** "Not X. Not Y. Not Z." formula—use sparingly.
+
+**Good examples:**
+```
+Don't rent it.
+Grow your own.
+
+They say learn to use AI.
+We say learn to own it.
+
+Three companies will control intelligence.
+What's your hedge?
+```
 
 ### Tension
-- **Line 1:** What THEY (Big Tech) do
-- **Line 2:** What WE do instead
+- **Format:** THEY do X / WE do Y (one line each)
+- **Goal:** Sharp contrast. Make the alternative clear.
+
+**Good examples:**
+```
+They tell you to 'adapt.'
+We say: own it instead.
+
+They build moats around data centers.
+We build protocols for edge clusters.
+```
 
 ### Quotes
-- 3 quotes from authorities the persona respects
+- 3 quotes from authorities THIS PERSONA respects
 - Author names in ALL CAPS
 - Short, punchy titles
+- Can be real quotes or representative framings (label appropriately)
 
 ---
 
-## Manual Configuration
+## Current Configuration
 
-Add to your `narratives.json` in GCS:
+All lens realities are stored in `data/narratives.json` under the `lensRealities` key.
+
+### Example: Engineer Lens
 
 ```json
 {
-  "version": "2.1",
-  "lensRealities": {
-    "engineer": {
-      "hero": {
-        "headline": "LATENCY IS THE MIND KILLER.",
-        "subtext": [
-          "Distributed inference isn't a pipe dream.",
-          "It's a routing problem."
-        ]
-      },
-      "problem": {
-        "quotes": [
-          {
-            "text": "We are constrained by thermal density...",
-            "author": "MARK ZUCKERBERG",
-            "title": "META"
-          },
-          {
-            "text": "The cost of compute is the primary bottleneck.",
-            "author": "JENSEN HUANG",
-            "title": "NVIDIA"
-          },
-          {
-            "text": "Centralized models are hitting a data wall.",
-            "author": "YANN LECUN",
-            "title": "META AI"
-          }
-        ],
-        "tension": [
-          "They build moats around data centers.",
-          "We build protocols for edge clusters."
-        ]
-      }
+  "engineer": {
+    "hero": {
+      "headline": "LOCAL HUMS. CLOUD BREAKS THROUGH.",
+      "subtext": ["7B for routine. Frontier for insight.", "Both owned."]
+    },
+    "problem": {
+      "quotes": [
+        {"text": "We are constrained by thermal density and power distribution.", "author": "MARK ZUCKERBERG", "title": "META"},
+        {"text": "The cost of compute is the primary bottleneck.", "author": "JENSEN HUANG", "title": "NVIDIA"},
+        {"text": "Centralized models are hitting a data wall.", "author": "YANN LECUN", "title": "META AI"}
+      ],
+      "tension": ["They build moats around data centers.", "We build protocols for edge clusters."]
     }
-  },
+  }
+}
+```
+
+### Default Reality (no lens selected)
+
+```json
+{
   "defaultReality": {
     "hero": {
       "headline": "YOUR AI.",
-      "subtext": [
-        "Not rented. Not surveilled. Not theirs.",
-        "Yours."
-      ]
+      "subtext": ["Not rented. Not surveilled. Not theirs.", "Yours."]
     },
     "problem": {
-      "quotes": [...],
-      "tension": [...]
+      "quotes": [
+        {"text": "AI is the most profound technology humanity has ever worked on... People will need to adapt.", "author": "SUNDAR PICHAI", "title": "GOOGLE CEO"},
+        {"text": "This is the new version of learning to code...", "author": "SAM ALTMAN", "title": "OPENAI CEO"},
+        {"text": "I advise ordinary citizens to learn to use AI.", "author": "DARIO AMODEI", "title": "ANTHROPIC CEO"}
+      ],
+      "tension": ["They're building the future of intelligence.", "And they're telling you to get comfortable being a guest in it."]
     }
   }
 }
@@ -139,20 +158,20 @@ Add to your `narratives.json` in GCS:
 
 ## Generation Script
 
-Use this Node.js script to generate headlines for all lenses using Gemini:
+Use this script to generate headline OPTIONS for human review. The script produces multiple variants per persona—you pick the winners.
 
 ### `scripts/generate-lens-realities.js`
 
 ```javascript
 #!/usr/bin/env node
 /**
- * Generate LensReality content for all personas using Gemini
+ * Generate LensReality OPTIONS for all personas using Gemini
+ * 
+ * This generates 3 variants per persona for human review.
+ * The human picks the winners, then updates narratives.json.
  *
  * Usage:
- *   GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js
- *
- * Output:
- *   Writes lens-realities.json to stdout (pipe to file)
+ *   GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js > lens-options.json
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -161,98 +180,92 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-// All personas from default-personas.ts
 const PERSONAS = [
   {
     id: 'freestyle',
     label: 'Freestyle',
     description: 'Explore freely without a specific lens',
-    guidance: 'Curious explorer, adaptable tone, no agenda'
+    seed: 'Curious, no agenda, just wants to understand'
   },
   {
     id: 'concerned-citizen',
     label: 'Concerned Citizen',
     description: "I'm worried about Big Tech's grip on AI",
-    guidance: 'Fears about corporate control, accessible language, personal impact, agency'
+    seed: 'Fears corporate control, wants agency, accessible language'
   },
   {
     id: 'academic',
     label: 'Academic',
     description: 'I work in research, university, or policy',
-    guidance: 'Precise language, cite sources, epistemic humility, theoretical frameworks'
+    seed: 'Epistemic independence, knowledge commons, enclosure concerns'
   },
   {
     id: 'engineer',
     label: 'Engineer',
     description: 'I want to understand how it actually works',
-    guidance: 'Technical depth, architecture trade-offs, implementation details, WHY decisions'
+    seed: 'Architecture, trade-offs, hybrid local/cloud, protocols'
   },
   {
     id: 'geopolitical',
     label: 'Geopolitical Analyst',
     description: 'I think about power, nations, and systemic risk',
-    guidance: 'Power dynamics, strategic concerns, historical parallels, civilizational stability'
+    seed: 'Sovereignty, concentration risk, power dynamics'
   },
   {
     id: 'big-ai-exec',
     label: 'Big AI / Tech Exec',
     description: 'I work at a major tech company or AI lab',
-    guidance: 'Business language, market dynamics, regulatory risk, competitive analysis'
+    seed: 'Business opportunity, edge economics, infrastructure layer'
   },
   {
     id: 'family-office',
     label: 'Family Office / Investor',
     description: 'I manage wealth and evaluate opportunities',
-    guidance: 'Investment thesis, risk/return, timeline, market size, defensibility'
+    seed: 'Investment thesis, platform risk hedge, long-term compounding'
   }
 ];
 
-const COLLAPSE_PROMPT = `You are the Grove's Reality Collapser. Generate landing page content for a specific persona.
+const SYSTEM_PROMPT = `You are writing landing page headlines for The Grove, a distributed AI infrastructure project.
 
-The Grove is distributed AI infrastructure. Core thesis: "Intelligence is a fluid resource shaped by the user, not the provider."
+The Grove's thesis: You should own your AI, not rent it. Distributed beats centralized. The edge is the hedge.
 
-RHETORICAL CONSTRAINTS (follow EXACTLY):
+CONSTRAINTS:
+- Headline: ≤40 characters, ALL CAPS, ends with period
+- Subtext: 2 lines that complete the thought (not a formula—just make it land)
+- Tension: THEY do X / WE do Y
 
-HERO HEADLINE:
-- Format: [2-4 WORDS]. [ABSTRACT NOUN]. [PERIOD].
-- ALL CAPS, ends with period
-- Examples: "LATENCY IS THE MIND KILLER." / "THE EPISTEMIC COMMONS."
+QUALITY BAR:
+- Visceral over clever
+- Memorable over comprehensive  
+- This persona's language, not generic tech-speak
+- Break patterns when breaking them works
 
-HERO SUBTEXT:
-- Line 1: "Not [X]. Not [Y]. Not [Z]." (what it ISN'T)
-- Line 2: Single word/phrase of what it IS (e.g., "Yours." / "Open.")
+ANTI-PATTERNS TO AVOID:
+- "Not X. Not Y. Not Z." on every subtext (use sparingly)
+- "[NOUN] IS THE [NOUN]." headline formula (stale)
+- Generic tech buzzwords the persona wouldn't use
 
-TENSION:
-- Line 1: What THEY (Big Tech) do
-- Line 2: What WE do instead
+Generate 3 DIFFERENT options. Vary the angle, not just the words.
 
-QUOTES:
-- 3 quotes from authorities THIS PERSONA would respect
-- Author names ALL CAPS, short titles
-- Can be real or representative of the viewpoint
-
-OUTPUT (JSON only, no markdown):
+OUTPUT FORMAT (JSON only, no markdown):
 {
-  "hero": {
-    "headline": "HEADLINE.",
-    "subtext": ["Not X. Not Y. Not Z.", "Word."]
-  },
-  "problem": {
-    "quotes": [
-      { "text": "...", "author": "NAME", "title": "TITLE" },
-      { "text": "...", "author": "NAME", "title": "TITLE" },
-      { "text": "...", "author": "NAME", "title": "TITLE" }
-    ],
-    "tension": ["What they do.", "What we do."]
-  }
+  "options": [
+    {
+      "tag": "A - [brief angle description]",
+      "headline": "HEADLINE.",
+      "subtext": ["Line 1", "Line 2"],
+      "tension": ["They do X.", "We do Y."]
+    },
+    // ... options B and C
+  ]
 }`;
 
 async function generateForPersona(persona) {
   const userPrompt = `PERSONA: ${persona.label}
 DESCRIPTION: ${persona.description}
-TONE GUIDANCE: ${persona.guidance}
+SEED IDEAS: ${persona.seed}
 
-Generate the landing page reality for this persona. Remember: this persona will see the Grove's homepage THROUGH THEIR EYES. The headline should resonate with their worldview and concerns.`;
+Generate 3 headline options for this persona. Each should hit a different angle.`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -261,12 +274,12 @@ Generate the landing page reality for this persona. Remember: this persona will 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [
-          { role: 'user', parts: [{ text: COLLAPSE_PROMPT }] },
-          { role: 'model', parts: [{ text: 'I understand. I will generate persona-specific content following the rhetorical constraints exactly. Please provide the persona details.' }] },
+          { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+          { role: 'model', parts: [{ text: 'Understood. I will generate 3 distinct headline options per persona, varying the angle and avoiding formulaic patterns. Ready for persona details.' }] },
           { role: 'user', parts: [{ text: userPrompt }] }
         ],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.9,  // Higher for more variety
           maxOutputTokens: 1024
         }
       })
@@ -284,7 +297,7 @@ Generate the landing page reality for this persona. Remember: this persona will 
     throw new Error('No content in response');
   }
 
-  // Parse JSON from response (handle markdown wrapping)
+  // Parse JSON from response
   let jsonStr = text;
   if (text.includes('```json')) {
     jsonStr = text.split('```json')[1].split('```')[0].trim();
@@ -296,29 +309,39 @@ Generate the landing page reality for this persona. Remember: this persona will 
 }
 
 async function main() {
-  console.error('Generating lens realities for all personas...\n');
+  console.error('Generating lens reality OPTIONS for review...\n');
 
-  const lensRealities = {};
+  const results = {};
 
   for (const persona of PERSONAS) {
     console.error(`  → ${persona.label}...`);
     try {
-      const reality = await generateForPersona(persona);
-      lensRealities[persona.id] = reality;
-      console.error(`    ✓ "${reality.hero.headline}"`);
+      const generated = await generateForPersona(persona);
+      results[persona.id] = {
+        persona: persona.label,
+        description: persona.description,
+        options: generated.options
+      };
+      console.error(`    ✓ Generated ${generated.options.length} options`);
     } catch (error) {
       console.error(`    ✗ Error: ${error.message}`);
+      results[persona.id] = { error: error.message };
     }
 
-    // Rate limit: 1 request per second
-    await new Promise(r => setTimeout(r, 1000));
+    // Rate limit
+    await new Promise(r => setTimeout(r, 1200));
   }
 
-  // Output final JSON to stdout
   const output = {
     _generated: new Date().toISOString(),
-    _note: 'Copy lensRealities into narratives.json',
-    lensRealities
+    _instructions: [
+      '1. Review each persona\'s options',
+      '2. Pick one winner per persona (or write your own)',
+      '3. Add quotes for each winner',
+      '4. Update narratives.json with final selections',
+      '5. Upload: gcloud storage cp data/narratives.json gs://grove-assets/narratives.json'
+    ],
+    personas: results
   };
 
   console.log(JSON.stringify(output, null, 2));
@@ -330,16 +353,15 @@ main().catch(console.error);
 ### Usage
 
 ```bash
-# Generate all headlines
-GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js > lens-output.json
+# Generate options for review
+GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js > lens-options.json
 
-# Review the output
-cat lens-output.json | jq '.lensRealities'
+# Review in editor
+code lens-options.json
 
-# Then manually add to narratives.json or upload to GCS:
-# 1. Copy the lensRealities object
-# 2. Add to your narratives.json
-# 3. Upload: gcloud storage cp narratives.json gs://grove-assets/narratives.json
+# Pick winners, add quotes, update narratives.json
+# Then upload to GCS
+gcloud storage cp data/narratives.json gs://grove-assets/narratives.json
 ```
 
 ---
@@ -349,20 +371,15 @@ cat lens-output.json | jq '.lensRealities'
 After updating `narratives.json` in GCS, verify in browser console:
 
 ```javascript
-// Check which source is being used
 // Look for: [Quantum] Using predefined reality for: engineer (from schema)
 // vs:       [Quantum] Using predefined reality for: engineer (from fallback)
 ```
 
-The console log indicates whether the headline is coming from:
-- `(from schema)` - GCS-backed narratives.json
-- `(from fallback)` - Hardcoded SUPERPOSITION_MAP
-
 ---
 
-## Current Hardcoded Fallbacks
+## Hardcoded Fallbacks
 
-These exist in `src/data/quantum-content.ts` as backup:
+These exist in `src/data/quantum-content.ts` as backup when schema loading fails:
 
 | Lens | Headline |
 |------|----------|
@@ -370,6 +387,20 @@ These exist in `src/data/quantum-content.ts` as backup:
 | `academic` | "THE EPISTEMIC COMMONS." |
 | `family-office` | "COMPOUNDING INTELLIGENCE." |
 | (default) | "YOUR AI." |
+
+**Note:** The fallbacks may drift from narratives.json. The schema is authoritative.
+
+---
+
+## Editorial Process
+
+1. **Generate options** — Run the script to get 3 variants per persona
+2. **Human review** — Pick winners based on what lands, not what follows the formula
+3. **Add quotes** — Find 3 quotes from authorities each persona respects
+4. **Test locally** — Verify JSON is valid, headlines render correctly
+5. **Deploy** — Upload to GCS, verify `(from schema)` in console logs
+
+**The human is the editor. The LLM is the writer's room.**
 
 ---
 

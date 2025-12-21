@@ -1,119 +1,145 @@
 #!/usr/bin/env node
 /**
- * Generate LensReality content for all personas using Gemini
+ * Generate LensReality OPTIONS for all personas using Gemini
+ * 
+ * This generates 3 variants per persona for human review.
+ * The human picks the winners, then updates narratives.json.
  *
  * Usage:
- *   GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js
- *
- * Output:
- *   Writes lens-realities.json to stdout (pipe to file)
- *
- * Example:
- *   GEMINI_API_KEY=xxx node scripts/generate-lens-realities.js > lens-output.json
- *   cat lens-output.json | jq '.lensRealities'
+ *   GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js > lens-options.json
+ * 
+ * Philosophy:
+ *   The goal is to hit the right rhetorical note, fit the character count, 
+ *   and make it land. Formulas get stale. The human editor picks winners.
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
   console.error('Error: GEMINI_API_KEY environment variable required');
-  console.error('Usage: GEMINI_API_KEY=your_key node scripts/generate-lens-realities.js');
   process.exit(1);
 }
 
-// All personas from data/default-personas.ts
 const PERSONAS = [
   {
     id: 'freestyle',
     label: 'Freestyle',
     description: 'Explore freely without a specific lens',
-    guidance: 'Curious explorer, adaptable tone, no agenda, knowledgeable companion'
+    seed: 'Curious, no agenda, just wants to understand'
   },
   {
     id: 'concerned-citizen',
     label: 'Concerned Citizen',
     description: "I'm worried about Big Tech's grip on AI",
-    guidance: 'Fears about corporate control, accessible language, personal impact, agency, relatable metaphors'
+    seed: 'Fears corporate control, wants agency, accessible language. Counter the "adapt" narrative.'
   },
   {
     id: 'academic',
     label: 'Academic',
     description: 'I work in research, university, or policy',
-    guidance: 'Precise language, cite sources, epistemic humility, theoretical frameworks, intellectual sophistication'
+    seed: 'Epistemic independence, knowledge commons, enclosure concerns, rate limits on research'
   },
   {
     id: 'engineer',
     label: 'Engineer',
     description: 'I want to understand how it actually works',
-    guidance: 'Technical depth, architecture trade-offs, implementation details, WHY decisions were made, code-like precision'
+    seed: 'Architecture trade-offs, hybrid local/cloud (7B routine, frontier insight), protocols not platforms'
   },
   {
     id: 'geopolitical',
     label: 'Geopolitical Analyst',
     description: 'I think about power, nations, and systemic risk',
-    guidance: 'Power dynamics, strategic concerns, historical parallels, civilizational stability, resilience and redundancy'
+    seed: 'Sovereignty, concentration risk, power dynamics, not American/Chinese/corporate'
   },
   {
     id: 'big-ai-exec',
     label: 'Big AI / Tech Exec',
     description: 'I work at a major tech company or AI lab',
-    guidance: 'Business language, market dynamics, regulatory risk, competitive analysis, not adversarial'
+    seed: 'Business opportunity, edge economics, infrastructure layer play, margin in the middle'
   },
   {
     id: 'family-office',
     label: 'Family Office / Investor',
     description: 'I manage wealth and evaluate opportunities',
-    guidance: 'Investment thesis, risk/return, timeline, market size, defensibility, milestone-focused'
+    seed: 'Platform risk hedge, owned vs rented infrastructure, long-term compounding'
   }
 ];
 
-const COLLAPSE_PROMPT = `You are the Grove's Reality Collapser. Generate landing page content for a specific persona.
+// Current winners for reference (what we're trying to beat or vary from)
+const CURRENT_WINNERS = {
+  'freestyle': 'OWN YOUR AI.',
+  'concerned-citizen': 'ADAPT? ADAPT AND OWN.',
+  'academic': 'THE EPISTEMIC COMMONS.',
+  'engineer': 'LOCAL HUMS. CLOUD BREAKS THROUGH.',
+  'geopolitical': 'SOVEREIGN INTELLIGENCE.',
+  'big-ai-exec': 'THE EDGE HEDGE.',
+  'family-office': 'THE EDGE HEDGE.'
+};
 
-The Grove is distributed AI infrastructure. Core thesis: "Intelligence is a fluid resource shaped by the user, not the provider."
+const SYSTEM_PROMPT = `You are writing landing page headlines for The Grove, a distributed AI infrastructure project.
 
-RHETORICAL CONSTRAINTS (follow EXACTLY):
+The Grove's thesis: You should own your AI, not rent it. Distributed beats centralized. The edge is the hedge.
 
-HERO HEADLINE:
-- Format: [2-4 WORDS]. [ABSTRACT NOUN]. [PERIOD].
-- ALL CAPS, ends with period
-- Must resonate with THIS persona's worldview
-- Examples: "LATENCY IS THE MIND KILLER." / "THE EPISTEMIC COMMONS."
+CONSTRAINTS:
+- Headline: ≤40 characters, ALL CAPS, ends with period
+- Subtext: 2 lines that complete the thought (make it land, no formula required)
+- Tension: THEY do X / WE do Y (one line each)
 
-HERO SUBTEXT:
-- Line 1: "Not [X]. Not [Y]. Not [Z]." (what it ISN'T - speak to persona's concerns)
-- Line 2: Single word/phrase of what it IS (e.g., "Yours." / "Open.")
+QUALITY BAR:
+- Visceral over clever
+- Memorable over comprehensive  
+- This persona's language, not generic tech-speak
+- Short sentences hit harder
+- Rhymes and wordplay are good when they work (e.g., "THE EDGE HEDGE.")
+- Questions can be powerful (e.g., "ADAPT? ADAPT AND OWN.")
 
-TENSION:
-- Line 1: What THEY (Big Tech) do - frame it how THIS persona would see it
-- Line 2: What WE do instead - frame it as what THIS persona values
+ANTI-PATTERNS TO AVOID:
+- "Not X. Not Y. Not Z." subtext formula (stale—use sparingly)
+- "[NOUN] IS THE [NOUN]." headline formula (overused)
+- Generic tech buzzwords the persona wouldn't use
+- Being comprehensive when you should be punchy
 
-QUOTES:
-- 3 quotes from authorities THIS PERSONA would actually respect and listen to
-- Author names ALL CAPS, short titles
-- Can be real quotes or representative of the viewpoint
-- Should feel credible to this persona
+EXAMPLES OF GOOD HEADLINES:
+- "OWN YOUR AI." — Direct, personal, three words
+- "ADAPT? ADAPT AND OWN." — Counters their framing with a question
+- "LOCAL HUMS. CLOUD BREAKS THROUGH." — Poetic, describes architecture
+- "THE EDGE HEDGE." — Rhymes, memorable, business-coded
+- "SOVEREIGN INTELLIGENCE." — One phrase does all the work
 
-OUTPUT (JSON only, no markdown, no explanation):
+Generate 3 DIFFERENT options. Vary the ANGLE, not just the words.
+
+OUTPUT FORMAT (JSON only, no markdown):
 {
-  "hero": {
-    "headline": "HEADLINE.",
-    "subtext": ["Not X. Not Y. Not Z.", "Word."]
-  },
-  "problem": {
-    "quotes": [
-      { "text": "...", "author": "NAME", "title": "TITLE" },
-      { "text": "...", "author": "NAME", "title": "TITLE" },
-      { "text": "...", "author": "NAME", "title": "TITLE" }
-    ],
-    "tension": ["What they do.", "What we do."]
-  }
+  "options": [
+    {
+      "tag": "A - [brief angle description]",
+      "headline": "HEADLINE.",
+      "subtext": ["Line 1", "Line 2"],
+      "tension": ["They do X.", "We do Y."]
+    },
+    {
+      "tag": "B - [brief angle description]",
+      "headline": "HEADLINE.",
+      "subtext": ["Line 1", "Line 2"],
+      "tension": ["They do X.", "We do Y."]
+    },
+    {
+      "tag": "C - [brief angle description]",
+      "headline": "HEADLINE.",
+      "subtext": ["Line 1", "Line 2"],
+      "tension": ["They do X.", "We do Y."]
+    }
+  ]
 }`;
 
 async function generateForPersona(persona) {
+  const currentWinner = CURRENT_WINNERS[persona.id];
+  
   const userPrompt = `PERSONA: ${persona.label}
 DESCRIPTION: ${persona.description}
-TONE GUIDANCE: ${persona.guidance}
+SEED IDEAS: ${persona.seed}
+${currentWinner ? `CURRENT HEADLINE: "${currentWinner}" (for reference—try to beat it or vary from it)` : ''}
 
-Generate the landing page reality for this persona. Remember: this persona will see the Grove's homepage THROUGH THEIR EYES. The headline should resonate with their worldview, concerns, and values. The quotes should come from authorities they would actually trust and respect.`;
+Generate 3 headline options for this persona. Each should hit a DIFFERENT angle.`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -122,12 +148,12 @@ Generate the landing page reality for this persona. Remember: this persona will 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [
-          { role: 'user', parts: [{ text: COLLAPSE_PROMPT }] },
-          { role: 'model', parts: [{ text: 'I understand. I will generate persona-specific content following the rhetorical constraints exactly. Please provide the persona details.' }] },
+          { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+          { role: 'model', parts: [{ text: 'Understood. I will generate 3 distinct headline options per persona, varying the angle and avoiding formulaic patterns. Ready for persona details.' }] },
           { role: 'user', parts: [{ text: userPrompt }] }
         ],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.9,  // Higher for more variety
           maxOutputTokens: 1024
         }
       })
@@ -135,8 +161,7 @@ Generate the landing page reality for this persona. Remember: this persona will 
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+    throw new Error(`Gemini API error: ${response.status}`);
   }
 
   const data = await response.json();
@@ -146,102 +171,68 @@ Generate the landing page reality for this persona. Remember: this persona will 
     throw new Error('No content in response');
   }
 
-  // Parse JSON from response (handle markdown wrapping)
-  let jsonStr = text.trim();
-  if (jsonStr.includes('```json')) {
-    jsonStr = jsonStr.split('```json')[1].split('```')[0].trim();
-  } else if (jsonStr.includes('```')) {
-    jsonStr = jsonStr.split('```')[1].split('```')[0].trim();
+  // Parse JSON from response
+  let jsonStr = text;
+  if (text.includes('```json')) {
+    jsonStr = text.split('```json')[1].split('```')[0].trim();
+  } else if (text.includes('```')) {
+    jsonStr = text.split('```')[1].split('```')[0].trim();
   }
 
-  const parsed = JSON.parse(jsonStr);
-
-  // Validate structure
-  if (!parsed.hero?.headline || !parsed.hero?.subtext || !parsed.problem?.quotes || !parsed.problem?.tension) {
-    throw new Error('Invalid structure in response');
-  }
-
-  return parsed;
+  return JSON.parse(jsonStr);
 }
 
 async function main() {
   console.error('='.repeat(60));
-  console.error('Grove Lens Reality Generator');
+  console.error('Generating lens reality OPTIONS for human review');
   console.error('='.repeat(60));
-  console.error(`\nGenerating for ${PERSONAS.length} personas...\n`);
+  console.error('');
 
-  const lensRealities = {};
-  const errors = [];
+  const results = {};
 
   for (const persona of PERSONAS) {
-    console.error(`  [${persona.id}] ${persona.label}...`);
+    console.error(`  → ${persona.label}...`);
     try {
-      const reality = await generateForPersona(persona);
-      lensRealities[persona.id] = reality;
-      console.error(`    ✓ "${reality.hero.headline}"`);
+      const generated = await generateForPersona(persona);
+      results[persona.id] = {
+        persona: persona.label,
+        description: persona.description,
+        currentWinner: CURRENT_WINNERS[persona.id] || null,
+        options: generated.options
+      };
+      
+      // Show headlines in stderr for quick review
+      for (const opt of generated.options) {
+        console.error(`      ${opt.tag}: "${opt.headline}"`);
+      }
     } catch (error) {
       console.error(`    ✗ Error: ${error.message}`);
-      errors.push({ persona: persona.id, error: error.message });
+      results[persona.id] = { error: error.message };
     }
 
-    // Rate limit: 1.5 seconds between requests
-    await new Promise(r => setTimeout(r, 1500));
+    // Rate limit
+    await new Promise(r => setTimeout(r, 1200));
   }
 
-  console.error('\n' + '='.repeat(60));
-  console.error(`Complete: ${Object.keys(lensRealities).length}/${PERSONAS.length} successful`);
-  if (errors.length > 0) {
-    console.error(`Errors: ${errors.map(e => e.persona).join(', ')}`);
-  }
-  console.error('='.repeat(60) + '\n');
+  console.error('');
+  console.error('='.repeat(60));
+  console.error('Done. Pipe stdout to a file for full JSON output.');
+  console.error('='.repeat(60));
 
-  // Output final JSON to stdout
   const output = {
-    _meta: {
-      generated: new Date().toISOString(),
-      personas: PERSONAS.length,
-      successful: Object.keys(lensRealities).length,
-      note: 'Copy lensRealities into narratives.json in GCS'
-    },
-    lensRealities,
-    defaultReality: {
-      hero: {
-        headline: "YOUR AI.",
-        subtext: [
-          "Not rented. Not surveilled. Not theirs.",
-          "Yours."
-        ]
-      },
-      problem: {
-        quotes: [
-          {
-            text: "AI is the most profound technology humanity has ever worked on... People will need to adapt.",
-            author: "SUNDAR PICHAI",
-            title: "GOOGLE CEO"
-          },
-          {
-            text: "This is the new version of [learning to code]... adaptability and continuous learning would be the most valuable skills.",
-            author: "SAM ALTMAN",
-            title: "OPENAI CEO"
-          },
-          {
-            text: "People have adapted to past technological changes... I advise ordinary citizens to learn to use AI.",
-            author: "DARIO AMODEI",
-            title: "ANTHROPIC CEO"
-          }
-        ],
-        tension: [
-          "They're building the future of intelligence.",
-          "And they're telling you to get comfortable being a guest in it."
-        ]
-      }
-    }
+    _generated: new Date().toISOString(),
+    _instructions: [
+      '1. Review each persona\'s options below',
+      '2. Pick one winner per persona (or write your own)',
+      '3. Add 3 quotes for each winner (authorities the persona respects)',
+      '4. Update data/narratives.json with final selections',
+      '5. Upload: gcloud storage cp data/narratives.json gs://grove-assets/narratives.json'
+    ],
+    _currentWinners: CURRENT_WINNERS,
+    personas: results
   };
 
   console.log(JSON.stringify(output, null, 2));
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+main().catch(console.error);

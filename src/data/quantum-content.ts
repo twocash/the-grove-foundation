@@ -2,6 +2,7 @@
 // Superposition Map: Maps lens IDs to content realities
 // v0.13: The Quantum Interface
 // v0.14+: Fallback content - schema.lensRealities takes precedence if available
+// v0.15: Updated fallbacks to match narratives.json (2025-12-20)
 
 import { ArchetypeId } from '../../types/lens';
 // Re-export types from core schema for backward compatibility
@@ -31,12 +32,12 @@ export const DEFAULT_REALITY: LensReality = {
         title: "GOOGLE CEO"
       },
       {
-        text: "This is the new version of [learning to code]... adaptability and continuous learning would be the most valuable skills.",
+        text: "This is the new version of learning to code... adaptability and continuous learning would be the most valuable skills.",
         author: "SAM ALTMAN",
         title: "OPENAI CEO"
       },
       {
-        text: "People have adapted to past technological changes... I advise ordinary citizens to learn to use AI.",
+        text: "I advise ordinary citizens to learn to use AI.",
         author: "DARIO AMODEI",
         title: "ANTHROPIC CEO"
       }
@@ -49,24 +50,127 @@ export const DEFAULT_REALITY: LensReality = {
 };
 
 // ============================================================================
-// COLLAPSED REALITIES (Lens-specific content)
+// COLLAPSED REALITIES (Lens-specific fallback content)
+// NOTE: schema.lensRealities in narratives.json takes precedence over these
 // ============================================================================
 
 export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
 
-  // ENGINEER REALITY
-  'engineer': {
+  // FREESTYLE REALITY
+  'freestyle': {
     hero: {
-      headline: "LATENCY IS THE MIND KILLER.",
+      headline: "OWN YOUR AI.",
       subtext: [
-        "Distributed inference isn't a pipe dream.",
-        "It's a routing problem."
+        "Don't rent it.",
+        "Grow your own."
       ]
     },
     problem: {
       quotes: [
         {
-          text: "We are constrained by thermal density...",
+          text: "The most profound technologies disappear. They weave themselves into the fabric of everyday life.",
+          author: "MARK WEISER",
+          title: "XEROX PARC"
+        },
+        {
+          text: "We shape our tools, and thereafter our tools shape us.",
+          author: "MARSHALL MCLUHAN",
+          title: "MEDIA THEORIST"
+        },
+        {
+          text: "The question isn't whether AI will change everything. It's who gets to decide how.",
+          author: "GROVE THESIS",
+          title: "2025"
+        }
+      ],
+      tension: [
+        "They're building the future of intelligence.",
+        "We're building who gets to own it."
+      ]
+    }
+  },
+
+  // CONCERNED CITIZEN REALITY
+  'concerned-citizen': {
+    hero: {
+      headline: "ADAPT? ADAPT AND OWN.",
+      subtext: [
+        "They say learn to use AI.",
+        "We say learn to own it."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "AI is the most profound technology humanity has ever worked on... People will need to adapt.",
+          author: "SUNDAR PICHAI",
+          title: "GOOGLE CEO"
+        },
+        {
+          text: "This is the new version of learning to code... adaptability and continuous learning would be the most valuable skills.",
+          author: "SAM ALTMAN",
+          title: "OPENAI CEO"
+        },
+        {
+          text: "I advise ordinary citizens to learn to use AI.",
+          author: "DARIO AMODEI",
+          title: "ANTHROPIC CEO"
+        }
+      ],
+      tension: [
+        "They tell you to 'adapt.'",
+        "We say: own it instead."
+      ]
+    }
+  },
+
+  // ACADEMIC REALITY
+  'academic': {
+    hero: {
+      headline: "THE EPISTEMIC COMMONS.",
+      subtext: [
+        "Knowledge shouldn't be enclosed.",
+        "Neither should intelligence."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "The enclosure of AI research threatens scientific progress and public accountability.",
+          author: "MEREDITH WHITTAKER",
+          title: "SIGNAL FOUNDATION"
+        },
+        {
+          text: "We need public options for public intelligence.",
+          author: "BRUCE SCHNEIER",
+          title: "HARVARD KENNEDY SCHOOL"
+        },
+        {
+          text: "Opacity is the enemy of accountability.",
+          author: "JOY BUOLAMWINI",
+          title: "ALGORITHMIC JUSTICE LEAGUE"
+        }
+      ],
+      tension: [
+        "The enclosure of the digital commons is accelerating.",
+        "We are building the library, not the bookstore."
+      ]
+    }
+  },
+
+  // ENGINEER REALITY
+  'engineer': {
+    hero: {
+      headline: "LOCAL HUMS. CLOUD BREAKS THROUGH.",
+      subtext: [
+        "7B for routine. Frontier for insight.",
+        "Both owned."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "We are constrained by thermal density and power distribution.",
           author: "MARK ZUCKERBERG",
           title: "META"
         },
@@ -88,55 +192,89 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
     }
   },
 
-  // ACADEMIC REALITY
-  'academic': {
+  // GEOPOLITICAL REALITY
+  'geopolitical': {
     hero: {
-      headline: "THE EPISTEMIC COMMONS.",
+      headline: "SOVEREIGN INTELLIGENCE.",
       subtext: [
-        "Knowledge shouldn't be enclosed.",
-        "Intelligence must be open."
+        "Not American. Not Chinese. Not corporate.",
+        "Distributed."
       ]
     },
     problem: {
       quotes: [
         {
-          text: "The enclosure of AI research threatens scientific progress.",
-          author: "MEREDITH WHITTAKER",
-          title: "SIGNAL FOUNDATION"
+          text: "AI will be the most transformative and potentially dangerous technology in human history.",
+          author: "HENRY KISSINGER",
+          title: "FORMER SECRETARY OF STATE"
         },
         {
-          text: "We need public options for public intelligence.",
-          author: "BRUCE SCHNEIER",
-          title: "HARVARD KENNEDY SCHOOL"
+          text: "The nation that leads in AI will rule the world.",
+          author: "VLADIMIR PUTIN",
+          title: "RUSSIAN PRESIDENT"
         },
         {
-          text: "Opacity is the enemy of accountability.",
-          author: "JOY BUOLAMWINI",
-          title: "AJL"
+          text: "We are in a period of geopolitical competition defined by who controls critical technologies.",
+          author: "JAKE SULLIVAN",
+          title: "NSC ADVISOR"
         }
       ],
       tension: [
-        "The enclosure of the digital commons is accelerating.",
-        "We are building the library, not the bookstore."
+        "They concentrate power in data centers with flags.",
+        "We distribute it across borders."
       ]
     }
   },
 
-  // INVESTOR (FAMILY OFFICE) REALITY
-  'family-office': {
+  // BIG AI EXEC REALITY
+  'big-ai-exec': {
     hero: {
-      headline: "COMPOUNDING INTELLIGENCE.",
+      headline: "THE EDGE HEDGE.",
       subtext: [
-        "The most valuable asset of the next century",
-        "won't be rented."
+        "Frontier capability. Edge economics.",
+        "The margin is in the middle."
       ]
     },
     problem: {
       quotes: [
         {
-          text: "Data is the new oil, but intelligence is the engine.",
-          author: "TECH INVESTMENT MEMO",
-          title: "Q1 2025"
+          text: "The economics of AI will fundamentally reshape enterprise software.",
+          author: "SATYA NADELLA",
+          title: "MICROSOFT CEO"
+        },
+        {
+          text: "Infrastructure companies capture value at every layer of the stack.",
+          author: "MARC ANDREESSEN",
+          title: "A16Z"
+        },
+        {
+          text: "The real competition isn't models—it's distribution.",
+          author: "TECH STRATEGY MEMO",
+          title: "Q4 2024"
+        }
+      ],
+      tension: [
+        "You're in a capex arms race for data center capacity.",
+        "We're building the network that doesn't need one."
+      ]
+    }
+  },
+
+  // FAMILY OFFICE / INVESTOR REALITY
+  'family-office': {
+    hero: {
+      headline: "THE EDGE HEDGE.",
+      subtext: [
+        "Three companies will control intelligence.",
+        "What's your hedge?"
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "The infrastructure layer always captures disproportionate value over time.",
+          author: "TECH INVESTMENT THESIS",
+          title: "FAMILY OFFICE MEMO"
         },
         {
           text: "Sovereign AI is the only hedge against platform risk.",
@@ -144,7 +282,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
           title: "GLOBAL FUND"
         },
         {
-          text: "Ownership of the model weights is ownership of the future.",
+          text: "Ownership of the weights is ownership of the future.",
           author: "VENTURE PARTNER",
           title: "SILICON VALLEY"
         }
