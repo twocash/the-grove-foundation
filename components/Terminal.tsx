@@ -22,6 +22,8 @@ import CustomLensOffer from './Terminal/Reveals/CustomLensOffer';
 import { TerminatorModePrompt, TerminatorModeOverlay, TerminatorResponseMetadata } from './Terminal/Reveals/TerminatorMode';
 import FounderStory from './Terminal/Reveals/FounderStory';
 import ConversionCTAPanel from './Terminal/ConversionCTA';
+import { CommandInput } from './Terminal/CommandInput';
+import { HelpModal, JourneysModal, StatsModal } from './Terminal/Modals';
 import {
   trackLensActivated,
   trackSimulationRevealShown,
@@ -205,6 +207,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
   const [showFounderStory, setShowFounderStory] = useState<boolean>(false);
   const [showConversionCTA, setShowConversionCTA] = useState<boolean>(false);
+  // Command Palette modal state (v0.16)
+  const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
+  const [showJourneysModal, setShowJourneysModal] = useState<boolean>(false);
+  const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
   // Cognitive Bridge state
   const [bridgeState, setBridgeState] = useState<{
     visible: boolean;
@@ -419,6 +425,39 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const handleWelcomeCreateCustomLens = () => {
     setShowWelcomeInterstitial(false);
     setShowCustomLensWizard(true);
+  };
+
+  // Command Palette handlers (v0.16)
+  const handleOpenModal = (modal: 'help' | 'journeys' | 'stats') => {
+    if (modal === 'help') setShowHelpModal(true);
+    if (modal === 'journeys') setShowJourneysModal(true);
+    if (modal === 'stats') setShowStatsModal(true);
+  };
+
+  const handleCommandLensSwitch = (lensId: string) => {
+    // Find matching lens by ID or label
+    const normalizedId = lensId.toLowerCase().replace(/\s+/g, '-');
+    const persona = enabledPersonas.find(p =>
+      p.id.toLowerCase() === normalizedId ||
+      p.publicLabel.toLowerCase() === lensId.toLowerCase()
+    );
+
+    if (persona) {
+      selectLens(persona.id);
+      trackLensActivated(persona.id, false);
+      emit.lensSelected(persona.id, false, currentArchetypeId || undefined);
+    } else {
+      // Check custom lenses
+      const customLens = customLenses.find(l =>
+        l.id.toLowerCase() === normalizedId ||
+        l.publicLabel?.toLowerCase() === lensId.toLowerCase()
+      );
+      if (customLens) {
+        selectLens(customLens.id);
+        trackLensActivated(customLens.id, true);
+        emit.lensSelected(customLens.id, true, currentArchetypeId || undefined);
+      }
+    }
   };
 
   // Handle custom lens wizard completion
@@ -1245,26 +1284,18 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   {currentTopic && <span className="text-[10px] font-mono text-ink-muted">Ref: {currentTopic}</span>}
                 </div>
 
-                {/* Input Area */}
-                <div className="relative">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Write a query..."
-                    className="w-full bg-white border border-ink/20 p-3 pl-4 pr-10 text-sm font-serif text-ink focus:outline-none focus:border-grove-forest focus:ring-1 focus:ring-grove-forest/20 transition-all rounded-sm placeholder:italic"
-                    disabled={terminalState.isLoading}
-                    autoComplete="off"
-                  />
-                  <button
-                    onClick={() => handleSend()}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-grove-forest transition-colors"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                  </button>
-                </div>
+                {/* Input Area - Command Palette enabled (v0.16) */}
+                <CommandInput
+                  onSubmitQuery={(query) => {
+                    setInput(query);
+                    handleSend(query);
+                  }}
+                  disabled={terminalState.isLoading}
+                  onOpenModal={handleOpenModal}
+                  onSwitchLens={handleCommandLensSwitch}
+                  onShowWelcome={() => setShowWelcomeInterstitial(true)}
+                  onShowLensPicker={() => setShowLensPicker(true)}
+                />
 
                 {/* Controls below input - shows when feature flag enabled */}
                 {enableControlsBelow && (
@@ -1360,6 +1391,11 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           </div>
         </div>
       )}
+
+      {/* Command Palette Modals (v0.16) */}
+      {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
+      {showJourneysModal && <JourneysModal onClose={() => setShowJourneysModal(false)} />}
+      {showStatsModal && <StatsModal onClose={() => setShowStatsModal(false)} />}
     </>
   );
 };
