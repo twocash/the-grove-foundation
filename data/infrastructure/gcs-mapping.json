@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "gcsFileMapping": {
+    "ratchet-deep-dive.md": "The Grove Core Concepts The Ratchet Deep Dive 2c7780a78eef80e2acfbd49b84359d33.md",
+    "ratchet-quantitative.md": "The Ratchet Quantitative Analysis 2c6780a78eef80ce84b4d5a3c0a18b7d.md",
+    "edge-intelligence.md": "Why Edge Intelligence Is the Structural Answer to  2c9780a78eef8061a56efa68c190cbe4.md",
+    "economics-deep-dive.md": "The Grove Economics Deep Dive 2c7780a78eef8109bd04c172e7ce8c88.md",
+    "distributed-edge.md": "Distributed Edge Infrastructure Implications for G 2c8780a78eef80dfa4b6fbefd38f0eec.md",
+    "infrastructure-provider.md": "The Grove as Distributed Infrastructure Provider 2c8780a78eef800ab8edca41bcb5f5dd.md",
+    "everyday-ai.md": "The Grove as Everyday AI Infrastructure 2c7780a78eef806c8705dcd5605f6177.md",
+    "simulation-deep-dive.md": "The Grove Simulation Deep Dive 2c7780a78eef801bae5cf150f185fc0b.md",
+    "diary-deep-dive.md": "The Grove Diary System Deep Dive 2c7780a78eef80d38ac8e257a3e9d00d.md",
+    "technical-architecture.md": "Grove Technical Architecture Reference 2c8780a78eef809990c9d57ff81e5b1a.md",
+    "distributed-systems.md": "The Grove Distributed Systems Advances for Decentr 2c7780a78eef80008eb7e8630bed1f71.md",
+    "engagement-research.md": "The Grove Engagement Research Brief 2c7780a78eef806c8fa2e6ab6f4dbe31.md"
+  }
+}

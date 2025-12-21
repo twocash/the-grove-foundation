@@ -1,0 +1,101 @@
+{
+  "version": "1.0",
+  "hubs": {
+    "meta-philosophy": {
+      "id": "meta-philosophy",
+      "title": "You Are Already Here",
+      "thesis": "The Grove isn't something you visit. It's something you're already inside.",
+      "path": "hubs/meta-philosophy/",
+      "primaryFile": "you-are-already-here.md",
+      "status": "active",
+      "tags": [
+        "meta",
+        "architecture",
+        "simulation",
+        "observer"
+      ]
+    },
+    "infrastructure-bet": {
+      "id": "infrastructure-bet",
+      "title": "The $380B Infrastructure Bet",
+      "thesis": "Big Tech is betting GDP-level capital that you'll rent intelligence forever.",
+      "path": "hubs/infrastructure-bet/",
+      "primaryFile": "economics-deep-dive.md",
+      "status": "active",
+      "tags": [
+        "$380 billion",
+        "capex",
+        "rent",
+        "ownership"
+      ]
+    },
+    "ratchet-effect": {
+      "id": "ratchet-effect",
+      "title": "The Ratchet Effect",
+      "thesis": "AI capability propagates with predictable dynamics that favor distributed systems.",
+      "path": "hubs/ratchet-effect/",
+      "primaryFile": "ratchet-deep-dive.md",
+      "status": "active",
+      "tags": [
+        "ratchet",
+        "capability propagation",
+        "frontier to edge",
+        "21 months",
+        "seven month",
+        "7 month",
+        "7-month",
+        "doubling",
+        "clock"
+      ]
+    },
+    "diary-system": {
+      "id": "diary-system",
+      "title": "The Diary System",
+      "thesis": "Agents develop identity through reflective self-narrative.",
+      "path": "hubs/diary-system/",
+      "primaryFile": "diary-deep-dive.md",
+      "status": "active",
+      "tags": [
+        "diary",
+        "memory",
+        "narrative"
+      ]
+    },
+    "translation-emergence": {
+      "id": "translation-emergence",
+      "title": "The Emergence Pattern",
+      "thesis": "Capabilities emerge in AI systems without explicit training when the observer asks the right question.",
+      "path": "hubs/translation-emergence/",
+      "primaryFile": "LLM_Translation_Emergence_Chicago_Endnotes.md.md",
+      "status": "active",
+      "tags": [
+        "emergence",
+        "translation",
+        "observer",
+        "capability",
+        "latent",
+        "threshold",
+        "scaling"
+      ]
+    },
+    "technical-architecture": {
+      "id": "technical-architecture",
+      "title": "Under the Hood",
+      "thesis": "Grove's distributed architecture runs on commodity hardware today.",
+      "path": "hubs/technical-architecture/",
+      "primaryFile": "technical-architecture.md",
+      "status": "active",
+      "tags": [
+        "architecture",
+        "technical",
+        "local",
+        "cloud",
+        "hybrid",
+        "7B",
+        "ollama",
+        "village",
+        "coordination"
+      ]
+    }
+  }
+}

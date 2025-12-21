@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "path": "_default/",
+  "maxBytes": 15000,
+  "files": [
+    "grove-overview.md",
+    "key-concepts.md",
+    "visionary-narrative.md"
+  ]
+}

@@ -3,7 +3,10 @@
   "meta": {
     "labelStyle": "lewis",
     "lastUpdated": "2025-12-20",
-    "description": "Unified Registry: Journeys drive the Narrative; Hubs drive the RAG."
+    "description": "Unified Registry: Journeys drive the Narrative; Hubs drive the RAG.",
+    "deprecated": true,
+    "deprecationNote": "Use split files in data/{exploration,knowledge,presentation,infrastructure}/",
+    "replacedBy": ["exploration/journeys.json", "exploration/nodes.json", "knowledge/hubs.json", "knowledge/default-context.json"]
   },
   "lensRealities": {
     "freestyle": {

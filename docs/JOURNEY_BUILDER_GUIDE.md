@@ -7,10 +7,18 @@ This guide documents the process for generating new journeys as the Grove knowle
 
 ## Quick Reference
 
-**Files involved:**
-- `data/narratives.json` — Journey and node definitions (source of truth)
-- `data/kb-export/` — Local export of RAG content (run `node scripts/kb.js export-all`)
-- `scripts/kb.js` — CLI tool for accessing knowledge base
+**Files involved (New Split Architecture):**
+- `data/exploration/journeys.json` — Journey definitions
+- `data/exploration/nodes.json` — Node definitions
+- `data/knowledge/hubs.json` — Hub definitions (RAG context)
+- `data/knowledge/default-context.json` — Tier 1 default files
+- `data/presentation/lenses.json` — Persona messaging
+- `data/infrastructure/gcs-mapping.json` — GCS file path mappings
+- `data/infrastructure/feature-flags.json` — Feature toggles
+- `data/schema/grove-knowledge-ontology.md` — Architecture documentation (also RAG content)
+
+**Legacy (deprecated):**
+- `data/narratives.json` — Unified registry (kept for backward compatibility)
 
 **Commands:**
 ```bash
@@ -26,15 +34,15 @@ node scripts/kb.js search <term>
 # Export all RAG content locally
 node scripts/kb.js export-all
 
-# Validate narratives.json
-node scripts/validate-narratives.js
+# Validate knowledge schema
+node scripts/validate-knowledge-schema.js
 ```
 
 ---
 
 ## Journey Anatomy
 
-### Journey Definition (in `journeys` section)
+### Journey Definition (in `data/exploration/journeys.json`)
 ```json
 {
   "id": "unique-journey-id",
@@ -42,13 +50,13 @@ node scripts/validate-narratives.js
   "description": "1-2 sentence hook for journey picker",
   "entryNode": "first-node-id",
   "targetAha": "The insight users should reach by journey end",
-  "linkedHubId": "hub-id-for-rag-context",
+  "hubId": "hub-id-for-rag-context",
   "estimatedMinutes": 8,
   "status": "active"
 }
 ```
 
-### Node Definition (in `nodes` section)
+### Node Definition (in `data/exploration/nodes.json`)
 ```json
 {
   "id": "unique-node-id",
@@ -176,11 +184,12 @@ For each node in your arc:
 4. **Assign sequenceOrder** — 1, 2, 3, 4, 5...
 5. **Link to next** — primaryNext + alternateNext
 
-### Phase 4: Add to narratives.json
-1. Add journey definition to `journeys` section
-2. Add all nodes to `nodes` section
-3. Validate: `node scripts/validate-narratives.js`
-4. Test locally: `npm run dev`
+### Phase 4: Add to knowledge files
+1. Add journey definition to `data/exploration/journeys.json`
+2. Add all nodes to `data/exploration/nodes.json`
+3. If new hub needed, add to `data/knowledge/hubs.json`
+4. Validate: `node scripts/validate-knowledge-schema.js`
+5. Test locally: `npm run dev`
 
 ### Phase 5: Test the Journey
 1. Start the Terminal
@@ -196,29 +205,29 @@ For each node in your arc:
 
 ## Linking Journeys to Hubs
 
-Journeys pull RAG context from hubs via `linkedHubId`. The hub determines:
+Journeys pull RAG context from hubs via `hubId`. The hub determines:
 - Which files are loaded into context
 - How much context budget is allocated
 - What tags route free-form queries to this content
 
-**Hub structure (in `hubs` section):**
+**Hub structure (in `data/knowledge/hubs.json`):**
 ```json
 {
   "id": "diary-system",
   "title": "The Diary System",
+  "thesis": "Agents develop identity through reflective self-narrative.",
   "path": "hubs/diary-system/",
   "primaryFile": "diary-deep-dive.md",
   "maxBytes": 50000,
   "tags": ["diary", "memory", "narrative", "voice"],
-  "enabled": true,
   "status": "active"
 }
 ```
 
 **If your journey needs new RAG:**
 1. Upload content to GCS bucket under `hubs/<hub-id>/`
-2. Add or update hub definition in `narratives.json`
-3. Set `linkedHubId` in journey definition
+2. Add or update hub definition in `data/knowledge/hubs.json`
+3. Set `hubId` in journey definition in `data/exploration/journeys.json`
 
 ---
 
@@ -304,13 +313,13 @@ Design journeys for specific personas:
 ## Maintenance Checklist
 
 When adding new journeys:
-- [ ] Journey definition added to `journeys` section
-- [ ] All nodes added to `nodes` section
-- [ ] `linkedHubId` points to valid hub (or null)
-- [ ] All `primaryNext` IDs exist
-- [ ] All `alternateNext` IDs exist
+- [ ] Journey definition added to `data/exploration/journeys.json`
+- [ ] All nodes added to `data/exploration/nodes.json`
+- [ ] `hubId` points to valid hub in `data/knowledge/hubs.json`
+- [ ] All `primaryNext` IDs exist in nodes.json
+- [ ] All `alternateNext` IDs exist in nodes.json
 - [ ] `sequenceOrder` is sequential (1, 2, 3...)
-- [ ] JSON validated: `node scripts/validate-narratives.js`
+- [ ] Schema validated: `node scripts/validate-knowledge-schema.js`
 - [ ] Tested in local dev: `npm run dev`
 
 ---
@@ -321,11 +330,11 @@ For rapid journey creation:
 
 1. **Topic:** What concept does this journey explain?
 2. **Aha:** What should users understand by the end?
-3. **Hub:** Which hub provides RAG? (or create new one)
+3. **Hub:** Which hub provides RAG? (or create new one in `data/knowledge/hubs.json`)
 4. **Nodes:** 3-5 nodes following HOOK → TENSION → INSIGHT → RESOLUTION
 5. **Labels:** Short, provocative, curiosity-inducing
 6. **Links:** Every node has primaryNext + alternateNext
-7. **Validate:** `node scripts/validate-narratives.js`
+7. **Validate:** `node scripts/validate-knowledge-schema.js`
 8. **Test:** Start the journey in Terminal
 
 ---

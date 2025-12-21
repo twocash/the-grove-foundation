@@ -878,6 +878,52 @@ async function fetchNarratives() {
     }
 }
 
+/**
+ * Load JSON file from GCS
+ * @param {string} path - Path within bucket (e.g., 'knowledge/hubs.json')
+ */
+async function loadJsonFromGCS(path) {
+    const file = storage.bucket(BUCKET_NAME).file(path);
+    const [content] = await file.download();
+    return JSON.parse(content.toString());
+}
+
+/**
+ * Load knowledge configuration from new split file structure
+ * Falls back to unified narratives.json if new structure not found
+ */
+async function loadKnowledgeConfig() {
+    try {
+        // Try new file structure
+        const [hubsData, journeysData, defaultContextData, gcsMappingData] = await Promise.all([
+            loadJsonFromGCS('knowledge/hubs.json'),
+            loadJsonFromGCS('exploration/journeys.json'),
+            loadJsonFromGCS('knowledge/default-context.json'),
+            loadJsonFromGCS('infrastructure/gcs-mapping.json')
+        ]);
+
+        console.log('[RAG] Loaded from new file structure');
+        return {
+            hubs: hubsData.hubs,
+            journeys: journeysData.journeys,
+            defaultContext: defaultContextData,
+            gcsFileMapping: gcsMappingData.gcsFileMapping
+        };
+    } catch (err) {
+        console.log('[RAG] New structure not found, falling back to narratives.json');
+        const narratives = await fetchNarratives();
+        if (narratives?.hubs) {
+            return {
+                hubs: narratives.hubs,
+                journeys: narratives.journeys,
+                defaultContext: narratives.defaultContext,
+                gcsFileMapping: narratives.gcsFileMapping
+            };
+        }
+        return null;
+    }
+}
+
 // Helper: Fetch active system prompt from GCS narratives.json
 async function fetchActiveSystemPrompt() {
     try {
@@ -1114,21 +1160,27 @@ function routeQueryToHub(query, hubs) {
  * Build tiered RAG context (Unified Registry Model)
  *
  * Supports two modes:
- * - Deterministic Mode: If activeJourneyId provided, load the journey's linkedHubId
+ * - Deterministic Mode: If activeJourneyId provided, load the journey's hubId
  * - Discovery Mode: Route query to best matching hub via tag matching
  *
  * @param {string} message - User's query for hub routing (Discovery Mode)
- * @param {Object} narratives - Full unified narratives.json schema (V2.1)
+ * @param {Object} narratives - Optional: pre-loaded config (for backward compat)
  * @param {string} activeJourneyId - Optional journey ID for Deterministic Mode
  */
 async function fetchRagContext(message = '', narratives = null, activeJourneyId = null) {
-    // Fallback to legacy behavior if no unified registry
-    if (!narratives || !narratives.hubs) {
+    // Load config: use provided narratives or fetch from new structure / fallback
+    let config = narratives;
+    if (!config || !config.hubs) {
+        config = await loadKnowledgeConfig();
+    }
+
+    // Fallback to legacy behavior if still no registry
+    if (!config || !config.hubs) {
         console.log('[RAG] No unified registry, falling back to legacy loader');
         return await fetchRagContextLegacy();
     }
 
-    const { hubs, journeys, defaultContext, gcsFileMapping } = narratives;
+    const { hubs, journeys, defaultContext, gcsFileMapping } = config;
 
     const result = {
         context: '',
@@ -1174,11 +1226,12 @@ async function fetchRagContext(message = '', narratives = null, activeJourneyId 
     let targetHubId = null;
     let targetHub = null;
 
-    // Mode 1: DETERMINISTIC - Journey specifies linkedHubId
+    // Mode 1: DETERMINISTIC - Journey specifies hubId (or legacy linkedHubId)
     if (activeJourneyId && journeys?.[activeJourneyId]) {
         const journey = journeys[activeJourneyId];
-        if (journey.linkedHubId && hubs[journey.linkedHubId]) {
-            targetHubId = journey.linkedHubId;
+        const journeyHubId = journey.hubId || journey.linkedHubId; // Support both new and legacy field names
+        if (journeyHubId && hubs[journeyHubId]) {
+            targetHubId = journeyHubId;
             targetHub = hubs[targetHubId];
             result.mode = 'deterministic';
             console.log(`[RAG] Deterministic Mode: Journey "${activeJourneyId}" → Hub "${targetHubId}"`);

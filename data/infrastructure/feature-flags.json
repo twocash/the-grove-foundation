@@ -1,0 +1,53 @@
+{
+  "version": "1.0",
+  "featureFlags": [
+    {
+      "id": "custom-lens-in-picker",
+      "name": "Show \"Create Your Own\" in Lens Picker",
+      "description": "Users see custom lens option immediately in the lens picker",
+      "enabled": false
+    },
+    {
+      "id": "journey-ratings",
+      "name": "Journey Rating System",
+      "description": "Show rating prompt after journey completion",
+      "enabled": true
+    },
+    {
+      "id": "streaks-display",
+      "name": "Show Streak Counter",
+      "description": "Display streak counter in Terminal header",
+      "enabled": true
+    },
+    {
+      "id": "feedback-transmission",
+      "name": "Anonymous Feedback Submission",
+      "description": "Allow anonymous feedback submission to Foundation",
+      "enabled": true
+    },
+    {
+      "id": "auto-journey-generation",
+      "name": "Auto-Generate Journeys",
+      "description": "Generate first journey for custom persona users based on first question",
+      "enabled": true
+    },
+    {
+      "id": "genesis-landing",
+      "name": "Genesis Landing Experience",
+      "description": "Show the new Jobs-style landing page instead of Classic",
+      "enabled": true
+    },
+    {
+      "id": "terminal-minimize",
+      "name": "Terminal Minimize",
+      "description": "Enable minimize to pill functionality",
+      "enabled": true
+    },
+    {
+      "id": "terminal-controls-below",
+      "name": "Controls Below Input",
+      "description": "Move lens/journey controls below input",
+      "enabled": true
+    }
+  ]
+}

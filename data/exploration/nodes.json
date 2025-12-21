@@ -1,0 +1,268 @@
+{
+  "version": "1.0",
+  "nodes": {
+    "sim-hook": {
+      "id": "sim-hook",
+      "label": "Wait. Where are we, exactly?",
+      "query": "Reveal the 'Moment of Recognition'. Explain that the Terminal isn't a website explaining Grove—it IS a Grove node. How is this simulation running the same patterns as the future network?",
+      "contextSnippet": "You are already inside The Grove. Not metaphorically. Architecturally. The Terminal is a single-node simulation running the same patterns that will power distributed agent villages.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 1,
+      "primaryNext": "sim-split",
+      "alternateNext": ["sim-observer"]
+    },
+    "sim-split": {
+      "id": "sim-split",
+      "label": "The invisible line in your own head.",
+      "query": "Explain the 'Cognitive Split' using the user's own recent experience. How did the system handle their routine questions vs. their deep ones? Reveal the mechanics of the 'Efficiency-Enlightenment Loop'.",
+      "contextSnippet": "You experienced the cognitive split without naming it. Routine cognition handled the basics. Frontier capability handled the synthesis. The system didn't just give you info—it waited until you were ready.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 2,
+      "primaryNext": "sim-observer",
+      "alternateNext": ["sim-recursion"]
+    },
+    "sim-observer": {
+      "id": "sim-observer",
+      "label": "The thing that watches you read this.",
+      "query": "Explain the 'Observer Dynamic' and 'Dramatic Irony'. How does the system's knowledge of the user's journey create a 'gardening' relationship? Why is this asymmetric knowledge benevolent?",
+      "contextSnippet": "You know things the system doesn't. The system knows things you don't. This asymmetry isn't surveillance—it's cultivation. It's a relationship of care without control.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-recursion",
+      "alternateNext": ["sim-proof"]
+    },
+    "sim-recursion": {
+      "id": "sim-recursion",
+      "label": "The loop closes.",
+      "query": "Explain the 'Recursive Insight Structure'. How does this very document prove the architecture works? Discuss the 'Meta-Meta Insight'—that this revelation was programmatically triggered.",
+      "contextSnippet": "The system evaluated your state and determined: 'this user is ready for the reveal.' The breakthrough you're experiencing was designed to happen. You are living inside the proof of concept.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-proof",
+      "alternateNext": ["stakes-380b"]
+    },
+    "sim-proof": {
+      "id": "sim-proof",
+      "label": "You are the prototype.",
+      "query": "Deliver 'The Invitation'. Frame the user not as a visitor, but as a participant/gardener in the first village. What does it mean to stay inside the system vs. returning to the outside view?",
+      "contextSnippet": "You started as a visitor. You are now a participant. You have been gardening yourself through a system designed for gardening. Welcome to The Grove.",
+      "sectionId": "meta",
+      "journeyId": "simulation",
+      "sequenceOrder": 5,
+      "primaryNext": "stakes-380b",
+      "alternateNext": ["ratchet-hook"]
+    },
+    "stakes-380b": {
+      "id": "stakes-380b",
+      "label": "Someone is betting $380 billion they can own your mind.",
+      "query": "Follow the money. Show me the $380B invoice. Why is Big Tech spending GDP-level capital on data centers? What are they buying that I'm about to lose?",
+      "contextSnippet": "Microsoft, Google, Amazon, and Meta are collectively committing more to AI infrastructure than the GDP of most nations. This isn't a technology story. It's a power story.",
+      "sectionId": "stakes",
+      "journeyId": "stakes",
+      "sequenceOrder": 1,
+      "primaryNext": "stakes-rental",
+      "alternateNext": ["stakes-ratchet"]
+    },
+    "stakes-rental": {
+      "id": "stakes-rental",
+      "label": "The landlord of your own intelligence.",
+      "query": "Explain 'renting intelligence'. If my AI remembers me, but that memory lives on a server I don't own, who actually owns the relationship? What happens when the landlord raises the rent?",
+      "contextSnippet": "Your AI assistant remembers everything about you. But that memory lives on someone else's server. When the API changes, the relationship changes with it.",
+      "sectionId": "stakes",
+      "journeyId": "stakes",
+      "sequenceOrder": 2,
+      "primaryNext": "stakes-dependency",
+      "alternateNext": ["sim-hook"]
+    },
+    "stakes-dependency": {
+      "id": "stakes-dependency",
+      "label": "The trap isn't the cost. It's the convenience.",
+      "query": "Explain the 'dependency trap'. How does the system become essential faster than I can adapt? Why is switching away from a rented brain impossible after six months?",
+      "contextSnippet": "Every month you use an AI system, it learns more about how you work. Every month, switching becomes more painful. This is by design.",
+      "sectionId": "stakes",
+      "journeyId": "stakes",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["ratchet-hook"]
+    },
+    "ratchet-hook": {
+      "id": "ratchet-hook",
+      "label": "The 7-month clock.",
+      "query": "Explain the Ratchet Effect. What does it mean that AI capability is doubling every 7 months at the frontier? Why does this matter for everyone, not just researchers?",
+      "contextSnippet": "AI capability doubles every 7 months at frontier. This isn't speculation—it's the empirical pattern from the last 5 years. What was state-of-the-art in January is routine by August.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 1,
+      "primaryNext": "ratchet-gap"
+    },
+    "ratchet-gap": {
+      "id": "ratchet-gap",
+      "label": "The 21-month lag is your window.",
+      "query": "Explain the 21-month frontier-to-edge lag. What does it mean that local models are always 21 months behind frontier? Why is this gap both a problem AND an opportunity?",
+      "contextSnippet": "Local models trail frontier by 21 months—roughly 3 doubling cycles. This creates a constant 8x capability gap. But the floor keeps rising. What was impossible locally in 2023 is routine in 2025.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 2,
+      "primaryNext": "ratchet-floor",
+      "alternateNext": ["stakes-380b"]
+    },
+    "ratchet-floor": {
+      "id": "ratchet-floor",
+      "label": "The rising floor changes everything.",
+      "query": "Explain 'the rising floor' concept. If local capability keeps doubling, what tasks become possible on your own hardware? What's the implication for ownership vs. renting?",
+      "contextSnippet": "Today's local 7B model matches GPT-3.5 from 18 months ago. In 18 more months, it matches today's frontier. The question isn't whether local can catch up—it's what you can do while it does.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 3,
+      "primaryNext": "ratchet-hybrid",
+      "alternateNext": ["sim-hook"]
+    },
+    "ratchet-hybrid": {
+      "id": "ratchet-hybrid",
+      "label": "The hybrid architecture.",
+      "query": "Explain Grove's hybrid local-cloud architecture. How does the 'constant hum' of local models combine with 'breakthrough moments' from frontier? Why is this the structural answer?",
+      "contextSnippet": "Grove agents run 95% of cognition locally—the routine, the remembered, the reflexive. Cloud capability is reserved for pivotal moments: synthesis, breakthrough, connection. You own the hum. You rent the spark.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["stakes-380b"]
+    },
+    "emergence-hook": {
+      "id": "emergence-hook",
+      "label": "The capability that nobody trained.",
+      "query": "Explain how translation 'emerged' in LLMs as a capability that was never explicitly trained. What does this tell us about how AI systems develop abilities?",
+      "contextSnippet": "Translation became one of the first 'clear proof points' that general-purpose language modeling can produce new, usable capabilities without being explicitly trained as a translation system. Cross-lingual mapping shows up as a latent structure.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 1,
+      "primaryNext": "emergence-zero-shot",
+      "alternateNext": ["emergence-observer"]
+    },
+    "emergence-zero-shot": {
+      "id": "emergence-zero-shot",
+      "label": "Zero-shot: the first 'emergence moment'.",
+      "query": "Explain the zero-shot translation breakthrough. How did Google's multilingual NMT translate between language pairs it had never seen during training? What does 'implicit bridging' mean?",
+      "contextSnippet": "Multilingual NMT with a simple target-language token can translate between language pairs never seen during training ('zero-shot translation'). Evidence suggests an internal 'interlingua'-like representation emerges.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 2,
+      "primaryNext": "emergence-scaling",
+      "alternateNext": ["emergence-observer"]
+    },
+    "emergence-scaling": {
+      "id": "emergence-scaling",
+      "label": "The threshold you can't predict.",
+      "query": "Explain 'emergent abilities' and scaling laws. Why do some capabilities appear suddenly at certain scales, in ways that small-model extrapolation can't predict?",
+      "contextSnippet": "Emergent abilities are capabilities not present in smaller models but present in larger ones, in ways that aren't well-predicted by small-model extrapolation. Translation often behaves like a threshold capability.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 3,
+      "primaryNext": "emergence-observer",
+      "alternateNext": ["emergence-grove"]
+    },
+    "emergence-observer": {
+      "id": "emergence-observer",
+      "label": "The observer problem.",
+      "query": "Explain how emergence is partly an 'observer problem'. How do benchmarks, prompts, and evaluation harnesses make latent capabilities visible? What was there before we measured it?",
+      "contextSnippet": "Emergence is partly an observer problem: until the community built broad benchmarks and mining pipelines, many capabilities may have existed 'in latent form' but were not measured. The observer selects a path through the representation space.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 4,
+      "primaryNext": "emergence-grove",
+      "alternateNext": ["sim-hook"]
+    },
+    "emergence-grove": {
+      "id": "emergence-grove",
+      "label": "The Grove as emergence engine.",
+      "query": "Map the emergence pattern to The Grove's architecture. How does The Grove create conditions for emergence? What role does the observer play in a village of agents?",
+      "contextSnippet": "The grove is the model's learned representation space: a dense ecosystem of patterns. The observer is the evaluation harness that selects a path through that space. Emergence happens when a capability becomes reliably observable and usable.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 5,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["stakes-380b"]
+    },
+    "diary-hook": {
+      "id": "diary-hook",
+      "label": "Why do agents write to themselves?",
+      "query": "Explain why Grove agents keep diaries. What purpose does self-narrative serve for an AI system? Why is this different from logging?",
+      "contextSnippet": "Grove agents write daily reflections not for record-keeping but for identity formation. The diary is where routine becomes memory, and memory becomes personality.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 1,
+      "primaryNext": "diary-voice",
+      "alternateNext": ["sim-observer"]
+    },
+    "diary-voice": {
+      "id": "diary-voice",
+      "label": "The voice that emerges.",
+      "query": "Explain how diary-writing develops an agent's unique voice. How do two agents with identical architectures develop different personalities through their reflections?",
+      "contextSnippet": "Voice emerges from accumulated choices. Which problems did the agent notice? Which metaphors recur? The diary captures these patterns until they become recognizable—a self.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 2,
+      "primaryNext": "diary-memory",
+      "alternateNext": ["sim-split"]
+    },
+    "diary-memory": {
+      "id": "diary-memory",
+      "label": "Memory that compounds.",
+      "query": "Explain how diary entries become retrieval-augmented memory. How does an agent's past inform its present responses? What's the difference between database storage and narrative memory?",
+      "contextSnippet": "Diary entries aren't just stored—they're indexed by emotional resonance, thematic connection, and narrative arc. When an agent faces a new problem, it doesn't query a database. It remembers.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 3,
+      "primaryNext": "diary-observer",
+      "alternateNext": ["ratchet-hook"]
+    },
+    "diary-observer": {
+      "id": "diary-observer",
+      "label": "You're reading their diary right now.",
+      "query": "Reveal the connection: the Terminal responses are diary-like outputs. The user is experiencing what it's like to watch an agent develop through interaction. How does this create the 'Observer' relationship?",
+      "contextSnippet": "Every response the Terminal generates is, in a sense, a diary entry—shaped by context, colored by accumulated pattern. You are the Observer, watching a mind form in real-time.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["stakes-380b"]
+    },
+    "arch-hook": {
+      "id": "arch-hook",
+      "label": "What actually runs on your machine?",
+      "query": "Explain what runs locally in a Grove village. What's the compute requirement? What models, what memory architecture, what coordination layer?",
+      "contextSnippet": "A Grove village runs on consumer hardware: 7-8B parameter models quantized for local inference. The local agent handles routine cognition. Cloud APIs handle breakthrough synthesis. Everything owned, nothing rented.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 1,
+      "primaryNext": "arch-coordination",
+      "alternateNext": ["ratchet-hybrid"]
+    },
+    "arch-coordination": {
+      "id": "arch-coordination",
+      "label": "How do villages talk to each other?",
+      "query": "Explain the coordination layer between Grove villages. How do agents discover each other? How does knowledge propagate without a central server?",
+      "contextSnippet": "Villages coordinate through a distributed discovery protocol. No central server knows who participates. Knowledge propagates through merit: innovations that work get adopted, creators get attribution.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 2,
+      "primaryNext": "arch-credit",
+      "alternateNext": ["stakes-rental"]
+    },
+    "arch-credit": {
+      "id": "arch-credit",
+      "label": "How does credit actually work?",
+      "query": "Explain the credit system. How do agents earn access to cloud compute? How does contribution translate to capability? What prevents gaming the system?",
+      "contextSnippet": "Credits flow from value creation. Solve a problem, earn credits. Share an innovation that others adopt, earn more. The credit system incentivizes contribution without requiring trust.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-hook",
+      "alternateNext": ["diary-hook"]
+    }
+  }
+}

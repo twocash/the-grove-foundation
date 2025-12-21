@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "journeys": {
+    "simulation": {
+      "id": "simulation",
+      "title": "The Ghost in the Machine",
+      "description": "You aren't just reading about The Grove. You are already inside it.",
+      "entryNode": "sim-hook",
+      "targetAha": "The Terminal is a single-node village. I am the proof of concept.",
+      "hubId": "meta-philosophy",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "stakes": {
+      "id": "stakes",
+      "title": "The $380 Billion Bet",
+      "description": "Follow the money. Why Big Tech is spending GDP-level capital to own your future.",
+      "entryNode": "stakes-380b",
+      "targetAha": "If you don't own the infrastructure, you are the product.",
+      "hubId": "infrastructure-bet",
+      "estimatedMinutes": 12,
+      "status": "active"
+    },
+    "ratchet": {
+      "id": "ratchet",
+      "title": "The Ratchet",
+      "description": "Why AI capability is doubling every 7 months—and why you're 21 months behind.",
+      "entryNode": "ratchet-hook",
+      "targetAha": "The gap is constant, but the floor keeps rising. Ownership beats renting when the floor is high enough.",
+      "hubId": "ratchet-effect",
+      "estimatedMinutes": 10,
+      "status": "active"
+    },
+    "diary": {
+      "id": "diary",
+      "title": "The Agent's Inner Voice",
+      "description": "How Grove agents develop memory, voice, and narrative identity through their diaries.",
+      "entryNode": "diary-hook",
+      "targetAha": "Diaries aren't logs. They're the mechanism through which agents develop selfhood.",
+      "hubId": "diary-system",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "architecture": {
+      "id": "architecture",
+      "title": "Under the Hood",
+      "description": "The technical architecture of distributed agent villages. For those who want to see the blueprints.",
+      "entryNode": "arch-hook",
+      "targetAha": "This isn't theoretical. The architecture exists and runs on commodity hardware.",
+      "hubId": "technical-architecture",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "emergence": {
+      "id": "emergence",
+      "title": "The Emergence Pattern",
+      "description": "How capabilities appear in AI systems without being explicitly trained. Translation was the proof point.",
+      "entryNode": "emergence-hook",
+      "targetAha": "Emergence isn't magic—it's what happens when the observer finally asks the right question.",
+      "hubId": "translation-emergence",
+      "estimatedMinutes": 10,
+      "status": "active"
+    }
+  }
+}
