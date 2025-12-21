@@ -55,15 +55,25 @@ function getHeadlineSizeClasses(headline: string): string {
 }
 
 /**
- * Calculate line height adjustment for multi-line headlines.
- * Tighter leading for headlines that will wrap.
+ * Calculate line height for headlines based on tier.
+ * Larger headlines can be tighter; smaller headlines need more breathing room.
  */
 function getHeadlineLeadingClass(headline: string): string {
-  // Headlines with line breaks or very long get tighter leading
-  if (headline.includes('\n') || headline.length > 25) {
-    return 'leading-[0.9]';
+  const charCount = headline.length;
+  
+  if (charCount <= 12) {
+    // XL tier: usually single line, tight is fine
+    return 'leading-none';  // 1.0
+  } else if (charCount <= 20) {
+    // Large tier: might wrap on mobile, slightly looser
+    return 'leading-[1.1]';
+  } else if (charCount <= 30) {
+    // Medium tier: will likely wrap, comfortable reading
+    return 'leading-tight';  // 1.25
+  } else {
+    // Small tier: dense text, needs room to breathe
+    return 'leading-snug';  // 1.375
   }
-  return 'leading-tight';
 }
 
 /**
@@ -85,31 +95,33 @@ function getContainerWidthClass(headline: string): string {
 /**
  * Calculate subtext sizing based on headline tier.
  * Subtext should be proportional to headline - smaller headlines get larger subtext.
+ * Includes leading for comfortable multi-line reading.
  */
 function getSubtextSizeClasses(headline: string, isLastLine: boolean): string {
   const charCount = headline.length;
   
   // Last line is always slightly larger/bolder
+  // Leading is tighter for short punchy lines, looser for longer ones
   if (charCount <= 12) {
-    // XL headline tier - larger subtext
+    // XL headline tier - larger subtext, tight leading (short lines)
     return isLastLine 
-      ? 'text-2xl sm:text-3xl md:text-4xl font-semibold'
-      : 'text-xl sm:text-2xl md:text-3xl';
+      ? 'text-2xl sm:text-3xl md:text-4xl font-semibold leading-snug'
+      : 'text-xl sm:text-2xl md:text-3xl leading-snug';
   } else if (charCount <= 20) {
     // Large headline tier
     return isLastLine
-      ? 'text-xl sm:text-2xl md:text-3xl font-semibold'
-      : 'text-lg sm:text-xl md:text-2xl';
+      ? 'text-xl sm:text-2xl md:text-3xl font-semibold leading-snug'
+      : 'text-lg sm:text-xl md:text-2xl leading-snug';
   } else if (charCount <= 30) {
     // Medium headline tier - proportionally smaller subtext
     return isLastLine
-      ? 'text-lg sm:text-xl md:text-2xl font-semibold'
-      : 'text-base sm:text-lg md:text-xl';
+      ? 'text-lg sm:text-xl md:text-2xl font-semibold leading-normal'
+      : 'text-base sm:text-lg md:text-xl leading-normal';
   } else {
-    // Small headline tier - compact subtext
+    // Small headline tier - compact subtext, relaxed leading
     return isLastLine
-      ? 'text-base sm:text-lg md:text-xl font-semibold'
-      : 'text-sm sm:text-base md:text-lg';
+      ? 'text-base sm:text-lg md:text-xl font-semibold leading-relaxed'
+      : 'text-sm sm:text-base md:text-lg leading-relaxed';
   }
 }
 
