@@ -65,7 +65,7 @@
       "journeyId": "stakes",
       "sequenceOrder": 1,
       "primaryNext": "stakes-rental",
-      "alternateNext": ["stakes-ratchet"]
+      "alternateNext": ["ratchet-hook"]
     },
     "stakes-rental": {
       "id": "stakes-rental",
