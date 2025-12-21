@@ -82,6 +82,72 @@ function getContainerWidthClass(headline: string): string {
   }
 }
 
+/**
+ * Calculate subtext sizing based on headline tier.
+ * Subtext should be proportional to headline - smaller headlines get larger subtext.
+ */
+function getSubtextSizeClasses(headline: string, isLastLine: boolean): string {
+  const charCount = headline.length;
+  
+  // Last line is always slightly larger/bolder
+  if (charCount <= 12) {
+    // XL headline tier - larger subtext
+    return isLastLine 
+      ? 'text-2xl sm:text-3xl md:text-4xl font-semibold'
+      : 'text-xl sm:text-2xl md:text-3xl';
+  } else if (charCount <= 20) {
+    // Large headline tier
+    return isLastLine
+      ? 'text-xl sm:text-2xl md:text-3xl font-semibold'
+      : 'text-lg sm:text-xl md:text-2xl';
+  } else if (charCount <= 30) {
+    // Medium headline tier - proportionally smaller subtext
+    return isLastLine
+      ? 'text-lg sm:text-xl md:text-2xl font-semibold'
+      : 'text-base sm:text-lg md:text-xl';
+  } else {
+    // Small headline tier - compact subtext
+    return isLastLine
+      ? 'text-base sm:text-lg md:text-xl font-semibold'
+      : 'text-sm sm:text-base md:text-lg';
+  }
+}
+
+/**
+ * Calculate vertical spacing between subtext lines based on headline tier.
+ * Tighter spacing for larger headlines (they dominate), more breathing room for smaller.
+ */
+function getSubtextSpacingClass(headline: string): string {
+  const charCount = headline.length;
+  
+  if (charCount <= 12) {
+    return 'space-y-3';  // Tighter - headline dominates
+  } else if (charCount <= 20) {
+    return 'space-y-4';
+  } else if (charCount <= 30) {
+    return 'space-y-5';
+  } else {
+    return 'space-y-6';  // More breathing room when headline is dense
+  }
+}
+
+/**
+ * Calculate margin between headline and subtext based on headline tier.
+ */
+function getHeadlineMarginClass(headline: string): string {
+  const charCount = headline.length;
+  
+  if (charCount <= 12) {
+    return 'mb-8';   // Standard gap for big headlines
+  } else if (charCount <= 20) {
+    return 'mb-6';
+  } else if (charCount <= 30) {
+    return 'mb-5';
+  } else {
+    return 'mb-4';   // Tighter when headline is already dense
+  }
+}
+
 interface HeroHookProps {
   onScrollNext?: () => void;
   content?: HeroContent;  // Optional - enables Chameleon in v0.13
@@ -110,6 +176,16 @@ export const HeroHook: React.FC<HeroHookProps> = ({
 
   const containerWidthClass = useMemo(
     () => getContainerWidthClass(content.headline),
+    [content.headline]
+  );
+
+  const subtextSpacingClass = useMemo(
+    () => getSubtextSpacingClass(content.headline),
+    [content.headline]
+  );
+
+  const headlineMarginClass = useMemo(
+    () => getHeadlineMarginClass(content.headline),
     [content.headline]
   );
 
@@ -144,7 +220,7 @@ export const HeroHook: React.FC<HeroHookProps> = ({
       <div className={`text-center ${containerWidthClass} relative z-10`}>
         {/* Main headline - morphs with lens via WaveformCollapse */}
         {/* Size classes are dynamic based on headline length */}
-        <h1 className={`font-display ${headlineSizeClasses} ${headlineLeadingClass} font-bold text-grove-forest mb-8 tracking-tight`}>
+        <h1 className={`font-display ${headlineSizeClasses} ${headlineLeadingClass} font-bold text-grove-forest ${headlineMarginClass} tracking-tight`}>
           <WaveformCollapse
             text={content.headline}
             trigger={trigger}
@@ -153,22 +229,22 @@ export const HeroHook: React.FC<HeroHookProps> = ({
           />
         </h1>
 
-        {/* Subtext with fade-in sequence - from props */}
-        <div className="space-y-4 mb-8">
-          {content.subtext.map((text, index) => (
-            <p
-              key={index}
-              className={`font-serif ${
-                index === content.subtext.length - 1
-                  ? 'text-2xl sm:text-3xl md:text-4xl font-semibold'
-                  : 'text-xl sm:text-2xl md:text-3xl'
-              } text-ink transition-opacity duration-700 ${
-                visibleSubtext.includes(index) ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              {text}
-            </p>
-          ))}
+        {/* Subtext with fade-in sequence - sizing proportional to headline */}
+        <div className={`${subtextSpacingClass} mb-8`}>
+          {content.subtext.map((text, index) => {
+            const isLastLine = index === content.subtext.length - 1;
+            const sizeClasses = getSubtextSizeClasses(content.headline, isLastLine);
+            return (
+              <p
+                key={index}
+                className={`font-serif ${sizeClasses} text-ink transition-opacity duration-700 ${
+                  visibleSubtext.includes(index) ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {text}
+              </p>
+            );
+          })}
         </div>
 
         {/* Scroll indicator - floating seedling */}
