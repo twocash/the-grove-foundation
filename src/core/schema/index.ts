@@ -39,6 +39,11 @@ export {
   type TerminalSession,
   type NarrativeNodeV1,
   type NarrativeGraphV1,
+  // Quantum Interface (Lens Reality)
+  type LensQuote,
+  type HeroContent,
+  type TensionContent,
+  type LensReality,
   isV1Schema,
   isV2Schema,
   nodeToCard

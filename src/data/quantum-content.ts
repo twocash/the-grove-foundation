@@ -1,20 +1,15 @@
 // src/data/quantum-content.ts
 // Superposition Map: Maps lens IDs to content realities
 // v0.13: The Quantum Interface
+// v0.14+: Fallback content - schema.lensRealities takes precedence if available
 
-import { HeroContent, Quote } from '../surface/components/genesis';
 import { ArchetypeId } from '../../types/lens';
+// Re-export types from core schema for backward compatibility
+import type { LensReality, HeroContent, TensionContent, LensQuote } from '../core/schema/narrative';
+export type { LensReality, HeroContent, TensionContent, LensQuote };
 
-// Extended interface for problem section
-export interface TensionContent {
-  quotes: Quote[];
-  tension: string[];
-}
-
-export interface LensReality {
-  hero: HeroContent;
-  problem: TensionContent;
-}
+// Legacy Quote type alias for backward compatibility with genesis components
+export type Quote = LensQuote;
 
 // ============================================================================
 // DEFAULT REALITY (No lens selected)

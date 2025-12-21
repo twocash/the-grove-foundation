@@ -292,6 +292,46 @@ export interface GlobalSettings {
 }
 
 // ============================================================================
+// LENS REALITY (Quantum Interface Content)
+// ============================================================================
+
+/**
+ * Quote for problem section - CEO/authority voice
+ */
+export interface LensQuote {
+  text: string;
+  author: string;
+  title: string;
+}
+
+/**
+ * HeroContent - Headline and subtext for the landing page hero section
+ */
+export interface HeroContent {
+  headline: string;
+  subtext: string[];
+}
+
+/**
+ * TensionContent - Problem section with quotes and tension framing
+ */
+export interface TensionContent {
+  quotes: LensQuote[];
+  tension: string[];
+}
+
+/**
+ * LensReality - Complete reality projection for a lens/persona
+ *
+ * This is what the Quantum Interface collapses to when a lens is selected.
+ * Each lens can have a unique "reality" that reshapes the landing page.
+ */
+export interface LensReality {
+  hero: HeroContent;
+  problem: TensionContent;
+}
+
+// ============================================================================
 // FULL SCHEMA V2.1 (Unified Registry Model)
 // ============================================================================
 
@@ -319,6 +359,10 @@ export interface NarrativeSchemaV2 {
   nodes?: Record<string, JourneyNode>;      // Journey-aware narrative nodes
   defaultContext?: DefaultContext;          // Tier 1 RAG config
   gcsFileMapping?: Record<string, string>;  // Clean name → hashed GCS name
+
+  // Quantum Interface: Lens-specific reality content (v0.14+)
+  lensRealities?: Record<string, LensReality>;  // Lens ID → collapsed reality
+  defaultReality?: LensReality;                  // Fallback when no lens selected
 }
 
 // ============================================================================
