@@ -7,6 +7,7 @@ import ScrollIndicator from './ScrollIndicator';
 
 interface FoundationProps {
   onOpenTerminal?: (query: string) => void;
+  onScrollNext?: () => void;  // v0.15: Section-aware scroll
 }
 
 // Deep dive queries from TARGET_CONTENT.md
@@ -16,7 +17,7 @@ const deepDiveQueries = {
   vision: "What is The Grove's long-term vision? How does distributed, sovereign AI change the landscape?"
 };
 
-export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
+export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal, onScrollNext }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -108,7 +109,7 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal }) => {
 
           {/* Scroll indicator - floating seedling */}
           <div className="mt-12 flex justify-center">
-            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
+            <ScrollIndicator onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
           </div>
         </div>
       </div>

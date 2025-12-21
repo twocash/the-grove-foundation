@@ -15,6 +15,7 @@ import { RevealType } from './engagement';
 // ============================================================================
 
 export type ArchetypeId =
+  | 'freestyle'
   | 'academic'
   | 'engineer'
   | 'concerned-citizen'

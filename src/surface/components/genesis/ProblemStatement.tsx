@@ -43,13 +43,15 @@ interface ProblemStatementProps {
   quotes?: Quote[];  // Optional - enables Chameleon in v0.13
   tension?: string[];  // v0.13: Dynamic tension text
   trigger?: any;  // v0.13: Triggers animation restart on lens change
+  onScrollNext?: () => void;  // v0.15: Section-aware scroll
 }
 
 export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   className = '',
   quotes = DEFAULT_QUOTES,
   tension = DEFAULT_TENSION,
-  trigger
+  trigger,
+  onScrollNext
 }) => {
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [showTension, setShowTension] = useState(false);
@@ -154,7 +156,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
 
           {/* Scroll indicator - floating seedling */}
           <div className="mt-12 flex justify-center">
-            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
+            <ScrollIndicator onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
           </div>
         </div>
       </div>

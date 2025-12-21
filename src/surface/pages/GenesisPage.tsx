@@ -1,6 +1,7 @@
 // src/surface/pages/GenesisPage.tsx
 // Genesis landing experience - Jobs-style "Feel -> Understand -> Believe" progression
 // DESIGN CONSTRAINT: Organic, warm, paper-textured - NOT futuristic/sci-fi
+// v0.15: Section-aware smooth scrolling for bespoke experience
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Terminal from '../../../components/Terminal';
@@ -84,6 +85,33 @@ const GenesisPage: React.FC = () => {
     return () => observers.forEach(obs => obs.disconnect());
   }, [viewedScreens]);
 
+  /**
+   * Section-aware smooth scroll
+   * Scrolls to a specific section by index, with the content centered in viewport
+   */
+  const scrollToSection = useCallback((sectionIndex: number) => {
+    const targetRef = screenRefs.current[sectionIndex];
+    if (targetRef) {
+      targetRef.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start'  // Align to top of viewport
+      });
+    }
+  }, []);
+
+  /**
+   * Create scroll handler for a given section
+   * Returns a function that scrolls to the NEXT section
+   */
+  const createScrollToNext = useCallback((currentIndex: number) => {
+    return () => {
+      const nextIndex = currentIndex + 1;
+      if (nextIndex < GENESIS_SCREENS.length) {
+        scrollToSection(nextIndex);
+      }
+    };
+  }, [scrollToSection]);
+
   // Handler for opening Terminal with a specific query
   const handleOpenTerminal = useCallback((query?: string) => {
     setTerminalState(prev => ({ ...prev, isOpen: true }));
@@ -138,30 +166,42 @@ const GenesisPage: React.FC = () => {
           content={reality.hero}
           trigger={quantumTrigger}
           isCollapsing={isCollapsing}
+          onScrollNext={createScrollToNext(0)}
         />
       </div>
 
       {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
       <div ref={el => { screenRefs.current[1] = el; }}>
-        <ProblemStatement />
+        <ProblemStatement 
+          onScrollNext={createScrollToNext(1)}
+        />
       </div>
 
       {/* SCREEN 3: Product Reveal */}
       <div ref={el => { screenRefs.current[2] = el; }}>
-        <ProductReveal onOpenTerminal={handleProductRevealCTA} />
+        <ProductReveal 
+          onOpenTerminal={handleProductRevealCTA}
+          onScrollNext={createScrollToNext(2)}
+        />
       </div>
 
       {/* SCREEN 4: Aha Demo */}
       <div ref={el => { screenRefs.current[3] = el; }}>
-        <AhaDemo onGoDeeper={handleAhaDemoCTA} />
+        <AhaDemo 
+          onGoDeeper={handleAhaDemoCTA}
+          onKeepExploring={createScrollToNext(3)}
+        />
       </div>
 
       {/* SCREEN 5: Foundation */}
       <div ref={el => { screenRefs.current[4] = el; }}>
-        <Foundation onOpenTerminal={handleFoundationCTA} />
+        <Foundation 
+          onOpenTerminal={handleFoundationCTA}
+          onScrollNext={createScrollToNext(4)}
+        />
       </div>
 
-      {/* SCREEN 6: Call to Action */}
+      {/* SCREEN 6: Call to Action (no scroll indicator - it's the last section) */}
       <div ref={el => { screenRefs.current[5] = el; }}>
         <CallToAction
           onOpenTerminal={handleCallToActionTerminal}

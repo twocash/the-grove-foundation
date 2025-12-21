@@ -96,7 +96,7 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
 
         {/* Scroll indicator - floating seedling */}
         <div className="flex justify-center">
-          <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
+          <ScrollIndicator onClick={handleKeepExploring} />
         </div>
       </div>
     </section>

@@ -8,6 +8,7 @@ import ScrollIndicator from './ScrollIndicator';
 
 interface ProductRevealProps {
   onOpenTerminal?: () => void;
+  onScrollNext?: () => void;  // v0.15: Section-aware scroll
 }
 
 const pillars = [
@@ -31,7 +32,7 @@ const pillars = [
 // Animation phases - simplified to just hidden/visible
 type AnimationPhase = 'hidden' | 'visible';
 
-export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) => {
+export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal, onScrollNext }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [phase, setPhase] = useState<AnimationPhase>('hidden');
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -134,7 +135,7 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal }) 
 
           {/* Scroll indicator - floating seedling */}
           <div className="mt-16 flex justify-center">
-            <ScrollIndicator onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })} />
+            <ScrollIndicator onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
           </div>
         </div>
       </div>
