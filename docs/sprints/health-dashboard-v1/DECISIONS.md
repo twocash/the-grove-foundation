@@ -1,169 +1,206 @@
-# Architectural Decision Records — health-dashboard-v1
+# Architectural Decision Records — health-dashboard-v1 (Revised)
 
-## ADR-001: Health Log Storage Format
-
-### Status
-Accepted
-
-### Context
-Need to persist health check results for trend analysis. Options for storage:
-1. JSON file in data/infrastructure/
-2. SQLite database
-3. Cloud storage (GCS)
-
-### Options Considered
-1. **JSON file** — Simple, versionable, no dependencies
-2. **SQLite** — More queryable, but adds dependency
-3. **GCS** — Persistent across deploys, but adds latency and complexity
-
-### Decision
-Use JSON file at `data/infrastructure/health-log.json`
-
-### Rationale
-- Matches existing data patterns (hubs.json, journeys.json, etc.)
-- No new dependencies
-- Version controlled alongside code
-- Simple FIFO implementation for cap
-- Can migrate to database later if needed
-
-### Consequences
-**Positive:**
-- Zero new dependencies
-- Works offline
-- Instant reads
-
-**Negative:**
-- Concurrent writes need care (unlikely in practice)
-- Lost on fresh deploys (acceptable for v1)
-
----
-
-## ADR-002: Shared Validation Logic Location
+## ADR-001: Declarative Health Configuration
 
 ### Status
 Accepted
 
 ### Context
-Health check validation logic is duplicated:
-- `scripts/health-check.js` — CLI tool
-- `tests/unit/schema.test.ts` — Test file
-
-Need single source of truth.
+Per DAIRE Architecture Specification, "domain-specific behavior belongs in configuration, not code." The current health check implementation has hardcoded validation logic that would require code changes to adapt to different domains (legal discovery, academic synthesis, etc.).
 
 ### Options Considered
-1. **lib/health-validator.js** — Dedicated validation module
-2. **Keep in scripts/, import in tests** — Less refactoring
-3. **Put in tests/utils/, import in scripts** — Tests as source of truth
+1. **Keep hardcoded checks** — Faster to implement, creates tech debt
+2. **Declarative JSON config** — Aligns with DAIRE, enables domain experts to configure
+3. **Database-driven config** — Most flexible, but adds complexity
 
 ### Decision
-Create `lib/health-validator.js` as dedicated module
+Use declarative JSON configuration at `data/infrastructure/health-config.json`
 
 ### Rationale
-- `lib/` is standard location for shared logic
-- Clear separation from scripts and tests
-- Can be imported by server.js for API
-- Tests and CLI both consume same source
+- Direct implementation of DAIRE Principle 2: Declarative Configuration
+- JSON files are version-controlled alongside code
+- Non-developers can define checks (per DAIRE: "without becoming software engineers")
+- Same pattern will apply to annotation schemas, relationship schemas, processing flows
+- Progressive enhancement: system works without config, becomes more powerful with it
 
 ### Consequences
 **Positive:**
-- Single source of truth
-- Easier to maintain
-- API can reuse validation
+- Domain experts can configure checks without engineering
+- New domains supported through config, not code
+- Establishes pattern for all future Grove configuration
 
 **Negative:**
-- Requires refactoring existing code
+- More upfront design work for config schema
+- Need config validation to fail fast on malformed input
+- Check types are still code (but extensible via registry)
 
 ---
 
-## ADR-003: Health API Authentication
-
-### Status
-Proposed (deferred to future sprint)
-
-### Context
-Health endpoints expose internal system state. Should they be protected?
-
-### Options Considered
-1. **No auth** — Health data is not sensitive
-2. **Admin token check** — Require Foundation admin access
-3. **Rate limiting only** — Prevent abuse without auth
-
-### Decision
-No authentication for v1, add in future if needed
-
-### Rationale
-- Health data reveals counts, not content
-- Foundation UI already requires admin access conceptually
-- Simplifies initial implementation
-- Can add auth middleware later without API changes
-
-### Consequences
-**Positive:**
-- Faster to implement
-- Easier debugging
-
-**Negative:**
-- Public health endpoint (acceptable risk)
-
----
-
-## ADR-004: Health Log Entry Cap
+## ADR-002: Engine Checks vs Corpus Checks Separation
 
 ### Status
 Accepted
 
 ### Context
-Unbounded log growth is a risk. Need to cap entries.
+DAIRE specifies three layers: Engine (fixed), Corpus (variable), Configuration (declarative). Health checks span layers—some validate engine infrastructure, others validate domain-specific corpus data.
 
 ### Options Considered
-1. **Fixed count (100)** — FIFO when exceeded
-2. **Time-based (30 days)** — Delete old entries
-3. **Size-based (1MB)** — Delete when file exceeds size
+1. **Single checks array** — Simpler, but conflates concerns
+2. **Separate engineChecks/corpusChecks** — Clear layer separation
+3. **Category-based separation** — Flexible, but implicit
 
 ### Decision
-Fixed count of 100 entries, FIFO
+Separate `engineChecks` and `corpusChecks` arrays in health-config.json
 
 ### Rationale
-- Predictable file size
-- Simple implementation
-- 100 entries = ~2 weeks of daily checks + ad-hoc
-- Easy to increase later
+- Makes DAIRE layer separation explicit and visible
+- Engine checks are portable across all deployments
+- Corpus checks are domain-specific, would differ for legal/academic/enterprise
+- Enables future tooling to extract engine checks as shared config
 
 ### Consequences
 **Positive:**
-- Bounded storage
-- Simple logic
+- Clear architectural boundary in config
+- Engine checks can be standardized across deployments
+- Corpus checks are explicitly domain-specific
 
 **Negative:**
-- Loses old history (acceptable)
+- Slightly more complex config structure
+- Some checks might be ambiguous (solved by documenting guidelines)
 
 ---
 
-## ADR-005: UI Pattern for Health Dashboard
+## ADR-003: Attribution Chain on Health Log Entries
 
 ### Status
 Accepted
 
 ### Context
-Health Dashboard needs to match existing Foundation console aesthetics.
+DAIRE Principle 3: "Every piece of refined knowledge must maintain provenance." Current health log design only tracks `triggeredBy` (manual/api/ci) without full attribution.
 
 ### Options Considered
-1. **Copy Genesis console pattern** — Cards with glow effects
-2. **Table-based layout** — Dense information display
-3. **Custom design** — Optimized for health data
+1. **Minimal attribution** — Just triggeredBy, simple
+2. **Full attribution chain** — userId, sessionId, configVersion, engineVersion
+3. **Blockchain-style provenance** — Immutable, but overkill
 
 ### Decision
-Follow Genesis console pattern with status cards
+Full attribution chain with configVersion, engineVersion, triggeredBy, and optional userId/sessionId
 
 ### Rationale
-- Consistent UX across Foundation
-- Existing components (MetricCard, GlowButton) can be reused
-- Users already understand the visual language
+- Implements DAIRE attribution preservation principle
+- Enables debugging: "which config version caused this failure?"
+- Supports future multi-user scenarios (who ran this check?)
+- configVersion tracks which check definitions were active
+- engineVersion tracks which executor implementations were used
 
 ### Consequences
 **Positive:**
-- Consistent UI
-- Faster implementation
+- Full traceability for debugging
+- Supports future multi-user, multi-deployment scenarios
+- Demonstrates DAIRE principles in practice
 
 **Negative:**
-- May need custom components for history list
+- Slightly larger log entries
+- userId/sessionId often null in current implementation
+
+---
+
+## ADR-004: Check Type Executor Pattern
+
+### Status
+Accepted
+
+### Context
+Declarative config defines *what* to check, but *how* to execute checks requires code. Need a pattern that's extensible without modifying engine core.
+
+### Options Considered
+1. **Giant switch statement** — Simple, not extensible
+2. **Executor registry pattern** — Extensible, follows engine philosophy
+3. **Dynamic code evaluation** — Maximum flexibility, security risk
+
+### Decision
+Executor registry pattern with typed check handlers
+
+### Rationale
+- Each check type (`json-exists`, `reference-check`, `chain-valid`) has a registered executor
+- New check types can be added by registering new executors
+- Config references type by string, engine dispatches to executor
+- Follows DAIRE engine layer philosophy: fixed mechanics, extensible through defined interfaces
+
+### Consequences
+**Positive:**
+- Extensible without core engine changes
+- Type-safe dispatch
+- Clear contract between config and engine
+
+**Negative:**
+- Need to document available check types
+- Custom checks require code (but that's appropriate for engine layer)
+
+---
+
+## ADR-005: Config-Driven Display Labels
+
+### Status
+Accepted
+
+### Context
+The HealthDashboard UI needs to display category names, dashboard titles, and other text. Hardcoding these in React components violates DAIRE's declarative configuration principle.
+
+### Options Considered
+1. **Hardcode in React** — Fast, but not domain-agnostic
+2. **Display config section** — Labels defined in health-config.json
+3. **Separate i18n system** — Full internationalization, but overkill
+
+### Decision
+Add `display` section to health-config.json with dashboardTitle and categoryLabels
+
+### Rationale
+- UI becomes domain-agnostic: legal deployment shows "Evidence Integrity," Grove shows "Schema Integrity"
+- Single source of truth for all display text
+- React component reads from /api/health/config endpoint
+- Follows DAIRE Phase 3 vision: admin interface for configuration
+
+### Consequences
+**Positive:**
+- UI is domain-agnostic
+- Labels can be changed without code deployment
+- Consistent with DAIRE display schema concept
+
+**Negative:**
+- Extra API call to fetch config on mount
+- Need to handle missing labels gracefully
+
+---
+
+## ADR-006: Progressive Enhancement for Config Loading
+
+### Status
+Accepted
+
+### Context
+DAIRE Principle 5: "Work with minimal configuration and become more powerful with additional configuration." What happens if health-config.json is missing or malformed?
+
+### Options Considered
+1. **Fail hard** — Require config, error if missing
+2. **Built-in defaults** — Work without config, warn in logs
+3. **Config generator** — Auto-create default config if missing
+
+### Decision
+Built-in defaults with warning. Engine has hardcoded fallback checks that run if config is missing or unparseable.
+
+### Rationale
+- New deployments work immediately without configuration
+- Existing deployments don't break if config is temporarily invalid
+- Warning in logs alerts operators to configure properly
+- Matches DAIRE progressive enhancement principle
+
+### Consequences
+**Positive:**
+- Zero-config startup possible
+- Graceful degradation
+- Explicit warning guides toward proper configuration
+
+**Negative:**
+- Need to maintain default checks in code (but minimal set)
+- Risk of running on defaults without noticing (mitigated by warning)

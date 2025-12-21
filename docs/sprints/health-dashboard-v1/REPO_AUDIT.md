@@ -1,58 +1,68 @@
-# Repository Audit — health-dashboard-v1
+# Repository Audit — health-dashboard-v1 (Revised)
 
 ## Audit Date: 2025-12-21
+## Revision: Aligned with DAIRE Architecture Specification
 
 ## Current State Summary
 
-Grove Terminal has a working CLI health check (`npm run health`) that validates schema integrity and journey chains. It outputs human-readable ASCII or JSON. However:
+Grove Terminal has a working CLI health check (`npm run health`) that validates schema integrity and journey chains. However, the implementation has architectural issues that conflict with the DAIRE specification:
 
-1. **No persistent history** — Each run is ephemeral; no trend analysis possible
-2. **No UI integration** — Admins must use CLI; Foundation console has no health visibility
-3. **No automated logging** — Health checks run manually or in CI, but results aren't stored
+1. **Hardcoded check definitions** — Validation logic is embedded in code, not configuration
+2. **No attribution chain** — Log entries lack provenance (who, what config version, what context)
+3. **Coupled to Grove corpus** — Health checks assume hubs/journeys/nodes, not domain-agnostic
+4. **No persistent history** — Each run is ephemeral; no trend analysis possible
+5. **No UI integration** — Admins must use CLI; Foundation console has no health visibility
 
-This sprint adds a Health Dashboard to the Foundation UI with persistent logging.
+This sprint adds a Health Dashboard with **declarative health configuration** that establishes the pattern for all future Grove infrastructure.
+
+## DAIRE Alignment Requirements
+
+Per the Domain-Agnostic Information Refinement Engine specification:
+
+| Principle | Current State | Required State |
+|-----------|---------------|----------------|
+| Declarative Configuration | ❌ Hardcoded | ✅ JSON config defines checks |
+| Attribution Preservation | ❌ Missing | ✅ Full provenance chain |
+| Three-Layer Separation | ❌ Mixed | ✅ Engine vs corpus checks |
+| Progressive Enhancement | ✅ Additive | ✅ Config optional, defaults work |
 
 ## File Structure Analysis
 
 ### Key Files
-| File | Purpose | Lines |
-|------|---------|-------|
-| `scripts/health-check.js` | CLI health reporter | 280 |
-| `tests/unit/schema.test.ts` | Schema validation tests | 106 |
-| `tests/unit/journey-navigation.test.ts` | Journey chain tests | 134 |
-| `src/foundation/layout/NavSidebar.tsx` | Foundation navigation | 127 |
-| `src/foundation/consoles/Genesis.tsx` | Genesis console (metrics) | ~200 |
-| `server.js` | Express API server | ~600 |
+| File | Purpose | Lines | Issue |
+|------|---------|-------|-------|
+| `scripts/health-check.js` | CLI health reporter | 280 | Hardcoded logic |
+| `tests/unit/schema.test.ts` | Schema validation tests | 106 | Duplicates validator |
+| `src/foundation/layout/NavSidebar.tsx` | Foundation navigation | 127 | Needs health link |
+| `server.js` | Express API server | ~600 | Needs health endpoints |
 
-### Dependencies
-- `vitest` — Test runner (already installed)
-- `lucide-react` — Icons (already installed)
-- No new dependencies required
+### Missing Files (To Create)
+| File | Purpose |
+|------|---------|
+| `data/infrastructure/health-config.json` | Declarative check definitions |
+| `data/infrastructure/health-log.json` | Persistent health history |
+| `lib/health-validator.js` | Config-driven validation engine |
+| `src/foundation/consoles/HealthDashboard.tsx` | UI component |
 
-## Technical Debt
+## Technical Debt Being Addressed
 
-1. **Duplicated validation logic** — `health-check.js` and `schema.test.ts` both validate references separately. Should extract to shared module.
-
-2. **Hardcoded expected counts** — Tests fail when adding new content:
-   ```typescript
-   expect(Object.keys(hubs.hubs)).toHaveLength(6)  // Brittle
-   ```
-
-3. **No health log storage** — No infrastructure for persisting health results.
+1. **Duplicated validation logic** — Extract to shared module that reads from config
+2. **Hardcoded expected counts** — Move to config with explicit thresholds
+3. **No separation of concerns** — Distinguish engine checks from corpus checks
+4. **Missing attribution** — Add provenance to all log entries
 
 ## Risk Assessment
-| Area | Current Risk | Notes |
-|------|--------------|-------|
-| Storage | Low | Can use local JSON file initially |
-| API security | Medium | Health endpoint needs admin auth |
-| Performance | Low | Health check runs in <1 second |
-| Complexity | Low | Building on existing patterns |
+| Area | Risk | Mitigation |
+|------|------|------------|
+| Config schema design | Medium | Start simple, extend later |
+| Migration complexity | Low | New system, no legacy to migrate |
+| Over-engineering | Medium | Limit to essential DAIRE patterns |
 
 ## Recommendations
 
-1. **Extract shared validation logic** to `lib/schema-validator.ts`
-2. **Add `/api/health` endpoint** that returns JSON health report
-3. **Add `/api/health/history` endpoint** for log retrieval
-4. **Store health logs** in `data/infrastructure/health-log.json`
-5. **Create Health Dashboard console** in Foundation UI
-6. **Add nav item** to Foundation sidebar
+1. **Create health-config.json** with declarative check definitions
+2. **Build config-driven validator** that interprets check definitions at runtime
+3. **Add attribution chain** to all health log entries
+4. **Separate engine from corpus checks** in config structure
+5. **Make display labels configurable** for domain-agnostic UI
+6. **Document the pattern** so future infrastructure follows it
