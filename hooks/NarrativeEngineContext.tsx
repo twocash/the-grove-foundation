@@ -454,13 +454,36 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
       return;
     }
     console.log(`[V2.1] Starting journey: ${journeyId}, entry: ${journey.entryNode}`);
+
+    // Build thread from journey nodes for legacy UI compatibility
+    const thread: string[] = [];
+    let currentNodeId: string | null = journey.entryNode;
+    const visited = new Set<string>();
+
+    while (currentNodeId && !visited.has(currentNodeId)) {
+      visited.add(currentNodeId);
+      const node = schema?.nodes?.[currentNodeId];
+      if (node) {
+        // Add the card ID to the thread (nodes reference cards)
+        thread.push(currentNodeId);
+        currentNodeId = node.primaryNext || null;
+      } else {
+        break;
+      }
+    }
+
+    console.log(`[V2.1] Built thread with ${thread.length} nodes:`, thread);
+
     setSession(prev => ({
       ...prev,
       activeJourneyId: journeyId,
       currentNodeId: journey.entryNode,
-      visitedNodes: [journey.entryNode]
+      visitedNodes: [journey.entryNode],
+      // Legacy fields for UI compatibility
+      currentThread: thread,
+      currentPosition: 0
     }));
-  }, [getJourney]);
+  }, [getJourney, schema]);
 
   const advanceNode = useCallback((choiceIndex: number = 0) => {
     if (!session.currentNodeId || !schema?.nodes) return;
@@ -505,8 +528,24 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
   }, [session.currentNodeId, schema, advanceNode]);
 
   const getThreadCard = useCallback((position: number): Card | null => {
-    if (schema?.cards && session.currentThread[position]) {
-      return schema.cards[session.currentThread[position]] || null;
+    const itemId = session.currentThread[position];
+    if (!itemId) return null;
+
+    // Try cards first (legacy), then nodes (v2.1)
+    if (schema?.cards?.[itemId]) {
+      return schema.cards[itemId];
+    }
+    if (schema?.nodes?.[itemId]) {
+      // Nodes have compatible structure with cards for display
+      const node = schema.nodes[itemId];
+      return {
+        id: node.id,
+        label: node.label,
+        query: node.query,
+        contextSnippet: node.contextSnippet,
+        sectionId: node.sectionId,
+        next: node.primaryNext ? [node.primaryNext, ...(node.alternateNext || [])] : []
+      } as Card;
     }
     return null;
   }, [schema, session.currentThread]);
