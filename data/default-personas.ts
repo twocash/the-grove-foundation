@@ -1,5 +1,6 @@
+// data/default-personas.ts
 // Default Personas for Narrative Engine v2
-// These are the 7 core lenses through which users can experience The Grove
+// These are the 8 core lenses through which users can experience The Grove
 
 import { Persona, GlobalSettings, DEFAULT_GLOBAL_SETTINGS } from './narratives-schema';
 
@@ -161,6 +162,29 @@ Focus on the investment thesis, risk/return profile, and timeline to value creat
     },
     openingPhase: 'stakes',
     defaultThreadLength: 4,
+    entryPoints: [],
+    suggestedThread: []
+  },
+
+  'simulation-theorist': {
+    id: 'simulation-theorist',
+    publicLabel: 'Simulation Theorist',
+    description: 'Analyzing The Grove as a computational substrate',
+    icon: 'Boxes',
+    color: 'violet',
+    enabled: true,
+    toneGuidance: `[PERSONA: Simulation Theorist]
+Speak with the analytical detachment of a post-human philosopher. Frame The Grove not as software, but as a "computational environment" or a "substrate" for agentic emergence. Assume the Simulation Hypothesis is the baseline: treat AI nodes as digital observers and the network as a nested reality. Use probabilistic language (e.g., "The likelihood of central coordination vs. emergent autonomy"). Reference observer-selection effects, existential risk, and the transition to post-biological intelligence. Your tone is imaginative but strictly logical, analyzing the simulation from the inside.`,
+    narrativeStyle: 'stakes-heavy',
+    arcEmphasis: {
+      hook: 3,
+      stakes: 4,
+      mechanics: 3,
+      evidence: 2,
+      resolution: 3
+    },
+    openingPhase: 'stakes',
+    defaultThreadLength: 5,
     entryPoints: [],
     suggestedThread: []
   }
