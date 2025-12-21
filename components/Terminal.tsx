@@ -751,8 +751,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
         entropyState
       });
 
-      // Cognitive Bridge triggers for freestyle users (not in an active journey thread)
-      if (session.activeLens === 'freestyle' && currentThread.length === 0) {
+      // Cognitive Bridge triggers for freestyle/unguided users (not in an active journey thread)
+      // v0.12e: Also trigger for null activeLens (first-time users before lens selection)
+      const isFreestyleMode = session.activeLens === 'freestyle' || session.activeLens === null;
+      if (isFreestyleMode && currentThread.length === 0) {
         // Build history from messages for entropy calculation
         const history = terminalState.messages.map(m => ({
           role: m.role as 'user' | 'model',
@@ -810,7 +812,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           }
         }
       } else {
-        console.log('[Entropy] Skipped - not in freestyle mode');
+        console.log('[Entropy] Skipped - user has active lens or journey', {
+          activeLens: session.activeLens,
+          threadLength: currentThread.length
+        });
       }
 
     } catch (error) {
