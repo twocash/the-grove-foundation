@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ScrollIndicator from './ScrollIndicator';
 
 interface ProductRevealProps {
-  onOpenTerminal?: () => void;
+  onOpenTerminal?: (query: string) => void;
   onScrollNext?: () => void;  // v0.15: Section-aware scroll
 }
 
@@ -62,7 +62,7 @@ export const ProductReveal: React.FC<ProductRevealProps> = ({ onOpenTerminal, on
 
   const handleCTAClick = () => {
     if (onOpenTerminal) {
-      onOpenTerminal();
+      onOpenTerminal("What is a Grove node? How does local AI ownership lead to distributed intelligence?");
     } else {
       window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
     }

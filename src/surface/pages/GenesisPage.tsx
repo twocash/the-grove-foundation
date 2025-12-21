@@ -124,9 +124,9 @@ const GenesisPage: React.FC = () => {
   }, []);
 
   // CTA click handlers with telemetry
-  const handleProductRevealCTA = useCallback(() => {
-    trackGenesisCTAClicked('see-it-in-action', 3, 'ProductReveal');
-    handleOpenTerminal();
+  const handleProductRevealCTA = useCallback((query: string) => {
+    trackGenesisCTAClicked('consult-the-grove', 3, 'ProductReveal');
+    handleOpenTerminal(query);
   }, [handleOpenTerminal]);
 
   const handleAhaDemoCTA = useCallback(() => {

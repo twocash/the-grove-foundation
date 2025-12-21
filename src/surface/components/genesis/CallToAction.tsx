@@ -13,13 +13,8 @@ export const CallToAction: React.FC<CallToActionProps> = ({
   onOpenTerminal,
   onRequestAccess
 }) => {
-  const handleRequestAccess = () => {
-    if (onRequestAccess) {
-      onRequestAccess();
-    } else {
-      // Default: open email or signup flow
-      window.open('mailto:hello@thegrovefoundation.org?subject=Early Access Request', '_blank');
-    }
+  const handleReadWhitePaper = () => {
+    window.open('https://yummy-twig-79e.notion.site/The-Grove-A-World-Changing-Play-for-Distributed-Intelligence-2c7780a78eef80b6b4f7ceb3f3c94c73', '_blank');
   };
 
   const handleExploreTerminal = () => {
@@ -48,10 +43,10 @@ export const CallToAction: React.FC<CallToActionProps> = ({
         <div className="flex flex-col gap-4 items-center mb-8">
           {/* Primary CTA */}
           <button
-            onClick={handleRequestAccess}
+            onClick={handleReadWhitePaper}
             className="px-10 py-4 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors shadow-lg hover:shadow-xl"
           >
-            Request Early Access
+            Read the White Paper
           </button>
 
           {/* Divider */}
@@ -70,6 +65,9 @@ export const CallToAction: React.FC<CallToActionProps> = ({
         <div className="border-t border-ink/10 pt-8 mt-16">
           <p className="font-mono text-xs text-ink-muted tracking-wider">
             The Grove Foundation · Research Preview v0.11
+          </p>
+          <p className="font-mono text-xs text-ink-muted/70 tracking-wider mt-2">
+            © 2025 The Grove Foundation
           </p>
         </div>
       </div>
