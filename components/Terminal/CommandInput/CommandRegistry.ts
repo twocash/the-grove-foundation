@@ -3,17 +3,36 @@
 
 // Command execution result types
 export type CommandResult =
-  | { type: 'modal'; modal: 'help' | 'journeys' | 'stats' }
+  | { type: 'modal'; modal: 'help' | 'journeys' | 'stats' | 'garden' }
   | { type: 'action'; action: string; payload?: unknown }
   | { type: 'error'; message: string };
 
+// Session context for sprout provenance
+export interface SessionContext {
+  personaId: string | null;
+  journeyId: string | null;
+  hubId: string | null;
+  nodeId: string | null;
+}
+
+// Last response data for sprout capture
+export interface LastResponseData {
+  text: string;
+  query: string;
+}
+
 // Context provided to command execute functions
 export interface CommandContext {
-  openModal: (modal: 'help' | 'journeys' | 'stats') => void;
+  openModal: (modal: 'help' | 'journeys' | 'stats' | 'garden') => void;
   switchLens: (lensId: string) => void;
   showToast: (message: string) => void;
   showWelcome: () => void;
   showLensPicker: () => void;
+
+  // Sprout System (Sprint: Sprout System)
+  getLastResponse?: () => LastResponseData | null;
+  getSessionContext?: () => SessionContext;
+  captureSprout?: (options?: { tags?: string[]; notes?: string }) => boolean;
 }
 
 // Command definition interface

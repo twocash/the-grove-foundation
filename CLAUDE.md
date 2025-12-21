@@ -646,6 +646,86 @@ Access via `/foundation/genesis`:
 
 ---
 
+## Completed Sprints: Sprout System (Sprint 15)
+
+### Sprint 15: Sprout System MVP
+
+**Goal:** Transform the Terminal from a content delivery interface into a content refinement engine where users can capture valuable LLM responses as "sprouts" with full provenance.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/core/schema/sprout.ts` | Sprout, SproutStorage, SproutStats types |
+| `hooks/useSproutStorage.ts` | localStorage CRUD for sprout persistence |
+| `hooks/useSproutCapture.ts` | Capture hook with flag parsing |
+| `hooks/useSproutStats.ts` | Aggregated statistics |
+| `components/Terminal/CommandInput/commands/sprout.ts` | /sprout command |
+| `components/Terminal/CommandInput/commands/garden.ts` | /garden command |
+| `components/Terminal/Modals/GardenModal.tsx` | Garden modal UI |
+| `docs/SPROUT_SYSTEM.md` | Academic architecture document |
+
+### Commands Added
+
+| Command | Aliases | Description |
+|---------|---------|-------------|
+| `/sprout` | `/capture`, `/save` | Capture last response as a sprout |
+| `/garden` | `/sprouts`, `/contributions` | View captured sprouts |
+
+### Sprout Command Flags
+
+```bash
+/sprout                          # Capture with no tags
+/sprout --tag=ratchet            # Capture with single tag
+/sprout --tags=ratchet,infra     # Capture with multiple tags
+/sprout --note="Great framing"   # Capture with annotation
+```
+
+### localStorage Keys
+
+| Key | Purpose |
+|-----|---------|
+| `grove-sprouts` | All captured sprouts with provenance |
+| `grove-session-id` | Anonymous session identifier |
+
+### Data Model
+
+```typescript
+interface Sprout {
+  id: string;           // UUID
+  capturedAt: string;   // ISO timestamp
+  response: string;     // Verbatim LLM output
+  query: string;        // User's original query
+  personaId: string;    // Active lens
+  journeyId: string;    // Active journey
+  hubId: string;        // Topic hub matched
+  nodeId: string;       // Card/node triggered
+  status: 'sprout';     // Lifecycle stage (MVP: always 'sprout')
+  tags: string[];       // User annotations
+  notes: string;        // Human commentary
+  sessionId: string;    // Anonymous session
+  creatorId: string;    // Future: Grove ID
+}
+```
+
+### StatsModal Integration
+
+The `/stats` command now includes a "Your Garden" section showing:
+- Total sprouts captured
+- Contribution lifecycle visualization
+- Sprouts by tag breakdown
+- Network Impact placeholder (future)
+
+### Future Phases
+
+| Phase | Capability |
+|-------|------------|
+| 2 | Grove ID integration, claim anonymous sprouts |
+| 3 | Server-side storage, admin review workflow |
+| 4 | Network propagation, credit attribution |
+
+---
+
 ## CI/CD and Deployment
 
 ### Git Worktree Setup

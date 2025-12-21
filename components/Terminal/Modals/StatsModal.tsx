@@ -1,8 +1,10 @@
 // StatsModal - Display user exploration statistics
 // Sprint v0.16: Command Palette feature
+// Sprint: Sprout System - Added Garden section
 
 import React from 'react';
 import { useExplorationStats, ExplorationStats } from '../../../hooks/useExplorationStats';
+import { useSproutStats } from '../../../hooks/useSproutStats';
 
 interface StatsModalProps {
   onClose: () => void;
@@ -36,6 +38,91 @@ function formatDuration(minutes: number): string {
   const mins = Math.round(minutes % 60);
   return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
+
+// Garden section component for sprout statistics
+const GardenSection: React.FC = () => {
+  const stats = useSproutStats();
+
+  return (
+    <div className="mt-4 pt-4 border-t border-ink/10">
+      {/* Section Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-lg">🌿</span>
+        <span className="font-mono text-[10px] text-ink-muted uppercase tracking-widest">
+          YOUR GARDEN
+        </span>
+      </div>
+
+      {/* Lifecycle Progress */}
+      <div className="p-3 bg-grove-forest/5 rounded border border-grove-forest/20 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-serif text-ink">Contribution Lifecycle</span>
+          <span className="text-[10px] text-ink-muted">
+            {stats.totalSprouts} total contribution{stats.totalSprouts !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        {/* Visual lifecycle bar */}
+        {stats.totalSprouts > 0 ? (
+          <div className="flex items-center gap-1 h-6">
+            <div
+              className="h-full bg-grove-forest/30 rounded flex items-center justify-center px-2"
+              style={{ flex: stats.totalSprouts || 1 }}
+            >
+              <span className="text-[10px] text-grove-forest font-mono">
+                🌱 {stats.totalSprouts}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="text-xs text-ink-muted italic text-center py-2">
+            Use <code className="px-1 bg-ink/5 rounded">/sprout</code> to capture valuable responses
+          </div>
+        )}
+
+        {/* Legend */}
+        <div className="flex justify-between mt-2 text-[10px] text-ink-muted">
+          <span>🌱 Captured</span>
+          <span className="opacity-50">🌿 Reviewed</span>
+          <span className="opacity-50">🌳 Published</span>
+        </div>
+      </div>
+
+      {/* Top Contributions by Tag */}
+      {Object.keys(stats.sproutsByTag).length > 0 && (
+        <div className="p-3 bg-paper border border-ink/10 rounded mb-3">
+          <div className="text-xs font-serif text-ink mb-2">
+            Contributions by Tag
+          </div>
+          <div className="space-y-1">
+            {Object.entries(stats.sproutsByTag)
+              .sort(([, a], [, b]) => b - a)
+              .slice(0, 5)
+              .map(([tag, count]) => (
+                <div key={tag} className="flex items-center justify-between">
+                  <span className="text-xs text-ink-muted">#{tag}</span>
+                  <span className="text-xs font-mono text-ink">{count}</span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Future: Network Impact */}
+      <div className="p-3 bg-ink/5 rounded border border-ink/10">
+        <div className="flex items-center gap-2">
+          <span className="text-lg opacity-50">✨</span>
+          <div>
+            <div className="text-xs text-ink-muted">Network Impact</div>
+            <div className="text-[10px] text-ink-muted italic">
+              Coming soon: See when your contributions shape responses
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const StatCard: React.FC<{
   label: string;
@@ -151,6 +238,9 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
                 </div>
               </div>
             )}
+
+            {/* Garden Section (Sprint: Sprout System) */}
+            <GardenSection />
           </div>
 
           {/* Footer */}

@@ -121,3 +121,17 @@ export {
   isValidHubsManifest,
   isValidHubConfig
 } from './rag';
+
+// Sprout System types
+export {
+  type Sprout,
+  type SproutStatus,
+  type SproutStorage,
+  type SproutCaptureOptions,
+  type SproutCaptureContext,
+  type SproutStats,
+  isSprout,
+  isValidSproutStorage,
+  SPROUT_STORAGE_KEY,
+  MAX_RECENT_SPROUTS
+} from './sprout';

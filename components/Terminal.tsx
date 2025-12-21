@@ -15,6 +15,7 @@ import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
+import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 import SimulationReveal from './Terminal/Reveals/SimulationReveal';
@@ -23,7 +24,7 @@ import { TerminatorModePrompt, TerminatorModeOverlay, TerminatorResponseMetadata
 import FounderStory from './Terminal/Reveals/FounderStory';
 import ConversionCTAPanel from './Terminal/ConversionCTA';
 import { CommandInput } from './Terminal/CommandInput';
-import { HelpModal, JourneysModal, StatsModal } from './Terminal/Modals';
+import { HelpModal, JourneysModal, StatsModal, GardenModal } from './Terminal/Modals';
 import {
   trackLensActivated,
   trackSimulationRevealShown,
@@ -211,6 +212,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showJourneysModal, setShowJourneysModal] = useState<boolean>(false);
   const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
+  const [showGardenModal, setShowGardenModal] = useState<boolean>(false);
   // Cognitive Bridge state
   const [bridgeState, setBridgeState] = useState<{
     visible: boolean;
@@ -334,6 +336,9 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   // Note: "No lens nudge" logic removed - all users now have a lens (min: freestyle)
   // The Cognitive Bridge handles suggesting journeys for freestyle users
 
+  // Sprout capture (Sprint: Sprout System)
+  const { capture: captureSprout } = useSproutCapture();
+
   // Journey completion state
   const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
   const [journeyStartTime] = useState(Date.now());
@@ -428,10 +433,57 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   };
 
   // Command Palette handlers (v0.16)
-  const handleOpenModal = (modal: 'help' | 'journeys' | 'stats') => {
+  const handleOpenModal = (modal: 'help' | 'journeys' | 'stats' | 'garden') => {
     if (modal === 'help') setShowHelpModal(true);
     if (modal === 'journeys') setShowJourneysModal(true);
     if (modal === 'stats') setShowStatsModal(true);
+    if (modal === 'garden') setShowGardenModal(true);
+  };
+
+  // Sprout System handlers (Sprint: Sprout System)
+  const getLastResponse = () => {
+    const messages = terminalState.messages;
+    // Find the last model response
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'model') {
+        // Find the user query that triggered this response
+        for (let j = i - 1; j >= 0; j--) {
+          if (messages[j].role === 'user') {
+            return {
+              text: messages[i].text,
+              query: messages[j].text
+            };
+          }
+        }
+        // If no user message found before it, return response with empty query
+        return {
+          text: messages[i].text,
+          query: ''
+        };
+      }
+    }
+    return null;
+  };
+
+  const getSessionContext = () => ({
+    personaId: session.activeLens || null,
+    journeyId: activeJourneyId || null,
+    hubId: null, // Hub routing happens server-side; not tracked client-side
+    nodeId: engineCurrentNodeId || currentNodeId || null
+  });
+
+  const handleCaptureSprout = (options?: { tags?: string[]; notes?: string }) => {
+    const lastResponse = getLastResponse();
+    if (!lastResponse) return false;
+
+    const context = getSessionContext();
+    const sprout = captureSprout({
+      response: lastResponse.text,
+      query: lastResponse.query,
+      ...context
+    }, options);
+
+    return sprout !== null;
   };
 
   const handleCommandLensSwitch = (lensId: string) => {
@@ -1295,6 +1347,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   onSwitchLens={handleCommandLensSwitch}
                   onShowWelcome={() => setShowWelcomeInterstitial(true)}
                   onShowLensPicker={() => setShowLensPicker(true)}
+                  // Sprout System (Sprint: Sprout System)
+                  getLastResponse={getLastResponse}
+                  getSessionContext={getSessionContext}
+                  captureSprout={handleCaptureSprout}
                 />
 
                 {/* Controls below input - shows when feature flag enabled */}
@@ -1396,6 +1452,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
       {showJourneysModal && <JourneysModal onClose={() => setShowJourneysModal(false)} />}
       {showStatsModal && <StatsModal onClose={() => setShowStatsModal(false)} />}
+      {showGardenModal && (
+        <GardenModal
+          onClose={() => setShowGardenModal(false)}
+          onViewFullStats={() => {
+            setShowGardenModal(false);
+            setShowStatsModal(true);
+          }}
+        />
+      )}
     </>
   );
 };

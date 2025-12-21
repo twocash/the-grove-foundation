@@ -1,18 +1,23 @@
 // CommandInput - Composite input component with command palette support
 // Sprint v0.16: Command Palette feature
+// Sprint: Sprout System - Added sprout capture props
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CommandAutocomplete from './CommandAutocomplete';
 import { useCommandParser } from './useCommandParser';
-import { Command, CommandContext } from './CommandRegistry';
+import { Command, CommandContext, LastResponseData, SessionContext } from './CommandRegistry';
 
 interface CommandInputProps {
   onSubmitQuery: (query: string) => void;
   disabled?: boolean;
-  onOpenModal: (modal: 'help' | 'journeys' | 'stats') => void;
+  onOpenModal: (modal: 'help' | 'journeys' | 'stats' | 'garden') => void;
   onSwitchLens: (lensId: string) => void;
   onShowWelcome: () => void;
   onShowLensPicker: () => void;
+  // Sprout System (Sprint: Sprout System)
+  getLastResponse?: () => LastResponseData | null;
+  getSessionContext?: () => SessionContext;
+  captureSprout?: (options?: { tags?: string[]; notes?: string }) => boolean;
 }
 
 const CommandInput: React.FC<CommandInputProps> = ({
@@ -21,7 +26,11 @@ const CommandInput: React.FC<CommandInputProps> = ({
   onOpenModal,
   onSwitchLens,
   onShowWelcome,
-  onShowLensPicker
+  onShowLensPicker,
+  // Sprout System
+  getLastResponse,
+  getSessionContext,
+  captureSprout
 }) => {
   const [input, setInput] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -57,7 +66,11 @@ const CommandInput: React.FC<CommandInputProps> = ({
     switchLens: onSwitchLens,
     showToast: (message: string) => setToast(message),
     showWelcome: onShowWelcome,
-    showLensPicker: onShowLensPicker
+    showLensPicker: onShowLensPicker,
+    // Sprout System (Sprint: Sprout System)
+    getLastResponse,
+    getSessionContext,
+    captureSprout
   };
 
   const handleSubmit = useCallback(() => {
