@@ -654,8 +654,51 @@ function migrateV1ToV2(v1Data) {
 }
 
 // GET Narrative Graph (with auto-migration support)
+// Tries new split file structure first, falls back to narratives.json
 app.get('/api/narrative', async (req, res) => {
     try {
+        // Try loading from new split file structure
+        try {
+            const [hubsData, journeysData, nodesData, lensesData, flagsData] = await Promise.all([
+                loadJsonFromGCS('knowledge/hubs.json'),
+                loadJsonFromGCS('exploration/journeys.json'),
+                loadJsonFromGCS('exploration/nodes.json'),
+                loadJsonFromGCS('presentation/lenses.json'),
+                loadJsonFromGCS('infrastructure/feature-flags.json')
+            ]);
+
+            console.log('[Narrative API] Loaded from split file structure');
+
+            // Merge split files into unified response format
+            // Still need globalSettings from narratives.json for non-migrated fields
+            const narrativesFile = storage.bucket(BUCKET_NAME).file('narratives.json');
+            const [narrativesExists] = await narrativesFile.exists();
+            let globalSettings = DEFAULT_GLOBAL_SETTINGS_V2;
+
+            if (narrativesExists) {
+                const [content] = await narrativesFile.download();
+                const narratives = JSON.parse(content.toString());
+                if (narratives.globalSettings) {
+                    globalSettings = narratives.globalSettings;
+                    // Override featureFlags with split file version
+                    globalSettings.featureFlags = flagsData.featureFlags;
+                }
+            }
+
+            return res.json({
+                version: CURRENT_SCHEMA_VERSION,
+                globalSettings,
+                hubs: hubsData.hubs,
+                journeys: journeysData.journeys,
+                nodes: nodesData.nodes,
+                lensRealities: lensesData.lensRealities,
+                defaultReality: lensesData.defaultReality
+            });
+        } catch (splitErr) {
+            console.log('[Narrative API] Split files not found, falling back to narratives.json');
+        }
+
+        // Fallback to legacy narratives.json
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
         const [exists] = await file.exists();
 
@@ -895,9 +938,10 @@ async function loadJsonFromGCS(path) {
 async function loadKnowledgeConfig() {
     try {
         // Try new file structure
-        const [hubsData, journeysData, defaultContextData, gcsMappingData] = await Promise.all([
+        const [hubsData, journeysData, nodesData, defaultContextData, gcsMappingData] = await Promise.all([
             loadJsonFromGCS('knowledge/hubs.json'),
             loadJsonFromGCS('exploration/journeys.json'),
+            loadJsonFromGCS('exploration/nodes.json'),
             loadJsonFromGCS('knowledge/default-context.json'),
             loadJsonFromGCS('infrastructure/gcs-mapping.json')
         ]);
@@ -906,6 +950,7 @@ async function loadKnowledgeConfig() {
         return {
             hubs: hubsData.hubs,
             journeys: journeysData.journeys,
+            nodes: nodesData.nodes,
             defaultContext: defaultContextData,
             gcsFileMapping: gcsMappingData.gcsFileMapping
         };
@@ -916,6 +961,7 @@ async function loadKnowledgeConfig() {
             return {
                 hubs: narratives.hubs,
                 journeys: narratives.journeys,
+                nodes: narratives.nodes,
                 defaultContext: narratives.defaultContext,
                 gcsFileMapping: narratives.gcsFileMapping
             };
