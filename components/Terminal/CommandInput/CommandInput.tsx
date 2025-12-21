@@ -86,8 +86,10 @@ const CommandInput: React.FC<CommandInputProps> = ({
       if (result) {
         if (result.type === 'error') {
           setToast(result.message);
+        } else if (result.type === 'modal') {
+          onOpenModal(result.modal);
         }
-        // Modal and action results are handled by the context callbacks
+        // Action results are handled by the command itself
       }
 
       setInput('');
@@ -136,6 +138,8 @@ const CommandInput: React.FC<CommandInputProps> = ({
           const result = executeCommand(command.id, commandContext);
           if (result?.type === 'error') {
             setToast(result.message);
+          } else if (result?.type === 'modal') {
+            onOpenModal(result.modal);
           }
           setInput('');
         } else {
@@ -157,8 +161,10 @@ const CommandInput: React.FC<CommandInputProps> = ({
     const result = executeCommand(command.id, commandContext);
     if (result?.type === 'error') {
       setToast(result.message);
+    } else if (result?.type === 'modal') {
+      onOpenModal(result.modal);
     }
-  }, [executeCommand, commandContext]);
+  }, [executeCommand, commandContext, onOpenModal]);
 
   return (
     <div className="relative">
