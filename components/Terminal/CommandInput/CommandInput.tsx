@@ -170,7 +170,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
     <div className="relative">
       {/* Toast notification */}
       {toast && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 px-3 py-2 bg-ink text-paper text-sm font-mono rounded shadow-lg animate-fade-in">
+        <div className="absolute bottom-full left-0 right-0 mb-2 px-3 py-2 bg-slate-900 dark:bg-slate-700 text-white text-sm font-mono rounded-lg shadow-lg animate-fade-in">
           {toast}
         </div>
       )}
@@ -184,29 +184,31 @@ const CommandInput: React.FC<CommandInputProps> = ({
         />
       )}
 
-      {/* Input field */}
-      <input
-        ref={inputRef}
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Write a query or type /help"
-        className="w-full bg-white border border-ink/20 p-3 pl-4 pr-10 text-sm font-serif text-ink focus:outline-none focus:border-grove-forest focus:ring-1 focus:ring-grove-forest/20 transition-all rounded-sm placeholder:italic"
-        disabled={disabled}
-        autoComplete="off"
-      />
+      {/* Input container */}
+      <div className="flex items-center gap-2 bg-surface-light dark:bg-surface-dark rounded-xl p-2 border border-border-light dark:border-border-dark focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all shadow-sm">
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Write a query or type /help"
+          className="flex-1 bg-transparent border-0 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-0 focus:outline-none py-2 px-2 text-sm"
+          disabled={disabled}
+          autoComplete="off"
+        />
 
-      {/* Submit button */}
-      <button
-        onClick={handleSubmit}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-grove-forest transition-colors"
-        disabled={disabled}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </button>
+        {/* Submit button */}
+        <button
+          onClick={handleSubmit}
+          className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50"
+          disabled={disabled}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };

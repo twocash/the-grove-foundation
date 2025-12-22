@@ -1033,8 +1033,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       )}
 
       {/* Drawer - Library Marginalia Style (hidden when minimized) */}
-      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white border-l border-ink/10 transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex flex-col h-full text-ink font-sans">
+      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white dark:bg-background-dark border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="flex flex-col h-full text-slate-900 dark:text-slate-100 font-sans">
 
           {/* Show Custom Lens Wizard, Welcome Interstitial, Lens Picker, or Main Terminal */}
           {showCustomLensWizard ? (
@@ -1101,7 +1101,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               )}
 
               {/* Messages Area - Thread Style */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-8 terminal-scroll bg-white">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 terminal-scroll bg-white dark:bg-background-dark">
+                <div className="max-w-3xl mx-auto space-y-6">
                 {terminalState.messages.map((msg) => {
                   const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
                   const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
@@ -1109,16 +1110,28 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   return (
                     <React.Fragment key={msg.id}>
                       <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                        <div className="text-[10px] font-mono text-ink-muted mb-2 uppercase tracking-widest">
-                          {msg.role === 'user' ? 'You' : 'The Grove'}
-                        </div>
-                        <div className={`max-w-[95%] text-sm ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                        {/* Message Label */}
+                        <div className={`flex items-center gap-2 mb-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.role === 'user' ? (
-                            <div className="bg-paper-dark px-4 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-xl text-ink font-serif border border-ink/5">
-                              {msg.text.replace(' --verbose', '')}
+                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">You</span>
+                          ) : (
+                            <span className="text-xs font-semibold text-primary">The Grove</span>
+                          )}
+                        </div>
+                        {/* Message Bubble */}
+                        <div className={`${msg.role === 'user' ? 'max-w-[85%] md:max-w-[70%]' : 'max-w-[90%] md:max-w-[85%]'}`}>
+                          {msg.role === 'user' ? (
+                            <div className="bg-primary text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md">
+                              <p className="text-sm md:text-base leading-relaxed">
+                                {msg.text.replace(' --verbose', '')}
+                              </p>
                             </div>
                           ) : (
-                            <div className={`pl-4 border-l-2 ${isSystemError ? 'border-red-500 text-red-700 bg-red-50/50 py-2 pr-2' : 'border-grove-forest/30'}`}>
+                            <div className={`px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm ${
+                              isSystemError
+                                ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
+                                : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-border-dark'
+                            }`}>
                               {msg.isStreaming && !msg.text ? (
                                 /* Show loading messages while waiting for first chunk */
                                 <LoadingIndicator messages={globalSettings?.loadingMessages} />
@@ -1128,7 +1141,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                                     content={msg.text}
                                     onPromptClick={handleSuggestion}
                                   />
-                                  {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-ink/50 cursor-blink align-middle"></span>}
+                                  {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-slate-500 dark:bg-slate-400 cursor-blink align-middle"></span>}
                                 </>
                               )}
                             </div>
@@ -1214,10 +1227,11 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   );
                 })}
                 <div ref={messagesEndRef} />
+                </div>
               </div>
 
               {/* Interactions Area */}
-              <div className="p-6 border-t border-ink/5 bg-paper/50">
+              <div className="p-6 border-t border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-surface-dark/50">
 
                 {/* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */}
                 {v21JourneyContext?.isIncomplete ? (

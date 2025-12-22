@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat Window - Light Mode Cards</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#197fe6",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#111921",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#0e141b] overflow-hidden h-screen flex">
+<!-- Sidebar -->
+<aside class="w-[280px] bg-[#f8fafc] dark:bg-[#111921] border-r border-[#e7edf3] flex flex-col h-full shrink-0 z-20 hidden md:flex">
+<div class="p-5 flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-sm" data-alt="Abstract green geometric logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCHmiWxBXObWra7pvGOp1QyHyy5YcowX25gkwAhBxP9zThbUa-dkhhMd6PRB-ku12glhI2w9xt9Ly6GZ3mCzFjZkTvwSPZXo0Tefi9AzYagQZnh25dEQtBgzFGtFz0KC-ITwqOMIIfLEuKIyl8toV9BKE74FlcwUT7j3vs__BNCiIolEXx1i4ufB77d2-Xk1-E0ex9rIXcGDR9ElKStYWdnTgbv-uJs9mlkNe5T-iOsSC1WfGia_yyHBMDedEMZkaxkoV3GklaIrgk");'></div>
+<h1 class="text-[#0e141b] dark:text-white text-lg font-bold leading-normal tracking-tight">The Grove</h1>
+</div>
+<div class="px-3 py-2 flex-1 overflow-y-auto">
+<div class="flex flex-col gap-2">
+<button class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors group">
+<span class="material-symbols-outlined filled icon-filled" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<p class="text-sm font-bold leading-normal">New Journey</p>
+</button>
+<div class="mt-4 mb-2 px-3">
+<p class="text-xs font-semibold text-[#4e7397] uppercase tracking-wider">Library</p>
+</div>
+<button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#e7edf3] dark:hover:bg-slate-800 transition-colors text-[#0e141b] dark:text-slate-200">
+<span class="material-symbols-outlined text-[#4e7397]">history</span>
+<p class="text-sm font-medium leading-normal">Recent Journeys</p>
+</button>
+<button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#e7edf3] dark:hover:bg-slate-800 transition-colors text-[#0e141b] dark:text-slate-200">
+<span class="material-symbols-outlined text-[#4e7397]">bookmark</span>
+<p class="text-sm font-medium leading-normal">Saved Lenses</p>
+</button>
+<button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#e7edf3] dark:hover:bg-slate-800 transition-colors text-[#0e141b] dark:text-slate-200">
+<span class="material-symbols-outlined text-[#4e7397]">folder_open</span>
+<p class="text-sm font-medium leading-normal">Archives</p>
+</button>
+</div>
+</div>
+<div class="p-4 border-t border-[#e7edf3] dark:border-slate-800">
+<button class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#e7edf3] dark:hover:bg-slate-800 w-full transition-colors text-[#0e141b] dark:text-slate-200">
+<span class="material-symbols-outlined text-[#4e7397]">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</button>
+<div class="mt-2 flex items-center gap-3 px-3 py-2">
+<div class="size-8 rounded-full bg-slate-200 bg-center bg-cover" data-alt="User profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBAJmmio8PP0O2wncnqkU6ffvHyurNDsWJifSCWtTPsSpqvOxFS8TZNfEEfgQaTU_jaiEvMEGdin4_vrtaNRkej5T2pxKCrZRZBtvxeHWHu0eI1ZePSFv8MK43Xi_GdwMofNrJRddWPp4Ulgn378VRV7rJfAuhYSI8A_FDqJ5nBXOgNYorNS6TJRSBCsh2rhz2l2VkmkMjdP7jy_YIKz6XvdRpmyVEjfsNggeNaZeN3O4WOQCf6nUzWsRp8ZJu1aYCCigXuOxe_jfU');"></div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-[#0e141b] dark:text-white">Sarah Jenkins</span>
+<span class="text-[10px] text-[#4e7397]">Pro Plan</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full relative bg-white dark:bg-[#111921]">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#e7edf3] dark:border-slate-800 px-6 py-3 bg-white dark:bg-[#111921] z-10 shrink-0">
+<div class="flex items-center gap-4 text-[#0e141b] dark:text-white">
+<div class="size-6 text-primary">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#0e141b] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">Project Alpha - Session 4</h2>
+<span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium border border-emerald-200">Active</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#4e7397] text-[20px]">search</span>
+</div>
+<input class="bg-[#f0f4f8] dark:bg-slate-800 border-none rounded-lg py-2 pl-10 pr-4 text-sm w-64 focus:ring-2 focus:ring-primary/50 text-[#0e141b] dark:text-white placeholder-[#4e7397]" placeholder="Search session content..." type="text"/>
+</div>
+<div class="flex gap-2 border-l border-[#e7edf3] dark:border-slate-800 pl-4">
+<button class="size-9 flex items-center justify-center rounded-full hover:bg-[#e7edf3] dark:hover:bg-slate-800 text-[#4e7397] transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="size-9 flex items-center justify-center rounded-full hover:bg-[#e7edf3] dark:hover:bg-slate-800 text-[#4e7397] transition-colors">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+<!-- Mobile Menu Button -->
+<button class="md:hidden size-9 flex items-center justify-center rounded-full hover:bg-[#e7edf3] text-[#4e7397] transition-colors">
+<span class="material-symbols-outlined text-[20px]">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Chat Stream -->
+<div class="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col gap-6" id="chat-stream">
+<!-- Message 1: AI Welcome -->
+<div class="flex items-start gap-4 max-w-4xl mx-auto w-full">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0 shadow-sm border border-slate-100 mt-1" data-alt="Abstract AI avatar with blue gradients" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCPKziMkg9hLxZ8QDdxSPG0i1RNMlbIB8V675LmhWdCBSYKbvcZVVf57viveIpkwZqwC7KgZ8_g5UCU2aEIPd_PWkqFuqzSmrD_EvQzyHFjvafk0-U_rRWibJR2VOroW_3rPLraUzbS-wwIi0syZmye1z88rn9kDmmXFJulBe1rH8M81kTAMpl56In2qX_X-Vqy5jF9aHI8YGWppzzBOqFDuD3kNIxVWm_qdRh6mVfKXBvWhigc6_V_yDv0Z0ChYUdh7-SXZOv1YMQ");'></div>
+<div class="flex flex-col gap-1 items-start">
+<div class="flex items-center gap-2">
+<p class="text-[#0e141b] dark:text-white text-sm font-bold">The Grove AI</p>
+<span class="text-[#94a3b8] text-xs">10:23 AM</span>
+</div>
+<div class="bg-[#f1f5f9] dark:bg-slate-800 text-[#0e141b] dark:text-slate-200 px-5 py-3.5 rounded-2xl rounded-tl-none shadow-sm text-[15px] leading-relaxed max-w-[600px]">
+                        Welcome back to The Grove. How would you like to analyze the quarterly data today?
+                    </div>
+</div>
+</div>
+<!-- Message 2: User Reply -->
+<div class="flex items-start gap-4 justify-end max-w-4xl mx-auto w-full">
+<div class="flex flex-col gap-1 items-end">
+<div class="flex items-center gap-2">
+<span class="text-[#94a3b8] text-xs">10:24 AM</span>
+<p class="text-[#0e141b] dark:text-white text-sm font-bold">You</p>
+</div>
+<div class="bg-primary text-white px-5 py-3.5 rounded-2xl rounded-tr-none shadow-md text-[15px] leading-relaxed max-w-[600px]">
+                        Show me the perspectives available.
+                    </div>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0 shadow-sm border border-slate-100 mt-1" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsVLEKxmc8m1uqxqaX8w2I3sHMYBAFi6ZPmdicrE3aexKc1T5BUWiyurwl2mqUQmXybONoACVELUZUoT3t8f6BOXzcWMVj7VdxB7Y6-qqUL8WJ3TPhFAWlpsGG0GTwWCotrNcumy1P5LkyBlQrk6wH3nKL6knauuBkLkcFyI0shpyjyQyEfVwhApBH9J0eyAEc2dph7Rz7g2WcadbTisLta23FLWswytzEEgZOOElnNt2ytuaOaln4ZV634oAXWxmNexTedFSyCFg");'></div>
+</div>
+<!-- Message 3: AI with Cards -->
+<div class="flex items-start gap-4 max-w-4xl mx-auto w-full">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0 shadow-sm border border-slate-100 mt-1" data-alt="Abstract AI avatar with blue gradients" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCHuC_pEoipRmE8aHxMVfKhhYGG4R3R32LZBojhzUV4QLhoz6Am9j_zgjP5AVAvE7SwAfssLfZrVdaYg3rO0iXqzksI_IeC6YaEwAJR_Cgl4KMy2O9sPruVPXQPwIXx8SAp5OaVHPgEFj45NcDcNpG8sDCxkjgNpHWGRMxvmqkf8iANamABmcXRX6u2nEfqUrB2Tg5WLSXkuqtIOC7OhNg62EHwRskpu8Oxv7L0MPydVXelrcQqekJTMDQSU_v40Hppv5eGWPPNkZ4");'></div>
+<div class="flex flex-col gap-3 items-start w-full">
+<div class="flex items-center gap-2">
+<p class="text-[#0e141b] dark:text-white text-sm font-bold">The Grove AI</p>
+<span class="text-[#94a3b8] text-xs">10:24 AM</span>
+</div>
+<div class="bg-[#f1f5f9] dark:bg-slate-800 text-[#0e141b] dark:text-slate-200 px-5 py-3.5 rounded-2xl rounded-tl-none shadow-sm text-[15px] leading-relaxed max-w-[600px]">
+                        I've generated three lenses for you based on the dataset. Each offers a unique analytical path:
+                    </div>
+<!-- Lens Cards Container -->
+<div class="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+<!-- Card 1: Strategist -->
+<div class="bg-white dark:bg-[#1a2632] border border-[#e2e8f0] dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer group flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-blue-500 rounded-l-xl"></div>
+<div class="mb-3 size-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+<span class="material-symbols-outlined">strategy</span>
+</div>
+<h3 class="text-[#0e141b] dark:text-white font-bold text-lg mb-1">The Strategist</h3>
+<p class="text-[#4e7397] dark:text-slate-400 text-sm leading-snug mb-4 flex-1">
+                                Focus on long-term KPI growth, market positioning, and competitive analysis.
+                            </p>
+<button class="w-full mt-auto py-2 px-4 rounded-lg border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-bold text-sm bg-blue-50 dark:bg-blue-900/10 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-colors">
+                                Apply Lens
+                            </button>
+</div>
+<!-- Card 2: Empath -->
+<div class="bg-white dark:bg-[#1a2632] border border-[#e2e8f0] dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-purple-500/50 transition-all cursor-pointer group flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-purple-500 rounded-l-xl"></div>
+<div class="mb-3 size-10 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</div>
+<h3 class="text-[#0e141b] dark:text-white font-bold text-lg mb-1">The Empath</h3>
+<p class="text-[#4e7397] dark:text-slate-400 text-sm leading-snug mb-4 flex-1">
+                                Analyze customer sentiment, feedback trends, and internal team morale impact.
+                            </p>
+<button class="w-full mt-auto py-2 px-4 rounded-lg border border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 font-bold text-sm bg-purple-50 dark:bg-purple-900/10 group-hover:bg-purple-600 group-hover:text-white group-hover:border-purple-600 transition-colors">
+                                Apply Lens
+                            </button>
+</div>
+<!-- Card 3: Skeptic -->
+<div class="bg-white dark:bg-[#1a2632] border border-[#e2e8f0] dark:border-slate-700 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-orange-500/50 transition-all cursor-pointer group flex flex-col h-full relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-orange-500 rounded-l-xl"></div>
+<div class="mb-3 size-10 rounded-lg bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+<span class="material-symbols-outlined">visibility_off</span>
+</div>
+<h3 class="text-[#0e141b] dark:text-white font-bold text-lg mb-1">The Skeptic</h3>
+<p class="text-[#4e7397] dark:text-slate-400 text-sm leading-snug mb-4 flex-1">
+                                Identify risks, outliers, data anomalies, and potential pitfalls in the strategy.
+                            </p>
+<button class="w-full mt-auto py-2 px-4 rounded-lg border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 font-bold text-sm bg-orange-50 dark:bg-orange-900/10 group-hover:bg-orange-600 group-hover:text-white group-hover:border-orange-600 transition-colors">
+                                Apply Lens
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Spacer for bottom scroll -->
+<div class="h-4"></div>
+</div>
+<!-- Input Area -->
+<div class="shrink-0 p-6 bg-white dark:bg-[#111921] border-t border-[#e7edf3] dark:border-slate-800 z-10">
+<div class="max-w-4xl mx-auto w-full relative">
+<div class="flex items-end gap-2 bg-[#f8fafc] dark:bg-slate-800 rounded-xl p-2 border border-[#e2e8f0] dark:border-slate-700 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all shadow-sm">
+<button class="p-2 text-[#4e7397] hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors shrink-0" title="Attach file">
+<span class="material-symbols-outlined text-[22px]">attach_file</span>
+</button>
+<textarea class="w-full bg-transparent border-0 focus:ring-0 text-[#0e141b] dark:text-white resize-none max-h-32 py-2.5 text-[15px] placeholder-[#94a3b8]" placeholder="Type a message or select a lens above..." rows="1"></textarea>
+<button class="p-2 bg-primary hover:bg-blue-600 text-white rounded-lg shadow-sm transition-colors shrink-0 mb-0.5" title="Send message">
+<span class="material-symbols-outlined text-[20px] filled icon-filled" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+<div class="text-center mt-2">
+<p class="text-[11px] text-[#94a3b8]">AI can make mistakes. Please review critical information.</p>
+</div>
+</div>
+</div>
+</main>
+</body></html>
