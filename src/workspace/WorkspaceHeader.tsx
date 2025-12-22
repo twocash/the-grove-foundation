@@ -1,63 +1,94 @@
 // src/workspace/WorkspaceHeader.tsx
 // Top bar with branding and global actions
 
+import { useState, useEffect } from 'react';
 import { useWorkspaceUI } from './WorkspaceUIContext';
-import { Settings, HelpCircle } from 'lucide-react';
 
 export function WorkspaceHeader() {
   const { openCommandPalette, toggleInspector, inspector } = useWorkspaceUI();
+  const [isDark, setIsDark] = useState(false);
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const stored = localStorage.getItem('grove-theme');
+    if (stored === 'dark') {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    } else if (stored === 'light') {
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
+    } else {
+      // Use system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(prefersDark);
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    if (newIsDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('grove-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('grove-theme', 'light');
+    }
+  };
 
   return (
-    <header className="h-12 flex items-center justify-between px-4 bg-[var(--grove-bg)] border-b border-[var(--grove-border)]">
+    <header className="h-14 flex items-center justify-between px-4 bg-[var(--grove-surface)] border-b border-[var(--grove-border)] flex-shrink-0 z-10">
       {/* Left: Logo */}
       <div className="flex items-center gap-2">
-        <span className="text-[var(--grove-accent)] text-lg">🌳</span>
-        <span className="font-medium text-[var(--grove-text)]">The Grove</span>
+        <span className="material-symbols-outlined text-primary text-2xl filled">forest</span>
+        <span className="font-serif font-bold text-lg text-[var(--grove-text)]">The Grove</span>
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {/* Command Palette Trigger */}
         <button
           onClick={openCommandPalette}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--grove-text-muted)] bg-[var(--grove-surface)] rounded border border-[var(--grove-border)] hover:border-[var(--grove-accent)] transition-colors"
+          className="hidden md:flex items-center gap-2 bg-stone-100 dark:bg-slate-900 border border-[var(--grove-border)] px-2 py-1.5 rounded-md text-sm text-[var(--grove-text-muted)] min-w-[160px] justify-between group cursor-pointer hover:border-primary transition-colors"
         >
           <span>Search</span>
-          <kbd className="text-xs px-1.5 py-0.5 rounded bg-[var(--grove-bg)]">⌘K</kbd>
+          <span className="text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded px-1">⌘K</span>
         </button>
 
         {/* Toggle Inspector */}
         <button
           onClick={toggleInspector}
           className={`
-            p-2 rounded transition-colors
+            p-2 rounded-md transition-colors
             ${inspector.isOpen
-              ? 'text-[var(--grove-accent)] bg-[var(--grove-accent-muted)]'
-              : 'text-[var(--grove-text-muted)] hover:text-[var(--grove-text)]'
+              ? 'text-primary bg-stone-100 dark:bg-slate-700'
+              : 'text-[var(--grove-text-muted)] hover:bg-stone-100 dark:hover:bg-slate-700'
             }
           `}
           title="Toggle Inspector (⌘\\)"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <rect x="1" y="1" width="14" height="14" rx="2" />
-            <line x1="10" y1="1" x2="10" y2="15" />
-          </svg>
+          <span className="material-symbols-outlined">dock_to_right</span>
         </button>
 
         {/* Settings */}
         <button
-          className="p-2 text-[var(--grove-text-muted)] hover:text-[var(--grove-text)] transition-colors"
+          className="p-2 text-[var(--grove-text-muted)] hover:bg-stone-100 dark:hover:bg-slate-700 rounded-md transition-colors"
           title="Settings"
         >
-          <Settings size={16} />
+          <span className="material-symbols-outlined">settings</span>
         </button>
 
-        {/* Help */}
+        {/* Theme Toggle */}
         <button
-          className="p-2 text-[var(--grove-text-muted)] hover:text-[var(--grove-text)] transition-colors"
-          title="Help"
+          onClick={toggleTheme}
+          className="p-2 text-[var(--grove-text-muted)] hover:bg-stone-100 dark:hover:bg-slate-700 rounded-md transition-colors"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          <HelpCircle size={16} />
+          <span className={`material-symbols-outlined ${isDark ? 'hidden' : ''}`}>dark_mode</span>
+          <span className={`material-symbols-outlined ${isDark ? '' : 'hidden'}`}>light_mode</span>
         </button>
       </div>
     </header>

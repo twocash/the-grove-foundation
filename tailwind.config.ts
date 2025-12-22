@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './index.html',
     './index.tsx',
@@ -13,6 +14,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // ============================================================
+        // WORKSPACE TOKENS (Grove Workspace - Light/Dark mode)
+        // Sprint 3: Clean paper aesthetic (light) / Deep slate (dark)
+        // ============================================================
+        primary: '#4d7c0f',                    // Grove green (emerald-700ish)
+        'background-light': '#f8f7f5',         // Warm paper/cream
+        'background-dark': '#0f172a',          // Deep slate
+        'surface-light': '#ffffff',            // Cards, panels (light)
+        'surface-dark': '#1e293b',             // Cards, panels (dark)
+        'border-light': '#e7e5e4',             // Subtle borders (light)
+        'border-dark': '#334155',              // Dark borders
+        // Lens accent colors
+        accent: {
+          freestyle: '#3b82f6',                // blue
+          citizen: '#dc2626',                  // red
+          academic: '#10b981',                 // emerald
+          engineer: '#6366f1',                 // indigo
+          investor: '#f59e0b',                 // amber
+          builder: '#8b5cf6',                  // violet
+          skeptic: '#64748b',                  // slate
+          visionary: '#ec4899',                // pink
+        },
+
         // ============================================================
         // SURFACE TOKENS (The Village - Paper/Ink aesthetic)
         // v0.12e: Minimalist Orchard palette (warm bone, forest charcoal)

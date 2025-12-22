@@ -5,21 +5,19 @@ import { useState, useEffect } from 'react';
 import { useWorkspaceUI } from './WorkspaceUIContext';
 import type { NavItem, NavigationPath } from '@core/schema/workspace';
 
-// Icons from lucide-react
-import {
-  Compass,
-  Sprout,
-  Users,
-  Zap,
-  MessageSquare,
-  GitBranch,
-  Map,
-  Glasses,
-  Code,
-  Bot,
-  ChevronRight,
-  ChevronDown,
-} from 'lucide-react';
+// Material Symbols icon name mapping
+const iconNameToSymbol: Record<string, string> = {
+  compass: 'explore',
+  sprout: 'eco',
+  users: 'groups',
+  zap: 'bolt',
+  message: 'chat_bubble',
+  branch: 'account_tree',
+  map: 'map',
+  glasses: 'eyeglasses',
+  code: 'code',
+  bot: 'smart_toy',
+};
 
 // Navigation tree structure - Updated IA
 const navigationTree: Record<string, NavItem> = {
@@ -63,19 +61,6 @@ const navigationTree: Record<string, NavItem> = {
   },
 };
 
-const iconMap: Record<string, React.FC<{ className?: string }>> = {
-  compass: Compass,
-  sprout: Sprout,
-  users: Users,
-  zap: Zap,
-  message: MessageSquare,
-  branch: GitBranch,
-  map: Map,
-  glasses: Glasses,
-  code: Code,
-  bot: Bot,
-};
-
 interface NavItemProps {
   item: NavItem;
   path: string[];
@@ -92,7 +77,7 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
   const isParentOfActive = navigation.activePath.join('.').startsWith(pathString + '.');
 
   const hasChildren = item.children && Object.keys(item.children).length > 0;
-  const Icon = item.icon ? iconMap[item.icon] : null;
+  const iconSymbol = item.icon ? iconNameToSymbol[item.icon] : null;
   const isComingSoon = item.comingSoon ?? false;
 
   const handleClick = () => {
@@ -107,15 +92,15 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
   // Determine styling based on state
   const getItemClasses = () => {
     if (isComingSoon) {
-      return 'text-[var(--grove-text-dim)] cursor-pointer hover:bg-[var(--grove-surface)]';
+      return 'text-[var(--grove-text-dim)] cursor-pointer hover:bg-stone-50 dark:hover:bg-slate-800/50';
     }
     if (isActive) {
-      return 'bg-[var(--grove-accent-muted)] text-[var(--grove-accent)]';
+      return 'bg-stone-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium';
     }
     if (isParentOfActive) {
       return 'text-[var(--grove-text)]';
     }
-    return 'text-[var(--grove-text-muted)] hover:text-[var(--grove-text)] hover:bg-[var(--grove-surface)]';
+    return 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800/50';
   };
 
   return (
@@ -123,21 +108,25 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
       <button
         onClick={handleClick}
         className={`
-          w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors
+          w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors
           ${getItemClasses()}
         `}
-        style={{ paddingLeft: `${12 + depth * 16}px` }}
+        style={{ paddingLeft: `${8 + depth * 24}px` }}
       >
         {hasChildren && (
-          <span className="w-4 h-4 flex items-center justify-center">
-            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <span className="material-symbols-outlined text-lg">
+            {isExpanded ? 'expand_more' : 'chevron_right'}
           </span>
         )}
-        {!hasChildren && <span className="w-4" />}
-        {Icon && <Icon className={`w-4 h-4 ${isComingSoon ? 'opacity-50' : ''}`} />}
+        {!hasChildren && depth > 0 && <span className="w-5" />}
+        {iconSymbol && (
+          <span className={`material-symbols-outlined text-lg ${isActive ? 'filled text-primary' : 'opacity-70'} ${isComingSoon ? 'opacity-50' : ''}`}>
+            {iconSymbol}
+          </span>
+        )}
         <span className="flex-1 text-left">{item.label}</span>
         {isComingSoon && (
-          <span className="px-1.5 py-0.5 text-[10px] rounded bg-[var(--grove-surface)] text-[var(--grove-text-dim)]">
+          <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-600">
             Soon
           </span>
         )}
@@ -181,28 +170,25 @@ export function NavigationSidebar() {
   }, [session.startTime]);
 
   return (
-    <aside className="w-60 flex flex-col bg-[var(--grove-bg)] border-r border-[var(--grove-border)]">
+    <aside className="w-60 flex flex-col bg-[var(--grove-surface)] dark:bg-background-dark/50 border-r border-[var(--grove-border)] flex-shrink-0">
       {/* Navigation Tree */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2">
+      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
         {Object.values(navigationTree).map((item) => (
-          <div key={item.id} className="mb-2">
+          <div key={item.id}>
             <NavItemComponent item={item} path={[]} depth={0} />
           </div>
         ))}
       </nav>
 
       {/* Footer with session info */}
-      <div className="border-t border-[var(--grove-border)] px-4 py-3">
-        <div className="flex items-center justify-between text-xs text-[var(--grove-text-muted)]">
-          <span className="font-mono">{elapsed}m</span>
-          <span className="flex items-center gap-1">
-            <Sprout size={12} />
-            {session.sproutCount}
-          </span>
+      <div className="border-t border-[var(--grove-border)] px-4 py-3 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
+          <span>{elapsed}m</span>
+          <span>Healthy</span>
         </div>
-        <div className="flex items-center gap-2 mt-2 text-xs">
-          <span className="w-2 h-2 rounded-full bg-[var(--grove-success)]" />
-          <span className="text-[var(--grove-text-dim)]">Healthy</span>
+        <div className="flex items-center gap-1 text-slate-400 dark:text-slate-600">
+          <span className="material-symbols-outlined text-sm">eco</span>
+          <span>{session.sproutCount}</span>
         </div>
       </div>
     </aside>

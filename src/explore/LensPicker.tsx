@@ -1,43 +1,117 @@
 // src/explore/LensPicker.tsx
 // Lens selection view for the workspace
 
+import { useState, useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { Persona } from '../../data/narratives-schema';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import {
-  Compass,
-  Home,
-  GraduationCap,
-  Settings,
-  Globe,
-  Building2,
-  Briefcase,
-  Boxes,
-  Check,
-} from 'lucide-react';
+import { CollectionHeader } from '../shared';
 
-// Map icon names to components
-const iconMap: Record<string, React.FC<{ className?: string; size?: number }>> = {
-  Compass,
-  Home,
-  GraduationCap,
-  Settings,
-  Globe,
-  Building2,
-  Briefcase,
-  Boxes,
+// Map persona IDs to accent colors and Material Symbols icons
+interface LensAccent {
+  icon: string;
+  bgLight: string;
+  bgDark: string;
+  textLight: string;
+  textDark: string;
+  borderHover: string;
+  selectedBg: string;
+  selectedBgDark: string;
+}
+
+const lensAccents: Record<string, LensAccent> = {
+  'freestyle-explorer': {
+    icon: 'explore',
+    bgLight: 'bg-blue-50',
+    bgDark: 'dark:bg-blue-900/30',
+    textLight: 'text-blue-600',
+    textDark: 'dark:text-blue-400',
+    borderHover: 'hover:border-blue-300',
+    selectedBg: 'bg-blue-50',
+    selectedBgDark: 'dark:bg-blue-900/40',
+  },
+  'concerned-citizen': {
+    icon: 'home',
+    bgLight: 'bg-red-50',
+    bgDark: 'dark:bg-red-900/30',
+    textLight: 'text-red-600',
+    textDark: 'dark:text-red-400',
+    borderHover: 'hover:border-red-300',
+    selectedBg: 'bg-red-50',
+    selectedBgDark: 'dark:bg-[#3f1919]',
+  },
+  'academic-researcher': {
+    icon: 'school',
+    bgLight: 'bg-emerald-50',
+    bgDark: 'dark:bg-emerald-900/30',
+    textLight: 'text-emerald-600',
+    textDark: 'dark:text-emerald-400',
+    borderHover: 'hover:border-emerald-300',
+    selectedBg: 'bg-emerald-50',
+    selectedBgDark: 'dark:bg-emerald-900/40',
+  },
+  'infrastructure-engineer': {
+    icon: 'settings',
+    bgLight: 'bg-stone-100',
+    bgDark: 'dark:bg-slate-700/50',
+    textLight: 'text-slate-600',
+    textDark: 'dark:text-slate-300',
+    borderHover: 'hover:border-indigo-300',
+    selectedBg: 'bg-indigo-50',
+    selectedBgDark: 'dark:bg-indigo-900/40',
+  },
+  'ai-investor': {
+    icon: 'trending_up',
+    bgLight: 'bg-amber-50',
+    bgDark: 'dark:bg-amber-900/30',
+    textLight: 'text-amber-600',
+    textDark: 'dark:text-amber-400',
+    borderHover: 'hover:border-amber-300',
+    selectedBg: 'bg-amber-50',
+    selectedBgDark: 'dark:bg-amber-900/40',
+  },
+  'ai-builder': {
+    icon: 'construction',
+    bgLight: 'bg-violet-50',
+    bgDark: 'dark:bg-violet-900/30',
+    textLight: 'text-violet-600',
+    textDark: 'dark:text-violet-400',
+    borderHover: 'hover:border-violet-300',
+    selectedBg: 'bg-violet-50',
+    selectedBgDark: 'dark:bg-violet-900/40',
+  },
+  'ai-skeptic': {
+    icon: 'sentiment_dissatisfied',
+    bgLight: 'bg-slate-100',
+    bgDark: 'dark:bg-slate-700/50',
+    textLight: 'text-slate-600',
+    textDark: 'dark:text-slate-400',
+    borderHover: 'hover:border-slate-400',
+    selectedBg: 'bg-slate-100',
+    selectedBgDark: 'dark:bg-slate-700/40',
+  },
+  'tech-visionary': {
+    icon: 'lightbulb',
+    bgLight: 'bg-pink-50',
+    bgDark: 'dark:bg-pink-900/30',
+    textLight: 'text-pink-600',
+    textDark: 'dark:text-pink-400',
+    borderHover: 'hover:border-pink-300',
+    selectedBg: 'bg-pink-50',
+    selectedBgDark: 'dark:bg-pink-900/40',
+  },
 };
 
-// Map persona colors to dark theme CSS variables
-const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-  forest: { bg: '#1a3c26', text: '#4ade80', border: '#2F5C3B' },
-  moss: { bg: '#283d28', text: '#7EA16B', border: '#4a6b4a' },
-  amber: { bg: '#3d3420', text: '#E0A83B', border: '#5a4a20' },
-  clay: { bg: '#3d2420', text: '#D95D39', border: '#5a3a2a' },
-  slate: { bg: '#1a2832', text: '#526F8A', border: '#3a4852' },
-  fig: { bg: '#2d2428', text: '#6B4B56', border: '#4a3a42' },
-  stone: { bg: '#2a2824', text: '#9C9285', border: '#4a4844' },
-  violet: { bg: '#2a2438', text: '#8b5cf6', border: '#4a3a58' },
+// Default accent for unknown personas
+const defaultAccent: LensAccent = {
+  icon: 'psychology',
+  bgLight: 'bg-slate-100',
+  bgDark: 'dark:bg-slate-700/50',
+  textLight: 'text-slate-600',
+  textDark: 'dark:text-slate-400',
+  borderHover: 'hover:border-slate-400',
+  selectedBg: 'bg-slate-100',
+  selectedBgDark: 'dark:bg-slate-700/40',
 };
 
 interface LensCardProps {
@@ -47,50 +121,40 @@ interface LensCardProps {
 }
 
 function LensCard({ persona, isActive, onSelect }: LensCardProps) {
-  const Icon = iconMap[persona.icon] || Compass;
-  const colors = colorMap[persona.color] || colorMap.slate;
+  const accent = lensAccents[persona.id] || defaultAccent;
 
   return (
     <button
       onClick={onSelect}
       className={`
-        relative flex flex-col items-start p-4 rounded-lg border transition-all text-left
+        group flex flex-col items-start p-6 rounded-xl border transition-all text-left relative overflow-hidden
         ${isActive
-          ? 'ring-2 ring-[var(--grove-accent)] border-[var(--grove-accent)]'
-          : 'border-[var(--grove-border)] hover:border-[var(--grove-accent)]/50'
+          ? `border-red-200 dark:border-red-900/50 ${accent.selectedBg} ${accent.selectedBgDark} ring-1 ring-red-100 dark:ring-red-500/20`
+          : `border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg dark:hover:border-slate-600 ${accent.borderHover} dark:hover:bg-slate-800`
         }
       `}
-      style={{
-        backgroundColor: isActive ? colors.bg : 'var(--grove-surface)',
-      }}
     >
       {/* Active indicator */}
       {isActive && (
-        <div className="absolute top-2 right-2">
-          <div
-            className="w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: colors.text }}
-          >
-            <Check size={12} className="text-[var(--grove-bg)]" />
-          </div>
+        <div className="absolute top-4 right-4 bg-red-200 dark:bg-red-500 text-red-700 dark:text-white rounded-full p-1 flex items-center justify-center">
+          <span className="material-symbols-outlined text-sm font-bold">check</span>
         </div>
       )}
 
       {/* Icon */}
-      <div
-        className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-        style={{ backgroundColor: colors.bg }}
-      >
-        <Icon size={20} style={{ color: colors.text }} />
+      <div className={`${accent.bgLight} ${accent.bgDark} p-3 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
+        <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark}`}>
+          {accent.icon}
+        </span>
       </div>
 
       {/* Label */}
-      <h3 className="font-medium text-[var(--grove-text)] mb-1">
+      <h3 className={`text-lg font-semibold mb-2 ${isActive ? 'text-slate-900 dark:text-red-100' : 'text-slate-900 dark:text-slate-100'}`}>
         {persona.publicLabel}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[var(--grove-text-muted)] line-clamp-2">
+      <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-500 dark:text-red-300/70' : 'text-slate-500 dark:text-slate-400'}`}>
         {persona.description}
       </p>
     </button>
@@ -99,42 +163,48 @@ function LensCard({ persona, isActive, onSelect }: LensCardProps) {
 
 export function LensPicker() {
   const { getEnabledPersonas, selectLens, session } = useNarrativeEngine();
-  const { navigateTo } = useWorkspaceUI();
+  const { navigateTo, openInspector } = useWorkspaceUI();
   const personas = getEnabledPersonas();
   const activeLensId = session.activeLens;
+  const activePersona = personas.find(p => p.id === activeLensId);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter personas based on search
+  const filteredPersonas = useMemo(() => {
+    if (!searchQuery.trim()) return personas;
+    const query = searchQuery.toLowerCase();
+    return personas.filter(p =>
+      p.publicLabel.toLowerCase().includes(query) ||
+      p.description.toLowerCase().includes(query)
+    );
+  }, [personas, searchQuery]);
 
   const handleSelect = (personaId: string) => {
     selectLens(personaId);
-    // Navigate back to Explore/Terminal after selection
-    navigateTo(['explore']);
+    // Open inspector to show lens details
+    openInspector({ type: 'lens', lensId: personaId });
   };
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-[var(--grove-text)] mb-2">
-            Choose Your Lens
-          </h1>
-          <p className="text-[var(--grove-text-muted)]">
-            Select a perspective to explore The Grove. Each lens shapes how ideas are presented to you.
-          </p>
-        </div>
-
-        {/* Active lens indicator */}
-        {activeLensId && (
-          <div className="mb-6 p-3 rounded-lg bg-[var(--grove-accent-muted)] border border-[var(--grove-accent)]/30">
-            <p className="text-sm text-[var(--grove-text)]">
-              <span className="text-[var(--grove-accent)]">Active:</span>{' '}
-              {personas.find(p => p.id === activeLensId)?.publicLabel || 'Unknown'}
-            </p>
-          </div>
-        )}
+    <div className="h-full overflow-y-auto p-8">
+      <div className="max-w-4xl">
+        <CollectionHeader
+          title="Choose Your Lens"
+          description="Select a perspective to explore The Grove. Each lens shapes how ideas are presented to you, filtering the noise to match your intent."
+          searchPlaceholder="Search perspectives..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeIndicator={activePersona ? {
+            label: 'Active Lens',
+            value: activePersona.publicLabel,
+          } : undefined}
+        />
 
         {/* Lens grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {personas.map((persona) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredPersonas.map((persona) => (
             <LensCard
               key={persona.id}
               persona={persona}
@@ -144,10 +214,21 @@ export function LensPicker() {
           ))}
         </div>
 
-        {/* Footer hint */}
-        <div className="mt-8 text-center text-sm text-[var(--grove-text-dim)]">
-          <p>You can change your lens anytime from this view.</p>
-        </div>
+        {/* Empty state */}
+        {filteredPersonas.length === 0 && (
+          <div className="text-center py-12">
+            <span className="material-symbols-outlined text-4xl text-slate-400 mb-4">search_off</span>
+            <p className="text-slate-500 dark:text-slate-400">
+              No perspectives match "{searchQuery}"
+            </p>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="mt-4 text-sm text-primary hover:underline"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
