@@ -21,6 +21,7 @@ import { DEFAULT_PERSONAS } from '../../../data/default-personas';
 import { DataPanel } from '../components/DataPanel';
 import { GlowButton } from '../components/GlowButton';
 import { MetricCard } from '../components/MetricCard';
+import { LoadingSpinner } from '../../shared/feedback';
 import {
   BookOpen,
   Users,
@@ -300,7 +301,7 @@ const NarrativeArchitect: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-holo-cyan animate-pulse font-mono">Loading Narrative Engine...</div>
+        <LoadingSpinner size="lg" label="Loading Narrative Engine..." />
       </div>
     );
   }

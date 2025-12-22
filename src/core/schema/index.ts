@@ -151,3 +151,16 @@ export {
   MODE_CONFIGS,
   isWidgetMode
 } from './widget';
+
+// Foundation Console types
+export {
+  type FoundationConsole,
+  type FoundationInspectorMode,
+  type FoundationNavState,
+  type FoundationInspectorState,
+  type FoundationUIState,
+  type FoundationUIActions,
+  type FoundationUIContextType,
+  FOUNDATION_CONSOLE_KEY,
+  FOUNDATION_EXPANDED_KEY
+} from './foundation';
