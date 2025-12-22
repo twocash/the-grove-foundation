@@ -23,7 +23,10 @@
       "@core": ["./src/core"],
       "@core/*": ["./src/core/*"],
       "@surface/*": ["./src/surface/*"],
-      "@foundation/*": ["./src/foundation/*"]
+      "@foundation/*": ["./src/foundation/*"],
+      "@widget": ["./src/widget"],
+      "@widget/*": ["./src/widget/*"],
+      "@garden/*": ["./src/garden/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

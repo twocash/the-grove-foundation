@@ -43,6 +43,8 @@ export default defineConfig(({ mode }) => {
         '@core': path.resolve(__dirname, './src/core'),
         '@surface': path.resolve(__dirname, './src/surface'),
         '@foundation': path.resolve(__dirname, './src/foundation'),
+        '@widget': path.resolve(__dirname, './src/widget'),
+        '@garden': path.resolve(__dirname, './src/garden'),
       }
     }
   };

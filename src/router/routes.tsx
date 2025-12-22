@@ -1,11 +1,14 @@
 // src/router/routes.tsx
-// Route configuration for Surface and Foundation experiences
+// Route configuration for Surface, Widget, and Foundation experiences
 
 import React, { lazy, Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 
 // Lazy load Foundation to enable code splitting
 const FoundationLayout = lazy(() => import('../foundation/layout/FoundationLayout'));
+
+// Lazy load Grove Workspace for code splitting
+const GroveWorkspace = lazy(() => import('../workspace/GroveWorkspace').then(m => ({ default: m.GroveWorkspace })));
 
 // Lazy load all consoles for code splitting
 const NarrativeArchitect = lazy(() => import('../foundation/consoles/NarrativeArchitect'));
@@ -30,6 +33,13 @@ const ConsoleLoadingFallback: React.FC = () => (
   </div>
 );
 
+// Workspace loading fallback
+const WorkspaceLoadingFallback: React.FC = () => (
+  <div className="min-h-screen bg-[#0a0f14] text-white flex items-center justify-center">
+    <div className="text-[#00d4aa] animate-pulse">Loading Grove Workspace...</div>
+  </div>
+);
+
 // Surface Router handles Classic/Genesis experience switching
 import SurfaceRouter from '../surface/pages/SurfaceRouter';
 
@@ -38,6 +48,16 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <SurfaceRouter />,
+  },
+
+  // Grove Workspace (three-column Terminal experience)
+  {
+    path: '/terminal',
+    element: (
+      <Suspense fallback={<WorkspaceLoadingFallback />}>
+        <GroveWorkspace />
+      </Suspense>
+    ),
   },
 
   // Foundation (admin/control plane)
