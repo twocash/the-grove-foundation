@@ -84,7 +84,7 @@ const parseInline = (text: string, onBoldClick?: (phrase: string) => void) => {
     if ((part.startsWith('*') && part.endsWith('*') && part.length > 2) ||
         (part.startsWith('_') && part.endsWith('_') && part.length > 2)) {
       return (
-        <em key={i} className="italic text-ink">
+        <em key={i} className="italic text-slate-600 dark:text-slate-300">
           {part.slice(1, -1)}
         </em>
       );
@@ -125,8 +125,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptCl
       elements.push(
         <ul key={`list-${elements.length}`} className="mb-4 space-y-1 ml-4 list-none">
           {currentListItems.map((item, i) => (
-            <li key={i} className="pl-4 relative text-sm font-sans text-ink-muted">
-              <span className="absolute left-0 text-grove-clay top-1.5 w-1 h-1 rounded-full bg-grove-clay"></span>
+            <li key={i} className="pl-4 relative text-sm font-sans text-slate-600 dark:text-slate-300">
+              <span className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full bg-primary"></span>
               <span>{parseInline(item, onPromptClick)}</span>
             </li>
           ))}
@@ -150,9 +150,9 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptCl
             ) : (
               <div
                 key={i}
-                className="px-4 py-2.5 text-sm font-serif text-ink-muted"
+                className="px-4 py-2.5 text-sm font-serif text-slate-600 dark:text-slate-300"
               >
-                <span className="text-grove-clay mr-2">→</span>
+                <span className="text-primary mr-2">→</span>
                 {prompt}
               </div>
             )
