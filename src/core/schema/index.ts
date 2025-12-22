@@ -135,3 +135,19 @@ export {
   SPROUT_STORAGE_KEY,
   MAX_RECENT_SPROUTS
 } from './sprout';
+
+// Widget types
+export {
+  type WidgetMode,
+  type InspectorMode,
+  type WidgetSession,
+  type WidgetState,
+  type WidgetActions,
+  type WidgetUIContextType,
+  type ModeConfig,
+  WIDGET_MODE_KEY,
+  WIDGET_SESSION_KEY,
+  MODE_LABELS,
+  MODE_CONFIGS,
+  isWidgetMode
+} from './widget';
