@@ -6,6 +6,18 @@
    ============================================================ */
 @theme {
   /* ============================================================
+     WORKSPACE TOKENS (Grove Workspace - Light/Dark mode)
+     Sprint 6: Chat styling requires these for message bubbles
+     ============================================================ */
+  --color-primary: #4d7c0f;                    /* Grove green */
+  --color-background-light: #f8f7f5;           /* Warm paper/cream */
+  --color-background-dark: #0f172a;            /* Deep slate */
+  --color-surface-light: #ffffff;              /* Cards, panels (light) */
+  --color-surface-dark: #1e293b;               /* Cards, panels (dark) */
+  --color-border-light: #e7e5e4;               /* Subtle borders (light) */
+  --color-border-dark: #334155;                /* Dark borders */
+
+  /* ============================================================
      SURFACE TOKENS (The Village - Paper/Ink aesthetic)
      v0.12e: Minimalist Orchard palette (warm bone, forest charcoal)
      ============================================================ */
