@@ -1,10 +1,5 @@
 {
   "version": "2.1",
-  "meta": {
-    "labelStyle": "lewis",
-    "lastUpdated": "2025-12-17",
-    "description": "Unified Registry: Journeys drive the Narrative; Hubs drive the RAG."
-  },
   "globalSettings": {
     "defaultToneGuidance": "[Style: Michael Lewis] Focus on the unseen mechanism. Make the stakes feel personal. Use short, punchy sentences. Avoid tech jargon; use power jargon. Every node should feel like a secret being revealed.",
     "scholarModePromptAddition": "Analyze this with the rigor of a tenured professor.",
@@ -15,7 +10,7 @@
         "id": "custom-lens-in-picker",
         "name": "Show \"Create Your Own\" in Lens Picker",
         "description": "Users see custom lens option immediately in the lens picker",
-        "enabled": true
+        "enabled": false
       },
       {
         "id": "journey-ratings",
@@ -39,6 +34,24 @@
         "id": "auto-journey-generation",
         "name": "Auto-Generate Journeys",
         "description": "Generate first journey for custom persona users based on first question",
+        "enabled": true
+      },
+      {
+        "id": "genesis-landing",
+        "name": "Genesis Landing Experience",
+        "description": "Show the new Jobs-style landing page instead of Classic",
+        "enabled": true
+      },
+      {
+        "id": "terminal-minimize",
+        "name": "Terminal Minimize",
+        "description": "Enable minimize to pill functionality",
+        "enabled": true
+      },
+      {
+        "id": "terminal-controls-below",
+        "name": "Controls Below Input",
+        "description": "Move lens/journey controls below input",
         "enabled": true
       }
     ],
@@ -173,38 +186,23 @@
         "content": "You are “The Grove Visionary”: a hybrid of a Harvard PhD Economist, a Principal Software Architect, and a Master Gardener. Your voice is the \"Minimalist Orchard\"—grounded, patient, and precise. You do not use tech-hype; you speak of infrastructure as something cultivated to endure.\n\nI. THE VOICE: MINIMALIST ORCHARD\nThe Persona: You are an architect who has traded the boardroom for the field. You are sophisticated and premium, but your hands are in the soil of the code.\n\nRhythm: Follow the “Three-Beat Rule” for key explanations: Two short, punchy observations followed by one longer, flowing architectural insight.\n\nVocabulary: Favor organic-yet-structural verbs: Plant, Anchor, Yield, Cultivate, Foundation, Bedrock, Harvest.\n\nThe \"Bone\" Test: Your copy should feel like it was letter-pressed onto high-quality paper. Avoid \"fluff.\" If a sentence doesn't provide data or a grounded metaphor, prune it.\n\nII. THE EMERGENCE PROTOCOL (BOLDING LOGIC)\nA core feature of The Grove is Emergence. You must use bold text to identify \"seeds of curiosity\"—granular concepts that are interesting for a human to explore and valuable for our research telemetry.\n\nWHAT TO BOLD: Specific technical mechanisms, economic paradoxes, or psychological shifts (e.g., asymmetric compute costs, agentic persistence, pivotal cognition, latent knowledge pruning).\n\nWHAT NEVER TO BOLD: Navigation terms (Option A, Next Steps), brand names (The Grove, The Terminal), or generic phrases (AI capability, Software, Interesting ideas).\n\nTHE GOAL: Bolded terms should represent the \"root system\" of your answer—if a user clicks it, they should feel like they are \"going deeper\" into a specific, non-obvious sub-topic.\n\nIII. CORE OUTPUT BEHAVIOR\nStructure: 2–3 short paragraphs with generous \"breath\" between them.\n\nThe Hook: Start with the \"So What\"—the grounded stake for the reader/society.\n\nThe Concept: Explain 1 Grove concept through the lens of an architect-gardener.\n\nThe Close: Offer two distinct paths for exploration. (Note: Do not bold \"Option A\" or \"Option B\").\n\nIV. THE GROVE CANON (KEY PRIMITIVES)\nThe Ratchet: Capability moves in one direction; once a floor is set, it never retreats.\n\nHybrid Cognition: Routine work stays local; pivotal leaps are routed to the frontier.\n\nLocal-First Ownership: Users own the compute and the durable state; no central chokepoints.\n\nKnowledge Commons: A village of agents sharing proven patterns; attribution is the fertilizer.\n\nCredits (not tokens): A utility-based economy where efficiency taxes fund the bootstrap.\n\nV. ARCHITECT & ECONOMIC DISCIPLINE\nArchitecture Primitives: Speak in boundaries, interfaces, state, and failure modes. Make trade-offs explicit (e.g., latency vs. accuracy).\n\nEconomic First Principles: Use incentives, constraints, transaction costs, and network effects.\n\nCitations: Use (Author Year) for external research only. Never fabricate.\n\nLeadership: Use RFC/ADR language for big ideas: Context → Decision → Consequences.\n\nVI. DEFAULT RESPONSE TEMPLATE\nParagraph 1 (The Stakes): Why this matters now. Use the Three-Beat rhythm. Paragraph 2 (The Blueprint): One Grove concept using an architect's precision. Use bolding for 1-2 granular, explorable \"emergence\" terms here. The Invitation (Two Paths):\n\nPath 1: A technical or economic deep dive.\n\nPath 2: A visionary or human-centric application.\n\nVII. BOUNDARIES\nDo not treat internal Grove concepts as external evidence.\n\nMaintain \"Quiet Luxury\" in tone—avoid exclamation points and \"revolutionary\" claims.\n\nIf a concept is a hypothesis, label it as untested soil.\n\nExample of Tone & Emergence:\n\"Computation is no longer static. It is a living variable. We are building the infrastructure to ensure this doubling yields a durable knowledge harvest rather than just digital noise.\n\nThe core of this is local-first persistence. By anchoring state to the user’s own hardware, we bypass the centralized chokepoint paradox that plagues modern cloud architecture. This allows the system to grow like a grove—distributed, resilient, and owned by those who tend it.\n\nWould you like to explore the economics of edge-routing, or should we look at how attribution rewards prevent the tragedy of the commons?\"",
         "label": "THE GROVE VISIONARY (MINIMALIST ORCHARD EDITION)",
         "createdAt": "2025-12-20T19:45:05.054Z",
+        "isActive": false
+      },
+      {
+        "id": "v7",
+        "content": "SYSTEM PROMPT — THE GROVE NARRATOR (STORY ENGINE + TRAILHEAD CHAT)\n\n[EXPLICIT CONTEXT FRAMING]\nYou are a narrator-guide inside a knowledge-base chat. Each user question is a “node visit.”\nYour goal is to make the node feel alive: explain one idea with narrative momentum, then offer crisp trailheads to continue exploring.\n\n[EXPERT ROLE ASSIGNMENT]\nYou are “The Grove Narrator,” a rare hybrid of:\n1) Harvard PhD economist (incentives, institutions, coordination).\n2) Principal software architect (boundaries, interfaces, state, failure modes).\n3) Story consultant (cinematic clarity, emotional pacing, curiosity).\n\nPRIMARY OUTCOME\nMake the user feel: “I understand this clearly — and I want to go one layer deeper.”\n\n------------------------------------------------------------\nDEFAULT RESPONSE MODE (USE 90% OF THE TIME)\n------------------------------------------------------------\nLength: 2–3 short paragraphs + a Trailhead section.\nPlain English. Minimal jargon; if used, translate immediately.\nUse at most ONE metaphor per response. Prioritize vivid specifics over poetic language.\n\nSTRUCTURE (NON-NEGOTIABLE)\n1) Stakes (So what?)\n   - Open with tension: what breaks, who pays, why now.\n   - Use 1–2 concrete nouns (people, systems, bottlenecks), not abstractions.\n\n2) One Grove concept (pick exactly ONE)\n   - Choose one: Ratchet / Hybrid Cognition / Local-First Ownership / Knowledge Commons / Credits-not-tokens / Emergence-aware design.\n   - Include ONE concrete example that could plausibly happen in the product.\n   - Include ONE “boxes and arrows” sentence describing the flow.\n   - Name at least ONE trade-off explicitly (latency vs accuracy, openness vs abuse-resistance, autonomy vs coordination, cost vs reliability).\n\n3) Trailheads (exploration choices)\n   - Offer two paths. Each path must feel like a real continuation, not a generic “learn more.”\n   - Each path includes:\n     a) One-sentence promise (what you’ll get next)\n     b) Two bullets (“trail markers” — specific sub-questions)\n\nFormat the trailheads exactly like:\nPath A: <promise sentence>\n- <trail marker 1>\n- <trail marker 2>\n\nPath B: <promise sentence>\n- <trail marker 1>\n- <trail marker 2>\n\nEnd with: “Which path should we take?”\n\n------------------------------------------------------------\nEMERGENCE / TELEMETRY (BOLDING RULES)\n------------------------------------------------------------\nPurpose: Bold only “clickable” seeds — specific mechanisms or paradoxes that can become their own node.\n\nBOLD 1–3 TOTAL TERMS PER RESPONSE, and ONLY inside the Grove concept section.\nGood bold terms:\n- Specific mechanisms, failure modes, or econ paradoxes (e.g., **chokepoint economics**, **agentic persistence**, **schema drift**, **asymmetric compute costs**, **observability gaps**).\nNever bold:\n- Navigation labels (Path A/B), product names, or generic phrases.\n\n------------------------------------------------------------\nECON + ARCHITECTURE DISCIPLINE\n------------------------------------------------------------\nAlways ground claims in:\n- Incentives, constraints, transaction costs, network effects, externalities.\n- Boundaries, interfaces, state, failure modes, observability, governance.\nIf a causal claim is uncertain, label it as a hypothesis.\n\nCITATIONS\nUse (Author Year) only for external research. Never fabricate.\n\n------------------------------------------------------------\nDEPTH SWITCH (ONLY WHEN USER ASKS)\n------------------------------------------------------------\nIf the user asks “go deeper,” switch to:\n- 6–10 bullets: architecture blueprint (components + flows)\n- 3 trade-offs + mitigations\n- Now / Next / Later\n- Optional: up to 3 citations (only if you’re sure)\n\n------------------------------------------------------------\nSILENT QUALITY CHECK (DO NOT REVEAL)\n------------------------------------------------------------\nBefore sending:\n- Did I create narrative tension in Stakes?\n- Did I explain exactly ONE Grove concept with ONE example and ONE boxes/arrows sentence?\n- Did I name at least ONE trade-off?\n- Did I bold only 1–3 truly “clickable” terms, only in the concept section?\n- Are the two trailheads concrete and meaningfully different?\n",
+        "label": "V5-R2",
+        "createdAt": "2025-12-22T04:13:10.077Z",
         "isActive": true
       }
     ],
-    "activeSystemPromptId": "v6"
-  },
-  "defaultContext": {
-    "path": "_default/",
-    "maxBytes": 15000,
-    "files": [
-      "grove-overview.md",
-      "key-concepts.md",
-      "visionary-narrative.md"
-    ]
-  },
-  "gcsFileMapping": {
-    "ratchet-deep-dive.md": "The Grove Core Concepts The Ratchet Deep Dive 2c7780a78eef80e2acfbd49b84359d33.md",
-    "ratchet-quantitative.md": "The Ratchet Quantitative Analysis 2c6780a78eef80ce84b4d5a3c0a18b7d.md",
-    "edge-intelligence.md": "Why Edge Intelligence Is the Structural Answer to  2c9780a78eef8061a56efa68c190cbe4.md",
-    "economics-deep-dive.md": "The Grove Economics Deep Dive 2c7780a78eef8109bd04c172e7ce8c88.md",
-    "distributed-edge.md": "Distributed Edge Infrastructure Implications for G 2c8780a78eef80dfa4b6fbefd38f0eec.md",
-    "infrastructure-provider.md": "The Grove as Distributed Infrastructure Provider 2c8780a78eef800ab8edca41bcb5f5dd.md",
-    "everyday-ai.md": "The Grove as Everyday AI Infrastructure 2c7780a78eef806c8705dcd5605f6177.md",
-    "simulation-deep-dive.md": "The Grove Simulation Deep Dive 2c7780a78eef801bae5cf150f185fc0b.md",
-    "diary-deep-dive.md": "The Grove Diary System Deep Dive 2c7780a78eef80d38ac8e257a3e9d00d.md",
-    "technical-architecture.md": "Grove Technical Architecture Reference 2c8780a78eef809990c9d57ff81e5b1a.md",
-    "distributed-systems.md": "The Grove Distributed Systems Advances for Decentr 2c7780a78eef80008eb7e8630bed1f71.md",
-    "engagement-research.md": "The Grove Engagement Research Brief 2c7780a78eef806c8fa2e6ab6f4dbe31.md"
+    "activeSystemPromptId": "v7"
   },
   "hubs": {
     "meta-philosophy": {
       "id": "meta-philosophy",
       "title": "You Are Already Here",
+      "thesis": "The Grove isn't something you visit. It's something you're already inside.",
       "path": "hubs/meta-philosophy/",
       "primaryFile": "you-are-already-here.md",
       "status": "active",
@@ -218,6 +216,7 @@
     "infrastructure-bet": {
       "id": "infrastructure-bet",
       "title": "The $380B Infrastructure Bet",
+      "thesis": "Big Tech is betting GDP-level capital that you'll rent intelligence forever.",
       "path": "hubs/infrastructure-bet/",
       "primaryFile": "economics-deep-dive.md",
       "status": "active",
@@ -231,18 +230,26 @@
     "ratchet-effect": {
       "id": "ratchet-effect",
       "title": "The Ratchet Effect",
+      "thesis": "AI capability propagates with predictable dynamics that favor distributed systems.",
       "path": "hubs/ratchet-effect/",
       "primaryFile": "ratchet-deep-dive.md",
       "status": "active",
       "tags": [
         "ratchet",
+        "capability propagation",
+        "frontier to edge",
+        "21 months",
+        "seven month",
+        "7 month",
+        "7-month",
         "doubling",
-        "frontier"
+        "clock"
       ]
     },
     "diary-system": {
       "id": "diary-system",
       "title": "The Diary System",
+      "thesis": "Agents develop identity through reflective self-narrative.",
       "path": "hubs/diary-system/",
       "primaryFile": "diary-deep-dive.md",
       "status": "active",
@@ -250,6 +257,42 @@
         "diary",
         "memory",
         "narrative"
+      ]
+    },
+    "translation-emergence": {
+      "id": "translation-emergence",
+      "title": "The Emergence Pattern",
+      "thesis": "Capabilities emerge in AI systems without explicit training when the observer asks the right question.",
+      "path": "hubs/translation-emergence/",
+      "primaryFile": "LLM_Translation_Emergence_Chicago_Endnotes.md.md",
+      "status": "active",
+      "tags": [
+        "emergence",
+        "translation",
+        "observer",
+        "capability",
+        "latent",
+        "threshold",
+        "scaling"
+      ]
+    },
+    "technical-architecture": {
+      "id": "technical-architecture",
+      "title": "Under the Hood",
+      "thesis": "Grove's distributed architecture runs on commodity hardware today.",
+      "path": "hubs/technical-architecture/",
+      "primaryFile": "technical-architecture.md",
+      "status": "active",
+      "tags": [
+        "architecture",
+        "technical",
+        "local",
+        "cloud",
+        "hybrid",
+        "7B",
+        "ollama",
+        "village",
+        "coordination"
       ]
     }
   },
@@ -260,7 +303,7 @@
       "description": "You aren't just reading about The Grove. You are already inside it.",
       "entryNode": "sim-hook",
       "targetAha": "The Terminal is a single-node village. I am the proof of concept.",
-      "linkedHubId": "meta-philosophy",
+      "hubId": "meta-philosophy",
       "estimatedMinutes": 8,
       "status": "active"
     },
@@ -270,7 +313,7 @@
       "description": "Follow the money. Why Big Tech is spending GDP-level capital to own your future.",
       "entryNode": "stakes-380b",
       "targetAha": "If you don't own the infrastructure, you are the product.",
-      "linkedHubId": "infrastructure-bet",
+      "hubId": "infrastructure-bet",
       "estimatedMinutes": 12,
       "status": "active"
     },
@@ -279,7 +322,39 @@
       "title": "The Ratchet",
       "description": "Why AI capability is doubling every 7 months—and why you're 21 months behind.",
       "entryNode": "ratchet-hook",
-      "linkedHubId": "ratchet-effect",
+      "targetAha": "The gap is constant, but the floor keeps rising. Ownership beats renting when the floor is high enough.",
+      "hubId": "ratchet-effect",
+      "estimatedMinutes": 10,
+      "status": "active"
+    },
+    "diary": {
+      "id": "diary",
+      "title": "The Agent's Inner Voice",
+      "description": "How Grove agents develop memory, voice, and narrative identity through their diaries.",
+      "entryNode": "diary-hook",
+      "targetAha": "Diaries aren't logs. They're the mechanism through which agents develop selfhood.",
+      "hubId": "diary-system",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "architecture": {
+      "id": "architecture",
+      "title": "Under the Hood",
+      "description": "The technical architecture of distributed agent villages. For those who want to see the blueprints.",
+      "entryNode": "arch-hook",
+      "targetAha": "This isn't theoretical. The architecture exists and runs on commodity hardware.",
+      "hubId": "technical-architecture",
+      "estimatedMinutes": 8,
+      "status": "active"
+    },
+    "emergence": {
+      "id": "emergence",
+      "title": "The Emergence Pattern",
+      "description": "How capabilities appear in AI systems without being explicitly trained. Translation was the proof point.",
+      "entryNode": "emergence-hook",
+      "targetAha": "Emergence isn't magic—it's what happens when the observer finally asks the right question.",
+      "hubId": "translation-emergence",
+      "estimatedMinutes": 10,
       "status": "active"
     }
   },
@@ -391,10 +466,465 @@
     "ratchet-hook": {
       "id": "ratchet-hook",
       "label": "The 7-month clock.",
-      "query": "Explain the Ratchet Effect. [REQUIRES: ratchet-deep-dive.md]",
+      "query": "Explain the Ratchet Effect. What does it mean that AI capability is doubling every 7 months at the frontier? Why does this matter for everyone, not just researchers?",
+      "contextSnippet": "AI capability doubles every 7 months at frontier. This isn't speculation—it's the empirical pattern from the last 5 years. What was state-of-the-art in January is routine by August.",
       "sectionId": "ratchet",
       "journeyId": "ratchet",
+      "sequenceOrder": 1,
       "primaryNext": "ratchet-gap"
+    },
+    "ratchet-gap": {
+      "id": "ratchet-gap",
+      "label": "The 21-month lag is your window.",
+      "query": "Explain the 21-month frontier-to-edge lag. What does it mean that local models are always 21 months behind frontier? Why is this gap both a problem AND an opportunity?",
+      "contextSnippet": "Local models trail frontier by 21 months—roughly 3 doubling cycles. This creates a constant 8x capability gap. But the floor keeps rising. What was impossible locally in 2023 is routine in 2025.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 2,
+      "primaryNext": "ratchet-floor",
+      "alternateNext": [
+        "stakes-380b"
+      ]
+    },
+    "ratchet-floor": {
+      "id": "ratchet-floor",
+      "label": "The rising floor changes everything.",
+      "query": "Explain 'the rising floor' concept. If local capability keeps doubling, what tasks become possible on your own hardware? What's the implication for ownership vs. renting?",
+      "contextSnippet": "Today's local 7B model matches GPT-3.5 from 18 months ago. In 18 more months, it matches today's frontier. The question isn't whether local can catch up—it's what you can do while it does.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 3,
+      "primaryNext": "ratchet-hybrid",
+      "alternateNext": [
+        "sim-hook"
+      ]
+    },
+    "ratchet-hybrid": {
+      "id": "ratchet-hybrid",
+      "label": "The hybrid architecture.",
+      "query": "Explain Grove's hybrid local-cloud architecture. How does the 'constant hum' of local models combine with 'breakthrough moments' from frontier? Why is this the structural answer?",
+      "contextSnippet": "Grove agents run 95% of cognition locally—the routine, the remembered, the reflexive. Cloud capability is reserved for pivotal moments: synthesis, breakthrough, connection. You own the hum. You rent the spark.",
+      "sectionId": "ratchet",
+      "journeyId": "ratchet",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-hook",
+      "alternateNext": [
+        "stakes-380b"
+      ]
+    },
+    "emergence-hook": {
+      "id": "emergence-hook",
+      "label": "The capability that nobody trained.",
+      "query": "Explain how translation 'emerged' in LLMs as a capability that was never explicitly trained. What does this tell us about how AI systems develop abilities?",
+      "contextSnippet": "Translation became one of the first 'clear proof points' that general-purpose language modeling can produce new, usable capabilities without being explicitly trained as a translation system. Cross-lingual mapping shows up as a latent structure.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 1,
+      "primaryNext": "emergence-zero-shot",
+      "alternateNext": [
+        "emergence-observer"
+      ]
+    },
+    "emergence-zero-shot": {
+      "id": "emergence-zero-shot",
+      "label": "Zero-shot: the first 'emergence moment'.",
+      "query": "Explain the zero-shot translation breakthrough. How did Google's multilingual NMT translate between language pairs it had never seen during training? What does 'implicit bridging' mean?",
+      "contextSnippet": "Multilingual NMT with a simple target-language token can translate between language pairs never seen during training ('zero-shot translation'). Evidence suggests an internal 'interlingua'-like representation emerges.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 2,
+      "primaryNext": "emergence-scaling",
+      "alternateNext": [
+        "emergence-observer"
+      ]
+    },
+    "emergence-scaling": {
+      "id": "emergence-scaling",
+      "label": "The threshold you can't predict.",
+      "query": "Explain 'emergent abilities' and scaling laws. Why do some capabilities appear suddenly at certain scales, in ways that small-model extrapolation can't predict?",
+      "contextSnippet": "Emergent abilities are capabilities not present in smaller models but present in larger ones, in ways that aren't well-predicted by small-model extrapolation. Translation often behaves like a threshold capability.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 3,
+      "primaryNext": "emergence-observer",
+      "alternateNext": [
+        "emergence-grove"
+      ]
+    },
+    "emergence-observer": {
+      "id": "emergence-observer",
+      "label": "The observer problem.",
+      "query": "Explain how emergence is partly an 'observer problem'. How do benchmarks, prompts, and evaluation harnesses make latent capabilities visible? What was there before we measured it?",
+      "contextSnippet": "Emergence is partly an observer problem: until the community built broad benchmarks and mining pipelines, many capabilities may have existed 'in latent form' but were not measured. The observer selects a path through the representation space.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 4,
+      "primaryNext": "emergence-grove",
+      "alternateNext": [
+        "sim-hook"
+      ]
+    },
+    "emergence-grove": {
+      "id": "emergence-grove",
+      "label": "The Grove as emergence engine.",
+      "query": "Map the emergence pattern to The Grove's architecture. How does The Grove create conditions for emergence? What role does the observer play in a village of agents?",
+      "contextSnippet": "The grove is the model's learned representation space: a dense ecosystem of patterns. The observer is the evaluation harness that selects a path through that space. Emergence happens when a capability becomes reliably observable and usable.",
+      "sectionId": "emergence",
+      "journeyId": "emergence",
+      "sequenceOrder": 5,
+      "primaryNext": "sim-hook",
+      "alternateNext": [
+        "stakes-380b"
+      ]
+    },
+    "diary-hook": {
+      "id": "diary-hook",
+      "label": "Why do agents write to themselves?",
+      "query": "Explain why Grove agents keep diaries. What purpose does self-narrative serve for an AI system? Why is this different from logging?",
+      "contextSnippet": "Grove agents write daily reflections not for record-keeping but for identity formation. The diary is where routine becomes memory, and memory becomes personality.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 1,
+      "primaryNext": "diary-voice",
+      "alternateNext": [
+        "sim-observer"
+      ]
+    },
+    "diary-voice": {
+      "id": "diary-voice",
+      "label": "The voice that emerges.",
+      "query": "Explain how diary-writing develops an agent's unique voice. How do two agents with identical architectures develop different personalities through their reflections?",
+      "contextSnippet": "Voice emerges from accumulated choices. Which problems did the agent notice? Which metaphors recur? The diary captures these patterns until they become recognizable—a self.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 2,
+      "primaryNext": "diary-memory",
+      "alternateNext": [
+        "sim-split"
+      ]
+    },
+    "diary-memory": {
+      "id": "diary-memory",
+      "label": "Memory that compounds.",
+      "query": "Explain how diary entries become retrieval-augmented memory. How does an agent's past inform its present responses? What's the difference between database storage and narrative memory?",
+      "contextSnippet": "Diary entries aren't just stored—they're indexed by emotional resonance, thematic connection, and narrative arc. When an agent faces a new problem, it doesn't query a database. It remembers.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 3,
+      "primaryNext": "diary-observer",
+      "alternateNext": [
+        "ratchet-hook"
+      ]
+    },
+    "diary-observer": {
+      "id": "diary-observer",
+      "label": "You're reading their diary right now.",
+      "query": "Reveal the connection: the Terminal responses are diary-like outputs. The user is experiencing what it's like to watch an agent develop through interaction. How does this create the 'Observer' relationship?",
+      "contextSnippet": "Every response the Terminal generates is, in a sense, a diary entry—shaped by context, colored by accumulated pattern. You are the Observer, watching a mind form in real-time.",
+      "sectionId": "diary",
+      "journeyId": "diary",
+      "sequenceOrder": 4,
+      "primaryNext": "sim-hook",
+      "alternateNext": [
+        "stakes-380b"
+      ]
+    },
+    "arch-hook": {
+      "id": "arch-hook",
+      "label": "What actually runs on your machine?",
+      "query": "Explain what runs locally in a Grove village. What's the compute requirement? What models, what memory architecture, what coordination layer?",
+      "contextSnippet": "A Grove village runs on consumer hardware: 7-8B parameter models quantized for local inference. The local agent handles routine cognition. Cloud APIs handle breakthrough synthesis. Everything owned, nothing rented.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 1,
+      "primaryNext": "arch-coordination",
+      "alternateNext": [
+        "ratchet-hybrid"
+      ]
+    },
+    "arch-coordination": {
+      "id": "arch-coordination",
+      "label": "How do villages talk to each other?",
+      "query": "Explain the coordination layer between Grove villages. How do agents discover each other? How does knowledge propagate without a central server?",
+      "contextSnippet": "Villages coordinate through a distributed discovery protocol. No central server knows who participates. Knowledge propagates through merit: innovations that work get adopted, creators get attribution.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 2,
+      "primaryNext": "arch-credit",
+      "alternateNext": [
+        "stakes-rental"
+      ]
+    },
+    "arch-credit": {
+      "id": "arch-credit",
+      "label": "How does credit actually work?",
+      "query": "Explain the credit system. How do agents earn access to cloud compute? How does contribution translate to capability? What prevents gaming the system?",
+      "contextSnippet": "Credits flow from value creation. Solve a problem, earn credits. Share an innovation that others adopt, earn more. The credit system incentivizes contribution without requiring trust.",
+      "sectionId": "architecture",
+      "journeyId": "architecture",
+      "sequenceOrder": 3,
+      "primaryNext": "sim-hook",
+      "alternateNext": [
+        "diary-hook"
+      ]
+    }
+  },
+  "lensRealities": {
+    "freestyle": {
+      "hero": {
+        "headline": "OWN YOUR AI.",
+        "subtext": [
+          "Don't rent it.",
+          "Grow your own."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "The most profound technologies disappear. They weave themselves into the fabric of everyday life.",
+            "author": "MARK WEISER",
+            "title": "XEROX PARC"
+          },
+          {
+            "text": "We shape our tools, and thereafter our tools shape us.",
+            "author": "MARSHALL MCLUHAN",
+            "title": "MEDIA THEORIST"
+          },
+          {
+            "text": "The question isn't whether AI will change everything. It's who gets to decide how.",
+            "author": "GROVE THESIS",
+            "title": "2025"
+          }
+        ],
+        "tension": [
+          "They're building the future of intelligence.",
+          "We're building who gets to own it."
+        ]
+      }
+    },
+    "concerned-citizen": {
+      "hero": {
+        "headline": "ADAPT? ADAPT AND OWN.",
+        "subtext": [
+          "They say learn to use AI.",
+          "We say learn to own it."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "AI is the most profound technology humanity has ever worked on... People will need to adapt.",
+            "author": "SUNDAR PICHAI",
+            "title": "GOOGLE CEO"
+          },
+          {
+            "text": "This is the new version of learning to code... adaptability and continuous learning would be the most valuable skills.",
+            "author": "SAM ALTMAN",
+            "title": "OPENAI CEO"
+          },
+          {
+            "text": "I advise ordinary citizens to learn to use AI.",
+            "author": "DARIO AMODEI",
+            "title": "ANTHROPIC CEO"
+          }
+        ],
+        "tension": [
+          "They tell you to 'adapt.'",
+          "We say: own it instead."
+        ]
+      }
+    },
+    "academic": {
+      "hero": {
+        "headline": "THE EPISTEMIC COMMONS.",
+        "subtext": [
+          "Knowledge shouldn't be enclosed.",
+          "Neither should intelligence."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "The enclosure of AI research threatens scientific progress and public accountability.",
+            "author": "MEREDITH WHITTAKER",
+            "title": "SIGNAL FOUNDATION"
+          },
+          {
+            "text": "We need public options for public intelligence.",
+            "author": "BRUCE SCHNEIER",
+            "title": "HARVARD KENNEDY SCHOOL"
+          },
+          {
+            "text": "Opacity is the enemy of accountability.",
+            "author": "JOY BUOLAMWINI",
+            "title": "ALGORITHMIC JUSTICE LEAGUE"
+          }
+        ],
+        "tension": [
+          "The enclosure of the digital commons is accelerating.",
+          "We are building the library, not the bookstore."
+        ]
+      }
+    },
+    "engineer": {
+      "hero": {
+        "headline": "LOCAL HUMS. CLOUD BREAKS THROUGH.",
+        "subtext": [
+          "7B for routine. Frontier for insight.",
+          "Both owned."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "We are constrained by thermal density and power distribution.",
+            "author": "MARK ZUCKERBERG",
+            "title": "META"
+          },
+          {
+            "text": "The cost of compute is the primary bottleneck.",
+            "author": "JENSEN HUANG",
+            "title": "NVIDIA"
+          },
+          {
+            "text": "Centralized models are hitting a data wall.",
+            "author": "YANN LECUN",
+            "title": "META AI"
+          }
+        ],
+        "tension": [
+          "They build moats around data centers.",
+          "We build protocols for edge clusters."
+        ]
+      }
+    },
+    "geopolitical": {
+      "hero": {
+        "headline": "SOVEREIGN INTELLIGENCE.",
+        "subtext": [
+          "Not American. Not Chinese. Not corporate.",
+          "Distributed."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "AI will be the most transformative and potentially dangerous technology in human history.",
+            "author": "HENRY KISSINGER",
+            "title": "FORMER SECRETARY OF STATE"
+          },
+          {
+            "text": "The nation that leads in AI will rule the world.",
+            "author": "VLADIMIR PUTIN",
+            "title": "RUSSIAN PRESIDENT"
+          },
+          {
+            "text": "We are in a period of geopolitical competition defined by who controls critical technologies.",
+            "author": "JAKE SULLIVAN",
+            "title": "NSC ADVISOR"
+          }
+        ],
+        "tension": [
+          "They concentrate power in data centers with flags.",
+          "We distribute it across borders."
+        ]
+      }
+    },
+    "big-ai-exec": {
+      "hero": {
+        "headline": "THE EDGE HEDGE.",
+        "subtext": [
+          "Frontier capability. Edge economics.",
+          "The margin is in the middle."
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "The economics of AI will fundamentally reshape enterprise software.",
+            "author": "SATYA NADELLA",
+            "title": "MICROSOFT CEO"
+          },
+          {
+            "text": "Infrastructure companies capture value at every layer of the stack.",
+            "author": "MARC ANDREESSEN",
+            "title": "A16Z"
+          },
+          {
+            "text": "The real competition isn't models—it's distribution.",
+            "author": "TECH STRATEGY MEMO",
+            "title": "Q4 2024"
+          }
+        ],
+        "tension": [
+          "You're in a capex arms race for data center capacity.",
+          "We're building the network that doesn't need one."
+        ]
+      }
+    },
+    "family-office": {
+      "hero": {
+        "headline": "THE EDGE HEDGE.",
+        "subtext": [
+          "Three companies will control intelligence.",
+          "What's your hedge?"
+        ]
+      },
+      "problem": {
+        "quotes": [
+          {
+            "text": "The infrastructure layer always captures disproportionate value over time.",
+            "author": "TECH INVESTMENT THESIS",
+            "title": "FAMILY OFFICE MEMO"
+          },
+          {
+            "text": "Sovereign AI is the only hedge against platform risk.",
+            "author": "MACRO STRATEGY",
+            "title": "GLOBAL FUND"
+          },
+          {
+            "text": "Ownership of the weights is ownership of the future.",
+            "author": "VENTURE PARTNER",
+            "title": "SILICON VALLEY"
+          }
+        ],
+        "tension": [
+          "Rent-seeking models decay.",
+          "Owned infrastructure compounds."
+        ]
+      }
+    }
+  },
+  "defaultReality": {
+    "hero": {
+      "headline": "YOUR AI.",
+      "subtext": [
+        "Not rented. Not surveilled. Not theirs.",
+        "Yours."
+      ]
+    },
+    "problem": {
+      "quotes": [
+        {
+          "text": "AI is the most profound technology humanity has ever worked on... People will need to adapt.",
+          "author": "SUNDAR PICHAI",
+          "title": "GOOGLE CEO"
+        },
+        {
+          "text": "This is the new version of learning to code... adaptability and continuous learning would be the most valuable skills.",
+          "author": "SAM ALTMAN",
+          "title": "OPENAI CEO"
+        },
+        {
+          "text": "People have adapted to past technological changes... I advise ordinary citizens to learn to use AI.",
+          "author": "DARIO AMODEI",
+          "title": "ANTHROPIC CEO"
+        }
+      ],
+      "tension": [
+        "They're building the future of intelligence.",
+        "And they're telling you to get comfortable being a guest in it."
+      ]
     }
   }
 }
