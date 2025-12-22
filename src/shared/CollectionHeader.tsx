@@ -1,6 +1,7 @@
 // src/shared/CollectionHeader.tsx
 // Reusable header for collection views with search, filter, sort
 
+import { type ReactNode } from 'react';
 import { SearchInput } from './SearchInput';
 import { FilterButton, FilterOption } from './FilterButton';
 import { SortButton, SortOption } from './SortButton';
@@ -34,7 +35,7 @@ interface CollectionHeaderProps {
   };
 
   // Additional content
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export function CollectionHeader({

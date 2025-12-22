@@ -1,11 +1,11 @@
 // src/cultivate/SproutGrid.tsx
 // Display user's captured sprouts organized by status
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useSproutStorage } from '../../hooks/useSproutStorage';
 import { Sprout } from '../core/schema/sprout';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { Sprout as SproutIcon, Clock, Tag, MessageSquare, Trash2 } from 'lucide-react';
+import { CollectionHeader } from '../shared';
 
 interface SproutCardProps {
   sprout: Sprout;
@@ -19,7 +19,7 @@ function SproutCard({ sprout, onDelete, onSelect }: SproutCardProps) {
 
   return (
     <div
-      className="group relative p-4 rounded-lg border border-[var(--grove-border)] bg-[var(--grove-surface)] hover:border-[var(--grove-accent)]/50 transition-all cursor-pointer"
+      className="group relative p-5 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-pointer"
       onClick={() => onSelect(sprout)}
     >
       {/* Delete button */}
@@ -28,37 +28,37 @@ function SproutCard({ sprout, onDelete, onSelect }: SproutCardProps) {
           e.stopPropagation();
           onDelete(sprout.id);
         }}
-        className="absolute top-2 right-2 p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-[var(--grove-bg)] text-[var(--grove-text-dim)] hover:text-red-400 transition-all"
+        className="absolute top-3 right-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-all"
         title="Delete sprout"
       >
-        <Trash2 size={14} />
+        <span className="material-symbols-outlined text-lg">delete</span>
       </button>
 
       {/* Query snippet */}
       <div className="flex items-start gap-2 mb-2">
-        <MessageSquare size={14} className="text-[var(--grove-text-dim)] mt-0.5 shrink-0" />
-        <p className="text-sm text-[var(--grove-text-muted)] line-clamp-1">
+        <span className="material-symbols-outlined text-slate-400 text-sm mt-0.5">chat_bubble</span>
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
           {sprout.query}
         </p>
       </div>
 
       {/* Response preview */}
-      <p className="text-[var(--grove-text)] text-sm line-clamp-3 mb-3">
+      <p className="text-slate-700 dark:text-slate-200 text-sm line-clamp-3 mb-3 leading-relaxed">
         {sprout.response}
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-[var(--grove-text-dim)]">
+      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-1">
-          <Clock size={12} />
+          <span className="material-symbols-outlined text-sm">schedule</span>
           <span>{timeAgo}</span>
         </div>
 
         {sprout.tags.length > 0 && (
           <div className="flex items-center gap-1">
-            <Tag size={12} />
+            <span className="material-symbols-outlined text-sm">label</span>
             <span>{sprout.tags.slice(0, 2).join(', ')}</span>
-            {sprout.tags.length > 2 && <span>+{sprout.tags.length - 2}</span>}
+            {sprout.tags.length > 2 && <span className="text-slate-400">+{sprout.tags.length - 2}</span>}
           </div>
         )}
       </div>
@@ -82,16 +82,29 @@ function getTimeAgo(date: Date): string {
 
 export function SproutGrid() {
   const { getSprouts, deleteSprout, getSproutsCount } = useSproutStorage();
-  const { openInspector } = useWorkspaceUI();
-  const sprouts = getSprouts();
+  const { openInspector, navigateTo } = useWorkspaceUI();
+  const [searchQuery, setSearchQuery] = useState('');
+  const allSprouts = getSprouts();
   const count = getSproutsCount();
 
-  // Sort by most recent first
+  // Sort by most recent first and filter by search
   const sortedSprouts = useMemo(() => {
-    return [...sprouts].sort((a, b) =>
+    let result = [...allSprouts].sort((a, b) =>
       new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
     );
-  }, [sprouts]);
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(s =>
+        s.query.toLowerCase().includes(query) ||
+        s.response.toLowerCase().includes(query) ||
+        s.tags.some(t => t.toLowerCase().includes(query)) ||
+        (s.notes && s.notes.toLowerCase().includes(query))
+      );
+    }
+
+    return result;
+  }, [allSprouts, searchQuery]);
 
   const handleSelect = (sprout: Sprout) => {
     openInspector({ type: 'sprout', sproutId: sprout.id });
@@ -106,59 +119,75 @@ export function SproutGrid() {
   if (count === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-8">
-        <div className="w-16 h-16 rounded-full bg-[var(--grove-surface)] flex items-center justify-center mb-4">
-          <SproutIcon size={32} className="text-[var(--grove-accent)]" />
+        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-3xl text-emerald-600 dark:text-emerald-400">eco</span>
         </div>
-        <h2 className="text-xl font-semibold text-[var(--grove-text)] mb-2">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
           No Sprouts Yet
         </h2>
-        <p className="text-[var(--grove-text-muted)] max-w-md mb-6">
-          Capture insights from conversations using the <code className="text-[var(--grove-accent)]">/sprout</code> command in the Terminal.
+        <p className="text-slate-500 dark:text-slate-400 max-w-md mb-6">
+          Capture insights from conversations using the <code className="text-primary font-mono">/sprout</code> command in the Terminal.
         </p>
-        <div className="text-sm text-[var(--grove-text-dim)] space-y-1">
+        <div className="text-sm text-slate-500 dark:text-slate-400 space-y-1 font-mono">
           <p><code>/sprout</code> - Capture the last response</p>
           <p><code>/sprout --tag=idea</code> - Capture with a tag</p>
-          <p><code>/sprout --note="Great insight"</code> - Add a note</p>
+          <p><code>/sprout --note="..."</code> - Add a note</p>
         </div>
+        <button
+          onClick={() => navigateTo(['explore'])}
+          className="mt-6 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+        >
+          Start Exploring
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-[var(--grove-text)] mb-1">
-              My Sprouts
-            </h1>
-            <p className="text-[var(--grove-text-muted)]">
-              {count} insight{count !== 1 ? 's' : ''} captured
+    <div className="h-full overflow-y-auto p-8">
+      <div className="max-w-4xl">
+        <CollectionHeader
+          title="My Sprouts"
+          description="Insights you've captured from conversations. Review, refine, and share."
+          searchPlaceholder="Search sprouts..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeIndicator={{
+            label: 'Total',
+            value: `${count} sprout${count !== 1 ? 's' : ''}`,
+            icon: 'eco',
+          }}
+        />
+
+        {/* No search results */}
+        {sortedSprouts.length === 0 && searchQuery && (
+          <div className="text-center py-12">
+            <span className="material-symbols-outlined text-4xl text-slate-400 mb-4">search_off</span>
+            <p className="text-slate-500 dark:text-slate-400">
+              No sprouts match "{searchQuery}"
             </p>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="mt-4 text-sm text-primary hover:underline"
+            >
+              Clear search
+            </button>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--grove-accent-muted)]">
-            <SproutIcon size={16} className="text-[var(--grove-accent)]" />
-            <span className="text-sm font-medium text-[var(--grove-accent)]">{count}</span>
-          </div>
-        </div>
+        )}
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sortedSprouts.map((sprout) => (
-            <SproutCard
-              key={sprout.id}
-              sprout={sprout}
-              onDelete={handleDelete}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
-
-        {/* Footer hint */}
-        <div className="mt-8 text-center text-sm text-[var(--grove-text-dim)]">
-          <p>Click a sprout to view details in the Inspector</p>
-        </div>
+        {sortedSprouts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sortedSprouts.map((sprout) => (
+              <SproutCard
+                key={sprout.id}
+                sprout={sprout}
+                onDelete={handleDelete}
+                onSelect={handleSelect}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

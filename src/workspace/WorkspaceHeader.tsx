@@ -1,43 +1,17 @@
 // src/workspace/WorkspaceHeader.tsx
 // Top bar with branding and global actions
 
-import { useState, useEffect } from 'react';
 import { useWorkspaceUI } from './WorkspaceUIContext';
+import { useWorkspaceState } from '../lib/useWorkspaceState';
 
 export function WorkspaceHeader() {
   const { openCommandPalette, toggleInspector, inspector } = useWorkspaceUI();
-  const [isDark, setIsDark] = useState(false);
+  const { effectiveTheme, preferences, toggleTheme } = useWorkspaceState();
 
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const stored = localStorage.getItem('grove-theme');
-    if (stored === 'dark') {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    } else if (stored === 'light') {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      // Use system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDark(prefersDark);
-      if (prefersDark) {
-        document.documentElement.classList.add('dark');
-      }
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('grove-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('grove-theme', 'light');
-    }
-  };
+  const isDark = effectiveTheme === 'dark';
+  const themeLabel = preferences.theme === 'system'
+    ? `System (${effectiveTheme})`
+    : effectiveTheme === 'dark' ? 'Dark' : 'Light';
 
   return (
     <header className="h-14 flex items-center justify-between px-4 bg-[var(--grove-surface)] border-b border-[var(--grove-border)] flex-shrink-0 z-10">
@@ -85,10 +59,15 @@ export function WorkspaceHeader() {
         <button
           onClick={toggleTheme}
           className="p-2 text-[var(--grove-text-muted)] hover:bg-stone-100 dark:hover:bg-slate-700 rounded-md transition-colors"
-          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={`Theme: ${themeLabel} (click to cycle)`}
         >
-          <span className={`material-symbols-outlined ${isDark ? 'hidden' : ''}`}>dark_mode</span>
-          <span className={`material-symbols-outlined ${isDark ? '' : 'hidden'}`}>light_mode</span>
+          {preferences.theme === 'system' ? (
+            <span className="material-symbols-outlined">contrast</span>
+          ) : isDark ? (
+            <span className="material-symbols-outlined">light_mode</span>
+          ) : (
+            <span className="material-symbols-outlined">dark_mode</span>
+          )}
         </button>
       </div>
     </header>

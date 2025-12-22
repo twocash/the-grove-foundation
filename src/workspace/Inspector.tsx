@@ -3,6 +3,8 @@
 
 import { useWorkspaceUI } from './WorkspaceUIContext';
 import { LensInspector } from '../explore/LensInspector';
+import { JourneyInspector } from '../explore/JourneyInspector';
+import { SproutInspector } from '../cultivate/SproutInspector';
 
 export function Inspector() {
   const { inspector, closeInspector } = useWorkspaceUI();
@@ -59,44 +61,10 @@ export function Inspector() {
         );
 
       case 'journey':
-        return (
-          <div className="p-5 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-stone-100 dark:bg-slate-700 flex items-center justify-center">
-                <span className="material-symbols-outlined text-slate-600 dark:text-slate-300">map</span>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Journey</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{inspector.mode.journeyId}</p>
-              </div>
-            </div>
-            <div className="p-4 bg-stone-50 dark:bg-slate-900 rounded-lg border border-border-light dark:border-slate-700">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Journey details coming soon
-              </p>
-            </div>
-          </div>
-        );
+        return <JourneyInspector journeyId={inspector.mode.journeyId} />;
 
       case 'sprout':
-        return (
-          <div className="p-5 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
-                <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400">eco</span>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Sprout</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{inspector.mode.sproutId}</p>
-              </div>
-            </div>
-            <div className="p-4 bg-stone-50 dark:bg-slate-900 rounded-lg border border-border-light dark:border-slate-700">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Sprout details coming soon
-              </p>
-            </div>
-          </div>
-        );
+        return <SproutInspector sproutId={inspector.mode.sproutId} />;
 
       case 'diary-entry':
         return (

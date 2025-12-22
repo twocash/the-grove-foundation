@@ -216,7 +216,7 @@ export function LensInspector({ personaId }: LensInspectorProps) {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{persona.publicLabel}</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{persona.archetypeLabel || 'Custom Perspective'}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{persona.description?.substring(0, 50) || 'Perspective'}</p>
         </div>
       </div>
 
@@ -229,6 +229,26 @@ export function LensInspector({ personaId }: LensInspectorProps) {
         label="Lens Active"
         description={isActive ? 'Currently in use' : 'Click to activate'}
       />
+
+      {/* Primary Action Button */}
+      <button
+        onClick={() => {
+          if (!isActive) {
+            selectLens(personaId);
+          }
+          navigateTo(['explore']);
+        }}
+        className={`
+          w-full py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 transition-all
+          ${isActive
+            ? 'bg-primary text-white hover:bg-primary/90 shadow-md'
+            : 'bg-stone-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-stone-200 dark:hover:bg-slate-700'
+          }
+        `}
+      >
+        <span className="material-symbols-outlined text-lg">chat</span>
+        {isActive ? 'Continue Exploring' : 'Start Exploring'}
+      </button>
 
       {/* Configuration Section */}
       <div className="border-t border-border-light dark:border-border-dark pt-5 space-y-5">
