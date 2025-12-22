@@ -16,6 +16,13 @@ try {
 }
 import { NARRATIVE_ARCHITECT_PROMPT } from './data/prompts.js';
 import { Octokit } from '@octokit/rest';
+import {
+  loadConfig as loadHealthConfig,
+  runChecks,
+  loadHealthLog,
+  appendToHealthLog,
+  getEngineVersion
+} from './lib/health-validator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -1672,6 +1679,67 @@ app.get('/api/health/ready', async (req, res) => {
             message: 'Missing required configuration. Check Cloud Run env vars.',
             timestamp: new Date().toISOString()
         });
+    }
+});
+
+// --- Health Dashboard API ---
+// Declarative health check system (DAIRE aligned)
+
+// GET /api/health - Current health status
+app.get('/api/health', (req, res) => {
+    try {
+        const config = loadHealthConfig();
+        const report = runChecks(config);
+        res.json(report);
+    } catch (err) {
+        console.error('[Health API] Error running checks:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/health/config - Configuration for UI
+app.get('/api/health/config', (req, res) => {
+    try {
+        const config = loadHealthConfig();
+        res.json({
+            version: config.version,
+            display: config.display,
+            checkCount: {
+                engine: config.engineChecks?.length || 0,
+                corpus: config.corpusChecks?.length || 0
+            }
+        });
+    } catch (err) {
+        console.error('[Health API] Error loading config:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/health/history - Health log entries
+app.get('/api/health/history', (req, res) => {
+    try {
+        const log = loadHealthLog();
+        const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+        res.json({
+            entries: log.entries.slice(0, limit),
+            total: log.entries.length
+        });
+    } catch (err) {
+        console.error('[Health API] Error loading history:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST /api/health/run - Trigger check and log
+app.post('/api/health/run', (req, res) => {
+    try {
+        const config = loadHealthConfig();
+        const report = runChecks(config);
+        const entry = appendToHealthLog(report, { triggeredBy: 'api' });
+        res.json(entry);
+    } catch (err) {
+        console.error('[Health API] Error running check:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 

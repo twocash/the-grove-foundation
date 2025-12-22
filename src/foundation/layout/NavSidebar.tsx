@@ -14,6 +14,7 @@ import {
   Home,
   Menu,
   Activity,
+  HeartPulse,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -26,6 +27,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'genesis', icon: Activity, label: 'Genesis', route: '/foundation/genesis' },
+  { id: 'health', icon: HeartPulse, label: 'System Health', route: '/foundation/health' },
   { id: 'narrative', icon: BookOpen, label: 'Narrative Architect', route: '/foundation/narrative' },
   { id: 'engagement', icon: Zap, label: 'Engagement Bridge', route: '/foundation/engagement' },
   { id: 'knowledge', icon: Database, label: 'Knowledge Vault', route: '/foundation/knowledge' },

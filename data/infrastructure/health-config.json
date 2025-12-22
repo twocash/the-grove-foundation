@@ -1,0 +1,124 @@
+{
+  "version": "1.0",
+  "display": {
+    "dashboardTitle": "System Health",
+    "categoryLabels": {
+      "engine": "Engine Health",
+      "schema-integrity": "Schema Integrity",
+      "journey-navigation": "Journey Navigation",
+      "rag-integration": "RAG Integration"
+    }
+  },
+  "engineChecks": [
+    {
+      "id": "health-config-valid",
+      "name": "Health Config Parseable",
+      "category": "engine",
+      "type": "json-exists",
+      "target": { "file": "infrastructure/health-config.json" },
+      "severity": "critical",
+      "impact": "Health system cannot function without valid config",
+      "inspect": "Validate JSON syntax in health-config.json"
+    }
+  ],
+  "corpusChecks": [
+    {
+      "id": "hub-data-valid",
+      "name": "Hub Data Parseable",
+      "category": "schema-integrity",
+      "type": "json-exists",
+      "target": { "file": "knowledge/hubs.json" },
+      "severity": "critical"
+    },
+    {
+      "id": "journey-data-valid",
+      "name": "Journey Data Parseable",
+      "category": "schema-integrity",
+      "type": "json-exists",
+      "target": { "file": "exploration/journeys.json" },
+      "severity": "critical"
+    },
+    {
+      "id": "node-data-valid",
+      "name": "Node Data Parseable",
+      "category": "schema-integrity",
+      "type": "json-exists",
+      "target": { "file": "exploration/nodes.json" },
+      "severity": "critical"
+    },
+    {
+      "id": "journey-hub-refs",
+      "name": "Journey Hub References",
+      "category": "schema-integrity",
+      "type": "reference-check",
+      "source": { "file": "exploration/journeys.json", "path": "journeys.*.hubId" },
+      "target": { "file": "knowledge/hubs.json", "path": "hubs" },
+      "severity": "critical",
+      "impact": "Broken hub references cause navigation failures",
+      "inspect": "Compare journeys.json hubId values against hubs.json keys"
+    },
+    {
+      "id": "node-journey-refs",
+      "name": "Node Journey References",
+      "category": "schema-integrity",
+      "type": "reference-check",
+      "source": { "file": "exploration/nodes.json", "path": "nodes.*.journeyId" },
+      "target": { "file": "exploration/journeys.json", "path": "journeys" },
+      "severity": "critical",
+      "impact": "Orphaned nodes won't appear in any journey",
+      "inspect": "Compare nodes.json journeyId values against journeys.json keys"
+    },
+    {
+      "id": "journey-entry-refs",
+      "name": "Journey Entry Node References",
+      "category": "schema-integrity",
+      "type": "reference-check",
+      "source": { "file": "exploration/journeys.json", "path": "journeys.*.entryNode" },
+      "target": { "file": "exploration/nodes.json", "path": "nodes" },
+      "severity": "critical",
+      "impact": "Journeys without valid entry nodes cannot start",
+      "inspect": "Compare journeys.json entryNode values against nodes.json keys"
+    },
+    {
+      "id": "node-next-refs",
+      "name": "Node Primary Next References",
+      "category": "journey-navigation",
+      "type": "reference-check",
+      "source": { "file": "exploration/nodes.json", "path": "nodes.*.primaryNext" },
+      "target": { "file": "exploration/nodes.json", "path": "nodes" },
+      "severity": "critical",
+      "params": { "allowNull": true },
+      "impact": "Broken next references strand users mid-journey",
+      "inspect": "Check nodes.json primaryNext values exist in nodes keys (null is valid terminal)"
+    },
+    {
+      "id": "node-alt-next-refs",
+      "name": "Node Alternate Next References",
+      "category": "journey-navigation",
+      "type": "reference-check",
+      "source": { "file": "exploration/nodes.json", "path": "nodes.*.alternateNext" },
+      "target": { "file": "exploration/nodes.json", "path": "nodes" },
+      "severity": "critical",
+      "params": { "allowNull": true, "isArray": true },
+      "impact": "Broken alternate paths frustrate exploration",
+      "inspect": "Check nodes.json alternateNext values exist in nodes keys"
+    },
+    {
+      "id": "journey-chains-complete",
+      "name": "Journey Chains Reach Terminal",
+      "category": "journey-navigation",
+      "type": "chain-valid",
+      "source": { "file": "exploration/journeys.json", "path": "journeys" },
+      "params": {
+        "entryField": "entryNode",
+        "nodeFile": "exploration/nodes.json",
+        "linkField": "primaryNext",
+        "maxDepth": 50,
+        "terminalValues": [null]
+      },
+      "severity": "warning",
+      "impact": "Incomplete chains may leave users stranded or in loops",
+      "inspect": "Trace from each journey's entryNode following primaryNext until null or maxDepth"
+    }
+  ]
+}

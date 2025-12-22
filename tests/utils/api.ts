@@ -27,3 +27,36 @@ export async function healthCheck(): Promise<{ status: string }> {
   }
   return res.json()
 }
+
+// Health Dashboard API helpers
+export async function fetchHealth(): Promise<any> {
+  const res = await fetch(`${API_URL}/api/health`)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch health: ${res.status} ${res.statusText}`)
+  }
+  return res.json()
+}
+
+export async function fetchHealthConfig(): Promise<any> {
+  const res = await fetch(`${API_URL}/api/health/config`)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch health config: ${res.status} ${res.statusText}`)
+  }
+  return res.json()
+}
+
+export async function fetchHealthHistory(limit = 50): Promise<any> {
+  const res = await fetch(`${API_URL}/api/health/history?limit=${limit}`)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch health history: ${res.status} ${res.statusText}`)
+  }
+  return res.json()
+}
+
+export async function runHealthCheck(): Promise<any> {
+  const res = await fetch(`${API_URL}/api/health/run`, { method: 'POST' })
+  if (!res.ok) {
+    throw new Error(`Failed to run health check: ${res.status} ${res.statusText}`)
+  }
+  return res.json()
+}
