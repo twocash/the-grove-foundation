@@ -164,3 +164,14 @@ export {
   FOUNDATION_CONSOLE_KEY,
   FOUNDATION_EXPANDED_KEY
 } from './foundation';
+
+// Sprout Queue types
+export {
+  type SproutQueueStatus,
+  type SproutCaptureContext,
+  type SproutModeration,
+  type SproutTargetCommons,
+  type QueuedSprout,
+  type SproutQueueCounts,
+  type SproutQueueFilter
+} from './sprout-queue';

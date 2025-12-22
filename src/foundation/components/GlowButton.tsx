@@ -1,5 +1,5 @@
 // src/foundation/components/GlowButton.tsx
-// Foundation-styled button with glow effects
+// Foundation-styled button with unified design tokens
 
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
@@ -11,7 +11,7 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 interface GlowButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  icon?: LucideIcon;
+  icon?: LucideIcon | string; // LucideIcon or Material Symbols name
   iconPosition?: 'left' | 'right';
   loading?: boolean;
   disabled?: boolean;
@@ -19,24 +19,26 @@ interface GlowButtonProps {
   children: React.ReactNode;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  fullWidth?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: `
-    bg-holo-cyan/10 border-holo-cyan text-holo-cyan
-    hover:bg-holo-cyan/20 hover:shadow-[0_0_15px_rgba(0,212,255,0.3)]
+    bg-primary/10 border-primary text-primary
+    hover:bg-primary/20 hover:shadow-[0_0_15px_rgba(77,124,15,0.3)]
+    dark:bg-primary/20 dark:hover:bg-primary/30
   `,
   secondary: `
-    bg-transparent border-holo-cyan/30 text-gray-400
-    hover:border-holo-cyan/50 hover:text-holo-cyan
+    bg-slate-100 dark:bg-slate-800 border-border-light dark:border-border-dark text-slate-700 dark:text-slate-300
+    hover:bg-slate-200 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600
   `,
   danger: `
-    bg-holo-red/10 border-holo-red text-holo-red
-    hover:bg-holo-red/20 hover:shadow-[0_0_15px_rgba(255,68,68,0.3)]
+    bg-red-500/10 border-red-500 text-red-500
+    hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.3)]
   `,
   ghost: `
-    bg-transparent border-transparent text-gray-400
-    hover:text-white hover:bg-white/5
+    bg-transparent border-transparent text-slate-500 dark:text-slate-400
+    hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800
   `,
 };
 
@@ -49,7 +51,7 @@ const sizeStyles: Record<ButtonSize, string> = {
 export const GlowButton: React.FC<GlowButtonProps> = ({
   variant = 'primary',
   size = 'md',
-  icon: Icon,
+  icon,
   iconPosition = 'left',
   loading = false,
   disabled = false,
@@ -57,8 +59,30 @@ export const GlowButton: React.FC<GlowButtonProps> = ({
   children,
   className = '',
   type = 'button',
+  fullWidth = false,
 }) => {
   const isDisabled = disabled || loading;
+
+  const renderIcon = (position: 'left' | 'right') => {
+    if (loading && position === 'left') {
+      return <Loader2 size={16} className="animate-spin" />;
+    }
+
+    if (!icon || iconPosition !== position) return null;
+
+    // String = Material Symbols icon name
+    if (typeof icon === 'string') {
+      return (
+        <span className="material-symbols-outlined text-base">
+          {icon}
+        </span>
+      );
+    }
+
+    // LucideIcon component
+    const Icon = icon;
+    return <Icon size={16} />;
+  };
 
   return (
     <button
@@ -67,24 +91,21 @@ export const GlowButton: React.FC<GlowButtonProps> = ({
       disabled={isDisabled}
       className={`
         inline-flex items-center justify-center gap-2
-        font-mono uppercase tracking-wider
-        border rounded
+        font-medium
+        border rounded-lg
         transition-all duration-150 ease-out
-        focus:outline-none focus:ring-2 focus:ring-holo-cyan focus:ring-offset-2 focus:ring-offset-obsidian
+        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900
         active:scale-[0.98]
         ${variantStyles[variant]}
         ${sizeStyles[size]}
         ${isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer'}
+        ${fullWidth ? 'w-full' : ''}
         ${className}
       `}
     >
-      {loading ? (
-        <Loader2 size={16} className="animate-spin" />
-      ) : (
-        Icon && iconPosition === 'left' && <Icon size={16} />
-      )}
+      {renderIcon('left')}
       {children}
-      {!loading && Icon && iconPosition === 'right' && <Icon size={16} />}
+      {!loading && renderIcon('right')}
     </button>
   );
 };

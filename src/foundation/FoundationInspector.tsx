@@ -1,10 +1,13 @@
 // src/foundation/FoundationInspector.tsx
-// Foundation inspector panel - switches content based on mode
+// Foundation inspector panel - routes to correct inspector based on mode
 
 import { InspectorPanel, InspectorSection, InspectorDivider } from '../shared/layout';
 import { EmptyState } from '../shared/feedback';
 import type { FoundationInspectorMode } from '@core/schema/foundation';
 import { useFoundationUI } from './FoundationUIContext';
+import { SproutReviewInspector } from './inspectors/SproutReviewInspector';
+import { JourneyInspector } from './inspectors/JourneyInspector';
+import { NodeInspector } from './inspectors/NodeInspector';
 
 interface FoundationInspectorProps {
   mode: FoundationInspectorMode;
@@ -13,162 +16,116 @@ interface FoundationInspectorProps {
 export function FoundationInspector({ mode }: FoundationInspectorProps) {
   const { closeInspector } = useFoundationUI();
 
-  // Render different inspector content based on mode
-  const renderContent = () => {
-    switch (mode.type) {
-      case 'journey':
-        return <JourneyInspectorContent journeyId={mode.journeyId} />;
-      case 'node':
-        return <NodeInspectorContent nodeId={mode.nodeId} />;
-      case 'persona':
-        return <PersonaInspectorContent personaId={mode.personaId} />;
-      case 'card':
-        return <CardInspectorContent cardId={mode.cardId} />;
-      case 'sprout-review':
-        return <SproutReviewContent sproutId={mode.sproutId} />;
-      case 'rag-document':
-        return <RagDocumentContent documentId={mode.documentId} />;
-      case 'audio-track':
-        return <AudioTrackContent trackId={mode.trackId} />;
-      case 'settings':
-        return <SettingsContent section={mode.section} />;
-      default:
-        return (
-          <EmptyState
-            icon="info"
-            title="No Selection"
-            description="Select an item to view details"
-          />
-        );
-    }
-  };
+  // Route to correct inspector based on mode
+  switch (mode.type) {
+    case 'sprout-review':
+      return <SproutReviewInspector sproutId={mode.sproutId} />;
 
-  // Get icon and title based on mode
-  const getHeaderInfo = () => {
-    switch (mode.type) {
-      case 'journey':
-        return { icon: 'route', title: 'Journey Details', color: 'text-amber-600' };
-      case 'node':
-        return { icon: 'hub', title: 'Node Details', color: 'text-blue-600' };
-      case 'persona':
-        return { icon: 'person', title: 'Persona Details', color: 'text-purple-600' };
-      case 'card':
-        return { icon: 'article', title: 'Card Details', color: 'text-emerald-600' };
-      case 'sprout-review':
-        return { icon: 'eco', title: 'Sprout Review', color: 'text-primary' };
-      case 'rag-document':
-        return { icon: 'description', title: 'Document Details', color: 'text-cyan-600' };
-      case 'audio-track':
-        return { icon: 'music_note', title: 'Audio Track', color: 'text-pink-600' };
-      case 'settings':
-        return { icon: 'settings', title: 'Settings', color: 'text-slate-600' };
-      default:
-        return { icon: 'info', title: 'Inspector', color: 'text-slate-600' };
-    }
-  };
+    case 'journey':
+      return <JourneyInspector journeyId={mode.journeyId} />;
 
-  const { icon, title, color } = getHeaderInfo();
+    case 'node':
+      return <NodeInspector nodeId={mode.nodeId} />;
 
+    case 'persona':
+      return <PersonaInspectorPlaceholder personaId={mode.personaId} onClose={closeInspector} />;
+
+    case 'card':
+      return <CardInspectorPlaceholder cardId={mode.cardId} onClose={closeInspector} />;
+
+    case 'rag-document':
+      return <RagDocumentPlaceholder documentId={mode.documentId} onClose={closeInspector} />;
+
+    case 'audio-track':
+      return <AudioTrackPlaceholder trackId={mode.trackId} onClose={closeInspector} />;
+
+    case 'settings':
+      return <SettingsPlaceholder section={mode.section} onClose={closeInspector} />;
+
+    default:
+      return (
+        <EmptyState
+          icon="info"
+          title="No Selection"
+          description="Select an item to view details"
+        />
+      );
+  }
+}
+
+// Placeholder components - will be implemented in later phases
+
+function PersonaInspectorPlaceholder({ personaId, onClose }: { personaId: string; onClose: () => void }) {
   return (
     <InspectorPanel
-      title={title}
-      icon={icon}
-      iconColor={color}
-      onClose={closeInspector}
+      title="Persona Details"
+      icon="person"
+      iconColor="text-purple-600"
+      onClose={onClose}
     >
-      {renderContent()}
+      <InspectorSection title="Persona">
+        <div className="text-xs text-slate-500">Persona ID: {personaId}</div>
+      </InspectorSection>
     </InspectorPanel>
   );
 }
 
-// Placeholder content components - these will be expanded in Phase 4
-function JourneyInspectorContent({ journeyId }: { journeyId: string }) {
+function CardInspectorPlaceholder({ cardId, onClose }: { cardId: string; onClose: () => void }) {
   return (
-    <>
-      <InspectorSection title="Details">
-        <div className="space-y-3">
-          <div className="text-xs text-slate-500">Journey ID: {journeyId}</div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Journey details will be editable here.
-          </p>
-        </div>
+    <InspectorPanel
+      title="Card Details"
+      icon="article"
+      iconColor="text-emerald-600"
+      onClose={onClose}
+    >
+      <InspectorSection title="Card">
+        <div className="text-xs text-slate-500">Card ID: {cardId}</div>
       </InspectorSection>
-      <InspectorDivider />
-      <InspectorSection title="Nodes">
-        <p className="text-xs text-slate-500">Node list coming soon</p>
+    </InspectorPanel>
+  );
+}
+
+function RagDocumentPlaceholder({ documentId, onClose }: { documentId: string; onClose: () => void }) {
+  return (
+    <InspectorPanel
+      title="Document Details"
+      icon="description"
+      iconColor="text-cyan-600"
+      onClose={onClose}
+    >
+      <InspectorSection title="Document">
+        <div className="text-xs text-slate-500">Document ID: {documentId}</div>
       </InspectorSection>
-    </>
+    </InspectorPanel>
   );
 }
 
-function NodeInspectorContent({ nodeId }: { nodeId: string }) {
+function AudioTrackPlaceholder({ trackId, onClose }: { trackId: string; onClose: () => void }) {
   return (
-    <InspectorSection title="Node">
-      <div className="text-xs text-slate-500">Node ID: {nodeId}</div>
-    </InspectorSection>
-  );
-}
-
-function PersonaInspectorContent({ personaId }: { personaId: string }) {
-  return (
-    <InspectorSection title="Persona">
-      <div className="text-xs text-slate-500">Persona ID: {personaId}</div>
-    </InspectorSection>
-  );
-}
-
-function CardInspectorContent({ cardId }: { cardId: string }) {
-  return (
-    <InspectorSection title="Card">
-      <div className="text-xs text-slate-500">Card ID: {cardId}</div>
-    </InspectorSection>
-  );
-}
-
-function SproutReviewContent({ sproutId }: { sproutId: string }) {
-  return (
-    <>
-      <InspectorSection title="Content">
-        <div className="text-xs text-slate-500">Sprout ID: {sproutId}</div>
-        <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
-          Sprout content and review tools will appear here.
-        </p>
+    <InspectorPanel
+      title="Audio Track"
+      icon="music_note"
+      iconColor="text-pink-600"
+      onClose={onClose}
+    >
+      <InspectorSection title="Track">
+        <div className="text-xs text-slate-500">Track ID: {trackId}</div>
       </InspectorSection>
-      <InspectorDivider />
-      <InspectorSection title="Moderation">
-        <div className="flex gap-2">
-          <button className="px-3 py-1.5 text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors">
-            Approve
-          </button>
-          <button className="px-3 py-1.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
-            Reject
-          </button>
-        </div>
+    </InspectorPanel>
+  );
+}
+
+function SettingsPlaceholder({ section, onClose }: { section: string; onClose: () => void }) {
+  return (
+    <InspectorPanel
+      title="Settings"
+      icon="settings"
+      iconColor="text-slate-600"
+      onClose={onClose}
+    >
+      <InspectorSection title={section}>
+        <p className="text-xs text-slate-500">Settings for {section}</p>
       </InspectorSection>
-    </>
-  );
-}
-
-function RagDocumentContent({ documentId }: { documentId: string }) {
-  return (
-    <InspectorSection title="Document">
-      <div className="text-xs text-slate-500">Document ID: {documentId}</div>
-    </InspectorSection>
-  );
-}
-
-function AudioTrackContent({ trackId }: { trackId: string }) {
-  return (
-    <InspectorSection title="Track">
-      <div className="text-xs text-slate-500">Track ID: {trackId}</div>
-    </InspectorSection>
-  );
-}
-
-function SettingsContent({ section }: { section: string }) {
-  return (
-    <InspectorSection title={section}>
-      <p className="text-xs text-slate-500">Settings for {section}</p>
-    </InspectorSection>
+    </InspectorPanel>
   );
 }
