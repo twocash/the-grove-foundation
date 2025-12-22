@@ -1,11 +1,11 @@
 # Repository Audit — health-dashboard-v1 (Revised)
 
 ## Audit Date: 2025-12-21
-## Revision: Aligned with DAIRE Architecture Specification
+## Revision: Aligned with Trellis Architecture / DEX Standard
 
 ## Current State Summary
 
-Grove Terminal has a working CLI health check (`npm run health`) that validates schema integrity and journey chains. However, the implementation has architectural issues that conflict with the DAIRE specification:
+Grove Terminal has a working CLI health check (`npm run health`) that validates schema integrity and journey chains. However, the implementation has architectural issues that conflict with the Trellis Architecture specification:
 
 1. **Hardcoded check definitions** — Validation logic is embedded in code, not configuration
 2. **No attribution chain** — Log entries lack provenance (who, what config version, what context)
@@ -15,34 +15,36 @@ Grove Terminal has a working CLI health check (`npm run health`) that validates 
 
 This sprint adds a Health Dashboard with **declarative health configuration** that establishes the pattern for all future Grove infrastructure.
 
-## DAIRE Alignment Requirements
+## DEX Standard Alignment Requirements
 
-Per the Domain-Agnostic Information Refinement Engine specification:
+Per the Trellis Architecture Kernel Codex:
 
-| Principle | Current State | Required State |
-|-----------|---------------|----------------|
-| Declarative Configuration | ❌ Hardcoded | ✅ JSON config defines checks |
-| Attribution Preservation | ❌ Missing | ✅ Full provenance chain |
-| Three-Layer Separation | ❌ Mixed | ✅ Engine vs corpus checks |
-| Progressive Enhancement | ✅ Additive | ✅ Config optional, defaults work |
+| DEX Principle | Current State | Required State |
+|---------------|---------------|----------------|
+| Declarative Sovereignty | ❌ Hardcoded | ✅ JSON config defines checks |
+| Capability Agnosticism | ✅ No AI dependency | ✅ Maintain |
+| Provenance as Infrastructure | ❌ Missing | ✅ Full attribution chain |
+| Organic Scalability | ❌ Grove-specific | ✅ Engine vs corpus separation |
+
+**The Test:** Can a non-technical domain expert alter health check behavior by editing a schema file, without recompiling? Currently: No. After sprint: Yes.
 
 ## File Structure Analysis
 
 ### Key Files
 | File | Purpose | Lines | Issue |
 |------|---------|-------|-------|
-| `scripts/health-check.js` | CLI health reporter | 280 | Hardcoded logic |
+| `scripts/health-check.js` | CLI health reporter | 280 | Hardcoded logic (violates Declarative Sovereignty) |
 | `tests/unit/schema.test.ts` | Schema validation tests | 106 | Duplicates validator |
 | `src/foundation/layout/NavSidebar.tsx` | Foundation navigation | 127 | Needs health link |
 | `server.js` | Express API server | ~600 | Needs health endpoints |
 
 ### Missing Files (To Create)
-| File | Purpose |
-|------|---------|
-| `data/infrastructure/health-config.json` | Declarative check definitions |
-| `data/infrastructure/health-log.json` | Persistent health history |
-| `lib/health-validator.js` | Config-driven validation engine |
-| `src/foundation/consoles/HealthDashboard.tsx` | UI component |
+| File | Purpose | DEX Layer |
+|------|---------|-----------|
+| `data/infrastructure/health-config.json` | Declarative check definitions | Configuration |
+| `data/infrastructure/health-log.json` | Persistent health history | Corpus |
+| `lib/health-validator.js` | Config-driven validation engine | Engine |
+| `src/foundation/consoles/HealthDashboard.tsx` | UI component | Engine |
 
 ## Technical Debt Being Addressed
 
@@ -56,7 +58,7 @@ Per the Domain-Agnostic Information Refinement Engine specification:
 |------|------|------------|
 | Config schema design | Medium | Start simple, extend later |
 | Migration complexity | Low | New system, no legacy to migrate |
-| Over-engineering | Medium | Limit to essential DAIRE patterns |
+| Over-engineering | Medium | Limit to essential DEX patterns |
 
 ## Recommendations
 
@@ -65,4 +67,4 @@ Per the Domain-Agnostic Information Refinement Engine specification:
 3. **Add attribution chain** to all health log entries
 4. **Separate engine from corpus checks** in config structure
 5. **Make display labels configurable** for domain-agnostic UI
-6. **Document the pattern** so future infrastructure follows it
+6. **Document the pattern** so future infrastructure follows DEX standard

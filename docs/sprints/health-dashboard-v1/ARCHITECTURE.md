@@ -1,28 +1,35 @@
 # Architecture — health-dashboard-v1 (Revised)
 
 ## Revision Note
-Aligned with DAIRE three-layer architecture: Engine (fixed), Corpus (variable), Configuration (declarative).
+Aligned with Trellis Architecture three-layer DEX Stack: Engine (Trellis Frame), Corpus (Substrate), Configuration (Conditions).
 
 ## Overview
 
-The Health Dashboard implements DAIRE's declarative configuration principle for system health monitoring. Check definitions, display labels, and validation rules live in JSON configuration—not code. The engine interprets configuration at runtime, enabling domain experts to define appropriate checks without engineering involvement.
+The Health Dashboard implements the Trellis Architecture's DEX (Declarative Exploration) standard for system health monitoring. Check definitions, display labels, and validation rules live in JSON configuration—not code. The engine interprets configuration at runtime, enabling domain experts to define appropriate checks without engineering involvement.
 
-## System Diagram
+**First Order Directive:** *Separation of Exploration Logic from Execution Capability.*
+
+## System Diagram (DEX Stack)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         LAYER 3: CONFIGURATION                          │
+│            LAYER 3: CONFIGURATION (The Conditions) — DEX Layer          │
+│            Status: Declarative | Change Velocity: High                  │
 │  ┌───────────────────────────────────────────────────────────────────┐  │
 │  │              data/infrastructure/health-config.json               │  │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐   │  │
 │  │  │ engineChecks│  │corpusChecks │  │ display (labels, theme) │   │  │
+│  │  │ (Trellis)   │  │ (Substrate) │  │ (View)                  │   │  │
 │  │  └─────────────┘  └─────────────┘  └─────────────────────────┘   │  │
 │  └───────────────────────────────────────────────────────────────────┘  │
+│  "A legal analyst defines a 'Contradiction' nutrient; a biologist       │
+│   defines a 'Replication Error' nutrient." — Trellis Codex             │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          LAYER 1: ENGINE (Fixed)                        │
+│            LAYER 1: ENGINE (The Trellis Frame) — Fixed Infrastructure   │
+│            Status: Fixed | Change Velocity: Low                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
 │  │                    lib/health-validator.js                       │   │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐    │   │
@@ -30,11 +37,13 @@ The Health Dashboard implements DAIRE's declarative configuration principle for 
 │  │  │              │  │ (iterates    │  │ (type→executor)    │    │   │
 │  │  │              │  │  config)     │  │                    │    │   │
 │  │  └──────────────┘  └──────────────┘  └────────────────────┘    │   │
+│  │                                                                 │   │
+│  │  "The engine does not know WHAT it is refining, only HOW."     │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
 │  │                         server.js                                │   │
-│  │  GET /api/health  │  GET /api/health/history  │  POST /run      │   │
+│  │  GET /api/health  │  GET /api/health/config  │  POST /run       │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
@@ -45,21 +54,22 @@ The Health Dashboard implements DAIRE's declarative configuration principle for 
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                       LAYER 2: CORPUS (Variable)                        │
+│            LAYER 2: CORPUS (The Substrate) — Variable Input             │
+│            Status: Variable | Change Velocity: Medium                   │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐     │
 │  │ knowledge/      │  │ exploration/    │  │ infrastructure/     │     │
 │  │  hubs.json      │  │  journeys.json  │  │  health-log.json    │     │
 │  │                 │  │  nodes.json     │  │                     │     │
 │  └─────────────────┘  └─────────────────┘  └─────────────────────┘     │
 │                                                                         │
-│  (In legal discovery deployment, this layer would contain:)            │
-│  │ evidence/depositions.json │ timeline/events.json │ etc.            │
+│  "The Trellis can be planted in any substrate:"                        │
+│  │ Grove Research │ Legal Discovery │ Academic Lit │ Enterprise │      │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Data Structures
 
-### HealthConfig (Configuration Layer)
+### HealthConfig (Configuration Layer — DEX)
 ```typescript
 interface HealthConfig {
   version: string
@@ -68,8 +78,8 @@ interface HealthConfig {
     categoryLabels: Record<string, string>
     severityColors?: Record<string, string>
   }
-  engineChecks: HealthCheckDefinition[]
-  corpusChecks: HealthCheckDefinition[]
+  engineChecks: HealthCheckDefinition[]  // Trellis Frame checks
+  corpusChecks: HealthCheckDefinition[]  // Substrate checks
 }
 
 interface HealthCheckDefinition {
@@ -86,9 +96,10 @@ interface HealthCheckDefinition {
 }
 ```
 
-### Check Type Executors (Engine Layer)
+### Check Type Executors (Engine Layer — Trellis Frame)
 ```typescript
 // Engine provides executors for each check type
+// The engine doesn't know WHAT it's checking, only HOW to check
 const checkExecutors: Record<string, CheckExecutor> = {
   'json-exists': (def, dataDir) => { /* verify file exists and parses */ },
   'reference-check': (def, dataDir) => { /* verify all refs resolve */ },
@@ -98,7 +109,7 @@ const checkExecutors: Record<string, CheckExecutor> = {
 }
 ```
 
-### HealthReport (Engine Output)
+### HealthReport (Engine Output with Attribution)
 ```typescript
 interface HealthReport {
   timestamp: string  // ISO 8601
@@ -127,17 +138,18 @@ interface HealthCheckResult {
   message: string
   impact?: string   // From config
   inspect?: string  // From config
-  details?: any     // Type-specific details (e.g., list of broken refs)
+  details?: any     // Type-specific details
 }
 ```
 
-### HealthLogEntry (Corpus Layer - Persisted)
+### HealthLogEntry (Corpus Layer — with Provenance)
 ```typescript
+// "In the Trellis, a fact without a root is a weed."
 interface HealthLogEntry extends HealthReport {
   id: string  // UUID
   attribution: {
     triggeredBy: 'manual' | 'api' | 'ci' | 'startup'
-    userId?: string        // Grove ID when available
+    userId?: string        // Grove ID (who collapsed the superposition)
     sessionId?: string     // Terminal session
     deploymentId?: string  // For future multi-deployment
   }
@@ -155,20 +167,20 @@ interface HealthLog {
 ```
 the-grove-foundation/
 ├── lib/
-│   └── health-validator.js        # Config-driven validation engine
+│   └── health-validator.js        # Engine (Trellis Frame)
 ├── data/
 │   └── infrastructure/
-│       ├── health-config.json     # Declarative check definitions
-│       └── health-log.json        # Persistent health log
+│       ├── health-config.json     # Configuration (DEX Layer)
+│       └── health-log.json        # Corpus (Substrate)
 ├── src/
 │   └── foundation/
 │       ├── consoles/
-│       │   └── HealthDashboard.tsx  # Config-driven UI
+│       │   └── HealthDashboard.tsx  # Engine (UI)
 │       └── layout/
-│           └── NavSidebar.tsx       # Add health nav item
-├── server.js                        # Add /api/health endpoints
+│           └── NavSidebar.tsx       # Engine (Navigation)
+├── server.js                        # Engine (API)
 └── scripts/
-    └── health-check.js              # CLI uses same validator
+    └── health-check.js              # Engine (CLI)
 ```
 
 ## API Contracts
@@ -194,34 +206,8 @@ Returns current health report with config-defined checks.
 }
 ```
 
-### GET /api/health/history
-Returns health log entries with attribution.
-
-**Query params:**
-- `limit` (optional, default 50, max 100)
-- `status` (optional: 'pass' | 'fail' | 'warn')
-
-**Response:**
-```json
-{
-  "entries": [
-    {
-      "id": "uuid",
-      "timestamp": "...",
-      "configVersion": "1.0",
-      "attribution": {
-        "triggeredBy": "api",
-        "userId": null
-      },
-      "summary": {...}
-    }
-  ],
-  "total": 50
-}
-```
-
 ### GET /api/health/config
-Returns current health configuration (for UI to read display settings).
+Returns current health configuration (DEX layer) for UI to read display settings.
 
 **Response:**
 ```json
@@ -235,18 +221,11 @@ Returns current health configuration (for UI to read display settings).
 }
 ```
 
-### POST /api/health/run
-Triggers a health check and appends to log.
+### GET /api/health/history
+Returns health log entries with attribution (provenance chain).
 
-**Response:**
-```json
-{
-  "id": "uuid",
-  "timestamp": "...",
-  "configVersion": "1.0",
-  "summary": {...}
-}
-```
+### POST /api/health/run
+Triggers a health check, appends to log with attribution.
 
 ## Check Type Reference
 
@@ -258,12 +237,12 @@ Triggers a health check and appends to log.
 | `chain-valid` | Verify linked list integrity | `source.file`, `source.path`, `linkField`, `terminalValues[]` |
 | `custom` | Run custom validation | `handler` (function name in registry) |
 
-## Progressive Enhancement
+## Progressive Enhancement (Organic Scalability)
 
-Per DAIRE Principle 5, the system works with minimal configuration:
+Per DEX Standard Principle IV: "Structure must precede growth, but not inhibit it."
 
 1. **No config file** → Engine uses built-in defaults, logs warning
 2. **Minimal config** → Only essential checks, default display labels
 3. **Full config** → Custom checks, custom labels, custom severity colors
 
-This enables new domains to start simple and refine over time.
+This enables new domains (Legal Trellis, Academic Trellis) to start simple and refine over time.

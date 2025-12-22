@@ -36,7 +36,8 @@ COPY package.json ./
 RUN npm install --omit=dev
 
 COPY server.js ./
-COPY data/prompts.js ./data/
+COPY lib/ ./lib/
+COPY data/ ./data/
 
 # Expose port
 EXPOSE 8080

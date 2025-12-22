@@ -2,37 +2,48 @@
 
 ## Context
 
-Add a Health Dashboard to the Grove Terminal Foundation UI with **declarative health configuration** aligned with the DAIRE Architecture Specification. This establishes the pattern for all future Grove infrastructure: domain-specific behavior in configuration, not code.
+Add a Health Dashboard to the Grove Terminal Foundation UI with **declarative health configuration** aligned with the **Trellis Architecture / DEX (Declarative Exploration) Standard**. This establishes the pattern for all future Grove infrastructure: domain-specific behavior in configuration, not code.
 
-Key DAIRE principles being implemented:
-- **Declarative Configuration** — Health checks defined in JSON, interpreted at runtime
-- **Attribution Preservation** — Full provenance chain on all log entries
-- **Three-Layer Separation** — Engine checks vs corpus checks explicitly separated
-- **Progressive Enhancement** — Works without config, becomes more powerful with it
+**First Order Directive:** *Separation of Exploration Logic from Execution Capability.*
+> Build the engine that reads the map; do not build the map into the engine.
+
+**The Core Thesis:** Models are seeds. Exploration architecture is soil.
+
+Key DEX Stack Standards being implemented:
+- **I. Declarative Sovereignty** — Health checks defined in JSON, interpreted at runtime
+- **II. Capability Agnosticism** — Structure provides validity, not the model
+- **III. Provenance as Infrastructure** — Full attribution chain ("a fact without a root is a weed")
+- **IV. Organic Scalability** — Works without config, guided wandering not rigid tunnels
 
 ## Documentation
 
 Sprint documentation in `docs/sprints/health-dashboard-v1/`:
-- `REPO_AUDIT.md` — DAIRE alignment analysis
-- `SPEC.md` — Goals with DAIRE acceptance criteria
-- `ARCHITECTURE.md` — Three-layer system diagram, data structures
+- `REPO_AUDIT.md` — Trellis Architecture alignment analysis
+- `SPEC.md` — Goals with DEX Standard acceptance criteria
+- `ARCHITECTURE.md` — Three-layer DEX Stack diagram, data structures
 - `MIGRATION_MAP.md` — File-by-file changes with full config schema
-- `DECISIONS.md` — 6 ADRs on declarative patterns
+- `DECISIONS.md` — 6 ADRs on DEX patterns
 - `SPRINTS.md` — 7 epics, 23 stories
 
 ## Repository Intelligence
 
 Key locations:
-- `data/infrastructure/` — Where config and log files go
-- `lib/` — Where shared validator goes
+- `data/infrastructure/` — Where config and log files go (DEX Layer)
+- `lib/` — Where shared validator goes (Trellis Frame)
 - `scripts/health-check.js` — CLI to refactor (currently ~280 lines of hardcoded logic)
 - `server.js` — Add API endpoints around line 200-250
 - `src/foundation/consoles/Genesis.tsx` — Reference for console patterns
 - `src/foundation/layout/NavSidebar.tsx` — Add nav item
 
+## The DEX Test (from Trellis Architecture)
+
+> Can a non-technical lawyer, doctor, or historian alter the behavior of the refinement engine by editing a schema file, without recompiling the application? If no, the feature is incomplete.
+
+Applied to this sprint: Can a non-developer add a new health check by editing `health-config.json`? **Must be YES.**
+
 ## Execution Order
 
-### Phase 1: Configuration Layer
+### Phase 1: Configuration Layer (DEX — The Conditions)
 
 **Step 1.1:** Create health config file
 ```bash
@@ -167,7 +178,7 @@ Create `data/infrastructure/health-config.json`:
 }
 ```
 
-**Step 1.2:** Create health log file
+**Step 1.2:** Create health log file (Corpus — The Substrate)
 Create `data/infrastructure/health-log.json`:
 ```json
 {
@@ -179,18 +190,20 @@ Create `data/infrastructure/health-log.json`:
 
 ---
 
-### Phase 2: Engine Layer (Validator)
+### Phase 2: Engine Layer (Trellis Frame — The Validator)
 
 Create `lib/health-validator.js`:
 
-This module must implement:
+This module implements the "invariant physics" — it doesn't know WHAT it's checking, only HOW.
+
+Functions to implement:
 1. `loadConfig()` — Load health-config.json, validate, return config or defaults
 2. `runChecks(config)` — Execute all checks, return HealthReport with attribution
 3. `loadHealthLog()` — Load health-log.json
 4. `appendToHealthLog(report, attribution)` — Add entry with attribution, enforce cap
 5. `getEngineVersion()` — Return version string (read from package.json)
 
-Check type executors:
+Check type executors (The Vine — interchangeable):
 - `jsonExists(def, dataDir)` — Verify file exists and parses as valid JSON
 - `referenceCheck(def, dataDir)` — Extract values at source.path, verify all exist in target.path
 - `chainValid(def, dataDir)` — Follow links from entry through linkField until terminal or maxDepth
@@ -294,7 +307,7 @@ app.get('/api/health', (req, res) => {
   }
 })
 
-// GET /api/health/config - Configuration for UI
+// GET /api/health/config - DEX configuration for UI
 app.get('/api/health/config', (req, res) => {
   try {
     const config = loadConfig()
@@ -311,7 +324,7 @@ app.get('/api/health/config', (req, res) => {
   }
 })
 
-// GET /api/health/history - Health log entries
+// GET /api/health/history - Health log entries with attribution
 app.get('/api/health/history', (req, res) => {
   try {
     const log = loadHealthLog()
@@ -325,7 +338,7 @@ app.get('/api/health/history', (req, res) => {
   }
 })
 
-// POST /api/health/run - Trigger check and log
+// POST /api/health/run - Trigger check and log with attribution
 app.post('/api/health/run', (req, res) => {
   try {
     const config = loadConfig()
@@ -348,12 +361,12 @@ curl -X POST http://localhost:8080/api/health/run
 
 ---
 
-### Phase 5: Health Dashboard Component
+### Phase 5: Health Dashboard Component (The View)
 
 Create `src/foundation/consoles/HealthDashboard.tsx`:
-- Fetch `/api/health/config` on mount for display settings
+- Fetch `/api/health/config` on mount for display settings (DEX Display Schema)
 - Fetch `/api/health` for current status
-- Fetch `/api/health/history` for log entries
+- Fetch `/api/health/history` for log entries with attribution
 - Render using config.display.dashboardTitle and categoryLabels
 - "Run Health Check" button POSTs to /api/health/run
 - Failed checks expand to show impact/inspect
@@ -391,7 +404,7 @@ Create `tests/integration/health-api.test.ts`:
 
 Create `tests/unit/health-config.test.ts`:
 - Config loads correctly
-- Missing config returns defaults with warning
+- Missing config returns defaults with warning (Progressive Enhancement)
 - Malformed config handled gracefully
 
 Verify: `npm test`
@@ -407,14 +420,14 @@ npm test
 npm run health
 ```
 
-## Success Criteria (DAIRE Alignment)
+## Success Criteria (DEX Standard Alignment)
 
-- [ ] Health checks defined declaratively in health-config.json
-- [ ] Adding a check requires only config change, not code
-- [ ] Engine checks separated from corpus checks in config
-- [ ] Log entries include attribution (configVersion, engineVersion, triggeredBy)
-- [ ] Display labels come from config.display
-- [ ] Progressive enhancement: works without config, warns and uses defaults
+- [ ] **Declarative Sovereignty:** Health checks defined in health-config.json, not code
+- [ ] **Declarative Sovereignty:** Adding a check requires only config change
+- [ ] **Capability Agnosticism:** Engine checks vs corpus checks separated
+- [ ] **Provenance as Infrastructure:** Log entries include attribution chain
+- [ ] **Organic Scalability:** Works without config, warns and uses defaults
+- [ ] **DEX Display Schema:** Labels come from config.display
 
 ## Success Criteria (Functionality)
 
@@ -426,10 +439,27 @@ npm run health
 - [ ] Failed checks show impact/inspect
 - [ ] Tests pass
 
-## Forbidden Actions
+## Forbidden Actions (Trellis Violations)
 
-- Do NOT hardcode check definitions in health-validator.js (they come from config)
-- Do NOT hardcode display labels in HealthDashboard.tsx (read from API)
+- Do NOT hardcode check definitions in health-validator.js (violates Declarative Sovereignty)
+- Do NOT hardcode display labels in HealthDashboard.tsx (violates DEX Display Schema)
 - Do NOT delete health-check.js (refactor it to use shared validator)
-- Do NOT skip attribution on log entries (DAIRE requirement)
+- Do NOT skip attribution on log entries (violates Provenance as Infrastructure)
 - Do NOT exceed 100 entries in health log (FIFO cap)
+
+---
+
+## Trellis Terminology Reference
+
+| Term | Definition |
+|------|------------|
+| **Trellis** | The structural framework (architecture) supporting the DEX stack |
+| **DEX** | Declarative Exploration — methodology separating intent from inference |
+| **Trellis Frame** | Engine layer — fixed infrastructure, low change velocity |
+| **Substrate** | Corpus layer — variable input, medium change velocity |
+| **Conditions** | Configuration layer — DEX definitions, high change velocity |
+| **Vine** | Execution capability (LLM, RAG) — interchangeable and ephemeral |
+| **Sprout** | Atomic unit of captured insight |
+| **Grove** | Accumulated, refined knowledge base |
+| **Gardener** | Human applying judgment (pruning) to AI-generated possibilities (growth) |
+| **Superposition Collapse** | Human attention transforms probabilistic AI output into validated fact |

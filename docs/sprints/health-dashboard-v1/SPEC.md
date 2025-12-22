@@ -1,17 +1,19 @@
 # Specification — health-dashboard-v1 (Revised)
 
 ## Revision Note
-Aligned with DAIRE Architecture Specification. Key addition: declarative health configuration.
+Aligned with Trellis Architecture / DEX (Declarative Exploration) Standard.
 
 ## Overview
 
-Add a Health Dashboard to the Foundation UI with **declarative health configuration** that establishes the pattern for domain-agnostic infrastructure. Health check definitions live in configuration files, not code. The engine interprets configuration at runtime, enabling domain experts to define appropriate checks without engineering involvement.
+Add a Health Dashboard to the Foundation UI with **declarative health configuration** that establishes the DEX pattern for domain-agnostic infrastructure. Health check definitions live in configuration files, not code. The engine interprets configuration at runtime, enabling domain experts to define appropriate checks without engineering involvement.
+
+**Trellis Principle:** Build the engine that reads the map; do not build the map into the engine.
 
 ## Goals
 
-1. **Establish declarative configuration pattern** — Health checks defined in JSON, not code
-2. **Implement attribution preservation** — Full provenance chain on all log entries
-3. **Separate engine from corpus checks** — Three-layer architecture in practice
+1. **Establish DEX pattern** — Health checks defined in JSON, not code (Declarative Sovereignty)
+2. **Implement provenance** — Full attribution chain on all log entries (Provenance as Infrastructure)
+3. **Separate engine from corpus** — engineChecks vs corpusChecks (Organic Scalability)
 4. **Surface health status in Foundation UI** — Admins see system health without CLI
 5. **Persist health check history** — Store results with timestamps for trend analysis
 
@@ -27,13 +29,21 @@ Add a Health Dashboard to the Foundation UI with **declarative health configurat
 After this sprint:
 1. Health checks are defined in `health-config.json`, not hardcoded
 2. Adding a new check requires only config change, no code change
-3. Log entries include full attribution (config version, engine version, trigger source)
+3. Log entries include full attribution (configVersion, engineVersion, trigger source)
 4. Foundation UI has a "System Health" console with configurable display labels
 5. Engine checks vs corpus checks are clearly separated in config
 
-## Acceptance Criteria
+## DEX Standard Acceptance Criteria
 
-### Must Have (DAIRE Alignment)
+### The Test (from Trellis Architecture)
+> Can a non-technical lawyer, doctor, or historian alter the behavior of the refinement engine by editing a schema file, without recompiling the application? If no, the feature is incomplete.
+
+Applied to health dashboard:
+- [ ] Can a non-developer add a new health check by editing `health-config.json`? **Must be YES**
+- [ ] Can display labels be changed without code deployment? **Must be YES**
+- [ ] Does the engine work if the config file is missing? **Must be YES (with defaults)**
+
+### Must Have (DEX Alignment)
 - [ ] AC-1: Health checks defined declaratively in `data/infrastructure/health-config.json`
 - [ ] AC-2: Validator reads check definitions from config, not hardcoded
 - [ ] AC-3: Log entries include attribution chain (configVersion, engineVersion, triggeredBy)
@@ -56,7 +66,7 @@ After this sprint:
 
 ### Nice to Have
 - [ ] AC-16: Filter history by status (pass/fail/warn)
-- [ ] AC-17: Admin UI for editing health-config.json (Phase 3 per DAIRE roadmap)
+- [ ] AC-17: Admin UI for editing health-config.json (Phase 3 per Trellis roadmap)
 
 ## Configuration Schema Preview
 
@@ -75,7 +85,7 @@ After this sprint:
       "id": "config-valid",
       "name": "Health Config Valid",
       "type": "json-exists",
-      "target": "infrastructure/health-config.json"
+      "target": { "file": "infrastructure/health-config.json" }
     }
   ],
   "corpusChecks": [
@@ -114,4 +124,4 @@ After this sprint:
 - Push notifications on failure
 - Health checks for LLM/RAG quality
 - Multi-tenant health isolation
-- Admin UI for config editing (DAIRE Phase 3)
+- Admin UI for config editing (Trellis Phase 3: "The Trellis Builder")
