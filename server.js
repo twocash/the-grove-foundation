@@ -1683,7 +1683,7 @@ app.get('/api/health/ready', async (req, res) => {
 });
 
 // --- Health Dashboard API ---
-// Declarative health check system (DAIRE aligned)
+// Trellis Architecture / DEX Standard implementation
 
 // GET /api/health - Current health status
 app.get('/api/health', (req, res) => {

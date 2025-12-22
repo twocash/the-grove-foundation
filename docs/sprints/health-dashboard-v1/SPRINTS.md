@@ -205,7 +205,7 @@
 
 ## Smoke Test Checklist
 
-### DAIRE Alignment
+### DEX Standard Alignment
 - [ ] Health checks defined declaratively in config (not hardcoded)
 - [ ] Adding a check requires only config change (no code)
 - [ ] Engine checks separated from corpus checks

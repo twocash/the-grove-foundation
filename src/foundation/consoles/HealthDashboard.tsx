@@ -411,23 +411,23 @@ const HealthDashboard: React.FC = () => {
         </div>
       </DataPanel>
 
-      <DataPanel title="DAIRE Alignment" icon={Activity}>
+      <DataPanel title="DEX Standard Alignment" icon={Activity}>
         <ul className="space-y-2 text-sm text-gray-400">
           <li className="flex items-center gap-2">
             <CheckCircle size={14} className="text-holo-lime" />
-            Declarative Configuration - Checks defined in JSON
+            Declarative Sovereignty - Checks defined in JSON
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle size={14} className="text-holo-lime" />
-            Attribution Preservation - Log entries include provenance
+            Provenance as Infrastructure - Log entries include attribution
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle size={14} className="text-holo-lime" />
-            Three-Layer Separation - Engine vs Corpus checks
+            Three-Layer DEX Stack - Engine vs Corpus checks
           </li>
           <li className="flex items-center gap-2">
             <CheckCircle size={14} className="text-holo-lime" />
-            Progressive Enhancement - Works without config file
+            Organic Scalability - Works without config file
           </li>
         </ul>
       </DataPanel>

@@ -2,12 +2,12 @@
 
 ## Overview
 
-Implement declarative health configuration aligned with DAIRE architecture. Creates 5 new files, modifies 3 existing files.
+Implement declarative health configuration aligned with Trellis Architecture / DEX Standard. Creates 5 new files, modifies 3 existing files.
 
 ## Files to Create
 
 ### `data/infrastructure/health-config.json`
-**Purpose:** Declarative health check definitions (DAIRE Layer 3)
+**Purpose:** Declarative health check definitions (DEX Layer 3: Configuration)
 **Depends on:** None
 **Content:**
 ```json
@@ -138,7 +138,7 @@ Implement declarative health configuration aligned with DAIRE architecture. Crea
 ---
 
 ### `lib/health-validator.js`
-**Purpose:** Config-driven validation engine (DAIRE Layer 1)
+**Purpose:** Config-driven validation engine (DEX Layer 1: Trellis Frame)
 **Depends on:** health-config.json
 **Key functions:**
 - `loadConfig()` — Load and validate health-config.json
