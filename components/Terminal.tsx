@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, TerminalControls, SuggestionChip } from './Terminal/index';
+import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
@@ -1064,12 +1064,20 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
             />
           ) : (
             <>
-              {/* Header - Clean title bar with minimize/close */}
+              {/* Header - Clean title bar with context selectors */}
               <TerminalHeader
                 onMinimize={handleMinimize}
                 onClose={handleClose}
                 isScholarMode={isVerboseMode}
                 showMinimize={enableMinimize}
+                // Context selectors
+                lensName={activeLensData?.publicLabel || 'Choose Lens'}
+                lensColor={activeLensData?.color}
+                journeyName={currentThread.length > 0 ? 'Guided Journey' : 'Self-Guided'}
+                currentStreak={currentStreak}
+                showStreak={showStreakDisplay}
+                onLensClick={() => setShowLensPicker(true)}
+                onStreakClick={() => setShowStatsModal(true)}
               />
 
               {/* Consolidated Journey Navigation Bar - hidden when controls below enabled */}
@@ -1338,17 +1346,17 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 {/* Suggested Inquiry button removed - was taking up real estate without clear value */}
 
                 <div className="flex items-center space-x-3 mb-4">
-                  {/* PRESERVED: Verbose Toggle - Wax Seal Style - exact same implementation */}
+                  {/* v0.13: Scholar Mode button restyled for dark mode */}
                   <button
                     onClick={toggleVerboseMode}
                     className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${isVerboseMode
-                        ? 'bg-grove-clay text-white shadow-sm'
-                        : 'bg-transparent text-ink-muted border border-ink/10 hover:border-grove-clay hover:text-grove-clay'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'bg-transparent text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary'
                       }`}
                   >
                     {isVerboseMode ? 'Scholar Mode: ON' : 'Enable Scholar Mode'}
                   </button>
-                  {currentTopic && <span className="text-[10px] font-mono text-ink-muted">Ref: {currentTopic}</span>}
+                  {currentTopic && <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">Ref: {currentTopic}</span>}
                 </div>
 
                 {/* Input Area - Command Palette enabled (v0.16) */}
@@ -1368,18 +1376,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                   captureSprout={handleCaptureSprout}
                 />
 
-                {/* Controls below input - shows when feature flag enabled */}
-                {enableControlsBelow && (
-                  <TerminalControls
-                    persona={activeLensData}
-                    onSwitchLens={() => setShowLensPicker(true)}
-                    currentPosition={currentPosition}
-                    totalSteps={currentThread.length}
-                    currentStreak={currentStreak}
-                    showStreak={showStreakDisplay}
-                    showJourney={currentThread.length > 0}
-                  />
-                )}
+                {/* v0.13: TerminalControls removed - lens/streak moved to header */}
                 </div>
               </div>
             </>
