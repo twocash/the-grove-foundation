@@ -113,8 +113,13 @@ function pathToView(path: string[]): string {
   const key = path.join('.');
 
   const viewMap: Record<string, string> = {
-    // Explore - clicking "Explore" directly shows terminal
-    'explore': 'terminal',
+    // Explore > Grove Project (field) > views
+    'explore': 'terminal',  // Default if clicking Explore directly
+    'explore.groveProject': 'terminal',
+    'explore.groveProject.nodes': 'node-grid',
+    'explore.groveProject.journeys': 'journey-list',
+    'explore.groveProject.lenses': 'lens-picker',
+    // Legacy paths (backward compatibility)
     'explore.nodes': 'node-grid',
     'explore.journeys': 'journey-list',
     'explore.lenses': 'lens-picker',

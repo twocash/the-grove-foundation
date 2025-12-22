@@ -22,6 +22,7 @@ const iconNameToSymbol: Record<string, string> = {
 };
 
 // Navigation tree structure - Updated IA v0.14.2
+// Explore contains Fields (Grove Project is first field, + Fields for future expansion)
 const navigationTree: Record<string, NavItem> = {
   explore: {
     id: 'explore',
