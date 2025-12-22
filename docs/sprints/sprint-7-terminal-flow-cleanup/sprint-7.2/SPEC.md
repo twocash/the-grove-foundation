@@ -1,56 +1,131 @@
-# Sprint 7.2: Width Constraint & Sidebar IA
+# Sprint 7.2: LensPicker Card Pattern + Sidebar IA
 
 **Status:** Ready for Execution  
 **Depends On:** Sprint 7.1 (c325036) - COMPLETE
 **Priority:** HIGH
 
-## Problem Statement
+## Current State Analysis
 
-Screenshots reveal two remaining issues after Sprint 7.1:
+**What Already Exists (and is GOOD):**
+- `src/explore/LensPicker.tsx` - Has CollectionHeader, search, grid layout ✅
+- `src/explore/LensInspector.tsx` - Full inspector with config UI, toggle, CTAs ✅
+- `src/workspace/Inspector.tsx` - Already wired to show LensInspector ✅
 
-1. **Width Violation:** LensPicker and WelcomeInterstitial render full-width, should be ~768px centered in middle column
-2. **Sidebar IA:** Need "Fields" concept with "Grove Project" as knowledge base selector
+**What Needs Fixing:**
 
-## Part A: Width Constraint
+| Issue | Current | Target |
+|-------|---------|--------|
+| LensCard interaction | Click card → immediate selection + opens inspector | Click card → ONLY opens inspector; "Select" button → selection |
+| Sidebar IA | Flat: Nodes/Journeys/Lenses | Nested: Grove Project → Nodes/Journeys/Lenses; + Fields |
 
-### Current State (Post 7.1)
+---
 
-The LensPicker now has correct dark mode styling and minimal header, but still renders full-width, violating the three-column layout. Content should be constrained to `max-w-3xl` (~768px).
+## Part A: Fix LensCard Interaction Pattern
 
-| Component | Issue |
-|-----------|-------|
-| WelcomeInterstitial | Full-width, legacy "THE GROVE TERMINAL" header still present |
-| LensPicker | Full-width (dark mode fixed, width not) |
+The JourneyCard pattern separates viewing from action:
+- **Click card** → View details (open inspector)
+- **Click "Start" button** → Take action (start journey)
 
-### Target Layout
+LensCard should follow the same pattern:
+- **Click card** → View details (open inspector)
+- **Click "Select" button** → Activate lens
 
+### Task A1: Update LensCard Props
+
+```tsx
+interface LensCardProps {
+  persona: Persona;
+  isActive: boolean;
+  onSelect: () => void;  // Click "Select" button
+  onView: () => void;    // Click card body
+}
 ```
-┌──────────────┬─────────────────────────────────────┬──────────────────┐
-│ Sidebar      │      max-w-3xl centered content     │   Inspector      │
-│              │  ┌─────────────────────────────┐    │                  │
-│              │  │ Welcome / Lens picker       │    │                  │
-│              │  │ content here                │    │                  │
-│              │  └─────────────────────────────┘    │                  │
-└──────────────┴─────────────────────────────────────┴──────────────────┘
+
+### Task A2: Update LensCard Component
+
+Change from `<button>` to `<div>` and add footer with "Select" button:
+
+```tsx
+function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
+  const accent = lensAccents[persona.id] || defaultAccent;
+
+  return (
+    <div
+      onClick={onView}  // Card click opens inspector
+      className={`
+        group cursor-pointer flex flex-col items-start p-5 rounded-xl border transition-all text-left relative
+        ${isActive
+          ? 'border-primary/30 bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20'
+          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
+        }
+      `}
+    >
+      {/* Header row with icon and active badge */}
+      <div className="flex items-start justify-between w-full mb-3">
+        <div className={`${accent.bgLight} ${accent.bgDark} p-2.5 rounded-lg`}>
+          <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark} text-xl`}>
+            {accent.icon}
+          </span>
+        </div>
+        {isActive && (
+          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/20 text-primary font-medium">
+            Active
+          </span>
+        )}
+      </div>
+
+      {/* Label */}
+      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">
+        {persona.publicLabel}
+      </h3>
+
+      {/* Description as italic quote */}
+      <p className="text-sm text-slate-500 dark:text-slate-400 italic mb-4">
+        "{persona.description}"
+      </p>
+
+      {/* Footer with Select button */}
+      <div className="flex items-center justify-end w-full mt-auto">
+        {!isActive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();  // Don't trigger card click
+              onSelect();
+            }}
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
+          >
+            Select
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 ```
 
-### Tasks
+### Task A3: Update LensPicker to Wire Both Handlers
 
-**Task A1: Fix WelcomeInterstitial.tsx**
+```tsx
+const handleSelect = (personaId: string) => {
+  selectLens(personaId);
+  // Also open inspector to confirm selection
+  openInspector({ type: 'lens', lensId: personaId });
+};
 
-File: `components/Terminal/WelcomeInterstitial.tsx`
+const handleView = (personaId: string) => {
+  // Only open inspector, don't change selection
+  openInspector({ type: 'lens', lensId: personaId });
+};
 
-1. Remove legacy header (lines 36-42): "THE GROVE TERMINAL [v2.5.0]" and "Connection established"
-2. Wrap content in `max-w-3xl mx-auto` container
-3. Update remaining `text-ink` classes to dark mode compatible
-4. Remove or update footer `bg-paper/50`
-
-**Task A2: Fix LensPicker.tsx**
-
-File: `components/Terminal/LensPicker.tsx`
-
-1. Change outer container to `bg-transparent` (parent provides background)
-2. Wrap content in `max-w-3xl mx-auto w-full h-full flex flex-col`
+// In grid:
+<LensCard
+  key={persona.id}
+  persona={persona}
+  isActive={activeLensId === persona.id}
+  onSelect={() => handleSelect(persona.id)}
+  onView={() => handleView(persona.id)}
+/>
+```
 
 ---
 
@@ -58,7 +133,7 @@ File: `components/Terminal/LensPicker.tsx`
 
 ### Current Structure
 ```
-Explore           ← Click shows Terminal
+Explore (view: terminal)
   ├─ Nodes
   ├─ Journeys
   └─ Lenses
@@ -67,35 +142,41 @@ Explore           ← Click shows Terminal
 ### Target Structure
 ```
 Explore
-  └─ Grove Project     ← Click shows Terminal
+  └─ Grove Project (view: terminal)
       ├─ Nodes
       ├─ Journeys
       └─ Lenses
-  └─ + Fields          ← Placeholder (doesn't work)
+  └─ + Fields (comingSoon)
 ```
 
-### Task B1: Update NavigationSidebar.tsx
+### Task B1: Add Icon Mappings
 
-File: `src/workspace/NavigationSidebar.tsx`
+File: `src/workspace/NavigationSidebar.tsx` (around line 11)
 
-1. Add icon mappings:
 ```typescript
-forest: 'forest',
-add_circle: 'add_circle_outline',
+const iconNameToSymbol: Record<string, string> = {
+  // ... existing
+  forest: 'forest',
+  add_circle: 'add_circle_outline',
+};
 ```
 
-2. Restructure `explore` in navigationTree:
+### Task B2: Update Navigation Tree
+
+Replace `explore` entry (around line 22):
+
 ```typescript
 explore: {
   id: 'explore',
   label: 'Explore',
   icon: 'compass',
+  // NO view here - just a container now
   children: {
     groveProject: {
       id: 'groveProject',
       label: 'Grove Project',
       icon: 'forest',
-      view: 'terminal',
+      view: 'terminal',  // Click Grove Project → Terminal
       children: {
         nodes: { id: 'nodes', label: 'Nodes', icon: 'branch', view: 'node-grid' },
         journeys: { id: 'journeys', label: 'Journeys', icon: 'map', view: 'journey-list' },
@@ -118,37 +199,40 @@ explore: {
 
 | File | Changes | Priority |
 |------|---------|----------|
-| `components/Terminal/WelcomeInterstitial.tsx` | Width constraint, remove legacy header | HIGH |
-| `components/Terminal/LensPicker.tsx` | Width constraint, transparent bg | HIGH |
-| `src/workspace/NavigationSidebar.tsx` | Add Fields IA structure | MEDIUM |
+| `src/explore/LensPicker.tsx` | Update LensCard props and component, wire onView | HIGH |
+| `src/workspace/NavigationSidebar.tsx` | Add icons, restructure explore tree | HIGH |
 
 ---
 
 ## Acceptance Criteria
 
-### Part A
-- [ ] WelcomeInterstitial content ≤768px centered
-- [ ] LensPicker content ≤768px centered
-- [ ] No "THE GROVE TERMINAL [v2.5.0]" text anywhere
-- [ ] Inspector panel remains visible on right
+### Part A (LensCard Pattern)
+- [ ] Click lens card → Inspector opens (does NOT change active lens)
+- [ ] Click "Select" button → Lens activates + inspector opens
+- [ ] Active lens shows "Active" badge instead of "Select" button
+- [ ] Card styling matches mockup (icon top-left, description italic)
 
-### Part B
-- [ ] "Grove Project" appears under Explore
+### Part B (Sidebar IA)
+- [ ] "Grove Project" appears under Explore with forest icon
 - [ ] Nodes/Journeys/Lenses nested under Grove Project
 - [ ] Clicking "Grove Project" shows Terminal
-- [ ] "+ Fields" appears grayed out (comingSoon style)
+- [ ] "+ Fields" appears with "Soon" styling
+- [ ] Clicking Explore expands to show Grove Project (doesn't navigate)
 
 ---
 
 ## Testing Checklist
 
-1. **Width constraint:**
-   - [ ] Fresh visit: welcome content centered, not full-width
-   - [ ] Click lens pill: picker centered, not full-width
-   - [ ] Inspector panel visible throughout
+1. **LensPicker interaction:**
+   - [ ] Navigate to Lenses view
+   - [ ] Click a lens card → Inspector opens with lens details
+   - [ ] Active lens is NOT changed
+   - [ ] Click "Select" button on a different lens → That lens becomes active
+   - [ ] Inspector updates to show selected lens config
 
-2. **Sidebar IA:**
+2. **Sidebar navigation:**
    - [ ] Expand Explore → see "Grove Project" and "+ Fields"
-   - [ ] Click "Grove Project" → Terminal shows
-   - [ ] Expand "Grove Project" → see Nodes/Journeys/Lenses
-   - [ ] "+ Fields" shows "Soon" badge, non-functional
+   - [ ] Click Grove Project → Terminal shows
+   - [ ] Expand Grove Project → see Nodes/Journeys/Lenses
+   - [ ] Click Lenses → Lens picker shows
+   - [ ] "+ Fields" is grayed/disabled

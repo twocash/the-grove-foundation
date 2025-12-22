@@ -117,47 +117,63 @@ const defaultAccent: LensAccent = {
 interface LensCardProps {
   persona: Persona;
   isActive: boolean;
-  onSelect: () => void;
+  onSelect: () => void;  // Select button click → activates lens
+  onView: () => void;    // Card body click → opens inspector
 }
 
-function LensCard({ persona, isActive, onSelect }: LensCardProps) {
+function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
   const accent = lensAccents[persona.id] || defaultAccent;
 
   return (
-    <button
-      onClick={onSelect}
+    <div
+      onClick={onView}
       className={`
-        group flex flex-col items-start p-6 rounded-xl border transition-all text-left relative overflow-hidden
+        group cursor-pointer flex flex-col p-5 rounded-xl border transition-all text-left relative
         ${isActive
-          ? `border-red-200 dark:border-red-900/50 ${accent.selectedBg} ${accent.selectedBgDark} ring-1 ring-red-100 dark:ring-red-500/20`
-          : `border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg dark:hover:border-slate-600 ${accent.borderHover} dark:hover:bg-slate-800`
+          ? 'border-primary/30 bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20'
+          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
         }
       `}
     >
-      {/* Active indicator */}
-      {isActive && (
-        <div className="absolute top-4 right-4 bg-red-200 dark:bg-red-500 text-red-700 dark:text-white rounded-full p-1 flex items-center justify-center">
-          <span className="material-symbols-outlined text-sm font-bold">check</span>
+      {/* Header: Icon + Active Badge */}
+      <div className="flex items-start justify-between mb-3">
+        <div className={`${accent.bgLight} ${accent.bgDark} p-2.5 rounded-lg`}>
+          <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark} text-xl`}>
+            {accent.icon}
+          </span>
         </div>
-      )}
-
-      {/* Icon */}
-      <div className={`${accent.bgLight} ${accent.bgDark} p-3 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-300`}>
-        <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark}`}>
-          {accent.icon}
-        </span>
+        {isActive && (
+          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/20 text-primary font-medium">
+            Active
+          </span>
+        )}
       </div>
 
-      {/* Label */}
-      <h3 className={`text-lg font-semibold mb-2 ${isActive ? 'text-slate-900 dark:text-red-100' : 'text-slate-900 dark:text-slate-100'}`}>
+      {/* Title */}
+      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">
         {persona.publicLabel}
       </h3>
 
       {/* Description */}
-      <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-500 dark:text-red-300/70' : 'text-slate-500 dark:text-slate-400'}`}>
-        {persona.description}
+      <p className="text-sm text-slate-500 dark:text-slate-400 italic mb-4">
+        "{persona.description}"
       </p>
-    </button>
+
+      {/* Footer: Select button (only if not active) */}
+      <div className="flex items-center justify-end mt-auto">
+        {!isActive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
+          >
+            Select
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -187,6 +203,10 @@ export function LensPicker() {
     openInspector({ type: 'lens', lensId: personaId });
   };
 
+  const handleView = (personaId: string) => {
+    openInspector({ type: 'lens', lensId: personaId });
+  };
+
   return (
     <div className="h-full overflow-y-auto p-8">
       <div className="max-w-4xl mx-auto">
@@ -210,6 +230,7 @@ export function LensPicker() {
               persona={persona}
               isActive={activeLensId === persona.id}
               onSelect={() => handleSelect(persona.id)}
+              onView={() => handleView(persona.id)}
             />
           ))}
         </div>
