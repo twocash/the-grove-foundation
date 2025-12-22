@@ -52,6 +52,20 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Start backend server
+        run: node server.js &
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GCS_BUCKET_NAME: grove-assets
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            curl -s http://localhost:8080/api/health/ready && break
+            echo "Waiting for backend... ($i/30)"
+            sleep 1
+          done
+
       - name: Run E2E tests
         run: npm run test:e2e
         env:
