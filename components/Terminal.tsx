@@ -1056,6 +1056,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               personas={enabledPersonas}
               customLenses={customLenses}
               onSelect={handleLensSelect}
+              onClose={() => setShowLensPicker(false)}
               onCreateCustomLens={handleCreateCustomLens}
               onDeleteCustomLens={handleDeleteCustomLens}
               currentLens={session.activeLens}

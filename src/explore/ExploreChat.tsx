@@ -126,6 +126,24 @@ export function ExploreChat() {
         .explore-chat-container button:not([class*="fixed"]) {
           transition: all 150ms ease;
         }
+
+        /* v0.14.1: LensPicker dark mode overrides */
+        .explore-chat-container .bg-paper\\/50 {
+          background: transparent !important;
+        }
+
+        .explore-chat-container .border-ink\\/5 {
+          border-color: var(--grove-border, #1e2a36) !important;
+        }
+
+        /* Ensure dark backgrounds work */
+        .explore-chat-container .dark\\:bg-slate-900 {
+          background: var(--grove-surface, #121a22) !important;
+        }
+
+        .explore-chat-container .dark\\:bg-slate-800 {
+          background: rgba(30, 41, 59, 0.8) !important;
+        }
       `}</style>
 
       <Terminal
