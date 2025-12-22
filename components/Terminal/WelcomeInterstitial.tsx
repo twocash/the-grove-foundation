@@ -1,4 +1,5 @@
 // WelcomeInterstitial - First-open experience for new Terminal users
+// v0.14.2: Width constraint, dark mode, removed legacy header
 // Shows welcome copy + lens selection to establish product context
 
 import React from 'react';
@@ -30,35 +31,25 @@ const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({
   showCreateOption = true
 }) => {
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="px-4 py-6 border-b border-ink/5">
-        <div className="font-mono text-[10px] text-ink-muted uppercase tracking-widest mb-2">
-          THE GROVE TERMINAL [v2.5.0]
-        </div>
-        <div className="font-mono text-xs text-grove-forest mb-6">
-          Connection established.
-        </div>
-
+    <div className="flex flex-col h-full overflow-y-auto">
+      <div className="max-w-3xl mx-auto w-full px-4 py-6">
         {/* Welcome Copy */}
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           {WELCOME_COPY.split('\n\n').map((paragraph, i) => (
-            <p key={i} className={`font-serif text-sm leading-relaxed ${i === 0 ? 'text-ink font-medium' : 'text-ink-muted'}`}>
+            <p key={i} className={`font-serif text-sm leading-relaxed ${i === 0 ? 'text-slate-900 dark:text-slate-100 font-medium' : 'text-slate-500 dark:text-slate-400'}`}>
               {paragraph}
             </p>
           ))}
         </div>
-      </div>
 
-      {/* Section Header */}
-      <div className="px-4 pt-4 pb-2">
-        <div className="text-[10px] font-mono uppercase tracking-wider text-ink-muted">
-          Select Your Starting Lens
+        {/* Section Header */}
+        <div className="pb-2 border-b border-slate-200 dark:border-slate-700 mb-4">
+          <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Select Your Starting Lens
+          </div>
         </div>
-      </div>
 
-      {/* Lens Grid */}
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {/* Lens Grid */}
         <LensGrid
           personas={personas}
           customLenses={customLenses}
@@ -67,13 +58,13 @@ const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({
           onDeleteCustomLens={onDeleteCustomLens}
           showCreateOption={showCreateOption}
         />
-      </div>
 
-      {/* Footer */}
-      <div className="px-4 py-3 border-t border-ink/5 bg-paper/50">
-        <p className="text-[10px] text-ink-muted text-center">
-          You can switch lenses anytime by clicking on your lens in the Terminal.
-        </p>
+        {/* Footer hint */}
+        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center">
+            You can switch lenses anytime by clicking on your lens in the Terminal.
+          </p>
+        </div>
       </div>
     </div>
   );

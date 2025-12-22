@@ -17,19 +17,34 @@ const iconNameToSymbol: Record<string, string> = {
   glasses: 'eyeglasses',
   code: 'code',
   bot: 'smart_toy',
+  forest: 'forest',
+  add_circle: 'add_circle_outline',
 };
 
-// Navigation tree structure - Updated IA
+// Navigation tree structure - Updated IA v0.14.2
 const navigationTree: Record<string, NavItem> = {
   explore: {
     id: 'explore',
     label: 'Explore',
     icon: 'compass',
-    view: 'terminal',  // Clicking Explore shows Terminal directly
     children: {
-      nodes: { id: 'nodes', label: 'Nodes', icon: 'branch', view: 'node-grid' },
-      journeys: { id: 'journeys', label: 'Journeys', icon: 'map', view: 'journey-list' },
-      lenses: { id: 'lenses', label: 'Lenses', icon: 'glasses', view: 'lens-picker' },
+      groveProject: {
+        id: 'groveProject',
+        label: 'Grove Project',
+        icon: 'forest',
+        view: 'terminal',
+        children: {
+          nodes: { id: 'nodes', label: 'Nodes', icon: 'branch', view: 'node-grid' },
+          journeys: { id: 'journeys', label: 'Journeys', icon: 'map', view: 'journey-list' },
+          lenses: { id: 'lenses', label: 'Lenses', icon: 'glasses', view: 'lens-picker' },
+        },
+      },
+      addField: {
+        id: 'addField',
+        label: '+ Fields',
+        icon: 'add_circle',
+        comingSoon: true,
+      },
     },
   },
   do: {
