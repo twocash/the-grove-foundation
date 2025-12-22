@@ -3,7 +3,7 @@
 **Implementing the Declarative Exploration (DEX) Standard**
 
 Author: Jim Calhoun  
-Version: 1.0 (Genesis)  
+Version: 2.0 (Field-Aware)  
 Status: Living Constitution  
 Context: The Grove Foundation
 
@@ -11,7 +11,7 @@ Context: The Grove Foundation
 
 ## 1. The Core Philosophy
 
-**Models are seeds. Exploration architecture is soil.**
+**Models are seeds. Fields are soil. Exploration architecture is the trellis.**
 
 We reject the "Model Maximalist" thesis that assumes value resides solely in the size of the LLM. Instead, we adhere to the **DEX Thesis**: Value comes from the *structure of exploration*.
 
@@ -50,7 +50,7 @@ To contribute to The Grove is to build upon the **DEX Stack**. All contributions
 ### III. Provenance as Infrastructure
 
 - **The Rule:** In the DEX stack, a fact without an origin is a bug.
-- **The Test:** Every "Sprout" (insight) must maintain an unbroken attribution chain back to its source. We do not just store *what* is known; we store *how* it became known (the specific human-AI interaction that collapsed the wave function).
+- **The Test:** Every "Sprout" (insight) must maintain an unbroken attribution chain back to its source—including the Field that scoped its generation. We do not just store *what* is known; we store *how* it became known (the specific human-AI interaction that collapsed the wave function) and *where* (the Field context).
 
 ### IV. Organic Scalability (The Trellis Principle)
 
@@ -72,115 +72,212 @@ The engine layer implements the invariant physics of the system. It does not kno
 - **Superposition Collapse:** Human attention transforms probabilistic AI outputs into validated insights
 - **Sprout/Card Mechanics:** The atomic units of insight capture
 - **Attribution Chains:** Provenance tracking linking every fruit back to its root
+- **Field Routing:** Scoping all operations to the active Field context
 - **Memory Persistence:** Accumulated context turning isolated sessions into a "Grove"
 
-### Layer 2: The Corpus (The Substrate)
+### Layer 2: The Field (The Substrate)
 
 **Status:** Variable Input | **Change Velocity:** Medium
 
-The corpus layer contains the raw information. The Trellis can be planted in any substrate:
+The Field layer contains bounded knowledge domains. Each Field is a self-contained workspace with its own RAG collection, exploration tools, and accumulated insights. The Trellis can be planted in any Field:
 
-| Corpus Type | Content | Value Proposition |
-|-------------|---------|-------------------|
-| Grove Research | White papers, specs | Coherent project architecture |
-| Legal Discovery | Depositions, exhibits | Case theory development |
-| Academic Lit | Papers, preprints | Synthesis & gap identification |
-| Enterprise Knowledge | Slack, Docs, Email | Tribal knowledge preservation |
+| Field Type | Content | Value Proposition |
+|------------|---------|-------------------|
+| Grove Research | White papers, specs, architecture | Coherent project knowledge |
+| Legal Corpus | Depositions, contracts, case law | Case theory development |
+| Academic Lit | Papers, preprints, citations | Synthesis & gap identification |
+| Enterprise Knowledge | Slack, Docs, Email archives | Tribal knowledge preservation |
+| Composite Field | Merged from 2+ parent Fields | Cross-domain synthesis |
+
+**Key Properties of Fields:**
+- Self-contained RAG collection (vector-indexed documents)
+- Namespaced entities (`legal.contract-clause`, `grove.strategic-insight`)
+- Scoped Sprouts (captured insights belong to their originating Field)
+- Attribution metadata (creator, contributors, fork lineage)
+- Visibility controls (private, organizational, public)
+
+See `FIELD_ARCHITECTURE.md` for complete Field specification.
 
 ### Layer 3: The Configuration (The Conditions)
 
 **Status:** Declarative (DEX) | **Change Velocity:** High
 
-This is the DEX Layer. It is where the "growing conditions" are defined. A legal analyst defines a "Contradiction" nutrient; a biologist defines a "Replication Error" nutrient.
+This is the DEX Layer. It is where the "growing conditions" are defined *per Field*. A legal analyst defines a "Contradiction" card type; a biologist defines a "Replication Error" card type. These configurations are Field-scoped.
 
 - **Configuration is Declarative:** Non-developers define behavior through structured data files
-- **Logic Isolation:** Changing the domain does not require touching the engine code
+- **Configuration is Field-Scoped:** Each Field can have different Lenses, Journeys, Card Definitions
+- **Logic Isolation:** Changing the domain (Field) does not require touching the engine code
 
 ---
 
 ## 5. The DEX Configuration Schemas
 
-The Trellis is shaped by four interconnected schemas—the "genetic code" of a specific deployment:
+The Trellis is shaped by four interconnected schemas—the "genetic code" of a specific Field deployment:
 
-### A. Annotation Schema
-Defines the "Fruit" types—what kind of insights can be harvested?
-- `annotationTypes[]` — Valid categories (e.g., "Strategic Insight", "Legal Privilege")
-- `validationRules{}` — Logic for what constitutes a valid annotation
+### A. Card Definition Schema
+Defines the "Fruit" types—what kind of insights can be harvested in this Field?
+- `cardTypes[]` — Valid categories (e.g., "Strategic Insight", "Legal Privilege")
+- `validationRules{}` — Logic for what constitutes a valid card
 - `displayTemplates{}` — UI rendering instructions
+- **Namespace:** `{field-slug}.{card-type-id}`
 
 ### B. Relationship Schema
-Defines the "Branching" rules—how do nodes connect?
+Defines the "Branching" rules—how do nodes connect within this Field?
 - `relationTypes[]` — "Supports", "Refutes", "Extends", "Causes"
 - `directionality{}` — Directed vs. Bi-directional graph edges
 - `autoDetection{}` — Prompts for LLM to suggest connections
 
-### C. Processing Flow Schema
-Defines the "Growth Cycle"—the lifecycle of an insight.
-- `stages[]` — Sprout → Sapling → Tree → Grove
-- `transitions{}` — Rules for moving between stages
-- `outputIntegration{}` — Where the harvest goes
+### C. Journey Schema
+Defines the "Growth Paths"—curated exploration sequences through Field knowledge.
+- `journeys[]` — Ordered node sequences with narrative structure
+- `entryConditions{}` — When to suggest each journey
+- `completionCriteria{}` — What constitutes journey completion
+- **Namespace:** `{field-slug}.{journey-id}`
 
-### D. Display Schema
-Defines the "View"—how the Trellis looks to the gardener.
-- `cardTemplates{}` — Visual layouts for content types
-- `densityLevels{}` — Information density (Compact vs. Detailed)
-- `visualizations[]` — Graph view, Timeline view, List view
+### D. Lens Schema
+Defines the "Perspectives"—how the Field speaks to different audiences.
+- `lenses[]` — Persona configurations with tone and emphasis
+- `arcEmphasis{}` — Narrative arc weighting per lens
+- `conversionPaths{}` — Next steps appropriate to each lens
+- **Namespace:** `{field-slug}.{lens-id}`
 
 ---
 
-## 6. Implementation Roadmap
+## 6. Field-Aware Architecture Diagram
 
-### Phase 1: Reference Implementation (The Grove Terminal)
-*Current State*
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              THE GROVE PLATFORM                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    LAYER 1: ENGINE (Fixed)                          │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │   │
+│  │  │ Sprout   │ │ Session  │ │ RAG      │ │ LLM      │ │ Attrib   │  │   │
+│  │  │ Manager  │ │ Manager  │ │ Engine   │ │ Router   │ │ Tracker  │  │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘  │   │
+│  └────────────────────────────────┬────────────────────────────────────┘   │
+│                                   │                                         │
+│                          fieldId required                                   │
+│                                   │                                         │
+│  ┌────────────────────────────────┼────────────────────────────────────┐   │
+│  │                    LAYER 2: FIELDS (Variable)                       │   │
+│  │                                │                                    │   │
+│  │  ┌──────────────────┐  ┌──────┴───────┐  ┌──────────────────┐      │   │
+│  │  │ Grove Foundation │  │ Legal Corpus │  │ Academic Lit     │      │   │
+│  │  │ ─────────────────│  │ ─────────────│  │ ─────────────────│      │   │
+│  │  │ RAG: grove-docs  │  │ RAG: legal   │  │ RAG: papers      │      │   │
+│  │  │ Lenses: 6        │  │ Lenses: 4    │  │ Lenses: 3        │      │   │
+│  │  │ Journeys: 5      │  │ Journeys: 8  │  │ Journeys: 12     │      │   │
+│  │  │ Sprouts: 127     │  │ Sprouts: 89  │  │ Sprouts: 234     │      │   │
+│  │  └──────────────────┘  └──────────────┘  └──────────────────┘      │   │
+│  │                                                                     │   │
+│  │  ┌──────────────────────────────────────────────────────────┐      │   │
+│  │  │ Legal-Grove Composite (merged)                           │      │   │
+│  │  │ ─────────────────────────────────────────────────────────│      │   │
+│  │  │ RAG: merged legal + grove                                │      │   │
+│  │  │ Inherited: legal.*, grove.* entities                     │      │   │
+│  │  │ Native: legal-grove.* entities                           │      │   │
+│  │  └──────────────────────────────────────────────────────────┘      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                 LAYER 3: CONFIGURATION (Per Field)                  │   │
+│  │                                                                     │   │
+│  │  Field: grove-foundation                                            │   │
+│  │  ├── grove.strategist-lens          (Lens config)                  │   │
+│  │  ├── grove.skeptic-lens             (Lens config)                  │   │
+│  │  ├── grove.architecture-journey     (Journey config)               │   │
+│  │  ├── grove.strategic-insight        (Card Definition)              │   │
+│  │  └── grove.technical-deep-dive      (Card Definition)              │   │
+│  │                                                                     │   │
+│  │  Field: legal-corpus                                                │   │
+│  │  ├── legal.litigator-lens           (Lens config)                  │   │
+│  │  ├── legal.compliance-journey       (Journey config)               │   │
+│  │  ├── legal.contract-clause          (Card Definition)              │   │
+│  │  └── legal.precedent-summary        (Card Definition)              │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-The Grove Terminal serves as the Reference Trellis. It demonstrates the DEX mechanics using the "Distributed AI Research" corpus.
-- Validates Sprout/Card lifecycle
+---
+
+## 7. Implementation Roadmap
+
+### Phase 1: Reference Implementation (Current)
+*The Grove Terminal as single-Field deployment*
+
+The Grove Terminal demonstrates the DEX mechanics using the "Grove Foundation" Field.
+- Validates Sprout/Card lifecycle with Field context
 - Proves the "Superposition Collapse" UX
+- Schema supports multi-Field (single Field populated)
 
-### Phase 2: Configuration Extraction (DEXification)
+### Phase 2: Multi-Field Support
 
-Extract hardcoded behaviors into the DEX Schemas.
-- Convert types.ts definitions into schema.json files
-- Implement the dynamic SchemaLoader
+Enable multiple Fields per user/organization.
+- Field creation flow
+- Field switching (clean break = new session)
+- Field selector in Explore UI
 
-### Phase 3: The Trellis Builder (Admin UI)
+### Phase 3: Composite Fields
 
-Enable non-technical experts to build their own Trellises.
-- Visual editor for Annotation and Relationship schemas
-- "No-Code" adjustment of processing flows
+Enable cross-domain synthesis through explicit Field merging.
+- Merge UI for selecting parent Fields
+- Namespaced entity inheritance
+- Sprout promotion to parent Fields
 
-### Phase 4: Multi-Domain Deployment
+### Phase 4: Knowledge Commons Integration
 
-Deploy the Trellis into new soils.
-- **Legal Trellis:** Pilot with partner law firm
-- **Academic Trellis:** Pilot with university research group
-- **Enterprise Trellis:** Pilot with corporate partner
+Connect Fields to the shared marketplace.
+- Publish Fields/Lenses/Journeys to marketplace
+- Fork public Fields with attribution
+- Credit economy for adoption
+
+### Phase 5: Federation
+
+Enable cross-instance Field discovery.
+- University A can explore University B's public Fields
+- Attribution flows across federation boundaries
 
 ---
 
-## 7. Terminology Reference
+## 8. Terminology Reference
 
 | Term | Definition |
 |------|------------|
 | **Trellis** | The structural framework (architecture) supporting the DEX stack |
 | **DEX** | Declarative Exploration — methodology separating intent from inference |
+| **Field** | A bounded knowledge domain with RAG collection and exploration tools |
+| **Namespace** | Prefix identifying entity origin (e.g., `legal.`, `grove.`) |
+| **Composite Field** | Field created by merging 2+ parent Fields |
 | **Trellis Frame** | Engine layer — fixed infrastructure, low change velocity |
-| **Substrate** | Corpus layer — variable input, medium change velocity |
+| **Substrate** | Field layer — variable input, medium change velocity |
 | **Conditions** | Configuration layer — DEX definitions, high change velocity |
 | **Vine** | Execution capability (LLM, RAG) — interchangeable and ephemeral |
-| **Sprout** | Atomic unit of captured insight |
-| **Grove** | Accumulated, refined knowledge base |
+| **Sprout** | Atomic unit of captured insight, scoped to a Field |
+| **Grove** | The platform; also accumulated, refined knowledge across Fields |
 | **Gardener** | Human applying judgment (pruning) to AI-generated possibilities (growth) |
 | **Superposition Collapse** | Human attention transforming AI outputs into validated insights |
 
 ---
 
-## 8. Conclusion: The Infrastructure of Thought
+## 9. Cross-References
 
-The Grove is many things. But we aren't really building an "App." We are building the **Trellis Protocol** to create new kinds of connections between vast stores of knowledge and information types.
-
-Information Architecture organized the static web. **Exploration Architecture (DEX)** organizes knowledge in the generative age for productive refinement. By separating the logic of exploration from the capability of execution, we ensure that as models get smarter, our Trellis simply bears better fruit.
+- **Field Architecture:** See `FIELD_ARCHITECTURE.md` for complete Field specification
+- **Sprout System:** See `SPROUT_SYSTEM.md` for insight capture lifecycle
+- **Data Models:** See `specs/dex-object-model.ts` for TypeScript schemas
 
 ---
 
-**Build the Trellis. The community brings the seeds.**
+## 10. Conclusion: The Infrastructure of Thought
+
+The Grove is many things. But we aren't really building an "App." We are building the **Trellis Protocol** to create new kinds of connections between vast stores of knowledge and information types.
+
+Fields are the soil in which this protocol grows. Each Field is a bounded context—a knowledge domain with its own RAG collection, exploration tools, and accumulated insights. The Trellis architecture enables these Fields to support organic growth without chaos.
+
+Information Architecture organized the static web. **Exploration Architecture (DEX)** organizes knowledge in the generative age for productive refinement. By separating the logic of exploration from the capability of execution, and by scoping exploration to Fields, we ensure that as models get smarter and knowledge domains multiply, our Trellis simply bears better fruit.
+
+---
+
+**Build the Trellis. Plant the Fields. The community brings the seeds.**

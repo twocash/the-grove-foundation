@@ -4,3 +4,4 @@
 export { ThreeColumnLayout } from './ThreeColumnLayout';
 export { InspectorPanel, InspectorSection, InspectorDivider } from './InspectorPanel';
 export { NavigationTree, type NavItem } from './NavigationTree';
+export { ContentContainer } from './ContentContainer';

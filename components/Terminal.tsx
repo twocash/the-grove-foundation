@@ -1231,7 +1231,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               </div>
 
               {/* Interactions Area */}
-              <div className="p-6 border-t border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-surface-dark/50">
+              <div className="border-t border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-surface-dark/50">
+                <div className="max-w-3xl mx-auto p-6">
 
                 {/* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */}
                 {v21JourneyContext?.isIncomplete ? (
@@ -1379,6 +1380,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     showJourney={currentThread.length > 0}
                   />
                 )}
+                </div>
               </div>
             </>
           )}

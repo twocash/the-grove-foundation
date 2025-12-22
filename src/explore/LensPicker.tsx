@@ -189,7 +189,7 @@ export function LensPicker() {
 
   return (
     <div className="h-full overflow-y-auto p-8">
-      <div className="max-w-4xl">
+      <div className="max-w-4xl mx-auto">
         <CollectionHeader
           title="Choose Your Lens"
           description="Select a perspective to explore The Grove. Each lens shapes how ideas are presented to you, filtering the noise to match your intent."
