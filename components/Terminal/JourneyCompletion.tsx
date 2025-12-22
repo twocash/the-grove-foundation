@@ -1,5 +1,5 @@
 // JourneyCompletion - Shows completion celebration and optional rating
-// Displayed when user finishes all cards in a journey
+// v0.14: Updated for dark mode and inline rendering (not modal)
 
 import React, { useState } from 'react';
 
@@ -55,26 +55,26 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
   // Consent screen for feedback transmission
   if (showConsent) {
     return (
-      <div className="p-6 bg-white border border-ink/10 rounded-lg shadow-sm">
-        <h3 className="font-display text-lg text-ink mb-4">
+      <div className="p-6 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-sm">
+        <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100 mb-4">
           Share Feedback with The Foundation?
         </h3>
 
-        <p className="text-sm text-ink-muted mb-4">
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
           Your rating and feedback help us improve the experience for everyone.
         </p>
 
-        <div className="bg-ink/[0.02] p-4 rounded-lg mb-4 text-sm">
-          <div className="font-semibold text-ink mb-2">What we'll receive:</div>
-          <ul className="text-ink-muted space-y-1">
+        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg mb-4 text-sm">
+          <div className="font-semibold text-slate-900 dark:text-slate-100 mb-2">What we'll receive:</div>
+          <ul className="text-slate-600 dark:text-slate-400 space-y-1">
             <li>• Your rating ({RATING_EMOJIS.find(e => e.value === rating)?.label})</li>
             {feedback && <li>• Your feedback text</li>}
             <li>• Which journey and persona</li>
             <li>• How long it took ({completionTimeMinutes} min)</li>
           </ul>
 
-          <div className="font-semibold text-ink mt-4 mb-2">What we WON'T receive:</div>
-          <ul className="text-ink-muted space-y-1">
+          <div className="font-semibold text-slate-900 dark:text-slate-100 mt-4 mb-2">What we WON'T receive:</div>
+          <ul className="text-slate-600 dark:text-slate-400 space-y-1">
             <li>• Your identity</li>
             <li>• Your queries or conversations</li>
             <li>• Your custom lens details</li>
@@ -84,13 +84,13 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
         <div className="flex space-x-3">
           <button
             onClick={() => handleSubmit(true)}
-            className="flex-1 px-4 py-2 bg-grove-forest text-white font-semibold rounded-lg hover:bg-grove-forest/90 transition-colors"
+            className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
           >
             Send Anonymously
           </button>
           <button
             onClick={() => handleSubmit(false)}
-            className="flex-1 px-4 py-2 bg-ink/5 text-ink font-semibold rounded-lg hover:bg-ink/10 transition-colors"
+            className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
           >
             Keep Private
           </button>
@@ -100,21 +100,21 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
   }
 
   return (
-    <div className="p-6 bg-white border border-ink/10 rounded-lg shadow-sm">
+    <div className="p-6 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-sm">
       {/* Celebration Header */}
       <div className="text-center mb-6">
         <div className="text-4xl mb-2">🎉</div>
-        <h3 className="font-display text-xl text-ink">
+        <h3 className="font-semibold text-xl text-slate-900 dark:text-slate-100">
           Journey Complete!
         </h3>
-        <p className="text-sm text-ink-muted mt-1">
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           {journeyTitle}
         </p>
       </div>
 
       {/* Summary */}
-      <div className="bg-ink/[0.02] p-4 rounded-lg mb-6 text-center">
-        <p className="text-sm text-ink">
+      <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg mb-6 text-center">
+        <p className="text-sm text-slate-700 dark:text-slate-300">
           You've explored this topic in depth. Time spent: {completionTimeMinutes} minutes
         </p>
       </div>
@@ -123,7 +123,7 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
         <>
           {/* Rating Section */}
           <div className="mb-6">
-            <p className="text-sm font-semibold text-ink mb-3 text-center">
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 text-center">
               How was this journey?
             </p>
             <div className="flex justify-center space-x-2">
@@ -133,12 +133,12 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
                   onClick={() => setRating(item.value)}
                   className={`flex flex-col items-center p-3 rounded-lg transition-all ${
                     rating === item.value
-                      ? 'bg-grove-forest/10 ring-2 ring-grove-forest scale-110'
-                      : 'bg-ink/[0.02] hover:bg-ink/5'
+                      ? 'bg-primary/10 ring-2 ring-primary scale-110'
+                      : 'bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span className="text-2xl">{item.emoji}</span>
-                  <span className="text-[9px] text-ink-muted mt-1">{item.value}</span>
+                  <span className="text-[9px] text-slate-500 dark:text-slate-400 mt-1">{item.value}</span>
                 </button>
               ))}
             </div>
@@ -146,14 +146,17 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
 
           {/* Feedback Text */}
           <div className="mb-6">
-            <label className="block text-xs text-ink-muted mb-2">
+            <label className="block text-xs text-slate-500 dark:text-slate-400 mb-2">
               Want to share feedback? (optional)
             </label>
             <textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="What resonated? What was confusing?"
-              className="w-full px-3 py-2 border border-ink/10 rounded-lg text-sm focus:ring-2 focus:ring-grove-forest focus:border-grove-forest"
+              className="w-full px-3 py-2 border border-border-light dark:border-border-dark rounded-lg text-sm
+                bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                placeholder:text-slate-400 dark:placeholder:text-slate-500
+                focus:ring-2 focus:ring-primary focus:border-primary"
               rows={2}
             />
           </div>
@@ -164,13 +167,13 @@ const JourneyCompletion: React.FC<JourneyCompletionProps> = ({
       <div className="flex space-x-3">
         <button
           onClick={onSkip}
-          className="flex-1 px-4 py-2 text-ink-muted font-semibold rounded-lg hover:bg-ink/5 transition-colors"
+          className="flex-1 px-4 py-2 text-slate-500 dark:text-slate-400 font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
         >
           Skip
         </button>
         <button
           onClick={handleContinue}
-          className="flex-1 px-4 py-2 bg-grove-forest text-white font-semibold rounded-lg hover:bg-grove-forest/90 transition-colors"
+          className="flex-1 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
         >
           {rating !== null ? 'Submit & Continue' : 'Continue'}
         </button>

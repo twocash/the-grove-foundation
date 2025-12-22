@@ -1073,7 +1073,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 // Context selectors
                 lensName={activeLensData?.publicLabel || 'Choose Lens'}
                 lensColor={activeLensData?.color}
-                journeyName={currentThread.length > 0 ? 'Guided Journey' : 'Self-Guided'}
+                journeyName={getJourney(activeJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
                 onLensClick={() => setShowLensPicker(true)}
@@ -1234,6 +1234,33 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     </React.Fragment>
                   );
                 })}
+
+                {/* v0.14: Inline Journey Completion (moved from fixed modal) */}
+                {showJourneyCompletion && (
+                  <div className="max-w-md mx-auto my-6">
+                    <JourneyCompletion
+                      journeyTitle={completedJourneyTitle || getJourney(activeJourneyId || '')?.title || (activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey')}
+                      journeyId={`${session.activeLens || 'default'}-${Date.now()}`}
+                      personaId={session.activeLens}
+                      completionTimeMinutes={Math.round((Date.now() - journeyStartTime) / 60000)}
+                      showRating={showJourneyRatings}
+                      showFeedbackTransmission={showFeedbackTransmission}
+                      onSubmit={(rating, feedback, sendToFoundation) => {
+                        console.log('Journey feedback:', { rating, feedback, sendToFoundation });
+                        setShowJourneyCompletion(false);
+                        setCompletedJourneyTitle(null);
+                        if (shouldShowFounder && currentArchetypeId) {
+                          markFounderStoryShown();
+                        }
+                      }}
+                      onSkip={() => {
+                        setShowJourneyCompletion(false);
+                        setCompletedJourneyTitle(null);
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
                 </div>
               </div>
@@ -1317,29 +1344,22 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                     </div>
                   </div>
                 ) : currentThread.length > 0 && currentPosition < currentThread.length ? (
-                  /* Journey Progress Card - dynamically shows journey cards from schema */
+                  /* v0.14: Minimal journey card - context now in header */
                   <JourneyCard
-                    currentThread={currentThread}
                     currentPosition={currentPosition}
+                    totalCards={currentThread.length}
                     currentCard={getThreadCard(currentPosition)}
-                    journeyTitle={activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey'}
-                    isFirstCard={currentPosition === 0}
                     onResume={() => {
                       const card = getThreadCard(currentPosition);
                       if (card) {
                         handleSend(card.query, card.label, card.id);
-                        // Advance thread after sending - check if this was the last card
                         const nextCardId = advanceThread();
                         if (nextCardId === null && currentPosition >= currentThread.length - 1) {
-                          // Journey complete! Show completion UI
                           setShowJourneyCompletion(true);
                           recordJourneyCompleted();
                           incrementJourneysCompleted();
                         }
                       }
-                    }}
-                    onExploreFreely={() => {
-                      // User can type freely below
                     }}
                   />
 ) : null}
@@ -1409,35 +1429,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
       {terminatorModeActive && <TerminatorModeOverlay />}
 
-      {/* Journey Completion Modal */}
-      {showJourneyCompletion && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/30 backdrop-blur-sm">
-          <div className="w-full max-w-md mx-4">
-            <JourneyCompletion
-              journeyTitle={completedJourneyTitle || (activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey')}
-              journeyId={`${session.activeLens || 'default'}-${Date.now()}`}
-              personaId={session.activeLens}
-              completionTimeMinutes={Math.round((Date.now() - journeyStartTime) / 60000)}
-              showRating={showJourneyRatings}
-              showFeedbackTransmission={showFeedbackTransmission}
-              onSubmit={(rating, feedback, sendToFoundation) => {
-                console.log('Journey feedback:', { rating, feedback, sendToFoundation });
-                // TODO: Send feedback to server if sendToFoundation is true
-                setShowJourneyCompletion(false);
-                setCompletedJourneyTitle(null);
-                // Optionally show founder story or CTA after journey completion
-                if (shouldShowFounder && currentArchetypeId) {
-                  markFounderStoryShown();
-                }
-              }}
-              onSkip={() => {
-                setShowJourneyCompletion(false);
-                setCompletedJourneyTitle(null);
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* v0.14: JourneyCompletion moved inline in messages area */}
 
       {showFounderStory && currentArchetypeId && (
         <FounderStory
