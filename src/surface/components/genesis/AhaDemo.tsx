@@ -39,65 +39,68 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
   };
 
   return (
-    <section className="min-h-screen bg-paper py-24 px-6 flex flex-col items-center justify-center">
-      <div className="max-w-2xl mx-auto w-full">
-        {/* Simulated message card - paper aesthetic */}
-        <div className="bg-paper-dark border border-ink/10 rounded-sm shadow-lg p-8 md:p-10 mb-8">
-          {/* Loading state */}
-          {isTyping && (
-            <div className="flex items-center gap-3 text-ink-muted mb-6">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+    <section className="flex-1 flex flex-col bg-paper">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto flex flex-col justify-center px-6 py-8">
+        <div className="max-w-2xl mx-auto w-full">
+          {/* Simulated message card - paper aesthetic */}
+          <div className="bg-paper-dark border border-ink/10 rounded-sm shadow-lg p-6 md:p-8 mb-6">
+            {/* Loading state */}
+            {isTyping && (
+              <div className="flex items-center gap-3 text-ink-muted mb-6">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-grove-forest rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span className="font-serif text-lg italic">Your Grove is thinking...</span>
               </div>
-              <span className="font-serif text-lg italic">Your Grove is thinking...</span>
-            </div>
-          )}
+            )}
 
-          {/* Demo message */}
-          <div
-            className={`transition-opacity duration-500 ${
-              showMessage ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            {/* Divider */}
-            <div className="border-t border-ink/10 mb-6" />
+            {/* Demo message */}
+            <div
+              className={`transition-opacity duration-500 ${
+                showMessage ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              {/* Divider */}
+              <div className="border-t border-ink/10 mb-6" />
 
-            {/* Message content - clean serif */}
-            <div className="font-serif text-lg md:text-xl text-ink leading-relaxed space-y-4">
-              <p>"Good morning. I've been exploring a few threads while you were away.</p>
-              <p>I found a connection between distributed systems and cognitive architecture that might interest you.</p>
-              <p>Want me to explain, or should I keep digging?"</p>
-            </div>
+              {/* Message content - clean serif */}
+              <div className="font-serif text-lg md:text-xl text-ink leading-relaxed space-y-4">
+                <p>"Good morning. I've been exploring a few threads while you were away.</p>
+                <p>I found a connection between distributed systems and cognitive architecture that might interest you.</p>
+                <p>Want me to explain, or should I keep digging?"</p>
+              </div>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <button
-                onClick={handleGoDeeper}
-                className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
-              >
-                Consult the Grove
-              </button>
-              <button
-                onClick={handleKeepExploring}
-                className="px-6 py-3 border border-grove-forest text-grove-forest font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-grove-forest hover:text-white transition-colors"
-              >
-                Keep exploring
-              </button>
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                <button
+                  onClick={handleGoDeeper}
+                  className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
+                >
+                  Consult the Grove
+                </button>
+                <button
+                  onClick={handleKeepExploring}
+                  className="px-6 py-3 border border-grove-forest text-grove-forest font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-grove-forest hover:text-white transition-colors"
+                >
+                  Keep exploring
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Tagline */}
-        <p className="text-center font-serif text-xl md:text-2xl text-grove-forest italic mb-12">
-          This is what AI feels like when it's yours.
-        </p>
-
-        {/* Scroll indicator - floating seedling */}
-        <div className="flex justify-center">
-          <ScrollIndicator onClick={handleKeepExploring} />
+          {/* Tagline */}
+          <p className="text-center font-serif text-xl md:text-2xl text-grove-forest italic">
+            This is what AI feels like when it's yours.
+          </p>
         </div>
+      </div>
+
+      {/* ScrollIndicator anchored at bottom */}
+      <div className="shrink-0 py-4 flex justify-center bg-paper">
+        <ScrollIndicator onClick={handleKeepExploring} />
       </div>
     </section>
   );

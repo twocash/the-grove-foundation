@@ -315,7 +315,7 @@ const GenesisPage: React.FC = () => {
             {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
             <div
               ref={el => { screenRefs.current[1] = el; }}
-              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+              className="h-[calc(100vh-56px)] flex flex-col overflow-hidden"
             >
               <ProblemStatement
                 onScrollNext={createScrollToNext(1)}
@@ -326,7 +326,7 @@ const GenesisPage: React.FC = () => {
             {/* SCREEN 3: Product Reveal */}
             <div
               ref={el => { screenRefs.current[2] = el; }}
-              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+              className="h-[calc(100vh-56px)] flex flex-col overflow-hidden"
             >
               <ProductReveal
                 onOpenTerminal={handleProductRevealCTA}
@@ -337,7 +337,7 @@ const GenesisPage: React.FC = () => {
             {/* SCREEN 4: Aha Demo */}
             <div
               ref={el => { screenRefs.current[3] = el; }}
-              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+              className="h-[calc(100vh-56px)] flex flex-col overflow-hidden"
             >
               <AhaDemo
                 onGoDeeper={handleAhaDemoCTA}
@@ -348,7 +348,7 @@ const GenesisPage: React.FC = () => {
             {/* SCREEN 5: Foundation */}
             <div
               ref={el => { screenRefs.current[4] = el; }}
-              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+              className="h-[calc(100vh-56px)] flex flex-col overflow-hidden"
             >
               <Foundation
                 onOpenTerminal={handleFoundationCTA}
@@ -359,7 +359,7 @@ const GenesisPage: React.FC = () => {
             {/* SCREEN 6: Call to Action (no scroll indicator - it's the last section) */}
             <div
               ref={el => { screenRefs.current[5] = el; }}
-              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+              className="h-[calc(100vh-56px)] flex flex-col overflow-hidden"
             >
               <CallToAction
                 onOpenTerminal={handleCallToActionTerminal}
