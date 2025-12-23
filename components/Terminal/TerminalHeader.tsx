@@ -31,14 +31,16 @@ const HeaderPill: React.FC<{
   onClick?: () => void;
   icon?: React.ReactNode;
   disabled?: boolean;
-}> = ({ label, onClick, icon, disabled }) => (
+  className?: string;  // Allow custom classes for responsive hiding
+}> = ({ label, onClick, icon, disabled, className = '' }) => (
   <button
     onClick={onClick}
     disabled={disabled || !onClick}
-    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium
+    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium
       bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200
       border border-transparent hover:border-primary/30 dark:hover:border-primary/50
-      transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+      ${className}`}
   >
     {icon}
     <span className="truncate max-w-[100px]">{label}</span>
@@ -91,18 +93,9 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         )}
       </div>
 
-      {/* Center: Context Pills */}
-      <div className="flex items-center gap-2 flex-1 min-w-0 justify-center">
-        {/* Field Pill */}
-        {fieldName && (
-          <HeaderPill
-            label={fieldName}
-            onClick={onFieldClick}
-            disabled={!onFieldClick}
-          />
-        )}
-
-        {/* Lens Pill */}
+      {/* Center: Context Pills - aligned right, Journey/Field collapse first */}
+      <div className="flex items-center gap-2 flex-1 min-w-0 justify-end mr-2">
+        {/* Lens Pill - Always visible, highest priority */}
         {lensName && (
           <HeaderPill
             label={lensName}
@@ -111,12 +104,23 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
           />
         )}
 
-        {/* Journey Pill */}
+        {/* Journey Pill - Hidden on smaller screens */}
         {journeyName && (
           <HeaderPill
             label={journeyName}
             onClick={onJourneyClick}
             disabled={!onJourneyClick}
+            className="hidden xl:flex"
+          />
+        )}
+
+        {/* Field Pill - Only show on very wide screens */}
+        {fieldName && (
+          <HeaderPill
+            label={fieldName}
+            onClick={onFieldClick}
+            disabled={!onFieldClick}
+            className="hidden 2xl:flex"
           />
         )}
       </div>

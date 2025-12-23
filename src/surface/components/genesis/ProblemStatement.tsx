@@ -77,22 +77,40 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
     return () => clearInterval(interval);
   }, [isCompressed, quotes.length]);
 
-  // Scroll to active quote
+  // Scroll to active quote - HORIZONTAL ONLY (Fix #9)
+  // Using scrollTo instead of scrollIntoView to prevent page jumps
   useEffect(() => {
     if (!isCompressed || !carouselRef.current) return;
 
-    const cards = carouselRef.current.children;
-    if (cards[activeQuoteIndex]) {
-      (cards[activeQuoteIndex] as HTMLElement).scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
+    const container = carouselRef.current;
+    const cards = container.children;
+    const activeCard = cards[activeQuoteIndex] as HTMLElement;
+
+    if (activeCard) {
+      // Calculate horizontal scroll position to center the card
+      const containerWidth = container.offsetWidth;
+      const cardLeft = activeCard.offsetLeft;
+      const cardWidth = activeCard.offsetWidth;
+      const scrollTarget = cardLeft - (containerWidth / 2) + (cardWidth / 2);
+
+      // Horizontal scroll only - prevents page jumps
+      container.scrollTo({
+        left: scrollTarget,
+        behavior: 'smooth'
       });
     }
   }, [activeQuoteIndex, isCompressed]);
 
   // Reset and re-animate on content/trigger change
+  // Skip observers in compressed mode - they're for full-page staggered reveal only
   useEffect(() => {
+    // In compressed mode, show all content immediately (carousel handles visibility)
+    if (isCompressed) {
+      setVisibleCards(new Set(quotes.map((_, i) => i)));
+      setShowTension(true);
+      return;
+    }
+
     setVisibleCards(new Set());  // Reset card visibility
     setShowTension(false);  // Reset tension visibility
 
@@ -139,7 +157,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
     }
 
     return () => observers.forEach(obs => obs.disconnect());
-  }, [quotes, trigger]); // Re-run effect on quotes or trigger change
+  }, [quotes, trigger, isCompressed]); // Add isCompressed to dependencies
 
   return (
     <section className={`${isCompressed ? '' : 'min-h-screen'} bg-paper py-12 px-6 ${className}`}>
