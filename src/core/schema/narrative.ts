@@ -321,6 +321,21 @@ export interface TensionContent {
 }
 
 /**
+ * TerminalWelcome - Lens-specific terminal greeting content
+ *
+ * When a user selects a lens, the terminal welcome message transforms
+ * to match their perspective, mirroring how the landing page hero morphs.
+ *
+ * Sprint: Terminal Architecture Refactor v1.0
+ */
+export interface TerminalWelcome {
+  heading: string;           // e.g., "The Terminal." → "Research Interface."
+  thesis: string;            // One-sentence value prop for this lens
+  prompts: string[];         // 2-4 suggested starting questions
+  footer?: string;           // Optional closing line
+}
+
+/**
  * LensReality - Complete reality projection for a lens/persona
  *
  * This is what the Quantum Interface collapses to when a lens is selected.
@@ -329,6 +344,7 @@ export interface TensionContent {
 export interface LensReality {
   hero: HeroContent;
   problem: TensionContent;
+  terminal?: TerminalWelcome;  // NEW: Lens-specific terminal greeting
 }
 
 // ============================================================================

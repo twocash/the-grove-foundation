@@ -6,11 +6,30 @@
 
 import { ArchetypeId } from '../../types/lens';
 // Re-export types from core schema for backward compatibility
-import type { LensReality, HeroContent, TensionContent, LensQuote } from '../core/schema/narrative';
-export type { LensReality, HeroContent, TensionContent, LensQuote };
+import type { LensReality, HeroContent, TensionContent, LensQuote, TerminalWelcome } from '../core/schema/narrative';
+export type { LensReality, HeroContent, TensionContent, LensQuote, TerminalWelcome };
 
 // Legacy Quote type alias for backward compatibility with genesis components
 export type Quote = LensQuote;
+
+// ============================================================================
+// DEFAULT TERMINAL WELCOME (Sprint: Terminal Architecture Refactor v1.0)
+// ============================================================================
+
+/**
+ * Default terminal welcome message shown when no lens is selected
+ * or as fallback when a lens doesn't define custom terminal content.
+ */
+export const DEFAULT_TERMINAL_WELCOME: TerminalWelcome = {
+  heading: "The Terminal.",
+  thesis: "Everything documented about Grove—the white paper, technical architecture, economic model, advisory council analysis—is indexed here.",
+  prompts: [
+    "What does \"distributed AI infrastructure\" actually mean?",
+    "How does capability propagate from frontier to local?",
+    "Why would agents work to improve themselves?"
+  ],
+  footer: "Or explore freely. The questions lead to each other."
+};
 
 // ============================================================================
 // DEFAULT REALITY (No lens selected)
@@ -87,6 +106,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "They're building the future of intelligence.",
         "We're building who gets to own it."
       ]
+    },
+    terminal: {
+      heading: "The Terminal.",
+      thesis: "Explore the Grove thesis freely. Ask anything about distributed AI, ownership, and the infrastructure question.",
+      prompts: [
+        "What is Grove, really?",
+        "Why does AI ownership matter?",
+        "How is this different from just using ChatGPT?"
+      ],
+      footer: "No guided path. Just curiosity."
     }
   },
 
@@ -121,6 +150,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "They tell you to 'adapt.'",
         "We say: own it instead."
       ]
+    },
+    terminal: {
+      heading: "The Terminal.",
+      thesis: "Plain-language explanations of how distributed AI works and why it matters for ordinary people.",
+      prompts: [
+        "Why should I care about who owns AI?",
+        "How is this different from ChatGPT?",
+        "What can I actually do with this?"
+      ],
+      footer: "No jargon. Just answers."
     }
   },
 
@@ -155,6 +194,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "The enclosure of the digital commons is accelerating.",
         "We are building the library, not the bookstore."
       ]
+    },
+    terminal: {
+      heading: "Research Interface.",
+      thesis: "Peer-reviewed sources, technical documentation, and advisory council analysis. Academic rigor applied to distributed AI.",
+      prompts: [
+        "What peer-reviewed research supports the hybrid architecture?",
+        "How does Grove address the enclosure of AI research?",
+        "What are the methodological limitations?"
+      ],
+      footer: "Citations available. Ask for sources."
     }
   },
 
@@ -189,6 +238,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "They build moats around data centers.",
         "We build protocols for edge clusters."
       ]
+    },
+    terminal: {
+      heading: "Technical Documentation.",
+      thesis: "Architecture specs, API design, and performance analysis. The hybrid local-cloud system explained.",
+      prompts: [
+        "How does the cognitive router decide local vs. cloud?",
+        "What are the memory system's retrieval mechanics?",
+        "Show me the agent cognition loop."
+      ],
+      footer: "Implementation details available on request."
     }
   },
 
@@ -223,6 +282,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "They concentrate power in data centers with flags.",
         "We distribute it across borders."
       ]
+    },
+    terminal: {
+      heading: "Strategic Analysis.",
+      thesis: "Geopolitical implications of AI infrastructure concentration. Power dynamics, sovereignty, and distributed alternatives.",
+      prompts: [
+        "How does AI concentration affect national sovereignty?",
+        "What is the strategic case for distributed infrastructure?",
+        "Who benefits from the current centralized model?"
+      ],
+      footer: "Policy implications and strategic options."
     }
   },
 
@@ -257,6 +326,16 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "You're in a capex arms race for data center capacity.",
         "We're building the network that doesn't need one."
       ]
+    },
+    terminal: {
+      heading: "Competitive Analysis.",
+      thesis: "Edge economics, hybrid architectures, and the threat/opportunity matrix for established AI providers.",
+      prompts: [
+        "How does the edge-cloud split affect unit economics?",
+        "What capabilities remain cloud-exclusive?",
+        "Where does Grove complement vs. compete with APIs?"
+      ],
+      footer: "Strategic implications for established players."
     }
   },
 
@@ -291,14 +370,28 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "Rent-seeking models decay.",
         "Owned infrastructure compounds."
       ]
+    },
+    terminal: {
+      heading: "Investment Thesis.",
+      thesis: "Economic analysis, market dynamics, and infrastructure value capture. The case for distributed AI as an asset class.",
+      prompts: [
+        "What is the efficiency tax model?",
+        "How does Grove capture value from capability propagation?",
+        "What are the comparable infrastructure investments?"
+      ],
+      footer: "Due diligence materials available."
     }
   }
 };
 
 // ============================================================================
-// RESOLUTION FUNCTION
+// RESOLUTION FUNCTIONS
 // ============================================================================
 
+/**
+ * Get the reality projection for a given lens.
+ * Falls back to DEFAULT_REALITY for null, custom lenses, or unmapped archetypes.
+ */
 export const getReality = (lensId: string | null): LensReality => {
   // No lens = default reality
   if (!lensId) return DEFAULT_REALITY;
@@ -311,4 +404,39 @@ export const getReality = (lensId: string | null): LensReality => {
 
   // Fall back to default if archetype not mapped
   return reality || DEFAULT_REALITY;
+};
+
+/**
+ * Get the terminal welcome content for a given lens.
+ * Priority: 1) Lens-specific terminal content, 2) DEFAULT_TERMINAL_WELCOME
+ *
+ * Sprint: Terminal Architecture Refactor v1.0
+ *
+ * @param lensId - The lens/persona ID (null for no lens selected)
+ * @param schemaRealities - Optional lens realities from the schema (takes precedence)
+ * @returns TerminalWelcome content for the terminal greeting
+ */
+export const getTerminalWelcome = (
+  lensId: string | null,
+  schemaRealities?: Record<string, LensReality>
+): TerminalWelcome => {
+  // No lens = default welcome
+  if (!lensId) return DEFAULT_TERMINAL_WELCOME;
+
+  // Custom lenses fall back to default (per ADR-005)
+  if (lensId.startsWith('custom-')) return DEFAULT_TERMINAL_WELCOME;
+
+  // Priority 1: Check schema-defined lens realities (from narratives.json)
+  if (schemaRealities?.[lensId]?.terminal) {
+    return schemaRealities[lensId].terminal!;
+  }
+
+  // Priority 2: Check client-side SUPERPOSITION_MAP
+  const reality = SUPERPOSITION_MAP[lensId as ArchetypeId];
+  if (reality?.terminal) {
+    return reality.terminal;
+  }
+
+  // Fall back to default
+  return DEFAULT_TERMINAL_WELCOME;
 };
