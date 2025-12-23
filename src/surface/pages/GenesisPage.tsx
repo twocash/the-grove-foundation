@@ -163,7 +163,7 @@ const GenesisPage: React.FC = () => {
     if (activeLens && flowState === 'split') {
       setFlowState('collapsing');
     }
-  }, [activeLens]);
+  }, [activeLens, flowState]);
 
   // Auto-scroll to Section 2 after headline morph completes (Fix #9)
   useEffect(() => {
