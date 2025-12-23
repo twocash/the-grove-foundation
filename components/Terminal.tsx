@@ -387,6 +387,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     selectLens(personaId);
     setShowLensPicker(false);
     localStorage.setItem('grove-terminal-welcomed', 'true');
+    localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
 
     // Track lens activation via analytics
     if (personaId) {
@@ -414,6 +415,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     selectLens(personaId);
     setShowWelcomeInterstitial(false);
     localStorage.setItem('grove-terminal-welcomed', 'true');
+    localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
 
     // Track lens activation
     if (personaId) {
@@ -497,6 +499,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
     if (persona) {
       selectLens(persona.id);
+      localStorage.setItem('grove-session-established', 'true'); // v0.12f
       trackLensActivated(persona.id, false);
       emit.lensSelected(persona.id, false, currentArchetypeId || undefined);
     } else {
@@ -507,6 +510,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       );
       if (customLens) {
         selectLens(customLens.id);
+        localStorage.setItem('grove-session-established', 'true'); // v0.12f
         trackLensActivated(customLens.id, true);
         emit.lensSelected(customLens.id, true, currentArchetypeId || undefined);
       }
@@ -519,6 +523,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     selectLens(newLens.id);
     setShowCustomLensWizard(false);
     localStorage.setItem('grove-terminal-welcomed', 'true');
+    localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
   };
 
   // Handle custom lens wizard cancel
@@ -1058,6 +1063,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               onBack={() => setShowLensPicker(false)}
               onAfterSelect={(personaId) => {
                 localStorage.setItem('grove-terminal-welcomed', 'true');
+                localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
                 // Track lens activation via analytics
                 trackLensActivated(personaId, personaId.startsWith('custom-'));
                 // Emit to Engagement Bus

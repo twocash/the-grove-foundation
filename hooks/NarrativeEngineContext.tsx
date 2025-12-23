@@ -37,6 +37,7 @@ const STORAGE_KEY_SESSION = 'grove-terminal-session';
 const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
 const STORAGE_KEY_REFERRER = 'grove-referrer';
 const STORAGE_KEY_WELCOMED = 'grove-terminal-welcomed';
+const STORAGE_KEY_ESTABLISHED = 'grove-session-established';
 
 // v0.12e: Track referrer code from ?r= parameter
 const captureReferrer = (): string | null => {
@@ -70,14 +71,26 @@ const hasIdentifyingParams = (): boolean => {
 
 // v0.12e: Force clear stale localStorage for fresh first-time experience
 // Called when user arrives with no identifying params - ensures clean slate
+// v0.12f: Skip clearing if user has established a session (picked a lens)
 const ensureCleanFirstVisit = (): void => {
   if (typeof window === 'undefined') return;
 
   // If user has identifying URL params, don't clear - they're intentional
   if (hasIdentifyingParams()) return;
 
-  // If user has NO identifying params but HAS localStorage, it's stale
-  // Clear it to ensure fresh first-time experience
+  // v0.12f: If user has established a session, preserve their state
+  // This marker is set when user explicitly picks a lens
+  try {
+    const isEstablished = localStorage.getItem(STORAGE_KEY_ESTABLISHED) === 'true';
+    if (isEstablished) {
+      console.log('[v0.12f] Returning user with established session - preserving state');
+      return;
+    }
+  } catch (e) {
+    // Continue with clearing if we can't read the marker
+  }
+
+  // If user has NO identifying params and NO established session, clear stale state
   try {
     const hasAnyState = localStorage.getItem(STORAGE_KEY_WELCOMED) ||
                         localStorage.getItem(STORAGE_KEY_LENS) ||
