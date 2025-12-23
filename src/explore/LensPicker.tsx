@@ -14,6 +14,7 @@ interface LensPickerProps {
   mode?: 'full' | 'compact';
   onBack?: () => void;  // For compact mode "Back to Chat"
   onAfterSelect?: (personaId: string) => void;  // Callback after lens selected (for analytics, etc.)
+  onCreateCustomLens?: () => void;  // Opens custom lens wizard
 }
 
 // Union type for display
@@ -251,9 +252,91 @@ function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
   );
 }
 
-export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerProps = {}) {
+// Custom lens card for workspace grid
+interface CustomLensCardProps {
+  lens: CustomLens;
+  isActive: boolean;
+  onSelect: () => void;
+  onView: () => void;
+  onDelete?: () => void;
+}
+
+function CustomLensCard({ lens, isActive, onSelect, onView, onDelete }: CustomLensCardProps) {
+  return (
+    <div
+      onClick={onView}
+      className={`
+        group cursor-pointer flex flex-col p-5 rounded-xl border transition-all text-left relative
+        ${isActive
+          ? 'border-violet-400/50 bg-violet-50 dark:bg-violet-900/20 ring-1 ring-violet-300/30'
+          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-violet-300'
+        }
+      `}
+    >
+      {/* Delete button - appears on hover */}
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="absolute top-3 right-3 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-all"
+          title="Delete custom lens"
+        >
+          <span className="material-symbols-outlined text-lg">delete</span>
+        </button>
+      )}
+      
+      {/* Header: Icon + Custom Badge */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="bg-violet-50 dark:bg-violet-900/30 p-2.5 rounded-lg">
+          <span className="material-symbols-outlined text-violet-600 dark:text-violet-400 text-xl">
+            auto_fix_high
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-0.5 text-[10px] uppercase font-bold rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400">
+            Custom
+          </span>
+          {isActive && (
+            <span className="px-2 py-0.5 text-xs rounded-full bg-violet-200 dark:bg-violet-800/50 text-violet-700 dark:text-violet-300 font-medium">
+              Active
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Title */}
+      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">
+        {lens.publicLabel}
+      </h3>
+
+      {/* Description */}
+      <p className="text-sm text-slate-500 dark:text-slate-400 italic mb-4">
+        "{lens.description}"
+      </p>
+
+      {/* Footer: Select button (only if not active) */}
+      <div className="flex items-center justify-end mt-auto">
+        {!isActive && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 border border-violet-200 dark:border-violet-700 transition-colors"
+          >
+            Select
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCustomLens }: LensPickerProps = {}) {
   const { getEnabledPersonas, selectLens, session } = useNarrativeEngine();
-  const { customLenses } = useCustomLens();
+  const { customLenses, deleteCustomLens } = useCustomLens();
   const workspaceUI = useOptionalWorkspaceUI();
   const personas = getEnabledPersonas();
   const activeLensId = session.activeLens;
@@ -344,7 +427,7 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerP
           } : undefined}
         />
 
-        {/* Lens grid */}
+        {/* Standard lens grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredPersonas.map((persona) => (
             <LensCard
@@ -357,8 +440,56 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerP
           ))}
         </div>
 
+        {/* Custom lenses section */}
+        {customLenses.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">
+              Your Custom Lenses
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {customLenses.map((lens) => (
+                <CustomLensCard
+                  key={lens.id}
+                  lens={lens}
+                  isActive={activeLensId === lens.id}
+                  onSelect={() => handleSelect(lens.id)}
+                  onView={() => handleView(lens.id)}
+                  onDelete={() => deleteCustomLens(lens.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Create Your Own button */}
+        {onCreateCustomLens && (
+          <div className="mt-8 pt-6 border-t border-border-light dark:border-border-dark">
+            <button
+              onClick={onCreateCustomLens}
+              className="w-full p-6 rounded-xl border-2 border-dashed border-amber-400/50 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-lg group-hover:bg-amber-100 dark:group-hover:bg-amber-900/50 transition-colors">
+                  <span className="material-symbols-outlined text-2xl text-amber-600 dark:text-amber-400">
+                    auto_fix_high
+                  </span>
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-slate-900 dark:text-white">Create Your Own Lens</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Build a perspective uniquely tailored to how you see the world
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-xl text-slate-400 group-hover:text-amber-500 ml-auto transition-colors">
+                  arrow_forward
+                </span>
+              </div>
+            </button>
+          </div>
+        )}
+
         {/* Empty state */}
-        {filteredPersonas.length === 0 && (
+        {filteredPersonas.length === 0 && customLenses.length === 0 && (
           <div className="text-center py-12">
             <span className="material-symbols-outlined text-4xl text-slate-400 mb-4">search_off</span>
             <p className="text-slate-500 dark:text-slate-400">

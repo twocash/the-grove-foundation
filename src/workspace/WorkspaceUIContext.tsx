@@ -65,6 +65,9 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
   // Command palette state
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
+  // Custom lens wizard state
+  const [showCustomLensWizard, setShowCustomLensWizard] = useState(false);
+
   // Load sprout count on mount
   useEffect(() => {
     try {
@@ -92,11 +95,14 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
         e.preventDefault();
         setCommandPaletteOpen(true);
       }
-      // Escape closes command palette or inspector
+      // Escape closes command palette or inspector or wizard
       if (e.key === 'Escape') {
         if (isCommandPaletteOpen) {
           e.preventDefault();
           setCommandPaletteOpen(false);
+        } else if (showCustomLensWizard) {
+          e.preventDefault();
+          setShowCustomLensWizard(false);
         } else if (inspector.isOpen) {
           e.preventDefault();
           setInspector(s => ({ ...s, isOpen: false }));
@@ -111,7 +117,7 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen, inspector.isOpen]);
+  }, [isCommandPaletteOpen, inspector.isOpen, showCustomLensWizard]);
 
   // Navigation actions
   const navigateTo = useCallback((path: NavigationPath) => {
@@ -169,6 +175,10 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
   const openCommandPalette = useCallback(() => setCommandPaletteOpen(true), []);
   const closeCommandPalette = useCallback(() => setCommandPaletteOpen(false), []);
 
+  // Custom lens wizard actions
+  const openCustomLensWizard = useCallback(() => setShowCustomLensWizard(true), []);
+  const closeCustomLensWizard = useCallback(() => setShowCustomLensWizard(false), []);
+
   // Session actions
   const incrementSproutCount = useCallback(() => {
     setSession(s => ({ ...s, sproutCount: s.sproutCount + 1 }));
@@ -180,6 +190,7 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
     inspector,
     session,
     isCommandPaletteOpen,
+    showCustomLensWizard,
     // Actions
     navigateTo,
     toggleGroup,
@@ -190,6 +201,8 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
     clearSelection,
     openCommandPalette,
     closeCommandPalette,
+    openCustomLensWizard,
+    closeCustomLensWizard,
     incrementSproutCount,
   };
 

@@ -8,6 +8,9 @@ import { NodeGrid } from '../explore/NodeGrid';
 import { JourneyList } from '../explore/JourneyList';
 import { SproutGrid } from '../cultivate/SproutGrid';
 import { VillageFeed } from '../village/VillageFeed';
+import { CustomLensWizard } from '../../components/Terminal/CustomLensWizard';
+import { useCustomLens } from '../../hooks/useCustomLens';
+import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { MessageSquare, Code, Bot } from 'lucide-react';
 
 // Coming Soon placeholder for "Do" section items
@@ -138,15 +141,38 @@ function pathToView(path: string[]): string {
 }
 
 export function ContentRouter() {
-  const { navigation } = useWorkspaceUI();
+  const { navigation, showCustomLensWizard, closeCustomLensWizard, openInspector } = useWorkspaceUI();
+  const { saveCustomLens } = useCustomLens();
+  const { selectLens } = useNarrativeEngine();
   const viewId = pathToView(navigation.activePath);
+
+  // Handle custom lens wizard completion
+  const handleWizardComplete = async (candidate: Parameters<typeof saveCustomLens>[0], userInputs: Parameters<typeof saveCustomLens>[1]) => {
+    const savedLens = await saveCustomLens(candidate, userInputs);
+    selectLens(savedLens.id);
+    closeCustomLensWizard();
+    // Open inspector to show the new lens
+    openInspector({ type: 'lens', lensId: savedLens.id });
+  };
+
+  // If wizard is open, show it instead of the normal view
+  if (showCustomLensWizard) {
+    return (
+      <main className="flex-1 overflow-hidden bg-[var(--grove-surface)]">
+        <CustomLensWizard
+          onComplete={handleWizardComplete}
+          onCancel={closeCustomLensWizard}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 overflow-hidden bg-[var(--grove-surface)]">
       {viewId === 'terminal' && <ExploreChat />}
       {viewId === 'node-grid' && <NodeGrid />}
       {viewId === 'journey-list' && <JourneyList />}
-      {viewId === 'lens-picker' && <LensPicker />}
+      {viewId === 'lens-picker' && <LensPickerWithWizard />}
       {viewId === 'chat-placeholder' && <ChatPlaceholder />}
       {viewId === 'apps-placeholder' && <AppsPlaceholder />}
       {viewId === 'agents-placeholder' && <AgentsPlaceholder />}
@@ -155,4 +181,10 @@ export function ContentRouter() {
       {viewId === 'village-feed' && <VillageFeed />}
     </main>
   );
+}
+
+// Wrapper to connect LensPicker to workspace context
+function LensPickerWithWizard() {
+  const { openCustomLensWizard } = useWorkspaceUI();
+  return <LensPicker onCreateCustomLens={openCustomLensWizard} />;
 }

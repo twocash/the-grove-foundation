@@ -81,6 +81,7 @@ export interface WorkspaceUIState {
   inspector: InspectorState;
   session: SessionState;
   isCommandPaletteOpen: boolean;
+  showCustomLensWizard: boolean;
 }
 
 /**
@@ -103,6 +104,10 @@ export interface WorkspaceUIActions {
   // Command Palette
   openCommandPalette: () => void;
   closeCommandPalette: () => void;
+
+  // Custom Lens Wizard
+  openCustomLensWizard: () => void;
+  closeCustomLensWizard: () => void;
 
   // Session
   incrementSproutCount: () => void;

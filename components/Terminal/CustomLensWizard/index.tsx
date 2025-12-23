@@ -276,4 +276,7 @@ const CustomLensWizard: React.FC<CustomLensWizardProps> = ({
   );
 };
 
+// Named export for workspace imports
+export { CustomLensWizard };
+
 export default CustomLensWizard;
