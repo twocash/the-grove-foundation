@@ -291,7 +291,7 @@ const GenesisPage: React.FC = () => {
         </div>
 
         {/* Navigation-gated sections - only visible when unlocked */}
-        {(flowState === 'unlocked' || uiMode === 'hero') && (
+        {flowState === 'unlocked' && (
           <>
             {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
             <div ref={el => { screenRefs.current[1] = el; }}>
