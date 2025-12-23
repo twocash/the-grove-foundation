@@ -7,10 +7,11 @@ import { getPersonaColors } from '../../data/narratives-schema';
 
 interface TerminalHeaderProps {
   onMenuClick?: () => void;
-  onMinimize: () => void;
-  onClose: () => void;
+  onMinimize?: () => void;  // Optional for embedded mode
+  onClose?: () => void;     // Optional for embedded mode
   isScholarMode: boolean;
   showMinimize?: boolean;
+  showClose?: boolean;      // Control close button visibility
   // Context selectors
   fieldName?: string;
   lensName?: string;
@@ -51,6 +52,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   onClose,
   isScholarMode,
   showMinimize = true,
+  showClose = true,        // Default to showing close button
   fieldName,
   lensName,
   lensColor,
@@ -146,16 +148,18 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
           </button>
         )}
 
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-          aria-label="Close"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {/* Close button - only show if showClose is true and onClose is provided */}
+        {showClose && onClose && (
+          <button
+            onClick={onClose}
+            className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );

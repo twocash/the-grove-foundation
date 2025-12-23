@@ -62,6 +62,35 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const tensionRef = useRef<HTMLDivElement>(null);
 
+  // Auto-carousel state (Sprint: active-grove-v1 Fix #5)
+  const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Auto-advance carousel every 2.5 seconds
+  useEffect(() => {
+    if (!isCompressed) return;
+
+    const interval = setInterval(() => {
+      setActiveQuoteIndex(prev => (prev + 1) % quotes.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [isCompressed, quotes.length]);
+
+  // Scroll to active quote
+  useEffect(() => {
+    if (!isCompressed || !carouselRef.current) return;
+
+    const cards = carouselRef.current.children;
+    if (cards[activeQuoteIndex]) {
+      (cards[activeQuoteIndex] as HTMLElement).scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [activeQuoteIndex, isCompressed]);
+
   // Reset and re-animate on content/trigger change
   useEffect(() => {
     setVisibleCards(new Set());  // Reset card visibility
@@ -117,29 +146,38 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
       <div className={`${isCompressed ? 'max-w-full' : 'max-w-4xl'} mx-auto`}>
         {/* Quote Cards - Full variant: stacked, Compressed variant: carousel */}
         {isCompressed ? (
-          /* Compressed Carousel Layout */
-          <div className="mb-12">
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+          /* Compressed Carousel Layout - Auto-advancing (Sprint: active-grove-v1 Fix #5) */
+          <div className="mb-12 relative">
+            <div
+              ref={carouselRef}
+              className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+            >
               {quotes.map((quote, index) => (
                 <div
                   key={index}
-                  className="flex-shrink-0 w-44 h-44 bg-paper-dark border border-ink/5 p-4 rounded-sm shadow-sm hover:shadow-md transition-all snap-center"
+                  className={`flex-shrink-0 w-[280px] bg-white/5 border border-white/10 p-5 rounded-lg snap-center transition-opacity duration-500 ${
+                    index === activeQuoteIndex ? 'opacity-100' : 'opacity-50'
+                  }`}
                 >
-                  <blockquote className="font-serif text-sm text-ink leading-snug mb-2 line-clamp-4">
-                    "{quote.text.slice(0, 80)}..."
+                  <blockquote className="font-serif text-sm text-white/90 leading-relaxed mb-3 line-clamp-4">
+                    "{quote.text}"
                   </blockquote>
-                  <footer className="font-mono text-[10px] tracking-wider text-ink-muted mt-auto">
+                  <footer className="font-mono text-xs text-white/60 font-medium">
                     — {quote.author}
                   </footer>
                 </div>
               ))}
             </div>
-            {/* Carousel Indicators */}
-            <div className="flex justify-center gap-2 mt-4">
+            {/* Carousel Indicators - Clickable */}
+            <div className="flex justify-center gap-2 mt-3">
               {quotes.map((_, index) => (
-                <span
+                <button
                   key={index}
-                  className="w-2 h-2 rounded-full bg-ink/20"
+                  onClick={() => setActiveQuoteIndex(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === activeQuoteIndex ? 'bg-white' : 'bg-white/30'
+                  }`}
+                  aria-label={`Go to quote ${index + 1}`}
                 />
               ))}
             </div>

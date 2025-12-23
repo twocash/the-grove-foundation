@@ -923,18 +923,19 @@ const Terminal: React.FC<TerminalProps> = ({
   if (variant === 'embedded') {
     return (
       <div className="flex flex-col h-full w-full bg-[#1a2421] text-white">
-        {/* Embedded Terminal Header */}
-        <div className="flex-shrink-0 px-4 py-3 border-b border-white/10 flex items-center justify-between">
-          <span className="text-[#00D4AA] font-mono text-sm font-medium">The Grove</span>
-          {activeLensData && (
-            <button
-              onClick={() => actions.showLensPicker()}
-              className="text-xs text-white/60 hover:text-white/90 transition-colors"
-            >
-              {activeLensData.publicLabel}
-            </button>
-          )}
-        </div>
+        {/* Terminal Header - real component (Sprint: active-grove-v1 Fix #5) */}
+        <TerminalHeader
+          isScholarMode={isVerboseMode}
+          showMinimize={false}
+          showClose={false}
+          lensName={activeLensData?.publicLabel || 'Choose Lens'}
+          lensColor={activeLensData?.color}
+          journeyName={getJourney(activeJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
+          currentStreak={currentStreak}
+          showStreak={showStreakDisplay}
+          onLensClick={() => actions.showLensPicker()}
+          onStreakClick={() => handleOpenModal('stats')}
+        />
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
