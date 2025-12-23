@@ -226,9 +226,12 @@ export interface TerminalShellHandle {
 export interface TerminalShellProps {
   isOpen: boolean;
   isMinimized: boolean;
+  isLoading?: boolean;           // Loading state for pill indicator
+  enableMinimize?: boolean;      // Feature flag to show/hide minimize
   onClose: () => void;
   onMinimize: () => void;
   onExpand: () => void;
+  onToggle: () => void;          // Toggle open/close
   children: React.ReactNode;
   // Optional ref for programmatic control
   shellRef?: React.Ref<TerminalShellHandle>;

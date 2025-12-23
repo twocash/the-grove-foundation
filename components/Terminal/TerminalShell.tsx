@@ -21,9 +21,12 @@ import { TerminalShellHandle, TerminalShellProps } from './types';
 const TerminalShell = forwardRef<TerminalShellHandle, TerminalShellProps>(({
   isOpen,
   isMinimized,
+  isLoading = false,
+  enableMinimize = true,
   onClose,
   onMinimize,
   onExpand,
+  onToggle,
   children
 }, ref) => {
   // Refs for programmatic control
@@ -69,28 +72,19 @@ const TerminalShell = forwardRef<TerminalShellHandle, TerminalShellProps>(({
     setInput
   }), [focusInput, scrollToBottom, injectSystemMessage, getInput, setInput]);
 
-  // Toggle terminal open/closed
-  const handleToggle = useCallback(() => {
-    if (isOpen) {
-      onClose();
-    } else {
-      onExpand();
-    }
-  }, [isOpen, onClose, onExpand]);
-
   return (
     <>
       {/* Minimized Pill - shown when terminal is open but minimized */}
-      {isOpen && isMinimized && (
+      {isOpen && isMinimized && enableMinimize && (
         <div className="terminal-slide-up">
-          <TerminalPill isLoading={false} onExpand={onExpand} />
+          <TerminalPill isLoading={isLoading} onExpand={onExpand} />
         </div>
       )}
 
       {/* Floating Action Button - hidden when minimized */}
-      {!(isOpen && isMinimized) && (
+      {!(isOpen && isMinimized && enableMinimize) && (
         <button
-          onClick={handleToggle}
+          onClick={onToggle}
           className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${
             isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
           }`}

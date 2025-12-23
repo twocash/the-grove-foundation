@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -882,32 +882,18 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   return (
     <>
-      {/* Minimized Pill - shown when terminal is open but minimized */}
-      {terminalState.isOpen && isMinimized && enableMinimize && (
-        <div className="terminal-slide-up">
-          <TerminalPill isLoading={terminalState.isLoading} onExpand={handleExpand} />
-        </div>
-      )}
-
-      {/* Floating Action Button - hidden when minimized */}
-      {!(terminalState.isOpen && isMinimized && enableMinimize) && (
-        <button
-          onClick={toggleTerminal}
-          className={`fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 border border-ink/10 ${terminalState.isOpen ? 'bg-white text-ink' : 'bg-ink text-white'
-            }`}
-        >
-          {terminalState.isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          ) : (
-            <span className="font-mono text-xl font-bold">{`>_`}</span>
-          )}
-        </button>
-      )}
-
-      {/* Drawer - Library Marginalia Style (hidden when minimized) */}
-      <div className={`fixed inset-y-0 right-0 z-[60] w-full md:w-[480px] bg-white dark:bg-background-dark border-l border-border-light dark:border-border-dark transform transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] ${terminalState.isOpen && !isMinimized ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex flex-col h-full text-slate-900 dark:text-slate-100 font-sans">
-
+      {/* Terminal Shell - Chrome layer (FAB, pill, drawer) */}
+      {/* Sprint: Terminal Architecture Refactor v1.0 - Epic 4.2 */}
+      <TerminalShell
+        isOpen={terminalState.isOpen}
+        isMinimized={isMinimized}
+        isLoading={terminalState.isLoading}
+        enableMinimize={enableMinimize}
+        onClose={handleClose}
+        onMinimize={handleMinimize}
+        onExpand={handleExpand}
+        onToggle={toggleTerminal}
+      >
           {/* Show Custom Lens Wizard, Welcome Interstitial, Lens Picker, or Main Terminal */}
           {showCustomLensWizard ? (
             <CustomLensWizard
@@ -1280,9 +1266,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               </div>
             </>
           )}
-
-        </div>
-      </div>
+      </TerminalShell>
 
       {/* Reveal Overlays */}
       {showSimulationReveal && currentArchetypeId && (
