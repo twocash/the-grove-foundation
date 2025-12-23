@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { TerminalState, ChatMessage, SectionId } from '../types';
 import {
   sendMessageStream,
@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, useTerminalState } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -60,37 +60,39 @@ interface TerminalProps {
 // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4 integration)
 
 const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTerminalState, externalQuery, onQueryHandled }) => {
-  const [input, setInput] = useState('');
-  const [dynamicSuggestion, setDynamicSuggestion] = useState<string>('');
-  const [currentTopic, setCurrentTopic] = useState<string>('');
-  const [isVerboseMode, setIsVerboseMode] = useState<boolean>(false);
-  // RAG context is now handled server-side in /api/chat
-  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
-  const [showLensPicker, setShowLensPicker] = useState<boolean>(false);
-  const [showCustomLensWizard, setShowCustomLensWizard] = useState<boolean>(false);
-  const [showWelcomeInterstitial, setShowWelcomeInterstitial] = useState<boolean>(false);
-  const [hasShownWelcome, setHasShownWelcome] = useState<boolean>(false);
-  // Note: showNudge, nudgeDismissed, showLensChoice removed - all users now have a lens (min: freestyle)
-  const [showSimulationReveal, setShowSimulationReveal] = useState<boolean>(false);
-  const [showCustomLensOffer, setShowCustomLensOffer] = useState<boolean>(false);
-  const [showTerminatorPrompt, setShowTerminatorPrompt] = useState<boolean>(false);
-  const [showFounderStory, setShowFounderStory] = useState<boolean>(false);
-  const [showConversionCTA, setShowConversionCTA] = useState<boolean>(false);
-  // Command Palette modal state (v0.16)
-  const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
-  const [showJourneysModal, setShowJourneysModal] = useState<boolean>(false);
-  const [showStatsModal, setShowStatsModal] = useState<boolean>(false);
-  const [showGardenModal, setShowGardenModal] = useState<boolean>(false);
-  // Cognitive Bridge state
-  const [bridgeState, setBridgeState] = useState<{
-    visible: boolean;
-    journeyId: string | null;
-    topicMatch: string | null;
-    afterMessageId: string | null;  // Message ID after which to show the bridge
-    shownAt: number | null;         // Timestamp when bridge was shown (for timing analytics)
-    entropyScore: number | null;    // Entropy score that triggered the bridge
-    exchangeCount: number | null;   // Exchange count when bridge triggered
-  }>({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
+  // Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1
+  // Consolidated state management via useTerminalState hook
+  const { state: uiState, actions } = useTerminalState();
+
+  // Destructure commonly used state for cleaner code
+  const {
+    input,
+    dynamicSuggestion,
+    currentTopic,
+    isVerboseMode,
+    currentNodeId,
+    showLensPicker,
+    showCustomLensWizard,
+    showWelcomeInterstitial,
+    hasShownWelcome,
+    bridgeState,
+    completedJourneyTitle,
+    journeyStartTime
+  } = uiState;
+
+  // Destructure reveal states
+  const showSimulationReveal = uiState.reveals.simulation;
+  const showCustomLensOffer = uiState.reveals.customLensOffer;
+  const showTerminatorPrompt = uiState.reveals.terminator;
+  const showFounderStory = uiState.reveals.founderStory;
+  const showConversionCTA = uiState.reveals.conversionCTA;
+  const showJourneyCompletion = uiState.reveals.journeyCompletion;
+
+  // Destructure modal states
+  const showHelpModal = uiState.modals.help;
+  const showJourneysModal = uiState.modals.journeys;
+  const showStatsModal = uiState.modals.stats;
+  const showGardenModal = uiState.modals.garden;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -207,10 +209,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   // Sprout capture (Sprint: Sprout System)
   const { capture: captureSprout } = useSproutCapture();
 
-  // Journey completion state
-  const [showJourneyCompletion, setShowJourneyCompletion] = useState(false);
-  const [journeyStartTime] = useState(Date.now());
-  const [completedJourneyTitle, setCompletedJourneyTitle] = useState<string | null>(null);
+  // Journey completion state now managed by useTerminalState
+  // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1)
 
   // Get active lens data (could be custom or archetypal)
   const activeLensData = useMemo(() => {
@@ -241,18 +241,18 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       // v0.12e: If there's a URL lens, show LensPicker (with lens highlighted)
       // Otherwise, show welcome interstitial for first-time users
       if (urlLensId) {
-        setShowLensPicker(true);
+        actions.showLensPicker();
       } else {
-        setShowWelcomeInterstitial(true);
+        actions.showWelcomeInterstitial();
       }
-      setHasShownWelcome(true);
+      // hasShownWelcome is set internally by hideWelcomeInterstitial
     }
   }, [terminalState.isOpen, hasShownWelcome, urlLensId]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
     selectLens(personaId);
-    setShowLensPicker(false);
+    actions.hideLensPicker();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
 
@@ -273,14 +273,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   // Handle opening custom lens wizard
   const handleCreateCustomLens = () => {
-    setShowLensPicker(false);
-    setShowCustomLensWizard(true);
+    actions.showCustomLensWizard();
   };
 
   // Handle lens selection from welcome interstitial
   const handleWelcomeLensSelect = (personaId: string | null) => {
     selectLens(personaId);
-    setShowWelcomeInterstitial(false);
+    actions.hideWelcomeInterstitial();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
 
@@ -298,16 +297,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
   // Handle Create Your Own from welcome interstitial
   const handleWelcomeCreateCustomLens = () => {
-    setShowWelcomeInterstitial(false);
-    setShowCustomLensWizard(true);
+    actions.hideWelcomeInterstitial();
+    actions.showCustomLensWizard();
   };
 
   // Command Palette handlers (v0.16)
   const handleOpenModal = (modal: 'help' | 'journeys' | 'stats' | 'garden') => {
-    if (modal === 'help') setShowHelpModal(true);
-    if (modal === 'journeys') setShowJourneysModal(true);
-    if (modal === 'stats') setShowStatsModal(true);
-    if (modal === 'garden') setShowGardenModal(true);
+    actions.openModal(modal);
   };
 
   // Sprout System handlers (Sprint: Sprout System)
@@ -388,15 +384,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   const handleCustomLensComplete = async (candidate: LensCandidate, userInputs: UserInputs) => {
     const newLens = await saveCustomLens(candidate, userInputs);
     selectLens(newLens.id);
-    setShowCustomLensWizard(false);
+    actions.hideCustomLensWizard();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
   };
 
   // Handle custom lens wizard cancel
   const handleCustomLensCancel = () => {
-    setShowCustomLensWizard(false);
-    setShowLensPicker(true);
+    actions.hideCustomLensWizard();
+    actions.showLensPicker();
   };
 
   // Handle deleting a custom lens
@@ -436,7 +432,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
   // Trigger simulation reveal when conditions are met
   useEffect(() => {
     if (shouldShowSimReveal && !showSimulationReveal) {
-      setShowSimulationReveal(true);
+      actions.setReveal('simulation', true);
       if (currentArchetypeId) {
         trackSimulationRevealShown(currentArchetypeId);
       }
@@ -449,58 +445,58 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       trackSimulationRevealAcknowledged(currentArchetypeId);
     }
     acknowledgeSimulationReveal();
-    setShowSimulationReveal(false);
+    actions.setReveal('simulation', false);
     // After simulation reveal, offer custom lens if applicable
     if (shouldShowLensOffer) {
-      setShowCustomLensOffer(true);
+      actions.setReveal('customLensOffer', true);
     }
   };
 
   // Handle custom lens offer
   const handleAcceptCustomLensOffer = () => {
     dismissCustomLensOffer();
-    setShowCustomLensOffer(false);
-    setShowCustomLensWizard(true);
+    actions.setReveal('customLensOffer', false);
+    actions.showCustomLensWizard();
   };
 
   const handleDeclineCustomLensOffer = () => {
     dismissCustomLensOffer();
-    setShowCustomLensOffer(false);
+    actions.setReveal('customLensOffer', false);
   };
 
   // Handle terminator mode
   const handleAcceptTerminatorMode = () => {
     trackTerminatorModeActivated();
     activateTerminatorMode();
-    setShowTerminatorPrompt(false);
+    actions.setReveal('terminator', false);
   };
 
   const handleDeclineTerminatorMode = () => {
     trackTerminatorModeUnlocked();
     unlockTerminatorMode();
-    setShowTerminatorPrompt(false);
+    actions.setReveal('terminator', false);
   };
 
   // Handle founder story
   const handleFounderStoryContinue = () => {
     dismissFounderStory();
-    setShowFounderStory(false);
+    actions.setReveal('founderStory', false);
     // After founder story, show conversion CTA
-    setShowConversionCTA(true);
+    actions.setReveal('conversionCTA', true);
     markCTAViewed();
   };
 
   // Check for terminator mode trigger
   useEffect(() => {
     if (shouldShowTerminator && !showTerminatorPrompt && !revealState.terminatorModeUnlocked) {
-      setShowTerminatorPrompt(true);
+      actions.setReveal('terminator', true);
     }
   }, [shouldShowTerminator, showTerminatorPrompt, revealState.terminatorModeUnlocked]);
 
   // Check for founder story trigger
   useEffect(() => {
     if (shouldShowFounder && !showFounderStory && !revealState.founderStoryShown) {
-      setShowFounderStory(true);
+      actions.setReveal('founderStory', true);
       markFounderStoryShown();
       if (currentArchetypeId) {
         trackFounderStoryViewed(currentArchetypeId);
@@ -519,12 +515,12 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     const entryCards = getEntryPoints(null); // Get all entry points (no persona filter)
     if (entryCards.length > 0) {
       const randomCard = entryCards[Math.floor(Math.random() * entryCards.length)];
-      setDynamicSuggestion(randomCard.label);
+      actions.setDynamicSuggestion(randomCard.label);
     } else {
       const defaultHint = SECTION_CONFIG[activeSection]?.promptHint || "What is The Grove?";
-      setDynamicSuggestion(defaultHint);
+      actions.setDynamicSuggestion(defaultHint);
     }
-    setCurrentTopic('');
+    actions.setCurrentTopic('');
 
     console.log('Chat context changed - session will reinitialize on next message');
   }, [activeSection, activeLensData, getEntryPoints]);
@@ -602,13 +598,13 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
             emit.journeyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000), session.visitedCards.length);
             trackJourneyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000));
             // Set title and show completion modal
-            setCompletedJourneyTitle(completedJourney.title || 'Your Journey');
-            setShowJourneyCompletion(true);
+            actions.setCompletedJourneyTitle(completedJourney.title || 'Your Journey');
+            actions.setReveal('journeyCompletion', true);
           }
         }
       }
 
-      setCurrentNodeId(nodeId);
+      actions.setCurrentNodeId(nodeId);
       addVisitedCard(nodeId);
       // Emit card visited event to Engagement Bus
       emit.cardVisited(nodeId, textToDisplay, currentNodeId || undefined);
@@ -629,7 +625,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       messages: [...prev.messages, { id: displayId, role: 'user', text: finalDisplayText }],
       isLoading: true
     }));
-    setInput('');
+    actions.setInput('');
 
     const botMessageId = (Date.now() + 1).toString();
     setTerminalState(prev => ({
@@ -675,29 +671,29 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
       // Use server-extracted breadcrumb/topic if available, fall back to client parsing
       if (response.breadcrumb) {
-        setDynamicSuggestion(response.breadcrumb);
+        actions.setDynamicSuggestion(response.breadcrumb);
       } else {
         const breadcrumbMatch = accumulatedRawText.match(/\[\[BREADCRUMB:(.*?)\]\]/);
         if (breadcrumbMatch && breadcrumbMatch[1]) {
-          setDynamicSuggestion(breadcrumbMatch[1].trim());
+          actions.setDynamicSuggestion(breadcrumbMatch[1].trim());
         } else {
           // Dynamic fallback: pick a random entry-point card from the schema
           const entryCards = getEntryPoints(null); // Get all entry points (no persona filter)
           if (entryCards.length > 0) {
             const randomCard = entryCards[Math.floor(Math.random() * entryCards.length)];
-            setDynamicSuggestion(randomCard.label);
+            actions.setDynamicSuggestion(randomCard.label);
           } else {
-            setDynamicSuggestion("What is The Grove, and what problem does it solve?");
+            actions.setDynamicSuggestion("What is The Grove, and what problem does it solve?");
           }
         }
       }
 
       if (response.topic) {
-        setCurrentTopic(response.topic);
+        actions.setCurrentTopic(response.topic);
       } else {
         const topicMatch = accumulatedRawText.match(/\[\[TOPIC:(.*?)\]\]/);
         if (topicMatch && topicMatch[1]) {
-          setCurrentTopic(topicMatch[1].trim());
+          actions.setCurrentTopic(topicMatch[1].trim());
         }
       }
 
@@ -778,7 +774,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           console.log('[Entropy] Journey mapping:', { cluster: entropy.dominantCluster, journeyId });
           if (journeyId) {
             const shownAt = Date.now();
-            setBridgeState({
+            actions.setBridgeState({
               visible: true,
               journeyId,
               topicMatch: entropy.dominantCluster,
@@ -835,8 +831,8 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
     }
   }, [externalQuery]);
 
-  // PRESERVED: Scholar Mode toggle - exact same implementation
-  const toggleVerboseMode = () => setIsVerboseMode(prev => !prev);
+  // PRESERVED: Scholar Mode toggle - now using actions
+  const toggleVerboseMode = () => actions.toggleVerboseMode();
   const handleSuggestion = (hint: string) => {
     trackSuggestionClicked(hint);
     handleSend(hint);
@@ -936,7 +932,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           ) : showLensPicker ? (
             <LensPicker
               mode="compact"
-              onBack={() => setShowLensPicker(false)}
+              onBack={() => actions.hideLensPicker()}
               onAfterSelect={(personaId) => {
                 localStorage.setItem('grove-terminal-welcomed', 'true');
                 localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
@@ -965,15 +961,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 journeyName={getJourney(activeJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
-                onLensClick={() => setShowLensPicker(true)}
-                onStreakClick={() => setShowStatsModal(true)}
+                onLensClick={() => actions.showLensPicker()}
+                onStreakClick={() => actions.openModal('stats')}
               />
 
               {/* Consolidated Journey Navigation Bar - hidden when controls below enabled */}
               {!enableControlsBelow && (
                 <JourneyNav
                   persona={activeLensData}
-                  onSwitchLens={() => setShowLensPicker(true)}
+                  onSwitchLens={() => actions.showLensPicker()}
                   currentThread={currentThread}
                   currentPosition={currentPosition}
                   getThreadCard={getThreadCard}
@@ -1106,7 +1102,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                                 selectLens(targetPersona);
                               }
                             }
-                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
+                            actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
                           }}
                           onDismiss={() => {
                             // Track timing for analytics
@@ -1116,7 +1112,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                               timeToDecisionMs
                             });
                             recordEntropyDismiss();
-                            setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
+                            actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
                           }}
                         />
                       )}
@@ -1136,15 +1132,15 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       showFeedbackTransmission={showFeedbackTransmission}
                       onSubmit={(rating, feedback, sendToFoundation) => {
                         console.log('Journey feedback:', { rating, feedback, sendToFoundation });
-                        setShowJourneyCompletion(false);
-                        setCompletedJourneyTitle(null);
+                        actions.setReveal('journeyCompletion', false);
+                        actions.setCompletedJourneyTitle(null);
                         if (shouldShowFounder && currentArchetypeId) {
                           markFounderStoryShown();
                         }
                       }}
                       onSkip={() => {
-                        setShowJourneyCompletion(false);
-                        setCompletedJourneyTitle(null);
+                        actions.setReveal('journeyCompletion', false);
+                        actions.setCompletedJourneyTitle(null);
                       }}
                     />
                   </div>
@@ -1172,14 +1168,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       <button
                         onClick={() => {
                           // Continue exploring the topic freely
-                          setCurrentNodeId(null);
+                          actions.setCurrentNodeId(null);
                         }}
                         className="px-3 py-2 bg-grove-forest/10 border border-grove-forest/20 rounded-sm text-xs font-sans text-grove-forest hover:bg-grove-forest/20 transition-all"
                       >
                         Continue Exploring Freely
                       </button>
                       <button
-                        onClick={() => setShowLensPicker(true)}
+                        onClick={() => actions.showLensPicker()}
                         className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
                       >
                         Try a Different Lens
@@ -1199,14 +1195,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                       <button
                         onClick={() => {
                           exitJourney();
-                          setCurrentNodeId(null);
+                          actions.setCurrentNodeId(null);
                         }}
                         className="px-3 py-2 bg-grove-forest/10 border border-grove-forest/20 rounded-sm text-xs font-sans text-grove-forest hover:bg-grove-forest/20 transition-all"
                       >
                         Explore Freely
                       </button>
                       <button
-                        onClick={() => setShowLensPicker(true)}
+                        onClick={() => actions.showLensPicker()}
                         className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
                       >
                         Try a Different Lens
@@ -1244,7 +1240,7 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                         handleSend(card.query, card.label, card.id);
                         const nextCardId = advanceThread();
                         if (nextCardId === null && currentPosition >= currentThread.length - 1) {
-                          setShowJourneyCompletion(true);
+                          actions.setReveal('journeyCompletion', true);
                           recordJourneyCompleted();
                           incrementJourneysCompleted();
                         }
@@ -1271,14 +1267,14 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
                 {/* Input Area - Command Palette enabled (v0.16) */}
                 <CommandInput
                   onSubmitQuery={(query) => {
-                    setInput(query);
+                    actions.setInput(query);
                     handleSend(query);
                   }}
                   disabled={terminalState.isLoading}
                   onOpenModal={handleOpenModal}
                   onSwitchLens={handleCommandLensSwitch}
-                  onShowWelcome={() => setShowWelcomeInterstitial(true)}
-                  onShowLensPicker={() => setShowLensPicker(true)}
+                  onShowWelcome={() => actions.showWelcomeInterstitial()}
+                  onShowLensPicker={() => actions.showLensPicker()}
                   // Sprout System (Sprint: Sprout System)
                   getLastResponse={getLastResponse}
                   getSessionContext={getSessionContext}
@@ -1334,22 +1330,22 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
               onCTAClick={(ctaId) => {
                 trackCtaClicked(currentArchetypeId, ctaId, 'modal');
               }}
-              onDismiss={() => setShowConversionCTA(false)}
+              onDismiss={() => actions.setReveal('conversionCTA', false)}
             />
           </div>
         </div>
       )}
 
       {/* Command Palette Modals (v0.16) */}
-      {showHelpModal && <HelpModal onClose={() => setShowHelpModal(false)} />}
-      {showJourneysModal && <JourneysModal onClose={() => setShowJourneysModal(false)} />}
-      {showStatsModal && <StatsModal onClose={() => setShowStatsModal(false)} />}
+      {showHelpModal && <HelpModal onClose={() => actions.closeModal('help')} />}
+      {showJourneysModal && <JourneysModal onClose={() => actions.closeModal('journeys')} />}
+      {showStatsModal && <StatsModal onClose={() => actions.closeModal('stats')} />}
       {showGardenModal && (
         <GardenModal
-          onClose={() => setShowGardenModal(false)}
+          onClose={() => actions.closeModal('garden')}
           onViewFullStats={() => {
-            setShowGardenModal(false);
-            setShowStatsModal(true);
+            actions.closeModal('garden');
+            actions.openModal('stats');
           }}
         />
       )}
