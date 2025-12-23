@@ -142,11 +142,11 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   }, [quotes, trigger]); // Re-run effect on quotes or trigger change
 
   return (
-    <section className={`${isCompressed ? 'min-h-[50vh]' : 'min-h-screen'} bg-paper py-24 px-6 ${className}`}>
+    <section className={`${isCompressed ? '' : 'min-h-screen'} bg-paper py-12 px-6 ${className}`}>
       <div className={`${isCompressed ? 'max-w-full' : 'max-w-4xl'} mx-auto`}>
         {/* Quote Cards - Full variant: stacked, Compressed variant: carousel */}
         {isCompressed ? (
-          /* Compressed Carousel Layout - Auto-advancing (Sprint: active-grove-v1 Fix #5) */
+          /* Compressed Carousel Layout - Light theme (Sprint: active-grove-v1 Fix #9) */
           <div className="mb-12 relative">
             <div
               ref={carouselRef}
@@ -155,14 +155,16 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
               {quotes.map((quote, index) => (
                 <div
                   key={index}
-                  className={`flex-shrink-0 w-[280px] bg-white/5 border border-white/10 p-5 rounded-lg snap-center transition-opacity duration-500 ${
-                    index === activeQuoteIndex ? 'opacity-100' : 'opacity-50'
+                  className={`flex-shrink-0 w-[280px] bg-paper-dark border border-ink/10 p-5 rounded-lg shadow-sm snap-center transition-all duration-500 ${
+                    index === activeQuoteIndex
+                      ? 'opacity-100 scale-100 shadow-md'
+                      : 'opacity-70 scale-[0.98]'
                   }`}
                 >
-                  <blockquote className="font-serif text-sm text-white/90 leading-relaxed mb-3 line-clamp-4">
+                  <blockquote className="font-serif text-sm text-ink leading-relaxed mb-3">
                     "{quote.text}"
                   </blockquote>
-                  <footer className="font-mono text-xs text-white/60 font-medium">
+                  <footer className="font-mono text-xs text-ink-muted font-medium tracking-wide">
                     — {quote.author}
                   </footer>
                 </div>
@@ -174,8 +176,10 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
                 <button
                   key={index}
                   onClick={() => setActiveQuoteIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === activeQuoteIndex ? 'bg-white' : 'bg-white/30'
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === activeQuoteIndex
+                      ? 'bg-grove-forest scale-125'
+                      : 'bg-ink/30 hover:bg-ink/50'
                   }`}
                   aria-label={`Go to quote ${index + 1}`}
                 />

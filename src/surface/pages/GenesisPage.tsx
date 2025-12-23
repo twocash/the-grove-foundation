@@ -165,6 +165,23 @@ const GenesisPage: React.FC = () => {
     }
   }, [activeLens]);
 
+  // Auto-scroll to Section 2 after headline morph completes (Fix #9)
+  useEffect(() => {
+    if (flowState === 'unlocked' && uiMode === 'split') {
+      // Delay to let user absorb the personalized headline
+      const timer = setTimeout(() => {
+        const section2 = screenRefs.current[1];
+        if (section2) {
+          section2.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [flowState, uiMode]);
+
   // Track experience loaded on mount
   useEffect(() => {
     trackGenesisExperienceLoaded();
@@ -197,15 +214,15 @@ const GenesisPage: React.FC = () => {
   }, [viewedScreens]);
 
   /**
-   * Section-aware smooth scroll
-   * Scrolls to a specific section by index, with the content centered in viewport
+   * Section-aware smooth scroll (Fix #9)
+   * Scrolls to a specific section by index, centered in viewport
    */
   const scrollToSection = useCallback((sectionIndex: number) => {
     const targetRef = screenRefs.current[sectionIndex];
     if (targetRef) {
-      targetRef.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start'  // Align to top of viewport
+      targetRef.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'  // Center section in viewport
       });
     }
   }, []);
@@ -292,11 +309,14 @@ const GenesisPage: React.FC = () => {
           />
         </div>
 
-        {/* Navigation-gated sections - only visible when unlocked */}
+        {/* Navigation-gated sections - only visible when unlocked (Fix #9: centered) */}
         {flowState === 'unlocked' && (
           <>
             {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
-            <div ref={el => { screenRefs.current[1] = el; }}>
+            <div
+              ref={el => { screenRefs.current[1] = el; }}
+              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+            >
               <ProblemStatement
                 onScrollNext={createScrollToNext(1)}
                 variant={uiMode === 'split' ? 'compressed' : 'full'}
@@ -304,7 +324,10 @@ const GenesisPage: React.FC = () => {
             </div>
 
             {/* SCREEN 3: Product Reveal */}
-            <div ref={el => { screenRefs.current[2] = el; }}>
+            <div
+              ref={el => { screenRefs.current[2] = el; }}
+              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+            >
               <ProductReveal
                 onOpenTerminal={handleProductRevealCTA}
                 onScrollNext={createScrollToNext(2)}
@@ -312,7 +335,10 @@ const GenesisPage: React.FC = () => {
             </div>
 
             {/* SCREEN 4: Aha Demo */}
-            <div ref={el => { screenRefs.current[3] = el; }}>
+            <div
+              ref={el => { screenRefs.current[3] = el; }}
+              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+            >
               <AhaDemo
                 onGoDeeper={handleAhaDemoCTA}
                 onKeepExploring={createScrollToNext(3)}
@@ -320,7 +346,10 @@ const GenesisPage: React.FC = () => {
             </div>
 
             {/* SCREEN 5: Foundation */}
-            <div ref={el => { screenRefs.current[4] = el; }}>
+            <div
+              ref={el => { screenRefs.current[4] = el; }}
+              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+            >
               <Foundation
                 onOpenTerminal={handleFoundationCTA}
                 onScrollNext={createScrollToNext(4)}
@@ -328,7 +357,10 @@ const GenesisPage: React.FC = () => {
             </div>
 
             {/* SCREEN 6: Call to Action (no scroll indicator - it's the last section) */}
-            <div ref={el => { screenRefs.current[5] = el; }}>
+            <div
+              ref={el => { screenRefs.current[5] = el; }}
+              className="min-h-[calc(100vh-56px)] flex flex-col justify-center"
+            >
               <CallToAction
                 onOpenTerminal={handleCallToActionTerminal}
                 onRequestAccess={handleCallToActionAccess}
