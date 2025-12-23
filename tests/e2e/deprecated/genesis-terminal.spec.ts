@@ -1,36 +1,81 @@
-import { test, expect } from '@playwright/test'
-
 /**
- * Genesis Terminal E2E Tests
- * Sprint: Terminal Architecture Refactor v1.0 - Epic 6
+ * @deprecated DEPRECATED: 2024-12-23 - Active Grove Architecture Migration
  *
- * Tests the terminal chat functionality:
- * - Message input and submission
- * - Loading states
- * - Response rendering
- * - Command palette basics
+ * ============================================================================
+ * WHY THESE TESTS ARE DEPRECATED
+ * ============================================================================
+ *
+ * These tests were written for the pre-Active-Grove Terminal architecture which used:
+ * - FAB (Floating Action Button) to open/close Terminal
+ * - Tailwind `translate-x-0`/`translate-x-full` classes for drawer animation
+ * - Separate minimize/expand pill states
+ *
+ * The Active Grove architecture (v0.16+) replaced this with:
+ * - Tree click (🌱) to trigger split layout
+ * - CSS class `.terminal-panel.visible` for panel state
+ * - No FAB, no minimize pill - Terminal is always visible in split mode
+ *
+ * ============================================================================
+ * WHAT TO DO WITH THESE TESTS
+ * ============================================================================
+ *
+ * The BEHAVIOR these tests validated is still valid:
+ * - Terminal shows welcome message ✓
+ * - Input field is present and focusable ✓
+ * - Commands can be typed ✓
+ *
+ * The IMPLEMENTATION has changed, so we created new behavior-focused tests in:
+ * - tests/e2e/engagement-behaviors.spec.ts
+ *
+ * These tests are preserved for:
+ * 1. Reference during migration
+ * 2. Understanding original test intent
+ * 3. Potential restoration if architecture reverts
+ *
+ * ============================================================================
+ * MIGRATION STATUS
+ * ============================================================================
+ *
+ * See: docs/testing/ENGAGEMENT_MIGRATION_TEST_STRATEGY.md
+ *
+ * Behaviors migrated to engagement-behaviors.spec.ts:
+ * - [x] Terminal visibility after tree click
+ * - [x] Input field presence and functionality
+ * - [x] Lens picker flow
+ * - [x] URL lens parameter handling
+ *
+ * Behaviors intentionally NOT migrated (obsolete features):
+ * - [ ] FAB button toggle
+ * - [ ] Minimize pill / expand flow
+ * - [ ] translate-x animation classes
+ *
+ * ============================================================================
  */
 
-// Helper to ensure terminal is open
-async function ensureTerminalOpen(page: import('@playwright/test').Page) {
-  const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
-  const fabButtonOpen = page.locator('button[aria-label="Open terminal"]')
+import { test, expect } from '@playwright/test'
 
-  const isOpen = await terminalDrawer.evaluate(el => el.classList.contains('translate-x-0')).catch(() => false)
+test.describe.skip('DEPRECATED: Terminal Genesis', () => {
+  // Original tests preserved below for reference
+  // All tests are skipped via test.describe.skip()
 
-  if (!isOpen) {
-    if (await fabButtonOpen.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await fabButtonOpen.click()
-      await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
+  // Helper to ensure terminal is open
+  async function ensureTerminalOpen(page: import('@playwright/test').Page) {
+    const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
+    const fabButtonOpen = page.locator('button[aria-label="Open terminal"]')
+
+    const isOpen = await terminalDrawer.evaluate(el => el.classList.contains('translate-x-0')).catch(() => false)
+
+    if (!isOpen) {
+      if (await fabButtonOpen.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await fabButtonOpen.click()
+        await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
+      }
     }
+
+    return terminalDrawer
   }
 
-  return terminalDrawer
-}
-
-test.describe('Terminal Genesis', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear localStorage to reset state
     await page.goto('/')
     await page.evaluate(() => {
       Object.keys(localStorage).filter(k => k.startsWith('grove-')).forEach(k => localStorage.removeItem(k))
@@ -45,23 +90,16 @@ test.describe('Terminal Genesis', () => {
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
     const terminalContent = await terminalDrawer.textContent()
-
-    // Should contain welcome heading
     expect(terminalContent).toContain('The Terminal')
-
-    // Should contain prompts/suggestions
     expect(terminalContent).toBeTruthy()
   })
 
   test('terminal has input field', async ({ page }) => {
-    // Look for input field within terminal
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
     const inputField = terminalDrawer.locator('input[type="text"], textarea').first()
     await expect(inputField).toBeVisible({ timeout: 5000 })
-
-    // Input should be focusable
     await inputField.focus()
     await expect(inputField).toBeFocused()
   })
@@ -73,8 +111,6 @@ test.describe('Terminal Genesis', () => {
     const inputField = terminalDrawer.locator('input[type="text"], textarea').first()
     await expect(inputField).toBeVisible({ timeout: 5000 })
     await inputField.fill('test query')
-
-    // Verify input has value
     await expect(inputField).toHaveValue('test query')
   })
 
@@ -82,11 +118,9 @@ test.describe('Terminal Genesis', () => {
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
-    // Check for minimize button
     const minimizeButton = terminalDrawer.locator('button[aria-label="Minimize"]')
     await expect(minimizeButton).toBeVisible({ timeout: 5000 })
 
-    // Check for close button
     const closeButton = terminalDrawer.locator('button[aria-label="Close"]')
     await expect(closeButton).toBeVisible()
   })
@@ -95,14 +129,10 @@ test.describe('Terminal Genesis', () => {
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
-    // Click minimize
     const minimizeButton = terminalDrawer.locator('button[aria-label="Minimize"]')
     await minimizeButton.click()
-
-    // Terminal drawer should be hidden
     await expect(terminalDrawer).toHaveClass(/translate-x-full/, { timeout: 5000 })
 
-    // Pill should be visible
     const expandButton = page.locator('button[aria-label="Expand Your Grove"]')
     await expect(expandButton).toBeVisible({ timeout: 5000 })
   })
@@ -111,22 +141,35 @@ test.describe('Terminal Genesis', () => {
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
-    // Minimize first
     const minimizeButton = terminalDrawer.locator('button[aria-label="Minimize"]')
     await minimizeButton.click()
     await expect(terminalDrawer).toHaveClass(/translate-x-full/, { timeout: 5000 })
 
-    // Click expand pill
     const expandButton = page.locator('button[aria-label="Expand Your Grove"]')
     await expect(expandButton).toBeVisible({ timeout: 5000 })
     await expandButton.click()
 
-    // Terminal should be visible again
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
   })
 })
 
-test.describe('Terminal Commands', () => {
+test.describe.skip('DEPRECATED: Terminal Commands', () => {
+  async function ensureTerminalOpen(page: import('@playwright/test').Page) {
+    const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
+    const fabButtonOpen = page.locator('button[aria-label="Open terminal"]')
+
+    const isOpen = await terminalDrawer.evaluate(el => el.classList.contains('translate-x-0')).catch(() => false)
+
+    if (!isOpen) {
+      if (await fabButtonOpen.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await fabButtonOpen.click()
+        await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
+      }
+    }
+
+    return terminalDrawer
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.evaluate(() => {
@@ -142,9 +185,6 @@ test.describe('Terminal Commands', () => {
     const inputField = terminalDrawer.locator('input[type="text"], textarea').first()
     await expect(inputField).toBeVisible({ timeout: 5000 })
     await inputField.fill('/')
-
-    // At this point, the command palette might show or input might have special styling
-    // This test verifies the input accepts command syntax
     await expect(inputField).toHaveValue('/')
   })
 
@@ -153,7 +193,6 @@ test.describe('Terminal Commands', () => {
     const inputField = terminalDrawer.locator('input[type="text"], textarea').first()
     await expect(inputField).toBeVisible({ timeout: 5000 })
     await inputField.fill('/help')
-
     await expect(inputField).toHaveValue('/help')
   })
 
@@ -162,12 +201,27 @@ test.describe('Terminal Commands', () => {
     const inputField = terminalDrawer.locator('input[type="text"], textarea').first()
     await expect(inputField).toBeVisible({ timeout: 5000 })
     await inputField.fill('/stats')
-
     await expect(inputField).toHaveValue('/stats')
   })
 })
 
-test.describe('Terminal Message Rendering', () => {
+test.describe.skip('DEPRECATED: Terminal Message Rendering', () => {
+  async function ensureTerminalOpen(page: import('@playwright/test').Page) {
+    const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
+    const fabButtonOpen = page.locator('button[aria-label="Open terminal"]')
+
+    const isOpen = await terminalDrawer.evaluate(el => el.classList.contains('translate-x-0')).catch(() => false)
+
+    if (!isOpen) {
+      if (await fabButtonOpen.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await fabButtonOpen.click()
+        await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
+      }
+    }
+
+    return terminalDrawer
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.evaluate(() => {
@@ -183,19 +237,14 @@ test.describe('Terminal Message Rendering', () => {
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
     const terminalContent = await terminalDrawer.textContent()
-
-    // Welcome messages use arrow (→) formatting for prompts
-    // This may not be visible as text, so just check content exists
     expect(terminalContent).toBeTruthy()
     expect(terminalContent!.length).toBeGreaterThan(50)
   })
 
   test('terminal has scrollable message area', async ({ page }) => {
-    // Look for a scrollable container in terminal
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
-    // Should have overflow handling
     const scrollContainer = terminalDrawer.locator('.overflow-y-auto, .overflow-auto').first()
 
     if (await scrollContainer.count() > 0) {
@@ -204,7 +253,23 @@ test.describe('Terminal Message Rendering', () => {
   })
 })
 
-test.describe('Terminal Accessibility', () => {
+test.describe.skip('DEPRECATED: Terminal Accessibility', () => {
+  async function ensureTerminalOpen(page: import('@playwright/test').Page) {
+    const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
+    const fabButtonOpen = page.locator('button[aria-label="Open terminal"]')
+
+    const isOpen = await terminalDrawer.evaluate(el => el.classList.contains('translate-x-0')).catch(() => false)
+
+    if (!isOpen) {
+      if (await fabButtonOpen.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await fabButtonOpen.click()
+        await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
+      }
+    }
+
+    return terminalDrawer
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.evaluate(() => {
@@ -220,13 +285,11 @@ test.describe('Terminal Accessibility', () => {
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     await expect(terminalDrawer).toHaveClass(/translate-x-0/, { timeout: 5000 })
 
-    // Check role and aria-modal
     await expect(terminalDrawer).toHaveAttribute('role', 'dialog')
     await expect(terminalDrawer).toHaveAttribute('aria-modal', 'true')
   })
 
   test('FAB button has accessible label', async ({ page }) => {
-    // Ensure terminal is closed first to see open button
     const terminalDrawer = page.locator('[aria-label="Grove Terminal"]')
     const fabButtonClose = page.locator('button[aria-label="Close terminal"]')
 
