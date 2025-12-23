@@ -242,13 +242,14 @@ p {
   top: 0;
   height: 100vh;
   width: 50%;
-  transform: translateX(100%) scale(0.95);
+  transform: translateX(100%);
   opacity: 0;
   transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 40;
   will-change: transform, opacity;
-  background: var(--color-paper);
-  border-left: 1px solid var(--color-ink-border);
+  background: #1a2421;  /* Terminal dark bg */
+  border-radius: 0;
+  overflow: hidden;
 }
 
 .terminal-panel.visible {
@@ -256,22 +257,10 @@ p {
   opacity: 1;
 }
 
-/* Terminal fills panel when embedded */
+/* Terminal fills panel when embedded (React handles the rest) */
 .terminal-panel > * {
   width: 100%;
   height: 100%;
-}
-
-/* Override Terminal's internal constraints in embedded mode */
-.terminal-panel [aria-label="Grove Terminal"] {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 100% !important;
-  position: relative !important;
-  transform: none !important;
-  right: auto !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
 }
 
 /* Tablet: 40% width */

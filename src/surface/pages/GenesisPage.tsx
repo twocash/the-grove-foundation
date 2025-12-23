@@ -262,7 +262,6 @@ const GenesisPage: React.FC = () => {
 
   return (
     <div className="bg-paper min-h-screen relative overflow-x-hidden">
-      <AudioPlayer />
 
       {/* ====================================================================
           CONTENT RAIL (Sprint: active-grove-v1)
@@ -278,6 +277,9 @@ const GenesisPage: React.FC = () => {
         }}
       >
         <div className="content-rail-inner">
+          {/* Audio player in content rail so it splits with content */}
+          <AudioPlayer />
+
           {/* SCREEN 1: The Hook (Quantum-Reactive) */}
           <div ref={el => { screenRefs.current[0] = el; }}>
           <HeroHook

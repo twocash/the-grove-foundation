@@ -916,6 +916,120 @@ const Terminal: React.FC<TerminalProps> = ({
   // V2.1 Journey end detection - no next nodes available AND not in an incomplete journey
   const isJourneyEnd = currentNodeId && nextNodes.length === 0 && !v21JourneyContext?.isIncomplete;
 
+  // ============================================================================
+  // EMBEDDED MODE RENDERING (Sprint: active-grove-v1)
+  // Bypasses TerminalShell chrome for split layout integration
+  // ============================================================================
+  if (variant === 'embedded') {
+    return (
+      <div className="flex flex-col h-full w-full bg-[#1a2421] text-white">
+        {/* Embedded Terminal Header */}
+        <div className="flex-shrink-0 px-4 py-3 border-b border-white/10 flex items-center justify-between">
+          <span className="text-[#00D4AA] font-mono text-sm font-medium">The Grove</span>
+          {activeLensData && (
+            <button
+              onClick={() => actions.showLensPicker()}
+              className="text-xs text-white/60 hover:text-white/90 transition-colors"
+            >
+              {activeLensData.publicLabel}
+            </button>
+          )}
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          {showCustomLensWizard ? (
+            <div className="p-4">
+              <CustomLensWizard
+                onComplete={handleCustomLensComplete}
+                onCancel={handleCustomLensCancel}
+              />
+            </div>
+          ) : showWelcomeInterstitial ? (
+            <WelcomeInterstitial
+              personas={enabledPersonas}
+              customLenses={customLenses}
+              onSelect={handleWelcomeLensSelect}
+              onCreateCustomLens={handleWelcomeCreateCustomLens}
+              onDeleteCustomLens={handleDeleteCustomLens}
+              showCreateOption={showCustomLensInPicker}
+            />
+          ) : showLensPicker ? (
+            <LensPicker
+              mode="compact"
+              onBack={() => actions.hideLensPicker()}
+              onAfterSelect={(personaId) => {
+                localStorage.setItem('grove-terminal-welcomed', 'true');
+                localStorage.setItem('grove-session-established', 'true');
+                trackLensActivated(personaId, personaId.startsWith('custom-'));
+                emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
+                emit.journeyStarted(personaId, currentThread.length || 5);
+                if (personaId.startsWith('custom-')) {
+                  updateCustomLensUsage(personaId);
+                }
+              }}
+            />
+          ) : (
+            /* Chat Messages */
+            <div className="p-4 space-y-4">
+              {terminalState.messages.map((msg) => {
+                const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
+                return (
+                  <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex items-center gap-2 mb-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <span className={`text-xs font-medium ${msg.role === 'user' ? 'text-white/60' : 'text-[#00D4AA]'}`}>
+                        {msg.role === 'user' ? 'You' : 'The Grove'}
+                      </span>
+                    </div>
+                    <div className={`${msg.role === 'user' ? 'max-w-[85%]' : 'max-w-[90%]'}`}>
+                      {msg.role === 'user' ? (
+                        <div className="bg-[#00D4AA] text-[#1a2421] px-4 py-2.5 rounded-xl rounded-tr-sm text-sm">
+                          {msg.text.replace(' --verbose', '')}
+                        </div>
+                      ) : (
+                        <div className={`px-4 py-2.5 rounded-xl rounded-tl-sm text-sm ${
+                          isSystemError
+                            ? 'bg-red-900/30 text-red-300 border border-red-700/50'
+                            : 'bg-white/5 text-white/90 border border-white/10'
+                        }`}>
+                          {msg.isStreaming && !msg.text ? (
+                            <LoadingIndicator messages={globalSettings?.loadingMessages} />
+                          ) : (
+                            <>
+                              <MarkdownRenderer content={msg.text} onPromptClick={handleSuggestion} />
+                              {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-[#00D4AA] cursor-blink align-middle"></span>}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* Input Area - only show when not in wizard/picker mode */}
+        {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && (
+          <div className="flex-shrink-0 p-4 border-t border-white/10">
+            <CommandInput
+              value={input}
+              onChange={actions.setInput}
+              onSubmit={(text) => handleSend(text)}
+              onCommand={handleCommand}
+              isLoading={terminalState.isLoading}
+              placeholder="Ask about The Grove..."
+              inputRef={inputRef}
+              showMicrophone={false}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Terminal Shell - Chrome layer (FAB, pill, drawer) */}
