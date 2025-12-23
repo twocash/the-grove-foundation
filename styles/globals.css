@@ -310,10 +310,9 @@ p {
 }
 
 /* Terminal panel content - prevent jumps on lens switch (Fix #7) */
+/* Note: Do NOT set flex-direction here - it breaks TerminalHeader pills layout */
 .terminal-panel .flex-1 {
   min-height: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Terminal content fills available space */

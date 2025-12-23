@@ -40,7 +40,7 @@ const HeaderPill: React.FC<{
       bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200
       border border-transparent hover:border-primary/30 dark:hover:border-primary/50
       transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
-      ${className}`}
+      shrink-0 whitespace-nowrap ${className}`}
   >
     {icon}
     <span className="truncate max-w-[100px]">{label}</span>
@@ -69,7 +69,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   const lensColors = lensColor ? getPersonaColors(lensColor) : null;
 
   return (
-    <div className="px-4 py-2.5 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark flex items-center gap-3">
+    <div className="px-4 py-2.5 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark flex items-center gap-3 flex-nowrap">
       {/* Left: Menu + Title */}
       <div className="flex items-center gap-2 shrink-0">
         {/* Menu button */}
@@ -94,7 +94,8 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
       </div>
 
       {/* Center: Context Pills - aligned right, Journey/Field collapse first */}
-      <div className="flex items-center gap-2 flex-1 min-w-0 justify-end mr-2">
+      {/* Note: flex-row is explicit to override .terminal-panel .flex-1 { flex-direction: column } in globals.css */}
+      <div className="flex flex-row items-center gap-2 flex-1 min-w-0 justify-end mr-2 flex-nowrap">
         {/* Lens Pill - Always visible, highest priority */}
         {lensName && (
           <HeaderPill
