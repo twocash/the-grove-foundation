@@ -278,7 +278,7 @@ const GenesisPage: React.FC = () => {
       >
         <div className="content-rail-inner">
           {/* Audio player in content rail so it splits with content */}
-          <AudioPlayer />
+          <AudioPlayer splitMode={uiMode === 'split'} />
 
           {/* SCREEN 1: The Hook (Quantum-Reactive) */}
           <div ref={el => { screenRefs.current[0] = el; }}>

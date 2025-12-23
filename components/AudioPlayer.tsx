@@ -6,10 +6,15 @@ import { AudioManifest, AudioTrack } from '../types';
 const PLACEMENT_ID = 'deep-dive-main';
 
 /**
- * AudioPlayer Component (CMS + Classic Stye)
+ * AudioPlayer Component (CMS + Classic Style)
  * Features: Fixed Header, Waveform, Minimal UI
+ * Sprint: active-grove-v1 Fix #8 - splitMode prop for 50% width in split layout
  */
-const AudioPlayer: React.FC = () => {
+interface AudioPlayerProps {
+  splitMode?: boolean;
+}
+
+const AudioPlayer: React.FC<AudioPlayerProps> = ({ splitMode = false }) => {
   const [track, setTrack] = useState<AudioTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +69,11 @@ const AudioPlayer: React.FC = () => {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3 px-6 flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.02)] print:hidden">
+    <div className={`fixed top-0 left-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 py-3 px-6 flex justify-between items-center shadow-[0_1px_2px_rgba(0,0,0,0.02)] print:hidden transition-all duration-700 ease-out ${
+      splitMode
+        ? 'w-1/2 md:w-[60%] lg:w-1/2'  // Match content-rail widths at each breakpoint
+        : 'right-0'
+    }`}>
 
       {/* LEFT: Controls & Info */}
       <div className="flex items-center space-x-4">

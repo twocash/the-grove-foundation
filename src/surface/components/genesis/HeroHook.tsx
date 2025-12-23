@@ -229,7 +229,7 @@ export const HeroHook: React.FC<HeroHookProps> = ({
   };
 
   return (
-    <section className="min-h-screen bg-paper flex flex-col items-center justify-center px-6 relative overflow-hidden hero-container">
+    <section className="bg-paper flex flex-col items-center justify-center px-6 relative overflow-hidden hero-container">
       {/* Subtle organic background texture */}
       <div className="absolute inset-0 bg-grain opacity-50 pointer-events-none" />
 
