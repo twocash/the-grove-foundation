@@ -440,3 +440,58 @@ export const getTerminalWelcome = (
   // Fall back to default
   return DEFAULT_TERMINAL_WELCOME;
 };
+
+/**
+ * Format a TerminalWelcome object into a chat message string.
+ * Uses arrow prompts (→) to format suggested questions.
+ *
+ * Sprint: Terminal Architecture Refactor v1.0 - Epic 5
+ *
+ * @param welcome - TerminalWelcome object
+ * @returns Formatted string for display in terminal
+ */
+export const formatTerminalWelcome = (welcome: TerminalWelcome): string => {
+  const parts: string[] = [];
+
+  // Heading
+  parts.push(welcome.heading);
+  parts.push('');
+
+  // Thesis
+  parts.push(welcome.thesis);
+  parts.push('');
+
+  // Prompts with arrow formatting
+  if (welcome.prompts.length > 0) {
+    parts.push('You might start with:');
+    welcome.prompts.forEach(prompt => {
+      parts.push(`→ ${prompt}`);
+    });
+  }
+
+  // Footer
+  if (welcome.footer) {
+    parts.push('');
+    parts.push(welcome.footer);
+  }
+
+  return parts.join('\n');
+};
+
+/**
+ * Get the formatted terminal welcome message for a given lens.
+ * Convenience function that combines getTerminalWelcome + formatTerminalWelcome.
+ *
+ * Sprint: Terminal Architecture Refactor v1.0 - Epic 5
+ *
+ * @param lensId - The lens/persona ID (null for no lens selected)
+ * @param schemaRealities - Optional lens realities from the schema
+ * @returns Formatted welcome message string
+ */
+export const getFormattedTerminalWelcome = (
+  lensId: string | null,
+  schemaRealities?: Record<string, LensReality>
+): string => {
+  const welcome = getTerminalWelcome(lensId, schemaRealities);
+  return formatTerminalWelcome(welcome);
+};

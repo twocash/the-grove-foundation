@@ -18,6 +18,7 @@ import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
+import { getFormattedTerminalWelcome } from '../src/data/quantum-content';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 import SimulationReveal from './Terminal/Reveals/SimulationReveal';
 import CustomLensOffer from './Terminal/Reveals/CustomLensOffer';
@@ -527,6 +528,29 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
 
     console.log('Chat context changed - session will reinitialize on next message');
   }, [activeSection, activeLensData, getEntryPoints]);
+
+  // Sprint: Terminal Architecture Refactor v1.0 - Epic 5
+  // Update welcome message when lens changes
+  useEffect(() => {
+    if (session.activeLens) {
+      const lensWelcome = getFormattedTerminalWelcome(
+        session.activeLens,
+        schema?.lensRealities as Record<string, any> | undefined
+      );
+
+      // Update the initial message with lens-specific welcome
+      setTerminalState(prev => ({
+        ...prev,
+        messages: prev.messages.map(msg =>
+          msg.id === 'init'
+            ? { ...msg, text: lensWelcome }
+            : msg
+        )
+      }));
+
+      console.log('[Lens Welcome] Updated for:', session.activeLens);
+    }
+  }, [session.activeLens, schema?.lensRealities, setTerminalState]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
