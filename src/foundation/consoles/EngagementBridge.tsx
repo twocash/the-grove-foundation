@@ -224,6 +224,27 @@ const EngagementBridge: React.FC = () => {
         <GlowButton
           variant="secondary"
           icon={Play}
+          onClick={() => bus.emit('LENS_SELECTED', {
+            lensId: 'concerned-citizen',
+            isCustom: false,
+            archetypeId: 'skeptic'
+          })}
+        >
+          Select Lens
+        </GlowButton>
+        <GlowButton
+          variant="secondary"
+          icon={Play}
+          onClick={() => bus.emit('JOURNEY_STARTED', {
+            lensId: 'concerned-citizen',
+            threadLength: 5
+          })}
+        >
+          Start Journey
+        </GlowButton>
+        <GlowButton
+          variant="secondary"
+          icon={Play}
           onClick={() => bus.emit('TIME_MILESTONE', { minutes: state.minutesActive + 3 })}
         >
           +3 Minutes
