@@ -2,8 +2,9 @@
 // Genesis landing experience - Jobs-style "Feel -> Understand -> Believe" progression
 // DESIGN CONSTRAINT: Organic, warm, paper-textured - NOT futuristic/sci-fi
 // v0.15: Section-aware smooth scrolling for bespoke experience
+// v0.16: Active Grove - Split layout with Tree-triggered terminal reveal
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Terminal from '../../../components/Terminal';
 import AudioPlayer from '../../../components/AudioPlayer';
 import { SectionId, TerminalState } from '../../../types';
@@ -13,6 +14,27 @@ import {
   trackGenesisScrollDepth,
   trackGenesisCTAClicked
 } from '../../../utils/funnelAnalytics';
+
+// ============================================================================
+// ACTIVE GROVE STATE MACHINE (Sprint: active-grove-v1)
+// ============================================================================
+
+/**
+ * UI Mode: Controls the layout split
+ * - 'hero': Full-width hero section, Terminal hidden/overlay
+ * - 'split': Content rail on left, Terminal panel on right
+ */
+type UIMode = 'hero' | 'split';
+
+/**
+ * Flow State: Controls the user journey through the experience
+ * - 'hero': Initial state, Tree pulsing, waiting for interaction
+ * - 'split': Terminal visible, waiting for lens selection
+ * - 'selecting': LensPicker active in Terminal
+ * - 'collapsing': Lens chosen, WaveformCollapse animating headline
+ * - 'unlocked': Headline rewritten, navigation enabled
+ */
+type FlowState = 'hero' | 'split' | 'selecting' | 'collapsing' | 'unlocked';
 
 // Genesis screen components
 import {
@@ -38,21 +60,95 @@ const GENESIS_SCREENS = [
 ];
 
 const GenesisPage: React.FC = () => {
+  // ============================================================================
+  // ACTIVE GROVE STATE (Sprint: active-grove-v1)
+  // ============================================================================
+  const [uiMode, setUIMode] = useState<UIMode>('hero');
+  const [flowState, setFlowState] = useState<FlowState>('hero');
+
+  // Derive tree mode from flow state
+  const treeMode = useMemo(() => {
+    switch (flowState) {
+      case 'hero': return 'pulsing';
+      case 'split':
+      case 'selecting':
+      case 'collapsing': return 'stabilized';
+      case 'unlocked': return 'directional';
+      default: return 'pulsing';
+    }
+  }, [flowState]);
+
+  // Navigation lock - prevent scrolling until unlocked
+  const isNavigationLocked = flowState !== 'unlocked' && flowState !== 'hero';
+
   // Quantum Interface - lens-reactive content (v0.14: includes isCollapsing for tuning visual)
-  const { reality, quantumTrigger, isCollapsing } = useQuantumInterface();
+  const { reality, quantumTrigger, isCollapsing, activeLens } = useQuantumInterface();
 
   const [activeSection] = useState<SectionId>(SectionId.STAKES);
   const [externalQuery, setExternalQuery] = useState<{ nodeId?: string; display: string; query: string } | null>(null);
   const [viewedScreens, setViewedScreens] = useState<Set<number>>(new Set([0])); // Screen 1 is always viewed on load
   const screenRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // v0.16: Terminal starts closed in hero mode, opens when split
   const [terminalState, setTerminalState] = useState<TerminalState>({
-    isOpen: true,  // v0.12e: Terminal open by default to showcase experience
+    isOpen: false,  // Active Grove: Terminal starts closed, opens on Tree click
     messages: [
       { id: 'init', role: 'model', text: INITIAL_TERMINAL_MESSAGE }
     ],
     isLoading: false
   });
+
+  // ============================================================================
+  // ACTIVE GROVE EVENT HANDLERS (Sprint: active-grove-v1)
+  // ============================================================================
+
+  /**
+   * Handle Tree click - triggers the split layout
+   */
+  const handleTreeClick = useCallback(() => {
+    if (flowState === 'hero') {
+      // Transition to split mode
+      setUIMode('split');
+      setFlowState('split');
+      setTerminalState(prev => ({ ...prev, isOpen: true }));
+      console.log('[ActiveGrove] Tree clicked → split mode');
+    } else if (flowState === 'unlocked') {
+      // Scroll to next section
+      const targetRef = screenRefs.current[1];
+      if (targetRef) {
+        targetRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      // Navigation locked - could trigger shake animation
+      console.log('[ActiveGrove] Navigation locked, flowState:', flowState);
+    }
+  }, [flowState]);
+
+  /**
+   * Handle lens selection from Terminal
+   */
+  const handleLensSelected = useCallback((lensId: string) => {
+    console.log('[ActiveGrove] Lens selected:', lensId);
+    setFlowState('collapsing');
+    // WaveformCollapse will trigger via quantumTrigger change
+  }, []);
+
+  /**
+   * Handle WaveformCollapse animation complete
+   */
+  const handleCollapseComplete = useCallback(() => {
+    if (flowState === 'collapsing') {
+      console.log('[ActiveGrove] Collapse complete → unlocked');
+      setFlowState('unlocked');
+    }
+  }, [flowState]);
+
+  // Listen for lens changes to trigger collapsing state
+  useEffect(() => {
+    if (activeLens && flowState === 'split') {
+      setFlowState('collapsing');
+    }
+  }, [activeLens]);
 
   // Track experience loaded on mount
   useEffect(() => {
@@ -150,62 +246,96 @@ const GenesisPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-paper min-h-screen">
+    <div className="bg-paper min-h-screen relative overflow-x-hidden">
       <AudioPlayer />
-      <Terminal
-        activeSection={activeSection}
-        terminalState={terminalState}
-        setTerminalState={setTerminalState}
-        externalQuery={externalQuery}
-        onQueryHandled={() => setExternalQuery(null)}
-      />
 
-      {/* SCREEN 1: The Hook (Quantum-Reactive) */}
-      <div ref={el => { screenRefs.current[0] = el; }}>
-        <HeroHook
-          content={reality.hero}
-          trigger={quantumTrigger}
-          isCollapsing={isCollapsing}
-          onScrollNext={createScrollToNext(0)}
-        />
+      {/* ====================================================================
+          CONTENT RAIL (Sprint: active-grove-v1)
+          Uses clip-path for smooth split animation without text reflow
+          ==================================================================== */}
+      <div
+        className={`content-rail transition-all duration-1000 ease-out-expo ${
+          uiMode === 'split' ? 'split' : ''
+        }`}
+        style={{
+          // Prevent scroll when navigation is locked
+          ...(isNavigationLocked && { overflow: 'hidden', height: '100vh' })
+        }}
+      >
+        {/* SCREEN 1: The Hook (Quantum-Reactive) */}
+        <div ref={el => { screenRefs.current[0] = el; }}>
+          <HeroHook
+            content={reality.hero}
+            trigger={quantumTrigger}
+            isCollapsing={isCollapsing}
+            onScrollNext={handleTreeClick}
+            onAnimationComplete={handleCollapseComplete}
+            flowState={flowState}
+          />
+        </div>
+
+        {/* Navigation-gated sections - only visible when unlocked */}
+        {(flowState === 'unlocked' || uiMode === 'hero') && (
+          <>
+            {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
+            <div ref={el => { screenRefs.current[1] = el; }}>
+              <ProblemStatement
+                onScrollNext={createScrollToNext(1)}
+                variant={uiMode === 'split' ? 'compressed' : 'full'}
+              />
+            </div>
+
+            {/* SCREEN 3: Product Reveal */}
+            <div ref={el => { screenRefs.current[2] = el; }}>
+              <ProductReveal
+                onOpenTerminal={handleProductRevealCTA}
+                onScrollNext={createScrollToNext(2)}
+              />
+            </div>
+
+            {/* SCREEN 4: Aha Demo */}
+            <div ref={el => { screenRefs.current[3] = el; }}>
+              <AhaDemo
+                onGoDeeper={handleAhaDemoCTA}
+                onKeepExploring={createScrollToNext(3)}
+              />
+            </div>
+
+            {/* SCREEN 5: Foundation */}
+            <div ref={el => { screenRefs.current[4] = el; }}>
+              <Foundation
+                onOpenTerminal={handleFoundationCTA}
+                onScrollNext={createScrollToNext(4)}
+              />
+            </div>
+
+            {/* SCREEN 6: Call to Action (no scroll indicator - it's the last section) */}
+            <div ref={el => { screenRefs.current[5] = el; }}>
+              <CallToAction
+                onOpenTerminal={handleCallToActionTerminal}
+                onRequestAccess={handleCallToActionAccess}
+              />
+            </div>
+          </>
+        )}
       </div>
 
-      {/* SCREEN 2: The Problem - Static CEO quotes (not lens-reactive) */}
-      <div ref={el => { screenRefs.current[1] = el; }}>
-        <ProblemStatement 
-          onScrollNext={createScrollToNext(1)}
-        />
-      </div>
-
-      {/* SCREEN 3: Product Reveal */}
-      <div ref={el => { screenRefs.current[2] = el; }}>
-        <ProductReveal 
-          onOpenTerminal={handleProductRevealCTA}
-          onScrollNext={createScrollToNext(2)}
-        />
-      </div>
-
-      {/* SCREEN 4: Aha Demo */}
-      <div ref={el => { screenRefs.current[3] = el; }}>
-        <AhaDemo 
-          onGoDeeper={handleAhaDemoCTA}
-          onKeepExploring={createScrollToNext(3)}
-        />
-      </div>
-
-      {/* SCREEN 5: Foundation */}
-      <div ref={el => { screenRefs.current[4] = el; }}>
-        <Foundation 
-          onOpenTerminal={handleFoundationCTA}
-          onScrollNext={createScrollToNext(4)}
-        />
-      </div>
-
-      {/* SCREEN 6: Call to Action (no scroll indicator - it's the last section) */}
-      <div ref={el => { screenRefs.current[5] = el; }}>
-        <CallToAction
-          onOpenTerminal={handleCallToActionTerminal}
-          onRequestAccess={handleCallToActionAccess}
+      {/* ====================================================================
+          TERMINAL PANEL (Sprint: active-grove-v1)
+          Fixed right panel that slides in during split mode
+          ==================================================================== */}
+      <div
+        className={`terminal-panel ${uiMode === 'split' ? 'visible' : ''}`}
+        aria-hidden={uiMode !== 'split'}
+      >
+        <Terminal
+          activeSection={activeSection}
+          terminalState={terminalState}
+          setTerminalState={setTerminalState}
+          externalQuery={externalQuery}
+          onQueryHandled={() => setExternalQuery(null)}
+          onLensSelected={handleLensSelected}
+          variant="embedded"
         />
       </div>
     </div>

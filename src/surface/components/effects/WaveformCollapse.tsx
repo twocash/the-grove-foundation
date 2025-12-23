@@ -16,6 +16,7 @@ interface WaveformCollapseProps {
   typeSpeed?: number;
   pauseDuration?: number;
   isGenerating?: boolean;  // v0.14: Show tuning animation during LLM generation
+  onComplete?: () => void;  // v0.16: Active Grove - notify when animation completes
 }
 
 type Phase = 'idle' | 'collapsing' | 'observing' | 'forming';
@@ -28,7 +29,8 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
   backspaceSpeed = 15,
   typeSpeed = 40,
   pauseDuration = 400,
-  isGenerating = false
+  isGenerating = false,
+  onComplete
 }) => {
   const [display, setDisplay] = useState(text);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -98,9 +100,13 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
         return () => clearTimeout(timer);
       } else {
         setPhase('idle');
+        // v0.16: Active Grove - notify when animation completes
+        if (onComplete) {
+          onComplete();
+        }
       }
     }
-  }, [phase, display, targetText, backspaceSpeed, typeSpeed, pauseDuration]);
+  }, [phase, display, targetText, backspaceSpeed, typeSpeed, pauseDuration, onComplete]);
 
   const showCursor = phase !== 'idle' || isGenerating;
 

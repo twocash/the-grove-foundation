@@ -198,6 +198,101 @@ p {
 }
 
 /* ============================================================
+   ACTIVE GROVE SPLIT LAYOUT (Sprint: active-grove-v1)
+   ADR-001: Uses clip-path for smooth animation without text reflow
+   ============================================================ */
+
+/* Custom easing function for smooth animations */
+.ease-out-expo {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Content Rail - Left side content */
+.content-rail {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: clip-path;
+}
+
+.content-rail.split {
+  clip-path: inset(0 50% 0 0);
+}
+
+/* Tablet: 60/40 split */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .content-rail.split {
+    clip-path: inset(0 40% 0 0);
+  }
+}
+
+/* Mobile: No split (sheet behavior) */
+@media (max-width: 767px) {
+  .content-rail.split {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Terminal Panel - Right side */
+.terminal-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 50%;
+  transform: translateX(100%) scale(0.95);
+  opacity: 0;
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 40;
+  will-change: transform, opacity;
+  background: var(--color-paper);
+  border-left: 1px solid var(--color-ink-border);
+}
+
+.terminal-panel.visible {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+/* Tablet: 40% width */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .terminal-panel {
+    width: 40%;
+  }
+}
+
+/* Mobile: Bottom sheet instead of split */
+@media (max-width: 767px) {
+  .terminal-panel {
+    width: 100%;
+    height: 80vh;
+    top: auto;
+    bottom: 0;
+    transform: translateY(100%);
+    border-left: none;
+    border-top: 1px solid var(--color-ink-border);
+    border-radius: 16px 16px 0 0;
+  }
+  .terminal-panel.visible {
+    transform: translateY(0);
+  }
+}
+
+/* Hero container for container queries */
+.hero-container {
+  container-type: inline-size;
+}
+
+/* Fluid typography with container queries */
+@container (max-width: 800px) {
+  .hero-headline {
+    font-size: clamp(2rem, 8cqw, 4rem);
+  }
+}
+
+/* ============================================================
    TERMINAL ANIMATIONS (v0.12)
    ============================================================ */
 

@@ -44,6 +44,7 @@ interface ProblemStatementProps {
   tension?: string[];  // v0.13: Dynamic tension text
   trigger?: any;  // v0.13: Triggers animation restart on lens change
   onScrollNext?: () => void;  // v0.15: Section-aware scroll
+  variant?: 'full' | 'compressed';  // v0.16: Active Grove - layout variant
 }
 
 export const ProblemStatement: React.FC<ProblemStatementProps> = ({
@@ -51,8 +52,11 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   quotes = DEFAULT_QUOTES,
   tension = DEFAULT_TENSION,
   trigger,
-  onScrollNext
+  onScrollNext,
+  variant = 'full'
 }) => {
+  // v0.16: Active Grove - variant support (full carousel implementation in Epic 4)
+  const isCompressed = variant === 'compressed';
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const [showTension, setShowTension] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);

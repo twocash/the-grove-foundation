@@ -48,6 +48,9 @@ interface TerminalProps {
   setTerminalState: React.Dispatch<React.SetStateAction<TerminalState>>;
   externalQuery?: { nodeId?: string; display: string; query: string } | null;
   onQueryHandled?: () => void;
+  // Sprint: active-grove-v1 - Event callbacks for split layout integration
+  onLensSelected?: (lensId: string) => void;
+  variant?: 'overlay' | 'embedded';  // 'overlay' = default drawer, 'embedded' = split panel
 }
 
 // System prompt is now server-side in /api/chat
@@ -56,7 +59,15 @@ interface TerminalProps {
 // NOTE: MarkdownRenderer is now imported from ./Terminal/index
 // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4 integration)
 
-const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTerminalState, externalQuery, onQueryHandled }) => {
+const Terminal: React.FC<TerminalProps> = ({
+  activeSection,
+  terminalState,
+  setTerminalState,
+  externalQuery,
+  onQueryHandled,
+  onLensSelected,
+  variant = 'overlay'
+}) => {
   // Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1
   // Consolidated state management via useTerminalState hook
   const { state: uiState, actions } = useTerminalState();
@@ -260,6 +271,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       // Emit journey started event (lens selection initiates a new journey)
       emit.journeyStarted(personaId, currentThread.length || 5); // Default thread length if not yet generated
+      // Sprint: active-grove-v1 - Notify parent of lens selection
+      if (onLensSelected) {
+        onLensSelected(personaId);
+      }
     }
 
     // If selecting a custom lens, update its usage timestamp
@@ -285,6 +300,10 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
       trackLensActivated(personaId, personaId.startsWith('custom-'));
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       emit.journeyStarted(personaId, currentThread.length || 5);
+      // Sprint: active-grove-v1 - Notify parent of lens selection
+      if (onLensSelected) {
+        onLensSelected(personaId);
+      }
     }
 
     if (personaId?.startsWith('custom-')) {

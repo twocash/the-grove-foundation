@@ -165,13 +165,17 @@ interface HeroHookProps {
   content?: HeroContent;  // Optional - enables Chameleon in v0.13
   trigger?: any;  // v0.13: Triggers animation restart on lens change
   isCollapsing?: boolean;  // v0.14: Show tuning animation during LLM generation
+  onAnimationComplete?: () => void;  // v0.16: Active Grove - notify when headline morph completes
+  flowState?: 'hero' | 'split' | 'selecting' | 'collapsing' | 'unlocked';  // v0.16: Current flow state
 }
 
 export const HeroHook: React.FC<HeroHookProps> = ({
   onScrollNext,
   content = DEFAULT_CONTENT,
   trigger,
-  isCollapsing = false
+  isCollapsing = false,
+  onAnimationComplete,
+  flowState = 'hero'
 }) => {
   const [visibleSubtext, setVisibleSubtext] = useState<number[]>([]);
 
@@ -225,19 +229,20 @@ export const HeroHook: React.FC<HeroHookProps> = ({
   };
 
   return (
-    <section className="min-h-screen bg-paper flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <section className="min-h-screen bg-paper flex flex-col items-center justify-center px-6 relative overflow-hidden hero-container">
       {/* Subtle organic background texture */}
       <div className="absolute inset-0 bg-grain opacity-50 pointer-events-none" />
 
       <div className={`text-center ${containerWidthClass} relative z-10`}>
         {/* Main headline - morphs with lens via WaveformCollapse */}
         {/* Size classes are dynamic based on headline length */}
-        <h1 className={`font-display ${headlineSizeClasses} ${headlineLeadingClass} font-bold text-grove-forest ${headlineMarginClass} tracking-tight`}>
+        <h1 className={`font-display ${headlineSizeClasses} ${headlineLeadingClass} font-bold text-grove-forest ${headlineMarginClass} tracking-tight hero-headline`}>
           <WaveformCollapse
             text={content.headline}
             trigger={trigger}
             className="block"
             isGenerating={isCollapsing}
+            onComplete={onAnimationComplete}
           />
         </h1>
 
