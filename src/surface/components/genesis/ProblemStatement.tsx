@@ -4,7 +4,7 @@
 // v0.12e: Added quotes prop interface for Chameleon (v0.13)
 
 import React, { useEffect, useRef, useState } from 'react';
-import ScrollIndicator from './ScrollIndicator';
+import { ActiveTree } from './ActiveTree';
 
 // Quote interface (export for reuse in Chameleon)
 export interface Quote {
@@ -158,9 +158,12 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
             What if there was another way?
           </p>
 
-          {/* Scroll indicator - floating seedling */}
+          {/* Active Tree - always directional after content is visible */}
           <div className="mt-12 flex justify-center">
-            <ScrollIndicator onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
+            <ActiveTree
+              mode="directional"
+              onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))}
+            />
           </div>
         </div>
       </div>

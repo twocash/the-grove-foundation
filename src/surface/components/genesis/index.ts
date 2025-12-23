@@ -8,7 +8,9 @@ export { ProductReveal } from './ProductReveal';
 export { AhaDemo } from './AhaDemo';
 export { Foundation } from './Foundation';
 export { CallToAction } from './CallToAction';
-export { ScrollIndicator } from './ScrollIndicator';
+
+// v0.16: ActiveTree replaces ScrollIndicator (Sprint: active-grove-v1)
+export { ActiveTree, ScrollIndicator } from './ActiveTree';
 
 // Content interfaces for Chameleon (v0.13)
 export type { HeroContent } from './HeroHook';

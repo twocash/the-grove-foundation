@@ -5,7 +5,7 @@
 // v0.15: Dynamic headline sizing based on content length
 
 import React, { useEffect, useState, useMemo } from 'react';
-import ScrollIndicator from './ScrollIndicator';
+import { ActiveTree } from './ActiveTree';
 import { WaveformCollapse } from '../effects/WaveformCollapse';
 
 // Content interface for Chameleon (v0.13)
@@ -264,9 +264,17 @@ export const HeroHook: React.FC<HeroHookProps> = ({
           })}
         </div>
 
-        {/* Scroll indicator - floating seedling */}
+        {/* Active Tree - mode-aware scroll/interaction indicator */}
         <div className="mt-16 flex justify-center">
-          <ScrollIndicator onClick={handleScrollClick} />
+          <ActiveTree
+            mode={
+              flowState === 'unlocked' ? 'directional' :
+              flowState === 'hero' ? 'pulsing' :
+              'stabilized'
+            }
+            onClick={handleScrollClick}
+            isLocked={flowState !== 'hero' && flowState !== 'unlocked'}
+          />
         </div>
       </div>
     </section>

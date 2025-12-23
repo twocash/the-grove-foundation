@@ -293,6 +293,53 @@ p {
 }
 
 /* ============================================================
+   ACTIVE TREE STATES (Sprint: active-grove-v1 - Epic 2)
+   ============================================================ */
+
+.active-tree-pulsing {
+  position: relative;
+}
+
+.active-tree-pulsing::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(53, 94, 59, 0.2) 0%, transparent 70%);
+  animation: tree-pulse 2s ease-in-out infinite;
+}
+
+.active-tree-stabilized {
+  position: relative;
+  filter: drop-shadow(0 0 8px rgba(53, 94, 59, 0.4));
+}
+
+.active-tree-directional {
+  position: relative;
+}
+
+.active-tree-shake {
+  animation: tree-shake 0.5s ease-in-out;
+}
+
+@keyframes tree-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.8;
+  }
+}
+
+@keyframes tree-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* ============================================================
    TERMINAL ANIMATIONS (v0.12)
    ============================================================ */
 
