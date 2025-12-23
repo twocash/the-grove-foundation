@@ -264,8 +264,8 @@ const GenesisPage: React.FC = () => {
     <div className="bg-paper min-h-screen relative overflow-x-hidden">
 
       {/* ====================================================================
-          CONTENT RAIL (Sprint: active-grove-v1)
-          Uses clip-path for smooth split animation without text reflow
+          CONTENT RAIL (Sprint: active-grove-v1, Fix #7)
+          Scrollable container - Terminal panel is fixed, this rail scrolls
           ==================================================================== */}
       <div
         className={`content-rail transition-all duration-1000 ease-out-expo ${
