@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, useTerminalState } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -20,13 +20,10 @@ import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { getFormattedTerminalWelcome } from '../src/data/quantum-content';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
-import SimulationReveal from './Terminal/Reveals/SimulationReveal';
-import CustomLensOffer from './Terminal/Reveals/CustomLensOffer';
-import { TerminatorModePrompt, TerminatorModeOverlay, TerminatorResponseMetadata } from './Terminal/Reveals/TerminatorMode';
-import FounderStory from './Terminal/Reveals/FounderStory';
-import ConversionCTAPanel from './Terminal/ConversionCTA';
+// Reveal components now handled by TerminalFlow (Epic 4.3)
+// SimulationReveal, CustomLensOffer, TerminatorMode, FounderStory, ConversionCTA
 import { CommandInput } from './Terminal/CommandInput';
-import { HelpModal, JourneysModal, StatsModal, GardenModal } from './Terminal/Modals';
+// Modals now rendered by TerminalFlow (Epic 4.3)
 import {
   trackLensActivated,
   trackSimulationRevealShown,
@@ -1288,67 +1285,82 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
           )}
       </TerminalShell>
 
-      {/* Reveal Overlays */}
-      {showSimulationReveal && currentArchetypeId && (
-        <SimulationReveal
-          archetypeId={currentArchetypeId}
-          onContinue={handleSimulationRevealContinue}
-        />
-      )}
+      {/* Sprint: Terminal Architecture Refactor v1.0 - Epic 4.3 */}
+      {/* TerminalFlow handles: Reveal overlays + Modals (interstitials stay inside shell) */}
+      <TerminalFlow
+        // Flow interstitials - FALSE to prevent double-rendering (they're inside TerminalShell)
+        showWelcome={false}
+        showLensPicker={false}
+        showCustomLensWizard={false}
 
-      {showCustomLensOffer && (
-        <CustomLensOffer
-          onAccept={handleAcceptCustomLensOffer}
-          onDecline={handleDeclineCustomLensOffer}
-        />
-      )}
+        // Reveal states
+        showSimulationReveal={showSimulationReveal}
+        showCustomLensOffer={showCustomLensOffer}
+        showTerminatorPrompt={showTerminatorPrompt}
+        showFounderStory={showFounderStory}
+        showConversionCTA={showConversionCTA}
+        showJourneyCompletion={false}
+        terminatorModeActive={terminatorModeActive}
 
-      {showTerminatorPrompt && (
-        <TerminatorModePrompt
-          onActivate={handleAcceptTerminatorMode}
-          onDecline={handleDeclineTerminatorMode}
-        />
-      )}
+        // Modal states
+        showHelpModal={showHelpModal}
+        showJourneysModal={showJourneysModal}
+        showStatsModal={showStatsModal}
+        showGardenModal={showGardenModal}
 
-      {terminatorModeActive && <TerminatorModeOverlay />}
+        // Data
+        currentArchetypeId={currentArchetypeId}
+        activeLensData={activeLensData}
+        enabledPersonas={enabledPersonas}
+        customLenses={customLenses}
+        completedJourneyTitle={completedJourneyTitle}
+        journeyStartTime={journeyStartTime}
+        activeJourneyId={activeJourneyId}
 
-      {/* v0.14: JourneyCompletion moved inline in messages area */}
+        // Feature flags (not used for reveals/modals but required by props)
+        showCustomLensInPicker={showCustomLensInPicker}
+        showJourneyRatings={showJourneyRatings}
+        showFeedbackTransmission={showFeedbackTransmission}
 
-      {showFounderStory && currentArchetypeId && (
-        <FounderStory
-          archetypeId={currentArchetypeId}
-          onContinue={handleFounderStoryContinue}
-        />
-      )}
+        // Handlers - Lens selection (not used but required)
+        onLensSelect={handleLensSelect}
+        onWelcomeLensSelect={handleWelcomeLensSelect}
+        onCreateCustomLens={handleCreateCustomLens}
+        onDeleteCustomLens={handleDeleteCustomLens}
+        onCustomLensComplete={handleCustomLensComplete}
+        onCustomLensCancel={handleCustomLensCancel}
 
-      {showConversionCTA && currentArchetypeId && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink/30 backdrop-blur-sm">
-          <div className="w-full max-w-md mx-4">
-            <ConversionCTAPanel
-              archetypeId={currentArchetypeId}
-              customLensName={activeLensData?.name}
-              onCTAClick={(ctaId) => {
-                trackCtaClicked(currentArchetypeId, ctaId, 'modal');
-              }}
-              onDismiss={() => actions.setReveal('conversionCTA', false)}
-            />
-          </div>
-        </div>
-      )}
+        // Handlers - Reveals
+        onSimulationContinue={handleSimulationRevealContinue}
+        onCustomLensOfferAccept={handleAcceptCustomLensOffer}
+        onCustomLensOfferDecline={handleDeclineCustomLensOffer}
+        onTerminatorAccept={handleAcceptTerminatorMode}
+        onTerminatorDecline={handleDeclineTerminatorMode}
+        onFounderStoryContinue={handleFounderStoryContinue}
+        onConversionDismiss={() => actions.setReveal('conversionCTA', false)}
+        onConversionCTAClick={(ctaId) => trackCtaClicked(currentArchetypeId!, ctaId, 'modal')}
 
-      {/* Command Palette Modals (v0.16) */}
-      {showHelpModal && <HelpModal onClose={() => actions.closeModal('help')} />}
-      {showJourneysModal && <JourneysModal onClose={() => actions.closeModal('journeys')} />}
-      {showStatsModal && <StatsModal onClose={() => actions.closeModal('stats')} />}
-      {showGardenModal && (
-        <GardenModal
-          onClose={() => actions.closeModal('garden')}
-          onViewFullStats={() => {
-            actions.closeModal('garden');
-            actions.openModal('stats');
-          }}
-        />
-      )}
+        // Handlers - Journey completion (not used inline but required)
+        onJourneyCompletionSubmit={() => {}}
+        onJourneyCompletionSkip={() => {}}
+
+        // Handlers - Modals
+        onCloseHelpModal={() => actions.closeModal('help')}
+        onCloseJourneysModal={() => actions.closeModal('journeys')}
+        onCloseStatsModal={() => actions.closeModal('stats')}
+        onCloseGardenModal={() => actions.closeModal('garden')}
+        onViewFullStats={() => {
+          actions.closeModal('garden');
+          actions.openModal('stats');
+        }}
+
+        // Handlers - LensPicker (not used but required)
+        onLensPickerBack={() => actions.hideLensPicker()}
+        onLensPickerAfterSelect={() => {}}
+
+        // URL lens support
+        urlLensId={urlLensId}
+      />
     </>
   );
 };
