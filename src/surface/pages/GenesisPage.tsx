@@ -66,6 +66,21 @@ const GenesisPage: React.FC = () => {
   const [uiMode, setUIMode] = useState<UIMode>('hero');
   const [flowState, setFlowState] = useState<FlowState>('hero');
 
+  // Responsive breakpoint detection
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkBreakpoint = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+    checkBreakpoint();
+    window.addEventListener('resize', checkBreakpoint);
+    return () => window.removeEventListener('resize', checkBreakpoint);
+  }, []);
+
   // Derive tree mode from flow state
   const treeMode = useMemo(() => {
     switch (flowState) {
@@ -322,11 +337,14 @@ const GenesisPage: React.FC = () => {
 
       {/* ====================================================================
           TERMINAL PANEL (Sprint: active-grove-v1)
-          Fixed right panel that slides in during split mode
+          Fixed right panel (desktop/tablet) or bottom sheet (mobile)
           ==================================================================== */}
       <div
-        className={`terminal-panel ${uiMode === 'split' ? 'visible' : ''}`}
+        className={`terminal-panel ${uiMode === 'split' ? 'visible' : ''} ${isMobile ? 'mobile-sheet' : ''}`}
         aria-hidden={uiMode !== 'split'}
+        aria-expanded={uiMode === 'split'}
+        role="complementary"
+        aria-label="Grove Terminal"
       >
         <Terminal
           activeSection={activeSection}
@@ -335,7 +353,7 @@ const GenesisPage: React.FC = () => {
           externalQuery={externalQuery}
           onQueryHandled={() => setExternalQuery(null)}
           onLensSelected={handleLensSelected}
-          variant="embedded"
+          variant={isMobile ? 'overlay' : 'embedded'}
         />
       </div>
     </div>
