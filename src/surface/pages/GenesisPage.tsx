@@ -49,6 +49,9 @@ import {
 // Quantum Interface - lens-reactive content (v0.13)
 import { useQuantumInterface } from '../hooks/useQuantumInterface';
 
+// Bridge SSR gap for URL lens parameters (Epic 5: active-grove-polish-v2)
+import { useLensHydration } from '../hooks/useLensHydration';
+
 // Screen definitions for tracking
 const GENESIS_SCREENS = [
   { id: 'hero-hook', name: 'HeroHook' },
@@ -96,6 +99,10 @@ const GenesisPage: React.FC = () => {
   // Navigation lock - prevent scrolling in ALL states except 'unlocked'
   // In 'hero' mode, content should be locked to viewport (no scroll past hero)
   const isNavigationLocked = flowState !== 'unlocked';
+
+  // Bridge SSR gap for URL lens params (see hook for migration context)
+  // Must run BEFORE useQuantumInterface so activeLens is set for reality resolution
+  useLensHydration();
 
   // Quantum Interface - lens-reactive content (v0.14: includes isCollapsing for tuning visual)
   const { reality, quantumTrigger, isCollapsing, activeLens } = useQuantumInterface();
