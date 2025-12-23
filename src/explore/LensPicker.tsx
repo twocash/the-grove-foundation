@@ -126,11 +126,12 @@ const defaultAccent: LensAccent = {
   selectedBgDark: 'dark:bg-slate-700/40',
 };
 
-// Compact card for chat nav picker (single column, click = select)
-function CompactLensCard({ lens, isActive, onSelect }: {
+// Compact card for chat nav picker (single column, click = inspector, button = select)
+function CompactLensCard({ lens, isActive, onSelect, onView }: {
   lens: DisplayLens;
   isActive: boolean;
   onSelect: () => void;
+  onView: () => void;
 }) {
   const isCustom = 'isCustom' in lens && lens.isCustom;
   // Custom lenses use a special accent, personas use the accent map
@@ -140,7 +141,7 @@ function CompactLensCard({ lens, isActive, onSelect }: {
 
   return (
     <div
-      onClick={onSelect}
+      onClick={onView}
       className={`
         flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all
         ${isActive
@@ -171,7 +172,17 @@ function CompactLensCard({ lens, isActive, onSelect }: {
         <span className="px-2 py-1 text-xs font-medium rounded bg-primary/20 text-primary shrink-0">
           ACTIVE
         </span>
-      ) : null}
+      ) : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          className="px-3 py-1 text-xs font-medium rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+        >
+          Select
+        </button>
+      )}
     </div>
   );
 }
@@ -278,9 +289,8 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerP
   };
 
   const handleView = (personaId: string) => {
-    if (mode === 'compact') {
-      handleSelect(personaId);  // In compact mode, click = select
-    } else if (workspaceUI) {
+    // Card click opens inspector in both modes
+    if (workspaceUI) {
       workspaceUI.openInspector({ type: 'lens', lensId: personaId });
     }
   };
@@ -310,6 +320,7 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerP
               lens={lens}
               isActive={activeLensId === lens.id}
               onSelect={() => handleSelect(lens.id)}
+              onView={() => handleView(lens.id)}
             />
           ))}
         </div>
