@@ -93,8 +93,9 @@ const GenesisPage: React.FC = () => {
     }
   }, [flowState]);
 
-  // Navigation lock - prevent scrolling until unlocked
-  const isNavigationLocked = flowState !== 'unlocked' && flowState !== 'hero';
+  // Navigation lock - prevent scrolling in ALL states except 'unlocked'
+  // In 'hero' mode, content should be locked to viewport (no scroll past hero)
+  const isNavigationLocked = flowState !== 'unlocked';
 
   // Quantum Interface - lens-reactive content (v0.14: includes isCollapsing for tuning visual)
   const { reality, quantumTrigger, isCollapsing, activeLens } = useQuantumInterface();
