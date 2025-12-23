@@ -1015,14 +1015,18 @@ const Terminal: React.FC<TerminalProps> = ({
         {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && (
           <div className="flex-shrink-0 p-4 border-t border-white/10">
             <CommandInput
-              value={input}
-              onChange={actions.setInput}
-              onSubmit={(text) => handleSend(text)}
-              onCommand={handleCommand}
-              isLoading={terminalState.isLoading}
-              placeholder="Ask about The Grove..."
-              inputRef={inputRef}
-              showMicrophone={false}
+              onSubmitQuery={(query) => {
+                actions.setInput(query);
+                handleSend(query);
+              }}
+              disabled={terminalState.isLoading}
+              onOpenModal={handleOpenModal}
+              onSwitchLens={handleCommandLensSwitch}
+              onShowWelcome={() => actions.showWelcomeInterstitial()}
+              onShowLensPicker={() => actions.showLensPicker()}
+              getLastResponse={getLastResponse}
+              getSessionContext={getSessionContext}
+              captureSprout={handleCaptureSprout}
             />
           </div>
         )}
