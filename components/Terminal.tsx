@@ -246,7 +246,16 @@ const Terminal: React.FC<TerminalProps> = ({
     const hasBeenWelcomed = localStorage.getItem('grove-terminal-welcomed') === 'true';
 
     if (terminalState.isOpen && !hasBeenWelcomed && !hasShownWelcome) {
-      // v0.12e: If there's a URL lens, show LensPicker (with lens highlighted)
+      // Epic 5 Fix: If URL lens is present AND already hydrated, skip picker entirely
+      if (urlLensId && session.activeLens === urlLensId) {
+        // Lens already set via useLensHydration, skip to chat
+        localStorage.setItem('grove-terminal-welcomed', 'true');
+        localStorage.setItem('grove-session-established', 'true');
+        console.log('[Terminal] URL lens hydrated, skipping picker:', urlLensId);
+        return; // Don't show picker or welcome
+      }
+
+      // v0.12e: If there's a URL lens but not yet hydrated, show LensPicker (with lens highlighted)
       // Otherwise, show welcome interstitial for first-time users
       if (urlLensId) {
         actions.showLensPicker();
@@ -255,7 +264,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
       // hasShownWelcome is set internally by hideWelcomeInterstitial
     }
-  }, [terminalState.isOpen, hasShownWelcome, urlLensId]);
+  }, [terminalState.isOpen, hasShownWelcome, urlLensId, session.activeLens]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
