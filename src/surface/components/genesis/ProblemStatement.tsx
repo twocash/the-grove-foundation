@@ -66,13 +66,13 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   const [activeQuoteIndex, setActiveQuoteIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Auto-advance carousel every 2.5 seconds
+  // Auto-advance carousel every 6 seconds (Active Grove Polish v2)
   useEffect(() => {
     if (!isCompressed) return;
 
     const interval = setInterval(() => {
       setActiveQuoteIndex(prev => (prev + 1) % quotes.length);
-    }, 2500);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [isCompressed, quotes.length]);
@@ -167,6 +167,10 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           {/* Quote Cards - Full variant: stacked, Compressed variant: carousel */}
           {isCompressed ? (
             /* Compressed Carousel Layout - Light theme (Sprint: active-grove-v1 Fix #9) */
+            <>
+            <h2 className="text-xl md:text-2xl font-display text-grove-forest mb-6 text-center px-4">
+              The People Building AI Have a Message
+            </h2>
             <div className="mb-8 relative">
               <div
                 ref={carouselRef}
@@ -206,6 +210,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
                 ))}
               </div>
             </div>
+            </>
           ) : (
             /* Full Layout - Original stacked cards */
             <div className="grid gap-6 md:gap-8 mb-12">
