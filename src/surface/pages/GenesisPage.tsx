@@ -277,8 +277,9 @@ const GenesisPage: React.FC = () => {
           ...(isNavigationLocked && { overflow: 'hidden', height: '100vh' })
         }}
       >
-        {/* SCREEN 1: The Hook (Quantum-Reactive) */}
-        <div ref={el => { screenRefs.current[0] = el; }}>
+        <div className="content-rail-inner">
+          {/* SCREEN 1: The Hook (Quantum-Reactive) */}
+          <div ref={el => { screenRefs.current[0] = el; }}>
           <HeroHook
             content={reality.hero}
             trigger={quantumTrigger}
@@ -333,6 +334,7 @@ const GenesisPage: React.FC = () => {
             </div>
           </>
         )}
+        </div>{/* Close content-rail-inner */}
       </div>
 
       {/* ====================================================================

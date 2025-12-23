@@ -289,6 +289,35 @@ p {
   will-change: auto;
 }
 
+/* Content repositioning during split */
+.content-rail-inner {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  transition: max-width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.content-rail.split .content-rail-inner {
+  max-width: 50vw;
+  margin: 0;  /* Left-align within the clipped area */
+  padding-right: 2rem;  /* Breathing room from clip edge */
+}
+
+/* Tablet adjustment */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .content-rail.split .content-rail-inner {
+    max-width: 60vw;
+  }
+}
+
+/* Mobile - no repositioning needed (full width sheet) */
+@media (max-width: 767px) {
+  .content-rail.split .content-rail-inner {
+    max-width: 100%;
+    padding-right: 0;
+  }
+}
+
 /* Hero container for container queries */
 .hero-container {
   container-type: inline-size;
