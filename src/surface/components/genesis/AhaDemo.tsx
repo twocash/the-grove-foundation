@@ -1,9 +1,14 @@
 // src/surface/components/genesis/AhaDemo.tsx
-// Screen 4: The Aha Demo - Simulated Terminal moment
+// Screen 4: The Aha Demo - Diary entry moment (Active Grove Polish v2)
 // DESIGN: Paper card aesthetic - NOT dark terminal
 
 import React, { useState, useEffect } from 'react';
-import ScrollIndicator from './ScrollIndicator';
+import { ActiveTree } from './ActiveTree';
+
+// Diary content (Active Grove Polish v2)
+const DIARY_CONTENT = `I've been digging into Wang et al.'s research on hierarchical reasoning, which is informative as we build the Foundation: knowing things compresses well; thinking hard doesn't. That's why the hybrid works—your laptop handles the conversation, the memory; the cloud handles the breakthroughs. We're on the right path. Doing more research.`;
+
+const DIARY_AUTHOR = "Leah";
 
 interface AhaDemoProps {
   onGoDeeper?: () => void;
@@ -66,28 +71,21 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
               {/* Divider */}
               <div className="border-t border-ink/10 mb-6" />
 
-              {/* Message content - clean serif */}
-              <div className="font-serif text-lg md:text-xl text-ink leading-relaxed space-y-4">
-                <p>"Good morning. I've been exploring a few threads while you were away.</p>
-                <p>I found a connection between distributed systems and cognitive architecture that might interest you.</p>
-                <p>Want me to explain, or should I keep digging?"</p>
-              </div>
+              {/* Diary entry content */}
+              <blockquote className="diary-entry font-serif text-lg md:text-xl text-ink leading-relaxed mb-4">
+                {DIARY_CONTENT}
+              </blockquote>
+              <p className="diary-author font-mono text-sm text-ink-muted mb-6">
+                — {DIARY_AUTHOR}
+              </p>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <button
-                  onClick={handleGoDeeper}
-                  className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
-                >
-                  Consult the Grove
-                </button>
-                <button
-                  onClick={handleKeepExploring}
-                  className="px-6 py-3 border border-grove-forest text-grove-forest font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-grove-forest hover:text-white transition-colors"
-                >
-                  Keep exploring
-                </button>
-              </div>
+              {/* Single CTA (Active Grove Polish v2) */}
+              <button
+                onClick={handleGoDeeper}
+                className="px-6 py-3 bg-grove-forest text-white rounded-lg hover:bg-grove-forest/90 transition-colors font-medium"
+              >
+                Ask The Grove: How does Grove know when to call for backup?
+              </button>
             </div>
           </div>
 
@@ -98,9 +96,9 @@ export const AhaDemo: React.FC<AhaDemoProps> = ({ onGoDeeper, onKeepExploring })
         </div>
       </div>
 
-      {/* ScrollIndicator anchored at bottom */}
+      {/* ActiveTree anchored at bottom */}
       <div className="shrink-0 py-4 flex justify-center bg-paper">
-        <ScrollIndicator onClick={handleKeepExploring} />
+        <ActiveTree mode="directional" onClick={handleKeepExploring} />
       </div>
     </section>
   );

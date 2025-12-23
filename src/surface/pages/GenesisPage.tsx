@@ -264,9 +264,12 @@ const GenesisPage: React.FC = () => {
   }, [handleOpenTerminal]);
 
   const handleAhaDemoCTA = useCallback(() => {
-    trackGenesisCTAClicked('go-deeper', 4, 'AhaDemo');
-    handleOpenTerminal("Explain the connection between distributed systems and cognitive architecture in The Grove.");
-  }, [handleOpenTerminal]);
+    trackGenesisCTAClicked('diary-hybrid-routing', 4, 'AhaDemo');
+    setExternalQuery({
+      display: "How does Grove know when to call for backup?",
+      query: "Explain Grove's hybrid routing architecture in plain terms: how the system detects when a task exceeds local capability and routes to cloud inference. Frame it as the agent 'recognizing the limits of their own thinking'—make the technical feel almost introspective. Reference the efficiency-enlightenment loop briefly, and imagine if we build systems to ratchet forward, we can unlock new distributed computing models that scale without chokepoints."
+    });
+  }, []);
 
   const handleFoundationCTA = useCallback((query: string) => {
     trackGenesisCTAClicked('foundation-explore', 5, 'Foundation');
