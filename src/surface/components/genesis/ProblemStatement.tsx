@@ -113,27 +113,58 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
   }, [quotes, trigger]); // Re-run effect on quotes or trigger change
 
   return (
-    <section className={`min-h-screen bg-paper py-24 px-6 ${className}`}>
-      <div className="max-w-4xl mx-auto">
-        {/* Quote Cards */}
-        <div className="grid gap-6 md:gap-8 mb-16">
-          {quotes.map((quote, index) => (
-            <div
-              key={index}
-              ref={el => { cardRefs.current[index] = el; }}
-              className={`bg-paper-dark border border-ink/5 p-6 md:p-8 rounded-sm shadow-sm hover:shadow-md transition-all duration-700 ${
-                visibleCards.has(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
-            >
-              <blockquote className="font-serif text-lg md:text-xl text-ink leading-relaxed mb-4">
-                "{quote.text}"
-              </blockquote>
-              <footer className="font-mono text-xs tracking-wider text-ink-muted">
-                — {quote.author}, <span className="text-ink-muted/70">{quote.title}</span>
-              </footer>
+    <section className={`${isCompressed ? 'min-h-[50vh]' : 'min-h-screen'} bg-paper py-24 px-6 ${className}`}>
+      <div className={`${isCompressed ? 'max-w-full' : 'max-w-4xl'} mx-auto`}>
+        {/* Quote Cards - Full variant: stacked, Compressed variant: carousel */}
+        {isCompressed ? (
+          /* Compressed Carousel Layout */
+          <div className="mb-12">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+              {quotes.map((quote, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-44 h-44 bg-paper-dark border border-ink/5 p-4 rounded-sm shadow-sm hover:shadow-md transition-all snap-center"
+                >
+                  <blockquote className="font-serif text-sm text-ink leading-snug mb-2 line-clamp-4">
+                    "{quote.text.slice(0, 80)}..."
+                  </blockquote>
+                  <footer className="font-mono text-[10px] tracking-wider text-ink-muted mt-auto">
+                    — {quote.author}
+                  </footer>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            {/* Carousel Indicators */}
+            <div className="flex justify-center gap-2 mt-4">
+              {quotes.map((_, index) => (
+                <span
+                  key={index}
+                  className="w-2 h-2 rounded-full bg-ink/20"
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Full Layout - Original stacked cards */
+          <div className="grid gap-6 md:gap-8 mb-16">
+            {quotes.map((quote, index) => (
+              <div
+                key={index}
+                ref={el => { cardRefs.current[index] = el; }}
+                className={`bg-paper-dark border border-ink/5 p-6 md:p-8 rounded-sm shadow-sm hover:shadow-md transition-all duration-700 ${
+                  visibleCards.has(index) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+              >
+                <blockquote className="font-serif text-lg md:text-xl text-ink leading-relaxed mb-4">
+                  "{quote.text}"
+                </blockquote>
+                <footer className="font-mono text-xs tracking-wider text-ink-muted">
+                  — {quote.author}, <span className="text-ink-muted/70">{quote.title}</span>
+                </footer>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Tension Statement - NOW DYNAMIC */}
         <div
@@ -145,8 +176,8 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           {tension.map((line, index) => (
             <p
               key={index}
-              className={`font-serif text-xl md:text-2xl text-ink leading-relaxed ${
-                index === tension.length - 1 ? 'mb-8' : 'mb-4'
+              className={`font-serif ${isCompressed ? 'text-lg' : 'text-xl md:text-2xl'} text-ink leading-relaxed ${
+                index === tension.length - 1 ? (isCompressed ? 'mb-4' : 'mb-8') : (isCompressed ? 'mb-2' : 'mb-4')
               }`}
             >
               {line}
@@ -154,12 +185,12 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
           ))}
 
           {/* The hook question - stays static */}
-          <p className="font-serif text-2xl md:text-3xl text-grove-clay font-semibold">
+          <p className={`font-serif ${isCompressed ? 'text-xl' : 'text-2xl md:text-3xl'} text-grove-clay font-semibold`}>
             What if there was another way?
           </p>
 
           {/* Active Tree - always directional after content is visible */}
-          <div className="mt-12 flex justify-center">
+          <div className={`${isCompressed ? 'mt-6' : 'mt-12'} flex justify-center`}>
             <ActiveTree
               mode="directional"
               onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))}
