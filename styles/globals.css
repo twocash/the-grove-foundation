@@ -278,6 +278,15 @@ p {
   .terminal-panel.visible {
     transform: translateY(0);
   }
+  .terminal-panel.mobile-sheet {
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Performance optimization - cleanup will-change after animation */
+.content-rail:not(.split),
+.terminal-panel:not(.visible) {
+  will-change: auto;
 }
 
 /* Hero container for container queries */
