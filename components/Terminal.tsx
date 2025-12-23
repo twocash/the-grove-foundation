@@ -11,7 +11,7 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -55,142 +55,8 @@ interface TerminalProps {
 // System prompt is now server-side in /api/chat
 // See server.js TERMINAL_SYSTEM_PROMPT for the canonical version
 
-const parseInline = (text: string, onBoldClick?: (phrase: string) => void) => {
-  // Regex: Matches **bold**, *italic*, or _italic_
-  // Capturing group keeps the delimiters in the parts array for mapping
-  const parts = text.split(/(\*\*.*?\*\*|\*[^*]+\*|_[^_]+_)/g);
-
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      const phrase = part.slice(2, -2);
-      // Make bold text clickable when handler provided
-      if (onBoldClick) {
-        return (
-          <button
-            key={i}
-            onClick={() => onBoldClick(phrase)}
-            className="text-grove-clay font-bold hover:underline hover:decoration-grove-clay/50 hover:decoration-2 underline-offset-2 cursor-pointer transition-all active:scale-[0.98]"
-          >
-            {phrase}
-          </button>
-        );
-      }
-      return (
-        <strong key={i} className="text-grove-clay font-bold">
-          {phrase}
-        </strong>
-      );
-    }
-    // Handle italics (*...* or _..._)
-    if ((part.startsWith('*') && part.endsWith('*') && part.length > 2) ||
-        (part.startsWith('_') && part.endsWith('_') && part.length > 2)) {
-      return (
-        <em key={i} className="italic text-slate-600 dark:text-slate-300">
-          {part.slice(1, -1)}
-        </em>
-      );
-    }
-    return part;
-  });
-};
-
-interface MarkdownRendererProps {
-  content: string;
-  onPromptClick?: (prompt: string) => void;
-}
-
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onPromptClick }) => {
-  const lines = content.split('\n');
-  const elements: React.ReactNode[] = [];
-
-  let currentListItems: string[] = [];
-  let currentTextBuffer: string[] = [];
-  let currentPrompts: string[] = [];
-
-  const flushText = () => {
-    if (currentTextBuffer.length > 0) {
-      const text = currentTextBuffer.join('\n');
-      if (text.trim()) {
-        elements.push(
-          <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 leading-relaxed font-serif text-sm">
-            {parseInline(text, onPromptClick)}
-          </span>
-        );
-      }
-      currentTextBuffer = [];
-    }
-  };
-
-  const flushList = () => {
-    if (currentListItems.length > 0) {
-      elements.push(
-        <ul key={`list-${elements.length}`} className="mb-4 space-y-1 ml-4 list-none">
-          {currentListItems.map((item, i) => (
-            <li key={i} className="pl-4 relative text-sm font-sans text-slate-600 dark:text-slate-300">
-              <span className="absolute left-0 top-1.5 w-1.5 h-1.5 rounded-full bg-primary"></span>
-              <span>{parseInline(item, onPromptClick)}</span>
-            </li>
-          ))}
-        </ul>
-      );
-      currentListItems = [];
-    }
-  };
-
-  const flushPrompts = () => {
-    if (currentPrompts.length > 0) {
-      elements.push(
-        <div key={`prompts-${elements.length}`} className="mb-3 space-y-1.5">
-          {currentPrompts.map((prompt, i) => (
-            onPromptClick ? (
-              <SuggestionChip
-                key={i}
-                prompt={prompt}
-                onClick={onPromptClick}
-              />
-            ) : (
-              <div
-                key={i}
-                className="px-4 py-2.5 text-sm font-serif text-slate-600 dark:text-slate-300"
-              >
-                <span className="text-primary mr-2">→</span>
-                {prompt}
-              </div>
-            )
-          ))}
-        </div>
-      );
-      currentPrompts = [];
-    }
-  };
-
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    const isList = trimmed.startsWith('* ') || trimmed.startsWith('- ');
-    const isPrompt = trimmed.startsWith('→ ') || trimmed.startsWith('-> ');
-
-    if (isPrompt) {
-      flushText();
-      flushList();
-      const promptText = trimmed.replace(/^(→|->)\s+/, '');
-      currentPrompts.push(promptText);
-    } else if (isList) {
-      flushText();
-      flushPrompts();
-      currentListItems.push(line.replace(/^(\*|-)\s+/, ''));
-    } else {
-      flushList();
-      flushPrompts();
-      currentTextBuffer.push(line);
-    }
-  });
-
-  flushText();
-  flushList();
-  flushPrompts();
-
-  return <>{elements}</>;
-};
+// NOTE: MarkdownRenderer is now imported from ./Terminal/index
+// (Sprint: Terminal Architecture Refactor v1.0 - Epic 4 integration)
 
 const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTerminalState, externalQuery, onQueryHandled }) => {
   const [input, setInput] = useState('');
