@@ -123,11 +123,17 @@ const GenesisPage: React.FC = () => {
    */
   const handleTreeClick = useCallback(() => {
     if (flowState === 'hero') {
-      // Transition to split mode
       setUIMode('split');
-      setFlowState('split');
       setTerminalState(prev => ({ ...prev, isOpen: true }));
-      console.log('[ActiveGrove] Tree clicked → split mode');
+
+      // If lens already set from previous session, skip to unlocked
+      if (activeLens) {
+        console.log('[ActiveGrove] Tree clicked → unlocked (lens exists:', activeLens, ')');
+        setFlowState('unlocked');
+      } else {
+        console.log('[ActiveGrove] Tree clicked → split mode (no lens)');
+        setFlowState('split');
+      }
     } else if (flowState === 'unlocked') {
       // Scroll to next section
       const targetRef = screenRefs.current[1];
@@ -135,10 +141,9 @@ const GenesisPage: React.FC = () => {
         targetRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } else {
-      // Navigation locked - could trigger shake animation
       console.log('[ActiveGrove] Navigation locked, flowState:', flowState);
     }
-  }, [flowState]);
+  }, [flowState, activeLens]);
 
   /**
    * Handle lens selection from Terminal
