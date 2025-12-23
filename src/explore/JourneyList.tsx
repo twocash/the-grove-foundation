@@ -1,11 +1,60 @@
 // src/explore/JourneyList.tsx
 // Browse and start available journeys
+// Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
 import { useState, useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { Journey } from '../../data/narratives-schema';
-import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
+import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
+
+interface JourneyListProps {
+  mode?: 'full' | 'compact';
+  onBack?: () => void;  // For compact mode "Back to Chat"
+}
+
+// Compact card for chat nav picker (single column, click = start)
+function CompactJourneyCard({ journey, isActive, onStart }: {
+  journey: Journey;
+  isActive: boolean;
+  onStart: () => void;
+}) {
+  return (
+    <div
+      onClick={onStart}
+      className={`
+        flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all
+        ${isActive
+          ? 'border-primary/50 bg-primary/10 dark:bg-primary/20'
+          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-primary/30'
+        }
+      `}
+    >
+      <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 shrink-0">
+        <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">
+          {journey.icon || 'map'}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className={`font-medium ${isActive ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+          {journey.title}
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 italic truncate mb-1">
+          "{journey.targetAha || journey.description}"
+        </p>
+        <div className="flex items-center gap-1 text-xs text-slate-400">
+          <span className="material-symbols-outlined text-sm">schedule</span>
+          {journey.estimatedMinutes} min
+        </div>
+      </div>
+      {isActive ? (
+        <span className="px-2 py-1 text-xs font-medium rounded bg-primary/20 text-primary shrink-0">
+          ACTIVE
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 interface JourneyCardProps {
   journey: Journey;
@@ -84,9 +133,9 @@ function JourneyCard({ journey, isActive, onStart, onView }: JourneyCardProps) {
   );
 }
 
-export function JourneyList() {
+export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   const { schema, loading, startJourney, activeJourneyId, getJourney } = useNarrativeEngine();
-  const { openInspector, navigateTo } = useWorkspaceUI();
+  const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
 
   // Get active journeys only
@@ -95,7 +144,7 @@ export function JourneyList() {
     return Object.values(schema.journeys).filter(j => j.status === 'active');
   }, [schema]);
 
-  // Filter by search
+  // Filter by search (only used in full mode)
   const journeys = useMemo(() => {
     if (!searchQuery.trim()) return allJourneys;
     const query = searchQuery.toLowerCase();
@@ -110,12 +159,19 @@ export function JourneyList() {
 
   const handleStart = (journeyId: string) => {
     startJourney(journeyId);
-    // Navigate to Terminal to begin the journey
-    navigateTo(['explore']);
+    if (mode === 'compact' && onBack) {
+      onBack();  // Return to chat after selection
+    } else if (workspaceUI) {
+      workspaceUI.navigateTo(['explore', 'groveProject']);
+    }
   };
 
   const handleView = (journeyId: string) => {
-    openInspector({ type: 'journey', journeyId });
+    if (mode === 'compact') {
+      handleStart(journeyId);  // In compact mode, click = start
+    } else if (workspaceUI) {
+      workspaceUI.openInspector({ type: 'journey', journeyId });
+    }
   };
 
   if (loading) {
@@ -126,6 +182,39 @@ export function JourneyList() {
     );
   }
 
+  // COMPACT MODE - Single column list for chat nav
+  if (mode === 'compact') {
+    return (
+      <div className="flex flex-col h-full bg-transparent">
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+              Back to Chat
+            </button>
+          )}
+          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Switch Journey</span>
+          <div className="w-24" />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {allJourneys.map(journey => (
+            <CompactJourneyCard
+              key={journey.id}
+              journey={journey}
+              isActive={activeJourneyId === journey.id}
+              onStart={() => handleStart(journey.id)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // FULL MODE - Grid layout for workspace
   return (
     <div className="h-full overflow-y-auto p-8">
       <div className="max-w-4xl mx-auto">

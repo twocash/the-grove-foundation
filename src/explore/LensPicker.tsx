@@ -1,11 +1,23 @@
 // src/explore/LensPicker.tsx
 // Lens selection view for the workspace
+// Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
 import { useState, useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
+import { useCustomLens } from '../../hooks/useCustomLens';
 import { Persona } from '../../data/narratives-schema';
-import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
+import { CustomLens } from '../../types/lens';
+import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
+
+interface LensPickerProps {
+  mode?: 'full' | 'compact';
+  onBack?: () => void;  // For compact mode "Back to Chat"
+  onAfterSelect?: (personaId: string) => void;  // Callback after lens selected (for analytics, etc.)
+}
+
+// Union type for display
+type DisplayLens = Persona | CustomLens;
 
 // Map persona IDs to accent colors and Material Symbols icons
 interface LensAccent {
@@ -114,6 +126,57 @@ const defaultAccent: LensAccent = {
   selectedBgDark: 'dark:bg-slate-700/40',
 };
 
+// Compact card for chat nav picker (single column, click = select)
+function CompactLensCard({ lens, isActive, onSelect }: {
+  lens: DisplayLens;
+  isActive: boolean;
+  onSelect: () => void;
+}) {
+  const isCustom = 'isCustom' in lens && lens.isCustom;
+  // Custom lenses use a special accent, personas use the accent map
+  const accent = isCustom
+    ? { ...defaultAccent, icon: 'auto_fix_high', bgLight: 'bg-violet-50', bgDark: 'dark:bg-violet-900/30', textLight: 'text-violet-600', textDark: 'dark:text-violet-400' }
+    : lensAccents[lens.id] || defaultAccent;
+
+  return (
+    <div
+      onClick={onSelect}
+      className={`
+        flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all
+        ${isActive
+          ? 'border-primary/50 bg-primary/10 dark:bg-primary/20'
+          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-primary/30'
+        }
+      `}
+    >
+      <div className={`${accent.bgLight} ${accent.bgDark} p-2.5 rounded-lg shrink-0`}>
+        <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark}`}>
+          {accent.icon}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className={`font-medium ${isActive ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+            {lens.publicLabel}
+          </h3>
+          {isCustom && (
+            <span className="text-[10px] uppercase font-bold text-violet-500 dark:text-violet-400">Custom</span>
+          )}
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400 italic truncate">
+          "{lens.description}"
+        </p>
+      </div>
+      {isActive ? (
+        <span className="px-2 py-1 text-xs font-medium rounded bg-primary/20 text-primary shrink-0">
+          ACTIVE
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+// Full card for workspace grid (2-column, click = inspector, button = select)
 interface LensCardProps {
   persona: Persona;
   isActive: boolean;
@@ -177,17 +240,23 @@ function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
   );
 }
 
-export function LensPicker() {
+export function LensPicker({ mode = 'full', onBack, onAfterSelect }: LensPickerProps = {}) {
   const { getEnabledPersonas, selectLens, session } = useNarrativeEngine();
-  const { navigateTo, openInspector } = useWorkspaceUI();
+  const { customLenses } = useCustomLens();
+  const workspaceUI = useOptionalWorkspaceUI();
   const personas = getEnabledPersonas();
   const activeLensId = session.activeLens;
   const activePersona = personas.find(p => p.id === activeLensId);
 
-  // Search state
+  // Combine personas and custom lenses for display
+  const allLenses: DisplayLens[] = useMemo(() => {
+    return [...personas, ...customLenses];
+  }, [personas, customLenses]);
+
+  // Search state (only used in full mode)
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter personas based on search
+  // Filter personas based on search (full mode grid only shows personas)
   const filteredPersonas = useMemo(() => {
     if (!searchQuery.trim()) return personas;
     const query = searchQuery.toLowerCase();
@@ -199,14 +268,56 @@ export function LensPicker() {
 
   const handleSelect = (personaId: string) => {
     selectLens(personaId);
-    // Open inspector to show lens details
-    openInspector({ type: 'lens', lensId: personaId });
+    // Call optional callback for analytics, engagement bus, etc.
+    onAfterSelect?.(personaId);
+    if (mode === 'compact' && onBack) {
+      onBack();  // Return to chat after selection
+    } else if (workspaceUI) {
+      workspaceUI.openInspector({ type: 'lens', lensId: personaId });
+    }
   };
 
   const handleView = (personaId: string) => {
-    openInspector({ type: 'lens', lensId: personaId });
+    if (mode === 'compact') {
+      handleSelect(personaId);  // In compact mode, click = select
+    } else if (workspaceUI) {
+      workspaceUI.openInspector({ type: 'lens', lensId: personaId });
+    }
   };
 
+  // COMPACT MODE - Single column list for chat nav
+  if (mode === 'compact') {
+    return (
+      <div className="flex flex-col h-full bg-transparent">
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+              Back to Chat
+            </button>
+          )}
+          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Switch Lens</span>
+          <div className="w-24" />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {allLenses.map(lens => (
+            <CompactLensCard
+              key={lens.id}
+              lens={lens}
+              isActive={activeLensId === lens.id}
+              onSelect={() => handleSelect(lens.id)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // FULL MODE - Grid layout for workspace
   return (
     <div className="h-full overflow-y-auto p-8">
       <div className="max-w-4xl mx-auto">

@@ -11,8 +11,9 @@ import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensPicker, LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
+import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
@@ -1053,15 +1054,20 @@ const Terminal: React.FC<TerminalProps> = ({ activeSection, terminalState, setTe
             />
           ) : showLensPicker ? (
             <LensPicker
-              personas={enabledPersonas}
-              customLenses={customLenses}
-              onSelect={handleLensSelect}
-              onClose={() => setShowLensPicker(false)}
-              onCreateCustomLens={handleCreateCustomLens}
-              onDeleteCustomLens={handleDeleteCustomLens}
-              currentLens={session.activeLens}
-              highlightedLens={urlLensId}
-              showCreateOption={showCustomLensInPicker}
+              mode="compact"
+              onBack={() => setShowLensPicker(false)}
+              onAfterSelect={(personaId) => {
+                localStorage.setItem('grove-terminal-welcomed', 'true');
+                // Track lens activation via analytics
+                trackLensActivated(personaId, personaId.startsWith('custom-'));
+                // Emit to Engagement Bus
+                emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
+                emit.journeyStarted(personaId, currentThread.length || 5);
+                // Update custom lens usage timestamp
+                if (personaId.startsWith('custom-')) {
+                  updateCustomLensUsage(personaId);
+                }
+              }}
             />
           ) : (
             <>

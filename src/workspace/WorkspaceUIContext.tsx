@@ -206,3 +206,11 @@ export function useWorkspaceUI(): WorkspaceUIContextType {
   }
   return context;
 }
+
+/**
+ * Optional version of useWorkspaceUI that returns null outside WorkspaceUIProvider.
+ * Use this for components that need to work both inside and outside the workspace.
+ */
+export function useOptionalWorkspaceUI(): WorkspaceUIContextType | null {
+  return useContext(WorkspaceUIContext);
+}

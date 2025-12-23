@@ -2,7 +2,7 @@
 // V2.2: Added TerminalPill for minimize-to-pill functionality (v0.12)
 // V2.3: Added LensGrid and WelcomeInterstitial for welcome/switching split (v0.12d)
 // V2.4: Added CommandInput and Modals for command palette (v0.16)
-export { default as LensPicker } from './LensPicker';
+// V2.5: Removed LensPicker - now using unified src/explore/LensPicker.tsx (Sprint 7.3)
 export { default as LensGrid } from './LensGrid';
 export { default as WelcomeInterstitial } from './WelcomeInterstitial';
 export { default as LensBadge } from './LensBadge';
