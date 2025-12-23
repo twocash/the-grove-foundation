@@ -328,10 +328,26 @@ p {
 
 .hero-container {
   container-type: inline-size;
-  height: calc(100vh - var(--header-height));  /* Exact height, no overflow */
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Content top, tree bottom */
+  overflow: hidden;
   padding-top: var(--header-height);
   box-sizing: border-box;
-  overflow: hidden;  /* Prevent content overflow */
+}
+
+/* Split mode - scale typography to fit narrower rail */
+.content-rail.split h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.content-rail.split h2 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+.content-rail.split p {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
 }
 
 /* Fluid typography with container queries */
