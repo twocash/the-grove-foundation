@@ -1,9 +1,10 @@
 // src/surface/components/genesis/Foundation.tsx
 // Screen 5: The Foundation - For believers ready for depth
 // DESIGN: Clean, confident, minimal - paper background
+// Active Grove Polish v2: Reordered layout, accent CTA
 
 import React, { useEffect, useRef, useState } from 'react';
-import ScrollIndicator from './ScrollIndicator';
+import { ActiveTree } from './ActiveTree';
 
 interface FoundationProps {
   onOpenTerminal?: (query: string) => void;
@@ -44,12 +45,6 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal, onScroll
     }
   };
 
-  const handleExplore = () => {
-    if (onOpenTerminal) {
-      onOpenTerminal("Tell me more about The Grove and how it works.");
-    }
-  };
-
   return (
     <section ref={sectionRef} className="flex-1 flex flex-col bg-paper">
       {/* Scrollable content area */}
@@ -75,8 +70,13 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal, onScroll
             </p>
           </div>
 
-          {/* Deep dive links - ordered for narrative arc: Vision → Ratchet → Economics */}
-          <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
+          {/* CTA invitation - Active Grove Polish v2: moved up, restyled orange */}
+          <p className="text-grove-clay text-center font-medium text-lg mb-6">
+            Want to go deeper?
+          </p>
+
+          {/* Deep dive buttons */}
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
             <button
               onClick={() => handleDeepDive('vision')}
               className="px-5 py-2.5 border border-ink/20 text-ink font-mono text-sm uppercase tracking-wider rounded-sm hover:border-grove-forest hover:text-grove-forest transition-colors"
@@ -96,25 +96,12 @@ export const Foundation: React.FC<FoundationProps> = ({ onOpenTerminal, onScroll
               The Economics
             </button>
           </div>
-
-          {/* Terminal CTA */}
-          <div className="text-center">
-            <p className="font-serif text-base text-ink-muted mb-4">
-              Want to go deeper? Open the Terminal.
-            </p>
-            <button
-              onClick={handleExplore}
-              className="px-6 py-3 bg-grove-forest text-white font-mono text-sm uppercase tracking-wider rounded-sm hover:bg-ink transition-colors"
-            >
-              Consult the Grove
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* ScrollIndicator anchored at bottom */}
+      {/* ActiveTree anchored at bottom */}
       <div className="shrink-0 py-4 flex justify-center bg-paper">
-        <ScrollIndicator onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
+        <ActiveTree mode="directional" onClick={onScrollNext || (() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }))} />
       </div>
     </section>
   );
