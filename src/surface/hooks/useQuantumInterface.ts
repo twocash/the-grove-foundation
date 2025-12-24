@@ -8,6 +8,7 @@ import { useNarrativeEngine } from '../../../hooks/useNarrativeEngine';
 import { LensReality, DEFAULT_REALITY, SUPERPOSITION_MAP } from '../../data/quantum-content';
 import { realityCollapser } from '../../core/transformers';
 import { ArchetypeId } from '../../../types/lens';
+import { useEngagement, useLensState } from '@core/engagement';
 
 interface UseQuantumInterfaceReturn {
   reality: LensReality;
@@ -17,7 +18,12 @@ interface UseQuantumInterfaceReturn {
 }
 
 export const useQuantumInterface = (): UseQuantumInterfaceReturn => {
-  const { session, schema, getPersonaById } = useNarrativeEngine();
+  const { schema, getPersonaById } = useNarrativeEngine();
+
+  // Get lens from engagement state machine (Epic 7: migrated from session.activeLens)
+  const { actor } = useEngagement();
+  const { lens: activeLensFromMachine } = useLensState({ actor });
+
   const [reality, setReality] = useState<LensReality>(DEFAULT_REALITY);
   const [isCollapsing, setIsCollapsing] = useState(false);
   const [currentLensId, setCurrentLensId] = useState<string | null>(null);
@@ -74,23 +80,23 @@ export const useQuantumInterface = (): UseQuantumInterfaceReturn => {
     }
   }, [getPersonaById, effectiveRealities, effectiveDefaultReality, schema?.lensRealities]);
 
-  // React to lens changes
+  // React to lens changes (Epic 7: now uses engagement state machine)
   useEffect(() => {
-    if (session.activeLens !== currentLensId) {
-      setCurrentLensId(session.activeLens);
-      resolveReality(session.activeLens);
+    if (activeLensFromMachine !== currentLensId) {
+      setCurrentLensId(activeLensFromMachine);
+      resolveReality(activeLensFromMachine);
     }
-  }, [session.activeLens, currentLensId, resolveReality]);
+  }, [activeLensFromMachine, currentLensId, resolveReality]);
 
   // Initial resolution on mount
   useEffect(() => {
-    resolveReality(session.activeLens);
+    resolveReality(activeLensFromMachine);
   }, []);
 
   return {
     reality,
-    activeLens: session.activeLens,
-    quantumTrigger: session.activeLens,
+    activeLens: activeLensFromMachine,
+    quantumTrigger: activeLensFromMachine,
     isCollapsing
   };
 };
