@@ -39,19 +39,19 @@ export const HUDHeader: React.FC<HUDHeaderProps> = ({
   const consoleName = routeNames[location.pathname] || 'Console';
 
   return (
-    <header className="h-12 bg-obsidian-raised border-b border-holo-cyan/20 flex items-center px-4 font-mono">
+    <header className="h-12 bg-theme-bg-secondary border-b border-theme-border-accent/20 flex items-center px-4 font-mono">
       {/* Logo / Brand */}
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 border border-holo-cyan/60 rounded flex items-center justify-center">
-          <span className="text-holo-cyan text-xs font-bold">F</span>
+        <div className="w-6 h-6 border border-theme-border-accent/60 rounded flex items-center justify-center">
+          <span className="text-theme-text-accent text-xs font-bold">F</span>
         </div>
-        <span className="text-holo-cyan font-medium">Foundation</span>
+        <span className="text-theme-text-accent font-medium">Foundation</span>
       </div>
 
       {/* Breadcrumb */}
       <div className="flex items-center ml-4">
-        <span className="text-gray-600 mx-2">/</span>
-        <span className="text-gray-400 text-sm">{consoleName}</span>
+        <span className="text-theme-text-muted mx-2">/</span>
+        <span className="text-theme-text-secondary text-sm">{consoleName}</span>
       </div>
 
       {/* Spacer */}
@@ -63,11 +63,11 @@ export const HUDHeader: React.FC<HUDHeaderProps> = ({
           <span
             className={`w-2 h-2 rounded-full ${statusColors[status]} animate-pulse`}
           />
-          <span className="text-xs text-gray-400">{statusLabels[status]}</span>
+          <span className="text-xs text-theme-text-secondary">{statusLabels[status]}</span>
         </div>
 
         {/* Version */}
-        <span className="text-xs text-gray-500">v{version}</span>
+        <span className="text-xs text-theme-text-muted">v{version}</span>
       </div>
     </header>
   );

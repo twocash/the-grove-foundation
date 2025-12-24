@@ -54,7 +54,7 @@ export const NavSidebar: React.FC<NavSidebarProps> = ({ defaultExpanded = false 
     <nav
       className={`
         ${expanded ? 'w-[200px]' : 'w-14'}
-        bg-obsidian-raised border-r border-holo-cyan/10
+        bg-theme-bg-secondary border-r border-theme-border-accent/10
         min-h-[calc(100vh-48px)] flex flex-col
         transition-all duration-200 ease-out
       `}
@@ -64,8 +64,8 @@ export const NavSidebar: React.FC<NavSidebarProps> = ({ defaultExpanded = false 
         onClick={() => setExpanded(!expanded)}
         className="
           h-12 flex items-center justify-center
-          text-gray-500 hover:text-holo-cyan hover:bg-holo-cyan/5
-          border-b border-holo-cyan/10
+          text-theme-text-muted hover:text-theme-text-accent hover:bg-theme-accent-muted
+          border-b border-theme-border-accent/10
           transition-colors
         "
         title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
@@ -86,8 +86,8 @@ export const NavSidebar: React.FC<NavSidebarProps> = ({ defaultExpanded = false 
               className={`
                 flex items-center gap-3 px-4 py-3
                 ${active
-                  ? 'text-holo-cyan bg-holo-cyan/10 border-l-2 border-holo-cyan'
-                  : 'text-gray-500 hover:text-holo-cyan hover:bg-holo-cyan/5 border-l-2 border-transparent'
+                  ? 'text-theme-text-accent bg-theme-accent-muted border-l-2 border-theme-border-accent'
+                  : 'text-theme-text-muted hover:text-theme-text-accent hover:bg-theme-accent-muted/50 border-l-2 border-transparent'
                 }
                 transition-colors
               `}
@@ -105,12 +105,12 @@ export const NavSidebar: React.FC<NavSidebarProps> = ({ defaultExpanded = false 
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t border-holo-cyan/10 py-2">
+      <div className="border-t border-theme-border-accent/10 py-2">
         <Link
           to="/"
           className="
             flex items-center gap-3 px-4 py-3
-            text-gray-500 hover:text-white hover:bg-white/5
+            text-theme-text-muted hover:text-theme-text-primary hover:bg-theme-bg-tertiary
             transition-colors
           "
           title="Exit to Surface"

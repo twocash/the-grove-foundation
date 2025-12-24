@@ -1,0 +1,79 @@
+{
+  "id": "surface",
+  "name": "Surface Paper",
+  "version": "1.0.0",
+  "surfaces": ["marketing", "genesis", "global"],
+  "tokens": {
+    "background": {
+      "primary": "#FBFBF9",
+      "secondary": "#F5F5F3",
+      "tertiary": "#EFEEED",
+      "glass": "rgba(251, 251, 249, 0.85)",
+      "overlay": "rgba(28, 28, 28, 0.6)"
+    },
+    "text": {
+      "primary": "#1C1C1C",
+      "secondary": "#3D3D3D",
+      "muted": "#575757",
+      "accent": "#2F5C3B",
+      "inverse": "#FBFBF9"
+    },
+    "border": {
+      "default": "#E5E5E3",
+      "strong": "#C4C4C2",
+      "accent": "#2F5C3B",
+      "focus": "#D95D39"
+    },
+    "semantic": {
+      "success": "#2F5C3B",
+      "warning": "#D95D39",
+      "error": "#C53030",
+      "info": "#2B6CB0",
+      "highlight": "#48BB78"
+    },
+    "accent": {
+      "primary": "#2F5C3B",
+      "primaryMuted": "rgba(47, 92, 59, 0.1)",
+      "secondary": "#D95D39",
+      "glow": "rgba(47, 92, 59, 0.3)"
+    }
+  },
+  "modes": {
+    "light": {},
+    "dark": {
+      "background": {
+        "primary": "#1C1C1C",
+        "secondary": "#2D2D2D",
+        "tertiary": "#3D3D3D",
+        "glass": "rgba(28, 28, 28, 0.85)",
+        "overlay": "rgba(0, 0, 0, 0.7)"
+      },
+      "text": {
+        "primary": "#FBFBF9",
+        "secondary": "#E5E5E3",
+        "muted": "#A0A0A0",
+        "accent": "#48BB78",
+        "inverse": "#1C1C1C"
+      },
+      "border": {
+        "default": "#3D3D3D",
+        "strong": "#575757",
+        "accent": "#48BB78",
+        "focus": "#F6AD55"
+      }
+    }
+  },
+  "typography": {
+    "display": ["Tenor Sans", "EB Garamond", "serif"],
+    "body": ["EB Garamond", "Georgia", "serif"],
+    "mono": ["JetBrains Mono", "monospace"],
+    "ui": ["Inter", "sans-serif"]
+  },
+  "effects": {
+    "grain": true,
+    "glow": false,
+    "gridOverlay": false,
+    "glassmorphism": false,
+    "scanlines": false
+  }
+}

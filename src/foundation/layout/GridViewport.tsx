@@ -16,7 +16,7 @@ export const GridViewport: React.FC<GridViewportProps> = ({
     <main
       className={`
         flex-1 p-6 overflow-auto
-        bg-obsidian f-grid-overlay f-scrollbar
+        bg-theme-bg-primary f-grid-overlay f-scrollbar
         ${className}
       `}
     >
