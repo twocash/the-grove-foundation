@@ -860,9 +860,10 @@ const Terminal: React.FC<TerminalProps> = ({
   // ============================================================================
   if (variant === 'embedded') {
     return (
-      <div className="flex flex-col h-full w-full bg-[#1a2421] text-white">
+      <div className="chat-container flex flex-col h-full w-full bg-[var(--chat-bg)] text-[var(--chat-text)]">
         {/* Terminal Header - real component (Sprint: active-grove-v1 Fix #5) */}
         <TerminalHeader
+          variant="embedded"
           isScholarMode={isVerboseMode}
           showMinimize={false}
           showClose={false}
@@ -892,6 +893,7 @@ const Terminal: React.FC<TerminalProps> = ({
               onCreateCustomLens={handleWelcomeCreateCustomLens}
               onDeleteCustomLens={handleDeleteCustomLens}
               showCreateOption={showCustomLensInPicker}
+              embedded
             />
           ) : showLensPicker ? (
             <LensPicker
@@ -920,27 +922,27 @@ const Terminal: React.FC<TerminalProps> = ({
                 return (
                   <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                     <div className={`flex items-center gap-2 mb-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <span className={`text-xs font-medium ${msg.role === 'user' ? 'text-white/60' : 'text-[#00D4AA]'}`}>
+                      <span className={`text-xs font-medium ${msg.role === 'user' ? 'text-[var(--chat-text-muted)]' : 'text-[var(--chat-text-accent)]'}`}>
                         {msg.role === 'user' ? 'You' : 'The Grove'}
                       </span>
                     </div>
                     <div className={`${msg.role === 'user' ? 'max-w-[85%]' : 'max-w-[90%]'}`}>
                       {msg.role === 'user' ? (
-                        <div className="bg-[#00D4AA] text-[#1a2421] px-4 py-2.5 rounded-xl rounded-tr-sm text-sm">
+                        <div className="bg-[var(--chat-accent)] text-[var(--chat-accent-text)] px-4 py-2.5 rounded-xl rounded-tr-sm text-sm">
                           {msg.text.replace(' --verbose', '')}
                         </div>
                       ) : (
                         <div className={`px-4 py-2.5 rounded-xl rounded-tl-sm text-sm ${
                           isSystemError
-                            ? 'bg-red-900/30 text-red-300 border border-red-700/50'
-                            : 'bg-white/5 text-white/90 border border-white/10'
+                            ? 'bg-[var(--chat-error-bg)] text-red-300 border border-[var(--chat-error-border)]'
+                            : 'bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)]'
                         }`}>
                           {msg.isStreaming && !msg.text ? (
                             <LoadingIndicator messages={globalSettings?.loadingMessages} />
                           ) : (
                             <>
                               <MarkdownRenderer content={msg.text} onPromptClick={handleSuggestion} />
-                              {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-[#00D4AA] cursor-blink align-middle"></span>}
+                              {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-[var(--chat-accent)] cursor-blink align-middle"></span>}
                             </>
                           )}
                         </div>
@@ -956,7 +958,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
         {/* Input Area - only show when not in wizard/picker mode */}
         {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && (
-          <div className="flex-shrink-0 p-4 border-t border-white/10">
+          <div className="flex-shrink-0 p-4 border-t border-[var(--chat-border)]">
             <CommandInput
               onSubmitQuery={(query) => {
                 actions.setInput(query);
@@ -970,6 +972,7 @@ const Terminal: React.FC<TerminalProps> = ({
               getLastResponse={getLastResponse}
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
+              embedded
             />
           </div>
         )}
