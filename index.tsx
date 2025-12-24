@@ -6,6 +6,8 @@ import './styles/globals.css';
 import App from './src/App';
 // v0.14.1: Shared state provider for NarrativeEngine
 import { NarrativeEngineProvider } from './hooks/NarrativeEngineContext';
+// v0.15: XState-based engagement state machine
+import { EngagementProvider } from '@core/engagement';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -16,7 +18,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <NarrativeEngineProvider>
-      <App />
+      <EngagementProvider>
+        <App />
+      </EngagementProvider>
     </NarrativeEngineProvider>
   </React.StrictMode>
 );

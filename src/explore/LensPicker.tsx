@@ -9,6 +9,7 @@ import { Persona } from '../../data/narratives-schema';
 import { CustomLens } from '../../types/lens';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
+import { useEngagement, useLensState } from '@core/engagement';
 
 interface LensPickerProps {
   mode?: 'full' | 'compact';
@@ -335,11 +336,16 @@ function CustomLensCard({ lens, isActive, onSelect, onView, onDelete }: CustomLe
 }
 
 export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCustomLens }: LensPickerProps = {}) {
-  const { getEnabledPersonas, selectLens, session } = useNarrativeEngine();
+  // Schema helper from NarrativeEngine
+  const { getEnabledPersonas } = useNarrativeEngine();
   const { customLenses, deleteCustomLens } = useCustomLens();
   const workspaceUI = useOptionalWorkspaceUI();
   const personas = getEnabledPersonas();
-  const activeLensId = session.activeLens;
+
+  // Engagement state machine for lens state and actions
+  const { actor } = useEngagement();
+  const { lens, selectLens: engSelectLens } = useLensState({ actor });
+  const activeLensId = lens;
   const activePersona = personas.find(p => p.id === activeLensId);
 
   // Combine personas and custom lenses for display
@@ -361,7 +367,7 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   }, [personas, searchQuery]);
 
   const handleSelect = (personaId: string) => {
-    selectLens(personaId);
+    engSelectLens(personaId);
     // Call optional callback for analytics, engagement bus, etc.
     onAfterSelect?.(personaId);
     if (mode === 'compact' && onBack) {

@@ -7,6 +7,7 @@ import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
+import { useEngagement, useJourneyState } from '@core/engagement';
 
 interface JourneyListProps {
   mode?: 'full' | 'compact';
@@ -134,9 +135,15 @@ function JourneyCard({ journey, isActive, onStart, onView }: JourneyCardProps) {
 }
 
 export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
-  const { schema, loading, startJourney, activeJourneyId, getJourney } = useNarrativeEngine();
+  // Schema and lookup from NarrativeEngine
+  const { schema, loading, getJourney } = useNarrativeEngine();
   const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Engagement state machine for journey state and actions
+  const { actor } = useEngagement();
+  const { journey: engActiveJourney, startJourney: engStartJourney } = useJourneyState({ actor });
+  const activeJourneyId = engActiveJourney?.id ?? null;
 
   // Get active journeys only
   const allJourneys = useMemo(() => {
@@ -158,7 +165,11 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   const activeJourney = activeJourneyId ? getJourney(activeJourneyId) : null;
 
   const handleStart = (journeyId: string) => {
-    startJourney(journeyId);
+    // New engagement hooks require Journey object, not just ID
+    const j = getJourney(journeyId);
+    if (j) {
+      engStartJourney(j);
+    }
     if (mode === 'compact' && onBack) {
       onBack();  // Return to chat after selection
     } else if (workspaceUI) {

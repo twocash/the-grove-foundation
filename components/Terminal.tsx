@@ -10,6 +10,7 @@ import { useNarrative } from '../hooks/useNarrative';
 import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
+import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
@@ -159,6 +160,22 @@ const Terminal: React.FC<TerminalProps> = ({
     urlLensId
   } = useNarrativeEngine();
 
+  // NEW: Engagement state machine hooks (Epic 6 migration)
+  const { actor } = useEngagement();
+  const { lens: engLens, selectLens: engSelectLens } = useLensState({ actor });
+  const {
+    journey: engJourney,
+    isActive: isJourneyActive,
+    startJourney: engStartJourney,
+    advanceStep,
+    exitJourney: engExitJourney
+  } = useJourneyState({ actor });
+  const { entropy: engEntropy, updateEntropy: engUpdateEntropy, resetEntropy: engResetEntropy } = useEntropyState({ actor });
+
+  // Compatibility mappings for gradual migration
+  // These will be used in place of NarrativeEngine equivalents
+  const engActiveJourneyId = engJourney?.id ?? null;
+
   // Engagement Bus (unified state management replacing useRevealState)
   const {
     revealState,
@@ -268,7 +285,9 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
-    selectLens(personaId);
+    if (personaId) {
+      engSelectLens(personaId);
+    }
     actions.hideLensPicker();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
@@ -299,7 +318,9 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Handle lens selection from welcome interstitial
   const handleWelcomeLensSelect = (personaId: string | null) => {
-    selectLens(personaId);
+    if (personaId) {
+      engSelectLens(personaId);
+    }
     actions.hideWelcomeInterstitial();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
@@ -386,7 +407,7 @@ const Terminal: React.FC<TerminalProps> = ({
     );
 
     if (persona) {
-      selectLens(persona.id);
+      engSelectLens(persona.id);
       localStorage.setItem('grove-session-established', 'true'); // v0.12f
       trackLensActivated(persona.id, false);
       emit.lensSelected(persona.id, false, currentArchetypeId || undefined);
@@ -397,7 +418,7 @@ const Terminal: React.FC<TerminalProps> = ({
         l.publicLabel?.toLowerCase() === lensId.toLowerCase()
       );
       if (customLens) {
-        selectLens(customLens.id);
+        engSelectLens(customLens.id);
         localStorage.setItem('grove-session-established', 'true'); // v0.12f
         trackLensActivated(customLens.id, true);
         emit.lensSelected(customLens.id, true, currentArchetypeId || undefined);
@@ -408,7 +429,7 @@ const Terminal: React.FC<TerminalProps> = ({
   // Handle custom lens wizard completion
   const handleCustomLensComplete = async (candidate: LensCandidate, userInputs: UserInputs) => {
     const newLens = await saveCustomLens(candidate, userInputs);
-    selectLens(newLens.id);
+    engSelectLens(newLens.id);
     actions.hideCustomLensWizard();
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
@@ -1221,9 +1242,9 @@ const Terminal: React.FC<TerminalProps> = ({
                             });
 
                             if (journey && entryNode) {
-                              console.log('[CognitiveBridge] Starting journey with startJourney():', bridgeState.journeyId);
-                              // V2.1: Use engine's startJourney to set active journey state
-                              startJourney(bridgeState.journeyId!);
+                              console.log('[CognitiveBridge] Starting journey with engStartJourney():', bridgeState.journeyId);
+                              // V2.1: Use engagement state machine to set active journey state
+                              engStartJourney(journey);
                               // Send the entry node's query to kick off the conversation
                               handleSend(entryNode.query, entryNode.label, entryNode.id);
                               // Emit journey started event
@@ -1243,7 +1264,7 @@ const Terminal: React.FC<TerminalProps> = ({
                               const targetPersona = cluster ? clusterToPersona[cluster] : null;
 
                               if (targetPersona) {
-                                selectLens(targetPersona);
+                                engSelectLens(targetPersona);
                               }
                             }
                             actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
@@ -1338,7 +1359,7 @@ const Terminal: React.FC<TerminalProps> = ({
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => {
-                          exitJourney();
+                          engExitJourney();
                           actions.setCurrentNodeId(null);
                         }}
                         className="px-3 py-2 bg-grove-forest/10 border border-grove-forest/20 rounded-sm text-xs font-sans text-grove-forest hover:bg-grove-forest/20 transition-all"

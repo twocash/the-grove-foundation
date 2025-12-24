@@ -10,7 +10,7 @@ import { SproutGrid } from '../cultivate/SproutGrid';
 import { VillageFeed } from '../village/VillageFeed';
 import { CustomLensWizard } from '../../components/Terminal/CustomLensWizard';
 import { useCustomLens } from '../../hooks/useCustomLens';
-import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
+import { useEngagement, useLensState } from '@core/engagement';
 import { MessageSquare, Code, Bot } from 'lucide-react';
 
 // Coming Soon placeholder for "Do" section items
@@ -143,7 +143,8 @@ function pathToView(path: string[]): string {
 export function ContentRouter() {
   const { navigation, showCustomLensWizard, closeCustomLensWizard, openInspector } = useWorkspaceUI();
   const { saveCustomLens } = useCustomLens();
-  const { selectLens } = useNarrativeEngine();
+  const { actor } = useEngagement();
+  const { selectLens } = useLensState({ actor });
   const viewId = pathToView(navigation.activePath);
 
   // Handle custom lens wizard completion

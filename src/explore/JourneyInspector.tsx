@@ -4,17 +4,28 @@
 import { useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
+import { useEngagement, useJourneyState } from '@core/engagement';
 
 interface JourneyInspectorProps {
   journeyId: string;
 }
 
 export function JourneyInspector({ journeyId }: JourneyInspectorProps) {
-  const { getJourney, startJourney, exitJourney, activeJourneyId, visitedNodes, schema } = useNarrativeEngine();
+  // Schema and lookup functions from NarrativeEngine
+  const { getJourney, visitedNodes, schema } = useNarrativeEngine();
   const { navigateTo, closeInspector } = useWorkspaceUI();
 
+  // Engagement state machine for journey state and actions
+  const { actor } = useEngagement();
+  const {
+    journey: activeJourney,
+    isActive: isJourneyActive,
+    startJourney: engStartJourney,
+    exitJourney: engExitJourney
+  } = useJourneyState({ actor });
+
   const journey = getJourney(journeyId);
-  const isActive = activeJourneyId === journeyId;
+  const isActive = activeJourney?.id === journeyId;
 
   // Calculate journey progress
   const progress = useMemo(() => {
@@ -41,7 +52,10 @@ export function JourneyInspector({ journeyId }: JourneyInspectorProps) {
   }
 
   const handleStart = () => {
-    startJourney(journeyId);
+    // New engagement hooks require Journey object, not just ID
+    if (journey) {
+      engStartJourney(journey);
+    }
     navigateTo(['explore']);
     closeInspector();
   };
@@ -52,7 +66,7 @@ export function JourneyInspector({ journeyId }: JourneyInspectorProps) {
   };
 
   const handleExit = () => {
-    exitJourney();
+    engExitJourney();
     closeInspector();
   };
 
