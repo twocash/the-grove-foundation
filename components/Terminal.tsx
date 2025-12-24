@@ -893,6 +893,7 @@ const Terminal: React.FC<TerminalProps> = ({
               onCreateCustomLens={handleWelcomeCreateCustomLens}
               onDeleteCustomLens={handleDeleteCustomLens}
               showCreateOption={showCustomLensInPicker}
+              embedded
             />
           ) : showLensPicker ? (
             <LensPicker

@@ -14,6 +14,8 @@ interface WelcomeInterstitialProps {
   onCreateCustomLens?: () => void;
   onDeleteCustomLens?: (id: string) => void;
   showCreateOption?: boolean;
+  // Chat Column Unification (Sprint: chat-column-unification-v1)
+  embedded?: boolean;
 }
 
 const WELCOME_COPY = `Welcome to The Grove.
@@ -28,7 +30,8 @@ const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({
   onSelect,
   onCreateCustomLens,
   onDeleteCustomLens,
-  showCreateOption = true
+  showCreateOption = true,
+  embedded = false
 }) => {
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -36,15 +39,25 @@ const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({
         {/* Welcome Copy */}
         <div className="space-y-4 mb-6">
           {WELCOME_COPY.split('\n\n').map((paragraph, i) => (
-            <p key={i} className={`font-serif text-sm leading-relaxed ${i === 0 ? 'text-slate-900 dark:text-slate-100 font-medium' : 'text-slate-500 dark:text-slate-400'}`}>
+            <p key={i} className={`font-serif text-sm leading-relaxed ${
+              embedded
+                ? i === 0 ? 'text-[var(--chat-text)] font-medium' : 'text-[var(--chat-text-muted)]'
+                : i === 0 ? 'text-slate-900 dark:text-slate-100 font-medium' : 'text-slate-500 dark:text-slate-400'
+            }`}>
               {paragraph}
             </p>
           ))}
         </div>
 
         {/* Section Header */}
-        <div className="pb-2 border-b border-slate-200 dark:border-slate-700 mb-4">
-          <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
+        <div className={`pb-2 border-b mb-4 ${
+          embedded
+            ? 'border-[var(--chat-border)]'
+            : 'border-slate-200 dark:border-slate-700'
+        }`}>
+          <div className={`text-[10px] font-mono uppercase tracking-wider ${
+            embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
+          }`}>
             Select Your Starting Lens
           </div>
         </div>
@@ -57,11 +70,16 @@ const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({
           onCreateCustomLens={onCreateCustomLens}
           onDeleteCustomLens={onDeleteCustomLens}
           showCreateOption={showCreateOption}
+          embedded={embedded}
         />
 
         {/* Footer hint */}
-        <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center">
+        <div className={`mt-6 pt-4 border-t ${
+          embedded ? 'border-[var(--chat-border)]' : 'border-slate-200 dark:border-slate-700'
+        }`}>
+          <p className={`text-[10px] text-center ${
+            embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
+          }`}>
             You can switch lenses anytime by clicking on your lens in the Terminal.
           </p>
         </div>
