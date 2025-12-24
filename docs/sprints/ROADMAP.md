@@ -53,8 +53,8 @@ The Grove has three distinct UI surfaces with inconsistent styling approaches:
 | Sprint | Name | Focus | Est. Days | Status |
 |--------|------|-------|-----------|--------|
 | **1** | Chat Column Unification v1 | Terminal tokens, responsive | 4-5 | ✅ Complete (PR #34) |
-| **2** | Terminal Polish | Overlay mode, transitions | 3 | 🟡 Next |
-| **3** | Workspace Shell Completion | Nav, header, inspector | 3-4 | 📋 Planned |
+| **2** | ~~Terminal Polish~~ | ~~Overlay mode, transitions~~ | — | ⏭️ Skipped (not in user flow) |
+| **3** | Workspace Inspectors v1 | IA v0.15, inspector refactor | 2.5h | ✅ Complete (PR #35) |
 | **4** | Foundation Theme Integration | Connect --theme-* properly | 2-3 | 📋 Planned |
 | **5** | Cross-Surface Consistency | Shared components, patterns | 2-3 | 📋 Planned |
 | **6** | Responsive Excellence | All breakpoints, mobile | 3-4 | 📋 Planned |
@@ -104,56 +104,40 @@ Create unified `--chat-*` token system for Terminal embedded mode, fix responsiv
 
 ---
 
-## Sprint 2: Terminal Polish
+## Sprint 2: Terminal Polish ⏭️ SKIPPED
 
-### Objective
-Complete Terminal styling including overlay mode, transitions, and edge cases.
+### Decision
+Skipped 2024-12-24. Overlay mode, TerminalShell transitions, and pill/minimize behaviors are not in the active user flow. The primary user journey (Genesis → embedded Terminal → chat) is fully addressed by Sprint 1.
 
-### Scope
-- **Overlay mode migration** — Paper/ink aesthetic to tokens (optional light theme)
-- **TerminalShell transitions** — Smooth open/close animations
-- **Mobile bottom sheet** — Touch-friendly responsive behavior
-- **Loading states** — Consistent skeleton/spinner patterns
-- **Error states** — Unified error presentation
-
-### Dependencies
-- Sprint 1 complete
-- Overlay mode design decision (keep paper/ink or modernize?)
-
-### Key Files
-- `components/Terminal/TerminalShell.tsx`
-- `components/Terminal/LoadingIndicator.tsx`
-- `components/Terminal/Modals/*`
-- `components/Terminal/Reveals/*`
-
-### Open Questions
-- Do we keep paper/ink for overlay or unify with dark theme?
-- What animation library (Framer Motion vs CSS)?
+**Rationale:** Focus resources on inspector functionality (Sprint 3) rather than polish for unused code paths. Can revisit if overlay mode becomes relevant.
 
 ---
 
-## Sprint 3: Workspace Shell Completion
+## Sprint 3: Workspace Inspectors v1 ✅ COMPLETE
 
-### Objective
-Ensure all workspace chrome uses `--grove-*` tokens consistently.
+### Summary
+Completed 2024-12-24. IA v0.15 implemented with full navigation restructure.
 
-### Scope
-- **NavigationSidebar** — Full token coverage, active states
-- **WorkspaceHeader** — Search, user menu, breadcrumbs
-- **Inspector panels** — All inspector variants tokenized
-- **ContentRouter** — Loading/error states
+**PR #35:** https://github.com/twocash/the-grove-foundation/pull/35
 
-### Audit Required (from previous analysis)
+### Delivered
+- **IA v0.15** — Terminal, Lenses, Journeys, Nodes, Diary, Sprouts under Grove Project
+- **DiaryList.tsx** — Placeholder content view (20 lines)
+- **DiaryInspector.tsx** — Placeholder inspector (56 lines)
+- **LensInspector refactor** — 294 → 154 lines (-140 lines, uses shared components)
+- **Type updates** — diary in InspectorMode, EntityType, ViewId
+- **Cultivate simplified** — Commons only
 
-| Component | Current State | Work |
-|-----------|---------------|------|
-| `NavigationSidebar.tsx` | Partial tokens | Complete migration |
-| `WorkspaceHeader.tsx` | Partial tokens | Complete migration |
-| `NodeGrid.tsx` | Uses --grove-* | Verify complete |
-| `JourneyList.tsx` | Partial | Complete migration |
+### Metrics
+| Metric | Value |
+|--------|-------|
+| Files changed | 7 |
+| Lines added | ~130 |
+| Lines removed | ~145 |
+| Net | -15 lines |
+| Time | ~2.5 hours |
 
-### Dependencies
-- Sprint 1 complete (establishes token patterns)
+---
 
 ---
 

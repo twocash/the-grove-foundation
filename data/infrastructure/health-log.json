@@ -1,5 +1,1666 @@
 {
   "version": "1.0",
   "maxEntries": 100,
-  "entries": []
+  "entries": [
+    {
+      "id": "981adc70-ae75-429e-94e8-52cafd6cb5d9",
+      "timestamp": "2025-12-24T19:52:41.855Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "genesis-initial-state-baseline",
+              "name": "genesis initial state baseline",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 9100
+            },
+            {
+              "id": "genesis-expanded-page-baseline",
+              "name": "genesis expanded page baseline",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 12285
+            },
+            {
+              "id": "genesis-split-layout-baseline",
+              "name": "genesis split layout baseline",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 5414
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T19:52:41.858Z"
+      }
+    },
+    {
+      "id": "541f973f-140f-475d-930d-1534df1b5ad4",
+      "timestamp": "2025-12-24T19:47:00.065Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "genesis-page-visual-baseline",
+              "name": "genesis page visual baseline",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 39535
+            },
+            {
+              "id": "genesis-hero-section-baseline",
+              "name": "genesis hero section baseline",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 4624
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 2,
+        "passed": 1,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T19:47:00.071Z"
+      }
+    },
+    {
+      "id": "eae27867-4eb6-4fa0-824c-c34d3e972684",
+      "timestamp": "2025-12-24T06:51:26.940Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "terminal-shows-initial-welcome-message",
+              "name": "terminal shows initial welcome message",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-input-field",
+              "name": "terminal has input field",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-type-in-terminal-input",
+              "name": "can type in terminal input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-header-shows-controls",
+              "name": "terminal header shows controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "minimize-button-collapses-terminal-to-pill",
+              "name": "minimize button collapses terminal to pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-expand-from-minimized-pill",
+              "name": "can expand from minimized pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "typing-slash-shows-command-detection",
+              "name": "typing slash shows command detection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "help-command-recognized",
+              "name": "/help command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stats-command-recognized",
+              "name": "/stats command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "welcome-message-uses-arrow-formatting-for-prompts",
+              "name": "welcome message uses arrow formatting for prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-scrollable-message-area",
+              "name": "terminal has scrollable message area",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-has-correct-aria-attributes",
+              "name": "terminal drawer has correct ARIA attributes",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-button-has-accessible-label",
+              "name": "FAB button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "close-button-has-accessible-label",
+              "name": "close button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-opens-via-fab-button",
+              "name": "terminal opens via FAB button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-closes-via-close-button",
+              "name": "terminal closes via close button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-academic-lens",
+              "name": "URL lens parameter initializes academic lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-engineer-lens",
+              "name": "URL lens parameter initializes engineer lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "default-terminal-shows-generic-welcome-without-lens",
+              "name": "default terminal shows generic welcome without lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-toggles-terminal-state",
+              "name": "FAB toggles terminal state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-animation-classes-are-correct",
+              "name": "terminal drawer animation classes are correct",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 31080
+            },
+            {
+              "id": "page-loads-in-hero-mode-by-default",
+              "name": "page loads in hero mode by default",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 31087
+            },
+            {
+              "id": "landing-page-loads-without-critical-console-errors",
+              "name": "landing page loads without critical console errors",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "smoke.spec.ts",
+              "duration": 31168
+            },
+            {
+              "id": "app-loads-with-engagementprovider",
+              "name": "app loads with EngagementProvider",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "engagement-migration.spec.ts",
+              "duration": 31483
+            },
+            {
+              "id": "page-renders-main-content",
+              "name": "page renders main content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 8022
+            },
+            {
+              "id": "engagement-hooks-work-after-migration",
+              "name": "engagement hooks work after migration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 6504
+            },
+            {
+              "id": "terminal-panel-is-accessible",
+              "name": "terminal panel is accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4444
+            },
+            {
+              "id": "content-rail-has-proper-structure",
+              "name": "content rail has proper structure",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 15544
+            },
+            {
+              "id": "foundation-dashboard-loads",
+              "name": "foundation dashboard loads",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4857
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 22073
+            },
+            {
+              "id": "no-javascript-exceptions-on-page-load",
+              "name": "no JavaScript exceptions on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 28450
+            },
+            {
+              "id": "activetree-is-visible-in-hero-section",
+              "name": "ActiveTree is visible in hero section",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 35704
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 35421
+            },
+            {
+              "id": "can-navigate-to-foundation-from-home",
+              "name": "can navigate to foundation from home",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "smoke.spec.ts",
+              "duration": 38680
+            },
+            {
+              "id": "activetree-has-pulsing-mode-initially",
+              "name": "ActiveTree has pulsing mode initially",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 38619
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 37831
+            },
+            {
+              "id": "can-navigate-between-foundation-consoles",
+              "name": "can navigate between foundation consoles",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "smoke.spec.ts",
+              "duration": 33075
+            },
+            {
+              "id": "clicking-tree-triggers-split-layout",
+              "name": "clicking tree triggers split layout",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 36028
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 35394
+            },
+            {
+              "id": "terminal-panel-has-aria-attributes",
+              "name": "terminal panel has ARIA attributes",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 36176
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 35360
+            },
+            {
+              "id": "terminal-shows-lens-picker-after-tree-click",
+              "name": "terminal shows lens picker after tree click",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 35712
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 35966
+            },
+            {
+              "id": "desktop-shows-50-50-split",
+              "name": "desktop shows 50/50 split",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 22516
+            },
+            {
+              "id": "tablet-shows-40-terminal-width",
+              "name": "tablet shows 40% terminal width",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5270
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7640
+            },
+            {
+              "id": "mobile-shows-bottom-sheet",
+              "name": "mobile shows bottom sheet",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5150
+            },
+            {
+              "id": "activetree-has-proper-aria-labels",
+              "name": "ActiveTree has proper ARIA labels",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2979
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7703
+            },
+            {
+              "id": "content-rail-hides-terminal-when-not-visible",
+              "name": "content rail hides terminal when not visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2798
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7346
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10710
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4306
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5311
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4838
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4386
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4304
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4260
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 59,
+        "passed": 22,
+        "failed": 16,
+        "warnings": 21
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T06:51:26.943Z"
+      }
+    },
+    {
+      "id": "e240b224-034a-4f7f-bbf2-70449f95dff6",
+      "timestamp": "2025-12-24T05:46:07.033Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "app-loads-with-engagementprovider",
+              "name": "app loads with EngagementProvider",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 20150
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 21753
+            },
+            {
+              "id": "engagement-hooks-work-after-migration",
+              "name": "engagement hooks work after migration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 2262
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5215
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4972
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4708
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4709
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5182
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4685
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4789
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4917
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5489
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9495
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4673
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5117
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5014
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4464
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5177
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4490
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T05:46:07.036Z"
+      }
+    },
+    {
+      "id": "8a51d996-a237-4e87-a02a-f8e19f09cfb7",
+      "timestamp": "2025-12-24T04:18:45.095Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 23012
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7535
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6643
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6902
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7045
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6989
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6940
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6776
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6967
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4593
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 8277
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5580
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4192
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3996
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3903
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4019
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3647
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 17,
+        "passed": 17,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T04:18:45.097Z"
+      }
+    },
+    {
+      "id": "c4dee0c8-e6e5-4fdb-a979-d948eb6cf9c5",
+      "timestamp": "2025-12-24T01:58:18.330Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 11489
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5048
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4425
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4927
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4665
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4983
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5174
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4893
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3948
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4228
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7878
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3824
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3893
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3651
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3761
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3527
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 16,
+        "passed": 16,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T01:58:18.333Z"
+      }
+    },
+    {
+      "id": "05a9cf60-4674-467e-aa3a-4425f0a8b953",
+      "timestamp": "2025-12-24T01:56:12.752Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 13002
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T01:56:12.754Z"
+      }
+    },
+    {
+      "id": "4939adbc-bffe-4f4d-96b2-8ab2f08f6a4a",
+      "timestamp": "2025-12-24T00:09:27.349Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "warn",
+          "checks": [
+            {
+              "id": "terminal-shows-initial-welcome-message",
+              "name": "terminal shows initial welcome message",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-input-field",
+              "name": "terminal has input field",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-type-in-terminal-input",
+              "name": "can type in terminal input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-header-shows-controls",
+              "name": "terminal header shows controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "minimize-button-collapses-terminal-to-pill",
+              "name": "minimize button collapses terminal to pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-expand-from-minimized-pill",
+              "name": "can expand from minimized pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "typing-slash-shows-command-detection",
+              "name": "typing slash shows command detection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "help-command-recognized",
+              "name": "/help command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stats-command-recognized",
+              "name": "/stats command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "welcome-message-uses-arrow-formatting-for-prompts",
+              "name": "welcome message uses arrow formatting for prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-scrollable-message-area",
+              "name": "terminal has scrollable message area",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-has-correct-aria-attributes",
+              "name": "terminal drawer has correct ARIA attributes",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-button-has-accessible-label",
+              "name": "FAB button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "close-button-has-accessible-label",
+              "name": "close button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-opens-via-fab-button",
+              "name": "terminal opens via FAB button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-closes-via-close-button",
+              "name": "terminal closes via close button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-academic-lens",
+              "name": "URL lens parameter initializes academic lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-engineer-lens",
+              "name": "URL lens parameter initializes engineer lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "default-terminal-shows-generic-welcome-without-lens",
+              "name": "default terminal shows generic welcome without lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-toggles-terminal-state",
+              "name": "FAB toggles terminal state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-animation-classes-are-correct",
+              "name": "terminal drawer animation classes are correct",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "landing-page-loads-without-critical-console-errors",
+              "name": "landing page loads without critical console errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 7509
+            },
+            {
+              "id": "page-loads-in-hero-mode-by-default",
+              "name": "page loads in hero mode by default",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8172
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 8200
+            },
+            {
+              "id": "page-renders-main-content",
+              "name": "page renders main content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3318
+            },
+            {
+              "id": "content-rail-has-proper-structure",
+              "name": "content rail has proper structure",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3814
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3975
+            },
+            {
+              "id": "terminal-panel-is-accessible",
+              "name": "terminal panel is accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3016
+            },
+            {
+              "id": "activetree-is-visible-in-hero-section",
+              "name": "ActiveTree is visible in hero section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3639
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3595
+            },
+            {
+              "id": "foundation-dashboard-loads",
+              "name": "foundation dashboard loads",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 2641
+            },
+            {
+              "id": "activetree-has-pulsing-mode-initially",
+              "name": "ActiveTree has pulsing mode initially",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3724
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3945
+            },
+            {
+              "id": "no-javascript-exceptions-on-page-load",
+              "name": "no JavaScript exceptions on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4285
+            },
+            {
+              "id": "clicking-tree-triggers-split-layout",
+              "name": "clicking tree triggers split layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4001
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4131
+            },
+            {
+              "id": "can-navigate-to-foundation-from-home",
+              "name": "can navigate to foundation from home",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 5916
+            },
+            {
+              "id": "terminal-panel-has-aria-attributes",
+              "name": "terminal panel has ARIA attributes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4357
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4409
+            },
+            {
+              "id": "terminal-shows-lens-picker-after-tree-click",
+              "name": "terminal shows lens picker after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4496
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4570
+            },
+            {
+              "id": "desktop-shows-50-50-split",
+              "name": "desktop shows 50/50 split",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2264
+            },
+            {
+              "id": "can-navigate-between-foundation-consoles",
+              "name": "can navigate between foundation consoles",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 9250
+            },
+            {
+              "id": "tablet-shows-40-terminal-width",
+              "name": "tablet shows 40% terminal width",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2469
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4623
+            },
+            {
+              "id": "mobile-shows-bottom-sheet",
+              "name": "mobile shows bottom sheet",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2281
+            },
+            {
+              "id": "activetree-has-proper-aria-labels",
+              "name": "ActiveTree has proper ARIA labels",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1719
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4362
+            },
+            {
+              "id": "content-rail-hides-terminal-when-not-visible",
+              "name": "content rail hides terminal when not visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 2133
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5070
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4561
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4116
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4044
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4266
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4197
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 55,
+        "passed": 34,
+        "failed": 0,
+        "warnings": 21
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T00:09:27.351Z"
+      }
+    },
+    {
+      "id": "6de52041-c0d7-47fd-a5dd-9abba78eeba6",
+      "timestamp": "2025-12-24T00:07:27.650Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7481
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T00:07:27.652Z"
+      }
+    },
+    {
+      "id": "007447a2-3f33-46b9-a219-6e71f14c4de7",
+      "timestamp": "2025-12-24T00:04:41.986Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "test-check",
+              "name": "Test Check",
+              "status": "pass",
+              "message": "Test passed"
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "external",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-24T00:04:41.989Z"
+      }
+    }
+  ]
 }
