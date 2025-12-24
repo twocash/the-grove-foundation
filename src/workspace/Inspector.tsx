@@ -4,6 +4,7 @@
 import { useWorkspaceUI } from './WorkspaceUIContext';
 import { LensInspector } from '../explore/LensInspector';
 import { JourneyInspector } from '../explore/JourneyInspector';
+import { DiaryInspector } from '../explore/DiaryInspector';
 import { SproutInspector } from '../cultivate/SproutInspector';
 
 export function Inspector() {
@@ -19,6 +20,7 @@ export function Inspector() {
       case 'node': return 'Node Inspector';
       case 'journey': return 'Journey Inspector';
       case 'sprout': return 'Sprout Inspector';
+      case 'diary': return 'Diary Inspector';
       case 'diary-entry': return 'Diary Entry';
       case 'chat-context': return 'Chat Context';
       default: return 'Inspector';
@@ -65,6 +67,9 @@ export function Inspector() {
 
       case 'sprout':
         return <SproutInspector sproutId={inspector.mode.sproutId} />;
+
+      case 'diary':
+        return <DiaryInspector entryId={inspector.mode.entryId} />;
 
       case 'diary-entry':
         return (

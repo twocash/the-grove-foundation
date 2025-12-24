@@ -6,6 +6,7 @@ import { ExploreChat } from '../explore/ExploreChat';
 import { LensPicker } from '../explore/LensPicker';
 import { NodeGrid } from '../explore/NodeGrid';
 import { JourneyList } from '../explore/JourneyList';
+import { DiaryList } from '../explore/DiaryList';
 import { SproutGrid } from '../cultivate/SproutGrid';
 import { VillageFeed } from '../village/VillageFeed';
 import { CustomLensWizard } from '../../components/Terminal/CustomLensWizard';
@@ -119,9 +120,12 @@ function pathToView(path: string[]): string {
     // Explore > Grove Project (field) > views
     'explore': 'terminal',  // Default if clicking Explore directly
     'explore.groveProject': 'terminal',
-    'explore.groveProject.nodes': 'node-grid',
-    'explore.groveProject.journeys': 'journey-list',
+    'explore.groveProject.terminal': 'terminal',
     'explore.groveProject.lenses': 'lens-picker',
+    'explore.groveProject.journeys': 'journey-list',
+    'explore.groveProject.nodes': 'node-grid',
+    'explore.groveProject.diary': 'diary-list',
+    'explore.groveProject.sprouts': 'sprout-grid',
     // Legacy paths (backward compatibility)
     'explore.nodes': 'node-grid',
     'explore.journeys': 'journey-list',
@@ -174,6 +178,7 @@ export function ContentRouter() {
       {viewId === 'node-grid' && <NodeGrid />}
       {viewId === 'journey-list' && <JourneyList />}
       {viewId === 'lens-picker' && <LensPickerWithWizard />}
+      {viewId === 'diary-list' && <DiaryList />}
       {viewId === 'chat-placeholder' && <ChatPlaceholder />}
       {viewId === 'apps-placeholder' && <AppsPlaceholder />}
       {viewId === 'agents-placeholder' && <AgentsPlaceholder />}

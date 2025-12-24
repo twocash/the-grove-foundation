@@ -10,7 +10,7 @@ export type NavigationPath = string[];
 /**
  * Entity types that can be inspected
  */
-export type EntityType = 'node' | 'journey' | 'lens' | 'sprout' | 'diary-entry' | 'chat-context';
+export type EntityType = 'node' | 'journey' | 'lens' | 'sprout' | 'diary' | 'diary-entry' | 'chat-context';
 
 /**
  * Inspector mode determines what's shown in the right panel
@@ -21,6 +21,7 @@ export type InspectorMode =
   | { type: 'journey'; journeyId: string }
   | { type: 'lens'; lensId: string }
   | { type: 'sprout'; sproutId: string }
+  | { type: 'diary'; entryId?: string }
   | { type: 'diary-entry'; entryId: string }
   | { type: 'chat-context'; context: ChatContext };
 
@@ -127,6 +128,7 @@ export type ViewId =
   | 'node-detail'
   | 'journey-list'
   | 'lens-picker'
+  | 'diary-list'         // Explore > Diary
   | 'chat-placeholder'   // Do > Chat
   | 'apps-placeholder'   // Do > Apps
   | 'agents-placeholder' // Do > Agents
