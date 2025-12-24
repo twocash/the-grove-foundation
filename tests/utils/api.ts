@@ -60,3 +60,29 @@ export async function runHealthCheck(): Promise<any> {
   }
   return res.json()
 }
+
+export interface HealthReportPayload {
+  category: string;
+  categoryName?: string;
+  checks: Array<{
+    id: string;
+    name?: string;
+    status: 'pass' | 'fail' | 'warn';
+    message?: string;
+    file?: string;
+    duration?: number;
+  }>;
+  attribution?: {
+    triggeredBy?: string;
+    commit?: string;
+    branch?: string;
+  };
+}
+
+export async function postHealthReport(payload: HealthReportPayload): Promise<Response> {
+  return fetch(`${API_URL}/api/health/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+}

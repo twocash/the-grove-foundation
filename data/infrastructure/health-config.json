@@ -1,12 +1,14 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "display": {
     "dashboardTitle": "System Health",
     "categoryLabels": {
       "engine": "Engine Health",
       "schema-integrity": "Schema Integrity",
       "journey-navigation": "Journey Navigation",
-      "rag-integration": "RAG Integration"
+      "rag-integration": "RAG Integration",
+      "e2e-tests": "E2E Tests",
+      "engagement": "Engagement System"
     }
   },
   "engineChecks": [
@@ -119,6 +121,35 @@
       "severity": "warning",
       "impact": "Incomplete chains may leave users stranded or in loops",
       "inspect": "Trace from each journey's entryNode following primaryNext until null or maxDepth"
+    }
+  ],
+  "engagementChecks": [
+    {
+      "id": "lens-picker-shown",
+      "name": "Lens Picker Shows for New Users",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "engagement-behaviors.spec.ts:terminal shows lens picker for new users",
+      "impact": "Users cannot select a viewing perspective",
+      "inspect": "Run: npx playwright test -g 'lens picker'"
+    },
+    {
+      "id": "url-lens-hydration",
+      "name": "URL Lens Parameter Works",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "engagement-behaviors.spec.ts:engineer lens URL shows technical content",
+      "impact": "Deep links to specific lenses fail",
+      "inspect": "Run: npx playwright test -g 'engineer lens'"
+    },
+    {
+      "id": "terminal-opens",
+      "name": "Terminal Opens on Tree Click",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "engagement-behaviors.spec.ts:tree click opens terminal and shows content",
+      "impact": "Users cannot access Terminal",
+      "inspect": "Run: npx playwright test -g 'tree click'"
     }
   ]
 }

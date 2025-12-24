@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeAll } from 'vitest'
-import { healthCheck, fetchHealth, fetchHealthConfig, fetchHealthHistory, runHealthCheck } from '../utils/api'
+import { healthCheck, fetchHealth, fetchHealthConfig, fetchHealthHistory, runHealthCheck, postHealthReport } from '../utils/api'
 
 describe('Health API Endpoints', () => {
   let serverRunning = false
@@ -163,6 +163,87 @@ describe('Health API Endpoints', () => {
       const afterHistory = await fetchHealthHistory()
 
       expect(afterHistory.total).toBeGreaterThan(beforeCount)
+    })
+  })
+
+  describe('POST /api/health/report', () => {
+    test('accepts valid report and returns entry', async () => {
+      if (!serverRunning) return
+
+      const report = {
+        category: 'test-category',
+        categoryName: 'Test Category',
+        checks: [
+          { id: 'test-1', name: 'Test One', status: 'pass' as const, message: 'OK' },
+          { id: 'test-2', name: 'Test Two', status: 'fail' as const, message: 'Failed' }
+        ],
+        attribution: {
+          triggeredBy: 'integration-test',
+          commit: 'test-commit'
+        }
+      }
+
+      const response = await postHealthReport(report)
+
+      expect(response.status).toBe(201)
+
+      const entry = await response.json()
+      expect(entry.id).toBeDefined()
+      expect(entry.categories[0].id).toBe('test-category')
+      expect(entry.summary.total).toBe(2)
+      expect(entry.summary.passed).toBe(1)
+      expect(entry.summary.failed).toBe(1)
+    })
+
+    test('rejects missing category', async () => {
+      if (!serverRunning) return
+
+      const response = await postHealthReport({
+        checks: []
+      } as any)
+
+      expect(response.status).toBe(400)
+      const error = await response.json()
+      expect(error.error).toContain('category')
+    })
+
+    test('rejects missing checks', async () => {
+      if (!serverRunning) return
+
+      const response = await postHealthReport({
+        category: 'test'
+      } as any)
+
+      expect(response.status).toBe(400)
+      const error = await response.json()
+      expect(error.error).toContain('checks')
+    })
+
+    test('rejects invalid status', async () => {
+      if (!serverRunning) return
+
+      const response = await postHealthReport({
+        category: 'test',
+        checks: [{ id: 'test', status: 'invalid' as any }]
+      })
+
+      expect(response.status).toBe(400)
+      const error = await response.json()
+      expect(error.error).toContain('status')
+    })
+
+    test('report appears in history', async () => {
+      if (!serverRunning) return
+
+      const beforeHistory = await fetchHealthHistory()
+
+      await postHealthReport({
+        category: 'history-test',
+        checks: [{ id: 'test', status: 'pass' }]
+      })
+
+      const afterHistory = await fetchHealthHistory()
+      expect(afterHistory.total).toBeGreaterThan(beforeHistory.total)
     })
   })
 })

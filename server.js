@@ -1743,6 +1743,88 @@ app.post('/api/health/run', (req, res) => {
     }
 });
 
+// POST /api/health/report - Accept external test results
+app.post('/api/health/report', express.json(), async (req, res) => {
+    try {
+        const { category, categoryName, checks, attribution } = req.body;
+
+        // Validate required fields
+        if (!category || typeof category !== 'string') {
+            return res.status(400).json({
+                error: 'Missing or invalid required field: category'
+            });
+        }
+
+        if (!checks || !Array.isArray(checks)) {
+            return res.status(400).json({
+                error: 'Missing or invalid required field: checks (must be array)'
+            });
+        }
+
+        // Validate each check has required fields
+        for (const check of checks) {
+            if (!check.id || !check.status) {
+                return res.status(400).json({
+                    error: 'Each check must have id and status fields'
+                });
+            }
+            if (!['pass', 'fail', 'warn'].includes(check.status)) {
+                return res.status(400).json({
+                    error: `Invalid status "${check.status}" - must be pass, fail, or warn`
+                });
+            }
+        }
+
+        // Calculate summary
+        const summary = {
+            total: checks.length,
+            passed: checks.filter(c => c.status === 'pass').length,
+            failed: checks.filter(c => c.status === 'fail').length,
+            warnings: checks.filter(c => c.status === 'warn').length
+        };
+
+        // Determine category status
+        const hasFail = checks.some(c => c.status === 'fail');
+        const hasWarn = checks.some(c => c.status === 'warn');
+        const categoryStatus = hasFail ? 'fail' : hasWarn ? 'warn' : 'pass';
+
+        // Build report in Health format
+        const report = {
+            timestamp: new Date().toISOString(),
+            configVersion: 'external',
+            engineVersion: getEngineVersion(),
+            categories: [{
+                id: category,
+                name: categoryName || category,
+                status: categoryStatus,
+                checks: checks.map(c => ({
+                    id: c.id,
+                    name: c.name || c.id,
+                    status: c.status,
+                    message: c.message || '',
+                    file: c.file,
+                    duration: c.duration
+                }))
+            }],
+            summary
+        };
+
+        // Log with attribution
+        const entry = appendToHealthLog(report, {
+            triggeredBy: attribution?.triggeredBy || 'external',
+            commit: attribution?.commit || null,
+            branch: attribution?.branch || null
+        });
+
+        console.log(`[Health Report] Received ${checks.length} checks for category "${category}"`);
+        res.status(201).json(entry);
+
+    } catch (error) {
+        console.error('[Health Report] Error:', error);
+        res.status(500).json({ error: 'Failed to record health report' });
+    }
+});
+
 // --- Custom Lens Generation API ---
 
 // System prompt for lens generation
