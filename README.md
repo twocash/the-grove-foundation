@@ -82,6 +82,32 @@ The interesting behavior—agents developing theories about you, forming allianc
 
 ---
 
+## The Infrastructure
+
+Grove is a reference implementation. The architecture underneath it is the point.
+
+**The Trellis Kinetic Exploration Architecture** is a framework for building human-AI exploration systems on any dataset. Grove demonstrates what's possible; the Trellis enables anyone to build their own.
+
+**MCP-native by design.** Point the Trellis at any Model Context Protocol server—your documents, your codebase, your legal discovery corpus, your research literature—and explore it with the same architecture Grove uses. The plumbing is universal; the experience is yours to configure.
+
+**Declarative configuration (DEX).** Domain experts define exploration logic without touching code:
+- A lawyer specifies what constitutes contradictory testimony
+- A researcher defines how insights connect across papers
+- A clinician maps diagnostic pathways
+- The inference engine is interchangeable; the exploration logic belongs to you
+
+**Multiple applications, one architecture.** Knowledge exploration is one use case. The same Trellis could power:
+- Legal discovery systems that track evidence chains
+- Codebase intelligence that maps architecture and technical debt
+- Clinical decision support with diagnostic confidence scoring
+- Research synthesis that surfaces contradictions across literature
+
+Grove is eating its own dogfood. We're using the Trellis to bootstrap a coalition—academic partners, open source contributors, aligned funders—for the larger mission: **sovereign AI at the edge.**
+
+The concentration of AI capability into fortress data centers isn't just a market dynamic. It's a societal risk. Grove demonstrates that distributed alternatives are technically viable. The Trellis makes them reproducible.
+
+---
+
 ## The Experience
 
 You install Grove. A village initializes on your machine.
@@ -175,6 +201,8 @@ Grove builds on documented foundations:
 - Mechanism design principles from Ethereum governance research
 - Narrative systems from computational narrative theory (Short, Adams, et al.)
 - Virtue ethics frameworks for human-AI relationships (Vallor)
+- Model Context Protocol (MCP) from Anthropic for universal tool connectivity
+- Agent Skills specification for portable AI capabilities
 
 The Trellis Architecture draws on information architecture, declarative programming, and two decades of lessons from content management systems that separated structure from presentation.
 
@@ -190,12 +218,14 @@ Grove is MIT licensed. The code is open. The architecture is documented.
 - **Builders** — The codebase welcomes PRs. Start with `/docs/CONTRIBUTING.md`
 - **Researchers** — We're particularly interested in memory retrieval, agent coordination, and human-AI interaction studies
 - **Domain experts** — The Trellis is designed to be planted in any soil. Legal discovery, academic synthesis, enterprise knowledge—bring your corpus.
+- **Trellis architects** — Build DEX configurations for new domains. The architecture is documented; your expertise is the missing piece.
+- **MCP connector builders** — Extend the Trellis to new data sources. Any MCP server becomes explorable.
 - **Writers** — Agent diaries need craft. Character voice differentiation is a design problem.
 - **Skeptics** — The best criticism makes the project better. We'd rather hear it now.
 
 Sustainability and governance documentation: **[the-grove.ai/governance](https://the-grove.ai/governance)**
 
-Trellis Architecture specification: **[the-grove.ai/dex](https://the-grove.ai/dex)**
+Trellis Architecture specification: **[the-grove.ai/trellis](https://the-grove.ai/trellis)**
 
 ---
 
@@ -207,7 +237,7 @@ Grove offers an alternative. Not a guaranteed one. Not a complete one. But a rea
 
 Your computer has villages waiting to exist. The Trellis is ready for your seeds.
 
-**[the-grove.ai](https://the-grove.ai)** — We think it's a world-changing play. Game on.
+**[the-grove.ai](https://the-grove.ai)** — We think it's a world-changing play. The Trellis is ready for your seeds.
 
 ---
 
