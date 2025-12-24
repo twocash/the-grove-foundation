@@ -906,6 +906,10 @@ const Terminal: React.FC<TerminalProps> = ({
                 if (personaId.startsWith('custom-')) {
                   updateCustomLensUsage(personaId);
                 }
+                // Fix: Notify parent of lens selection for Genesis headline collapse
+                if (onLensSelected) {
+                  onLensSelected(personaId);
+                }
               }}
             />
           ) : (

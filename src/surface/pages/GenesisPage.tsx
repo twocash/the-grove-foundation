@@ -133,12 +133,12 @@ const GenesisPage: React.FC = () => {
       setUIMode('split');
       setTerminalState(prev => ({ ...prev, isOpen: true }));
 
-      // If lens already set from previous session, skip to unlocked
+      // If lens already set from previous session, trigger headline collapse
       if (activeLens) {
-        console.log('[ActiveGrove] Tree clicked → unlocked (lens exists:', activeLens, ')');
-        setFlowState('unlocked');
+        console.log('[ActiveGrove] Tree clicked → collapsing (returning user, lens:', activeLens, ')');
+        setFlowState('collapsing');
       } else {
-        console.log('[ActiveGrove] Tree clicked → split mode (no lens)');
+        console.log('[ActiveGrove] Tree clicked → split mode (new user)');
         setFlowState('split');
       }
     } else if (flowState === 'unlocked') {
