@@ -1,5 +1,6 @@
 // src/foundation/FoundationWorkspace.tsx
 // Main Foundation workspace using three-column layout
+// Kinetic Foundation v1: Now includes DEXRegistryProvider
 
 import { Outlet, useLocation } from 'react-router-dom';
 import { ThreeColumnLayout } from '../shared/layout';
@@ -7,6 +8,7 @@ import { FoundationUIProvider, useFoundationUI } from './FoundationUIContext';
 import { FoundationHeader } from './FoundationHeader';
 import { FoundationNav } from './FoundationNav';
 import { FoundationInspector } from './FoundationInspector';
+import { DEXRegistryProvider } from '../core/registry';
 
 // Dashboard placeholder - shown at /foundation root
 function DashboardPlaceholder() {
@@ -74,11 +76,13 @@ function FoundationWorkspaceInner() {
   );
 }
 
-// Main export wraps with provider
+// Main export wraps with providers (Kinetic Foundation v1: DEXRegistry added)
 export default function FoundationWorkspace() {
   return (
-    <FoundationUIProvider>
-      <FoundationWorkspaceInner />
-    </FoundationUIProvider>
+    <DEXRegistryProvider>
+      <FoundationUIProvider>
+        <FoundationWorkspaceInner />
+      </FoundationUIProvider>
+    </DEXRegistryProvider>
   );
 }
