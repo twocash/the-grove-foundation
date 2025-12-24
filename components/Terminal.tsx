@@ -967,6 +967,7 @@ const Terminal: React.FC<TerminalProps> = ({
               getLastResponse={getLastResponse}
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
+              embedded
             />
           </div>
         )}

@@ -18,6 +18,8 @@ interface CommandInputProps {
   getLastResponse?: () => LastResponseData | null;
   getSessionContext?: () => SessionContext;
   captureSprout?: (options?: { tags?: string[]; notes?: string }) => boolean;
+  // Chat Column Unification (Sprint: chat-column-unification-v1)
+  embedded?: boolean;
 }
 
 const CommandInput: React.FC<CommandInputProps> = ({
@@ -30,7 +32,9 @@ const CommandInput: React.FC<CommandInputProps> = ({
   // Sprout System
   getLastResponse,
   getSessionContext,
-  captureSprout
+  captureSprout,
+  // Chat Column Unification
+  embedded = false
 }) => {
   const [input, setInput] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -170,7 +174,11 @@ const CommandInput: React.FC<CommandInputProps> = ({
     <div className="relative">
       {/* Toast notification */}
       {toast && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 px-3 py-2 bg-slate-900 dark:bg-slate-700 text-white text-sm font-mono rounded-lg shadow-lg animate-fade-in">
+        <div className={`absolute bottom-full left-0 right-0 mb-2 px-3 py-2 text-sm font-mono rounded-lg shadow-lg animate-fade-in ${
+          embedded
+            ? 'bg-[var(--chat-surface)] text-[var(--chat-text)] border border-[var(--chat-border)]'
+            : 'bg-slate-900 dark:bg-slate-700 text-white'
+        }`}>
           {toast}
         </div>
       )}
@@ -181,11 +189,16 @@ const CommandInput: React.FC<CommandInputProps> = ({
           commands={suggestions}
           selectedIndex={selectedIndex}
           onSelect={handleSelectCommand}
+          embedded={embedded}
         />
       )}
 
       {/* Input container */}
-      <div className="flex items-center gap-2 bg-surface-light dark:bg-surface-dark rounded-xl p-2 border border-border-light dark:border-border-dark focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all shadow-sm">
+      <div className={`flex items-center gap-2 rounded-xl p-2 transition-all shadow-sm ${
+        embedded
+          ? 'bg-[var(--chat-input-bg)] border border-[var(--chat-border)] focus-within:border-[var(--chat-border-focus)] focus-within:ring-1 focus-within:ring-[var(--chat-accent)]/30'
+          : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50'
+      }`}>
         <input
           ref={inputRef}
           type="text"
@@ -193,7 +206,11 @@ const CommandInput: React.FC<CommandInputProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write a query or type /help"
-          className="flex-1 bg-transparent border-0 text-slate-900 dark:text-white placeholder-slate-500 focus:ring-0 focus:outline-none py-2 px-2 text-sm"
+          className={`flex-1 bg-transparent border-0 focus:ring-0 focus:outline-none py-2 px-2 text-sm ${
+            embedded
+              ? 'text-[var(--chat-text)] placeholder:text-[var(--chat-text-dim)]'
+              : 'text-slate-900 dark:text-white placeholder-slate-500'
+          }`}
           disabled={disabled}
           autoComplete="off"
         />
@@ -201,7 +218,11 @@ const CommandInput: React.FC<CommandInputProps> = ({
         {/* Submit button */}
         <button
           onClick={handleSubmit}
-          className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors shrink-0 disabled:opacity-50"
+          className={`p-2 rounded-lg transition-colors shrink-0 disabled:opacity-50 ${
+            embedded
+              ? 'bg-[var(--chat-accent)] text-[var(--chat-accent-text)] hover:bg-[var(--chat-accent-hover)]'
+              : 'bg-primary text-white hover:bg-primary/90'
+          }`}
           disabled={disabled}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
