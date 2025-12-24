@@ -8,6 +8,11 @@ export { FilterButton, type FilterOption } from './FilterButton';
 export { SortButton, type SortOption } from './SortButton';
 export { ActiveIndicator } from './ActiveIndicator';
 
+// Generic controls (Kinetic Foundation v1)
+export { SegmentedControl } from './SegmentedControl';
+export { ObjectList } from './ObjectList';
+export { ObjectGrid, type ObjectCardBadge } from './ObjectGrid';
+
 // Layout primitives
 export { ThreeColumnLayout } from './layout';
 export { InspectorPanel, InspectorSection, InspectorDivider } from './layout';

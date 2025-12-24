@@ -3,7 +3,7 @@
 // V2.1: Manages Journeys/Nodes with Inspector pattern
 
 import { useState, useMemo } from 'react';
-import { CollectionHeader } from '../../shared';
+import { CollectionHeader, SegmentedControl, ObjectList, ObjectGrid, type ObjectCardBadge } from '../../shared';
 import { DataPanel } from '../components/DataPanel';
 import { GlowButton } from '../components/GlowButton';
 import { MetricCard } from '../components/MetricCard';
@@ -179,40 +179,65 @@ const NarrativeArchitect: React.FC = () => {
       <div className="grid grid-cols-3 gap-6">
         {/* Left Column - Navigation */}
         <div className="col-span-1 space-y-4">
-          {/* View Toggle */}
-          <ViewToggle
-            isV21Schema={isV21Schema}
-            viewMode={viewMode}
-            onViewModeChange={(mode) => {
+          {/* View Toggle - using shared SegmentedControl */}
+          <SegmentedControl
+            options={
+              isV21Schema
+                ? [
+                    { id: 'journeys' as ViewMode, label: 'Journeys', icon: 'map' },
+                    { id: 'nodes' as ViewMode, label: 'Nodes', icon: 'hub' },
+                  ]
+                : [
+                    { id: 'library' as ViewMode, label: 'Library', icon: 'grid_view' },
+                    { id: 'persona' as ViewMode, label: 'Personas', icon: 'group' },
+                  ]
+            }
+            value={viewMode}
+            onChange={(mode) => {
               setViewMode(mode);
               if (mode === 'journeys') setSelectedJourneyId(null);
               if (mode === 'library') setSelectedPersonaId(null);
             }}
+            fullWidth
           />
 
-          {/* Navigation List */}
+          {/* Navigation List - using shared ObjectList */}
           {isV21Schema ? (
             <DataPanel title="Journeys" icon="map">
-              <JourneyList
-                journeys={allJourneys}
-                nodes={allNodes}
+              <ObjectList
+                items={allJourneys}
                 selectedId={selectedJourneyId}
                 activeInspectorId={
                   inspector.mode.type === 'journey' ? inspector.mode.journeyId : null
                 }
                 onSelect={handleJourneyClick}
+                getItemProps={(j) => ({
+                  id: j.id,
+                  label: j.title || j.id,
+                  count: allNodes.filter((n) => n.journeyId === j.id).length,
+                  status: j.status === 'active' ? 'active' : 'inactive',
+                })}
+                emptyMessage="No journeys yet"
               />
             </DataPanel>
           ) : (
             <DataPanel title="Personas" icon="group">
-              <PersonaList
-                personas={personas}
-                cards={allCards}
+              <ObjectList
+                items={personas}
                 selectedId={selectedPersonaId}
                 activeInspectorId={
                   inspector.mode.type === 'persona' ? inspector.mode.personaId : null
                 }
                 onSelect={handlePersonaClick}
+                getItemProps={(p) => ({
+                  id: p.id,
+                  label: p.publicLabel,
+                  count: allCards.filter(
+                    (c) => c.personas.includes(p.id) || c.personas.includes('all')
+                  ).length,
+                  status: p.enabled ? 'active' : 'inactive',
+                })}
+                emptyMessage="No personas"
               />
             </DataPanel>
           )}
@@ -241,7 +266,7 @@ const NarrativeArchitect: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column - Content Grid */}
+        {/* Right Column - Content Grid - using shared ObjectGrid */}
         <div className="col-span-2">
           {isV21Schema ? (
             <DataPanel
@@ -252,12 +277,33 @@ const NarrativeArchitect: React.FC = () => {
               }
               icon="hub"
             >
-              <NodeGrid
-                nodes={filteredNodes}
-                journeys={allJourneys}
+              <ObjectGrid
+                items={filteredNodes}
                 activeInspectorId={inspector.mode.type === 'node' ? inspector.mode.nodeId : null}
                 searchQuery={searchQuery}
                 onSelect={handleNodeClick}
+                getCardProps={(node) => {
+                  const journey = allJourneys.find((j) => j.id === node.journeyId);
+                  const badges: ObjectCardBadge[] = [];
+                  if (node.sequenceOrder !== undefined) {
+                    badges.push({ label: `#${node.sequenceOrder}`, variant: 'success' });
+                  }
+                  if (journey) {
+                    badges.push({ label: journey.title, variant: 'primary' });
+                  }
+                  badges.push({
+                    label: `${node.primaryNext ? '\u2192' : '\u2205'}${(node.alternateNext?.length || 0) > 0 ? ` +${node.alternateNext?.length}` : ''}`,
+                    variant: 'default',
+                  });
+                  return {
+                    id: node.id,
+                    title: node.label,
+                    subtitle: node.id,
+                    badges,
+                  };
+                }}
+                emptyMessage="No nodes yet"
+                emptySearchMessage="No nodes match your search"
               />
             </DataPanel>
           ) : (
@@ -269,11 +315,26 @@ const NarrativeArchitect: React.FC = () => {
               }
               icon="article"
             >
-              <CardGrid
-                cards={filteredCards}
+              <ObjectGrid
+                items={filteredCards}
                 activeInspectorId={inspector.mode.type === 'card' ? inspector.mode.cardId : null}
                 searchQuery={searchQuery}
                 onSelect={handleCardClick}
+                getCardProps={(card) => {
+                  const badges: ObjectCardBadge[] = [];
+                  if (card.sectionId) {
+                    badges.push({ label: card.sectionId, variant: 'primary' });
+                  }
+                  badges.push({ label: `${card.next.length} next`, variant: 'default' });
+                  return {
+                    id: card.id,
+                    title: card.label,
+                    subtitle: card.id,
+                    badges,
+                  };
+                }}
+                emptyMessage="No cards yet"
+                emptySearchMessage="No cards match your search"
               />
             </DataPanel>
           )}
@@ -283,288 +344,6 @@ const NarrativeArchitect: React.FC = () => {
   );
 };
 
-// Sub-components
-
-interface ViewToggleProps {
-  isV21Schema: boolean;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-}
-
-function ViewToggle({ isV21Schema, viewMode, onViewModeChange }: ViewToggleProps) {
-  if (isV21Schema) {
-    return (
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-        <button
-          onClick={() => onViewModeChange('journeys')}
-          className={`flex-1 py-2 px-4 rounded text-sm font-medium uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
-            viewMode === 'journeys'
-              ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-          }`}
-        >
-          <span className="material-symbols-outlined text-base">map</span>
-          Journeys
-        </button>
-        <button
-          onClick={() => onViewModeChange('nodes')}
-          className={`flex-1 py-2 px-4 rounded text-sm font-medium uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
-            viewMode === 'nodes'
-              ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-          }`}
-        >
-          <span className="material-symbols-outlined text-base">hub</span>
-          Nodes
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-      <button
-        onClick={() => onViewModeChange('library')}
-        className={`flex-1 py-2 px-4 rounded text-sm font-medium uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
-          viewMode === 'library'
-            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-        }`}
-      >
-        <span className="material-symbols-outlined text-base">grid_view</span>
-        Library
-      </button>
-      <button
-        onClick={() => onViewModeChange('persona')}
-        className={`flex-1 py-2 px-4 rounded text-sm font-medium uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${
-          viewMode === 'persona'
-            ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-            : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-        }`}
-      >
-        <span className="material-symbols-outlined text-base">group</span>
-        Personas
-      </button>
-    </div>
-  );
-}
-
-interface JourneyListProps {
-  journeys: Journey[];
-  nodes: JourneyNode[];
-  selectedId: string | null;
-  activeInspectorId: string | null;
-  onSelect: (id: string) => void;
-}
-
-function JourneyList({ journeys, nodes, selectedId, activeInspectorId, onSelect }: JourneyListProps) {
-  if (journeys.length === 0) {
-    return (
-      <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
-        No journeys yet
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1">
-      {journeys.map((journey) => {
-        const nodeCount = nodes.filter((n) => n.journeyId === journey.id).length;
-        const isSelected = selectedId === journey.id || activeInspectorId === journey.id;
-
-        return (
-          <button
-            key={journey.id}
-            onClick={() => onSelect(journey.id)}
-            className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-              isSelected
-                ? 'bg-primary/10 text-primary'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    journey.status === 'active' ? 'bg-emerald-500' : 'bg-slate-400'
-                  }`}
-                />
-                <span
-                  className={`text-sm ${journey.status !== 'active' ? 'opacity-50' : ''}`}
-                >
-                  {journey.title}
-                </span>
-              </div>
-              <span className="text-xs text-slate-400">{nodeCount}</span>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-interface PersonaListProps {
-  personas: Persona[];
-  cards: Card[];
-  selectedId: string | null;
-  activeInspectorId: string | null;
-  onSelect: (id: string) => void;
-}
-
-function PersonaList({ personas, cards, selectedId, activeInspectorId, onSelect }: PersonaListProps) {
-  return (
-    <div className="space-y-1">
-      {personas.map((persona) => {
-        const cardCount = cards.filter(
-          (c) => c.personas.includes(persona.id) || c.personas.includes('all')
-        ).length;
-        const isSelected = selectedId === persona.id || activeInspectorId === persona.id;
-
-        return (
-          <button
-            key={persona.id}
-            onClick={() => onSelect(persona.id)}
-            className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-              isSelected
-                ? 'bg-primary/10 text-primary'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    persona.enabled ? 'bg-emerald-500' : 'bg-slate-400'
-                  }`}
-                />
-                <span className={`text-sm ${!persona.enabled ? 'opacity-50' : ''}`}>
-                  {persona.publicLabel}
-                </span>
-              </div>
-              <span className="text-xs text-slate-400">{cardCount}</span>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-interface NodeGridProps {
-  nodes: JourneyNode[];
-  journeys: Journey[];
-  activeInspectorId: string | null;
-  searchQuery: string;
-  onSelect: (id: string) => void;
-}
-
-function NodeGrid({ nodes, journeys, activeInspectorId, searchQuery, onSelect }: NodeGridProps) {
-  if (nodes.length === 0) {
-    return (
-      <div className="text-center py-8 text-slate-500 dark:text-slate-400 text-sm">
-        {searchQuery ? 'No nodes match your search' : 'No nodes yet'}
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-2">
-      {nodes.map((node) => {
-        const isSelected = activeInspectorId === node.id;
-        const journey = journeys.find((j) => j.id === node.journeyId);
-
-        return (
-          <button
-            key={node.id}
-            onClick={() => onSelect(node.id)}
-            className={`text-left p-3 rounded-lg border transition-all ${
-              isSelected
-                ? 'bg-primary/5 border-primary/50'
-                : 'bg-white dark:bg-slate-800 border-border-light dark:border-border-dark hover:border-primary/30'
-            }`}
-          >
-            <div className="font-medium text-slate-900 dark:text-slate-100 text-sm truncate">
-              {node.label}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate mt-1">
-              {node.id}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {node.sequenceOrder !== undefined && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded">
-                  #{node.sequenceOrder}
-                </span>
-              )}
-              {journey && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary/10 text-primary rounded truncate max-w-[100px]">
-                  {journey.title}
-                </span>
-              )}
-              <span className="px-1.5 py-0.5 text-[10px] font-mono bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
-                {node.primaryNext ? '\u2192' : '\u2205'}{' '}
-                {(node.alternateNext?.length || 0) > 0 ? `+${node.alternateNext?.length}` : ''}
-              </span>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-interface CardGridProps {
-  cards: Card[];
-  activeInspectorId: string | null;
-  searchQuery: string;
-  onSelect: (id: string) => void;
-}
-
-function CardGrid({ cards, activeInspectorId, searchQuery, onSelect }: CardGridProps) {
-  if (cards.length === 0) {
-    return (
-      <div className="text-center py-8 text-slate-500 dark:text-slate-400 text-sm">
-        {searchQuery ? 'No cards match your search' : 'No cards yet'}
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-2">
-      {cards.map((card) => {
-        const isSelected = activeInspectorId === card.id;
-
-        return (
-          <button
-            key={card.id}
-            onClick={() => onSelect(card.id)}
-            className={`text-left p-3 rounded-lg border transition-all ${
-              isSelected
-                ? 'bg-primary/5 border-primary/50'
-                : 'bg-white dark:bg-slate-800 border-border-light dark:border-border-dark hover:border-primary/30'
-            }`}
-          >
-            <div className="font-medium text-slate-900 dark:text-slate-100 text-sm truncate">
-              {card.label}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate mt-1">
-              {card.id}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-2">
-              {card.sectionId && (
-                <span className="px-1.5 py-0.5 text-[10px] font-mono bg-primary/10 text-primary rounded">
-                  {card.sectionId}
-                </span>
-              )}
-              <span className="px-1.5 py-0.5 text-[10px] font-mono bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded">
-                {card.next.length} next
-              </span>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// Kinetic Foundation v1: Sub-components replaced with shared ObjectList/ObjectGrid
 
 export default NarrativeArchitect;

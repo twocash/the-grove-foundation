@@ -175,3 +175,21 @@ export {
   type SproutQueueCounts,
   type SproutQueueFilter
 } from './sprout-queue';
+
+// DEX Object Model (Kinetic Architecture)
+export {
+  type DEXObjectType,
+  type DEXVersionEntry,
+  type DEXObject,
+  type DEXCaptureContext,
+  type DEXJourney,
+  type DEXNode,
+  type DEXHub,
+  type DEXLens,
+  type DEXCard,
+  isDEXJourney,
+  isDEXNode,
+  isDEXHub,
+  isDEXLens,
+  isDEXCard
+} from './dex';
