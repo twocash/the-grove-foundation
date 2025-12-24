@@ -4,6 +4,7 @@
 import React from 'react';
 import { useNarrativeEngine } from '../../../hooks/useNarrativeEngine';
 import { Journey } from '../../../data/narratives-schema';
+import { useEngagement, useJourneyState } from '@core/engagement';
 
 interface JourneysModalProps {
   onClose: () => void;
@@ -60,7 +61,12 @@ const JourneyIcon: React.FC<{ name?: string; className?: string }> = ({ name, cl
 };
 
 const JourneysModal: React.FC<JourneysModalProps> = ({ onClose, onStartJourney }) => {
-  const { schema, activeJourneyId, visitedNodes, startJourney } = useNarrativeEngine();
+  const { schema, visitedNodes, getJourney } = useNarrativeEngine();
+
+  // Engagement state machine for journey state
+  const { actor } = useEngagement();
+  const { journey: engJourney, startJourney: engStartJourney } = useJourneyState({ actor });
+  const activeJourneyId = engJourney?.id ?? null;
 
   // Get journeys from schema
   const journeys = schema?.journeys || {};
@@ -72,7 +78,11 @@ const JourneysModal: React.FC<JourneysModalProps> = ({ onClose, onStartJourney }
     if (onStartJourney) {
       onStartJourney(journeyId);
     } else {
-      startJourney(journeyId);
+      // Use engagement hook - requires Journey object
+      const journey = getJourney(journeyId);
+      if (journey) {
+        engStartJourney(journey);
+      }
     }
     onClose();
   };

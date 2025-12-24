@@ -365,7 +365,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
   const getSessionContext = () => ({
     personaId: session.activeLens || null,
-    journeyId: activeJourneyId || null,
+    journeyId: engActiveJourneyId || null,
     hubId: null, // Hub routing happens server-side; not tracked client-side
     nodeId: engineCurrentNodeId || currentNodeId || null
   });
@@ -946,7 +946,7 @@ const Terminal: React.FC<TerminalProps> = ({
           showClose={false}
           lensName={activeLensData?.publicLabel || 'Choose Lens'}
           lensColor={activeLensData?.color}
-          journeyName={getJourney(activeJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
+          journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
           currentStreak={currentStreak}
           showStreak={showStreakDisplay}
           onLensClick={() => actions.showLensPicker()}
@@ -1109,7 +1109,7 @@ const Terminal: React.FC<TerminalProps> = ({
                 // Context selectors
                 lensName={activeLensData?.publicLabel || 'Choose Lens'}
                 lensColor={activeLensData?.color}
-                journeyName={getJourney(activeJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
+                journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
                 onLensClick={() => actions.showLensPicker()}
@@ -1275,7 +1275,7 @@ const Terminal: React.FC<TerminalProps> = ({
                 {showJourneyCompletion && (
                   <div className="max-w-md mx-auto my-6">
                     <JourneyCompletion
-                      journeyTitle={completedJourneyTitle || getJourney(activeJourneyId || '')?.title || (activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey')}
+                      journeyTitle={completedJourneyTitle || getJourney(engActiveJourneyId || '')?.title || (activeLensData?.publicLabel ? `${activeLensData.publicLabel} Journey` : 'Your Journey')}
                       journeyId={`${session.activeLens || 'default'}-${Date.now()}`}
                       personaId={session.activeLens}
                       completionTimeMinutes={Math.round((Date.now() - journeyStartTime) / 60000)}
@@ -1469,7 +1469,7 @@ const Terminal: React.FC<TerminalProps> = ({
         customLenses={customLenses}
         completedJourneyTitle={completedJourneyTitle}
         journeyStartTime={journeyStartTime}
-        activeJourneyId={activeJourneyId}
+        activeJourneyId={engActiveJourneyId}
 
         // Feature flags (not used for reveals/modals but required by props)
         showCustomLensInPicker={showCustomLensInPicker}
