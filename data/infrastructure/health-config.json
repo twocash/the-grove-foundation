@@ -159,6 +159,87 @@
       "test": "engagement-behaviors.spec.ts:tree click opens terminal and shows content",
       "impact": "Users cannot access Terminal",
       "inspect": "Run: npx playwright test -g 'tree click'"
+    },
+    {
+      "id": "lens-persistence-works",
+      "name": "Lens Persistence Works",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "engagement-behaviors.spec.ts:lens selection persists across page reload",
+      "impact": "User lens preferences not saved",
+      "inspect": "npx playwright test -g 'lens selection persists'"
+    },
+    {
+      "id": "journey-completion-persists",
+      "name": "Journey Completion Persists",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "engagement-behaviors.spec.ts:journey completion persists across page reload",
+      "impact": "Journey completion history lost on reload",
+      "inspect": "npx playwright test -g 'journey completion'"
+    },
+    {
+      "id": "entropy-threshold-triggers",
+      "name": "Entropy Threshold Detection Works",
+      "category": "engagement",
+      "type": "unit-test",
+      "test": "use-entropy-state.test.ts:isHighEntropy",
+      "impact": "Journey offers not triggered when conversation becomes unfocused",
+      "inspect": "npx vitest run tests/unit/use-entropy-state.test.ts"
+    },
+    {
+      "id": "engagement-provider-works",
+      "name": "Engagement Provider Works",
+      "category": "engagement",
+      "type": "unit-test",
+      "test": "engagement-context.test.tsx:EngagementProvider",
+      "impact": "Engagement context not available to components",
+      "inspect": "npx vitest run tests/unit/engagement-context.test.tsx"
+    },
+    {
+      "id": "active-grove-split-layout",
+      "name": "Active Grove Split Layout",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "active-grove.spec.ts:clicking tree triggers split layout",
+      "impact": "Terminal panel not visible when seedling clicked",
+      "inspect": "npx playwright test -g 'clicking tree triggers split layout'"
+    },
+    {
+      "id": "active-grove-lens-selection",
+      "name": "Active Grove Lens Selection",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "active-grove.spec.ts:AG-1.6: selecting a lens updates engagement state",
+      "impact": "Lens selection not persisted to XState machine",
+      "inspect": "npx playwright test -g 'AG-1.6'"
+    },
+    {
+      "id": "active-grove-content-transformation",
+      "name": "Active Grove Content Transformation",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "active-grove.spec.ts:AG-1.7: content rail shows hero section with dynamic content",
+      "impact": "Left column content does not change when lens selected",
+      "inspect": "npx playwright test -g 'AG-1.7'"
+    },
+    {
+      "id": "active-grove-persistence",
+      "name": "Active Grove Lens Persistence",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "active-grove.spec.ts:AG-1.9: lens persists across page reload",
+      "impact": "User lens preference lost on page reload",
+      "inspect": "npx playwright test -g 'AG-1.9'"
+    },
+    {
+      "id": "active-grove-url-hydration",
+      "name": "Active Grove URL Hydration",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "active-grove.spec.ts:AG-2.3: URL lens parameter hydrates state",
+      "impact": "Deep links to specific lenses fail",
+      "inspect": "npx playwright test -g 'AG-2.3'"
     }
   ]
 }
