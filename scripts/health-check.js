@@ -16,26 +16,30 @@ const args = process.argv.slice(2)
 const jsonOutput = args.includes('--json')
 const logResult = args.includes('--log')
 
-try {
-  const config = loadConfig()
-  const report = runChecks(config)
+async function main() {
+  try {
+    const config = loadConfig()
+    const report = await runChecks(config)
 
-  // Optionally log the result
-  if (logResult) {
-    appendToHealthLog(report, { triggeredBy: 'cli' })
+    // Optionally log the result
+    if (logResult) {
+      appendToHealthLog(report, { triggeredBy: 'cli' })
+    }
+
+    if (jsonOutput) {
+      console.log(JSON.stringify(report, null, 2))
+    } else {
+      printHumanReadable(report, config.display)
+    }
+
+    process.exit(report.summary.failed > 0 ? 1 : 0)
+  } catch (err) {
+    console.error('Health check failed:', err.message)
+    process.exit(1)
   }
-
-  if (jsonOutput) {
-    console.log(JSON.stringify(report, null, 2))
-  } else {
-    printHumanReadable(report, config.display)
-  }
-
-  process.exit(report.summary.failed > 0 ? 1 : 0)
-} catch (err) {
-  console.error('Health check failed:', err.message)
-  process.exit(1)
 }
+
+main()
 
 function printHumanReadable(report, display) {
   const width = 60

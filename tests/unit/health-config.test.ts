@@ -56,8 +56,8 @@ describe('Health Config Structure', () => {
   })
 
   test('check types are valid', () => {
-    const validTypes = ['json-exists', 'reference-check', 'chain-valid', 'count-range', 'custom']
-    const allChecks = [...config.engineChecks, ...config.corpusChecks]
+    const validTypes = ['json-exists', 'reference-check', 'chain-valid', 'count-range', 'custom', 'engagement-machine-check', 'e2e-behavior']
+    const allChecks = [...config.engineChecks, ...config.corpusChecks, ...(config.engagementChecks || [])]
 
     for (const check of allChecks) {
       expect(validTypes, `Check "${check.id}" has invalid type "${check.type}"`).toContain(check.type)

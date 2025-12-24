@@ -21,6 +21,15 @@
       "severity": "critical",
       "impact": "Health system cannot function without valid config",
       "inspect": "Validate JSON syntax in health-config.json"
+    },
+    {
+      "id": "engagement-machine-valid",
+      "name": "Engagement Machine Valid",
+      "category": "engine",
+      "type": "engagement-machine-check",
+      "severity": "critical",
+      "impact": "State machine not properly defined, cannot migrate engagement context",
+      "inspect": "npx vitest run tests/unit/engagement-machine.test.ts"
     }
   ],
   "corpusChecks": [
