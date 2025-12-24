@@ -863,6 +863,7 @@ const Terminal: React.FC<TerminalProps> = ({
       <div className="chat-container flex flex-col h-full w-full bg-[var(--chat-bg)] text-[var(--chat-text)]">
         {/* Terminal Header - real component (Sprint: active-grove-v1 Fix #5) */}
         <TerminalHeader
+          variant="embedded"
           isScholarMode={isVerboseMode}
           showMinimize={false}
           showClose={false}

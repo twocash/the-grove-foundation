@@ -12,6 +12,7 @@ interface TerminalHeaderProps {
   isScholarMode: boolean;
   showMinimize?: boolean;
   showClose?: boolean;      // Control close button visibility
+  variant?: 'overlay' | 'embedded';  // Styling context
   // Context selectors
   fieldName?: string;
   lensName?: string;
@@ -32,19 +33,22 @@ const HeaderPill: React.FC<{
   icon?: React.ReactNode;
   disabled?: boolean;
   className?: string;  // Allow custom classes for responsive hiding
-}> = ({ label, onClick, icon, disabled, className = '' }) => (
+  embedded?: boolean;  // Use chat tokens in embedded mode
+}> = ({ label, onClick, icon, disabled, className = '', embedded = false }) => (
   <button
     onClick={onClick}
     disabled={disabled || !onClick}
     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium
-      bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200
-      border border-transparent hover:border-primary/30 dark:hover:border-primary/50
+      ${embedded
+        ? 'bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)] hover:bg-[var(--chat-glass-hover)] hover:border-[var(--chat-border-accent)]/50'
+        : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 border border-transparent hover:border-primary/30 dark:hover:border-primary/50'
+      }
       transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       shrink-0 whitespace-nowrap ${className}`}
   >
     {icon}
     <span className="truncate max-w-[100px]">{label}</span>
-    {onClick && <span className="text-[9px] text-slate-400 dark:text-slate-500">▾</span>}
+    {onClick && <span className={`text-[9px] ${embedded ? 'text-[var(--chat-text-dim)]' : 'text-slate-400 dark:text-slate-500'}`}>▾</span>}
   </button>
 );
 
@@ -55,6 +59,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   isScholarMode,
   showMinimize = true,
   showClose = true,        // Default to showing close button
+  variant = 'overlay',
   fieldName,
   lensName,
   lensColor,
@@ -67,15 +72,24 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   onStreakClick
 }) => {
   const lensColors = lensColor ? getPersonaColors(lensColor) : null;
+  const isEmbedded = variant === 'embedded';
 
   return (
-    <div className="px-4 py-2.5 border-b border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark flex items-center gap-3 flex-nowrap">
+    <div className={`px-4 py-2.5 border-b flex items-center gap-3 flex-nowrap ${
+      isEmbedded
+        ? 'border-[var(--chat-border)] bg-[var(--chat-bg)]'
+        : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark'
+    }`}>
       {/* Left: Menu + Title */}
       <div className="flex items-center gap-2 shrink-0">
         {/* Menu button */}
         <button
           onClick={onMenuClick}
-          className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            isEmbedded
+              ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+          }`}
           disabled={!onMenuClick}
           aria-label="Menu"
         >
@@ -85,7 +99,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         </button>
 
         {/* Title */}
-        <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Your Grove</span>
+        <span className={`font-semibold text-sm ${isEmbedded ? 'text-[var(--chat-text)]' : 'text-slate-900 dark:text-slate-100'}`}>Your Grove</span>
         {isScholarMode && (
           <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase">
             Scholar
@@ -102,6 +116,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             label={lensName}
             onClick={onLensClick}
             icon={lensColors && <span className={`w-2 h-2 rounded-full ${lensColors.dot}`} />}
+            embedded={isEmbedded}
           />
         )}
 
@@ -112,6 +127,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             onClick={onJourneyClick}
             disabled={!onJourneyClick}
             className="hidden xl:flex"
+            embedded={isEmbedded}
           />
         )}
 
@@ -122,17 +138,22 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             onClick={onFieldClick}
             disabled={!onFieldClick}
             className="hidden 2xl:flex"
+            embedded={isEmbedded}
           />
         )}
       </div>
 
       {/* Right: Streak + Actions */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* Streak */}
+        {/* Streak - Keep orange semantic color */}
         {showStreak && currentStreak !== undefined && currentStreak > 0 && (
           <button
             onClick={onStreakClick}
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-primary hover:bg-primary/10 transition-colors"
+            className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${
+              isEmbedded
+                ? 'text-orange-400 hover:bg-orange-400/10'
+                : 'text-primary hover:bg-primary/10'
+            }`}
             aria-label={`${currentStreak} day streak`}
           >
             <span className="text-sm">🔥</span>
@@ -144,7 +165,11 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         {showMinimize && (
           <button
             onClick={onMinimize}
-            className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className={`p-1 transition-colors ${
+              isEmbedded
+                ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
             aria-label="Minimize"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +182,11 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         {showClose && onClose && (
           <button
             onClick={onClose}
-            className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+            className={`p-1 transition-colors ${
+              isEmbedded
+                ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
             aria-label="Close"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
