@@ -753,85 +753,10 @@ const Terminal: React.FC<TerminalProps> = ({
       }
 
       // === Cognitive Bridge / Entropy Evaluation ===
-      // Only evaluate if user is in freestyle mode (no active lens/journey)
-      // Note: We count messages AFTER this exchange, so add 1 to current count
-      // (incrementExchangeCount was called at start but React state is async)
-      const currentExchangeCount = Math.floor((terminalState.messages.length + 1) / 2);
-
-      console.log('[Entropy Debug] Preconditions:', {
-        activeLens: session.activeLens,
-        threadLength: currentThread.length,
-        messageCount: terminalState.messages.length,
-        calculatedExchanges: currentExchangeCount,
-        entropyState
-      });
-
-      // Cognitive Bridge triggers for freestyle/unguided users (not in an active journey thread)
-      // v0.12e: Also trigger for null activeLens (first-time users before lens selection)
-      const isFreestyleMode = session.activeLens === 'freestyle' || session.activeLens === null;
-      if (isFreestyleMode && currentThread.length === 0) {
-        // Build history from messages for entropy calculation
-        const history = terminalState.messages.map(m => ({
-          role: m.role as 'user' | 'model',
-          text: m.text
-        }));
-
-        // Evaluate entropy for this exchange - use calculated count, not stale state
-        const entropy = evaluateEntropy(textToSend, history);
-        // Override with correct exchange count since evaluateEntropy uses stale session.exchangeCount
-        let adjustedScore = entropy.score;
-        // If we have 3+ exchanges but the score doesn't include the +30 bonus, add it
-        if (currentExchangeCount >= 3 && entropy.score < 30) {
-          adjustedScore += 30;
-        }
-        const adjustedClassification = adjustedScore >= 60 ? 'high' : adjustedScore >= 30 ? 'medium' : 'low';
-
-        console.log('[Entropy]', {
-          originalScore: entropy.score,
-          adjustedScore,
-          classification: adjustedClassification,
-          cluster: entropy.dominantCluster,
-          matchedTags: entropy.matchedTags,
-          exchangeCount: currentExchangeCount,
-          message: textToSend.substring(0, 50)
-        });
-
-        // Check if we should show the Cognitive Bridge (use adjusted classification)
-        const adjustedEntropy = { ...entropy, score: adjustedScore, classification: adjustedClassification as 'low' | 'medium' | 'high' };
-        const shouldShow = checkShouldInject(adjustedEntropy);
-        console.log('[Entropy] shouldInject:', shouldShow, 'hasDominantCluster:', !!entropy.dominantCluster);
-
-        if (shouldShow && entropy.dominantCluster) {
-          const journeyId = getJourneyIdForCluster(entropy.dominantCluster);
-          console.log('[Entropy] Journey mapping:', { cluster: entropy.dominantCluster, journeyId });
-          if (journeyId) {
-            const shownAt = Date.now();
-            actions.setBridgeState({
-              visible: true,
-              journeyId,
-              topicMatch: entropy.dominantCluster,
-              afterMessageId: botMessageId,
-              shownAt,
-              entropyScore: adjustedScore,
-              exchangeCount: currentExchangeCount
-            });
-            recordEntropyInjection(adjustedEntropy);
-            // Track bridge shown event
-            trackCognitiveBridgeShown({
-              journeyId,
-              entropyScore: adjustedScore,
-              cluster: entropy.dominantCluster,
-              exchangeCount: currentExchangeCount
-            });
-            console.log('[Entropy] Bridge ACTIVATED');
-          }
-        }
-      } else {
-        console.log('[Entropy] Skipped - user has active lens or journey', {
-          activeLens: session.activeLens,
-          threadLength: currentThread.length
-        });
-      }
+      // DISABLED: Epic 7 migrated entropy to engagement hooks
+      // TODO: Re-enable with useEntropyState hook integration
+      // The Cognitive Bridge feature is temporarily disabled until
+      // the entropy detection logic is migrated to the new XState-based hooks
 
     } catch (error) {
       // Handle errors gracefully
@@ -843,9 +768,6 @@ const Terminal: React.FC<TerminalProps> = ({
         )
       }));
     }
-
-    // Always tick entropy cooldown after each exchange (regardless of mode)
-    tickEntropyCooldown();
 
     setTerminalState(prev => ({
       ...prev,
@@ -1262,7 +1184,7 @@ const Terminal: React.FC<TerminalProps> = ({
                               journeyId: bridgeState.journeyId!,
                               timeToDecisionMs
                             });
-                            recordEntropyDismiss();
+                            // recordEntropyDismiss() - DISABLED: Epic 7 migration
                             actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
                           }}
                         />
