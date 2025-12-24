@@ -50,108 +50,117 @@ const WorkspaceLoadingFallback: React.FC = () => (
 // Surface Router handles Classic/Genesis experience switching
 import SurfaceRouter from '../surface/pages/SurfaceRouter';
 
+// Root layout with theme provider
+import { RootLayout } from './RootLayout';
+
 export const routes: RouteObject[] = [
-  // Surface (main experience - routes between Classic and Genesis)
+  // Root wrapper with ThemeProvider
   {
-    path: '/',
-    element: <SurfaceRouter />,
-  },
-
-  // Grove Workspace (three-column Terminal experience)
-  {
-    path: '/terminal',
-    element: (
-      <Suspense fallback={<WorkspaceLoadingFallback />}>
-        <GroveWorkspace />
-      </Suspense>
-    ),
-  },
-
-  // Foundation (admin/control plane with three-column layout)
-  {
-    path: '/foundation',
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <FoundationWorkspace />
-      </Suspense>
-    ),
+    element: <RootLayout />,
     children: [
-      // Default route - will show dashboard in layout
+      // Surface (main experience - routes between Classic and Genesis)
       {
-        index: true,
-        element: null, // Layout handles this with DashboardPlaceholder
+        path: '/',
+        element: <SurfaceRouter />,
       },
-      // Console routes
+
+      // Grove Workspace (three-column Terminal experience)
       {
-        path: 'narrative',
+        path: '/terminal',
         element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <NarrativeArchitect />
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <GroveWorkspace />
           </Suspense>
         ),
       },
+
+      // Foundation (admin/control plane with three-column layout)
       {
-        path: 'engagement',
+        path: '/foundation',
         element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <EngagementBridge />
+          <Suspense fallback={<LoadingFallback />}>
+            <FoundationWorkspace />
           </Suspense>
         ),
+        children: [
+          // Default route - will show dashboard in layout
+          {
+            index: true,
+            element: null, // Layout handles this with DashboardPlaceholder
+          },
+          // Console routes
+          {
+            path: 'narrative',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <NarrativeArchitect />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'engagement',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <EngagementBridge />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'knowledge',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <KnowledgeVault />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'tuner',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <RealityTuner />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'audio',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <AudioStudio />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'genesis',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <Genesis />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'health',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <HealthDashboard />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'sprouts',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <SproutQueue />
+              </Suspense>
+            ),
+          },
+        ],
       },
+
+      // Catch-all redirect to home
       {
-        path: 'knowledge',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <KnowledgeVault />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'tuner',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <RealityTuner />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'audio',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <AudioStudio />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'genesis',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <Genesis />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'health',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <HealthDashboard />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'sprouts',
-        element: (
-          <Suspense fallback={<ConsoleLoadingFallback />}>
-            <SproutQueue />
-          </Suspense>
-        ),
+        path: '*',
+        element: <Navigate to="/" replace />,
       },
     ],
-  },
-
-  // Catch-all redirect to home
-  {
-    path: '*',
-    element: <Navigate to="/" replace />,
   },
 ];
