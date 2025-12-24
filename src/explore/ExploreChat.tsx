@@ -1,5 +1,6 @@
 // src/explore/ExploreChat.tsx
 // Terminal wrapper for the workspace - embeds the existing Terminal component
+// v1.0: Simplified to use Terminal's embedded mode with chat tokens
 
 import { useState, useCallback } from 'react';
 import Terminal from '../../components/Terminal';
@@ -23,135 +24,14 @@ export function ExploreChat() {
   }, []);
 
   return (
-    <div className="explore-chat-container">
-      {/*
-        CSS overrides to embed the Terminal (normally a fixed drawer) into the workspace.
-        The Terminal uses fixed positioning which we override to be relative.
-      */}
-      <style>{`
-        .explore-chat-container {
-          position: relative;
-          height: 100%;
-          overflow: hidden;
-        }
-
-        /* Override Terminal's fixed positioning to embed it */
-        .explore-chat-container > div {
-          position: relative !important;
-          inset: unset !important;
-          width: 100% !important;
-          height: 100% !important;
-          transform: none !important;
-          z-index: 1 !important;
-        }
-
-        /* Hide the floating action button in workspace context */
-        .explore-chat-container button[class*="fixed bottom-8 right-8"] {
-          display: none !important;
-        }
-
-        /* Make the drawer fill the container */
-        .explore-chat-container .fixed.inset-y-0.right-0 {
-          position: relative !important;
-          inset: unset !important;
-          width: 100% !important;
-          height: 100% !important;
-          transform: none !important;
-          border: none !important;
-          box-shadow: none !important;
-        }
-
-        /* Ensure the inner flex container fills height */
-        .explore-chat-container .flex.flex-col.h-full {
-          height: 100% !important;
-        }
-
-        /* Override background to match workspace theme */
-        .explore-chat-container .bg-white {
-          background: var(--grove-surface, #121a22) !important;
-        }
-
-        /* Override text colors for dark theme */
-        .explore-chat-container .text-ink {
-          color: var(--grove-text, #e2e8f0) !important;
-        }
-
-        .explore-chat-container .text-ink-muted {
-          color: var(--grove-text-muted, #94a3b8) !important;
-        }
-
-        /* Override border colors */
-        .explore-chat-container .border-ink\\/10,
-        .explore-chat-container .border-ink-border {
-          border-color: var(--grove-border, #1e2a36) !important;
-        }
-
-        /* Override input/textarea backgrounds */
-        .explore-chat-container input,
-        .explore-chat-container textarea {
-          background: var(--grove-bg, #0a0f14) !important;
-          color: var(--grove-text, #e2e8f0) !important;
-          border-color: var(--grove-border, #1e2a36) !important;
-        }
-
-        .explore-chat-container input::placeholder,
-        .explore-chat-container textarea::placeholder {
-          color: var(--grove-text-dim, #64748b) !important;
-        }
-
-        /* Override scrollbar for dark theme */
-        .explore-chat-container ::-webkit-scrollbar-track {
-          background: var(--grove-surface, #121a22) !important;
-        }
-
-        .explore-chat-container ::-webkit-scrollbar-thumb {
-          background: var(--grove-border, #1e2a36) !important;
-        }
-
-        /* Hide the Terminal pill (minimized state) */
-        .explore-chat-container .terminal-slide-up {
-          display: none !important;
-        }
-
-        /* Accent colors */
-        .explore-chat-container .text-grove-clay {
-          color: var(--grove-accent, #00d4aa) !important;
-        }
-
-        .explore-chat-container .bg-grove-forest {
-          background: var(--grove-accent, #00d4aa) !important;
-        }
-
-        /* Button styling */
-        .explore-chat-container button:not([class*="fixed"]) {
-          transition: all 150ms ease;
-        }
-
-        /* v0.14.1: LensPicker dark mode overrides */
-        .explore-chat-container .bg-paper\\/50 {
-          background: transparent !important;
-        }
-
-        .explore-chat-container .border-ink\\/5 {
-          border-color: var(--grove-border, #1e2a36) !important;
-        }
-
-        /* Ensure dark backgrounds work */
-        .explore-chat-container .dark\\:bg-slate-900 {
-          background: var(--grove-surface, #121a22) !important;
-        }
-
-        .explore-chat-container .dark\\:bg-slate-800 {
-          background: rgba(30, 41, 59, 0.8) !important;
-        }
-      `}</style>
-
+    <div className="h-full w-full">
       <Terminal
         activeSection={activeSection}
         terminalState={terminalState}
         setTerminalState={setTerminalState}
         externalQuery={externalQuery}
         onQueryHandled={handleQueryHandled}
+        variant="embedded"
       />
     </div>
   );
