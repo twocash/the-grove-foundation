@@ -118,24 +118,18 @@ const Terminal: React.FC<TerminalProps> = ({
     getCustomLens
   } = useCustomLens();
 
-  // V2.1 Narrative Engine
+  // V2.1 Narrative Engine (schema + lookups only; state managed by engagement hooks)
   const {
     schema,
     session,
-    selectLens,
     getActiveLensData,
     getEnabledPersonas,
     getEntryPoints,
     getNextCards,
-    // V2.1 Journey Navigation
-    startJourney,
-    advanceNode,
-    exitJourney,
+    // V2.1 Journey Navigation (lookups only)
     getJourney,
     getNode,
     getNextNodes,
-    activeJourneyId,
-    currentNodeId: engineCurrentNodeId,
     visitedNodes,
     addVisitedNode,
     // Legacy (deprecated but kept for backward compatibility)
@@ -147,14 +141,6 @@ const Terminal: React.FC<TerminalProps> = ({
     incrementExchangeCount,
     addVisitedCard,
     globalSettings,
-    // Entropy / Cognitive Bridge
-    entropyState,
-    evaluateEntropy,
-    checkShouldInject,
-    recordEntropyInjection,
-    recordEntropyDismiss,
-    tickEntropyCooldown,
-    getJourneyIdForCluster,
     // v0.12e: First-time user detection and URL lens
     isFirstTimeUser,
     urlLensId

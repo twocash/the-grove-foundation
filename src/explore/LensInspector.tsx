@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { Persona } from '../../data/narratives-schema';
+import { useEngagement, useLensState } from '@core/engagement';
 
 // Reusable toggle switch
 interface ToggleProps {
@@ -165,8 +166,12 @@ interface LensInspectorProps {
 }
 
 export function LensInspector({ personaId }: LensInspectorProps) {
-  const { getEnabledPersonas, selectLens, session } = useNarrativeEngine();
+  const { getEnabledPersonas, session } = useNarrativeEngine();
   const { closeInspector, navigateTo } = useWorkspaceUI();
+
+  // Engagement state machine for lens selection
+  const { actor } = useEngagement();
+  const { selectLens: engSelectLens } = useLensState({ actor });
   const personas = getEnabledPersonas();
   const persona = personas.find(p => p.id === personaId);
 
@@ -188,7 +193,7 @@ export function LensInspector({ personaId }: LensInspectorProps) {
   }
 
   const handleActivate = () => {
-    selectLens(personaId);
+    engSelectLens(personaId);
     navigateTo(['explore']);
   };
 
@@ -234,7 +239,7 @@ export function LensInspector({ personaId }: LensInspectorProps) {
       <button
         onClick={() => {
           if (!isActive) {
-            selectLens(personaId);
+            engSelectLens(personaId);
           }
           navigateTo(['explore']);
         }}

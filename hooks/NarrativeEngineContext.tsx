@@ -2,7 +2,7 @@
 // Shared context for NarrativeEngine state across all components
 // v0.14.1: Fix - Terminal and GenesisPage now share lens state
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import {
   NarrativeSchemaV2,
   TerminalSession,
@@ -18,23 +18,11 @@ import {
   nodeToCard
 } from '../data/narratives-schema';
 import { DEFAULT_PERSONAS } from '../data/default-personas';
-import {
-  EntropyState,
-  EntropyResult,
-  DEFAULT_ENTROPY_STATE,
-  calculateEntropy,
-  shouldInject,
-  updateEntropyState,
-  dismissEntropy,
-  getJourneyForCluster,
-  type EntropyMessage
-} from '../src/core/engine/entropyDetector';
 import { deserializeLens } from '../src/utils/lensSerializer';
 
 // LocalStorage keys
 const STORAGE_KEY_LENS = 'grove-terminal-lens';
 const STORAGE_KEY_SESSION = 'grove-terminal-session';
-const STORAGE_KEY_ENTROPY = 'grove-terminal-entropy';
 const STORAGE_KEY_REFERRER = 'grove-referrer';
 const STORAGE_KEY_WELCOMED = 'grove-terminal-welcomed';
 const STORAGE_KEY_ESTABLISHED = 'grove-session-established';
@@ -101,7 +89,6 @@ const ensureCleanFirstVisit = (): void => {
       localStorage.removeItem(STORAGE_KEY_WELCOMED);
       localStorage.removeItem(STORAGE_KEY_LENS);
       localStorage.removeItem(STORAGE_KEY_SESSION);
-      localStorage.removeItem(STORAGE_KEY_ENTROPY);
       // Keep referrer if they previously had one - that's intentional tracking
     }
   } catch (e) {
@@ -189,19 +176,13 @@ interface NarrativeEngineContextType {
   session: TerminalSession;
   loading: boolean;
   error: string | null;
-  selectLens: (personaId: string | null) => void;
   getPersona: (personaId: string) => Persona | undefined;
   getPersonaById: (id: string) => Persona | undefined;
   getEnabledPersonas: () => Persona[];
   getActiveLensData: () => Persona | null;
-  startJourney: (journeyId: string) => void;
-  advanceNode: (choiceIndex?: number) => void;
-  exitJourney: () => void;
   getJourney: (journeyId: string) => Journey | undefined;
   getNode: (nodeId: string) => JourneyNode | undefined;
   getNextNodes: (nodeId: string) => JourneyNode[];
-  activeJourneyId: string | null;
-  currentNodeId: string | null;
   visitedNodes: string[];
   getCard: (cardId: string) => Card | undefined;
   getPersonaCards: (personaId: string | null) => Card[];
@@ -218,13 +199,6 @@ interface NarrativeEngineContextType {
   addVisitedNode: (nodeId: string) => void;
   shouldNudge: () => boolean;
   resetSession: () => void;
-  entropyState: EntropyState;
-  evaluateEntropy: (message: string, history: EntropyMessage[]) => EntropyResult;
-  checkShouldInject: (entropy: EntropyResult) => boolean;
-  recordEntropyInjection: (entropy: EntropyResult) => void;
-  recordEntropyDismiss: () => void;
-  tickEntropyCooldown: () => void;
-  getJourneyIdForCluster: (cluster: string) => string | null;
   globalSettings: GlobalSettings;
   // v0.12e: First-time user detection and referrer tracking
   isFirstTimeUser: boolean;
@@ -261,7 +235,6 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     ...DEFAULT_TERMINAL_SESSION,
     activeLens: getInitialLens() // Now reads from cleaned localStorage
   }));
-  const [entropyState, setEntropyState] = useState<EntropyState>(DEFAULT_ENTROPY_STATE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [urlLensId] = useState(() => {
@@ -346,37 +319,9 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     }
   }, [session]);
 
-  // Load entropy state
-  useEffect(() => {
-    try {
-      const storedEntropy = localStorage.getItem(STORAGE_KEY_ENTROPY);
-      if (storedEntropy) {
-        const parsed = JSON.parse(storedEntropy) as Partial<EntropyState>;
-        setEntropyState(prev => ({ ...prev, ...parsed }));
-      }
-    } catch (err) {
-      console.error('Failed to restore entropy state:', err);
-    }
-  }, []);
-
-  // Persist entropy state
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_ENTROPY, JSON.stringify(entropyState));
-    } catch (err) {
-      console.error('Failed to persist entropy state:', err);
-    }
-  }, [entropyState]);
 
   // === Callbacks ===
 
-  const selectLens = useCallback((personaId: string | null) => {
-    console.log('[NarrativeEngine] selectLens:', personaId);
-    setSession(prev => {
-      if (prev.activeLens === personaId) return prev;
-      return { ...prev, activeLens: personaId, exchangeCount: 0 };
-    });
-  }, []);
 
   const getPersona = useCallback((personaId: string): Persona | undefined => {
     if (!schema) return DEFAULT_PERSONAS[personaId];
@@ -460,68 +405,6 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     return nextIds.map(id => schema.nodes![id]).filter(Boolean) as JourneyNode[];
   }, [schema]);
 
-  const startJourney = useCallback((journeyId: string) => {
-    const journey = getJourney(journeyId);
-    if (!journey) {
-      console.warn(`[V2.1] Journey not found: ${journeyId}`);
-      return;
-    }
-    console.log(`[V2.1] Starting journey: ${journeyId}, entry: ${journey.entryNode}`);
-
-    // Build thread from journey nodes for legacy UI compatibility
-    const thread: string[] = [];
-    let currentNodeId: string | null = journey.entryNode;
-    const visited = new Set<string>();
-
-    while (currentNodeId && !visited.has(currentNodeId)) {
-      visited.add(currentNodeId);
-      const node = schema?.nodes?.[currentNodeId];
-      if (node) {
-        // Add the card ID to the thread (nodes reference cards)
-        thread.push(currentNodeId);
-        currentNodeId = node.primaryNext || null;
-      } else {
-        break;
-      }
-    }
-
-    console.log(`[V2.1] Built thread with ${thread.length} nodes:`, thread);
-
-    setSession(prev => ({
-      ...prev,
-      activeJourneyId: journeyId,
-      currentNodeId: journey.entryNode,
-      visitedNodes: [journey.entryNode],
-      // Legacy fields for UI compatibility
-      currentThread: thread,
-      currentPosition: 0
-    }));
-  }, [getJourney, schema]);
-
-  const advanceNode = useCallback((choiceIndex: number = 0) => {
-    if (!session.currentNodeId || !schema?.nodes) return;
-    const currentNode = schema.nodes[session.currentNodeId];
-    if (!currentNode) return;
-    const nextOptions: string[] = [];
-    if (currentNode.primaryNext) nextOptions.push(currentNode.primaryNext);
-    if (currentNode.alternateNext) nextOptions.push(...currentNode.alternateNext);
-    const nextNodeId = nextOptions[choiceIndex];
-    if (!nextNodeId) {
-      console.log('[V2.1] Journey complete - no more nodes');
-      return;
-    }
-    console.log(`[V2.1] Advancing to node: ${nextNodeId} (choice: ${choiceIndex})`);
-    setSession(prev => ({
-      ...prev,
-      currentNodeId: nextNodeId,
-      visitedNodes: prev.visitedNodes.includes(nextNodeId) ? prev.visitedNodes : [...prev.visitedNodes, nextNodeId]
-    }));
-  }, [session.currentNodeId, schema]);
-
-  const exitJourney = useCallback(() => {
-    console.log('[V2.1] Exiting journey');
-    setSession(prev => ({ ...prev, activeJourneyId: null, currentNodeId: null, visitedNodes: [] }));
-  }, []);
 
   // Legacy thread methods
   const regenerateThread = useCallback(() => {
@@ -529,16 +412,9 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
   }, []);
 
   const advanceThread = useCallback((): string | null => {
-    console.warn('[V2.1] advanceThread is deprecated.');
-    if (session.currentNodeId && schema?.nodes) {
-      const currentNode = schema.nodes[session.currentNodeId];
-      if (currentNode?.primaryNext) {
-        advanceNode(0);
-        return currentNode.primaryNext;
-      }
-    }
+    console.warn('[V2.1] advanceThread is deprecated. Use engagement hooks instead.');
     return null;
-  }, [session.currentNodeId, schema, advanceNode]);
+  }, []);
 
   const getThreadCard = useCallback((position: number): Card | null => {
     const itemId = session.currentThread[position];
@@ -593,39 +469,10 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
 
   const resetSession = useCallback(() => {
     setSession(DEFAULT_TERMINAL_SESSION);
-    setEntropyState(DEFAULT_ENTROPY_STATE);
     localStorage.removeItem(STORAGE_KEY_LENS);
     localStorage.removeItem(STORAGE_KEY_SESSION);
-    localStorage.removeItem(STORAGE_KEY_ENTROPY);
   }, []);
 
-  // Entropy methods
-  const evaluateEntropy = useCallback((message: string, history: EntropyMessage[]): EntropyResult => {
-    const v21Hubs = schema?.hubs ? Object.values(schema.hubs).filter(h => h.status === 'active') : [];
-    const legacyHubs = schema?.globalSettings.topicHubs || [];
-    const topicHubs = v21Hubs.length > 0 ? v21Hubs : legacyHubs;
-    return calculateEntropy(message, history, topicHubs, session.exchangeCount);
-  }, [schema, session.exchangeCount]);
-
-  const checkShouldInject = useCallback((entropy: EntropyResult): boolean => {
-    return shouldInject(entropy, entropyState);
-  }, [entropyState]);
-
-  const recordEntropyInjection = useCallback((entropy: EntropyResult) => {
-    setEntropyState(prev => updateEntropyState(prev, entropy, true, session.exchangeCount));
-  }, [session.exchangeCount]);
-
-  const recordEntropyDismiss = useCallback(() => {
-    setEntropyState(prev => dismissEntropy(prev, session.exchangeCount));
-  }, [session.exchangeCount]);
-
-  const tickEntropyCooldown = useCallback(() => {
-    setEntropyState(prev => ({ ...prev, cooldownRemaining: Math.max(0, prev.cooldownRemaining - 1) }));
-  }, []);
-
-  const getJourneyIdForCluster = useCallback((cluster: string): string | null => {
-    return getJourneyForCluster(cluster);
-  }, []);
 
   const globalSettings = schema?.globalSettings || DEFAULT_GLOBAL_SETTINGS;
 
@@ -634,19 +481,13 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     session,
     loading,
     error,
-    selectLens,
     getPersona,
     getPersonaById,
     getEnabledPersonas,
     getActiveLensData,
-    startJourney,
-    advanceNode,
-    exitJourney,
     getJourney,
     getNode,
     getNextNodes,
-    activeJourneyId: session.activeJourneyId,
-    currentNodeId: session.currentNodeId,
     visitedNodes: session.visitedNodes,
     getCard,
     getPersonaCards,
@@ -663,13 +504,6 @@ export const NarrativeEngineProvider: React.FC<{ children: ReactNode }> = ({ chi
     addVisitedNode,
     shouldNudge,
     resetSession,
-    entropyState,
-    evaluateEntropy,
-    checkShouldInject,
-    recordEntropyInjection,
-    recordEntropyDismiss,
-    tickEntropyCooldown,
-    getJourneyIdForCluster,
     globalSettings,
     // v0.12e: First-time user detection and referrer tracking
     isFirstTimeUser,
