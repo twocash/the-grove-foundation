@@ -19,9 +19,10 @@ const iconNameToSymbol: Record<string, string> = {
   bot: 'smart_toy',
   forest: 'forest',
   add_circle: 'add_circle_outline',
+  book: 'menu_book',
 };
 
-// Navigation tree structure - Updated IA v0.14.2
+// Navigation tree structure - Updated IA v0.15
 // Explore contains Fields (Grove Project is first field, + Fields for future expansion)
 const navigationTree: Record<string, NavItem> = {
   explore: {
@@ -35,9 +36,12 @@ const navigationTree: Record<string, NavItem> = {
         icon: 'forest',
         view: 'terminal',
         children: {
-          nodes: { id: 'nodes', label: 'Nodes', icon: 'branch', view: 'node-grid' },
-          journeys: { id: 'journeys', label: 'Journeys', icon: 'map', view: 'journey-list' },
+          terminal: { id: 'terminal', label: 'Terminal', icon: 'message', view: 'terminal' },
           lenses: { id: 'lenses', label: 'Lenses', icon: 'glasses', view: 'lens-picker' },
+          journeys: { id: 'journeys', label: 'Journeys', icon: 'map', view: 'journey-list' },
+          nodes: { id: 'nodes', label: 'Nodes', icon: 'branch', view: 'node-grid' },
+          diary: { id: 'diary', label: 'Diary', icon: 'book', view: 'diary-list' },
+          sprouts: { id: 'sprouts', label: 'Sprouts', icon: 'sprout', view: 'sprout-grid' },
         },
       },
       addField: {
@@ -63,7 +67,6 @@ const navigationTree: Record<string, NavItem> = {
     label: 'Cultivate',
     icon: 'sprout',
     children: {
-      mySprouts: { id: 'mySprouts', label: 'My Sprouts', view: 'sprout-grid' },
       commons: { id: 'commons', label: 'Commons', view: 'commons-feed' },
     },
   },
