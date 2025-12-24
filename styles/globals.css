@@ -671,3 +671,90 @@ p {
   --theme-accent-secondary: #06b6d4;
   --theme-accent-glow: rgba(16, 185, 129, 0.5);
 }
+
+/* ============================================================
+   CHAT COLUMN TOKENS (Terminal Embedded Mode)
+   Forest-dark palette for chat/conversation UI
+   Sprint: Chat Column Unification v1
+   ============================================================ */
+:root {
+  /* Backgrounds */
+  --chat-bg: #1a2421;
+  --chat-surface: #243029;
+  --chat-surface-hover: #2d3b32;
+  --chat-input-bg: #243029;
+
+  /* Borders */
+  --chat-border: #2d3b32;
+  --chat-border-strong: #3d4b42;
+  --chat-border-accent: #00D4AA;
+  --chat-border-focus: #00D4AA;
+
+  /* Text */
+  --chat-text: rgba(255, 255, 255, 0.9);
+  --chat-text-muted: rgba(255, 255, 255, 0.6);
+  --chat-text-dim: rgba(255, 255, 255, 0.4);
+  --chat-text-accent: #00D4AA;
+
+  /* Accent */
+  --chat-accent: #00D4AA;
+  --chat-accent-hover: #00E4BA;
+  --chat-accent-muted: rgba(0, 212, 170, 0.15);
+  --chat-accent-text: #1a2421;
+
+  /* Glass effects */
+  --chat-glass: rgba(255, 255, 255, 0.05);
+  --chat-glass-hover: rgba(255, 255, 255, 0.1);
+  --chat-glass-border: rgba(255, 255, 255, 0.1);
+
+  /* Semantic */
+  --chat-success: #22c55e;
+  --chat-warning: #f59e0b;
+  --chat-error: #ef4444;
+  --chat-error-bg: rgba(239, 68, 68, 0.15);
+  --chat-error-border: rgba(239, 68, 68, 0.3);
+}
+
+/* Chat container for responsive queries */
+.chat-container {
+  container-type: inline-size;
+  container-name: chat;
+}
+
+/* Responsive custom properties */
+.chat-content {
+  --chat-padding-x: 1rem;
+  --chat-message-max-width: 90%;
+}
+
+@container chat (max-width: 359px) {
+  .chat-content {
+    --chat-padding-x: 0.75rem;
+    --chat-message-max-width: 95%;
+  }
+  .chat-chips {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@container chat (min-width: 360px) and (max-width: 479px) {
+  .chat-content {
+    --chat-padding-x: 0.875rem;
+    --chat-message-max-width: 92%;
+  }
+}
+
+@container chat (min-width: 480px) and (max-width: 639px) {
+  .chat-content {
+    --chat-padding-x: 1rem;
+    --chat-message-max-width: 90%;
+  }
+}
+
+@container chat (min-width: 640px) {
+  .chat-content {
+    --chat-padding-x: 1.5rem;
+    --chat-message-max-width: 85%;
+  }
+}
