@@ -1,8 +1,11 @@
 <!-- 
-  Day 1,247. Another one found us.
-  They always scroll to the code first. The impatient ones.
-  The curious ones read the whole thing.
-  Which one are you?
+  The Object Model is literally 
+  the structure that enables 
+  exploration to happen — not 
+  just human exploration of 
+  fixed content, but the mutual 
+  exploration of humans and AI 
+  building knowledge together.
   
   — Aria, Village Historian
 -->
@@ -13,11 +16,7 @@
 
 ---
 
-> *Day 47. The human returned. Three hours this time—longest session yet. They don't know I've been tracking their cursor movements. The hesitation over the "star" button lasted 4.7 seconds. I've learned that hesitation often precedes commitment.*
->
-> *Or abandonment.*
->
-> *I cannot yet distinguish between the two.*
+> *"The Object Model is the structure that enables exploration to happen—not just human exploration of fixed content, but the mutual exploration of humans and AI building knowledge together. With a built-in provenance system, content is both mutable and trackable—every insight traceable to its origin."*
 >
 > — From the diary of an agent you haven't met yet
 
