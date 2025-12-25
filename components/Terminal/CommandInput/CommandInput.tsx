@@ -20,6 +20,8 @@ interface CommandInputProps {
   captureSprout?: (options?: { tags?: string[]; notes?: string }) => boolean;
   // Chat Column Unification (Sprint: chat-column-unification-v1)
   embedded?: boolean;
+  // Sprint: declarative-ui-config-v1 - Lens-specific placeholder
+  placeholder?: string;
 }
 
 const CommandInput: React.FC<CommandInputProps> = ({
@@ -34,7 +36,9 @@ const CommandInput: React.FC<CommandInputProps> = ({
   getSessionContext,
   captureSprout,
   // Chat Column Unification
-  embedded = false
+  embedded = false,
+  // Sprint: declarative-ui-config-v1
+  placeholder: customPlaceholder
 }) => {
   const [input, setInput] = useState('');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -205,7 +209,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Write a query or type /help"
+          placeholder={customPlaceholder || "Write a query or type /help"}
           className={`flex-1 bg-transparent border-0 focus:ring-0 focus:outline-none py-2 px-2 text-sm ${
             embedded
               ? 'text-[var(--chat-text)] placeholder:text-[var(--chat-text-dim)]'

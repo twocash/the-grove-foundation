@@ -19,7 +19,7 @@ import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
-import { getFormattedTerminalWelcome } from '../src/data/quantum-content';
+import { getFormattedTerminalWelcome, getTerminalWelcome } from '../src/data/quantum-content';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 // Reveal components now handled by TerminalFlow (Epic 4.3)
 // SimulationReveal, CustomLensOffer, TerminatorMode, FounderStory, ConversionCTA
@@ -580,6 +580,15 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   }, [session.activeLens, schema?.lensRealities, setTerminalState]);
 
+  // Sprint: declarative-ui-config-v1 - Lens-specific input placeholder
+  const inputPlaceholder = useMemo(() => {
+    const welcome = getTerminalWelcome(
+      session.activeLens,
+      schema?.lensRealities as Record<string, any> | undefined
+    );
+    return welcome?.placeholder;
+  }, [session.activeLens, schema?.lensRealities]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -973,6 +982,7 @@ const Terminal: React.FC<TerminalProps> = ({
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
               embedded
+              placeholder={inputPlaceholder}
             />
           </div>
         )}
@@ -1359,6 +1369,7 @@ const Terminal: React.FC<TerminalProps> = ({
                   getLastResponse={getLastResponse}
                   getSessionContext={getSessionContext}
                   captureSprout={handleCaptureSprout}
+                  placeholder={inputPlaceholder}
                 />
 
                 {/* v0.13: TerminalControls removed - lens/streak moved to header */}
