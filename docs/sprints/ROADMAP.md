@@ -1,7 +1,7 @@
 # Grove UI/UX Unification Roadmap
 
 **Created:** 2024-12-24
-**Last Updated:** 2024-12-24
+**Last Updated:** 2024-12-25
 **Owner:** Jim Calhoun
 
 ---
@@ -10,8 +10,8 @@
 
 This roadmap documents the complete path from current state (fragmented styling, technical debt) to unified UI across Terminal and Foundation surfaces. It captures extensive analysis and planning performed during the 2024-12-24 strategic session.
 
-**Total Scope:** ~8 sprints over ~4-6 weeks
-**Current Status:** Sprint 1 COMPLETE (PR #34), Sprint 2 planning
+**Total Scope:** ~12 sprints over ~4-6 weeks
+**Current Status:** Quantum Glass v1.1 COMPLETE, design system unified
 
 ---
 
@@ -56,11 +56,16 @@ The Grove has three distinct UI surfaces with inconsistent styling approaches:
 | **2** | ~~Terminal Polish~~ | ~~Overlay mode, transitions~~ | — | ⏭️ Skipped (not in user flow) |
 | **3** | Workspace Inspectors v1 | IA v0.15, inspector refactor | 2.5h | ✅ Complete (PR #35) |
 | **4** | Foundation Theme Cleanup | Remove orphaned theme code | 45 min | ✅ Complete (PR #36) |
-| **5** | Declarative UI Config v1 | Extend lens-reactive touchpoints | 2h | 📋 Ready |
-| **6** | Cross-Surface Consistency | Shared components, patterns | 2-3 days | 📋 Planned |
-| **7** | Responsive Excellence | All breakpoints, mobile | 3-4 days | 📋 Planned |
-| **8** | Animation & Micro-interactions | Polish, delight | 2-3 days | 📋 Planned |
-| **9** | Documentation & Handoff | Design system docs | 2 days | 📋 Planned |
+| **5** | Grove Object Model v1 | GroveObject pattern, CardShell | 2h | ✅ Complete |
+| **5.1** | Hub Normalization | TopicHub as GroveObject | 30 min | ✅ Complete |
+| **6** | Terminal Polish v1 | ObjectInspector, card tokens | 1h | ✅ Complete |
+| **7** | Quantum Glass v1 | CSS-first design system | 2h | ✅ Complete |
+| **7.1** | Quantum Glass v1 Hotfix | Collection view cards | 30 min | ✅ Complete |
+| **7.2** | Quantum Glass v1.1 | Card System Unification | 1.5h | ✅ Complete |
+| **8** | Declarative UI Config v1 | Extend lens-reactive touchpoints | 2h | 📋 Ready |
+| **9** | Responsive Excellence | All breakpoints, mobile | 3-4 days | 📋 Planned |
+| **10** | Animation & Micro-interactions | Polish, delight | 2-3 days | 📋 Planned |
+| **11** | Documentation & Handoff | Design system docs | 2 days | 📋 Planned |
 
 **Total:** ~20-26 days (~4-5 weeks)
 
@@ -220,7 +225,101 @@ src/foundation/layout/
 
 ---
 
-## Sprint 5: Declarative UI Config v1 📋 READY
+## Sprint 5: Grove Object Model v1 ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. Established Pattern 7 (Grove Object Model) for unified object representation.
+
+### Delivered
+- **GroveObject/GroveObjectMeta types** — Unified interface for all domain objects
+- **CardShell component** — Reusable card with visual state matrix
+- **Normalizer functions** — Journey, Lens, Hub converters
+- **ObjectInspector** — Collapsible JSON viewer for META/PAYLOAD
+
+### Key Files
+- `src/core/schema/grove-object.ts` — Type definitions
+- `src/surface/components/GroveObjectCard/CardShell.tsx` — Unified card component
+- `src/shared/inspector/ObjectInspector.tsx` — JSON inspector
+
+---
+
+## Sprint 5.1: Hub Normalization ✅ COMPLETE
+
+### Summary
+Extended Pattern 7 to include TopicHub as first-class GroveObject.
+
+### Delivered
+- **HubContent.tsx** — Hub-specific card renderer
+- **normalizeHub()** — Hub → GroveObject converter with legacy fallback
+- **Schema updates** — Added icon, createdBy, color to TopicHub
+
+---
+
+## Sprint 6: Terminal Polish v1 ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. Card token unification and ObjectInspector creation.
+
+### Delivered
+- **Card tokens** — `--card-*` CSS variables for visual states
+- **ObjectInspector** — Collapsible META/PAYLOAD sections
+- **LensInspector/JourneyInspector** — Refactored to use ObjectInspector
+
+---
+
+## Sprint 7: Quantum Glass v1 ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. CSS-first design system transformation.
+
+### Delivered
+- **~220 lines CSS tokens** — `--glass-*`, `--neon-*`, `--glow-*`
+- **Glass morphism** — Backdrop blur, translucent panels
+- **StatusBadge component** — Monospace status indicators with pulse
+- **Data-attribute states** — `data-selected`, `data-active` for CSS-driven styling
+
+### Key Files
+- `styles/globals.css` — Quantum Glass design system tokens
+- `src/shared/ui/StatusBadge.tsx` — Status badge component
+- `src/workspace/` — Updated NavigationSidebar, GroveWorkspace
+
+---
+
+## Sprint 7.1: Quantum Glass v1 Hotfix ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. Applied glass styling to collection view cards.
+
+### Delivered
+- **JourneyList** — glass-card, --neon-amber callouts
+- **LensPicker** — glass-card, status-badge
+- **NodeGrid** — glass-card, glass-section-header
+
+---
+
+## Sprint 7.2: Quantum Glass v1.1 — Card System Unification ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. Unified all collection view cards and fixed inspector context bug.
+
+### Delivered
+- **CSS utilities** — `.glass-card-icon`, `.glass-callout`, `.glass-card-footer`, `.glass-card-meta`, `.glass-btn-primary`, `.glass-btn-secondary`
+- **Inspector context fix** — Closes when navigating between collection views
+- **JourneyList refactor** — Full + compact cards to glass pattern
+- **LensPicker refactor** — Removed ~80 lines of lensAccents, unified to monochrome icons
+- **NodeGrid refactor** — Removed Lucide icons, glass pattern
+- **Shared components** — CollectionHeader, SearchInput, ActiveIndicator to glass tokens
+
+### Metrics
+| Metric | Change |
+|--------|--------|
+| lensAccents deleted | -80 lines |
+| Lucide imports removed | NodeGrid |
+| CSS utilities added | 6 classes |
+
+---
+
+## Sprint 8: Declarative UI Config v1 📋 READY
 
 ### Objective
 Extend the existing Quantum Interface to make more UI touchpoints lens-reactive.
@@ -278,29 +377,7 @@ interface LensReality {
 
 ---
 
-## Sprint 6: Cross-Surface Consistency
-
-### Objective
-Ensure shared components work correctly across all surfaces.
-
-### Scope
-- **Buttons** — Unified button component with surface variants
-- **Inputs** — Form controls that adapt to context
-- **Cards** — Card patterns for all surfaces
-- **Typography** — Consistent type scale
-- **Icons** — Icon usage and sizing
-
-### Deliverables
-- Shared component library (or patterns)
-- Usage documentation
-- Storybook stories (if using)
-
-### Dependencies
-- Sprint 1-4 complete
-
----
-
-## Sprint 6: Responsive Excellence
+## Sprint 9: Responsive Excellence
 
 ### Objective
 All surfaces work beautifully at all breakpoints.
@@ -321,11 +398,11 @@ Wide:       1280px+     (comfortable, max-width containers)
 ```
 
 ### Dependencies
-- Sprint 1-5 complete
+- Sprint 1-8 complete
 
 ---
 
-## Sprint 7: Animation & Micro-interactions
+## Sprint 10: Animation & Micro-interactions
 
 ### Objective
 Add polish and delight through thoughtful motion.
@@ -344,11 +421,11 @@ Add polish and delight through thoughtful motion.
 4. **Reducible** — Respects `prefers-reduced-motion`
 
 ### Dependencies
-- Sprint 1-6 complete
+- Sprint 1-9 complete
 
 ---
 
-## Sprint 8: Documentation & Handoff
+## Sprint 11: Documentation & Handoff
 
 ### Objective
 Document the design system for ongoing maintenance.
@@ -366,7 +443,7 @@ Document the design system for ongoing maintenance.
 - README updates
 
 ### Dependencies
-- Sprint 1-7 complete
+- Sprint 1-10 complete
 
 ---
 
@@ -548,3 +625,16 @@ src/core/ (shared)
 | 2024-12-24 | Sprint 4 executed via Claude Code CLI |
 | | PR #36 created: -386 lines dead code removal |
 | | Theme cleanup complete, Foundation routes verified |
+| 2024-12-25 | Sprint 5: Grove Object Model v1 complete |
+| | Pattern 7 established, CardShell, GroveObject types |
+| 2024-12-25 | Sprint 5.1: Hub Normalization complete |
+| | TopicHub as GroveObject, HubContent renderer |
+| 2024-12-25 | Sprint 6: Terminal Polish v1 complete |
+| | ObjectInspector, card tokens |
+| 2024-12-25 | Sprint 7: Quantum Glass v1 complete |
+| | ~220 lines CSS tokens, glass morphism design system |
+| 2024-12-25 | Sprint 7.1: Collection view hotfix complete |
+| | JourneyList, LensPicker, NodeGrid glass styling |
+| 2024-12-25 | Sprint 7.2: Quantum Glass v1.1 complete |
+| | Card system unification, lensAccents deleted (-80 lines) |
+| | Inspector context fix, shared component updates |
