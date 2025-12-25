@@ -518,16 +518,16 @@ p {
 :root {
   /* Card borders */
   --card-border-default: #e2e8f0;
-  --card-border-inspected: var(--grove-accent, #4d7c0f);
-  --card-border-active: rgba(16, 185, 129, 0.3);
+  --card-border-inspected: #22d3ee;  /* cyan-400 */
+  --card-border-active: rgba(16, 185, 129, 0.5);  /* emerald with alpha */
 
   /* Card backgrounds */
   --card-bg-default: transparent;
   --card-bg-active: rgba(16, 185, 129, 0.05);
 
   /* Card rings (focus/selection indicators) */
-  --card-ring-color: var(--grove-accent, #4d7c0f);
-  --card-ring-active: rgba(16, 185, 129, 0.2);
+  --card-ring-color: #22d3ee;  /* cyan-400 */
+  --card-ring-active: rgba(16, 185, 129, 0.3);
 
   /* Violet variant (custom lenses) */
   --card-ring-violet: #a78bfa;
@@ -536,10 +536,17 @@ p {
 }
 
 .dark {
-  --card-border-default: #334155;
+  --card-border-default: #334155;  /* slate-700 */
   --card-bg-active: rgba(16, 185, 129, 0.1);
   --card-bg-violet-active: rgba(139, 92, 246, 0.1);
 }
+
+/* JSON syntax highlighting (for ObjectInspector) */
+.json-key { color: #06b6d4; }      /* cyan-500 */
+.json-string { color: #10b981; }   /* emerald-500 */
+.json-number { color: #f59e0b; }   /* amber-500 */
+.json-boolean { color: #8b5cf6; }  /* violet-500 */
+.json-null { color: #64748b; }     /* slate-500 */
 
 /* Grove Workspace Container - Light Mode (default) */
 .grove-workspace {
