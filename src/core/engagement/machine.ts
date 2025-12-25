@@ -81,6 +81,9 @@ export const engagementMachine = setup({
         },
         journeyActive: {
           on: {
+            CHANGE_LENS: {
+              actions: 'setLens',
+            },
             ADVANCE_STEP: {
               actions: 'advanceStep',
               guard: 'notAtEnd',
@@ -97,6 +100,9 @@ export const engagementMachine = setup({
         },
         journeyComplete: {
           on: {
+            CHANGE_LENS: {
+              actions: 'setLens',
+            },
             START_JOURNEY: {
               target: 'journeyActive',
               actions: 'startJourney',

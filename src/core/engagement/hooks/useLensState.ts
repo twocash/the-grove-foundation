@@ -68,13 +68,19 @@ export function useLensState({ actor }: UseLensStateOptions): UseLensStateReturn
   }, [lens, lensSource]);
 
   // Select lens action
+  // Uses CHANGE_LENS for user selections (SELECT_LENS is for hydration only)
   const selectLens = useCallback((newLens: string) => {
     if (!isValidLens(newLens)) {
       console.warn(`Invalid lens: ${newLens}. Valid lenses: ${VALID_LENSES.join(', ')}`);
       return;
     }
-    actor.send({ type: 'SELECT_LENS', lens: newLens, source: 'selection' });
-  }, [actor]);
+    // If already in lensActive state, use CHANGE_LENS; otherwise SELECT_LENS for initial selection
+    if (lens) {
+      actor.send({ type: 'CHANGE_LENS', lens: newLens });
+    } else {
+      actor.send({ type: 'SELECT_LENS', lens: newLens, source: 'selection' });
+    }
+  }, [actor, lens]);
 
   return {
     lens,
