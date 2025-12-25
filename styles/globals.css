@@ -1020,38 +1020,43 @@ p {
    Sprint: Chat Column Unification v1
    ============================================================ */
 :root {
-  /* Backgrounds */
-  --chat-bg: #1a2421;
-  --chat-surface: #243029;
-  --chat-surface-hover: #2d3b32;
-  --chat-input-bg: #243029;
+  /* ============================================
+     CHAT TOKENS - Now aliased to Glass tokens
+     (Legacy compatibility layer - prefer --glass-* directly)
+     ============================================ */
 
-  /* Borders */
-  --chat-border: #2d3b32;
-  --chat-border-strong: #3d4b42;
-  --chat-border-accent: #00D4AA;
-  --chat-border-focus: #00D4AA;
+  /* Backgrounds - aliased to glass */
+  --chat-bg: var(--glass-void);
+  --chat-surface: var(--glass-solid);
+  --chat-surface-hover: var(--glass-elevated);
+  --chat-input-bg: var(--glass-solid);
 
-  /* Text */
-  --chat-text: rgba(255, 255, 255, 0.9);
-  --chat-text-muted: rgba(255, 255, 255, 0.6);
-  --chat-text-dim: rgba(255, 255, 255, 0.4);
-  --chat-text-accent: #00D4AA;
+  /* Borders - aliased to glass */
+  --chat-border: var(--glass-border);
+  --chat-border-strong: var(--glass-border-hover);
+  --chat-border-accent: var(--neon-cyan);
+  --chat-border-focus: var(--neon-cyan);
 
-  /* Accent */
-  --chat-accent: #00D4AA;
-  --chat-accent-hover: #00E4BA;
-  --chat-accent-muted: rgba(0, 212, 170, 0.15);
-  --chat-accent-text: #1a2421;
+  /* Text - aliased to glass */
+  --chat-text: var(--glass-text-primary);
+  --chat-text-muted: var(--glass-text-muted);
+  --chat-text-dim: var(--glass-text-subtle);
+  --chat-text-accent: var(--neon-cyan);
 
-  /* Glass effects */
-  --chat-glass: rgba(255, 255, 255, 0.05);
-  --chat-glass-hover: rgba(255, 255, 255, 0.1);
-  --chat-glass-border: rgba(255, 255, 255, 0.1);
+  /* Accent - aliased to neon */
+  --chat-accent: var(--neon-cyan);
+  --chat-accent-hover: var(--neon-cyan);
+  --chat-accent-muted: rgba(6, 182, 212, 0.15);
+  --chat-accent-text: var(--glass-void);
 
-  /* Semantic */
-  --chat-success: #22c55e;
-  --chat-warning: #f59e0b;
+  /* Glass effects - aliased to glass */
+  --chat-glass: var(--glass-panel);
+  --chat-glass-hover: var(--glass-elevated);
+  --chat-glass-border: var(--glass-border);
+
+  /* Semantic - keep as-is */
+  --chat-success: var(--neon-green);
+  --chat-warning: var(--neon-amber);
   --chat-error: #ef4444;
   --chat-error-bg: rgba(239, 68, 68, 0.15);
   --chat-error-border: rgba(239, 68, 68, 0.3);
