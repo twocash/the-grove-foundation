@@ -511,6 +511,7 @@ Host: We'll talk to you next time.
 
 // Entropy detection configuration for Cognitive Bridge
 // Centralized tuning parameters for entropy scoring and injection behavior
+// CANONICAL SOURCE: All engagement config re-exports from here
 export const ENTROPY_CONFIG = {
   THRESHOLDS: {
     LOW: 30,      // Below this: 'low' classification (stay in freestyle)
@@ -526,5 +527,10 @@ export const ENTROPY_CONFIG = {
     MAX_TAG_MATCHES: 3,             // Cap on tag matches counted
     DEPTH_MARKER_POINTS: 20,        // Bonus for depth marker presence
     REFERENCE_CHAIN_POINTS: 25,     // Bonus for referencing prior context
-  }
+  },
+  // Engagement state machine config (merged from engagement/config.ts)
+  defaultThreshold: 0.7,
+  minValue: 0,
+  maxValue: 1,
+  resetValue: 0,
 };

@@ -18,51 +18,54 @@ function SproutCard({ sprout, onDelete, onSelect }: SproutCardProps) {
   const timeAgo = getTimeAgo(capturedDate);
 
   return (
-    <div
-      className="group relative p-5 rounded-xl border border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-emerald-200 dark:hover:border-emerald-800 transition-all cursor-pointer"
+    <article
+      className="glass-card group relative p-5 cursor-pointer flex flex-col"
       onClick={() => onSelect(sprout)}
     >
-      {/* Delete button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(sprout.id);
-        }}
-        className="absolute top-3 right-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 transition-all"
-        title="Delete sprout"
-      >
-        <span className="material-symbols-outlined text-lg">delete</span>
-      </button>
+      {/* Icon + Delete button row */}
+      <div className="flex items-start justify-between mb-3">
+        <span className="material-symbols-outlined glass-card-icon text-2xl">eco</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(sprout.id);
+          }}
+          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-900/30 text-[var(--glass-text-subtle)] hover:text-red-400 transition-all"
+          title="Delete sprout"
+        >
+          <span className="material-symbols-outlined text-lg">delete</span>
+        </button>
+      </div>
 
       {/* Query snippet */}
       <div className="flex items-start gap-2 mb-2">
-        <span className="material-symbols-outlined text-slate-400 text-sm mt-0.5">chat_bubble</span>
-        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
+        <span className="material-symbols-outlined text-[var(--glass-text-subtle)] text-sm mt-0.5">chat_bubble</span>
+        <p className="text-sm text-[var(--glass-text-muted)] line-clamp-1">
           {sprout.query}
         </p>
       </div>
 
       {/* Response preview */}
-      <p className="text-slate-700 dark:text-slate-200 text-sm line-clamp-3 mb-3 leading-relaxed">
+      <p className="text-[var(--glass-text-secondary)] text-sm line-clamp-3 mb-3 leading-relaxed flex-1">
         {sprout.response}
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <div className="flex items-center gap-1">
-          <span className="material-symbols-outlined text-sm">schedule</span>
+      <div className="glass-card-footer">
+        <div className="glass-card-meta">
+          <span className="material-symbols-outlined">schedule</span>
           <span>{timeAgo}</span>
         </div>
 
         {sprout.tags.length > 0 && (
-          <div className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">label</span>
+          <div className="glass-card-meta">
+            <span className="material-symbols-outlined">label</span>
             <span>{sprout.tags.slice(0, 2).join(', ')}</span>
-            {sprout.tags.length > 2 && <span className="text-slate-400">+{sprout.tags.length - 2}</span>}
+            {sprout.tags.length > 2 && <span>+{sprout.tags.length - 2}</span>}
           </div>
         )}
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -119,23 +122,23 @@ export function SproutGrid() {
   if (count === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-8">
-        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
-          <span className="material-symbols-outlined text-3xl text-emerald-600 dark:text-emerald-400">eco</span>
+        <div className="w-16 h-16 rounded-full bg-[rgba(16,185,129,0.15)] flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-3xl text-[var(--neon-green)]">eco</span>
         </div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+        <h2 className="text-xl font-semibold text-[var(--glass-text-primary)] mb-2">
           No Sprouts Yet
         </h2>
-        <p className="text-slate-500 dark:text-slate-400 max-w-md mb-6">
-          Capture insights from conversations using the <code className="text-primary font-mono">/sprout</code> command in the Terminal.
+        <p className="text-[var(--glass-text-muted)] max-w-md mb-6">
+          Capture insights from conversations using the <code className="text-[var(--neon-green)] font-mono">/sprout</code> command in the Terminal.
         </p>
-        <div className="text-sm text-slate-500 dark:text-slate-400 space-y-1 font-mono">
+        <div className="text-sm text-[var(--glass-text-subtle)] space-y-1 font-mono">
           <p><code>/sprout</code> - Capture the last response</p>
           <p><code>/sprout --tag=idea</code> - Capture with a tag</p>
           <p><code>/sprout --note="..."</code> - Add a note</p>
         </div>
         <button
           onClick={() => navigateTo(['explore'])}
-          className="mt-6 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+          className="glass-btn-primary mt-6"
         >
           Start Exploring
         </button>
@@ -162,13 +165,13 @@ export function SproutGrid() {
         {/* No search results */}
         {sortedSprouts.length === 0 && searchQuery && (
           <div className="text-center py-12">
-            <span className="material-symbols-outlined text-4xl text-slate-400 mb-4">search_off</span>
-            <p className="text-slate-500 dark:text-slate-400">
+            <span className="material-symbols-outlined text-4xl text-[var(--glass-text-subtle)] mb-4">search_off</span>
+            <p className="text-[var(--glass-text-muted)]">
               No sprouts match "{searchQuery}"
             </p>
             <button
               onClick={() => setSearchQuery('')}
-              className="mt-4 text-sm text-primary hover:underline"
+              className="mt-4 text-sm text-[var(--neon-cyan)] hover:underline"
             >
               Clear search
             </button>

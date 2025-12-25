@@ -20,11 +20,9 @@ export function isValidLens(lens: string): boolean {
   return lens in DEFAULT_PERSONAS;
 }
 
-export const ENTROPY_CONFIG = {
-  defaultThreshold: 0.7,
-  minValue: 0,
-  maxValue: 1,
-  resetValue: 0,
-} as const;
+// Re-export from canonical source
+export { ENTROPY_CONFIG } from '../../../constants';
 
-export type EntropyConfig = typeof ENTROPY_CONFIG;
+// Type for the full config
+import type { ENTROPY_CONFIG as EntropyConfigType } from '../../../constants';
+export type EntropyConfig = typeof EntropyConfigType;

@@ -1,144 +1,149 @@
-# SPRINT PLAN - Cognitive Simulator
+# SPRINT PLAN - Grove Foundation
 
-> **Status:** 🟢 SPRINTS 1-5 COMPLETE | 🟡 SPRINT 6 IN PROGRESS
-> **Last Updated:** 2025-12-19
+> **Status:** 🟢 SPRINTS 1-5 COMPLETE | 🟡 SPRINT 6A + GLASS v1.2 READY
+> **Last Updated:** 2025-12-25
 
 ## Sprint History
 
 ### Sprints 1-3: V2.1 Migration ✅ COMPLETE
 See `docs/V21_MIGRATION_OPEN_ITEMS.md` for details.
-- V2.0 thread system replaced with V2.1 journey/node navigation
-- Dead code removed (threadGenerator, JourneyEnd, ThreadProgress)
-- Admin aligned with V2.1 schema
 
 ### Sprint 4: The Entropy Engine (Logic) ✅ COMPLETE
-
-**Goal:** Implement the "brain" of the simulator—detecting conversation depth.
-
-**Deliverables:**
-1. ✅ **Entropy Detector Module:** `src/core/engine/entropyDetector.ts`
-   - Scoring logic: +30 depth, +15 vocab, +20 markers, +25 chaining
-   - Classification thresholds: LOW (<30), MEDIUM (30-59), HIGH (≥60)
-   - Cluster mapping to journey IDs
-
-2. ✅ **State Management:** `useNarrativeEngine.ts`
-   - `entropyState` added to session management
-   - `evaluateEntropy()`, `checkShouldInject()`, `recordEntropyInjection()`, `recordEntropyDismiss()`
-   - Persists to `localStorage: grove-terminal-entropy`
-
-3. ✅ **Router Upgrade:** `src/core/engine/entropyDetector.ts`
-   - `TOPIC_CLUSTERS` vocabulary for each domain
-   - `CLUSTER_JOURNEY_MAP`: ratchet→ratchet, economics→stakes, observer→simulation
-
-**Verification:** ✅ `npm run build` passes, entropy scoring works in dev
-
----
+Entropy detection, scoring, classification, cluster routing.
 
 ### Sprint 5: The Cognitive Bridge (UI) ✅ COMPLETE
+Bridge component, Terminal integration, action handlers.
 
-**Goal:** Implement the visual injection that makes hybrid cognition visible.
+### Quantum Glass v1.0 ✅ COMPLETE
+Design system foundation: tokens, glass-panel, glass-card, glass-viewport.
 
-**Deliverables:**
-1. ✅ **Bridge Component:** `components/Terminal/CognitiveBridge.tsx`
-   - 800ms "Resolving connection..." animation
-   - Journey card with title, node count, duration, topics
-   - Accept/Dismiss handlers with keyboard support (Escape)
+### Quantum Glass v1.1 ✅ COMPLETE (commit f635568)
+Card system unification across Journeys, Lenses, Nodes collections.
 
-2. ✅ **Terminal Integration:** `components/Terminal.tsx` (~L943-1000)
-   - `bridgeState` tracks current injection context
-   - Conditional rendering after model response when `shouldInject()` true
-   - Bridge appears inline between chat messages
-
-3. ✅ **Action Handlers:**
-   - `onAccept`: Calls `startJourney(journeyId)`, sends entry node query
-   - `onDismiss`: Triggers 5-exchange cooldown via `dismissEntropy()`
-
-**Verification:** ✅ Bridge appears on high-entropy queries, animation smooth, journey starts correctly
+### Navigation Hotfix ✅ COMPLETE (commit d637447)
+Separated chevron/label click handlers for expand vs navigate.
 
 ---
 
-### Sprint 6: Analytics & Tuning 🟡 IN PROGRESS
+## Current Sprint
 
-**Goal:** Measure system performance and refine parameters based on real behavior.
+### Sprint 6A + Quantum Glass v1.2 🟡 READY
 
-**Stories:**
+**Goal:** Complete analytics wiring + visual unification of remaining views.
 
-1. ⬜ **Funnel Tracking**
-   - Add events: `bridge_shown`, `bridge_accepted`, `bridge_dismissed`
-   - Track: `journeyId`, `entropyScore`, `cluster`, `timeToDecision`
-   - Wire to existing `funnelAnalytics.ts` infrastructure
+**Documentation:** `docs/sprints/sprint-6a-glass-v1.2/`
+- REPO_AUDIT.md — Current state assessment
+- SPEC.md — Requirements and acceptance criteria
+- ARCHITECTURE.md — System diagrams and token mapping
+- DECISIONS.md — Architectural choices
+- SPRINTS.md — Story breakdown with estimates
+- EXECUTION_PROMPT.md — Step-by-step implementation guide
+- DEVLOG.md — Progress tracking template
 
-2. ⬜ **Parameter Tuning**
-   - Isolate thresholds in `constants.ts` for rapid iteration
-   - Evaluate: Is MEDIUM (30) too low? Is HIGH (60) right?
-   - A/B test potential: entropy_threshold_variant
+**Workstreams:**
 
-3. ⬜ **Content Alignment**
-   - Verify `DEFAULT_JOURNEY_INFO` in CognitiveBridge.tsx matches V2.1 schema
-   - Ensure all three journeys (ratchet, stakes, simulation) have complete metadata
-   - Identify gaps: clusters that trigger but lack appropriate journeys
+| ID | Story | Estimate | Priority |
+|----|-------|----------|----------|
+| 6A.1 | Verify Cognitive Bridge Events | 45 min | P1 |
+| 6A.2 | Consolidate ENTROPY_CONFIG | 30 min | P1 |
+| 6A.3 | Document Baseline Metrics | 30 min | P2 |
+| v1.2.1 | Chat Container + Welcome Card | 45 min | P1 |
+| v1.2.2 | Message Bubbles | 60 min | P1 |
+| v1.2.3 | Input Field + Send Button | 30 min | P1 |
+| v1.2.4 | Inspector Content Panels | 45 min | P1 |
+| v1.2.5 | Diary View Glass Styling | 45 min | P2 |
+| v1.2.6 | Sprout View Glass Styling | 45 min | P2 |
 
-4. ⬜ **Dynamic Journey Metadata** (Stretch)
-   - Pull journey info from schema instead of hardcoded defaults
-   - Update CognitiveBridge to use `schema.journeys[journeyId]`
+**Total Estimate:** 6-8 hours
 
-**Acceptance Criteria:**
-- [ ] Analytics events firing in console/backend
-- [ ] Tuning config isolated in `constants.ts`
-- [ ] Journey metadata validated against schema
-- [ ] Documented baseline metrics for activation/acceptance/completion rates
-
-**Commands:**
+**Execute:**
 ```bash
-npm run dev     # Manual testing
-npm run build   # Type safety verification
+claude "Execute the sprint defined in C:\GitHub\the-grove-foundation\docs\sprints\sprint-6a-glass-v1.2\EXECUTION_PROMPT.md"
 ```
 
 ---
 
-## Files Changed Summary (Sprints 4-6)
+## Queued Sprint
+
+### Engagement Reveal Bug Fix 📋 QUEUED
+
+**Goal:** Fix bugs preventing engagement reveals from displaying.
+
+**Documentation:** `docs/sprints/engagement-reveal-bugfix/PLAN.md`
+
+**Prerequisites:**
+- Sprint 6A complete (analytics for verification)
+- Quantum Glass v1.2 complete (visual layer stable)
+
+**Bugs:**
+| ID | Issue | Root Cause Hypothesis |
+|----|-------|----------------------|
+| BUG-001 | Custom Lens Offer never appears | Queue-to-flag computation issue |
+| BUG-003 | revealsShown[] always empty | State subscription not triggering render |
+
+**Estimate:** 4 hours (investigation + fix)
+
+---
+
+## Pending Hotfixes
+
+### Navigation Hotfixes 📋 DOCUMENTED
+
+**Documentation:** `docs/sprints/hotfixes/`
+- `inspector-not-clearing.md` — Inspector shows stale data on collection switch
+- `first-project-expanded.md` — Grove Project should start expanded
+- `EXECUTION_PROMPT_nav-fixes.md` — Combined fix (~6 lines, 2 files)
+
+**Execute when ready:**
+```bash
+claude "Execute the hotfixes defined in C:\GitHub\the-grove-foundation\docs\sprints\hotfixes\EXECUTION_PROMPT_nav-fixes.md"
+```
+
+---
+
+## Files Changed Summary (Recent Sprints)
 
 | File | Sprint | Change |
 |------|--------|--------|
-| `src/core/engine/entropyDetector.ts` | 4 | NEW: Entropy scoring, classification, cluster routing |
-| `hooks/useNarrativeEngine.ts` | 4 | ADD: Entropy state management, evaluation methods |
-| `components/Terminal/CognitiveBridge.tsx` | 5 | NEW: Bridge UI component |
-| `components/Terminal.tsx` | 5 | ADD: Bridge integration (~L943-1000) |
-| `utils/funnelAnalytics.ts` | 6 | ADD: Bridge tracking events (pending) |
-| `constants.ts` | 6 | ADD: Tunable thresholds (pending) |
+| `styles/globals.css` | Glass v1.0-1.1 | Design system tokens, card utilities |
+| `src/shared/ObjectGrid.tsx` | Glass v1.1 | Unified card component |
+| `src/workspace/WorkspaceUIContext.tsx` | Nav Hotfix | Chevron/label separation |
+| `utils/funnelAnalytics.ts` | 6A | Bridge tracking events (pending) |
+| `constants.ts` | 6A | Config consolidation (pending) |
+| `components/Terminal.tsx` | Glass v1.2 | Chat styling (pending) |
 
 ---
 
-## Tripwires Enforced
+## Architectural Principles
 
-- ✅ Terminal.tsx modifications are injection-only (no refactors)
-- ✅ Entropy state persists across page refresh
-- ✅ Cooldown logic prevents over-injection
-- ✅ Journey IDs in cluster map match V2.1 schema
-- ⬜ Analytics events follow existing funnel patterns
+From the Trellis Architecture and Grove directives:
 
----
-
-## Success Metrics (Sprint 6)
-
-| Metric | Definition | Baseline | Target |
-|--------|------------|----------|--------|
-| Activation Rate | % HIGH entropy → bridge shown | TBD | Measure |
-| Acceptance Rate | % bridge shown → accepted | TBD | >30% |
-| Completion Rate | % accepted → journey completed | TBD | >50% |
-| Return Rate | % completers → start another | TBD | Measure |
+1. **Soil before seeds:** Visual infrastructure must stabilize before behavioral features
+2. **Measure before optimize:** Analytics enable data-driven tuning
+3. **Consistency over cleverness:** Same card pattern across all views
+4. **Declarative sovereignty:** Non-developers can configure experiences
 
 ---
 
-## Next Phase: Knowledge Commons Integration
+## Success Metrics
 
-After Sprint 6 analytics establish baseline, potential enhancements:
+### Sprint 6A (Analytics)
+- [ ] Bridge events in localStorage with correct properties
+- [ ] Single ENTROPY_CONFIG source
+- [ ] Baseline metrics documented
 
-1. **Expand Cluster Vocabulary:** Add terms from underrepresented hubs
-2. **New Journeys:** Create journeys for `knowledge-commons` and `governance` clusters
-3. **Attribution Preview:** Show source citations in journey nodes
-4. **Refinery Connection:** Link journey content to validated L1-Hubs
+### Quantum Glass v1.2 (Visual)
+- [ ] Terminal chat uses glass tokens
+- [ ] Message bubbles differentiated
+- [ ] Inspector content matches frame
+- [ ] Diary and Sprout views unified
+
+### Engagement Bug Fix (Post-Sprint)
+- [ ] Simulation Reveal appears when thresholds met
+- [ ] Custom Lens Offer appears after acknowledgment
+- [ ] revealsShown[] populated correctly
+- [ ] Full funnel verified with analytics
 
 ---
 
-*Last Updated: 2025-12-19*
+*Last Updated: 2025-12-25*
