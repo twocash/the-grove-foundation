@@ -634,45 +634,6 @@ p {
 }
 
 /* ============================================================
-   THEME SYSTEM (Declarative JSON-driven theming)
-   Tokens are injected dynamically by ThemeProvider.tsx
-   ============================================================ */
-:root {
-  /* Background tokens */
-  --theme-bg-primary: #ffffff;
-  --theme-bg-secondary: #f8fafc;
-  --theme-bg-tertiary: #f1f5f9;
-  --theme-bg-glass: rgba(255, 255, 255, 0.7);
-  --theme-bg-overlay: rgba(0, 0, 0, 0.5);
-
-  /* Text tokens */
-  --theme-text-primary: #0f172a;
-  --theme-text-secondary: #334155;
-  --theme-text-muted: #64748b;
-  --theme-text-accent: #10b981;
-  --theme-text-inverse: #f8fafc;
-
-  /* Border tokens */
-  --theme-border-default: #e2e8f0;
-  --theme-border-strong: #94a3b8;
-  --theme-border-accent: #10b981;
-  --theme-border-focus: #10b981;
-
-  /* Semantic tokens */
-  --theme-success: #10b981;
-  --theme-warning: #f59e0b;
-  --theme-error: #ef4444;
-  --theme-info: #06b6d4;
-  --theme-highlight: #34d399;
-
-  /* Accent tokens */
-  --theme-accent-primary: #10b981;
-  --theme-accent-primary-muted: rgba(16, 185, 129, 0.1);
-  --theme-accent-secondary: #06b6d4;
-  --theme-accent-glow: rgba(16, 185, 129, 0.5);
-}
-
-/* ============================================================
    CHAT COLUMN TOKENS (Terminal Embedded Mode)
    Forest-dark palette for chat/conversation UI
    Sprint: Chat Column Unification v1
