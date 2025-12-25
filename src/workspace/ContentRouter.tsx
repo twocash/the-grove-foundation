@@ -7,6 +7,7 @@ import { LensPicker } from '../explore/LensPicker';
 import { NodeGrid } from '../explore/NodeGrid';
 import { JourneyList } from '../explore/JourneyList';
 import { DiaryList } from '../explore/DiaryList';
+import { ProjectDashboard } from '../explore/ProjectDashboard';
 import { SproutGrid } from '../cultivate/SproutGrid';
 import { VillageFeed } from '../village/VillageFeed';
 import { CustomLensWizard } from '../../components/Terminal/CustomLensWizard';
@@ -119,7 +120,7 @@ function pathToView(path: string[]): string {
   const viewMap: Record<string, string> = {
     // Explore > Grove Project (field) > views
     'explore': 'terminal',  // Default if clicking Explore directly
-    'explore.groveProject': 'terminal',
+    'explore.groveProject': 'project-dashboard',
     'explore.groveProject.terminal': 'terminal',
     'explore.groveProject.lenses': 'lens-picker',
     'explore.groveProject.journeys': 'journey-list',
@@ -175,6 +176,7 @@ export function ContentRouter() {
   return (
     <main className="flex-1 overflow-hidden bg-[var(--grove-surface)]">
       {viewId === 'terminal' && <ExploreChat />}
+      {viewId === 'project-dashboard' && <ProjectDashboard />}
       {viewId === 'node-grid' && <NodeGrid />}
       {viewId === 'journey-list' && <JourneyList />}
       {viewId === 'lens-picker' && <LensPickerWithWizard />}
