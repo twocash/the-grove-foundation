@@ -15,6 +15,7 @@ interface UseQuantumInterfaceReturn {
   activeLens: string | null;
   quantumTrigger: string | null;
   isCollapsing: boolean;
+  isLensHydrated: boolean;  // True when lens state has been hydrated from URL/localStorage
 }
 
 export const useQuantumInterface = (): UseQuantumInterfaceReturn => {
@@ -22,7 +23,7 @@ export const useQuantumInterface = (): UseQuantumInterfaceReturn => {
 
   // Get lens from engagement state machine (Epic 7: migrated from session.activeLens)
   const { actor } = useEngagement();
-  const { lens: activeLensFromMachine } = useLensState({ actor });
+  const { lens: activeLensFromMachine, isHydrated: isLensHydrated } = useLensState({ actor });
 
   const [reality, setReality] = useState<LensReality>(DEFAULT_REALITY);
   const [isCollapsing, setIsCollapsing] = useState(false);
@@ -97,7 +98,8 @@ export const useQuantumInterface = (): UseQuantumInterfaceReturn => {
     reality,
     activeLens: activeLensFromMachine,
     quantumTrigger: activeLensFromMachine,
-    isCollapsing
+    isCollapsing,
+    isLensHydrated
   };
 };
 

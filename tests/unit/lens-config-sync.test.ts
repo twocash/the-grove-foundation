@@ -1,48 +1,31 @@
 // tests/unit/lens-config-sync.test.ts
 // Regression tests for lens configuration synchronization
-// These tests prevent the bug where VALID_LENSES in engagement config
-// didn't match actual persona IDs in default-personas.ts
+// BULLETPROOF: VALID_LENSES is now derived from DEFAULT_PERSONAS at runtime
+// These tests verify the derivation works correctly
 
 import { describe, test, expect } from 'vitest';
 import { VALID_LENSES, isValidLens } from '../../src/core/engagement/config';
 import { DEFAULT_PERSONAS, getEnabledPersonas } from '../../data/default-personas';
 
 describe('Lens Configuration Sync', () => {
-  describe('VALID_LENSES matches DEFAULT_PERSONAS', () => {
-    test('every enabled persona ID should be in VALID_LENSES', () => {
+  describe('VALID_LENSES is derived from DEFAULT_PERSONAS', () => {
+    test('VALID_LENSES contains exactly the enabled persona IDs', () => {
       const enabledPersonas = getEnabledPersonas();
-      const missingFromConfig: string[] = [];
+      const enabledIds = enabledPersonas.map(p => p.id);
 
-      for (const persona of enabledPersonas) {
-        if (!VALID_LENSES.includes(persona.id as any)) {
-          missingFromConfig.push(persona.id);
-        }
-      }
-
-      expect(missingFromConfig).toEqual([]);
-      if (missingFromConfig.length > 0) {
-        throw new Error(
-          `Persona IDs missing from VALID_LENSES: ${missingFromConfig.join(', ')}\n` +
-          `Add these to src/core/engagement/config.ts VALID_LENSES array.`
-        );
-      }
+      // VALID_LENSES should be derived from enabled personas
+      expect(VALID_LENSES).toEqual(enabledIds);
     });
 
-    test('every VALID_LENS should exist in DEFAULT_PERSONAS', () => {
-      const invalidLenses: string[] = [];
+    test('VALID_LENSES length matches enabled personas count', () => {
+      const enabledPersonas = getEnabledPersonas();
+      expect(VALID_LENSES.length).toBe(enabledPersonas.length);
+    });
 
-      for (const lens of VALID_LENSES) {
-        if (!DEFAULT_PERSONAS[lens]) {
-          invalidLenses.push(lens);
-        }
-      }
-
-      expect(invalidLenses).toEqual([]);
-      if (invalidLenses.length > 0) {
-        throw new Error(
-          `VALID_LENSES contains non-existent personas: ${invalidLenses.join(', ')}\n` +
-          `Remove these from src/core/engagement/config.ts or add to data/default-personas.ts.`
-        );
+    test('isValidLens uses DEFAULT_PERSONAS directly', () => {
+      // All persona IDs in DEFAULT_PERSONAS should be valid
+      for (const id of Object.keys(DEFAULT_PERSONAS)) {
+        expect(isValidLens(id)).toBe(true);
       }
     });
   });
