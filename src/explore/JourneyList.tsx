@@ -66,17 +66,15 @@ interface JourneyCardProps {
 }
 
 function JourneyCard({ journey, isActive, isInspected, onStart, onView }: JourneyCardProps) {
+  const dataAttributes: Record<string, string | undefined> = {
+    'data-selected': isInspected ? 'true' : undefined,
+    'data-active': isActive ? 'true' : undefined,
+  };
+
   return (
     <div
-      className={`
-        p-5 rounded-xl border transition-all cursor-pointer
-        ${isInspected
-          ? 'ring-2 ring-[var(--card-ring-color)] border-[var(--card-border-inspected)]'
-          : isActive
-            ? 'border-[var(--card-border-active)] bg-[var(--card-bg-active)] ring-1 ring-[var(--card-ring-active)]'
-            : 'border-[var(--card-border-default)] dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
-        }
-      `}
+      {...dataAttributes}
+      className="glass-card p-5 cursor-pointer"
       onClick={onView}
     >
       {/* Header */}
@@ -85,27 +83,25 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
           <span className="material-symbols-outlined text-primary text-lg">
             {journey.icon || 'map'}
           </span>
-          <h3 className="font-medium text-slate-900 dark:text-slate-100">
+          <h3 className="font-medium text-[var(--glass-text-primary)]">
             {journey.title}
           </h3>
         </div>
         {isActive && (
-          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/20 text-primary font-medium">
-            Active
-          </span>
+          <span className="status-badge status-badge-active">Active</span>
         )}
       </div>
 
       {/* Description */}
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 line-clamp-2">
+      <p className="text-sm text-[var(--glass-text-muted)] mb-3 line-clamp-2">
         {journey.description}
       </p>
 
       {/* Target Aha */}
       {journey.targetAha && (
-        <div className="flex items-start gap-2 mb-3 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30">
-          <span className="material-symbols-outlined text-amber-500 text-sm mt-0.5">lightbulb</span>
-          <p className="text-xs text-amber-700 dark:text-amber-300 italic line-clamp-2">
+        <div className="flex items-start gap-2 mb-3 p-2.5 rounded-lg bg-[var(--glass-elevated)] border border-[var(--glass-border)]">
+          <span className="material-symbols-outlined text-[var(--neon-amber)] text-sm mt-0.5">lightbulb</span>
+          <p className="text-xs text-[var(--neon-amber)] italic line-clamp-2">
             {journey.targetAha}
           </p>
         </div>
@@ -113,7 +109,7 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
 
       {/* Footer */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-1 text-xs text-[var(--glass-text-subtle)]">
           <span className="material-symbols-outlined text-sm">schedule</span>
           <span>{journey.estimatedMinutes} min</span>
         </div>
@@ -125,7 +121,7 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
                 e.stopPropagation();
                 onStart();
               }}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors font-medium"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[var(--neon-green)] text-white hover:bg-[var(--neon-green)]/90 transition-colors font-medium"
             >
               <span className="material-symbols-outlined text-sm">play_arrow</span>
               Start

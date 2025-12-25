@@ -201,18 +201,16 @@ interface LensCardProps {
 function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCardProps) {
   const accent = lensAccents[persona.id] || defaultAccent;
 
+  const dataAttributes: Record<string, string | undefined> = {
+    'data-selected': isInspected ? 'true' : undefined,
+    'data-active': isActive ? 'true' : undefined,
+  };
+
   return (
     <div
+      {...dataAttributes}
+      className="glass-card p-5 cursor-pointer flex flex-col text-left"
       onClick={onView}
-      className={`
-        group cursor-pointer flex flex-col p-5 rounded-xl border transition-all text-left relative
-        ${isInspected
-          ? 'ring-2 ring-[var(--card-ring-color)] border-[var(--card-border-inspected)]'
-          : isActive
-            ? 'border-[var(--card-border-active)] bg-[var(--card-bg-active)] ring-1 ring-[var(--card-ring-active)]'
-            : 'border-[var(--card-border-default)] dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
-        }
-      `}
     >
       {/* Header: Icon + Active Badge */}
       <div className="flex items-start justify-between mb-3">
@@ -222,19 +220,17 @@ function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCard
           </span>
         </div>
         {isActive && (
-          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/20 text-primary font-medium">
-            Active
-          </span>
+          <span className="status-badge status-badge-active">Active</span>
         )}
       </div>
 
       {/* Title */}
-      <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-1">
+      <h3 className="text-lg font-medium text-[var(--glass-text-primary)] mb-1">
         {persona.publicLabel}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-slate-500 dark:text-slate-400 italic mb-4">
+      <p className="text-sm text-[var(--glass-text-muted)] italic mb-4">
         "{persona.description}"
       </p>
 
@@ -246,7 +242,7 @@ function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCard
               e.stopPropagation();
               onSelect();
             }}
-            className="px-4 py-1.5 text-xs font-medium rounded-md bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm"
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-[var(--neon-green)] text-white hover:bg-[var(--neon-green)]/90 transition-colors"
           >
             Select
           </button>

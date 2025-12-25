@@ -20,20 +20,20 @@ function NodeCard({ node, onSelect }: NodeCardProps) {
   return (
     <button
       onClick={() => onSelect(node.id)}
-      className="group p-4 rounded-lg border border-[var(--grove-border)] bg-[var(--grove-surface)] hover:border-[var(--grove-accent)]/50 transition-all text-left"
+      className="glass-card p-4 text-left group"
     >
       {/* Label */}
-      <h3 className="font-medium text-[var(--grove-text)] mb-2 line-clamp-2 group-hover:text-[var(--grove-accent)] transition-colors">
+      <h3 className="font-medium text-[var(--glass-text-primary)] mb-2 line-clamp-2 group-hover:text-[var(--neon-cyan)] transition-colors">
         {node.label}
       </h3>
 
       {/* Query preview */}
-      <p className="text-sm text-[var(--grove-text-muted)] line-clamp-2 mb-3">
+      <p className="text-sm text-[var(--glass-text-muted)] line-clamp-2 mb-3">
         {node.query}
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-[var(--grove-text-dim)]">
+      <div className="flex items-center justify-between text-xs text-[var(--glass-text-subtle)]">
         {/* Section tag */}
         {'sectionId' in node && node.sectionId && (
           <div className="flex items-center gap-1">
@@ -121,10 +121,10 @@ export function NodeGrid() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-[var(--grove-text)] mb-1">
+          <h1 className="text-2xl font-semibold text-[var(--glass-text-primary)] mb-1">
             Knowledge Nodes
           </h1>
-          <p className="text-[var(--grove-text-muted)]">
+          <p className="text-[var(--glass-text-muted)]">
             {allNodes.length} node{allNodes.length !== 1 ? 's' : ''} in the narrative graph
           </p>
         </div>
@@ -132,9 +132,9 @@ export function NodeGrid() {
         {/* Grouped sections */}
         {Object.entries(groupedNodes).map(([section, nodes]) => (
           <div key={section} className="mb-8">
-            <h2 className="text-sm font-medium text-[var(--grove-text-dim)] uppercase tracking-wider mb-3">
+            <h2 className="glass-section-header mb-3">
               {section === 'other' ? 'General' : section}
-              <span className="ml-2 text-[var(--grove-text-dim)]">({nodes.length})</span>
+              <span className="ml-2">({nodes.length})</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {nodes.map(node => (
