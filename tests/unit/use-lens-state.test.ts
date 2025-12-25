@@ -74,7 +74,8 @@ describe('useLensState', () => {
     });
 
     test('URL takes priority over localStorage', async () => {
-      localStorage.setItem(STORAGE_KEYS.lens, 'citizen');
+      // Use actual valid persona ID (not old wrong 'citizen')
+      localStorage.setItem(STORAGE_KEYS.lens, 'concerned-citizen');
       Object.defineProperty(window, 'location', {
         value: { search: '?lens=engineer' },
         writable: true,
@@ -119,10 +120,10 @@ describe('useLensState', () => {
       await waitFor(() => expect(result.current.isHydrated).toBe(true));
 
       act(() => {
-        result.current.selectLens('investor');
+        result.current.selectLens('family-office');
       });
 
-      expect(result.current.lens).toBe('investor');
+      expect(result.current.lens).toBe('family-office');
       expect(result.current.lensSource).toBe('selection');
     });
 
@@ -147,10 +148,10 @@ describe('useLensState', () => {
       await waitFor(() => expect(result.current.isHydrated).toBe(true));
 
       act(() => {
-        result.current.selectLens('policymaker');
+        result.current.selectLens('geopolitical');
       });
 
-      expect(localStorage.getItem(STORAGE_KEYS.lens)).toBe('policymaker');
+      expect(localStorage.getItem(STORAGE_KEYS.lens)).toBe('geopolitical');
     });
   });
 
@@ -161,10 +162,10 @@ describe('useLensState', () => {
       await waitFor(() => expect(result.current.isHydrated).toBe(true));
 
       act(() => {
-        actor.send({ type: 'SELECT_LENS', lens: 'citizen', source: 'selection' });
+        actor.send({ type: 'SELECT_LENS', lens: 'concerned-citizen', source: 'selection' });
       });
 
-      expect(result.current.lens).toBe('citizen');
+      expect(result.current.lens).toBe('concerned-citizen');
     });
   });
 });
