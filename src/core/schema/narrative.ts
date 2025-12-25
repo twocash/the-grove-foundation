@@ -327,12 +327,14 @@ export interface TensionContent {
  * to match their perspective, mirroring how the landing page hero morphs.
  *
  * Sprint: Terminal Architecture Refactor v1.0
+ * Sprint: Declarative UI Config v1 - Added placeholder field
  */
 export interface TerminalWelcome {
   heading: string;           // e.g., "The Terminal." → "Research Interface."
   thesis: string;            // One-sentence value prop for this lens
   prompts: string[];         // 2-4 suggested starting questions
   footer?: string;           // Optional closing line
+  placeholder?: string;      // Input field placeholder (Sprint: declarative-ui-config-v1)
 }
 
 /**
@@ -340,11 +342,27 @@ export interface TerminalWelcome {
  *
  * This is what the Quantum Interface collapses to when a lens is selected.
  * Each lens can have a unique "reality" that reshapes the landing page.
+ *
+ * Sprint: Declarative UI Config v1 - Added navigation and foundation fields
  */
 export interface LensReality {
   hero: HeroContent;
   problem: TensionContent;
-  terminal?: TerminalWelcome;  // NEW: Lens-specific terminal greeting
+  terminal?: TerminalWelcome;  // Lens-specific terminal greeting
+
+  // Sprint: declarative-ui-config-v1 - Extended UI touchpoints
+  navigation?: {
+    ctaLabel?: string;       // Primary CTA button text
+    ctaSubtext?: string;     // Optional subtext under CTA
+    skipLabel?: string;      // Skip/dismiss link text
+  };
+  foundation?: {
+    sectionLabels?: {
+      explore?: string;      // "Explore" section label
+      cultivate?: string;    // "Cultivate" section label
+      grove?: string;        // "Grove Project" section label
+    };
+  };
 }
 
 // ============================================================================

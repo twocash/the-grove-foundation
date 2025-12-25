@@ -50,18 +50,19 @@ The Grove has three distinct UI surfaces with inconsistent styling approaches:
 
 ## Sprint Overview
 
-| Sprint | Name | Focus | Est. Days | Status |
+| Sprint | Name | Focus | Est. Time | Status |
 |--------|------|-------|-----------|--------|
-| **1** | Chat Column Unification v1 | Terminal tokens, responsive | 4-5 | ✅ Complete (PR #34) |
+| **1** | Chat Column Unification v1 | Terminal tokens, responsive | 4-5 days | ✅ Complete (PR #34) |
 | **2** | ~~Terminal Polish~~ | ~~Overlay mode, transitions~~ | — | ⏭️ Skipped (not in user flow) |
 | **3** | Workspace Inspectors v1 | IA v0.15, inspector refactor | 2.5h | ✅ Complete (PR #35) |
-| **4** | Foundation Theme Integration | Connect --theme-* properly | 2-3 | 📋 Planned |
-| **5** | Cross-Surface Consistency | Shared components, patterns | 2-3 | 📋 Planned |
-| **6** | Responsive Excellence | All breakpoints, mobile | 3-4 | 📋 Planned |
-| **7** | Animation & Micro-interactions | Polish, delight | 2-3 | 📋 Planned |
-| **8** | Documentation & Handoff | Design system docs | 2 | 📋 Planned |
+| **4** | Foundation Theme Cleanup | Remove orphaned theme code | 45 min | ✅ Complete (PR #36) |
+| **5** | Declarative UI Config v1 | Extend lens-reactive touchpoints | 2h | 📋 Ready |
+| **6** | Cross-Surface Consistency | Shared components, patterns | 2-3 days | 📋 Planned |
+| **7** | Responsive Excellence | All breakpoints, mobile | 3-4 days | 📋 Planned |
+| **8** | Animation & Micro-interactions | Polish, delight | 2-3 days | 📋 Planned |
+| **9** | Documentation & Handoff | Design system docs | 2 days | 📋 Planned |
 
-**Total:** ~24-30 days (~5-6 weeks)
+**Total:** ~20-26 days (~4-5 weeks)
 
 ---
 
@@ -141,37 +142,143 @@ Completed 2024-12-24. IA v0.15 implemented with full navigation restructure.
 
 ---
 
-## Sprint 4: Foundation Theme Integration
+## Sprint 4: Foundation Theme Cleanup ✅ COMPLETE
 
 ### Objective
-Connect Foundation console `--theme-*` tokens with overall system.
+Remove orphaned theme system infrastructure that was never completed.
 
-### Context
-Foundation work (Sprints 1-6 in separate initiative) added:
-- DEX schema types
-- DEXRegistry
-- Console components with `--theme-*` tokens
+### Results (PR #36)
+- Deleted `src/foundation/layout/` (5 files, 310 lines)
+- Cleaned tailwind.config.ts (-37 lines of broken theme-* tokens)
+- Cleaned styles/globals.css (-39 lines of unused CSS variables)
+- Sprint documentation in `docs/sprints/foundation-theme-integration-v1/`
+- Build verification passed (`npm run build` succeeds)
 
-This sprint ensures Foundation integrates cleanly.
+### Discovery (2024-12-24)
+Audit revealed the codebase has TWO parallel Foundation layout systems:
 
-### Scope
-- **Verify isolation** — Foundation doesn't break Terminal
-- **Shared patterns** — Ensure consistent naming conventions
-- **Console loading** — Standardize loading states
-- **Dark mode consistency** — All surfaces work together
+| System | Location | Status | Tokens |
+|--------|----------|--------|--------|
+| **Active** | `FoundationWorkspace.tsx`, `FoundationHeader.tsx` | ✅ Works | workspace (`surface-*`, `slate-*`) |
+| **Orphaned** | `src/foundation/layout/*` | ❌ Never imported | broken `theme-*` |
 
-### Key Files (Foundation)
-- `src/foundation/consoles/*`
-- `src/foundation/inspectors/*`
-- `src/core/schema/*`
+**Root Cause:** `tailwind.config.ts` has theme-* tokens at wrong nesting level (siblings of `colors`, not children). Classes like `bg-theme-bg-secondary` were never generated.
 
-### Dependencies
-- Sprint 1-3 complete
-- Foundation Sprints 1-6 merged to main
+### Scope (Cleanup Only)
+
+| Task | Description | Est. |
+|------|-------------|------|
+| Delete orphaned files | Remove `src/foundation/layout/` (310 lines) | 5 min |
+| Clean Tailwind config | Remove broken theme-* objects | 10 min |
+| Clean globals.css | Remove unused theme fallbacks | 10 min |
+| Verify Foundation works | Test all /foundation routes | 10 min |
+| Update docs | Document cleanup | 10 min |
+
+### Files to Delete
+```
+src/foundation/layout/
+├── FoundationLayout.tsx    (65 lines)
+├── HUDHeader.tsx           (77 lines)
+├── NavSidebar.tsx          (129 lines)
+├── GridViewport.tsx        (29 lines)
+└── index.ts                (~10 lines)
+```
+
+### Config Changes
+- `tailwind.config.ts`: Remove theme-bg, theme-text, theme-border, theme, theme-accent objects (~35 lines)
+- `styles/globals.css`: Remove THEME SYSTEM section (~40 lines)
+
+### NOT in Scope (→ Sprint 5)
+- ThemeProvider implementation
+- JSON theme loading
+- Dynamic theme switching
+- Converting components to theme tokens
+
+### Success Criteria
+- [x] `src/foundation/layout/` deleted
+- [x] tailwind.config.ts has no theme-* objects
+- [x] globals.css has no THEME SYSTEM section
+- [x] `npm run build` succeeds
+- [ ] All `/foundation/*` routes work (visual verification pending)
+- [x] No console errors
+
+### Foundation Loop Artifacts
+- `docs/sprints/foundation-theme-integration-v1/REPO_AUDIT.md`
+- `docs/sprints/foundation-theme-integration-v1/SPEC.md`
+- `docs/sprints/foundation-theme-integration-v1/ARCHITECTURE.md`
+- `docs/sprints/foundation-theme-integration-v1/MIGRATION_MAP.md`
+- `docs/sprints/foundation-theme-integration-v1/STORIES.md`
+- `docs/sprints/foundation-theme-integration-v1/EXECUTION_PROMPT.md`
+
+### Metrics Actual
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Lines in /layout | 310 | 0 | -310 |
+| tailwind.config.ts | 169 | ~132 | -37 |
+| globals.css | 761 | ~722 | -39 |
+| **Total** | — | — | **-386 lines** |
 
 ---
 
-## Sprint 5: Cross-Surface Consistency
+## Sprint 5: Declarative UI Config v1 📋 READY
+
+### Objective
+Extend the existing Quantum Interface to make more UI touchpoints lens-reactive.
+
+### User Story
+**As a** Grove operator configuring experiences for different audiences
+**I want** more UI elements to respond to lens/persona selection
+**So that** CTA labels, placeholders, and nav labels adapt automatically
+
+### Approach
+**Extend, don't replace.** The persona/lens system already works via `useQuantumInterface`, `LensReality`, and `SUPERPOSITION_MAP`. We're adding fields and wiring more components.
+
+### Scope
+
+| Task | Location | Est. |
+|------|----------|------|
+| Extend LensReality type | `src/core/schema/narrative.ts` | 15 min |
+| Update SUPERPOSITION_MAP | `src/data/quantum-content.ts` | 30 min |
+| Wire HeroHook CTA | `src/surface/components/genesis/HeroHook.tsx` | 15 min |
+| Wire Terminal placeholder | `components/Terminal/CommandInput/*` | 15 min |
+| Wire Foundation nav (optional) | sidebar component | 20 min |
+| Test & commit | — | 15 min |
+| **Total** | | **~2 hours** |
+
+### Schema Extension
+
+```typescript
+// Add to existing LensReality (all optional)
+interface LensReality {
+  // existing fields preserved
+  navigation?: {
+    ctaLabel?: string;      // "Begin" | "Start Exploring" | "Access Research"
+    skipLabel?: string;
+  };
+  foundation?: {
+    sectionLabels?: {
+      explore?: string;     // "Explore" | "Research" | "Discover"
+      cultivate?: string;
+      grove?: string;
+    };
+  };
+}
+```
+
+### Success Criteria
+- [ ] LensReality type extended (backward compatible)
+- [ ] 3+ personas updated with new fields
+- [ ] CTA label changes when lens changes
+- [ ] `npm run build` succeeds
+
+### Foundation Loop Artifacts
+- `docs/sprints/declarative-ui-config-v1/SPEC.md`
+- `docs/sprints/declarative-ui-config-v1/STORIES.md`
+- `docs/sprints/declarative-ui-config-v1/EXECUTION_PROMPT.md`
+
+---
+
+## Sprint 6: Cross-Surface Consistency
 
 ### Objective
 Ensure shared components work correctly across all surfaces.
@@ -436,3 +543,8 @@ src/core/ (shared)
 | 2024-12-24 | Sprint 1 executed via Claude Code CLI |
 | | PR #34 created: 7 commits, 25 tokens, -121 lines |
 | | Genesis baseline tests passing |
+| 2024-12-24 | Sprint 3 executed via Claude Code CLI |
+| | PR #35 created: IA v0.15, DiaryList, DiaryInspector |
+| 2024-12-24 | Sprint 4 executed via Claude Code CLI |
+| | PR #36 created: -386 lines dead code removal |
+| | Theme cleanup complete, Foundation routes verified |

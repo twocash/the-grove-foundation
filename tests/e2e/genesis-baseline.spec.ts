@@ -38,13 +38,21 @@ test.describe('Genesis Visual Regression', () => {
     // Wait for split layout and Terminal to appear
     await page.waitForTimeout(2000);
     
-    // Select a lens in the Terminal to unlock navigation
-    // Look for lens picker buttons or first available lens
-    const lensButton = page.locator('[data-lens-id]').first()
-      .or(page.getByRole('button').filter({ hasText: /academic|engineer|citizen|investor/i }).first());
-    
+    // Select a lens in the Terminal to unlock navigation (two-click pattern)
+    // Step 1: Click lens card to preview
+    const lensCard = page.locator('.terminal-panel').locator('div').filter({
+      hasText: /academic|engineer|citizen|investor/i
+    }).first();
+
     try {
-      await lensButton.click({ timeout: 5000 });
+      await lensCard.click({ timeout: 5000 });
+      await page.waitForTimeout(300);
+
+      // Step 2: Click "Select" button to activate
+      const selectButton = page.locator('.terminal-panel').locator('button:has-text("Select")').first();
+      if (await selectButton.isVisible({ timeout: 2000 })) {
+        await selectButton.click();
+      }
     } catch {
       // If no lens picker visible, the page may auto-unlock
       console.log('No lens picker found - page may be in unlocked state');

@@ -19,7 +19,8 @@ import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
-import { getFormattedTerminalWelcome } from '../src/data/quantum-content';
+import { getPersona } from '../data/default-personas';
+import { getFormattedTerminalWelcome, getTerminalWelcome } from '../src/data/quantum-content';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 // Reveal components now handled by TerminalFlow (Epic 4.3)
 // SimulationReveal, CustomLensOffer, TerminatorMode, FounderStory, ConversionCTA
@@ -224,13 +225,18 @@ const Terminal: React.FC<TerminalProps> = ({
   // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1)
 
   // Get active lens data (could be custom or archetypal)
+  // FIX: Use engLens from Engagement Machine as source of truth (not session.activeLens)
+  // This ensures LensPicker selection immediately updates the header pill
   const activeLensData = useMemo(() => {
-    const archetypeLens = getActiveLensData();
+    if (!engLens) return null;
+
+    // Check for archetypal lens first
+    const archetypeLens = getPersona(engLens);
     if (archetypeLens) return archetypeLens;
 
     // Check if it's a custom lens
-    if (session.activeLens?.startsWith('custom-')) {
-      const customLens = getCustomLens(session.activeLens);
+    if (engLens.startsWith('custom-')) {
+      const customLens = getCustomLens(engLens);
       if (customLens) {
         // Return custom lens as Persona-compatible object
         return {
@@ -240,7 +246,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
     return null;
-  }, [getActiveLensData, session.activeLens, getCustomLens, customLenses]);
+  }, [engLens, getCustomLens, customLenses]);
 
   const enabledPersonas = getEnabledPersonas();
 
@@ -367,7 +373,7 @@ const Terminal: React.FC<TerminalProps> = ({
     personaId: session.activeLens || null,
     journeyId: engActiveJourneyId || null,
     hubId: null, // Hub routing happens server-side; not tracked client-side
-    nodeId: engineCurrentNodeId || currentNodeId || null
+    nodeId: currentNodeId || null
   });
 
   const handleCaptureSprout = (options?: { tags?: string[]; notes?: string }) => {
@@ -430,8 +436,8 @@ const Terminal: React.FC<TerminalProps> = ({
   // Handle deleting a custom lens
   const handleDeleteCustomLens = async (id: string) => {
     // If deleting the active lens, clear it first
-    if (session.activeLens === id) {
-      selectLens(null);
+    if (engLens === id) {
+      engSelectLens('freestyle'); // Clear to default lens
     }
     await deleteCustomLens(id);
   };
@@ -559,10 +565,11 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Sprint: Terminal Architecture Refactor v1.0 - Epic 5
   // Update welcome message when lens changes
+  // FIX: Use engLens (Engagement Machine) for immediate reactivity
   useEffect(() => {
-    if (session.activeLens) {
+    if (engLens) {
       const lensWelcome = getFormattedTerminalWelcome(
-        session.activeLens,
+        engLens,
         schema?.lensRealities as Record<string, any> | undefined
       );
 
@@ -576,9 +583,19 @@ const Terminal: React.FC<TerminalProps> = ({
         )
       }));
 
-      console.log('[Lens Welcome] Updated for:', session.activeLens);
+      console.log('[Lens Welcome] Updated for:', engLens);
     }
-  }, [session.activeLens, schema?.lensRealities, setTerminalState]);
+  }, [engLens, schema?.lensRealities, setTerminalState]);
+
+  // Sprint: declarative-ui-config-v1 - Lens-specific input placeholder
+  // FIX: Use engLens (Engagement Machine) for immediate reactivity
+  const inputPlaceholder = useMemo(() => {
+    const welcome = getTerminalWelcome(
+      engLens,
+      schema?.lensRealities as Record<string, any> | undefined
+    );
+    return welcome?.placeholder;
+  }, [engLens, schema?.lensRealities]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -973,6 +990,7 @@ const Terminal: React.FC<TerminalProps> = ({
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
               embedded
+              placeholder={inputPlaceholder}
             />
           </div>
         )}
@@ -1024,6 +1042,10 @@ const Terminal: React.FC<TerminalProps> = ({
                 // Update custom lens usage timestamp
                 if (personaId.startsWith('custom-')) {
                   updateCustomLensUsage(personaId);
+                }
+                // FIX: Notify parent of lens selection for Genesis headline collapse
+                if (onLensSelected) {
+                  onLensSelected(personaId);
                 }
               }}
             />
@@ -1359,6 +1381,7 @@ const Terminal: React.FC<TerminalProps> = ({
                   getLastResponse={getLastResponse}
                   getSessionContext={getSessionContext}
                   captureSprout={handleCaptureSprout}
+                  placeholder={inputPlaceholder}
                 />
 
                 {/* v0.13: TerminalControls removed - lens/streak moved to header */}

@@ -115,7 +115,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "Why does AI ownership matter?",
         "How is this different from just using ChatGPT?"
       ],
-      footer: "No guided path. Just curiosity."
+      footer: "No guided path. Just curiosity.",
+      placeholder: "What would you like to explore?"
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Begin",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Explore",
+        cultivate: "Cultivate",
+        grove: "Grove Project"
+      }
     }
   },
 
@@ -159,7 +172,21 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "How is this different from ChatGPT?",
         "What can I actually do with this?"
       ],
-      footer: "No jargon. Just answers."
+      footer: "No jargon. Just answers.",
+      placeholder: "Ask me anything..."
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Start Exploring",
+      ctaSubtext: "Learn what this means for you",
+      skipLabel: "Skip to chat"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Discover",
+        cultivate: "Participate",
+        grove: "The Grove"
+      }
     }
   },
 
@@ -203,7 +230,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "How does Grove address the enclosure of AI research?",
         "What are the methodological limitations?"
       ],
-      footer: "Citations available. Ask for sources."
+      footer: "Citations available. Ask for sources.",
+      placeholder: "Enter your research query..."
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Access Research",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Research",
+        cultivate: "Methodology",
+        grove: "Infrastructure"
+      }
     }
   },
 
@@ -247,7 +287,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What are the memory system's retrieval mechanics?",
         "Show me the agent cognition loop."
       ],
-      footer: "Implementation details available on request."
+      footer: "Implementation details available on request.",
+      placeholder: "Describe your technical question..."
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "View Architecture",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Architecture",
+        cultivate: "Implementation",
+        grove: "Infrastructure"
+      }
     }
   },
 
@@ -291,7 +344,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What is the strategic case for distributed infrastructure?",
         "Who benefits from the current centralized model?"
       ],
-      footer: "Policy implications and strategic options."
+      footer: "Policy implications and strategic options.",
+      placeholder: "What strategic question are you exploring?"
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Strategic Briefing",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Analysis",
+        cultivate: "Strategy",
+        grove: "Sovereignty"
+      }
     }
   },
 
@@ -335,7 +401,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What capabilities remain cloud-exclusive?",
         "Where does Grove complement vs. compete with APIs?"
       ],
-      footer: "Strategic implications for established players."
+      footer: "Strategic implications for established players.",
+      placeholder: "What competitive dynamic interests you?"
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Competitive Brief",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Market Analysis",
+        cultivate: "Positioning",
+        grove: "Edge Economics"
+      }
     }
   },
 
@@ -379,7 +458,20 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "How does Grove capture value from capability propagation?",
         "What are the comparable infrastructure investments?"
       ],
-      footer: "Due diligence materials available."
+      footer: "Due diligence materials available.",
+      placeholder: "What investment angle interests you?"
+    },
+    // Sprint: declarative-ui-config-v1
+    navigation: {
+      ctaLabel: "Investment Thesis",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Due Diligence",
+        cultivate: "Value Capture",
+        grove: "Infrastructure Play"
+      }
     }
   }
 };
