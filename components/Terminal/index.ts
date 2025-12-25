@@ -14,6 +14,7 @@ export { default as JourneyNav } from './JourneyNav';
 export { default as LoadingIndicator } from './LoadingIndicator';
 export { default as TerminalPill } from './TerminalPill';
 export { default as TerminalHeader } from './TerminalHeader';
+export { default as TerminalWelcome } from './TerminalWelcome';
 export { default as TerminalControls } from './TerminalControls';
 export { default as SuggestionChip } from './SuggestionChip';
 

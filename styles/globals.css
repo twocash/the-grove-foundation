@@ -1208,6 +1208,45 @@ p {
   border-radius: 12px 12px 12px 4px;
 }
 
+/* ============================================
+   TERMINAL WELCOME (Sprint: terminal-quantum-welcome-v1)
+   ============================================ */
+
+.glass-welcome-card {
+  background: var(--glass-panel);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+@supports (backdrop-filter: blur(12px)) {
+  .glass-welcome-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+.glass-welcome-prompt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--glass-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.glass-welcome-prompt:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
 /* Code blocks in messages */
 .glass-message pre {
   background: var(--glass-solid);

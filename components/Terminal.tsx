@@ -12,7 +12,7 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -20,7 +20,8 @@ import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { getPersona } from '../data/default-personas';
-import { getFormattedTerminalWelcome, getTerminalWelcome } from '../src/data/quantum-content';
+import { getFormattedTerminalWelcome, getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../src/data/quantum-content';
+import { useQuantumInterface } from '../src/surface/hooks/useQuantumInterface';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 // Reveal components now handled by TerminalFlow (Epic 4.3)
 // SimulationReveal, CustomLensOffer, TerminatorMode, FounderStory, ConversionCTA
@@ -188,6 +189,12 @@ const Terminal: React.FC<TerminalProps> = ({
     // NEW: Direct access to engagement bus for event emission
     emit
   } = useEngagementBridge();
+
+  // Quantum Interface for lens-reactive content (Sprint: terminal-quantum-welcome-v1)
+  const { reality, activeLens: quantumLens, isCollapsing } = useQuantumInterface();
+
+  // Derive welcome content with fallback
+  const welcomeContent = reality?.terminal ?? DEFAULT_TERMINAL_WELCOME;
 
   // Feature flags
   const showCustomLensInPicker = useFeatureFlag('custom-lens-in-picker');
@@ -1098,6 +1105,14 @@ const Terminal: React.FC<TerminalProps> = ({
               {/* Messages Area - Thread Style */}
               <div className="flex-1 overflow-y-auto p-4 md:p-6 terminal-scroll glass-chat-container">
                 <div className="w-full max-w-[min(90%,56rem)] mx-auto space-y-6">
+                {/* Welcome Card - lens-reactive (Sprint: terminal-quantum-welcome-v1) */}
+                {terminalState.messages.length === 0 && session.activeLens && (
+                  <TerminalWelcome
+                    welcome={welcomeContent}
+                    onPromptClick={(prompt) => handleSend(prompt)}
+                    variant={variant}
+                  />
+                )}
                 {terminalState.messages.map((msg) => {
                   const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
                   const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
