@@ -124,13 +124,18 @@ const LensGrid: React.FC<LensGridProps> = ({
   personas,
   customLenses = [],
   currentLens,
-  highlightedLens,
+  highlightedLens: externalHighlightedLens,
   onSelect,
   onCreateCustomLens,
   onDeleteCustomLens,
   showCreateOption = true,
   embedded = false
 }) => {
+  // Internal preview state: click card to preview, click "Select" to activate
+  const [previewLens, setPreviewLens] = React.useState<string | null>(null);
+
+  // Combine external highlight (URL lens) with internal preview
+  const highlightedLens = previewLens || externalHighlightedLens;
   const IconComponent = (iconName: string) => {
     const Icon = ICONS[iconName] || ICONS.Eye;
     return Icon;
@@ -155,29 +160,32 @@ const LensGrid: React.FC<LensGridProps> = ({
             const Icon = IconComponent(lens.icon);
             const colors = getColors(lens.color as PersonaColor | 'purple');
             const isSelected = currentLens === lens.id;
+            const isPreviewed = previewLens === lens.id;
 
             return (
               <div key={lens.id} className="relative group">
-                <button
-                  onClick={() => onSelect(lens.id)}
-                  className={`w-full text-left p-4 rounded-lg border transition-all duration-200
+                <div
+                  onClick={() => setPreviewLens(lens.id)}
+                  className={`w-full text-left p-4 rounded-lg border transition-all duration-200 cursor-pointer
                     ${isSelected
                       ? `${colors.bgLight} ${colors.border} border-2`
-                      : embedded
-                        ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
-                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
+                      : isPreviewed
+                        ? `${colors.bgLight} ${colors.border} border-2 ring-2 ring-offset-1 ring-${colors.border.replace('border-', '')}`
+                        : embedded
+                          ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
                     }`}
                 >
                   <div className="flex items-start space-x-3">
                     <div className={`p-2 rounded-lg transition-colors ${
-                      isSelected
+                      isSelected || isPreviewed
                         ? colors.bg
                         : embedded
                           ? 'bg-[var(--chat-glass)] group-hover:bg-[var(--chat-glass-hover)]'
                           : 'bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-200 dark:group-hover:bg-slate-600'
                     }`}>
                       <Icon className={`w-5 h-5 ${
-                        isSelected
+                        isSelected || isPreviewed
                           ? 'text-white'
                           : embedded
                             ? 'text-[var(--chat-text-muted)]'
@@ -186,7 +194,7 @@ const LensGrid: React.FC<LensGridProps> = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`font-sans font-semibold text-sm ${
-                        isSelected
+                        isSelected || isPreviewed
                           ? colors.text
                           : embedded
                             ? 'text-[var(--chat-text)]'
@@ -205,13 +213,24 @@ const LensGrid: React.FC<LensGridProps> = ({
                         {lens.journeysCompleted} {lens.journeysCompleted === 1 ? 'journey' : 'journeys'} completed
                       </div>
                     </div>
-                    {isSelected && (
+                    {isSelected ? (
                       <div className={`${colors.bg} text-white text-[9px] font-bold uppercase px-2 py-1 rounded`}>
                         Active
                       </div>
-                    )}
+                    ) : isPreviewed ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(lens.id);
+                          setPreviewLens(null);
+                        }}
+                        className={`${colors.bg} text-white text-[10px] font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity`}
+                      >
+                        Select
+                      </button>
+                    ) : null}
                   </div>
-                </button>
+                </div>
                 {/* Delete button (appears on hover) */}
                 {onDeleteCustomLens && (
                   <button
@@ -256,42 +275,45 @@ const LensGrid: React.FC<LensGridProps> = ({
         const Icon = IconComponent(persona.icon);
         const colors = getPersonaColors(persona.color);
         const isSelected = currentLens === persona.id;
-        const isHighlighted = highlightedLens === persona.id && !isSelected;
+        const isPreviewed = previewLens === persona.id;
+        const isExternalHighlighted = externalHighlightedLens === persona.id && !isSelected;
 
         return (
-          <button
+          <div
             key={persona.id}
-            onClick={() => onSelect(persona.id)}
-            className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group relative
+            onClick={() => setPreviewLens(persona.id)}
+            className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group relative cursor-pointer
               ${isSelected
                 ? `${colors.bgLight} ${colors.border} border-2`
-                : isHighlighted
-                  ? `bg-grove-clay/5 border-grove-clay/40 border-2 ring-2 ring-grove-clay/20 ring-offset-1`
-                  : embedded
-                    ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
-                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
+                : isPreviewed
+                  ? `${colors.bgLight} ${colors.border} border-2 ring-2 ring-offset-1`
+                  : isExternalHighlighted
+                    ? `bg-grove-clay/5 border-grove-clay/40 border-2 ring-2 ring-grove-clay/20 ring-offset-1`
+                    : embedded
+                      ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
               }`}
           >
             {/* v0.12e: URL lens highlight badge */}
-            {isHighlighted && (
+            {isExternalHighlighted && (
               <div className="absolute -top-2 left-4 bg-grove-clay text-white text-[9px] font-bold uppercase px-2 py-0.5 rounded">
                 Shared with you
               </div>
             )}
             <div className="flex items-start space-x-3">
               <div className={`p-2 rounded-lg transition-colors ${
-                isSelected
+                isSelected || isPreviewed
                   ? colors.bg
-                  : isHighlighted
+                  : isExternalHighlighted
                     ? 'bg-grove-clay/20'
                     : embedded
                       ? 'bg-[var(--chat-glass)] group-hover:bg-[var(--chat-glass-hover)]'
                       : 'bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-200 dark:group-hover:bg-slate-600'
               }`}>
                 <Icon className={`w-5 h-5 ${
-                  isSelected
+                  isSelected || isPreviewed
                     ? 'text-white'
-                    : isHighlighted
+                    : isExternalHighlighted
                       ? 'text-grove-clay'
                       : embedded
                         ? 'text-[var(--chat-text-muted)]'
@@ -300,9 +322,9 @@ const LensGrid: React.FC<LensGridProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <div className={`font-sans font-semibold text-sm ${
-                  isSelected
+                  isSelected || isPreviewed
                     ? colors.text
-                    : isHighlighted
+                    : isExternalHighlighted
                       ? 'text-grove-clay'
                       : embedded
                         ? 'text-[var(--chat-text)]'
@@ -316,13 +338,24 @@ const LensGrid: React.FC<LensGridProps> = ({
                   "{persona.description}"
                 </div>
               </div>
-              {isSelected && (
+              {isSelected ? (
                 <div className={`${colors.bg} text-white text-[9px] font-bold uppercase px-2 py-1 rounded`}>
                   Active
                 </div>
-              )}
+              ) : isPreviewed ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(persona.id);
+                    setPreviewLens(null);
+                  }}
+                  className={`${colors.bg} text-white text-[10px] font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity`}
+                >
+                  Select
+                </button>
+              ) : null}
             </div>
-          </button>
+          </div>
         );
       })}
 

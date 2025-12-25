@@ -161,8 +161,12 @@ const GenesisPage: React.FC = () => {
         console.log('[ActiveGrove] Tree clicked → split mode (new user)');
         setFlowState('split');
       }
-    } else if (flowState === 'unlocked') {
-      // Scroll to next section
+    } else if (flowState === 'unlocked' || flowState === 'collapsing') {
+      // Scroll to next section (also works if stuck in collapsing - safety valve)
+      if (flowState === 'collapsing') {
+        console.log('[ActiveGrove] Tree clicked while collapsing → forcing unlock');
+        setFlowState('unlocked');
+      }
       const targetRef = screenRefs.current[1];
       if (targetRef) {
         targetRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -176,10 +180,12 @@ const GenesisPage: React.FC = () => {
    * Handle lens selection from Terminal
    */
   const handleLensSelected = useCallback((lensId: string) => {
-    console.log('[ActiveGrove] Lens selected:', lensId);
-    setFlowState('collapsing');
-    // WaveformCollapse will trigger via quantumTrigger change
-  }, []);
+    console.log('[ActiveGrove] Lens selected:', lensId, 'current flowState:', flowState);
+    // Only trigger collapsing if we're in a state that needs it
+    if (flowState === 'split' || flowState === 'unlocked') {
+      setFlowState('collapsing');
+    }
+  }, [flowState]);
 
   /**
    * Handle WaveformCollapse animation complete
@@ -191,12 +197,26 @@ const GenesisPage: React.FC = () => {
     }
   }, [flowState]);
 
+  // Safety timeout: if 'collapsing' state lasts too long, auto-unlock
+  // This prevents the UI from getting stuck if the animation doesn't complete
+  useEffect(() => {
+    if (flowState === 'collapsing') {
+      const safetyTimer = setTimeout(() => {
+        console.log('[ActiveGrove] Safety timeout: collapsing → unlocked');
+        setFlowState('unlocked');
+      }, 4000); // 4 seconds max for animation
+      return () => clearTimeout(safetyTimer);
+    }
+  }, [flowState]);
+
   // Listen for lens changes to trigger collapsing state
   useEffect(() => {
+    console.log('[ActiveGrove] Lens change effect:', { activeLens, flowState, quantumTrigger });
     if (activeLens && flowState === 'split') {
+      console.log('[ActiveGrove] Lens selected while in split → transitioning to collapsing');
       setFlowState('collapsing');
     }
-  }, [activeLens, flowState]);
+  }, [activeLens, flowState, quantumTrigger]);
 
   // Auto-scroll to Section 2 after headline morph completes (Fix #9)
   useEffect(() => {

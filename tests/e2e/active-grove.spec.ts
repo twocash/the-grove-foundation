@@ -248,13 +248,23 @@ test.describe('Active Grove Content Transformation', () => {
     await page.locator('button:has-text("🌱")').first().click()
     await page.waitForTimeout(500)
 
-    // Find and click a lens option (Infrastructure Engineer)
-    const lensOption = page.locator('button').filter({
+    // Step 1: Click lens card to preview it (new two-click pattern)
+    const lensCard = page.locator('.terminal-panel').locator('div').filter({
       hasText: /Engineer/i
     }).first()
 
-    if (await lensOption.isVisible()) {
-      await lensOption.click()
+    if (await lensCard.isVisible()) {
+      await lensCard.click()
+      await page.waitForTimeout(300)
+
+      // Step 2: Click the "Select" button that appears
+      const selectButton = page.locator('.terminal-panel').locator('button:has-text("Select")').first()
+      if (await selectButton.isVisible({ timeout: 2000 })) {
+        await selectButton.click()
+      } else {
+        // Fallback: some cards may still use direct selection
+        await lensCard.click()
+      }
       await page.waitForTimeout(1000)
 
       // Check localStorage for engagement state update
@@ -295,14 +305,20 @@ test.describe('Active Grove Content Transformation', () => {
     await page.locator('button:has-text("🌱")').first().click()
     await page.waitForTimeout(500)
 
-    // Find and click a lens option
-    const lensOption = page.locator('button').filter({
+    // Step 1: Click lens card to preview it (two-click pattern)
+    const lensCard = page.locator('.terminal-panel').locator('div').filter({
       hasText: /Engineer|Observer|Investor/i
     }).first()
 
-    if (await lensOption.isVisible()) {
-      const lensText = await lensOption.textContent()
-      await lensOption.click()
+    if (await lensCard.isVisible()) {
+      await lensCard.click()
+      await page.waitForTimeout(300)
+
+      // Step 2: Click the "Select" button
+      const selectButton = page.locator('.terminal-panel').locator('button:has-text("Select")').first()
+      if (await selectButton.isVisible({ timeout: 2000 })) {
+        await selectButton.click()
+      }
       await page.waitForTimeout(1000)
 
       // Reload the page
@@ -499,17 +515,24 @@ test.describe('Genesis Headline Collapse Flow', () => {
     const terminalPanel = page.locator('.terminal-panel')
     await expect(terminalPanel).toHaveClass(/visible/)
 
-    // Step 3: Select a lens
-    const lensOption = terminalPanel.locator('button').filter({
+    // Step 3a: Click lens card to preview (two-click pattern)
+    const lensCard = terminalPanel.locator('div').filter({
       hasText: /Engineer|Academic|Citizen/i
     }).first()
 
-    if (await lensOption.isVisible({ timeout: 3000 })) {
-      await lensOption.click()
+    if (await lensCard.isVisible({ timeout: 3000 })) {
+      await lensCard.click()
+      await page.waitForTimeout(300)
+
+      // Step 3b: Click "Select" button to activate
+      const selectButton = terminalPanel.locator('button:has-text("Select")').first()
+      if (await selectButton.isVisible({ timeout: 2000 })) {
+        await selectButton.click()
+      }
 
       // Step 4: Wait for headline animation (collapsing → unlocked)
-      // The WaveformCollapse animation takes ~1-2 seconds
-      await page.waitForTimeout(2500)
+      // The WaveformCollapse animation takes ~1-2 seconds, plus 4s safety timeout
+      await page.waitForTimeout(5000)
 
       // Step 5: Verify flow reached unlocked state - additional sections should be visible
       // When unlocked, navigation-gated content appears (Section 2+)
@@ -604,16 +627,23 @@ test.describe('Genesis Headline Collapse Flow', () => {
       await lensSwitchTrigger.click()
       await page.waitForTimeout(500)
 
-      // Select a different lens
-      const differentLens = terminalPanel.locator('button').filter({
+      // Step 1: Click lens card to preview (two-click pattern)
+      const lensCard = terminalPanel.locator('div').filter({
         hasText: /Academic|Citizen/i
       }).first()
 
-      if (await differentLens.isVisible({ timeout: 2000 })) {
-        await differentLens.click()
+      if (await lensCard.isVisible({ timeout: 2000 })) {
+        await lensCard.click()
+        await page.waitForTimeout(300)
 
-        // Wait for headline collapse animation
-        await page.waitForTimeout(2500)
+        // Step 2: Click "Select" button
+        const selectButton = terminalPanel.locator('button:has-text("Select")').first()
+        if (await selectButton.isVisible({ timeout: 2000 })) {
+          await selectButton.click()
+        }
+
+        // Wait for headline collapse animation + safety timeout
+        await page.waitForTimeout(5000)
 
         // Verify engagement state updated
         const updatedState = await page.evaluate(() => {

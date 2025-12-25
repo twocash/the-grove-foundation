@@ -50,7 +50,16 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
   }, [isGenerating]);
 
   useEffect(() => {
+    console.log('[WaveformCollapse] Effect running:', {
+      trigger,
+      previousTrigger: previousTrigger.current,
+      isFirstRender: isFirstRender.current,
+      text: text?.substring(0, 30),
+      phase
+    });
+
     if (isFirstRender.current) {
+      console.log('[WaveformCollapse] First render, setting initial display');
       isFirstRender.current = false;
       setDisplay(text);
       setTargetText(text);
@@ -58,15 +67,18 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
     }
 
     if (trigger !== previousTrigger.current) {
+      console.log('[WaveformCollapse] Trigger changed! Starting animation:', trigger);
       previousTrigger.current = trigger;
       setTargetText(text);
 
       const timer = setTimeout(() => {
+        console.log('[WaveformCollapse] Starting collapse phase');
         setPhase('collapsing');
       }, delay);
 
       return () => clearTimeout(timer);
     } else if (text !== display && phase === 'idle') {
+      console.log('[WaveformCollapse] Text changed while idle, updating directly');
       setDisplay(text);
       setTargetText(text);
     }
@@ -99,6 +111,7 @@ export const WaveformCollapse: React.FC<WaveformCollapseProps> = ({
         }, speed);
         return () => clearTimeout(timer);
       } else {
+        console.log('[WaveformCollapse] Animation complete! Calling onComplete');
         setPhase('idle');
         // v0.16: Active Grove - notify when animation completes
         if (onComplete) {
