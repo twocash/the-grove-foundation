@@ -34,8 +34,8 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
       } catch { /* ignore */ }
     }
 
-    // Top-level sections expanded, projects collapsed by default
-    let expandedGroups = new Set<string>(['explore']);
+    // Top-level sections expanded, first project expanded, subsequent projects collapsed
+    let expandedGroups = new Set<string>(['explore', 'explore.groveProject']);
     if (storedExpanded) {
       try {
         expandedGroups = new Set(JSON.parse(storedExpanded));
@@ -122,8 +122,9 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
   // Navigation actions
   const navigateTo = useCallback((path: NavigationPath) => {
     // Close inspector when changing collection types
-    const currentCollection = navigation.activePath[1];
-    const newCollection = path[1];
+    // Path structure: ['explore', 'groveProject', 'lenses'] — collection is at index 2
+    const currentCollection = navigation.activePath[2];
+    const newCollection = path[2];
     const collectionViews = ['terminal', 'lenses', 'journeys', 'nodes', 'diary', 'sprouts'];
 
     if (

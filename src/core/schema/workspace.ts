@@ -143,6 +143,6 @@ export const WORKSPACE_NAV_KEY = 'grove-workspace-nav';
 export const WORKSPACE_EXPANDED_KEY = 'grove-workspace-expanded';
 
 /**
- * Default navigation path - Explore shows Terminal directly
+ * Default navigation path - Land on first project (Grove Project)
  */
-export const DEFAULT_NAV_PATH: NavigationPath = ['explore'];
+export const DEFAULT_NAV_PATH: NavigationPath = ['explore', 'groveProject'];
