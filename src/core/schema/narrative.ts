@@ -361,6 +361,9 @@ export interface LensReality {
       explore?: string;      // "Explore" section label
       cultivate?: string;    // "Cultivate" section label
       grove?: string;        // "Grove Project" section label
+      lenses?: string;       // Override "Lenses" nav label
+      journeys?: string;     // Override "Journeys" nav label
+      nodes?: string;        // Override "Nodes" nav label
     };
   };
 }
