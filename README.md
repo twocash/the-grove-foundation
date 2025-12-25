@@ -84,7 +84,7 @@ The interesting behavior—agents developing theories about you, forming allianc
 
 ## The Infrastructure
 
-Grove is a reference implementation. The architecture underneath it is the point.
+Grove is a reference implementation. The architecture underneath it is the point. Because information is infinite but understanding is rare. Let's change that.
 
 **The Trellis Kinetic Exploration Architecture** is a framework for building human-AI exploration systems on any dataset. Grove demonstrates what's possible; the Trellis enables anyone to build their own.
 
