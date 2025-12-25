@@ -136,6 +136,16 @@ export interface TopicHub {
   // Metadata
   createdAt: string;
   updatedAt: string;
+
+  // === GroveObjectMeta compatibility (v1.1) ===
+  /** Optional icon (Lucide icon name) */
+  icon?: string;
+
+  /** Optional provenance tracking */
+  createdBy?: GroveObjectProvenance;
+
+  /** Optional color for card rendering */
+  color?: string;
 }
 
 /**

@@ -3,9 +3,10 @@
 
 import React from 'react';
 import { GroveObject } from '@core/schema/grove-object';
-import { Journey } from '@core/schema/narrative';
+import { Journey, TopicHub } from '@core/schema/narrative';
 import { CardShell } from './CardShell';
 import { JourneyContent } from './JourneyContent';
+import { HubContent } from './HubContent';
 import { GenericContent } from './GenericContent';
 
 // ============================================================================
@@ -16,7 +17,8 @@ type ContentRenderer<T = unknown> = React.ComponentType<{ object: GroveObject<T>
 
 const CONTENT_RENDERERS: Record<string, ContentRenderer<unknown>> = {
   journey: ({ object }) => <JourneyContent journey={object.payload as Journey} />,
-  // Future: hub, sprout, lens, etc.
+  hub: ({ object }) => <HubContent hub={object.payload as TopicHub} />,
+  // Future: sprout, lens, etc.
 };
 
 // ============================================================================
@@ -66,5 +68,6 @@ export function GroveObjectCard({
 // Re-export for convenience
 export { CardShell } from './CardShell';
 export { JourneyContent } from './JourneyContent';
+export { HubContent } from './HubContent';
 export { GenericContent } from './GenericContent';
 export type { GroveObjectCardProps };

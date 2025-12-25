@@ -4,7 +4,7 @@
 import { useMemo, useCallback } from 'react';
 import { useNarrativeEngine } from '../../../hooks/useNarrativeEngine';
 import { GroveObject, GroveObjectMeta, GroveObjectType } from '@core/schema/grove-object';
-import { Journey } from '@core/schema/narrative';
+import { Journey, TopicHub } from '@core/schema/narrative';
 import { getFavorites, setFavorite as storeFavorite, isFavorite } from '../../lib/storage/user-preferences';
 
 // ============================================================================
@@ -53,7 +53,27 @@ function normalizeJourney(journey: Journey): GroveObject<Journey> {
   };
 }
 
-// Future: normalizeHub, normalizeSprout, etc.
+function normalizeHub(hub: TopicHub): GroveObject<TopicHub> {
+  return {
+    meta: {
+      id: hub.id,
+      type: 'hub',
+      title: hub.title,
+      description: hub.expertFraming,
+      icon: hub.icon,
+      color: hub.color,
+      createdAt: hub.createdAt,
+      updatedAt: hub.updatedAt,
+      createdBy: hub.createdBy,
+      status: hub.status,
+      tags: hub.tags,
+      favorite: isFavorite(hub.id),
+    },
+    payload: hub,
+  };
+}
+
+// Future: normalizeSprout, etc.
 
 // ============================================================================
 // HOOK
@@ -71,6 +91,17 @@ export function useGroveObjects(options: UseGroveObjectsOptions = {}): UseGroveO
     sortOrder = 'desc',
   } = options;
 
+  // Get hubs from schema (could be Record or from globalSettings.topicHubs array)
+  const hubs = useMemo(() => {
+    if (schema?.hubs) return schema.hubs;
+    // Fallback: convert array to Record if using legacy format
+    const topicHubsArray = schema?.globalSettings?.topicHubs;
+    if (topicHubsArray && Array.isArray(topicHubsArray)) {
+      return Object.fromEntries(topicHubsArray.map(h => [h.id, h]));
+    }
+    return {};
+  }, [schema?.hubs, schema?.globalSettings?.topicHubs]);
+
   // Normalize all objects
   const allObjects = useMemo(() => {
     const result: GroveObject[] = [];
@@ -82,10 +113,17 @@ export function useGroveObjects(options: UseGroveObjectsOptions = {}): UseGroveO
       });
     }
 
-    // Future: Add hubs, sprouts, etc.
+    // Add hubs (if type filter allows)
+    if (!types || types.includes('hub')) {
+      Object.values(hubs).forEach(h => {
+        result.push(normalizeHub(h));
+      });
+    }
+
+    // Future: Add sprouts, etc.
 
     return result;
-  }, [schema?.journeys, types]);
+  }, [schema?.journeys, hubs, types]);
 
   // Apply filters
   const filteredObjects = useMemo(() => {
