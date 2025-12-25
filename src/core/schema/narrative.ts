@@ -2,6 +2,7 @@
 // Narrative Engine v2 Schema - no React dependencies
 
 import { SectionId } from './base';
+import { GroveObjectMeta, GroveObjectProvenance } from './grove-object';
 
 // ============================================================================
 // PERSONA TYPES
@@ -177,11 +178,12 @@ export type JourneyStatus = 'active' | 'draft';
  * The `status` field supports the AI Gardener workflow:
  * - Gardener creates journeys in 'draft' status
  * - Admin reviews and promotes to 'active' status
+ *
+ * Extended in v1.0 to implement GroveObjectMeta (Pattern 7: Object Model)
  */
-export interface Journey {
-  id: string;
-  title: string;
-  description: string;
+export interface Journey extends Omit<GroveObjectMeta, 'type' | 'status'> {
+  // Type narrowed to literal
+  type: 'journey';
 
   // Entry point into the journey
   entryNode: string;              // Card ID where journey starts
@@ -195,16 +197,8 @@ export interface Journey {
   // Journey metrics
   estimatedMinutes: number;       // Expected time to complete
 
-  // Visual metadata
-  icon?: string;                  // Lucide icon name
-  color?: string;                 // Tailwind color class
-
   // Plugin lifecycle (for AI Gardener support)
-  status: JourneyStatus;          // 'active' | 'draft'
-
-  // Metadata
-  createdAt: string;
-  updatedAt: string;
+  status: JourneyStatus;          // 'active' | 'draft' | 'archived' | 'pending'
 }
 
 // ============================================================================
