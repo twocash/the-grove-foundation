@@ -108,18 +108,18 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
     }
   };
 
-  // Determine styling based on state
+  // Determine styling based on state - Quantum Glass v1
   const getItemClasses = () => {
     if (isComingSoon) {
-      return 'text-[var(--grove-text-dim)] cursor-pointer hover:bg-stone-50 dark:hover:bg-slate-800/50';
+      return 'text-[var(--glass-text-faint)] cursor-pointer hover:bg-[var(--glass-elevated)]';
     }
     if (isActive) {
-      return 'bg-stone-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-medium';
+      return 'bg-[rgba(16,185,129,0.1)] text-[var(--neon-green)] font-medium border-l-2 border-[var(--neon-green)] -ml-[2px]';
     }
     if (isParentOfActive) {
-      return 'text-[var(--grove-text)]';
+      return 'text-[var(--glass-text-secondary)]';
     }
-    return 'text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800/50';
+    return 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-secondary)] hover:bg-[var(--glass-elevated)]';
   };
 
   return (
@@ -189,7 +189,7 @@ export function NavigationSidebar() {
   }, [session.startTime]);
 
   return (
-    <aside className="w-60 flex flex-col bg-[var(--grove-surface)] dark:bg-background-dark/50 border-r border-[var(--grove-border)] flex-shrink-0">
+    <aside className="w-60 flex flex-col glass-panel-solid border-r border-[var(--glass-border)] flex-shrink-0">
       {/* Navigation Tree */}
       <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
         {Object.values(navigationTree).map((item) => (
@@ -200,8 +200,8 @@ export function NavigationSidebar() {
       </nav>
 
       {/* Footer with session info */}
-      <div className="border-t border-[var(--grove-border)] px-4 py-3 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
+      <div className="border-t border-[var(--glass-border)] px-4 py-3 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2 text-[var(--glass-text-subtle)]">
           <span>{elapsed}m</span>
           <span>Healthy</span>
         </div>

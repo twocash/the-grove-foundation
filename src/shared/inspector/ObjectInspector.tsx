@@ -32,7 +32,7 @@ export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps
       actions={
         <button
           onClick={copyToClipboard}
-          className="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 flex items-center justify-center gap-2 transition-colors"
+          className="w-full py-2 px-3 rounded-lg bg-[var(--glass-elevated)] hover:bg-[var(--glass-border-hover)] border border-[var(--glass-border)] text-sm text-[var(--glass-text-secondary)] flex items-center justify-center gap-2 transition-all hover:border-[var(--neon-cyan)]"
         >
           <span className="material-symbols-outlined text-base">content_copy</span>
           Copy Full JSON
@@ -82,7 +82,7 @@ function CollapsibleSection({ title, expanded, onToggle, children }: Collapsible
         >
           chevron_right
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 group-hover:text-slate-400">
+        <span className="glass-section-header group-hover:text-[var(--glass-text-muted)]">
           {title}
         </span>
       </button>

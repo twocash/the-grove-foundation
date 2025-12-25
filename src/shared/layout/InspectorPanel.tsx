@@ -33,9 +33,9 @@ export function InspectorPanel({
   actions,
 }: InspectorPanelProps) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full glass-panel-solid">
       {/* Header */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-border-light dark:border-border-dark flex-shrink-0">
+      <div className="h-14 flex items-center justify-between px-4 border-b border-[var(--glass-border)] flex-shrink-0 bg-black/20">
         <div className="flex items-center gap-3">
           {icon && (
             <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center`}>
@@ -43,15 +43,15 @@ export function InspectorPanel({
             </div>
           )}
           <div>
-            <span className="font-medium text-sm text-slate-700 dark:text-slate-200">{title}</span>
+            <span className="font-medium text-sm text-[var(--glass-text-primary)]">{title}</span>
             {subtitle && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
+              <p className="text-xs text-[var(--glass-text-muted)]">{subtitle}</p>
             )}
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-stone-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          className="p-1.5 text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)] hover:bg-[var(--glass-elevated)] rounded-lg transition-colors"
         >
           <span className="material-symbols-outlined">close</span>
         </button>
@@ -64,7 +64,7 @@ export function InspectorPanel({
 
       {/* Actions footer */}
       {actions && (
-        <div className="p-4 border-t border-border-light dark:border-border-dark flex-shrink-0">
+        <div className="p-4 border-t border-[var(--glass-border)] flex-shrink-0 bg-black/20">
           {actions}
         </div>
       )}
@@ -83,7 +83,7 @@ export function InspectorSection({ title, children, className = '' }: InspectorS
   return (
     <div className={`p-5 space-y-4 ${className}`}>
       {title && (
-        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
+        <h4 className="glass-section-header">
           {title}
         </h4>
       )}
@@ -94,5 +94,5 @@ export function InspectorSection({ title, children, className = '' }: InspectorS
 
 // Divider between sections
 export function InspectorDivider() {
-  return <div className="border-t border-border-light dark:border-border-dark" />;
+  return <div className="border-t border-[var(--glass-border)]" />;
 }

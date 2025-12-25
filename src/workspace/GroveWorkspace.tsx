@@ -33,7 +33,7 @@ interface GroveWorkspaceProps {
 export function GroveWorkspace({ initialPath }: GroveWorkspaceProps) {
   return (
     <WorkspaceUIProvider initialPath={initialPath}>
-      <div className="grove-workspace flex flex-col h-screen bg-[var(--grove-bg)] text-[var(--grove-text)]">
+      <div className="grove-workspace glass-viewport flex flex-col h-screen text-[var(--glass-text-body)]">
         <WorkspaceHeader />
         <div className="flex-1 flex overflow-hidden">
           <NavigationSidebar />
