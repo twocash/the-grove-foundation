@@ -19,6 +19,7 @@ import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
+import { getPersona } from '../data/default-personas';
 import { getFormattedTerminalWelcome, getTerminalWelcome } from '../src/data/quantum-content';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
 // Reveal components now handled by TerminalFlow (Epic 4.3)
@@ -245,7 +246,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
     return null;
-  }, [engLens, getPersona, getCustomLens, customLenses]);
+  }, [engLens, getCustomLens, customLenses]);
 
   const enabledPersonas = getEnabledPersonas();
 
@@ -372,7 +373,7 @@ const Terminal: React.FC<TerminalProps> = ({
     personaId: session.activeLens || null,
     journeyId: engActiveJourneyId || null,
     hubId: null, // Hub routing happens server-side; not tracked client-side
-    nodeId: engineCurrentNodeId || currentNodeId || null
+    nodeId: currentNodeId || null
   });
 
   const handleCaptureSprout = (options?: { tags?: string[]; notes?: string }) => {
@@ -435,8 +436,8 @@ const Terminal: React.FC<TerminalProps> = ({
   // Handle deleting a custom lens
   const handleDeleteCustomLens = async (id: string) => {
     // If deleting the active lens, clear it first
-    if (session.activeLens === id) {
-      selectLens(null);
+    if (engLens === id) {
+      engSelectLens('freestyle'); // Clear to default lens
     }
     await deleteCustomLens(id);
   };
