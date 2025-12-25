@@ -41,14 +41,14 @@ const HeaderPill: React.FC<{
     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium
       ${embedded
         ? 'bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)] hover:bg-[var(--chat-glass-hover)] hover:border-[var(--chat-border-accent)]/50'
-        : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 border border-transparent hover:border-primary/30 dark:hover:border-primary/50'
+        : 'bg-[var(--glass-elevated)] text-[var(--glass-text-secondary)] border border-[var(--glass-border)] hover:border-[var(--neon-cyan)]/50'
       }
       transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       shrink-0 whitespace-nowrap ${className}`}
   >
     {icon}
     <span className="truncate max-w-[100px]">{label}</span>
-    {onClick && <span className={`text-[9px] ${embedded ? 'text-[var(--chat-text-dim)]' : 'text-slate-400 dark:text-slate-500'}`}>▾</span>}
+    {onClick && <span className={`text-[9px] ${embedded ? 'text-[var(--chat-text-dim)]' : 'text-[var(--glass-text-subtle)]'}`}>▾</span>}
   </button>
 );
 
@@ -78,7 +78,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
     <div className={`px-4 py-2.5 border-b flex items-center gap-3 flex-nowrap ${
       isEmbedded
         ? 'border-[var(--chat-border)] bg-[var(--chat-bg)]'
-        : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark'
+        : 'border-[var(--glass-border)] bg-[var(--glass-solid)]'
     }`}>
       {/* Left: Menu + Title */}
       <div className="flex items-center gap-2 shrink-0">
@@ -88,7 +88,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
           className={`p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             isEmbedded
               ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+              : 'text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)]'
           }`}
           disabled={!onMenuClick}
           aria-label="Menu"
@@ -99,9 +99,9 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         </button>
 
         {/* Title */}
-        <span className={`font-semibold text-sm ${isEmbedded ? 'text-[var(--chat-text)]' : 'text-slate-900 dark:text-slate-100'}`}>Your Grove</span>
+        <span className={`font-semibold text-sm ${isEmbedded ? 'text-[var(--chat-text)]' : 'text-[var(--glass-text-primary)]'}`}>Your Grove</span>
         {isScholarMode && (
-          <span className="bg-primary text-white px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase">
+          <span className="bg-[var(--neon-green)] text-white px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase">
             Scholar
           </span>
         )}
@@ -152,7 +152,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${
               isEmbedded
                 ? 'text-orange-400 hover:bg-orange-400/10'
-                : 'text-primary hover:bg-primary/10'
+                : 'text-[var(--neon-amber)] hover:bg-[var(--neon-amber)]/10'
             }`}
             aria-label={`${currentStreak} day streak`}
           >
@@ -168,7 +168,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             className={`p-1 transition-colors ${
               isEmbedded
                 ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
-                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                : 'text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)]'
             }`}
             aria-label="Minimize"
           >
@@ -185,7 +185,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             className={`p-1 transition-colors ${
               isEmbedded
                 ? 'text-[var(--chat-text-muted)] hover:text-[var(--chat-text)]'
-                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                : 'text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)]'
             }`}
             aria-label="Close"
           >

@@ -181,7 +181,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
         <div className={`absolute bottom-full left-0 right-0 mb-2 px-3 py-2 text-sm font-mono rounded-lg shadow-lg animate-fade-in ${
           embedded
             ? 'bg-[var(--chat-surface)] text-[var(--chat-text)] border border-[var(--chat-border)]'
-            : 'bg-slate-900 dark:bg-slate-700 text-white'
+            : 'bg-[var(--glass-solid)] text-[var(--glass-text-primary)] border border-[var(--glass-border)]'
         }`}>
           {toast}
         </div>
@@ -201,7 +201,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
       <div className={`flex items-center gap-2 rounded-xl p-2 transition-all shadow-sm ${
         embedded
           ? 'bg-[var(--chat-input-bg)] border border-[var(--chat-border)] focus-within:border-[var(--chat-border-focus)] focus-within:ring-1 focus-within:ring-[var(--chat-accent)]/30'
-          : 'bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50'
+          : 'glass-input-wrapper'
       }`}>
         <input
           ref={inputRef}
@@ -213,7 +213,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
           className={`flex-1 bg-transparent border-0 focus:ring-0 focus:outline-none py-2 px-2 text-sm ${
             embedded
               ? 'text-[var(--chat-text)] placeholder:text-[var(--chat-text-dim)]'
-              : 'text-slate-900 dark:text-white placeholder-slate-500'
+              : 'text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-subtle)]'
           }`}
           disabled={disabled}
           autoComplete="off"
@@ -225,7 +225,7 @@ const CommandInput: React.FC<CommandInputProps> = ({
           className={`p-2 rounded-lg transition-colors shrink-0 disabled:opacity-50 ${
             embedded
               ? 'bg-[var(--chat-accent)] text-[var(--chat-accent-text)] hover:bg-[var(--chat-accent-hover)]'
-              : 'bg-primary text-white hover:bg-primary/90'
+              : 'glass-send-btn'
           }`}
           disabled={disabled}
         >

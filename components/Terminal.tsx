@@ -1096,8 +1096,8 @@ const Terminal: React.FC<TerminalProps> = ({
               )}
 
               {/* Messages Area - Thread Style */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 terminal-scroll bg-white dark:bg-background-dark">
-                <div className="max-w-3xl mx-auto space-y-6">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 terminal-scroll glass-chat-container">
+                <div className="w-full max-w-[min(90%,56rem)] mx-auto space-y-6">
                 {terminalState.messages.map((msg) => {
                   const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
                   const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
@@ -1108,24 +1108,24 @@ const Terminal: React.FC<TerminalProps> = ({
                         {/* Message Label */}
                         <div className={`flex items-center gap-2 mb-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.role === 'user' ? (
-                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">You</span>
+                            <span className="text-xs font-semibold text-[var(--glass-text-subtle)]">You</span>
                           ) : (
-                            <span className="text-xs font-semibold text-primary">The Grove</span>
+                            <span className="text-xs font-semibold text-[var(--neon-green)]">The Grove</span>
                           )}
                         </div>
                         {/* Message Bubble */}
                         <div className={`${msg.role === 'user' ? 'max-w-[85%] md:max-w-[70%]' : 'max-w-[90%] md:max-w-[85%]'}`}>
                           {msg.role === 'user' ? (
-                            <div className="bg-primary text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md">
+                            <div className="glass-message glass-message-user">
                               <p className="text-sm md:text-base leading-relaxed">
                                 {msg.text.replace(' --verbose', '')}
                               </p>
                             </div>
                           ) : (
-                            <div className={`px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm ${
+                            <div className={`glass-message ${
                               isSystemError
-                                ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
-                                : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-border-dark'
+                                ? 'glass-message-error'
+                                : 'glass-message-assistant'
                             }`}>
                               {msg.isStreaming && !msg.text ? (
                                 /* Show loading messages while waiting for first chunk */
@@ -1253,7 +1253,7 @@ const Terminal: React.FC<TerminalProps> = ({
               </div>
 
               {/* Interactions Area */}
-              <div className="border-t border-border-light dark:border-border-dark bg-surface-light/50 dark:bg-surface-dark/50">
+              <div className="border-t border-[var(--glass-border)] bg-[var(--glass-solid)]">
                 <div className="max-w-3xl mx-auto p-6">
 
                 {/* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */}
@@ -1353,17 +1353,17 @@ const Terminal: React.FC<TerminalProps> = ({
                 {/* Suggested Inquiry button removed - was taking up real estate without clear value */}
 
                 <div className="flex items-center space-x-3 mb-4">
-                  {/* v0.13: Scholar Mode button restyled for dark mode */}
+                  {/* v0.13: Scholar Mode button restyled for glass */}
                   <button
                     onClick={toggleVerboseMode}
                     className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase transition-all ${isVerboseMode
-                        ? 'bg-primary text-white shadow-sm'
-                        : 'bg-transparent text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary'
+                        ? 'bg-[var(--neon-green)] text-white shadow-sm'
+                        : 'bg-transparent text-[var(--glass-text-subtle)] border border-[var(--glass-border)] hover:border-[var(--neon-green)] hover:text-[var(--neon-green)]'
                       }`}
                   >
                     {isVerboseMode ? 'Scholar Mode: ON' : 'Enable Scholar Mode'}
                   </button>
-                  {currentTopic && <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">Ref: {currentTopic}</span>}
+                  {currentTopic && <span className="text-[10px] font-mono text-[var(--glass-text-subtle)]">Ref: {currentTopic}</span>}
                 </div>
 
                 {/* Input Area - Command Palette enabled (v0.16) */}
