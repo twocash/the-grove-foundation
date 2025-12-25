@@ -121,6 +121,31 @@ const GenesisPage: React.FC = () => {
     isLoading: false
   });
 
+  // FIX: Handle returning users with already-selected lens
+  // On refresh, if lens is already set, skip straight to unlocked state
+  useEffect(() => {
+    // Only run once on mount when in initial 'hero' state
+    if (flowState === 'hero' && activeLens) {
+      console.log('[ActiveGrove] Returning user with lens:', activeLens, '→ skipping to unlocked');
+      setUIMode('split');
+      setTerminalState(prev => ({ ...prev, isOpen: true }));
+      setFlowState('unlocked');
+    }
+  }, []); // Empty deps - only run once on mount
+  // Note: activeLens may hydrate async, so we also have the effect below
+
+  // Secondary check for async lens hydration (URL params, etc.)
+  const [hasCheckedReturningUser, setHasCheckedReturningUser] = useState(false);
+  useEffect(() => {
+    if (!hasCheckedReturningUser && flowState === 'hero' && activeLens) {
+      console.log('[ActiveGrove] Async lens hydration detected:', activeLens, '→ skipping to unlocked');
+      setUIMode('split');
+      setTerminalState(prev => ({ ...prev, isOpen: true }));
+      setFlowState('unlocked');
+      setHasCheckedReturningUser(true);
+    }
+  }, [activeLens, flowState, hasCheckedReturningUser]);
+
   // ============================================================================
   // ACTIVE GROVE EVENT HANDLERS (Sprint: active-grove-v1)
   // ============================================================================

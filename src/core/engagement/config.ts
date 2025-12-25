@@ -1,16 +1,26 @@
 // src/core/engagement/config.ts
 
+// FIXED: Updated to match actual persona IDs from data/default-personas.ts
+// Also includes custom-* prefix for custom lenses
 export const VALID_LENSES = [
-  'engineer',
+  'freestyle',
+  'concerned-citizen',
   'academic',
-  'citizen',
-  'investor',
-  'policymaker',
+  'engineer',
+  'geopolitical',
+  'big-ai-exec',
+  'family-office',
+  'simulation-theorist',
 ] as const;
 
 export type ValidLens = typeof VALID_LENSES[number];
 
-export function isValidLens(lens: string): lens is ValidLens {
+export function isValidLens(lens: string): boolean {
+  // Allow custom lenses (custom-*)
+  if (lens.startsWith('custom-')) return true;
+  // Allow shared/ephemeral lenses (shared-*)
+  if (lens.startsWith('shared-')) return true;
+  // Check against known persona IDs
   return VALID_LENSES.includes(lens as ValidLens);
 }
 
