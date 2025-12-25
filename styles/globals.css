@@ -1243,8 +1243,8 @@ p {
 }
 
 .glass-welcome-prompt:hover {
-  border-color: var(--neon-green);
-  color: var(--neon-green);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
 }
 
 /* Code blocks in messages */
