@@ -121,13 +121,26 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
 
   // Navigation actions
   const navigateTo = useCallback((path: NavigationPath) => {
+    // Close inspector when changing collection types
+    const currentCollection = navigation.activePath[1];
+    const newCollection = path[1];
+    const collectionViews = ['terminal', 'lenses', 'journeys', 'nodes', 'diary', 'sprouts'];
+
+    if (
+      inspector.isOpen &&
+      currentCollection !== newCollection &&
+      collectionViews.includes(newCollection)
+    ) {
+      setInspector({ mode: { type: 'none' }, isOpen: false });
+    }
+
     setNavigation(s => ({
       ...s,
       activePath: path,
       selectedEntityId: null,
       selectedEntityType: null,
     }));
-  }, []);
+  }, [navigation.activePath, inspector.isOpen]);
 
   const toggleGroup = useCallback((groupPath: string) => {
     setNavigation(s => {

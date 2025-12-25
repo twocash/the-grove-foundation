@@ -5,7 +5,6 @@ import { useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { Card, JourneyNode } from '../../data/narratives-schema';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { GitBranch, ArrowRight, Tag } from 'lucide-react';
 
 interface NodeCardProps {
   node: Card | JourneyNode;
@@ -13,16 +12,16 @@ interface NodeCardProps {
 }
 
 function NodeCard({ node, onSelect }: NodeCardProps) {
-  // Determine connections count
   const connectionsCount = 'next' in node && node.next ? node.next.length :
                           ('primaryNext' in node ? (node.primaryNext ? 1 : 0) + (node.alternateNext?.length || 0) : 0);
+  const sectionId = 'sectionId' in node ? node.sectionId : null;
 
   return (
-    <button
+    <article
       onClick={() => onSelect(node.id)}
-      className="glass-card p-4 text-left group"
+      className="glass-card p-4 cursor-pointer group"
     >
-      {/* Label */}
+      {/* Title */}
       <h3 className="font-medium text-[var(--glass-text-primary)] mb-2 line-clamp-2 group-hover:text-[var(--neon-cyan)] transition-colors">
         {node.label}
       </h3>
@@ -33,24 +32,22 @@ function NodeCard({ node, onSelect }: NodeCardProps) {
       </p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-[var(--glass-text-subtle)]">
-        {/* Section tag */}
-        {'sectionId' in node && node.sectionId && (
-          <div className="flex items-center gap-1">
-            <Tag size={12} />
-            <span>{node.sectionId}</span>
-          </div>
-        )}
-
-        {/* Connections */}
+      <div className="glass-card-footer">
+        <div className="glass-card-meta">
+          {sectionId && (
+            <>
+              <span className="material-symbols-outlined">sell</span>
+              <span>{sectionId}</span>
+            </>
+          )}
+        </div>
         {connectionsCount > 0 && (
-          <div className="flex items-center gap-1 ml-auto">
-            <ArrowRight size={12} />
-            <span>{connectionsCount} next</span>
-          </div>
+          <span className="text-xs text-[var(--glass-text-subtle)]">
+            → {connectionsCount} next
+          </span>
         )}
       </div>
-    </button>
+    </article>
   );
 }
 
@@ -95,7 +92,7 @@ export function NodeGrid() {
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-[var(--grove-accent)] animate-pulse">Loading nodes...</div>
+        <div className="text-[var(--neon-cyan)] animate-pulse">Loading nodes...</div>
       </div>
     );
   }
@@ -103,13 +100,13 @@ export function NodeGrid() {
   if (allNodes.length === 0) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center p-8">
-        <div className="w-16 h-16 rounded-full bg-[var(--grove-surface)] flex items-center justify-center mb-4">
-          <GitBranch size={32} className="text-[var(--grove-accent)]" />
+        <div className="w-16 h-16 rounded-full bg-[var(--glass-elevated)] flex items-center justify-center mb-4">
+          <span className="material-symbols-outlined text-3xl text-[var(--neon-cyan)]">account_tree</span>
         </div>
-        <h2 className="text-xl font-semibold text-[var(--grove-text)] mb-2">
+        <h2 className="text-xl font-semibold text-[var(--glass-text-primary)] mb-2">
           No Nodes Available
         </h2>
-        <p className="text-[var(--grove-text-muted)] max-w-md">
+        <p className="text-[var(--glass-text-muted)] max-w-md">
           Knowledge nodes will appear here once the narrative schema is loaded.
         </p>
       </div>

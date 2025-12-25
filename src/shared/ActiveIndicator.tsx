@@ -10,15 +10,15 @@ interface ActiveIndicatorProps {
 
 export function ActiveIndicator({ label, value, icon, className = '' }: ActiveIndicatorProps) {
   return (
-    <div className={`border border-border-light dark:border-slate-700 bg-stone-50 dark:bg-slate-900 rounded-lg p-4 flex items-center gap-3 shadow-sm ${className}`}>
-      <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-      <span className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+    <div className={`border border-[var(--glass-border)] bg-[var(--glass-solid)] rounded-lg p-4 flex items-center gap-3 ${className}`}>
+      <div className="h-2 w-2 rounded-full bg-[var(--neon-green)] animate-pulse" />
+      <span className="text-sm font-medium text-[var(--glass-text-subtle)] uppercase tracking-wide">
         {label}:
       </span>
       {icon && (
-        <span className="material-symbols-outlined text-primary text-lg">{icon}</span>
+        <span className="material-symbols-outlined text-[var(--neon-green)] text-lg">{icon}</span>
       )}
-      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+      <span className="text-sm font-semibold text-[var(--glass-text-primary)]">
         {value}
       </span>
     </div>

@@ -22,7 +22,7 @@ export function SearchInput({ placeholder, value, onChange, onClear, className =
 
   return (
     <div className={`relative flex-1 ${className}`}>
-      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
+      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[var(--glass-text-subtle)]">
         search
       </span>
       <input
@@ -31,12 +31,12 @@ export function SearchInput({ placeholder, value, onChange, onClear, className =
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full pl-10 pr-10 py-2.5 bg-surface-light dark:bg-slate-900 border border-border-light dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors"
+        className="w-full pl-10 pr-10 py-2.5 bg-[var(--glass-solid)] border border-[var(--glass-border)] rounded-lg text-sm text-[var(--glass-text-secondary)] placeholder:text-[var(--glass-text-subtle)] focus:outline-none focus:border-[var(--neon-cyan)] focus:ring-1 focus:ring-[var(--neon-cyan)]/30 transition-colors"
       />
       {value && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)] transition-colors"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>

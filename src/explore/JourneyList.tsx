@@ -8,6 +8,7 @@ import { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
+import { StatusBadge } from '../shared/ui';
 
 interface JourneyListProps {
   mode?: 'full' | 'compact';
@@ -22,37 +23,24 @@ function CompactJourneyCard({ journey, isActive, onStart }: {
 }) {
   return (
     <div
+      data-active={isActive || undefined}
       onClick={onStart}
-      className={`
-        flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all
-        ${isActive
-          ? 'border-primary/50 bg-primary/10 dark:bg-primary/20'
-          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-primary/30'
-        }
-      `}
+      className="glass-card p-4 cursor-pointer flex items-center gap-4"
     >
-      <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 shrink-0">
-        <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">
-          {journey.icon || 'map'}
-        </span>
-      </div>
+      <span className="material-symbols-outlined glass-card-icon text-xl">map</span>
       <div className="flex-1 min-w-0">
-        <h3 className={`font-medium ${isActive ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+        <h3 className="font-medium text-[var(--glass-text-primary)] truncate">
           {journey.title}
         </h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 italic truncate mb-1">
-          "{journey.targetAha || journey.description}"
+        <p className="text-sm text-[var(--glass-text-muted)] italic truncate">
+          {journey.targetAha || journey.description}
         </p>
-        <div className="flex items-center gap-1 text-xs text-slate-400">
+        <div className="flex items-center gap-1 text-xs text-[var(--glass-text-subtle)] mt-1">
           <span className="material-symbols-outlined text-sm">schedule</span>
           {journey.estimatedMinutes} min
         </div>
       </div>
-      {isActive ? (
-        <span className="px-2 py-1 text-xs font-medium rounded bg-primary/20 text-primary shrink-0">
-          ACTIVE
-        </span>
-      ) : null}
+      {isActive && <StatusBadge variant="active" />}
     </div>
   );
 }
@@ -66,30 +54,22 @@ interface JourneyCardProps {
 }
 
 function JourneyCard({ journey, isActive, isInspected, onStart, onView }: JourneyCardProps) {
-  const dataAttributes: Record<string, string | undefined> = {
-    'data-selected': isInspected ? 'true' : undefined,
-    'data-active': isActive ? 'true' : undefined,
-  };
-
   return (
-    <div
-      {...dataAttributes}
+    <article
+      data-selected={isInspected || undefined}
+      data-active={isActive || undefined}
       className="glass-card p-5 cursor-pointer"
       onClick={onView}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-lg">
-            {journey.icon || 'map'}
-          </span>
+          <span className="material-symbols-outlined glass-card-icon">map</span>
           <h3 className="font-medium text-[var(--glass-text-primary)]">
             {journey.title}
           </h3>
         </div>
-        {isActive && (
-          <span className="status-badge status-badge-active">Active</span>
-        )}
+        {isActive && <StatusBadge variant="active" />}
       </div>
 
       {/* Description */}
@@ -97,39 +77,30 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
         {journey.description}
       </p>
 
-      {/* Target Aha */}
+      {/* Target Aha Callout */}
       {journey.targetAha && (
-        <div className="flex items-start gap-2 mb-3 p-2.5 rounded-lg bg-[var(--glass-elevated)] border border-[var(--glass-border)]">
-          <span className="material-symbols-outlined text-[var(--neon-amber)] text-sm mt-0.5">lightbulb</span>
-          <p className="text-xs text-[var(--neon-amber)] italic line-clamp-2">
-            {journey.targetAha}
-          </p>
+        <div className="glass-callout line-clamp-2">
+          {journey.targetAha}
         </div>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 text-xs text-[var(--glass-text-subtle)]">
-          <span className="material-symbols-outlined text-sm">schedule</span>
+      <div className="glass-card-footer">
+        <div className="glass-card-meta">
+          <span className="material-symbols-outlined">schedule</span>
           <span>{journey.estimatedMinutes} min</span>
         </div>
-
-        <div className="flex items-center gap-2">
-          {!isActive && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onStart();
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-[var(--neon-green)] text-white hover:bg-[var(--neon-green)]/90 transition-colors font-medium"
-            >
-              <span className="material-symbols-outlined text-sm">play_arrow</span>
-              Start
-            </button>
-          )}
-        </div>
+        {!isActive && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onStart(); }}
+            className="glass-btn-primary"
+          >
+            <span className="material-symbols-outlined text-sm">play_arrow</span>
+            Start
+          </button>
+        )}
       </div>
-    </div>
+    </article>
   );
 }
 

@@ -10,6 +10,7 @@ import { CustomLens } from '../../types/lens';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader } from '../shared';
 import { useEngagement, useLensState } from '@core/engagement';
+import { StatusBadge } from '../shared/ui';
 
 interface LensPickerProps {
   mode?: 'full' | 'compact';
@@ -21,113 +22,6 @@ interface LensPickerProps {
 // Union type for display
 type DisplayLens = Persona | CustomLens;
 
-// Map persona IDs to accent colors and Material Symbols icons
-interface LensAccent {
-  icon: string;
-  bgLight: string;
-  bgDark: string;
-  textLight: string;
-  textDark: string;
-  borderHover: string;
-  selectedBg: string;
-  selectedBgDark: string;
-}
-
-const lensAccents: Record<string, LensAccent> = {
-  'freestyle-explorer': {
-    icon: 'explore',
-    bgLight: 'bg-blue-50',
-    bgDark: 'dark:bg-blue-900/30',
-    textLight: 'text-blue-600',
-    textDark: 'dark:text-blue-400',
-    borderHover: 'hover:border-blue-300',
-    selectedBg: 'bg-blue-50',
-    selectedBgDark: 'dark:bg-blue-900/40',
-  },
-  'concerned-citizen': {
-    icon: 'home',
-    bgLight: 'bg-red-50',
-    bgDark: 'dark:bg-red-900/30',
-    textLight: 'text-red-600',
-    textDark: 'dark:text-red-400',
-    borderHover: 'hover:border-red-300',
-    selectedBg: 'bg-red-50',
-    selectedBgDark: 'dark:bg-[#3f1919]',
-  },
-  'academic-researcher': {
-    icon: 'school',
-    bgLight: 'bg-emerald-50',
-    bgDark: 'dark:bg-emerald-900/30',
-    textLight: 'text-emerald-600',
-    textDark: 'dark:text-emerald-400',
-    borderHover: 'hover:border-emerald-300',
-    selectedBg: 'bg-emerald-50',
-    selectedBgDark: 'dark:bg-emerald-900/40',
-  },
-  'infrastructure-engineer': {
-    icon: 'settings',
-    bgLight: 'bg-stone-100',
-    bgDark: 'dark:bg-slate-700/50',
-    textLight: 'text-slate-600',
-    textDark: 'dark:text-slate-300',
-    borderHover: 'hover:border-indigo-300',
-    selectedBg: 'bg-indigo-50',
-    selectedBgDark: 'dark:bg-indigo-900/40',
-  },
-  'ai-investor': {
-    icon: 'trending_up',
-    bgLight: 'bg-amber-50',
-    bgDark: 'dark:bg-amber-900/30',
-    textLight: 'text-amber-600',
-    textDark: 'dark:text-amber-400',
-    borderHover: 'hover:border-amber-300',
-    selectedBg: 'bg-amber-50',
-    selectedBgDark: 'dark:bg-amber-900/40',
-  },
-  'ai-builder': {
-    icon: 'construction',
-    bgLight: 'bg-violet-50',
-    bgDark: 'dark:bg-violet-900/30',
-    textLight: 'text-violet-600',
-    textDark: 'dark:text-violet-400',
-    borderHover: 'hover:border-violet-300',
-    selectedBg: 'bg-violet-50',
-    selectedBgDark: 'dark:bg-violet-900/40',
-  },
-  'ai-skeptic': {
-    icon: 'sentiment_dissatisfied',
-    bgLight: 'bg-slate-100',
-    bgDark: 'dark:bg-slate-700/50',
-    textLight: 'text-slate-600',
-    textDark: 'dark:text-slate-400',
-    borderHover: 'hover:border-slate-400',
-    selectedBg: 'bg-slate-100',
-    selectedBgDark: 'dark:bg-slate-700/40',
-  },
-  'tech-visionary': {
-    icon: 'lightbulb',
-    bgLight: 'bg-pink-50',
-    bgDark: 'dark:bg-pink-900/30',
-    textLight: 'text-pink-600',
-    textDark: 'dark:text-pink-400',
-    borderHover: 'hover:border-pink-300',
-    selectedBg: 'bg-pink-50',
-    selectedBgDark: 'dark:bg-pink-900/40',
-  },
-};
-
-// Default accent for unknown personas
-const defaultAccent: LensAccent = {
-  icon: 'psychology',
-  bgLight: 'bg-slate-100',
-  bgDark: 'dark:bg-slate-700/50',
-  textLight: 'text-slate-600',
-  textDark: 'dark:text-slate-400',
-  borderHover: 'hover:border-slate-400',
-  selectedBg: 'bg-slate-100',
-  selectedBgDark: 'dark:bg-slate-700/40',
-};
-
 // Compact card for chat nav picker (single column, click = inspector, button = select)
 function CompactLensCard({ lens, isActive, onSelect, onView }: {
   lens: DisplayLens;
@@ -136,51 +30,35 @@ function CompactLensCard({ lens, isActive, onSelect, onView }: {
   onView: () => void;
 }) {
   const isCustom = 'isCustom' in lens && lens.isCustom;
-  // Custom lenses use a special accent, personas use the accent map
-  const accent = isCustom
-    ? { ...defaultAccent, icon: 'auto_fix_high', bgLight: 'bg-violet-50', bgDark: 'dark:bg-violet-900/30', textLight: 'text-violet-600', textDark: 'dark:text-violet-400' }
-    : lensAccents[lens.id] || defaultAccent;
 
   return (
     <div
+      data-active={isActive || undefined}
       onClick={onView}
-      className={`
-        flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all
-        ${isActive
-          ? 'border-primary/50 bg-primary/10 dark:bg-primary/20'
-          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:border-primary/30'
-        }
-      `}
+      className="glass-card p-4 cursor-pointer flex items-center gap-4"
     >
-      <div className={`${accent.bgLight} ${accent.bgDark} p-2.5 rounded-lg shrink-0`}>
-        <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark}`}>
-          {accent.icon}
-        </span>
-      </div>
+      <span className="material-symbols-outlined glass-card-icon text-xl">
+        {isCustom ? 'auto_fix_high' : 'psychology'}
+      </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className={`font-medium ${isActive ? 'text-primary' : 'text-slate-900 dark:text-white'}`}>
+          <h3 className="font-medium text-[var(--glass-text-primary)] truncate">
             {lens.publicLabel}
           </h3>
           {isCustom && (
-            <span className="text-[10px] uppercase font-bold text-violet-500 dark:text-violet-400">Custom</span>
+            <span className="text-[10px] uppercase font-bold text-[var(--neon-violet)]">Custom</span>
           )}
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 italic truncate">
+        <p className="text-sm text-[var(--glass-text-muted)] italic truncate">
           "{lens.description}"
         </p>
       </div>
       {isActive ? (
-        <span className="px-2 py-1 text-xs font-medium rounded bg-primary/20 text-primary shrink-0">
-          ACTIVE
-        </span>
+        <StatusBadge variant="active" />
       ) : (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect();
-          }}
-          className="px-3 py-1 text-xs font-medium rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shrink-0"
+          onClick={(e) => { e.stopPropagation(); onSelect(); }}
+          className="glass-btn-secondary"
         >
           Select
         </button>
@@ -199,29 +77,17 @@ interface LensCardProps {
 }
 
 function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCardProps) {
-  const accent = lensAccents[persona.id] || defaultAccent;
-
-  const dataAttributes: Record<string, string | undefined> = {
-    'data-selected': isInspected ? 'true' : undefined,
-    'data-active': isActive ? 'true' : undefined,
-  };
-
   return (
-    <div
-      {...dataAttributes}
-      className="glass-card p-5 cursor-pointer flex flex-col text-left"
+    <article
+      data-selected={isInspected || undefined}
+      data-active={isActive || undefined}
+      className="glass-card p-5 cursor-pointer flex flex-col"
       onClick={onView}
     >
-      {/* Header: Icon + Active Badge */}
+      {/* Header */}
       <div className="flex items-start justify-between mb-3">
-        <div className={`${accent.bgLight} ${accent.bgDark} p-2.5 rounded-lg`}>
-          <span className={`material-symbols-outlined ${accent.textLight} ${accent.textDark} text-xl`}>
-            {accent.icon}
-          </span>
-        </div>
-        {isActive && (
-          <span className="status-badge status-badge-active">Active</span>
-        )}
+        <span className="material-symbols-outlined glass-card-icon text-2xl">psychology</span>
+        {isActive && <StatusBadge variant="active" />}
       </div>
 
       {/* Title */}
@@ -230,25 +96,23 @@ function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCard
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-[var(--glass-text-muted)] italic mb-4">
+      <p className="text-sm text-[var(--glass-text-muted)] italic mb-4 line-clamp-2">
         "{persona.description}"
       </p>
 
-      {/* Footer: Select button (only if not active) */}
-      <div className="flex items-center justify-end mt-auto">
+      {/* Footer */}
+      <div className="glass-card-footer mt-auto">
+        <div /> {/* Spacer */}
         {!isActive && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect();
-            }}
-            className="px-4 py-1.5 text-xs font-medium rounded-md bg-[var(--neon-green)] text-white hover:bg-[var(--neon-green)]/90 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onSelect(); }}
+            className="glass-btn-primary"
           >
             Select
           </button>
         )}
       </div>
-    </div>
+    </article>
   );
 }
 
