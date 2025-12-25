@@ -319,6 +319,40 @@ src/core/
 - ❌ Create surface-specific versions of shared components
 - ❌ Mix domain logic into surface components
 
+---
+
+### Pattern 7: Object Model (Sprint: grove-object-model-v1)
+
+**Need:** Unified identity and operations across all Grove content types.
+
+**Philosophy:** Every thing in Grove is a GroveObject. Whether human-created or AI-generated, system-defined or user-customized, all objects share common identity and can be operated on uniformly.
+
+**Use:** GroveObjectMeta interface + GroveObjectCard component + useGroveObjects hook
+
+**Files:**
+- `src/core/schema/grove-object.ts` → Type definitions
+- `src/surface/components/GroveObjectCard/` → Generic renderer
+- `src/surface/hooks/useGroveObjects.ts` → Collection operations
+- `src/lib/storage/user-preferences.ts` → Favorites storage
+
+**Extend by:**
+1. Have new types implement GroveObjectMeta (flat extension)
+2. Add type-specific content renderer to CONTENT_RENDERERS
+3. Add normalizer function in useGroveObjects
+
+**GroveObjectMeta fields:**
+- id, type, title, description, icon, color
+- createdAt, updatedAt
+- createdBy (provenance)
+- status, tags, favorite
+
+**Visual States:** Uses `--card-*` tokens from Pattern 4.
+
+**DO NOT:**
+- ❌ Create object types without GroveObjectMeta
+- ❌ Build type-specific cards that don't use GroveObjectCard
+- ❌ Store metadata in different structures per type
+- ❌ Implement favorites outside user-preferences.ts
 
 ---
 
