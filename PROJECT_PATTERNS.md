@@ -236,6 +236,34 @@ const ctaLabel = reality?.navigation?.ctaLabel ?? 'Begin';
 - ❌ Create component-level CSS files for global concerns
 - ❌ Hardcode colors or spacing values
 
+### Card Components (Added Sprint 6)
+
+All card-based UI uses the `--card-*` token namespace. This is THE canonical pattern for card styling across Foundation, Genesis, and future admin interfaces.
+
+| Token | Purpose |
+|-------|---------|
+| `--card-border-default` | Default border color |
+| `--card-border-inspected` | Border when inspector shows this card |
+| `--card-border-active` | Border when card is currently applied |
+| `--card-bg-active` | Background when active |
+| `--card-ring-color` | Ring color for inspected state |
+| `--card-ring-active` | Subtle ring for active state |
+
+**Visual State Matrix:**
+- Default → `border-[var(--card-border-default)]`
+- Inspected → `ring-2 ring-[var(--card-ring-color)] border-[var(--card-border-inspected)]`
+- Active → `bg-[var(--card-bg-active)] border-[var(--card-border-active)] ring-1`
+
+**For new card components:**
+1. Use `--card-*` tokens for all styling
+2. Implement appropriate states (isInspected, isActive, isSelected)
+3. Add variant tokens if needed (e.g., `--card-ring-violet`)
+
+**DO NOT:**
+- ❌ Hardcode colors in new card components
+- ❌ Create parallel card styling systems
+- ❌ Use different token namespaces for cards
+
 ---
 
 ### Pattern 5: Feature Detection (Entropy & Signals)
