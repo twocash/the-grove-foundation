@@ -60,18 +60,21 @@ function CompactJourneyCard({ journey, isActive, onStart }: {
 interface JourneyCardProps {
   journey: Journey;
   isActive: boolean;
+  isInspected: boolean;
   onStart: () => void;
   onView: () => void;
 }
 
-function JourneyCard({ journey, isActive, onStart, onView }: JourneyCardProps) {
+function JourneyCard({ journey, isActive, isInspected, onStart, onView }: JourneyCardProps) {
   return (
     <div
       className={`
         p-5 rounded-xl border transition-all cursor-pointer
-        ${isActive
-          ? 'border-primary/30 bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20'
-          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
+        ${isInspected
+          ? 'ring-2 ring-[var(--card-ring-color)] border-[var(--card-border-inspected)]'
+          : isActive
+            ? 'border-[var(--card-border-active)] bg-[var(--card-bg-active)] ring-1 ring-[var(--card-ring-active)]'
+            : 'border-[var(--card-border-default)] dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
         }
       `}
       onClick={onView}
@@ -144,6 +147,11 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   const { actor } = useEngagement();
   const { journey: engActiveJourney, startJourney: engStartJourney } = useJourneyState({ actor });
   const activeJourneyId = engActiveJourney?.id ?? null;
+  // Derive inspected journey from workspace inspector state
+  const inspectedJourneyId = (
+    workspaceUI?.inspector?.isOpen &&
+    workspaceUI.inspector.mode?.type === 'journey'
+  ) ? workspaceUI.inspector.mode.journeyId : null;
 
   // Get active journeys only
   const allJourneys = useMemo(() => {
@@ -287,6 +295,7 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
                 key={journey.id}
                 journey={journey}
                 isActive={activeJourneyId === journey.id}
+                isInspected={inspectedJourneyId === journey.id}
                 onStart={() => handleStart(journey.id)}
                 onView={() => handleView(journey.id)}
               />
