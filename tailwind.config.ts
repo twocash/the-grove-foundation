@@ -123,43 +123,6 @@ const config: Config = {
         'holo-hover': 'rgba(0, 212, 255, 0.4)',
         'holo-active': '#00D4FF',
       },
-
-      // ============================================================
-      // THEME SYSTEM (CSS variable-driven from ThemeProvider)
-      // ============================================================
-      'theme-bg': {
-        primary: 'var(--theme-bg-primary)',
-        secondary: 'var(--theme-bg-secondary)',
-        tertiary: 'var(--theme-bg-tertiary)',
-        glass: 'var(--theme-bg-glass)',
-        overlay: 'var(--theme-bg-overlay)',
-      },
-      'theme-text': {
-        primary: 'var(--theme-text-primary)',
-        secondary: 'var(--theme-text-secondary)',
-        muted: 'var(--theme-text-muted)',
-        accent: 'var(--theme-text-accent)',
-        inverse: 'var(--theme-text-inverse)',
-      },
-      'theme-border': {
-        DEFAULT: 'var(--theme-border-default)',
-        strong: 'var(--theme-border-strong)',
-        accent: 'var(--theme-border-accent)',
-        focus: 'var(--theme-border-focus)',
-      },
-      'theme': {
-        success: 'var(--theme-success)',
-        warning: 'var(--theme-warning)',
-        error: 'var(--theme-error)',
-        info: 'var(--theme-info)',
-        highlight: 'var(--theme-highlight)',
-      },
-      'theme-accent': {
-        DEFAULT: 'var(--theme-accent-primary)',
-        muted: 'var(--theme-accent-primary-muted)',
-        secondary: 'var(--theme-accent-secondary)',
-        glow: 'var(--theme-accent-glow)',
-      },
     },
   },
   plugins: [],
