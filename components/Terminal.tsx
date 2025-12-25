@@ -940,7 +940,16 @@ const Terminal: React.FC<TerminalProps> = ({
             />
           ) : (
             /* Chat Messages */
-            <div className="p-4 space-y-4">
+            <div className="p-4 md:p-6">
+              <div className="max-w-3xl mx-auto space-y-4">
+              {/* Welcome Card - lens-reactive (Sprint: terminal-quantum-welcome-v1) */}
+              {terminalState.messages.length === 0 && session.activeLens && (
+                <TerminalWelcome
+                  welcome={welcomeContent}
+                  onPromptClick={(prompt) => handleSend(prompt)}
+                  variant="embedded"
+                />
+              )}
               {terminalState.messages.map((msg) => {
                 const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
                 return (
@@ -976,6 +985,7 @@ const Terminal: React.FC<TerminalProps> = ({
                 );
               })}
               <div ref={messagesEndRef} />
+              </div>
             </div>
           )}
         </div>
@@ -983,6 +993,7 @@ const Terminal: React.FC<TerminalProps> = ({
         {/* Input Area - only show when not in wizard/picker mode */}
         {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && (
           <div className="flex-shrink-0 p-4 border-t border-[var(--chat-border)]">
+            <div className="max-w-3xl mx-auto">
             <CommandInput
               onSubmitQuery={(query) => {
                 actions.setInput(query);
@@ -999,6 +1010,7 @@ const Terminal: React.FC<TerminalProps> = ({
               embedded
               placeholder={inputPlaceholder}
             />
+            </div>
           </div>
         )}
       </div>
