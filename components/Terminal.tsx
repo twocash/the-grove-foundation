@@ -224,13 +224,18 @@ const Terminal: React.FC<TerminalProps> = ({
   // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1)
 
   // Get active lens data (could be custom or archetypal)
+  // FIX: Use engLens from Engagement Machine as source of truth (not session.activeLens)
+  // This ensures LensPicker selection immediately updates the header pill
   const activeLensData = useMemo(() => {
-    const archetypeLens = getActiveLensData();
+    if (!engLens) return null;
+
+    // Check for archetypal lens first
+    const archetypeLens = getPersona(engLens);
     if (archetypeLens) return archetypeLens;
 
     // Check if it's a custom lens
-    if (session.activeLens?.startsWith('custom-')) {
-      const customLens = getCustomLens(session.activeLens);
+    if (engLens.startsWith('custom-')) {
+      const customLens = getCustomLens(engLens);
       if (customLens) {
         // Return custom lens as Persona-compatible object
         return {
@@ -240,7 +245,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
     return null;
-  }, [getActiveLensData, session.activeLens, getCustomLens, customLenses]);
+  }, [engLens, getPersona, getCustomLens, customLenses]);
 
   const enabledPersonas = getEnabledPersonas();
 
@@ -559,10 +564,11 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Sprint: Terminal Architecture Refactor v1.0 - Epic 5
   // Update welcome message when lens changes
+  // FIX: Use engLens (Engagement Machine) for immediate reactivity
   useEffect(() => {
-    if (session.activeLens) {
+    if (engLens) {
       const lensWelcome = getFormattedTerminalWelcome(
-        session.activeLens,
+        engLens,
         schema?.lensRealities as Record<string, any> | undefined
       );
 
@@ -576,18 +582,19 @@ const Terminal: React.FC<TerminalProps> = ({
         )
       }));
 
-      console.log('[Lens Welcome] Updated for:', session.activeLens);
+      console.log('[Lens Welcome] Updated for:', engLens);
     }
-  }, [session.activeLens, schema?.lensRealities, setTerminalState]);
+  }, [engLens, schema?.lensRealities, setTerminalState]);
 
   // Sprint: declarative-ui-config-v1 - Lens-specific input placeholder
+  // FIX: Use engLens (Engagement Machine) for immediate reactivity
   const inputPlaceholder = useMemo(() => {
     const welcome = getTerminalWelcome(
-      session.activeLens,
+      engLens,
       schema?.lensRealities as Record<string, any> | undefined
     );
     return welcome?.placeholder;
-  }, [session.activeLens, schema?.lensRealities]);
+  }, [engLens, schema?.lensRealities]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
