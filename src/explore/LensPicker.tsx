@@ -193,11 +193,12 @@ function CompactLensCard({ lens, isActive, onSelect, onView }: {
 interface LensCardProps {
   persona: Persona;
   isActive: boolean;
+  isInspected: boolean;
   onSelect: () => void;  // Select button click → activates lens
   onView: () => void;    // Card body click → opens inspector
 }
 
-function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
+function LensCard({ persona, isActive, isInspected, onSelect, onView }: LensCardProps) {
   const accent = lensAccents[persona.id] || defaultAccent;
 
   return (
@@ -205,9 +206,11 @@ function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
       onClick={onView}
       className={`
         group cursor-pointer flex flex-col p-5 rounded-xl border transition-all text-left relative
-        ${isActive
-          ? 'border-primary/30 bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20'
-          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
+        ${isInspected
+          ? 'ring-2 ring-[var(--card-ring-color)] border-[var(--card-border-inspected)]'
+          : isActive
+            ? 'border-[var(--card-border-active)] bg-[var(--card-bg-active)] ring-1 ring-[var(--card-ring-active)]'
+            : 'border-[var(--card-border-default)] dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-primary/30'
         }
       `}
     >
@@ -243,7 +246,7 @@ function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
               e.stopPropagation();
               onSelect();
             }}
-            className="px-4 py-1.5 text-xs font-medium rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm"
           >
             Select
           </button>
@@ -257,20 +260,23 @@ function LensCard({ persona, isActive, onSelect, onView }: LensCardProps) {
 interface CustomLensCardProps {
   lens: CustomLens;
   isActive: boolean;
+  isInspected: boolean;
   onSelect: () => void;
   onView: () => void;
   onDelete?: () => void;
 }
 
-function CustomLensCard({ lens, isActive, onSelect, onView, onDelete }: CustomLensCardProps) {
+function CustomLensCard({ lens, isActive, isInspected, onSelect, onView, onDelete }: CustomLensCardProps) {
   return (
     <div
       onClick={onView}
       className={`
         group cursor-pointer flex flex-col p-5 rounded-xl border transition-all text-left relative
-        ${isActive
-          ? 'border-violet-400/50 bg-violet-50 dark:bg-violet-900/20 ring-1 ring-violet-300/30'
-          : 'border-border-light dark:border-border-dark bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-violet-300'
+        ${isInspected
+          ? 'ring-2 ring-[var(--card-ring-violet)] border-[var(--card-border-violet)]'
+          : isActive
+            ? 'border-violet-400/50 bg-[var(--card-bg-violet-active)] ring-1 ring-violet-300/30'
+            : 'border-[var(--card-border-default)] dark:border-slate-700 bg-surface-light dark:bg-surface-dark hover:shadow-lg hover:border-violet-300'
         }
       `}
     >
@@ -325,7 +331,7 @@ function CustomLensCard({ lens, isActive, onSelect, onView, onDelete }: CustomLe
               e.stopPropagation();
               onSelect();
             }}
-            className="px-4 py-1.5 text-xs font-medium rounded-md bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800/50 border border-violet-200 dark:border-violet-700 transition-colors"
+            className="px-4 py-1.5 text-xs font-medium rounded-md bg-violet-500 text-white hover:bg-violet-500/90 transition-colors shadow-sm"
           >
             Select
           </button>
@@ -346,6 +352,11 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   const { actor } = useEngagement();
   const { lens, selectLens: engSelectLens } = useLensState({ actor });
   const activeLensId = lens;
+  // Derive inspected lens from workspace inspector state
+  const inspectedLensId = (
+    workspaceUI?.inspector?.isOpen &&
+    workspaceUI.inspector.mode?.type === 'lens'
+  ) ? workspaceUI.inspector.mode.lensId : null;
   const activePersona = personas.find(p => p.id === activeLensId);
 
   // Combine personas and custom lenses for display
@@ -440,6 +451,7 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
               key={persona.id}
               persona={persona}
               isActive={activeLensId === persona.id}
+              isInspected={inspectedLensId === persona.id}
               onSelect={() => handleSelect(persona.id)}
               onView={() => handleView(persona.id)}
             />
@@ -458,6 +470,7 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
                   key={lens.id}
                   lens={lens}
                   isActive={activeLensId === lens.id}
+                  isInspected={inspectedLensId === lens.id}
                   onSelect={() => handleSelect(lens.id)}
                   onView={() => handleView(lens.id)}
                   onDelete={() => deleteCustomLens(lens.id)}
