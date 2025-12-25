@@ -34,8 +34,8 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
       } catch { /* ignore */ }
     }
 
-    // Expand explore and Grove Project by default for discoverability
-    let expandedGroups = new Set<string>(['explore', 'explore.groveProject']);
+    // Top-level sections expanded, projects collapsed by default
+    let expandedGroups = new Set<string>(['explore']);
     if (storedExpanded) {
       try {
         expandedGroups = new Set(JSON.parse(storedExpanded));

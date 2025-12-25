@@ -99,10 +99,14 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
   const iconSymbol = item.icon ? iconNameToSymbol[item.icon] : null;
   const isComingSoon = item.comingSoon ?? false;
 
-  const handleClick = () => {
-    if (hasChildren) {
-      toggleGroup(pathString);
-    }
+  // Chevron click → toggle expand/collapse only
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleGroup(pathString);
+  };
+
+  // Label/row click → navigate only (if has view)
+  const handleLabelClick = () => {
     if (item.view) {
       navigateTo(fullPath);
     }
@@ -124,18 +128,24 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
 
   return (
     <div>
-      <button
-        onClick={handleClick}
+      <div
+        onClick={handleLabelClick}
         className={`
           w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors
+          ${item.view ? 'cursor-pointer' : ''}
           ${getItemClasses()}
         `}
         style={{ paddingLeft: `${8 + depth * 24}px` }}
       >
         {hasChildren && (
-          <span className="material-symbols-outlined text-lg">
-            {isExpanded ? 'expand_more' : 'chevron_right'}
-          </span>
+          <button
+            onClick={handleChevronClick}
+            className="p-0.5 -m-0.5 hover:bg-[var(--glass-elevated)] rounded transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">
+              {isExpanded ? 'expand_more' : 'chevron_right'}
+            </span>
+          </button>
         )}
         {!hasChildren && depth > 0 && <span className="w-5" />}
         {iconSymbol && (
@@ -154,7 +164,7 @@ function NavItemComponent({ item, path, depth }: NavItemProps) {
             {item.badge}
           </span>
         )}
-      </button>
+      </div>
 
       {hasChildren && isExpanded && (
         <div className="mt-1">
