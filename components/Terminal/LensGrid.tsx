@@ -133,6 +133,7 @@ const LensGrid: React.FC<LensGridProps> = ({
 }) => {
   // Internal preview state: click card to preview, click "Select" to activate
   const [previewLens, setPreviewLens] = React.useState<string | null>(null);
+  const [hoveredLens, setHoveredLens] = React.useState<string | null>(null);
 
   // Combine external highlight (URL lens) with internal preview
   const highlightedLens = previewLens || externalHighlightedLens;
@@ -151,9 +152,7 @@ const LensGrid: React.FC<LensGridProps> = ({
       {/* Custom Lenses Section */}
       {customLenses.length > 0 && (
         <>
-          <div className={`text-[10px] font-mono uppercase tracking-wider pt-2 pb-1 ${
-            embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-          }`}>
+          <div className="text-[10px] font-mono uppercase tracking-wider pt-2 pb-1 text-[var(--glass-text-muted)]">
             Your Custom Lenses
           </div>
           {customLenses.map(lens => {
@@ -165,51 +164,41 @@ const LensGrid: React.FC<LensGridProps> = ({
             return (
               <div key={lens.id} className="relative group">
                 <div
+                  onMouseEnter={() => setHoveredLens(lens.id)}
+                  onMouseLeave={() => setHoveredLens(null)}
                   onClick={() => setPreviewLens(lens.id)}
                   className={`w-full text-left p-4 rounded-lg border transition-all duration-200 cursor-pointer
                     ${isSelected
                       ? `${colors.bgLight} ${colors.border} border-2`
                       : isPreviewed
-                        ? `${colors.bgLight} ${colors.border} border-2 ring-2 ring-offset-1 ring-${colors.border.replace('border-', '')}`
-                        : embedded
-                          ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
-                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
+                        ? 'bg-[var(--glass-elevated)] border-[var(--neon-cyan)] border-2'
+                        : 'bg-[var(--glass-panel)] border-[var(--glass-border)] hover:border-[var(--glass-border-hover)] hover:bg-[var(--glass-elevated)]'
                     }`}
                 >
                   <div className="flex items-start space-x-3">
                     <div className={`p-2 rounded-lg transition-colors ${
                       isSelected || isPreviewed
                         ? colors.bg
-                        : embedded
-                          ? 'bg-[var(--chat-glass)] group-hover:bg-[var(--chat-glass-hover)]'
-                          : 'bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-200 dark:group-hover:bg-slate-600'
+                        : 'bg-[var(--glass-elevated)] group-hover:bg-[var(--glass-solid)]'
                     }`}>
                       <Icon className={`w-5 h-5 ${
                         isSelected || isPreviewed
                           ? 'text-white'
-                          : embedded
-                            ? 'text-[var(--chat-text-muted)]'
-                            : 'text-slate-500 dark:text-slate-400'
+                          : 'text-[var(--glass-text-muted)]'
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`font-sans font-semibold text-sm ${
                         isSelected || isPreviewed
                           ? colors.text
-                          : embedded
-                            ? 'text-[var(--chat-text)]'
-                            : 'text-slate-900 dark:text-slate-100'
+                          : 'text-[var(--glass-text-primary)]'
                       }`}>
                         {lens.publicLabel}
                       </div>
-                      <div className={`font-serif text-xs italic mt-0.5 line-clamp-2 ${
-                        embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-                      }`}>
+                      <div className="font-serif text-xs italic mt-0.5 line-clamp-2 text-[var(--glass-text-muted)]">
                         "{lens.description}"
                       </div>
-                      <div className={`text-[9px] mt-1 font-mono ${
-                        embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-                      }`}>
+                      <div className="text-[9px] mt-1 font-mono text-[var(--glass-text-muted)]">
                         {lens.journeysCompleted} {lens.journeysCompleted === 1 ? 'journey' : 'journeys'} completed
                       </div>
                     </div>
@@ -224,7 +213,17 @@ const LensGrid: React.FC<LensGridProps> = ({
                           onSelect(lens.id);
                           setPreviewLens(null);
                         }}
-                        className={`${colors.bg} text-white text-[10px] font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity`}
+                        className="glass-select-button glass-select-button--solid"
+                      >
+                        Select
+                      </button>
+                    ) : hoveredLens === lens.id ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(lens.id);
+                        }}
+                        className="glass-select-button glass-select-button--ghost"
                       >
                         Select
                       </button>
@@ -240,16 +239,10 @@ const LensGrid: React.FC<LensGridProps> = ({
                         onDeleteCustomLens(lens.id);
                       }
                     }}
-                    className={`absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity border border-transparent ${
-                      embedded
-                        ? 'bg-[var(--chat-surface)] hover:bg-[var(--chat-error-bg)] hover:border-[var(--chat-error-border)]'
-                        : 'bg-white/80 dark:bg-slate-800/80 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-200 dark:hover:border-red-800'
-                    }`}
+                    className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity border border-transparent bg-[var(--glass-solid)] hover:bg-red-900/30 hover:border-red-800"
                     title="Delete lens"
                   >
-                    <ICONS.Trash2 className={`w-3.5 h-3.5 hover:text-red-500 ${
-                      embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-                    }`} />
+                    <ICONS.Trash2 className="w-3.5 h-3.5 text-[var(--glass-text-muted)] hover:text-red-500" />
                   </button>
                 )}
               </div>
@@ -263,9 +256,7 @@ const LensGrid: React.FC<LensGridProps> = ({
 
       {/* Standard Lenses Section Header (only if custom lenses exist) */}
       {customLenses.length > 0 && (
-        <div className={`text-[10px] font-mono uppercase tracking-wider pt-1 pb-1 ${
-          embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-        }`}>
+        <div className="text-[10px] font-mono uppercase tracking-wider pt-1 pb-1 text-[var(--glass-text-muted)]">
           Standard Lenses
         </div>
       )}
@@ -281,17 +272,17 @@ const LensGrid: React.FC<LensGridProps> = ({
         return (
           <div
             key={persona.id}
+            onMouseEnter={() => setHoveredLens(persona.id)}
+            onMouseLeave={() => setHoveredLens(null)}
             onClick={() => setPreviewLens(persona.id)}
             className={`w-full text-left p-4 rounded-lg border transition-all duration-200 group relative cursor-pointer
               ${isSelected
                 ? `${colors.bgLight} ${colors.border} border-2`
                 : isPreviewed
-                  ? `${colors.bgLight} ${colors.border} border-2 ring-2 ring-offset-1`
+                  ? 'bg-[var(--glass-elevated)] border-[var(--neon-cyan)] border-2'
                   : isExternalHighlighted
-                    ? `bg-grove-clay/5 border-grove-clay/40 border-2 ring-2 ring-grove-clay/20 ring-offset-1`
-                    : embedded
-                      ? 'bg-[var(--chat-surface)] border-[var(--chat-border)] hover:border-[var(--chat-border-accent)]/50 hover:bg-[var(--chat-surface-hover)]'
-                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm dark:hover:shadow-none'
+                    ? 'bg-grove-clay/5 border-grove-clay/40 border-2 ring-2 ring-grove-clay/20 ring-offset-1'
+                    : 'bg-[var(--glass-panel)] border-[var(--glass-border)] hover:border-[var(--glass-border-hover)] hover:bg-[var(--glass-elevated)]'
               }`}
           >
             {/* v0.12e: URL lens highlight badge */}
@@ -306,18 +297,14 @@ const LensGrid: React.FC<LensGridProps> = ({
                   ? colors.bg
                   : isExternalHighlighted
                     ? 'bg-grove-clay/20'
-                    : embedded
-                      ? 'bg-[var(--chat-glass)] group-hover:bg-[var(--chat-glass-hover)]'
-                      : 'bg-slate-100 dark:bg-slate-700 group-hover:bg-slate-200 dark:group-hover:bg-slate-600'
+                    : 'bg-[var(--glass-elevated)] group-hover:bg-[var(--glass-solid)]'
               }`}>
                 <Icon className={`w-5 h-5 ${
                   isSelected || isPreviewed
                     ? 'text-white'
                     : isExternalHighlighted
                       ? 'text-grove-clay'
-                      : embedded
-                        ? 'text-[var(--chat-text-muted)]'
-                        : 'text-slate-500 dark:text-slate-400'
+                      : 'text-[var(--glass-text-muted)]'
                 }`} />
               </div>
               <div className="flex-1 min-w-0">
@@ -326,15 +313,11 @@ const LensGrid: React.FC<LensGridProps> = ({
                     ? colors.text
                     : isExternalHighlighted
                       ? 'text-grove-clay'
-                      : embedded
-                        ? 'text-[var(--chat-text)]'
-                        : 'text-slate-900 dark:text-slate-100'
+                      : 'text-[var(--glass-text-primary)]'
                 }`}>
                   {persona.publicLabel}
                 </div>
-                <div className={`font-serif text-xs italic mt-0.5 line-clamp-2 ${
-                  embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-                }`}>
+                <div className="font-serif text-xs italic mt-0.5 line-clamp-2 text-[var(--glass-text-muted)]">
                   "{persona.description}"
                 </div>
               </div>
@@ -349,7 +332,17 @@ const LensGrid: React.FC<LensGridProps> = ({
                     onSelect(persona.id);
                     setPreviewLens(null);
                   }}
-                  className={`${colors.bg} text-white text-[10px] font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity`}
+                  className="glass-select-button glass-select-button--solid"
+                >
+                  Select
+                </button>
+              ) : hoveredLens === persona.id ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(persona.id);
+                  }}
+                  className="glass-select-button glass-select-button--ghost"
                 >
                   Select
                 </button>
@@ -362,9 +355,7 @@ const LensGrid: React.FC<LensGridProps> = ({
       {/* "Create Your Own" Option - CLAY ORANGE dashed border for emphasis */}
       {showCreateOption && onCreateCustomLens && (
         <>
-          <div className={`border-t my-3 ${
-            embedded ? 'border-[var(--chat-border)]' : 'border-slate-200 dark:border-slate-700'
-          }`} />
+          <div className="border-t my-3 border-[var(--glass-border)]" />
           <button
             onClick={onCreateCustomLens}
             className="w-full text-left p-4 rounded-lg border-2 border-dashed border-grove-clay/40
@@ -379,9 +370,7 @@ const LensGrid: React.FC<LensGridProps> = ({
                 <div className="font-sans font-medium text-sm text-grove-clay/80 group-hover:text-grove-clay">
                   Create your own lens
                 </div>
-                <div className={`font-serif text-xs italic mt-0.5 ${
-                  embedded ? 'text-[var(--chat-text-muted)]' : 'text-slate-500 dark:text-slate-400'
-                }`}>
+                <div className="font-serif text-xs italic mt-0.5 text-[var(--glass-text-muted)]">
                   "Build a lens that's uniquely yours"
                 </div>
               </div>

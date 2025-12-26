@@ -832,6 +832,41 @@ p {
   box-shadow: var(--glow-green);
 }
 
+/* ============================================
+   GLASS SELECT BUTTON
+   Sprint: lens-hover-fix-v1
+   ============================================ */
+
+.glass-select-button {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all var(--duration-fast) var(--ease-out-expo);
+  cursor: pointer;
+}
+
+.glass-select-button--ghost {
+  background: transparent;
+  border: 1px solid var(--glass-border-hover);
+  color: var(--glass-text-muted);
+}
+
+.glass-select-button--ghost:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.glass-select-button--solid {
+  background: var(--neon-cyan);
+  border: 1px solid var(--neon-cyan);
+  color: var(--glass-void);
+}
+
+.glass-select-button--solid:hover {
+  opacity: 0.9;
+}
+
 /* Secondary action button - subtle */
 .glass-btn-secondary {
   display: inline-flex;
