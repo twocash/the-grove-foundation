@@ -15,16 +15,17 @@ interface JourneyListProps {
   onBack?: () => void;  // For compact mode "Back to Chat"
 }
 
-// Compact card for chat nav picker (single column, click = start)
-function CompactJourneyCard({ journey, isActive, onStart }: {
+// Compact card for chat nav picker (single column, click = inspect, button = start)
+function CompactJourneyCard({ journey, isActive, onStart, onView }: {
   journey: Journey;
   isActive: boolean;
   onStart: () => void;
+  onView: () => void;
 }) {
   return (
     <div
       data-active={isActive || undefined}
-      onClick={onStart}
+      onClick={onView}
       className="glass-card p-4 cursor-pointer flex items-center gap-4"
     >
       <span className="material-symbols-outlined glass-card-icon text-xl">map</span>
@@ -40,7 +41,16 @@ function CompactJourneyCard({ journey, isActive, onStart }: {
           {journey.estimatedMinutes} min
         </div>
       </div>
-      {isActive && <StatusBadge variant="active" />}
+      {isActive ? (
+        <StatusBadge variant="active" />
+      ) : (
+        <button
+          onClick={(e) => { e.stopPropagation(); onStart(); }}
+          className="glass-btn-secondary"
+        >
+          Start
+        </button>
+      )}
     </div>
   );
 }
@@ -197,6 +207,7 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
               journey={journey}
               isActive={activeJourneyId === journey.id}
               onStart={() => handleStart(journey.id)}
+              onView={() => handleStart(journey.id)}
             />
           ))}
         </div>
