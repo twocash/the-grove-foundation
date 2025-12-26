@@ -6,11 +6,13 @@ import { useState, useCallback, useMemo } from 'react';
 import {
   BridgeState,
   TerminalFlowState,
+  TerminalOverlay,
   RevealStates,
   ModalStates,
   TerminalUIState,
   TerminalActions,
   INITIAL_BRIDGE_STATE,
+  INITIAL_OVERLAY,
   INITIAL_REVEAL_STATES,
   INITIAL_MODAL_STATES
 } from './types';
@@ -56,13 +58,18 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
   // STATE HOOKS
   // ============================================================================
 
-  // Flow states
+  // Flow states (legacy - maintained for backward compatibility)
   const [flowState, setFlowStateInternal] = useState<TerminalFlowState>(initialFlowState);
   const [showLensPicker, setShowLensPicker] = useState(false);
   const [showJourneyPicker, setShowJourneyPicker] = useState(false);
   const [showCustomLensWizard, setShowCustomLensWizard] = useState(false);
   const [showWelcomeInterstitial, setShowWelcomeInterstitial] = useState(showWelcome);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
+
+  // Overlay state machine (Sprint: terminal-overlay-machine-v1)
+  const [overlay, setOverlayInternal] = useState<TerminalOverlay>(
+    showWelcome ? { type: 'welcome' } : INITIAL_OVERLAY
+  );
 
   // Cognitive Bridge
   const [bridgeState, setBridgeStateInternal] = useState<BridgeState>(INITIAL_BRIDGE_STATE);
@@ -155,6 +162,30 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     setHasShownWelcome(true);
   }, []);
 
+  // Overlay state machine actions (Sprint: terminal-overlay-machine-v1)
+  const setOverlay = useCallback((newOverlay: TerminalOverlay) => {
+    setOverlayInternal(newOverlay);
+
+    // Dual-write to legacy booleans during migration
+    setShowLensPicker(newOverlay.type === 'lens-picker');
+    setShowJourneyPicker(newOverlay.type === 'journey-picker');
+    setShowCustomLensWizard(newOverlay.type === 'wizard');
+    setShowWelcomeInterstitial(newOverlay.type === 'welcome');
+
+    // Update hasShownWelcome when leaving welcome
+    if (newOverlay.type !== 'welcome' && newOverlay.type !== 'none') {
+      setHasShownWelcome(true);
+    }
+  }, []);
+
+  const dismissOverlay = useCallback(() => {
+    setOverlayInternal(INITIAL_OVERLAY);
+    setShowLensPicker(false);
+    setShowJourneyPicker(false);
+    setShowCustomLensWizard(false);
+    setShowWelcomeInterstitial(false);
+  }, []);
+
   // Bridge actions
   const setBridgeState = useCallback((state: BridgeState) => {
     setBridgeStateInternal(state);
@@ -221,13 +252,18 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
   // MEMOIZED STATE AND ACTIONS
   // ============================================================================
 
-  const state: TerminalUIState = useMemo(() => ({
+  // Extended state including overlay (Sprint: terminal-overlay-machine-v1)
+  const state = useMemo(() => ({
+    // Legacy fields (for backward compatibility)
     flowState,
     showLensPicker,
     showJourneyPicker,
     showCustomLensWizard,
     showWelcomeInterstitial,
     hasShownWelcome,
+    // New overlay state
+    overlay,
+    // Existing fields
     bridgeState,
     reveals,
     modals,
@@ -245,6 +281,7 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     showCustomLensWizard,
     showWelcomeInterstitial,
     hasShownWelcome,
+    overlay,
     bridgeState,
     reveals,
     modals,
@@ -267,6 +304,9 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     hideCustomLensWizard,
     showWelcomeInterstitial: showWelcomeInterstitialAction,
     hideWelcomeInterstitial,
+    // Overlay state machine actions (Sprint: terminal-overlay-machine-v1)
+    setOverlay,
+    dismissOverlay,
     setBridgeState,
     dismissBridge,
     setReveal,
@@ -291,6 +331,8 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     hideCustomLensWizard,
     showWelcomeInterstitialAction,
     hideWelcomeInterstitial,
+    setOverlay,
+    dismissOverlay,
     setBridgeState,
     dismissBridge,
     setReveal,

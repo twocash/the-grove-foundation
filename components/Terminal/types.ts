@@ -35,18 +35,36 @@ export const INITIAL_BRIDGE_STATE: BridgeState = {
 };
 
 // ============================================================================
-// FLOW STATES
+// FLOW STATES (LEGACY - to be removed in Epic 4)
 // ============================================================================
 
 /**
  * The current flow state of the Terminal
- * - idle: No active interstitial or overlay
- * - welcome: Showing WelcomeInterstitial for first-time users
- * - selecting: Showing LensPicker for lens selection
- * - wizard: Showing CustomLensWizard for lens creation
- * - active: Normal chat mode with active lens
+ * @deprecated Use TerminalOverlay instead
  */
 export type TerminalFlowState = 'idle' | 'welcome' | 'selecting' | 'wizard' | 'active';
+
+// ============================================================================
+// OVERLAY STATE MACHINE
+// ============================================================================
+
+/**
+ * Terminal overlay state - only one overlay active at a time.
+ * Discriminated union enforces mutual exclusivity.
+ *
+ * Sprint: terminal-overlay-machine-v1
+ */
+export type TerminalOverlay =
+  | { type: 'none' }
+  | { type: 'welcome' }
+  | { type: 'lens-picker' }
+  | { type: 'journey-picker' }
+  | { type: 'wizard'; wizardId?: string }
+  | { type: 'field-picker' };
+
+export type OverlayType = TerminalOverlay['type'];
+
+export const INITIAL_OVERLAY: TerminalOverlay = { type: 'none' };
 
 // ============================================================================
 // REVEAL STATES
@@ -103,13 +121,16 @@ export const INITIAL_MODAL_STATES: ModalStates = {
  * This groups the 25+ useState hooks into a coherent structure
  */
 export interface TerminalUIState {
-  // Flow states
+  // Flow states (legacy - to be removed in Epic 4)
   flowState: TerminalFlowState;
   showLensPicker: boolean;
   showJourneyPicker: boolean;
   showCustomLensWizard: boolean;
   showWelcomeInterstitial: boolean;
   hasShownWelcome: boolean;
+
+  // Overlay state machine (Sprint: terminal-overlay-machine-v1)
+  overlay: TerminalOverlay;
 
   // Cognitive Bridge
   bridgeState: BridgeState;
@@ -141,6 +162,7 @@ export const INITIAL_TERMINAL_UI_STATE: TerminalUIState = {
   showCustomLensWizard: false,
   showWelcomeInterstitial: false,
   hasShownWelcome: false,
+  overlay: INITIAL_OVERLAY,
   bridgeState: INITIAL_BRIDGE_STATE,
   reveals: INITIAL_REVEAL_STATES,
   modals: INITIAL_MODAL_STATES,
@@ -161,7 +183,7 @@ export const INITIAL_TERMINAL_UI_STATE: TerminalUIState = {
  * Action dispatchers for Terminal state management
  */
 export interface TerminalActions {
-  // Flow actions
+  // Flow actions (legacy - to be removed in Epic 4)
   setFlowState: (state: TerminalFlowState) => void;
   showLensPicker: () => void;
   hideLensPicker: () => void;
@@ -171,6 +193,10 @@ export interface TerminalActions {
   hideCustomLensWizard: () => void;
   showWelcomeInterstitial: () => void;
   hideWelcomeInterstitial: () => void;
+
+  // Overlay state machine actions (Sprint: terminal-overlay-machine-v1)
+  setOverlay: (overlay: TerminalOverlay) => void;
+  dismissOverlay: () => void;
 
   // Bridge actions
   setBridgeState: (state: BridgeState) => void;

@@ -54,3 +54,11 @@ export type { UseTerminalStateOptions } from './useTerminalState';
 export { default as TerminalShell } from './TerminalShell';
 export { default as TerminalChat, MarkdownRenderer, parseInline } from './TerminalChat';
 export { default as TerminalFlow } from './TerminalFlow';
+
+// Overlay system (Sprint: terminal-overlay-machine-v1)
+export { TerminalOverlayRenderer } from './TerminalOverlayRenderer';
+export type { OverlayHandlers } from './TerminalOverlayRenderer';
+export { OVERLAY_REGISTRY } from './overlay-registry';
+export { shouldShowInput, isOverlayActive, getOverlayAnalytics } from './overlay-helpers';
+export type { TerminalOverlay, OverlayType } from './types';
+export { INITIAL_OVERLAY } from './types';

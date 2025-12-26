@@ -13,7 +13,7 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
 import { JourneyList } from '../src/explore/JourneyList';
@@ -94,7 +94,9 @@ const Terminal: React.FC<TerminalProps> = ({
     hasShownWelcome,
     bridgeState,
     completedJourneyTitle,
-    journeyStartTime
+    journeyStartTime,
+    // Overlay state machine (Sprint: terminal-overlay-machine-v1)
+    overlay
   } = uiState;
 
   // Destructure reveal states
@@ -999,7 +1001,8 @@ const Terminal: React.FC<TerminalProps> = ({
         </div>
 
         {/* Input Area - only show when not in wizard/picker mode */}
-        {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && !showJourneyPicker && (
+        {/* Sprint: terminal-overlay-machine-v1 - use shouldShowInput derived state */}
+        {shouldShowInput(overlay) && (
           <div className="flex-shrink-0 p-4 border-t border-[var(--chat-border)]">
             <div className="max-w-3xl mx-auto">
             <CommandInput
