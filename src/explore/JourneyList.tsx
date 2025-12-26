@@ -2,9 +2,9 @@
 // Browse and start available journeys
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
-import { useState, useMemo } from 'react';
-import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
-import { Journey } from '../../data/narratives-schema';
+import { useState, useMemo, useEffect } from 'react';
+import { useVersionedJourneys } from '../../hooks/useVersionedJourneys';
+import type { VersionedJourney } from '../../hooks/useVersionedJourneys';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
@@ -17,7 +17,7 @@ interface JourneyListProps {
 
 // Compact card for chat nav picker (single column, click = inspect, button = start)
 function CompactJourneyCard({ journey, isActive, onStart, onView }: {
-  journey: Journey;
+  journey: VersionedJourney;
   isActive: boolean;
   onStart: () => void;
   onView: () => void;
@@ -56,7 +56,7 @@ function CompactJourneyCard({ journey, isActive, onStart, onView }: {
 }
 
 interface JourneyCardProps {
-  journey: Journey;
+  journey: VersionedJourney;
   isActive: boolean;
   isInspected: boolean;
   onStart: () => void;
@@ -115,8 +115,8 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
 }
 
 export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
-  // Schema and lookup from NarrativeEngine
-  const { schema, loading, getJourney } = useNarrativeEngine();
+  // Journeys with versioned overrides merged from IndexedDB
+  const { journeys: allJourneys, loading, getJourney, refresh: refreshJourneys } = useVersionedJourneys();
   const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -133,11 +133,14 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
     workspaceUI.inspector.mode?.type === 'journey'
   ) ? workspaceUI.inspector.mode.journeyId : null;
 
-  // Get active journeys only
-  const allJourneys = useMemo(() => {
-    if (!schema?.journeys) return [];
-    return Object.values(schema.journeys).filter(j => j.status === 'active');
-  }, [schema]);
+  // Refresh versioned journeys when inspector closes (after potential save)
+  const inspectorOpen = workspaceUI?.inspector?.isOpen ?? false;
+  useEffect(() => {
+    // When inspector closes, refresh to pick up any versioned changes
+    if (!inspectorOpen) {
+      refreshJourneys();
+    }
+  }, [inspectorOpen, refreshJourneys]);
 
   // Filter by search (only used in full mode)
   const journeys = useMemo(() => {

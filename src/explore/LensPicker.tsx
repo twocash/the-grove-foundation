@@ -2,8 +2,8 @@
 // Lens selection view for the workspace
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
-import { useState, useMemo } from 'react';
-import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
+import { useState, useMemo, useEffect } from 'react';
+import { useVersionedPersonas } from '../../hooks/useVersionedPersonas';
 import { useCustomLens } from '../../hooks/useCustomLens';
 import { Persona } from '../../data/narratives-schema';
 import { CustomLens } from '../../types/lens';
@@ -202,11 +202,10 @@ function CustomLensCard({ lens, isActive, isInspected, onSelect, onView, onDelet
 }
 
 export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCustomLens }: LensPickerProps = {}) {
-  // Schema helper from NarrativeEngine
-  const { getEnabledPersonas } = useNarrativeEngine();
+  // Personas with versioned overrides merged from IndexedDB
+  const { personas, refresh: refreshPersonas } = useVersionedPersonas();
   const { customLenses, deleteCustomLens } = useCustomLens();
   const workspaceUI = useOptionalWorkspaceUI();
-  const personas = getEnabledPersonas();
 
   // Flow params for route-based selection
   const { returnTo, ctaLabel, isInFlow } = useFlowParams();
@@ -221,6 +220,15 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
     workspaceUI.inspector.mode?.type === 'lens'
   ) ? workspaceUI.inspector.mode.lensId : null;
   const activePersona = personas.find(p => p.id === activeLensId);
+
+  // Refresh versioned personas when inspector closes (after potential save)
+  const inspectorOpen = workspaceUI?.inspector?.isOpen ?? false;
+  useEffect(() => {
+    // When inspector closes, refresh to pick up any versioned changes
+    if (!inspectorOpen) {
+      refreshPersonas();
+    }
+  }, [inspectorOpen, refreshPersonas]);
 
   // Combine personas and custom lenses for display
   const allLenses: DisplayLens[] = useMemo(() => {
