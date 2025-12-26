@@ -1,9 +1,12 @@
 // src/shared/inspector/ObjectInspector.tsx
-// JSON inspector for GroveObjects
+// JSON inspector for GroveObjects with Copilot integration
 
 import { useState } from 'react';
-import { GroveObject } from '@core/schema/grove-object';
+import { applyPatch } from 'fast-json-patch';
+import type { GroveObject } from '@core/schema/grove-object';
+import type { JsonPatch } from '@core/copilot';
 import { InspectorPanel, InspectorDivider } from '../layout/InspectorPanel';
+import { CopilotPanel } from './CopilotPanel';
 
 interface ObjectInspectorProps {
   object: GroveObject;
@@ -12,14 +15,26 @@ interface ObjectInspectorProps {
 }
 
 export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps) {
+  const [localObject, setLocalObject] = useState<GroveObject>(object);
   const [metaExpanded, setMetaExpanded] = useState(true);
   const [payloadExpanded, setPayloadExpanded] = useState(true);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(object, null, 2));
+  const handleApplyPatch = (patch: JsonPatch) => {
+    try {
+      // Deep clone to avoid mutation
+      const cloned = JSON.parse(JSON.stringify(localObject));
+      const result = applyPatch(cloned, patch);
+      setLocalObject(result.newDocument);
+    } catch (error) {
+      console.error('Failed to apply patch:', error);
+    }
   };
 
-  const displayTitle = title || object.meta.title || 'Object';
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(JSON.stringify(localObject, null, 2));
+  };
+
+  const displayTitle = title || localObject.meta.title || 'Object';
 
   return (
     <InspectorPanel
@@ -38,6 +53,9 @@ export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps
           Copy Full JSON
         </button>
       }
+      bottomPanel={
+        <CopilotPanel object={localObject} onApplyPatch={handleApplyPatch} />
+      }
     >
       {/* Meta Section */}
       <CollapsibleSection
@@ -45,7 +63,7 @@ export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps
         expanded={metaExpanded}
         onToggle={() => setMetaExpanded(!metaExpanded)}
       >
-        <JsonBlock data={object.meta} />
+        <JsonBlock data={localObject.meta} />
       </CollapsibleSection>
 
       <InspectorDivider />
@@ -56,7 +74,7 @@ export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps
         expanded={payloadExpanded}
         onToggle={() => setPayloadExpanded(!payloadExpanded)}
       >
-        <JsonBlock data={object.payload} />
+        <JsonBlock data={localObject.payload} />
       </CollapsibleSection>
     </InspectorPanel>
   );

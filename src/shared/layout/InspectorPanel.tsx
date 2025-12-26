@@ -20,6 +20,8 @@ interface InspectorPanelProps {
   children: ReactNode;
   /** Footer actions */
   actions?: ReactNode;
+  /** Bottom panel slot (for Copilot) */
+  bottomPanel?: ReactNode;
 }
 
 export function InspectorPanel({
@@ -31,6 +33,7 @@ export function InspectorPanel({
   onClose,
   children,
   actions,
+  bottomPanel,
 }: InspectorPanelProps) {
   return (
     <div className="flex flex-col h-full glass-panel-solid">
@@ -66,6 +69,13 @@ export function InspectorPanel({
       {actions && (
         <div className="p-4 border-t border-[var(--glass-border)] flex-shrink-0 bg-black/20">
           {actions}
+        </div>
+      )}
+
+      {/* Bottom Panel (Copilot) */}
+      {bottomPanel && (
+        <div className="flex-shrink-0">
+          {bottomPanel}
         </div>
       )}
     </div>
