@@ -181,16 +181,24 @@ export class ReactInspectorSurface<T = unknown> implements InspectorSurface<T> {
   async initialize(): Promise<void> {
     if (this.disposed) return;
 
-    try {
-      const store = await getVersionedObjectStore();
+    console.log('[InspectorSurface] Starting initialization for:', this.config.objectId);
 
+    try {
+      console.log('[InspectorSurface] Getting versioned store...');
+      const store = await getVersionedObjectStore();
+      console.log('[InspectorSurface] Store ready');
+
+      console.log('[InspectorSurface] Getting stored object...');
       let stored = await store.get(this.config.objectId);
+      console.log('[InspectorSurface] Stored result:', stored ? 'found' : 'not found');
 
       if (!stored) {
+        console.log('[InspectorSurface] Importing new object...');
         await store.importObject(this.config.initialObject, {
           type: 'system',
           model: null
         });
+        console.log('[InspectorSurface] Import complete, fetching...');
         stored = await store.get(this.config.objectId);
       }
 
@@ -203,9 +211,11 @@ export class ReactInspectorSurface<T = unknown> implements InspectorSurface<T> {
         };
       }
 
+      console.log('[InspectorSurface] Initialization complete, setting loading=false');
       this._loading = false;
       this.notifyChange();
     } catch (error) {
+      console.error('[InspectorSurface] Initialization failed:', error);
       this._error = error instanceof Error ? error : new Error(String(error));
       this._loading = false;
       this.notifyChange();

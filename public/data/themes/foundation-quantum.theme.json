@@ -1,0 +1,92 @@
+{
+  "id": "foundation-quantum",
+  "name": "Quantum Grove",
+  "version": "1.0.0",
+  "surfaces": ["foundation"],
+  "tokens": {
+    "background": {
+      "primary": "#0D0D0D",
+      "secondary": "#141414",
+      "tertiary": "#1A1A1A",
+      "glass": "rgba(13, 13, 13, 0.8)",
+      "overlay": "rgba(0, 0, 0, 0.75)"
+    },
+    "text": {
+      "primary": "#E8E8E8",
+      "secondary": "#B0B0B0",
+      "muted": "#707070",
+      "accent": "#10B981",
+      "inverse": "#0D0D0D"
+    },
+    "border": {
+      "default": "#2A2A2A",
+      "strong": "#404040",
+      "accent": "#10B981",
+      "focus": "#06B6D4"
+    },
+    "semantic": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#06B6D4",
+      "highlight": "#34D399"
+    },
+    "accent": {
+      "primary": "#10B981",
+      "primaryMuted": "rgba(16, 185, 129, 0.15)",
+      "secondary": "#06B6D4",
+      "glow": "rgba(16, 185, 129, 0.4)"
+    }
+  },
+  "modes": {
+    "dark": {},
+    "light": {
+      "background": {
+        "primary": "#FFFFFF",
+        "secondary": "#F8FAFC",
+        "tertiary": "#F1F5F9",
+        "glass": "rgba(255, 255, 255, 0.85)",
+        "overlay": "rgba(0, 0, 0, 0.5)"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#334155",
+        "muted": "#64748B",
+        "accent": "#059669",
+        "inverse": "#F8FAFC"
+      },
+      "border": {
+        "default": "#E2E8F0",
+        "strong": "#94A3B8",
+        "accent": "#059669",
+        "focus": "#0891B2"
+      },
+      "semantic": {
+        "success": "#059669",
+        "warning": "#D97706",
+        "error": "#DC2626",
+        "info": "#0891B2",
+        "highlight": "#10B981"
+      },
+      "accent": {
+        "primary": "#059669",
+        "primaryMuted": "rgba(5, 150, 105, 0.1)",
+        "secondary": "#0891B2",
+        "glow": "rgba(5, 150, 105, 0.3)"
+      }
+    }
+  },
+  "typography": {
+    "display": ["Space Grotesk", "Inter", "sans-serif"],
+    "body": ["Inter", "system-ui", "sans-serif"],
+    "mono": ["JetBrains Mono", "Fira Code", "monospace"],
+    "ui": ["Inter", "system-ui", "sans-serif"]
+  },
+  "effects": {
+    "grain": false,
+    "glow": true,
+    "gridOverlay": true,
+    "glassmorphism": true,
+    "scanlines": false
+  }
+}
