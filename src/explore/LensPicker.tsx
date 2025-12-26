@@ -259,33 +259,38 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   };
 
   // COMPACT MODE - Single column list for chat nav
+  // Uses same max-w-3xl proportional scaling as chat messages
   if (mode === 'compact') {
     return (
       <div className="flex flex-col h-full bg-transparent">
-        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
-            >
-              <span className="material-symbols-outlined text-lg">chevron_left</span>
-              Back to Chat
-            </button>
-          )}
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Switch Lens</span>
-          <div className="w-24" />
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">chevron_left</span>
+                Back to Chat
+              </button>
+            )}
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">Switch Lens</span>
+            <div className="w-24" />
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {allLenses.map(lens => (
-            <CompactLensCard
-              key={lens.id}
-              lens={lens}
-              isActive={activeLensId === lens.id}
-              onSelect={() => handleSelect(lens.id)}
-              onView={() => handleView(lens.id)}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="max-w-3xl mx-auto space-y-3">
+            {allLenses.map(lens => (
+              <CompactLensCard
+                key={lens.id}
+                lens={lens}
+                isActive={activeLensId === lens.id}
+                onSelect={() => handleSelect(lens.id)}
+                onView={() => handleView(lens.id)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
