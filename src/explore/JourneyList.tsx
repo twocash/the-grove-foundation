@@ -183,12 +183,12 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   }
 
   // COMPACT MODE - Single column list for chat nav
-  // Uses same max-w-3xl proportional scaling as chat messages
+  // Uses percentage-based scaling for proportional margins in narrow containers
   if (mode === 'compact') {
     return (
       <div className="flex flex-col h-full bg-transparent">
         <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="w-[92%] max-w-3xl mx-auto flex items-center justify-between">
             {onBack && (
               <button
                 onClick={onBack}
@@ -204,7 +204,7 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
-          <div className="max-w-3xl mx-auto space-y-3">
+          <div className="w-[92%] max-w-3xl mx-auto space-y-3">
             {allJourneys.map(journey => (
               <CompactJourneyCard
                 key={journey.id}
