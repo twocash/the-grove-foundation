@@ -58,7 +58,9 @@ Grove bets that pattern holds for intelligence too.
 
 ## The Thesis
 
-Everyone is racing to build bigger models. We're building better soil.
+Everyone is racing to build bigger models. We're building better soil. A better foundation. 
+
+We call it **The Grove Foundation**. 
 
 **Models are seeds. Architecture is soil.** The current AI investment thesis assumes value resides in model size—bigger parameters, more capability, winner takes all. We think that's half the story. Seeds matter, but soil dictates the growing conditions.
 
