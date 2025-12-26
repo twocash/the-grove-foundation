@@ -7,7 +7,8 @@ import { useSproutStorage } from './useSproutStorage';
 import {
   Sprout,
   SproutCaptureOptions,
-  SproutCaptureContext
+  SproutCaptureContext,
+  SproutProvenance
 } from '../src/core/schema/sprout';
 
 /**
@@ -26,7 +27,7 @@ export function useSproutCapture() {
 
   /**
    * Capture a response as a sprout
-   * @param context - The generation context (response, query, persona, etc.)
+   * @param context - The generation context (response, query, provenance)
    * @param options - Optional tags and notes
    * @returns The created Sprout or null if capture failed
    */
@@ -40,6 +41,8 @@ export function useSproutCapture() {
       return null;
     }
 
+    const { provenance } = context;
+
     // Build sprout with full provenance
     const sprout: Sprout = {
       id: crypto.randomUUID(),
@@ -49,11 +52,14 @@ export function useSproutCapture() {
       response: context.response,
       query: context.query,
 
-      // Generation context (provenance)
-      personaId: context.personaId,
-      journeyId: context.journeyId,
-      hubId: context.hubId,
-      nodeId: context.nodeId,
+      // Human-readable provenance (v2+)
+      provenance,
+
+      // Legacy fields (deprecated but kept for backward compatibility)
+      personaId: provenance.lens?.id || null,
+      journeyId: provenance.journey?.id || null,
+      hubId: provenance.hub?.id || null,
+      nodeId: provenance.node?.id || null,
 
       // Lifecycle
       status: 'sprout',
@@ -72,7 +78,8 @@ export function useSproutCapture() {
       console.log('[Sprout] Captured:', {
         id: sprout.id.slice(0, 8),
         query: sprout.query.slice(0, 50),
-        tags: sprout.tags
+        tags: sprout.tags,
+        lens: provenance.lens?.name
       });
       return sprout;
     }

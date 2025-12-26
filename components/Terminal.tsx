@@ -20,6 +20,8 @@ import type { OverlayHandlers } from './Terminal/index';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
+import { SproutProvenance } from '../src/core/schema/sprout';
+import { useOptionalWidgetUI } from '../src/widget/WidgetUIContext';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { getPersona } from '../data/default-personas';
 import { getFormattedTerminalWelcome, getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../src/data/quantum-content';
@@ -235,6 +237,9 @@ const Terminal: React.FC<TerminalProps> = ({
   // Sprout capture (Sprint: Sprout System)
   const { capture: captureSprout } = useSproutCapture();
 
+  // Widget UI context (optional - may not be in widget context)
+  const widgetUI = useOptionalWidgetUI();
+
   // Kinetic Command System (Sprint: terminal-kinetic-commands-v1)
   const commands = useCommands({
     schema,
@@ -429,12 +434,35 @@ const Terminal: React.FC<TerminalProps> = ({
     const lastResponse = getLastResponse();
     if (!lastResponse) return false;
 
-    const context = getSessionContext();
+    // Build human-readable provenance with names
+    const provenance: SproutProvenance = {
+      lens: activeLensData
+        ? { id: activeLensData.id, name: activeLensData.publicLabel }
+        : null,
+      hub: null, // Hub routing happens server-side; not tracked client-side
+      journey: engJourney
+        ? { id: engJourney.id, name: engJourney.title }
+        : null,
+      node: currentNodeId && schema?.nodes
+        ? (() => {
+            const node = (schema.nodes as Record<string, { id: string; label?: string }>)[currentNodeId];
+            return node ? { id: currentNodeId, name: node.label || currentNodeId } : null;
+          })()
+        : null,
+      knowledgeFiles: [], // Not tracked client-side (server-side RAG)
+      generatedAt: new Date().toISOString()
+    };
+
     const sprout = captureSprout({
       response: lastResponse.text,
       query: lastResponse.query,
-      ...context
+      provenance
     }, options);
+
+    if (sprout) {
+      // Increment widget sprout count if in widget context
+      widgetUI?.incrementSproutCount();
+    }
 
     return sprout !== null;
   };
@@ -1076,6 +1104,7 @@ const Terminal: React.FC<TerminalProps> = ({
               onShowWelcome={() => actions.setOverlay({ type: 'welcome' })}
               onShowLensPicker={() => actions.setOverlay({ type: 'lens-picker' })}
               onNavigate={navigate}
+              onSwitchMode={(mode) => widgetUI?.setMode(mode as any)}
               getLastResponse={getLastResponse}
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
@@ -1444,6 +1473,7 @@ const Terminal: React.FC<TerminalProps> = ({
                   onShowWelcome={() => actions.setOverlay({ type: 'welcome' })}
                   onShowLensPicker={() => actions.setOverlay({ type: 'lens-picker' })}
                   onNavigate={navigate}
+                  onSwitchMode={(mode) => widgetUI?.setMode(mode as any)}
                   // Sprout System (Sprint: Sprout System)
                   getLastResponse={getLastResponse}
                   getSessionContext={getSessionContext}

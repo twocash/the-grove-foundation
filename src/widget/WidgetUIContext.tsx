@@ -121,3 +121,11 @@ export function useWidgetUI(): WidgetUIContextType {
   }
   return context;
 }
+
+/**
+ * Optional version of useWidgetUI that returns null when not in a WidgetUIProvider.
+ * Use this for components that need to work both inside and outside the widget context.
+ */
+export function useOptionalWidgetUI(): WidgetUIContextType | null {
+  return useContext(WidgetUIContext);
+}

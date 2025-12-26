@@ -8,6 +8,7 @@ import { useSproutStats } from '../../../hooks/useSproutStats';
 
 interface StatsModalProps {
   onClose: () => void;
+  onViewGarden?: () => void;
 }
 
 // Engagement level descriptions
@@ -40,7 +41,7 @@ function formatDuration(minutes: number): string {
 }
 
 // Garden section component for sprout statistics
-const GardenSection: React.FC = () => {
+const GardenSection: React.FC<{ onViewGarden?: () => void }> = ({ onViewGarden }) => {
   const stats = useSproutStats();
 
   return (
@@ -120,6 +121,16 @@ const GardenSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* View Garden Link */}
+      {stats.totalSprouts > 0 && onViewGarden && (
+        <button
+          onClick={onViewGarden}
+          className="mt-4 w-full text-xs text-grove-forest hover:underline text-center"
+        >
+          View Garden →
+        </button>
+      )}
     </div>
   );
 };
@@ -149,7 +160,7 @@ const StatCard: React.FC<{
   </div>
 );
 
-const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
+const StatsModal: React.FC<StatsModalProps> = ({ onClose, onViewGarden }) => {
   const stats = useExplorationStats();
   const engagement = ENGAGEMENT_LABELS[stats.engagementLevel];
 
@@ -240,7 +251,7 @@ const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
             )}
 
             {/* Garden Section (Sprint: Sprout System) */}
-            <GardenSection />
+            <GardenSection onViewGarden={onViewGarden} />
           </div>
 
           {/* Footer */}

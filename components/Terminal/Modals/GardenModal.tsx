@@ -1,5 +1,10 @@
 // GardenModal - View user's captured sprouts
 // Sprint: Sprout System
+//
+// @deprecated Sprint: Sprout System Wiring
+// This modal is deprecated in favor of src/widget/views/GardenView.tsx
+// The /garden command now switches to garden mode instead of opening a modal.
+// This file is retained for backward compatibility but will be removed in a future sprint.
 
 import React from 'react';
 import { useSproutStats } from '../../../hooks/useSproutStats';

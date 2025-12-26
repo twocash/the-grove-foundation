@@ -16,6 +16,8 @@ interface CommandInputProps {
   onShowLensPicker: () => void;
   // Sprint: route-selection-flow-v1 - Navigation support
   onNavigate?: (path: string) => void;
+  // Sprint: Sprout System Wiring - Mode switching for /garden command
+  onSwitchMode?: (mode: string) => void;
   // Sprout System (Sprint: Sprout System)
   getLastResponse?: () => LastResponseData | null;
   getSessionContext?: () => SessionContext;
@@ -35,6 +37,8 @@ const CommandInput: React.FC<CommandInputProps> = ({
   onShowLensPicker,
   // Sprint: route-selection-flow-v1
   onNavigate,
+  // Sprint: Sprout System Wiring
+  onSwitchMode,
   // Sprout System
   getLastResponse,
   getSessionContext,
@@ -102,8 +106,14 @@ const CommandInput: React.FC<CommandInputProps> = ({
           onOpenModal(result.modal);
         } else if (result.type === 'navigate' && onNavigate) {
           onNavigate(result.path);
+        } else if (result.type === 'action' && result.action === 'switch-mode' && onSwitchMode) {
+          // Sprint: Sprout System Wiring - Handle mode switching (e.g., /garden command)
+          const payload = result.payload as { mode: string } | undefined;
+          if (payload?.mode) {
+            onSwitchMode(payload.mode);
+          }
         }
-        // Action results are handled by the command itself
+        // Other action results are handled by the command itself
       }
 
       setInput('');

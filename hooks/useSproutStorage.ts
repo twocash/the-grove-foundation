@@ -7,7 +7,9 @@ import {
   Sprout,
   SproutStorage,
   isValidSproutStorage,
-  SPROUT_STORAGE_KEY
+  migrateStorageToV2,
+  SPROUT_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION
 } from '../src/core/schema/sprout';
 
 /**
@@ -38,7 +40,7 @@ function loadStorage(): SproutStorage {
     const raw = localStorage.getItem(SPROUT_STORAGE_KEY);
     if (!raw) {
       return {
-        version: 1,
+        version: CURRENT_STORAGE_VERSION,
         sprouts: [],
         sessionId: getOrCreateSessionId()
       };
@@ -46,9 +48,10 @@ function loadStorage(): SproutStorage {
 
     const parsed = JSON.parse(raw);
     if (isValidSproutStorage(parsed)) {
-      // Ensure session ID is current
+      // Migrate if needed, ensure session ID is current
+      const migrated = migrateStorageToV2(parsed);
       return {
-        ...parsed,
+        ...migrated,
         sessionId: getOrCreateSessionId()
       };
     }
@@ -56,14 +59,14 @@ function loadStorage(): SproutStorage {
     // Invalid storage, reset
     console.warn('[SproutStorage] Invalid storage format, resetting');
     return {
-      version: 1,
+      version: CURRENT_STORAGE_VERSION,
       sprouts: [],
       sessionId: getOrCreateSessionId()
     };
   } catch (error) {
     console.error('[SproutStorage] Failed to load storage:', error);
     return {
-      version: 1,
+      version: CURRENT_STORAGE_VERSION,
       sprouts: [],
       sessionId: getOrCreateSessionId()
     };

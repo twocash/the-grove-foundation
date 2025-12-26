@@ -656,13 +656,14 @@ Access via `/foundation/genesis`:
 
 | File | Purpose |
 |------|---------|
-| `src/core/schema/sprout.ts` | Sprout, SproutStorage, SproutStats types |
-| `hooks/useSproutStorage.ts` | localStorage CRUD for sprout persistence |
-| `hooks/useSproutCapture.ts` | Capture hook with flag parsing |
+| `src/core/schema/sprout.ts` | Sprout, SproutProvenance, SproutStorage types |
+| `hooks/useSproutStorage.ts` | localStorage CRUD with v2 migration |
+| `hooks/useSproutCapture.ts` | Capture hook with flag parsing and provenance |
 | `hooks/useSproutStats.ts` | Aggregated statistics |
 | `components/Terminal/CommandInput/commands/sprout.ts` | /sprout command |
-| `components/Terminal/CommandInput/commands/garden.ts` | /garden command |
-| `components/Terminal/Modals/GardenModal.tsx` | Garden modal UI |
+| `components/Terminal/CommandInput/commands/garden.ts` | /garden command (switches mode) |
+| `src/widget/views/GardenView.tsx` | Garden mode view with sprout gallery |
+| `components/Terminal/Modals/GardenModal.tsx` | @deprecated - replaced by GardenView |
 | `docs/SPROUT_SYSTEM.md` | Academic architecture document |
 
 ### Commands Added
@@ -670,7 +671,7 @@ Access via `/foundation/genesis`:
 | Command | Aliases | Description |
 |---------|---------|-------------|
 | `/sprout` | `/capture`, `/save` | Capture last response as a sprout |
-| `/garden` | `/sprouts`, `/contributions` | View captured sprouts |
+| `/garden` | `/sprouts`, `/contributions` | Switch to garden mode (view sprouts) |
 
 ### Sprout Command Flags
 
@@ -691,22 +692,40 @@ Access via `/foundation/genesis`:
 ### Data Model
 
 ```typescript
+interface SproutProvenance {
+  lens: { id: string; name: string } | null;
+  hub: { id: string; name: string } | null;
+  journey: { id: string; name: string } | null;
+  node: { id: string; name: string } | null;
+  knowledgeFiles: string[];
+  model?: string;
+  generatedAt: string;
+}
+
 interface Sprout {
   id: string;           // UUID
   capturedAt: string;   // ISO timestamp
   response: string;     // Verbatim LLM output
   query: string;        // User's original query
-  personaId: string;    // Active lens
-  journeyId: string;    // Active journey
+  provenance?: SproutProvenance; // Rich context (v2)
+  // Legacy flat fields (v1 - preserved for compatibility)
+  personaId: string;    // Active lens ID
+  journeyId: string;    // Active journey ID
   hubId: string;        // Topic hub matched
   nodeId: string;       // Card/node triggered
-  status: 'sprout';     // Lifecycle stage (MVP: always 'sprout')
+  status: 'sprout' | 'sapling' | 'tree'; // Lifecycle stage
   tags: string[];       // User annotations
   notes: string;        // Human commentary
   sessionId: string;    // Anonymous session
   creatorId: string;    // Future: Grove ID
 }
 ```
+
+### Storage Schema
+
+- **Version 1**: Original flat provenance fields
+- **Version 2**: Added `SproutProvenance` with human-readable names
+- Storage automatically migrates v1 → v2 on load
 
 ### StatsModal Integration
 
@@ -723,6 +742,25 @@ The `/stats` command now includes a "Your Garden" section showing:
 | 2 | Grove ID integration, claim anonymous sprouts |
 | 3 | Server-side storage, admin review workflow |
 | 4 | Network propagation, credit attribution |
+
+### Sprint 15b: Sprout System Wiring
+
+**Goal:** Connect the Sprout infrastructure to the Terminal and Widget modes.
+
+**Changes:**
+- Added `SproutProvenance` with human-readable names for lens, hub, journey, node
+- Storage schema migrated to v2 with automatic backward-compatible migration
+- Terminal now builds provenance with names via `getLastResponse()` callback
+- `/garden` command switches to garden mode instead of opening modal
+- GardenView displays real sprout gallery with growth stage grouping
+- StatsModal includes "View Garden →" link to switch modes
+- Widget `incrementSproutCount()` called on successful captures
+
+**Key Integration Points:**
+- `CommandContext.getLastResponse()` - Returns last AI response for capture
+- `CommandContext.getSessionContext()` - Returns current lens/journey/node context
+- `CommandContext.captureSprout()` - Executes capture with provenance
+- `CommandResult.type: 'action'` with `action: 'switch-mode'` for mode transitions
 
 ---
 
