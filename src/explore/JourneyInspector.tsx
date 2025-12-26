@@ -1,15 +1,13 @@
 // src/explore/JourneyInspector.tsx
 // Journey object inspector — displays Journey as GroveObject JSON
+// Uses InspectorSurface for versioning
 
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { ObjectInspector } from '../shared/inspector';
-import { useVersionedObject } from '../shared/inspector/hooks/useVersionedObject';
+import { ObjectInspector, InspectorSurfaceProvider } from '../shared/inspector';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { Journey } from '@core/schema/narrative';
-import type { JsonPatch } from '@core/copilot';
-import { getSessionId } from '../../utils/abTesting';
 
 interface JourneyInspectorProps {
   journeyId: string;
@@ -46,39 +44,13 @@ export function JourneyInspector({ journeyId }: JourneyInspectorProps) {
 
   const journey = getJourney(journeyId);
 
-  // Memoize the initial object to prevent useVersionedObject from re-importing
+  // Memoize the initial object for the surface provider
   const initialObject = useMemo(
     () => (journey ? journeyToGroveObject(journey) : null),
     [journey]
   );
 
-  // Use versioned object storage
-  const {
-    object: versionedObject,
-    version,
-    loading,
-    applyPatch,
-  } = useVersionedObject(
-    journeyId,
-    initialObject ?? {
-      meta: { id: journeyId, type: 'journey', title: '', createdAt: '', updatedAt: '' },
-      payload: {},
-    }
-  );
-
-  // Handle patch application with versioning
-  const handleApplyPatch = useCallback(
-    async (patch: JsonPatch) => {
-      return applyPatch(
-        patch,
-        { type: 'copilot', model: 'hybrid-local' },
-        { type: 'copilot', sessionId: getSessionId() }
-      );
-    },
-    [applyPatch]
-  );
-
-  if (!journey) {
+  if (!journey || !initialObject) {
     return (
       <div className="p-5 text-center text-slate-500">
         <span className="material-symbols-outlined text-4xl mb-2">error</span>
@@ -87,23 +59,16 @@ export function JourneyInspector({ journeyId }: JourneyInspectorProps) {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="p-5 text-center text-slate-500">
-        <span className="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
   return (
-    <ObjectInspector
-      object={versionedObject}
-      title={journey.title}
-      version={version}
-      onApplyPatch={handleApplyPatch}
-      onClose={closeInspector}
-    />
+    <InspectorSurfaceProvider
+      objectId={journeyId}
+      initialObject={initialObject}
+    >
+      <ObjectInspector
+        title={journey.title}
+        onClose={closeInspector}
+      />
+    </InspectorSurfaceProvider>
   );
 }
 
