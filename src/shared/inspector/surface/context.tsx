@@ -6,13 +6,20 @@ import React, {
   useContext,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useMemo
 } from 'react';
 import type { InspectorSurface } from './types';
 import { ReactInspectorSurface } from './ReactInspectorSurface';
 import type { GroveObject } from '@core/schema/grove-object';
 
-const InspectorSurfaceContext = createContext<InspectorSurface | undefined>(undefined);
+// Context value includes version to force re-renders when surface state changes
+interface ContextValue {
+  surface: InspectorSurface;
+  version: number;
+}
+
+const InspectorSurfaceContext = createContext<ContextValue | undefined>(undefined);
 
 export interface InspectorSurfaceProviderProps {
   objectId: string;
@@ -25,7 +32,7 @@ export function InspectorSurfaceProvider({
   initialObject,
   children
 }: InspectorSurfaceProviderProps) {
-  const [, forceUpdate] = useState({});
+  const [version, setVersion] = useState(0);
 
   const surfaceRef = useRef<ReactInspectorSurface | null>(null);
 
@@ -33,7 +40,7 @@ export function InspectorSurfaceProvider({
     surfaceRef.current = new ReactInspectorSurface({
       objectId,
       initialObject,
-      onStateChange: () => forceUpdate({})
+      onStateChange: () => setVersion(v => v + 1)
     });
   }
 
@@ -44,23 +51,26 @@ export function InspectorSurfaceProvider({
     return () => surface.dispose();
   }, [surface]);
 
+  // Memoize context value to only change when version changes
+  const contextValue = useMemo(() => ({ surface, version }), [surface, version]);
+
   return (
-    <InspectorSurfaceContext.Provider value={surface}>
+    <InspectorSurfaceContext.Provider value={contextValue}>
       {children}
     </InspectorSurfaceContext.Provider>
   );
 }
 
 export function useInspectorSurface<T = unknown>(): InspectorSurface<T> {
-  const surface = useContext(InspectorSurfaceContext);
+  const contextValue = useContext(InspectorSurfaceContext);
 
-  if (!surface) {
+  if (!contextValue) {
     throw new Error(
       'useInspectorSurface must be used within an InspectorSurfaceProvider'
     );
   }
 
-  return surface as InspectorSurface<T>;
+  return contextValue.surface as InspectorSurface<T>;
 }
 
 /**
@@ -68,6 +78,6 @@ export function useInspectorSurface<T = unknown>(): InspectorSurface<T> {
  * Use this for components that need to work both inside and outside the provider.
  */
 export function useOptionalInspectorSurface<T = unknown>(): InspectorSurface<T> | null {
-  const surface = useContext(InspectorSurfaceContext);
-  return surface as InspectorSurface<T> | null;
+  const contextValue = useContext(InspectorSurfaceContext);
+  return contextValue?.surface as InspectorSurface<T> | null;
 }
