@@ -28,7 +28,12 @@ export function TerminalOverlayRenderer({ overlay, handlers }: Props) {
   const Component = config.component;
   const props = getPropsForOverlay(overlay, handlers, config.props);
 
-  return <Component {...props} />;
+  // Wrap in container that ensures proper height and allows internal scaling
+  return (
+    <div className="h-full w-full overflow-hidden">
+      <Component {...props} />
+    </div>
+  );
 }
 
 function getPropsForOverlay(
