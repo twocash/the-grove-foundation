@@ -1,8 +1,13 @@
 // WelcomeInterstitial - First-open experience for new Terminal users
 // Sprint: route-selection-flow-v1 - Simplified to copy + CTA
+// Hotfix: Added onChooseLens callback to prevent navigation when embedded
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+interface WelcomeInterstitialProps {
+  onChooseLens?: () => void;
+}
 
 const WELCOME_COPY = `Welcome to The Grove.
 
@@ -10,11 +15,15 @@ You're inside the Terminal — engaging with your own personal AI. In this demo,
 
 Choose a lens to shape how we explore the subject matter in a way most relevant to you. Each lens emphasizes different aspects of this groundbreaking initiative.`;
 
-const WelcomeInterstitial: React.FC = () => {
+const WelcomeInterstitial: React.FC<WelcomeInterstitialProps> = ({ onChooseLens }) => {
   const navigate = useNavigate();
 
   const handleChooseLens = () => {
-    navigate('/lenses?returnTo=/terminal&ctaLabel=Start%20Exploring');
+    if (onChooseLens) {
+      onChooseLens();
+    } else {
+      navigate('/lenses?returnTo=/terminal&ctaLabel=Start%20Exploring');
+    }
   };
 
   return (

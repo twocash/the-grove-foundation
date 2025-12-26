@@ -914,7 +914,12 @@ const Terminal: React.FC<TerminalProps> = ({
               />
             </div>
           ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial />
+            <WelcomeInterstitial
+              onChooseLens={() => {
+                actions.hideWelcomeInterstitial();
+                actions.showLensPicker();
+              }}
+            />
           ) : showLensPicker ? (
             <LensPicker
               mode="compact"
@@ -1035,7 +1040,12 @@ const Terminal: React.FC<TerminalProps> = ({
               onCancel={handleCustomLensCancel}
             />
           ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial />
+            <WelcomeInterstitial
+              onChooseLens={() => {
+                actions.hideWelcomeInterstitial();
+                actions.showLensPicker();
+              }}
+            />
           ) : showLensPicker ? (
             <LensPicker
               mode="compact"
