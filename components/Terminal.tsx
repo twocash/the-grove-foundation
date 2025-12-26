@@ -13,10 +13,9 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput } from './Terminal/index';
-import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
-import { LensPicker } from '../src/explore/LensPicker';
-import { JourneyList } from '../src/explore/JourneyList';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput, TerminalOverlayRenderer, isOverlayActive } from './Terminal/index';
+import type { OverlayHandlers } from './Terminal/index';
+// Note: WelcomeInterstitial, LensPicker, JourneyList now rendered via TerminalOverlayRenderer
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
@@ -280,21 +279,21 @@ const Terminal: React.FC<TerminalProps> = ({
 
       // v0.12e: If there's a URL lens but not yet hydrated, show LensPicker (with lens highlighted)
       // Otherwise, show welcome interstitial for first-time users
+      // Sprint: terminal-overlay-machine-v1 - use setOverlay
       if (urlLensId) {
-        actions.showLensPicker();
+        actions.setOverlay({ type: 'lens-picker' });
       } else {
-        actions.showWelcomeInterstitial();
+        actions.setOverlay({ type: 'welcome' });
       }
-      // hasShownWelcome is set internally by hideWelcomeInterstitial
     }
-  }, [terminalState.isOpen, hasShownWelcome, urlLensId, session.activeLens]);
+  }, [terminalState.isOpen, hasShownWelcome, urlLensId, session.activeLens, actions]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {
     if (personaId) {
       engSelectLens(personaId);
     }
-    actions.hideLensPicker();
+    actions.setOverlay({ type: 'none' });
     localStorage.setItem('grove-terminal-welcomed', 'true');
     localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
 
@@ -318,25 +317,26 @@ const Terminal: React.FC<TerminalProps> = ({
   };
 
   // Handle opening custom lens wizard
+  // Sprint: terminal-overlay-machine-v1 - use setOverlay
   const handleCreateCustomLens = () => {
-    actions.showCustomLensWizard();
+    actions.setOverlay({ type: 'wizard' });
   };
 
   // Handle lens selection from welcome interstitial
+  // Note: This is now handled by overlayHandlers.onLensSelect but kept for backward compat
   const handleWelcomeLensSelect = (personaId: string | null) => {
     if (personaId) {
       engSelectLens(personaId);
     }
-    actions.hideWelcomeInterstitial();
+    actions.setOverlay({ type: 'none' });
     localStorage.setItem('grove-terminal-welcomed', 'true');
-    localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
+    localStorage.setItem('grove-session-established', 'true');
 
     // Track lens activation
     if (personaId) {
       trackLensActivated(personaId, personaId.startsWith('custom-'));
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       emit.journeyStarted(personaId, currentThread.length || 5);
-      // Sprint: active-grove-v1 - Notify parent of lens selection
       if (onLensSelected) {
         onLensSelected(personaId);
       }
@@ -349,8 +349,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Handle Create Your Own from welcome interstitial
   const handleWelcomeCreateCustomLens = () => {
-    actions.hideWelcomeInterstitial();
-    actions.showCustomLensWizard();
+    actions.setOverlay({ type: 'wizard' });
   };
 
   // Command Palette handlers (v0.16)
@@ -433,18 +432,22 @@ const Terminal: React.FC<TerminalProps> = ({
   };
 
   // Handle custom lens wizard completion
+  // Sprint: terminal-overlay-machine-v1 - use overlay state
   const handleCustomLensComplete = async (candidate: LensCandidate, userInputs: UserInputs) => {
     const newLens = await saveCustomLens(candidate, userInputs);
     engSelectLens(newLens.id);
-    actions.hideCustomLensWizard();
+    actions.setOverlay({ type: 'none' });
     localStorage.setItem('grove-terminal-welcomed', 'true');
-    localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
+    localStorage.setItem('grove-session-established', 'true');
+    // Track and emit
+    trackLensActivated(newLens.id, true);
+    emit.lensSelected(newLens.id, true, currentArchetypeId || undefined);
   };
 
   // Handle custom lens wizard cancel
+  // Sprint: terminal-overlay-machine-v1 - use overlay state
   const handleCustomLensCancel = () => {
-    actions.hideCustomLensWizard();
-    actions.showLensPicker();
+    actions.setOverlay({ type: 'lens-picker' });
   };
 
   // Handle deleting a custom lens
@@ -470,6 +473,35 @@ const Terminal: React.FC<TerminalProps> = ({
     };
     return personaToArchetype[activeLensData.id] || 'concerned-citizen';
   }, [activeLensData]);
+
+  // Sprint: terminal-overlay-machine-v1 - Unified overlay handlers
+  const overlayHandlers: OverlayHandlers = useMemo(() => ({
+    onDismiss: () => actions.setOverlay({ type: 'none' }),
+    onLensSelect: (personaId: string) => {
+      // Select the lens
+      engSelectLens(personaId);
+      // Persist welcome state
+      localStorage.setItem('grove-terminal-welcomed', 'true');
+      localStorage.setItem('grove-session-established', 'true');
+      // Analytics
+      trackLensActivated(personaId, personaId.startsWith('custom-'));
+      emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
+      emit.journeyStarted(personaId, currentThread.length || 5);
+      // Custom lens usage tracking
+      if (personaId.startsWith('custom-')) {
+        updateCustomLensUsage(personaId);
+      }
+      // Notify parent (for Genesis headline collapse)
+      if (onLensSelected) {
+        onLensSelected(personaId);
+      }
+      // Dismiss overlay
+      actions.setOverlay({ type: 'none' });
+    },
+    onWelcomeChooseLens: () => actions.setOverlay({ type: 'lens-picker' }),
+    onWizardComplete: handleCustomLensComplete,
+    onWizardCancel: handleCustomLensCancel
+  }), [actions, engSelectLens, emit, currentArchetypeId, currentThread.length, updateCustomLensUsage, onLensSelected, handleCustomLensComplete, handleCustomLensCancel]);
 
   // Check for reveal triggers
   useEffect(() => {
@@ -508,7 +540,7 @@ const Terminal: React.FC<TerminalProps> = ({
   const handleAcceptCustomLensOffer = () => {
     dismissCustomLensOffer();
     actions.setReveal('customLensOffer', false);
-    actions.showCustomLensWizard();
+    actions.setOverlay({ type: 'wizard' });
   };
 
   const handleDeclineCustomLensOffer = () => {
@@ -903,51 +935,15 @@ const Terminal: React.FC<TerminalProps> = ({
           journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
           currentStreak={currentStreak}
           showStreak={showStreakDisplay}
-          onLensClick={() => actions.showLensPicker()}
-          onJourneyClick={() => actions.showJourneyPicker()}
+          onLensClick={() => actions.setOverlay({ type: 'lens-picker' })}
+          onJourneyClick={() => actions.setOverlay({ type: 'journey-picker' })}
           onStreakClick={() => handleOpenModal('stats')}
         />
 
-        {/* Content Area */}
+        {/* Content Area - Sprint: terminal-overlay-machine-v1 */}
         <div className="flex-1 overflow-y-auto">
-          {showCustomLensWizard ? (
-            <div className="p-4">
-              <CustomLensWizard
-                onComplete={handleCustomLensComplete}
-                onCancel={handleCustomLensCancel}
-              />
-            </div>
-          ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial
-              onChooseLens={() => {
-                actions.hideWelcomeInterstitial();
-                actions.showLensPicker();
-              }}
-            />
-          ) : showLensPicker ? (
-            <LensPicker
-              mode="compact"
-              onBack={() => actions.hideLensPicker()}
-              onAfterSelect={(personaId) => {
-                localStorage.setItem('grove-terminal-welcomed', 'true');
-                localStorage.setItem('grove-session-established', 'true');
-                trackLensActivated(personaId, personaId.startsWith('custom-'));
-                emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
-                emit.journeyStarted(personaId, currentThread.length || 5);
-                if (personaId.startsWith('custom-')) {
-                  updateCustomLensUsage(personaId);
-                }
-                // Fix: Notify parent of lens selection for Genesis headline collapse
-                if (onLensSelected) {
-                  onLensSelected(personaId);
-                }
-              }}
-            />
-          ) : showJourneyPicker ? (
-            <JourneyList
-              mode="compact"
-              onBack={() => actions.hideJourneyPicker()}
-            />
+          {isOverlayActive(overlay) ? (
+            <TerminalOverlayRenderer overlay={overlay} handlers={overlayHandlers} />
           ) : (
             /* Chat Messages */
             <div className="p-4 md:p-6">
@@ -1013,8 +1009,8 @@ const Terminal: React.FC<TerminalProps> = ({
               disabled={terminalState.isLoading}
               onOpenModal={handleOpenModal}
               onSwitchLens={handleCommandLensSwitch}
-              onShowWelcome={() => actions.showWelcomeInterstitial()}
-              onShowLensPicker={() => actions.showLensPicker()}
+              onShowWelcome={() => actions.setOverlay({ type: 'welcome' })}
+              onShowLensPicker={() => actions.setOverlay({ type: 'lens-picker' })}
               onNavigate={navigate}
               getLastResponse={getLastResponse}
               getSessionContext={getSessionContext}
@@ -1043,46 +1039,9 @@ const Terminal: React.FC<TerminalProps> = ({
         onExpand={handleExpand}
         onToggle={toggleTerminal}
       >
-          {/* Show Custom Lens Wizard, Welcome Interstitial, Lens Picker, or Main Terminal */}
-          {showCustomLensWizard ? (
-            <CustomLensWizard
-              onComplete={handleCustomLensComplete}
-              onCancel={handleCustomLensCancel}
-            />
-          ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial
-              onChooseLens={() => {
-                actions.hideWelcomeInterstitial();
-                actions.showLensPicker();
-              }}
-            />
-          ) : showLensPicker ? (
-            <LensPicker
-              mode="compact"
-              onBack={() => actions.hideLensPicker()}
-              onAfterSelect={(personaId) => {
-                localStorage.setItem('grove-terminal-welcomed', 'true');
-                localStorage.setItem('grove-session-established', 'true'); // v0.12f: Persist for returning users
-                // Track lens activation via analytics
-                trackLensActivated(personaId, personaId.startsWith('custom-'));
-                // Emit to Engagement Bus
-                emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
-                emit.journeyStarted(personaId, currentThread.length || 5);
-                // Update custom lens usage timestamp
-                if (personaId.startsWith('custom-')) {
-                  updateCustomLensUsage(personaId);
-                }
-                // FIX: Notify parent of lens selection for Genesis headline collapse
-                if (onLensSelected) {
-                  onLensSelected(personaId);
-                }
-              }}
-            />
-          ) : showJourneyPicker ? (
-            <JourneyList
-              mode="compact"
-              onBack={() => actions.hideJourneyPicker()}
-            />
+          {/* Sprint: terminal-overlay-machine-v1 - Unified overlay rendering */}
+          {isOverlayActive(overlay) ? (
+            <TerminalOverlayRenderer overlay={overlay} handlers={overlayHandlers} />
           ) : (
             <>
               {/* Header - Clean title bar with context selectors */}
@@ -1097,8 +1056,8 @@ const Terminal: React.FC<TerminalProps> = ({
                 journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
-                onLensClick={() => actions.showLensPicker()}
-                onJourneyClick={() => actions.showJourneyPicker()}
+                onLensClick={() => actions.setOverlay({ type: 'lens-picker' })}
+                onJourneyClick={() => actions.setOverlay({ type: 'journey-picker' })}
                 onStreakClick={() => actions.openModal('stats')}
               />
 
@@ -1106,7 +1065,7 @@ const Terminal: React.FC<TerminalProps> = ({
               {!enableControlsBelow && (
                 <JourneyNav
                   persona={activeLensData}
-                  onSwitchLens={() => actions.showLensPicker()}
+                  onSwitchLens={() => actions.setOverlay({ type: 'lens-picker' })}
                   currentThread={currentThread}
                   currentPosition={currentPosition}
                   getThreadCard={getThreadCard}
@@ -1320,7 +1279,7 @@ const Terminal: React.FC<TerminalProps> = ({
                         Continue Exploring Freely
                       </button>
                       <button
-                        onClick={() => actions.showLensPicker()}
+                        onClick={() => actions.setOverlay({ type: 'lens-picker' })}
                         className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
                       >
                         Try a Different Lens
@@ -1347,7 +1306,7 @@ const Terminal: React.FC<TerminalProps> = ({
                         Explore Freely
                       </button>
                       <button
-                        onClick={() => actions.showLensPicker()}
+                        onClick={() => actions.setOverlay({ type: 'lens-picker' })}
                         className="px-3 py-2 bg-white border border-ink/10 rounded-sm text-xs font-sans text-ink-muted hover:border-ink/20 hover:text-ink transition-all"
                       >
                         Try a Different Lens
@@ -1418,8 +1377,8 @@ const Terminal: React.FC<TerminalProps> = ({
                   disabled={terminalState.isLoading}
                   onOpenModal={handleOpenModal}
                   onSwitchLens={handleCommandLensSwitch}
-                  onShowWelcome={() => actions.showWelcomeInterstitial()}
-                  onShowLensPicker={() => actions.showLensPicker()}
+                  onShowWelcome={() => actions.setOverlay({ type: 'welcome' })}
+                  onShowLensPicker={() => actions.setOverlay({ type: 'lens-picker' })}
                   onNavigate={navigate}
                   // Sprout System (Sprint: Sprout System)
                   getLastResponse={getLastResponse}
@@ -1503,7 +1462,7 @@ const Terminal: React.FC<TerminalProps> = ({
         }}
 
         // Handlers - LensPicker (not used but required)
-        onLensPickerBack={() => actions.hideLensPicker()}
+        onLensPickerBack={() => actions.setOverlay({ type: 'none' })}
         onLensPickerAfterSelect={() => {}}
 
         // URL lens support
