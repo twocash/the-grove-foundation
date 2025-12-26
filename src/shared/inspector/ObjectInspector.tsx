@@ -1,7 +1,10 @@
 // src/shared/inspector/ObjectInspector.tsx
 // JSON inspector for GroveObjects with Copilot integration
+// Supports two modes:
+// 1. Surface mode: Uses InspectorSurface from context (wrap with InspectorSurfaceProvider)
+// 2. Props mode: Legacy mode using props (backward compatible)
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { applyPatch } from 'fast-json-patch';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { JsonPatch } from '@core/copilot';
@@ -9,6 +12,7 @@ import type { ObjectVersion, VersionActor } from '@core/versioning';
 import { InspectorPanel, InspectorDivider } from '../layout/InspectorPanel';
 import { CopilotPanel } from './CopilotPanel';
 import { VersionIndicator } from './VersionIndicator';
+import { useInspectorSurface, type InspectorSurface } from './surface';
 
 /**
  * Version metadata for display
@@ -19,55 +23,127 @@ interface VersionMetadata {
   lastModifiedBy: VersionActor;
 }
 
+/**
+ * Props for ObjectInspector.
+ *
+ * Two usage modes:
+ * 1. Surface mode: Only provide onClose. Data comes from InspectorSurfaceProvider context.
+ * 2. Props mode (legacy): Provide object, version, onApplyPatch, onClose.
+ */
 interface ObjectInspectorProps {
-  object: GroveObject;
+  /** Object to display (legacy mode) - omit when using surface */
+  object?: GroveObject;
   title?: string;
-  /** Version metadata for display (optional) */
+  /** Version metadata for display (legacy mode) */
   version?: VersionMetadata | null;
-  /** Callback when patch is applied. If provided and returns ObjectVersion, versioning is enabled */
+  /** Callback when patch is applied (legacy mode) */
   onApplyPatch?: (patch: JsonPatch) => Promise<ObjectVersion | void> | void;
   onClose: () => void;
 }
 
+/**
+ * Try to get surface from context, return null if not available
+ */
+function useSurfaceOptional(): InspectorSurface | null {
+  try {
+    return useInspectorSurface();
+  } catch {
+    return null;
+  }
+}
+
 export function ObjectInspector({
-  object,
-  title,
-  version,
-  onApplyPatch,
+  object: propObject,
+  title: propTitle,
+  version: propVersion,
+  onApplyPatch: propOnApplyPatch,
   onClose,
 }: ObjectInspectorProps) {
-  const [localObject, setLocalObject] = useState<GroveObject>(object);
+  // Try to use surface if available (new mode)
+  const surface = useSurfaceOptional();
+
+  // Derive values from surface or props
+  const object = surface?.dataModel ?? propObject;
+  const version = surface?.version ?? propVersion;
+  const title = propTitle ?? object?.meta.title;
+
+  const [localObject, setLocalObject] = useState<GroveObject | undefined>(object);
   const [metaExpanded, setMetaExpanded] = useState(true);
   const [payloadExpanded, setPayloadExpanded] = useState(true);
 
-  // Sync local state when object prop changes (e.g., after versioning update)
+  // Sync local state when object changes
   useEffect(() => {
-    setLocalObject(object);
+    if (object) {
+      setLocalObject(object);
+    }
   }, [object]);
 
   const handleApplyPatch = async (patch: JsonPatch): Promise<ObjectVersion | void> => {
     try {
-      // If external handler provided (versioning enabled), use it
-      if (onApplyPatch) {
-        const result = await onApplyPatch(patch);
-        // Note: Parent component should update the object prop after versioning
+      // If surface available, use it
+      if (surface) {
+        const result = await surface.applyPatch(
+          patch,
+          { type: 'copilot', model: 'hybrid-local' },
+          { type: 'copilot', sessionId: 'session' }
+        );
+        return result;
+      }
+
+      // If external handler provided (legacy versioning), use it
+      if (propOnApplyPatch) {
+        const result = await propOnApplyPatch(patch);
         return result;
       }
 
       // Fallback: Apply locally (no persistence)
-      const cloned = JSON.parse(JSON.stringify(localObject));
-      const result = applyPatch(cloned, patch);
-      setLocalObject(result.newDocument);
+      if (localObject) {
+        const cloned = JSON.parse(JSON.stringify(localObject));
+        const result = applyPatch(cloned, patch);
+        setLocalObject(result.newDocument);
+      }
     } catch (error) {
       console.error('Failed to apply patch:', error);
     }
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(JSON.stringify(localObject, null, 2));
+    if (localObject) {
+      navigator.clipboard.writeText(JSON.stringify(localObject, null, 2));
+    }
   };
 
-  const displayTitle = title || localObject.meta.title || 'Object';
+  const displayTitle = title || localObject?.meta.title || 'Object';
+
+  // Loading state for surface mode
+  if (surface?.loading) {
+    return (
+      <div className="p-5 text-center text-slate-500">
+        <span className="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Error state for surface mode
+  if (surface?.error) {
+    return (
+      <div className="p-5 text-center text-red-500">
+        <span className="material-symbols-outlined text-4xl mb-2">error</span>
+        <p>{surface.error.message}</p>
+      </div>
+    );
+  }
+
+  // No object available
+  if (!localObject) {
+    return (
+      <div className="p-5 text-center text-slate-500">
+        <span className="material-symbols-outlined text-4xl mb-2">data_object</span>
+        <p>No object to display</p>
+      </div>
+    );
+  }
 
   return (
     <InspectorPanel

@@ -1,15 +1,13 @@
 // src/explore/LensInspector.tsx
 // Lens object inspector — displays Persona as GroveObject JSON
+// Uses InspectorSurface for versioning
 
-import { useMemo, useCallback } from 'react';
+import { useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { useWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { ObjectInspector } from '../shared/inspector';
-import { useVersionedObject } from '../shared/inspector/hooks/useVersionedObject';
+import { ObjectInspector, InspectorSurfaceProvider } from '../shared/inspector';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { Persona } from '../../data/narratives-schema';
-import type { JsonPatch } from '@core/copilot';
-import { getSessionId } from '../../utils/abTesting';
 
 interface LensInspectorProps {
   personaId: string;
@@ -54,39 +52,13 @@ export function LensInspector({ personaId }: LensInspectorProps) {
   const persona = personas.find(p => p.id === personaId);
   const isActive = session.activeLens === personaId;
 
-  // Memoize the initial object to prevent useVersionedObject from re-importing
+  // Memoize the initial object for the surface provider
   const initialObject = useMemo(
     () => (persona ? personaToGroveObject(persona, isActive) : null),
     [persona, isActive]
   );
 
-  // Use versioned object storage
-  const {
-    object: versionedObject,
-    version,
-    loading,
-    applyPatch,
-  } = useVersionedObject(
-    personaId,
-    initialObject ?? {
-      meta: { id: personaId, type: 'lens', title: '', createdAt: '', updatedAt: '' },
-      payload: {},
-    }
-  );
-
-  // Handle patch application with versioning
-  const handleApplyPatch = useCallback(
-    async (patch: JsonPatch) => {
-      return applyPatch(
-        patch,
-        { type: 'copilot', model: 'hybrid-local' },
-        { type: 'copilot', sessionId: getSessionId() }
-      );
-    },
-    [applyPatch]
-  );
-
-  if (!persona) {
+  if (!persona || !initialObject) {
     return (
       <div className="p-5 text-center text-slate-500">
         <span className="material-symbols-outlined text-4xl mb-2">error</span>
@@ -95,23 +67,16 @@ export function LensInspector({ personaId }: LensInspectorProps) {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="p-5 text-center text-slate-500">
-        <span className="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
   return (
-    <ObjectInspector
-      object={versionedObject}
-      title={persona.publicLabel}
-      version={version}
-      onApplyPatch={handleApplyPatch}
-      onClose={closeInspector}
-    />
+    <InspectorSurfaceProvider
+      objectId={personaId}
+      initialObject={initialObject}
+    >
+      <ObjectInspector
+        title={persona.publicLabel}
+        onClose={closeInspector}
+      />
+    </InspectorSurfaceProvider>
   );
 }
 
