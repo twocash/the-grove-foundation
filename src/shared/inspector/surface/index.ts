@@ -13,6 +13,7 @@ export type { ReactInspectorSurfaceConfig } from './ReactInspectorSurface';
 
 export {
   InspectorSurfaceProvider,
-  useInspectorSurface
+  useInspectorSurface,
+  useOptionalInspectorSurface
 } from './context';
 export type { InspectorSurfaceProviderProps } from './context';

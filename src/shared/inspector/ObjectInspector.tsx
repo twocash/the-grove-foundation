@@ -12,7 +12,7 @@ import type { ObjectVersion, VersionActor } from '@core/versioning';
 import { InspectorPanel, InspectorDivider } from '../layout/InspectorPanel';
 import { CopilotPanel } from './CopilotPanel';
 import { VersionIndicator } from './VersionIndicator';
-import { useInspectorSurface, type InspectorSurface } from './surface';
+import { useOptionalInspectorSurface } from './surface';
 
 /**
  * Version metadata for display
@@ -41,17 +41,6 @@ interface ObjectInspectorProps {
   onClose: () => void;
 }
 
-/**
- * Try to get surface from context, return null if not available
- */
-function useSurfaceOptional(): InspectorSurface | null {
-  try {
-    return useInspectorSurface();
-  } catch {
-    return null;
-  }
-}
-
 export function ObjectInspector({
   object: propObject,
   title: propTitle,
@@ -60,7 +49,7 @@ export function ObjectInspector({
   onClose,
 }: ObjectInspectorProps) {
   // Try to use surface if available (new mode)
-  const surface = useSurfaceOptional();
+  const surface = useOptionalInspectorSurface();
 
   // Derive values from surface or props
   const object = surface?.dataModel ?? propObject;

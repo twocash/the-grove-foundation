@@ -62,3 +62,12 @@ export function useInspectorSurface<T = unknown>(): InspectorSurface<T> {
 
   return surface as InspectorSurface<T>;
 }
+
+/**
+ * Optional version of useInspectorSurface that returns null outside provider.
+ * Use this for components that need to work both inside and outside the provider.
+ */
+export function useOptionalInspectorSurface<T = unknown>(): InspectorSurface<T> | null {
+  const surface = useContext(InspectorSurfaceContext);
+  return surface as InspectorSurface<T> | null;
+}
