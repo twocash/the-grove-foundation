@@ -52,12 +52,42 @@ This sequencing ensures a complete, demo-ready UX before adding complexity.
 ## Phase 2: Dashboard Sprout Widget
 
 **Sprint:** `dashboard-sprout-widget-v1`
-**Status:** 📋 Queued (see spec below)
+**Status:** 🔄 In Progress
 **Estimated:** 1-2 hours
 **Depends on:** Phase 1 complete
 
 ### Scope
 Pull Garden statistics into Grove Project dashboard for at-a-glance visibility.
+
+---
+
+## Phase 2.5: Server-Side Capture
+
+**Sprint:** `server-side-capture-v1`
+**Status:** 📋 Queued (see `docs/sprints/server-side-capture-v1/`)
+**Estimated:** 6-8 hours
+**Depends on:** Phase 2 complete
+
+### Scope
+Add optional server-side persistence for sprouts with vector search capability:
+- Feature flag (`NEXT_PUBLIC_SPROUT_STORAGE=server|local`)
+- Supabase Postgres + pg_vector storage
+- OpenAI embeddings for semantic search
+- API routes for CRUD + similarity search
+- Fallback to localStorage when server unavailable
+
+### Why Now
+- Closes the "how does collective knowledge grow?" loop
+- Enables demo: "Look at what the community discovered"
+- Forward-compatible foundation for Knowledge Commons
+- Vector search enables "find related insights" feature
+
+### Key Deliverables
+- [ ] Supabase schema with vector embeddings
+- [ ] API routes: POST/GET /api/sprouts, POST /api/sprouts/search
+- [ ] Feature flag in useSproutStorage hook
+- [ ] Embedding generation via OpenAI ada-002
+- [ ] Graceful fallback to localStorage
 
 ---
 
@@ -246,7 +276,7 @@ Current
    │
    ▼
 ┌──────────────────────────────────┐
-│ Phase 1: Sprout System Wiring    │ ◀── YOU ARE HERE
+│ Phase 1: Sprout System Wiring    │ ✅ Complete
 │ - Wire Terminal → capture        │
 │ - Garden as mode                 │
 │ - Stats integration              │
@@ -254,9 +284,17 @@ Current
    │
    ▼
 ┌──────────────────────────────────┐
-│ Phase 2: Dashboard Widget        │
+│ Phase 2: Dashboard Widget        │ ◀── YOU ARE HERE
 │ - Garden summary in dashboard    │
 │ - Quick stats visibility         │
+└──────────────────────────────────┘
+   │
+   ▼
+┌──────────────────────────────────┐
+│ Phase 2.5: Server-Side Capture   │ 📋 QUEUED
+│ - Supabase + pg_vector           │
+│ - Vector similarity search       │
+│ - Feature flag toggle            │
 └──────────────────────────────────┘
    │
    ▼
@@ -292,6 +330,7 @@ Current
 |-------|------------|
 | Phase 1 | Sprouts persist, Garden mode works |
 | Phase 2 | Dashboard shows sprout stats |
+| Phase 2.5 | Sprouts persist to server, vector search works |
 | Phase 3 | New user completes first exploration in <30s |
 | Phase 4 | User can restore previous lens configuration |
 | Phase 5 | Users return to check "what happened" |
