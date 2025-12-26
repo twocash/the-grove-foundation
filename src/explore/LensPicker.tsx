@@ -3,7 +3,8 @@
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
 import { useState, useMemo, useEffect } from 'react';
-import { useVersionedPersonas } from '../../hooks/useVersionedPersonas';
+import { useVersionedCollection } from '../../hooks/useVersionedCollection';
+import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { useCustomLens } from '../../hooks/useCustomLens';
 import { Persona } from '../../data/narratives-schema';
 import { CustomLens } from '../../types/lens';
@@ -202,8 +203,13 @@ function CustomLensCard({ lens, isActive, isInspected, onSelect, onView, onDelet
 }
 
 export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCustomLens }: LensPickerProps = {}) {
-  // Personas with versioned overrides merged from IndexedDB
-  const { personas, refresh: refreshPersonas } = useVersionedPersonas();
+  // Get schema personas and merge with versioned overrides
+  const { getEnabledPersonas } = useNarrativeEngine();
+  const schemaPersonas = getEnabledPersonas();
+  const { items: personas, refresh: refreshPersonas } = useVersionedCollection(
+    schemaPersonas,
+    { objectType: 'lens' }
+  );
   const { customLenses, deleteCustomLens } = useCustomLens();
   const workspaceUI = useOptionalWorkspaceUI();
 
@@ -221,13 +227,11 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   ) ? workspaceUI.inspector.mode.lensId : null;
   const activePersona = personas.find(p => p.id === activeLensId);
 
-  // Refresh versioned personas when inspector closes (after potential save)
-  const inspectorOpen = workspaceUI?.inspector?.isOpen ?? false;
+  // Subscribe to inspector close events for refresh (event-driven, not imperative)
   useEffect(() => {
-    if (!inspectorOpen) {
-      refreshPersonas();
-    }
-  }, [inspectorOpen, refreshPersonas]);
+    if (!workspaceUI?.onInspectorClosed) return;
+    return workspaceUI.onInspectorClosed(refreshPersonas);
+  }, [workspaceUI, refreshPersonas]);
 
   // Combine personas and custom lenses for display
   const allLenses: DisplayLens[] = useMemo(() => {

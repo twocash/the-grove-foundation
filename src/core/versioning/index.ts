@@ -24,3 +24,7 @@ export { generateUUID, formatRelativeTime, generateChangeMessage } from './utils
 
 // Cache utilities
 export { getCached, setCache, clearCache, clearAllCache } from './cache';
+
+// Merge configuration (DEX-compliant declarative field mappings)
+export { MERGE_CONFIGS, applyMergeConfig } from './merge-config';
+export type { MergeConfig, MetaFieldMapping, PayloadFieldMapping } from './merge-config';

@@ -68,6 +68,9 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
   // Custom lens wizard state
   const [showCustomLensWizard, setShowCustomLensWizard] = useState(false);
 
+  // Inspector close event subscribers (for refresh on close)
+  const [inspectorClosedCallbacks] = useState<Set<() => void>>(() => new Set());
+
   // Load sprout count on mount
   useEffect(() => {
     try {
@@ -162,7 +165,17 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
 
   const closeInspector = useCallback(() => {
     setInspector(s => ({ ...s, isOpen: false }));
-  }, []);
+    // Emit event to all subscribers
+    inspectorClosedCallbacks.forEach(cb => cb());
+  }, [inspectorClosedCallbacks]);
+
+  // Subscribe to inspector close events
+  const onInspectorClosed = useCallback((callback: () => void) => {
+    inspectorClosedCallbacks.add(callback);
+    return () => {
+      inspectorClosedCallbacks.delete(callback);
+    };
+  }, [inspectorClosedCallbacks]);
 
   const toggleInspector = useCallback(() => {
     setInspector(s => ({ ...s, isOpen: !s.isOpen }));
@@ -211,6 +224,7 @@ export function WorkspaceUIProvider({ children, initialPath }: WorkspaceUIProvid
     openInspector,
     closeInspector,
     toggleInspector,
+    onInspectorClosed,
     selectEntity,
     clearSelection,
     openCommandPalette,

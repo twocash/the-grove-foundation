@@ -2,13 +2,20 @@
 // Browse and start available journeys
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
 
-import { useState, useMemo, useEffect } from 'react';
-import { useVersionedJourneys } from '../../hooks/useVersionedJourneys';
-import type { VersionedJourney } from '../../hooks/useVersionedJourneys';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useVersionedCollection } from '../../hooks/useVersionedCollection';
+import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
+import type { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
 import { StatusBadge } from '../shared/ui';
+
+// Versioned journey type with metadata
+type VersionedJourney = Journey & {
+  versionOrdinal?: number;
+  hasLocalModifications?: boolean;
+};
 
 interface JourneyListProps {
   mode?: 'full' | 'compact';
@@ -115,8 +122,17 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
 }
 
 export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
-  // Journeys with versioned overrides merged from IndexedDB
-  const { journeys: allJourneys, loading, getJourney, refresh: refreshJourneys } = useVersionedJourneys();
+  // Get active journeys from schema and merge with versioned overrides
+  const { schema, loading: schemaLoading } = useNarrativeEngine();
+  const schemaJourneys = useMemo(() => {
+    if (!schema?.journeys) return [];
+    return Object.values(schema.journeys).filter(j => j.status === 'active');
+  }, [schema]);
+  const { items: allJourneys, loading: versionLoading, refresh: refreshJourneys } = useVersionedCollection(
+    schemaJourneys,
+    { objectType: 'journey' }
+  );
+  const loading = schemaLoading || versionLoading;
   const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -133,14 +149,16 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
     workspaceUI.inspector.mode?.type === 'journey'
   ) ? workspaceUI.inspector.mode.journeyId : null;
 
-  // Refresh versioned journeys when inspector closes (after potential save)
-  const inspectorOpen = workspaceUI?.inspector?.isOpen ?? false;
+  // Subscribe to inspector close events for refresh (event-driven, not imperative)
   useEffect(() => {
-    // When inspector closes, refresh to pick up any versioned changes
-    if (!inspectorOpen) {
-      refreshJourneys();
-    }
-  }, [inspectorOpen, refreshJourneys]);
+    if (!workspaceUI?.onInspectorClosed) return;
+    return workspaceUI.onInspectorClosed(refreshJourneys);
+  }, [workspaceUI, refreshJourneys]);
+
+  // Helper to get a single journey by ID
+  const getJourney = useCallback((journeyId: string): VersionedJourney | null => {
+    return (allJourneys as VersionedJourney[]).find(j => j.id === journeyId) ?? null;
+  }, [allJourneys]);
 
   // Filter by search (only used in full mode)
   const journeys = useMemo(() => {

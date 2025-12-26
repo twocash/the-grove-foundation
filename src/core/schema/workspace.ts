@@ -97,6 +97,8 @@ export interface WorkspaceUIActions {
   openInspector: (mode: InspectorMode) => void;
   closeInspector: () => void;
   toggleInspector: () => void;
+  /** Subscribe to inspector close events. Returns unsubscribe function. */
+  onInspectorClosed: (callback: () => void) => () => void;
 
   // Selection
   selectEntity: (id: string, type: EntityType) => void;
