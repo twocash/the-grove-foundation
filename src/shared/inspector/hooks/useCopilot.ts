@@ -19,6 +19,7 @@ import {
   getSuggestionsForType,
   getWelcomeMessage,
 } from '@core/copilot';
+import type { ObjectVersion } from '@core/versioning';
 
 // ============================================================================
 // Reducer
@@ -88,15 +89,21 @@ interface UseCopilotReturn {
   isCollapsed: boolean;
   currentModel: ModelConfig;
   sendMessage: (content: string) => Promise<void>;
-  applyPatch: (messageId: string) => JsonPatch | null;
+  applyPatch: (messageId: string) => Promise<JsonPatch | null>;
   rejectPatch: (messageId: string) => void;
   toggleCollapse: () => void;
   suggestions: { label: string; template: string; icon?: string }[];
 }
 
+/**
+ * Callback for applying patches.
+ * Returns the created version (if versioning is enabled) or void.
+ */
+export type ApplyPatchCallback = (patch: JsonPatch) => Promise<ObjectVersion | void> | void;
+
 export function useCopilot(
   object: GroveObject,
-  onApplyPatch: (patch: JsonPatch) => void
+  onApplyPatch: ApplyPatchCallback
 ): UseCopilotReturn {
   const [state, dispatch] = useReducer(
     copilotReducer,
@@ -181,7 +188,7 @@ export function useCopilot(
   }, [object, state.currentModel]);
 
   // Apply a pending patch
-  const applyPatch = useCallback((messageId: string): JsonPatch | null => {
+  const applyPatch = useCallback(async (messageId: string): Promise<JsonPatch | null> => {
     const message = state.messages.find(m => m.id === messageId);
     if (!message?.patch || message.patchStatus !== 'pending') return null;
 
@@ -192,17 +199,22 @@ export function useCopilot(
       updates: { patchStatus: 'applied' },
     });
 
-    // Add confirmation message
+    // Call parent to apply (may persist to versioning store)
+    const result = await onApplyPatch(message.patch);
+
+    // Add confirmation message with version info if available
+    const version = result as ObjectVersion | undefined;
+    const confirmContent = version?.ordinal
+      ? `✓ Changes saved as v${version.ordinal}`
+      : '✓ Changes applied successfully.';
+
     const confirmMessage: CopilotMessage = {
       id: generateId(),
       role: 'assistant',
-      content: '✓ Changes applied successfully.',
+      content: confirmContent,
       timestamp: new Date(),
     };
     dispatch({ type: 'ADD_MESSAGE', message: confirmMessage });
-
-    // Notify parent to apply
-    onApplyPatch(message.patch);
 
     return message.patch;
   }, [state.messages, onApplyPatch]);

@@ -1,27 +1,60 @@
 // src/shared/inspector/ObjectInspector.tsx
 // JSON inspector for GroveObjects with Copilot integration
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { applyPatch } from 'fast-json-patch';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { JsonPatch } from '@core/copilot';
+import type { ObjectVersion, VersionActor } from '@core/versioning';
 import { InspectorPanel, InspectorDivider } from '../layout/InspectorPanel';
 import { CopilotPanel } from './CopilotPanel';
+import { VersionIndicator } from './VersionIndicator';
+
+/**
+ * Version metadata for display
+ */
+interface VersionMetadata {
+  ordinal: number;
+  lastModifiedAt: string;
+  lastModifiedBy: VersionActor;
+}
 
 interface ObjectInspectorProps {
   object: GroveObject;
   title?: string;
+  /** Version metadata for display (optional) */
+  version?: VersionMetadata | null;
+  /** Callback when patch is applied. If provided and returns ObjectVersion, versioning is enabled */
+  onApplyPatch?: (patch: JsonPatch) => Promise<ObjectVersion | void> | void;
   onClose: () => void;
 }
 
-export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps) {
+export function ObjectInspector({
+  object,
+  title,
+  version,
+  onApplyPatch,
+  onClose,
+}: ObjectInspectorProps) {
   const [localObject, setLocalObject] = useState<GroveObject>(object);
   const [metaExpanded, setMetaExpanded] = useState(true);
   const [payloadExpanded, setPayloadExpanded] = useState(true);
 
-  const handleApplyPatch = (patch: JsonPatch) => {
+  // Sync local state when object prop changes (e.g., after versioning update)
+  useEffect(() => {
+    setLocalObject(object);
+  }, [object]);
+
+  const handleApplyPatch = async (patch: JsonPatch): Promise<ObjectVersion | void> => {
     try {
-      // Deep clone to avoid mutation
+      // If external handler provided (versioning enabled), use it
+      if (onApplyPatch) {
+        const result = await onApplyPatch(patch);
+        // Note: Parent component should update the object prop after versioning
+        return result;
+      }
+
+      // Fallback: Apply locally (no persistence)
       const cloned = JSON.parse(JSON.stringify(localObject));
       const result = applyPatch(cloned, patch);
       setLocalObject(result.newDocument);
@@ -39,7 +72,19 @@ export function ObjectInspector({ object, title, onClose }: ObjectInspectorProps
   return (
     <InspectorPanel
       title="Object Inspector"
-      subtitle={displayTitle}
+      subtitle={
+        <div className="flex flex-col gap-1">
+          <span>{displayTitle}</span>
+          {version && (
+            <VersionIndicator
+              ordinal={version.ordinal}
+              lastModifiedAt={version.lastModifiedAt}
+              lastModifiedBy={version.lastModifiedBy}
+              compact
+            />
+          )}
+        </div>
+      }
       icon="data_object"
       iconColor="text-cyan-500"
       iconBg="bg-cyan-950"

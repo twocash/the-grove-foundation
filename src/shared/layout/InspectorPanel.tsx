@@ -6,8 +6,8 @@ import { type ReactNode } from 'react';
 interface InspectorPanelProps {
   /** Panel title */
   title: string;
-  /** Panel subtitle (optional) */
-  subtitle?: string;
+  /** Panel subtitle (optional) - can be string or React node */
+  subtitle?: React.ReactNode;
   /** Icon name (Material Symbols) */
   icon?: string;
   /** Icon color class */
