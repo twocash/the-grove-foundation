@@ -356,6 +356,235 @@ src/core/
 
 ---
 
+### Pattern 8: Canonical Source Rendering
+
+**Need:** Same capability needs to render in multiple surfaces without duplication.
+
+**Philosophy:** A feature without a canonical home is a weed—it will spread. Every duplication creates two places to update, two places to style, two places to test, and two places that drift apart. Features have homes. Other surfaces invoke, not recreate.
+
+**The Principle:**
+> **Features have canonical homes. Other surfaces invoke, not recreate.**
+
+**Structure:**
+```
+src/explore/
+├── LensesView.tsx        ← Canonical home (one source of truth)
+├── JourneysView.tsx      ← Canonical home
+└── ...
+
+components/Terminal/
+├── Terminal.tsx          ← Invokes canonical via navigation, doesn't embed
+└── ...
+```
+
+**Route-Based Selection Flow:**
+```
+User at /terminal (needs to select lens)
+    ↓
+CTA: "Choose a lens" → router.push('/lenses?returnTo=/terminal')
+    ↓
+/lenses renders with flow params
+    ↓
+User selects → Contextual CTA appears: "Start Exploring"
+    ↓
+Click CTA → router.push('/terminal') (lens now active)
+```
+
+**Flow Parameters:**
+```typescript
+interface SelectionFlowParams {
+  returnTo?: string;           // Where to navigate after selection
+  ctaLabel?: string;           // "Start Exploring", "Continue", "Apply"
+  ctaCondition?: 'on-select' | 'always' | 'never';
+}
+
+// Usage: /lenses?returnTo=/terminal&ctaLabel=Start%20Exploring
+```
+
+**Extend by:**
+1. Add flow parameter support to canonical view
+2. Render contextual CTA when returnTo is present
+3. Navigate to returnTo on CTA click
+
+**DO NOT:**
+- ❌ Embed selection UI in consuming surfaces (Terminal, Settings, etc.)
+- ❌ Create "mini" or "embedded" variants of canonical views
+- ❌ Justify inline pickers with "it's faster"
+- ❌ Duplicate state management across surfaces
+
+**Refactoring Existing Inline Pickers:**
+1. Identify canonical home (or create one at proper route)
+2. Add flow parameter support to canonical view
+3. Replace inline picker with CTA that navigates to canonical
+4. Remove duplicate components
+5. Document in ADR why duplication was removed
+
+---
+
+### Pattern 9: Module Shell Architecture
+
+**Need:** Consistent user experience across all Grove modules with shared interaction patterns.
+
+**Philosophy:** Every module is a variation on a theme. Users learn the interaction grammar once and apply it everywhere. The shell provides the theme; modules provide the content. This is Organic Scalability applied to UX—structure precedes growth without inhibiting it.
+
+**The Principle:**
+> **Modules share a shell. Search is consistent. Features are contextual.**
+
+**Standard Module Layout:**
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Module Header                                                       │
+│  ┌──────────────────────┐  ┌──────────────────────────────────────┐ │
+│  │ 🔍 Contextual Search │  │ Contextual Features (module-specific)│ │
+│  └──────────────────────┘  └──────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│                        Module Content Area                           │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Module Header Component:**
+```typescript
+interface ModuleHeaderProps {
+  title: string;
+  searchPlaceholder: string;
+  onSearch: (query: string) => void;
+  contextualFeatures?: React.ReactNode;  // Module-specific slot
+}
+```
+
+**Module-Specific Implementations:**
+
+| Module | Contextual Search | Contextual Features |
+|--------|-------------------|---------------------|
+| **Terminal** | Search chat history | Lens badge → `/lenses`, Journey badge → `/journeys`, Clear |
+| **Lenses** | Filter lenses by name/tag | Create Lens, Sort, View mode |
+| **Journeys** | Filter journeys | Create Journey, Progress filter |
+| **Nodes** | Search nodes by title/content | Filter by type (meta/stakes), Sort |
+| **Diary** | Search entries | Date range, Export |
+| **Sprouts** | Search sprouts | Stage filter, Archive toggle |
+
+**Key Design Decisions:**
+- Search is **always left** (consistent muscle memory)
+- Contextual features are **always right** (variable per module)
+- Badge clicks navigate to canonical routes (Pattern 8)
+- Search operates on current module's content only
+
+**Extend by:**
+1. Use `<ModuleHeader>` component in new module
+2. Implement `onSearch` for module-specific filtering
+3. Pass module-specific features via `contextualFeatures` slot
+
+**DO NOT:**
+- ❌ Create module-specific header layouts
+- ❌ Put search in different positions per module
+- ❌ Embed selection UI instead of using badge → route pattern
+- ❌ Skip the header for "simpler" modules
+
+**Integration with Pattern 8:**
+Contextual features that involve selection (lens, journey) use the route-based flow:
+```typescript
+// In Terminal's contextual features
+<LensBadge 
+  lens={currentLens} 
+  onClick={() => router.push('/lenses?returnTo=/terminal')} 
+/>
+```
+
+---
+
+### Pattern 10: Declarative Wizard Engine
+
+**Need:** Multi-step user flows for creating personalized content (lenses, journeys, onboarding).
+
+**Philosophy:** Wizards are not code—they are conversations structured as configuration. By defining wizard steps, questions, branching logic, and outputs in JSON schema, domain experts can create new personalization flows without engineering involvement. The engine interprets the schema; the schema defines the experience.
+
+**The Principle:**
+> **Wizard definition is JSON. Wizard execution is the engine.**
+
+**Use:** WizardEngine component + wizard schema files
+
+**Files (Proposed):**
+```
+src/core/wizard/
+├── schema.ts           → TypeScript types for wizard schemas
+├── engine.ts           → State machine logic
+└── evaluator.ts        → Condition expression evaluator
+
+src/surface/components/Wizard/
+├── WizardEngine.tsx    → Main orchestrator
+├── steps/              → Generic step renderers
+└── hooks/useWizardState.ts
+
+src/data/wizards/
+├── custom-lens.wizard.json
+├── custom-journey.wizard.json
+└── onboarding.wizard.json
+```
+
+**Schema Structure:**
+```typescript
+interface WizardSchema {
+  id: string;                    // Unique identifier
+  version: string;               // Schema version
+  title: string;                 // Shown in header
+  steps: WizardStepSchema[];     // Step definitions
+  initialStep: string;           // First step ID
+  generation?: {                 // AI generation config
+    endpoint: string;
+    inputMapping: Record<string, string>;
+    outputKey: string;
+  };
+  output: {
+    type: string;                // Output type name
+    transform?: string;          // Transform function
+  };
+}
+```
+
+**Step Types:**
+| Type | Purpose | Key Fields |
+|------|---------|------------|
+| `consent` | Privacy/intro | headline, guarantees[], acceptAction |
+| `choice` | Single select | question, options[], inputKey, next (conditional) |
+| `text` | Free text input | question, inputKey, maxLength, optional |
+| `generation` | AI processing | loadingMessage, endpoint reference |
+| `selection` | Pick from generated | optionsKey, outputKey, cardRenderer |
+| `confirmation` | Final review | displayKey, benefits[], confirmLabel |
+
+**Conditional Flow:**
+```json
+{
+  "id": "motivation",
+  "type": "choice",
+  "next": {
+    "conditions": [
+      { "if": "motivation === 'worried-about-ai'", "then": "concerns" }
+    ],
+    "default": "outlook"
+  }
+}
+```
+
+**Extend by:**
+1. Create new `.wizard.json` schema file
+2. Add type-specific card renderer if needed
+3. Create API endpoint if generation is required
+4. Load schema and pass to `<WizardEngine>`
+
+**DO NOT:**
+- ❌ Hardcode wizard flow logic in React components
+- ❌ Create wizard-specific state management
+- ❌ Duplicate step rendering across wizards
+- ❌ Put branching logic in event handlers
+
+**Current State:** CustomLensWizard has semi-declarative bones (STEP_CONFIG object) but flow logic is still imperative. Full pattern implementation requires extracting to JSON schema and building generic engine.
+
+**See:** `docs/patterns/pattern-10-declarative-wizard-engine.md` for full specification and example schemas.
+
+---
+
 ## Anti-Patterns (The Violations)
 
 These patterns violate DEX principles. If you catch yourself doing these, stop and reconsider.

@@ -16,6 +16,7 @@ import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome } from './Terminal/index';
 import WelcomeInterstitial from './Terminal/WelcomeInterstitial';
 import { LensPicker } from '../src/explore/LensPicker';
+import { JourneyList } from '../src/explore/JourneyList';
 import CognitiveBridge from './Terminal/CognitiveBridge';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
@@ -87,6 +88,7 @@ const Terminal: React.FC<TerminalProps> = ({
     isVerboseMode,
     currentNodeId,
     showLensPicker,
+    showJourneyPicker,
     showCustomLensWizard,
     showWelcomeInterstitial,
     hasShownWelcome,
@@ -900,7 +902,7 @@ const Terminal: React.FC<TerminalProps> = ({
           currentStreak={currentStreak}
           showStreak={showStreakDisplay}
           onLensClick={() => actions.showLensPicker()}
-          onJourneyClick={() => navigate('/journeys?returnTo=/terminal&ctaLabel=Begin%20Journey')}
+          onJourneyClick={() => actions.showJourneyPicker()}
           onStreakClick={() => handleOpenModal('stats')}
         />
 
@@ -938,6 +940,11 @@ const Terminal: React.FC<TerminalProps> = ({
                   onLensSelected(personaId);
                 }
               }}
+            />
+          ) : showJourneyPicker ? (
+            <JourneyList
+              mode="compact"
+              onBack={() => actions.hideJourneyPicker()}
             />
           ) : (
             /* Chat Messages */
@@ -992,7 +999,7 @@ const Terminal: React.FC<TerminalProps> = ({
         </div>
 
         {/* Input Area - only show when not in wizard/picker mode */}
-        {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && (
+        {!showCustomLensWizard && !showWelcomeInterstitial && !showLensPicker && !showJourneyPicker && (
           <div className="flex-shrink-0 p-4 border-t border-[var(--chat-border)]">
             <div className="max-w-3xl mx-auto">
             <CommandInput
@@ -1068,6 +1075,11 @@ const Terminal: React.FC<TerminalProps> = ({
                 }
               }}
             />
+          ) : showJourneyPicker ? (
+            <JourneyList
+              mode="compact"
+              onBack={() => actions.hideJourneyPicker()}
+            />
           ) : (
             <>
               {/* Header - Clean title bar with context selectors */}
@@ -1083,7 +1095,7 @@ const Terminal: React.FC<TerminalProps> = ({
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
                 onLensClick={() => actions.showLensPicker()}
-                onJourneyClick={() => navigate('/journeys?returnTo=/terminal&ctaLabel=Begin%20Journey')}
+                onJourneyClick={() => actions.showJourneyPicker()}
                 onStreakClick={() => actions.openModal('stats')}
               />
 

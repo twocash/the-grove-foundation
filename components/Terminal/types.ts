@@ -106,6 +106,7 @@ export interface TerminalUIState {
   // Flow states
   flowState: TerminalFlowState;
   showLensPicker: boolean;
+  showJourneyPicker: boolean;
   showCustomLensWizard: boolean;
   showWelcomeInterstitial: boolean;
   hasShownWelcome: boolean;
@@ -136,6 +137,7 @@ export interface TerminalUIState {
 export const INITIAL_TERMINAL_UI_STATE: TerminalUIState = {
   flowState: 'idle',
   showLensPicker: false,
+  showJourneyPicker: false,
   showCustomLensWizard: false,
   showWelcomeInterstitial: false,
   hasShownWelcome: false,
@@ -163,6 +165,8 @@ export interface TerminalActions {
   setFlowState: (state: TerminalFlowState) => void;
   showLensPicker: () => void;
   hideLensPicker: () => void;
+  showJourneyPicker: () => void;
+  hideJourneyPicker: () => void;
   showCustomLensWizard: () => void;
   hideCustomLensWizard: () => void;
   showWelcomeInterstitial: () => void;

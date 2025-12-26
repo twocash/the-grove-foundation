@@ -1,0 +1,197 @@
+{
+  "id": "custom-lens-creator",
+  "version": "1.0",
+  "title": "Custom Lens Creator",
+  "description": "Create a personalized lens for exploring The Grove",
+  "initialStep": "privacy",
+  "generation": {
+    "endpoint": "/api/generate-lens",
+    "method": "POST",
+    "inputMapping": {
+      "userInputs": "inputs"
+    },
+    "outputKey": "lensOptions"
+  },
+  "output": {
+    "type": "LensCandidate",
+    "transform": "createCustomLens"
+  },
+  "analytics": {
+    "startEvent": "wizard_start",
+    "stepEvent": "wizard_step",
+    "completeEvent": "wizard_complete",
+    "abandonEvent": "wizard_abandon"
+  },
+  "theme": {
+    "primaryColor": "purple"
+  },
+  "steps": [
+    {
+      "id": "privacy",
+      "type": "consent",
+      "title": "Before we begin — a promise",
+      "progress": 0,
+      "guarantees": [
+        {
+          "icon": "lock",
+          "title": "Everything stays in your browser",
+          "description": "Your answers are encrypted locally using Web Crypto. We never see them."
+        },
+        {
+          "icon": "lock",
+          "title": "No accounts. No tracking.",
+          "description": "Your lens is stored only in this browser's localStorage."
+        },
+        {
+          "icon": "lock",
+          "title": "AI generates, you control",
+          "description": "We'll create 3 lens options for you to choose from. You pick."
+        }
+      ],
+      "processSteps": ["Questions", "Generate", "Select"],
+      "acceptLabel": "I understand — let's build my lens",
+      "acceptAction": { "next": "input-motivation" },
+      "footerText": "Takes about 2 minutes. 5 quick questions."
+    },
+    {
+      "id": "input-motivation",
+      "type": "choice",
+      "title": "Motivation",
+      "progress": 1,
+      "question": "What brings you to thinking about AI infrastructure?",
+      "inputKey": "motivation",
+      "allowOther": true,
+      "otherKey": "motivationOther",
+      "options": [
+        { "value": "worried-about-ai", "label": "I'm worried about where AI is heading" },
+        { "value": "researching-distributed-systems", "label": "I'm researching distributed systems" },
+        { "value": "someone-sent-link", "label": "Someone sent me this link" },
+        { "value": "investment-opportunities", "label": "I'm looking for investment opportunities" },
+        { "value": "just-curious", "label": "Just curious" },
+        { "value": "other", "label": "Something else..." }
+      ],
+      "next": {
+        "conditions": [
+          { "if": "motivation === 'worried-about-ai'", "then": "input-concerns" }
+        ],
+        "default": "input-outlook"
+      }
+    },
+    {
+      "id": "input-concerns",
+      "type": "choice",
+      "title": "Concerns",
+      "progress": 2,
+      "question": "What concerns you most?",
+      "inputKey": "concerns",
+      "allowOther": true,
+      "otherKey": "concernsOther",
+      "options": [
+        { "value": "big-tech-power", "label": "Big Tech having too much power" },
+        { "value": "job-displacement", "label": "Job displacement" },
+        { "value": "energy-environment", "label": "Energy and environmental costs" },
+        { "value": "privacy", "label": "Loss of privacy" },
+        { "value": "harder-to-articulate", "label": "Something harder to articulate" },
+        { "value": "other", "label": "Something else..." }
+      ],
+      "next": { "default": "input-outlook" }
+    },
+    {
+      "id": "input-outlook",
+      "type": "choice",
+      "title": "Outlook",
+      "progress": 3,
+      "question": "When you imagine AI's role in society 10 years from now, what's your gut reaction?",
+      "inputKey": "futureOutlook",
+      "allowOther": true,
+      "otherKey": "futureOutlookOther",
+      "options": [
+        { "value": "cautiously-optimistic", "label": "Cautiously optimistic" },
+        { "value": "genuinely-worried", "label": "Genuinely worried" },
+        { "value": "depends-on-control", "label": "Depends entirely on who controls it" },
+        { "value": "building-conflicted", "label": "I'm building it, so I'm conflicted" },
+        { "value": "other", "label": "Something else..." }
+      ],
+      "next": { "default": "input-professional" }
+    },
+    {
+      "id": "input-professional",
+      "type": "choice",
+      "title": "Professional",
+      "progress": 4,
+      "question": "What's your relationship to technology professionally?",
+      "inputKey": "professionalRelationship",
+      "allowOther": true,
+      "otherKey": "professionalRelationshipOther",
+      "options": [
+        { "value": "build-it", "label": "I build it" },
+        { "value": "fund-invest", "label": "I fund or invest in it" },
+        { "value": "study-regulate", "label": "I study or regulate it" },
+        { "value": "use-dont-trust", "label": "I use it but don't trust it" },
+        { "value": "lead-orgs", "label": "I lead organizations that depend on it" },
+        { "value": "other", "label": "Something else..." }
+      ],
+      "next": { "default": "input-worldview" }
+    },
+    {
+      "id": "input-worldview",
+      "type": "text",
+      "title": "Worldview",
+      "progress": 5,
+      "question": "In 2-3 sentences, describe how you see AI's role in the future.",
+      "subtext": "Optional, but helps us craft a lens that truly fits you.",
+      "inputKey": "worldviewStatement",
+      "placeholder": "Share your perspective on AI's future...",
+      "maxLength": 280,
+      "required": false,
+      "next": { "next": "generating" }
+    },
+    {
+      "id": "generating",
+      "type": "generation",
+      "title": "Generating",
+      "progress": 5,
+      "loadingTitle": "Analyzing your perspective...",
+      "loadingSubtext": "Creating 3 lens options tailored to your worldview",
+      "progressStages": [
+        "Processing responses",
+        "Generating tone guidance",
+        "Mapping to archetypes"
+      ],
+      "estimatedTime": "This usually takes 5-10 seconds",
+      "errorMessage": "We couldn't generate your lens options. Please try again.",
+      "retryLabel": "Try again",
+      "next": { "next": "select" }
+    },
+    {
+      "id": "select",
+      "type": "selection",
+      "title": "Select",
+      "progress": 6,
+      "instructionText": "I've generated 3 lenses that might fit you. Select the one that resonates most.",
+      "optionsKey": "generatedOptions",
+      "outputKey": "selectedOption",
+      "allowRefine": true,
+      "refineLabel": "None of these fit? Refine my answers",
+      "refineAction": { "next": "input-motivation" },
+      "confirmLabel": "Continue with selected lens",
+      "next": { "next": "confirm" }
+    },
+    {
+      "id": "confirm",
+      "type": "confirmation",
+      "title": "Confirm",
+      "progress": 7,
+      "displayKey": "selectedOption",
+      "benefitsTitle": "Your lens will",
+      "benefits": [
+        "Shape every response to your perspective",
+        "Guide your journey through The Grove"
+      ],
+      "privacyNote": "Your lens is saved locally in this browser. No data is sent to our servers.",
+      "confirmLabel": "Activate my lens",
+      "footerText": "You can edit or delete your lens anytime",
+      "next": { "complete": true }
+    }
+  ]
+}

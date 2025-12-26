@@ -59,6 +59,7 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
   // Flow states
   const [flowState, setFlowStateInternal] = useState<TerminalFlowState>(initialFlowState);
   const [showLensPicker, setShowLensPicker] = useState(false);
+  const [showJourneyPicker, setShowJourneyPicker] = useState(false);
   const [showCustomLensWizard, setShowCustomLensWizard] = useState(false);
   const [showWelcomeInterstitial, setShowWelcomeInterstitial] = useState(showWelcome);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
@@ -120,10 +121,20 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
 
   const showLensPickerAction = useCallback(() => {
     setShowLensPicker(true);
+    setShowJourneyPicker(false);
   }, []);
 
   const hideLensPicker = useCallback(() => {
     setShowLensPicker(false);
+  }, []);
+
+  const showJourneyPickerAction = useCallback(() => {
+    setShowJourneyPicker(true);
+    setShowLensPicker(false);
+  }, []);
+
+  const hideJourneyPicker = useCallback(() => {
+    setShowJourneyPicker(false);
   }, []);
 
   const showCustomLensWizardAction = useCallback(() => {
@@ -213,6 +224,7 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
   const state: TerminalUIState = useMemo(() => ({
     flowState,
     showLensPicker,
+    showJourneyPicker,
     showCustomLensWizard,
     showWelcomeInterstitial,
     hasShownWelcome,
@@ -229,6 +241,7 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
   }), [
     flowState,
     showLensPicker,
+    showJourneyPicker,
     showCustomLensWizard,
     showWelcomeInterstitial,
     hasShownWelcome,
@@ -248,6 +261,8 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     setFlowState,
     showLensPicker: showLensPickerAction,
     hideLensPicker,
+    showJourneyPicker: showJourneyPickerAction,
+    hideJourneyPicker,
     showCustomLensWizard: showCustomLensWizardAction,
     hideCustomLensWizard,
     showWelcomeInterstitial: showWelcomeInterstitialAction,
@@ -270,6 +285,8 @@ export function useTerminalState(options: UseTerminalStateOptions = {}) {
     setFlowState,
     showLensPickerAction,
     hideLensPicker,
+    showJourneyPickerAction,
+    hideJourneyPicker,
     showCustomLensWizardAction,
     hideCustomLensWizard,
     showWelcomeInterstitialAction,

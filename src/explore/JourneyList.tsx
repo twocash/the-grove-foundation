@@ -151,7 +151,8 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
     if (mode === 'compact' && onBack) {
       onBack();  // Return to chat after selection
     } else if (workspaceUI) {
-      workspaceUI.navigateTo(['explore', 'groveProject']);
+      // Navigate to terminal to continue the journey conversation
+      workspaceUI.navigateTo(['explore', 'groveProject', 'terminal']);
     }
   };
 
