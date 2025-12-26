@@ -10,7 +10,7 @@ import { ArchetypeId, LensCandidate, UserInputs } from '../../types/lens';
 import WelcomeInterstitial from './WelcomeInterstitial';
 import CustomLensWizard from './CustomLensWizard';
 import JourneyCompletion from './JourneyCompletion';
-import { HelpModal, JourneysModal, StatsModal, GardenModal } from './Modals';
+import { HelpModal, StatsModal, GardenModal } from './Modals';
 import { LensPicker } from '../../src/explore/LensPicker';
 import SimulationReveal from './Reveals/SimulationReveal';
 import CustomLensOffer from './Reveals/CustomLensOffer';
@@ -50,7 +50,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
 
   // Modal states
   showHelpModal,
-  showJourneysModal,
   showStatsModal,
   showGardenModal,
 
@@ -92,7 +91,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
 
   // Handlers - Modals
   onCloseHelpModal,
-  onCloseJourneysModal,
   onCloseStatsModal,
   onCloseGardenModal,
   onViewFullStats,
@@ -118,14 +116,7 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
       )}
 
       {showWelcome && !showCustomLensWizard && (
-        <WelcomeInterstitial
-          personas={enabledPersonas}
-          customLenses={customLenses}
-          onSelect={onWelcomeLensSelect}
-          onCreateCustomLens={onCreateCustomLens}
-          onDeleteCustomLens={onDeleteCustomLens}
-          showCreateOption={showCustomLensInPicker}
-        />
+        <WelcomeInterstitial />
       )}
 
       {showLensPicker && !showWelcome && !showCustomLensWizard && (
@@ -188,7 +179,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
       {/* ================================================================== */}
 
       {showHelpModal && <HelpModal onClose={onCloseHelpModal} />}
-      {showJourneysModal && <JourneysModal onClose={onCloseJourneysModal} />}
       {showStatsModal && <StatsModal onClose={onCloseStatsModal} />}
       {showGardenModal && (
         <GardenModal

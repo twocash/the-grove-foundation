@@ -298,7 +298,6 @@ export interface TerminalFlowProps {
 
   // Modal states
   showHelpModal: boolean;
-  showJourneysModal: boolean;
   showStatsModal: boolean;
   showGardenModal: boolean;
 
@@ -340,7 +339,6 @@ export interface TerminalFlowProps {
 
   // Handlers - Modals
   onCloseHelpModal: () => void;
-  onCloseJourneysModal: () => void;
   onCloseStatsModal: () => void;
   onCloseGardenModal: () => void;
   onViewFullStats: () => void;

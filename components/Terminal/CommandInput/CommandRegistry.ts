@@ -2,9 +2,11 @@
 // Sprint v0.16: Command Palette feature
 
 // Command execution result types
+// Sprint: route-selection-flow-v1 - Added 'navigate' type
 export type CommandResult =
   | { type: 'modal'; modal: 'help' | 'journeys' | 'stats' | 'garden' }
   | { type: 'action'; action: string; payload?: unknown }
+  | { type: 'navigate'; path: string }
   | { type: 'error'; message: string };
 
 // Session context for sprout provenance

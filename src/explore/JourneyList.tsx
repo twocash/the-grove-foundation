@@ -6,7 +6,7 @@ import { useState, useMemo } from 'react';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
 import { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { CollectionHeader } from '../shared';
+import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
 import { StatusBadge } from '../shared/ui';
 
@@ -109,6 +109,9 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   const { schema, loading, getJourney } = useNarrativeEngine();
   const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Flow params for route-based selection
+  const { returnTo, ctaLabel, isInFlow } = useFlowParams();
 
   // Engagement state machine for journey state and actions
   const { actor } = useEngagement();
@@ -270,6 +273,11 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
           </div>
         )}
       </div>
+
+      {/* Flow CTA - appears when navigating from another route */}
+      {isInFlow && activeJourneyId && returnTo && (
+        <FlowCTA label={ctaLabel} returnTo={returnTo} />
+      )}
     </div>
   );
 }

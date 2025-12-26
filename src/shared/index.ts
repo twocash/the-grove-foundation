@@ -1,6 +1,12 @@
 // src/shared/index.ts
 // Barrel export for shared components
 
+// Flow components (Sprint: route-selection-flow-v1)
+export { ModuleHeader } from './ModuleHeader';
+export { FlowCTA } from './FlowCTA';
+export { useFlowParams } from './hooks/useFlowParams';
+export type { FlowParams } from './hooks/useFlowParams';
+
 // Collection components
 export { CollectionHeader } from './CollectionHeader';
 export { SearchInput } from './SearchInput';

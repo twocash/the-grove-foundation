@@ -14,6 +14,8 @@ interface CommandInputProps {
   onSwitchLens: (lensId: string) => void;
   onShowWelcome: () => void;
   onShowLensPicker: () => void;
+  // Sprint: route-selection-flow-v1 - Navigation support
+  onNavigate?: (path: string) => void;
   // Sprout System (Sprint: Sprout System)
   getLastResponse?: () => LastResponseData | null;
   getSessionContext?: () => SessionContext;
@@ -31,6 +33,8 @@ const CommandInput: React.FC<CommandInputProps> = ({
   onSwitchLens,
   onShowWelcome,
   onShowLensPicker,
+  // Sprint: route-selection-flow-v1
+  onNavigate,
   // Sprout System
   getLastResponse,
   getSessionContext,
@@ -96,6 +100,8 @@ const CommandInput: React.FC<CommandInputProps> = ({
           setToast(result.message);
         } else if (result.type === 'modal') {
           onOpenModal(result.modal);
+        } else if (result.type === 'navigate' && onNavigate) {
+          onNavigate(result.path);
         }
         // Action results are handled by the command itself
       }

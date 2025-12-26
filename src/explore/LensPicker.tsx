@@ -8,7 +8,7 @@ import { useCustomLens } from '../../hooks/useCustomLens';
 import { Persona } from '../../data/narratives-schema';
 import { CustomLens } from '../../types/lens';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
-import { CollectionHeader } from '../shared';
+import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useLensState } from '@core/engagement';
 import { StatusBadge } from '../shared/ui';
 
@@ -208,6 +208,9 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   const workspaceUI = useOptionalWorkspaceUI();
   const personas = getEnabledPersonas();
 
+  // Flow params for route-based selection
+  const { returnTo, ctaLabel, isInFlow } = useFlowParams();
+
   // Engagement state machine for lens state and actions
   const { actor } = useEngagement();
   const { lens, selectLens: engSelectLens } = useLensState({ actor });
@@ -383,6 +386,11 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
           </div>
         )}
       </div>
+
+      {/* Flow CTA - appears when navigating from another route */}
+      {isInFlow && activeLensId && returnTo && (
+        <FlowCTA label={ctaLabel} returnTo={returnTo} />
+      )}
     </div>
   );
 }

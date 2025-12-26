@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TerminalState, ChatMessage, SectionId } from '../types';
 import {
   sendMessageStream,
@@ -71,6 +72,9 @@ const Terminal: React.FC<TerminalProps> = ({
   onLensSelected,
   variant = 'overlay'
 }) => {
+  // Sprint: route-selection-flow-v1 - Navigation for flow-based selection
+  const navigate = useNavigate();
+
   // Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1
   // Consolidated state management via useTerminalState hook
   const { state: uiState, actions } = useTerminalState();
@@ -101,7 +105,6 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Destructure modal states
   const showHelpModal = uiState.modals.help;
-  const showJourneysModal = uiState.modals.journeys;
   const showStatsModal = uiState.modals.stats;
   const showGardenModal = uiState.modals.garden;
 
@@ -897,6 +900,7 @@ const Terminal: React.FC<TerminalProps> = ({
           currentStreak={currentStreak}
           showStreak={showStreakDisplay}
           onLensClick={() => actions.showLensPicker()}
+          onJourneyClick={() => navigate('/journeys?returnTo=/terminal&ctaLabel=Begin%20Journey')}
           onStreakClick={() => handleOpenModal('stats')}
         />
 
@@ -910,15 +914,7 @@ const Terminal: React.FC<TerminalProps> = ({
               />
             </div>
           ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial
-              personas={enabledPersonas}
-              customLenses={customLenses}
-              onSelect={handleWelcomeLensSelect}
-              onCreateCustomLens={handleWelcomeCreateCustomLens}
-              onDeleteCustomLens={handleDeleteCustomLens}
-              showCreateOption={showCustomLensInPicker}
-              embedded
-            />
+            <WelcomeInterstitial />
           ) : showLensPicker ? (
             <LensPicker
               mode="compact"
@@ -1004,6 +1000,7 @@ const Terminal: React.FC<TerminalProps> = ({
               onSwitchLens={handleCommandLensSwitch}
               onShowWelcome={() => actions.showWelcomeInterstitial()}
               onShowLensPicker={() => actions.showLensPicker()}
+              onNavigate={navigate}
               getLastResponse={getLastResponse}
               getSessionContext={getSessionContext}
               captureSprout={handleCaptureSprout}
@@ -1038,14 +1035,7 @@ const Terminal: React.FC<TerminalProps> = ({
               onCancel={handleCustomLensCancel}
             />
           ) : showWelcomeInterstitial ? (
-            <WelcomeInterstitial
-              personas={enabledPersonas}
-              customLenses={customLenses}
-              onSelect={handleWelcomeLensSelect}
-              onCreateCustomLens={handleWelcomeCreateCustomLens}
-              onDeleteCustomLens={handleDeleteCustomLens}
-              showCreateOption={showCustomLensInPicker}
-            />
+            <WelcomeInterstitial />
           ) : showLensPicker ? (
             <LensPicker
               mode="compact"
@@ -1083,6 +1073,7 @@ const Terminal: React.FC<TerminalProps> = ({
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
                 onLensClick={() => actions.showLensPicker()}
+                onJourneyClick={() => navigate('/journeys?returnTo=/terminal&ctaLabel=Begin%20Journey')}
                 onStreakClick={() => actions.openModal('stats')}
               />
 
@@ -1404,6 +1395,7 @@ const Terminal: React.FC<TerminalProps> = ({
                   onSwitchLens={handleCommandLensSwitch}
                   onShowWelcome={() => actions.showWelcomeInterstitial()}
                   onShowLensPicker={() => actions.showLensPicker()}
+                  onNavigate={navigate}
                   // Sprout System (Sprint: Sprout System)
                   getLastResponse={getLastResponse}
                   getSessionContext={getSessionContext}
@@ -1437,7 +1429,6 @@ const Terminal: React.FC<TerminalProps> = ({
 
         // Modal states
         showHelpModal={showHelpModal}
-        showJourneysModal={showJourneysModal}
         showStatsModal={showStatsModal}
         showGardenModal={showGardenModal}
 
@@ -1479,7 +1470,6 @@ const Terminal: React.FC<TerminalProps> = ({
 
         // Handlers - Modals
         onCloseHelpModal={() => actions.closeModal('help')}
-        onCloseJourneysModal={() => actions.closeModal('journeys')}
         onCloseStatsModal={() => actions.closeModal('stats')}
         onCloseGardenModal={() => actions.closeModal('garden')}
         onViewFullStats={() => {
