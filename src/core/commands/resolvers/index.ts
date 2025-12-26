@@ -62,4 +62,4 @@ export const RESOLVERS: Record<ArgType, Resolver> = {
   boolean: booleanResolver,
 };
 
-export { ResolverContext, ResolveResult, Suggestion } from './types';
+export type { ResolverContext, ResolveResult, Suggestion } from './types';

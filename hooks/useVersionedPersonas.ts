@@ -31,6 +31,9 @@ export function useVersionedPersonas() {
   const { getEnabledPersonas } = useNarrativeEngine();
   const schemaPersonas = getEnabledPersonas();
 
+  // Memoize persona IDs to avoid re-running effect on every render
+  const personaIds = useMemo(() => schemaPersonas.map(p => p.id).join(','), [schemaPersonas]);
+
   const [versionedOverrides, setVersionedOverrides] = useState<Map<string, StoredObject>>(new Map());
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -57,7 +60,7 @@ export function useVersionedPersonas() {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Failed to load versioned personas:', error);
+        console.error('[useVersionedPersonas] Failed to load:', error);
         if (!cancelled) {
           setLoading(false);
         }
@@ -69,7 +72,7 @@ export function useVersionedPersonas() {
     return () => {
       cancelled = true;
     };
-  }, [schemaPersonas, refreshKey]);
+  }, [personaIds, refreshKey]);
 
   // Merge schema personas with versioned overrides
   const personas: VersionedPersona[] = useMemo(() => {

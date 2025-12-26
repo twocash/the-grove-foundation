@@ -75,7 +75,6 @@ export function useVersionedObject(
         setError(null);
 
         const store = await getVersionedObjectStore();
-
         let stored = await store.get(objectId);
 
         // Auto-import if not found

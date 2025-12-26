@@ -48,7 +48,7 @@ export function InspectorPanel({
           <div>
             <span className="font-medium text-sm text-[var(--glass-text-primary)]">{title}</span>
             {subtitle && (
-              <p className="text-xs text-[var(--glass-text-muted)]">{subtitle}</p>
+              <div className="text-xs text-[var(--glass-text-muted)]">{subtitle}</div>
             )}
           </div>
         </div>

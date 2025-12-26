@@ -224,7 +224,6 @@ export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCusto
   // Refresh versioned personas when inspector closes (after potential save)
   const inspectorOpen = workspaceUI?.inspector?.isOpen ?? false;
   useEffect(() => {
-    // When inspector closes, refresh to pick up any versioned changes
     if (!inspectorOpen) {
       refreshPersonas();
     }
