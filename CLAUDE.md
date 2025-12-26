@@ -726,6 +726,133 @@ The `/stats` command now includes a "Your Garden" section showing:
 
 ---
 
+## Completed Sprints: Kinetic Command System (Sprint 16)
+
+### Sprint 16: Terminal Kinetic Commands v1
+
+**Goal:** Transform the Terminal from a reactive chatbot to a **kinetic interface** with declarative command processing, enabling slash commands for navigation, actions, and future Proto-Skills.
+
+### Architecture
+
+The command system follows the three-layer architecture:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      USER INPUT                              │
+│              "/journey ghost" OR "What is Grove?"           │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     INPUT ROUTER                             │
+│           isCommand(input) → "/" prefix check               │
+└─────────────────────────────────────────────────────────────┘
+                    │               │
+            ┌───────┘               └────────┐
+            ▼                                ▼
+┌─────────────────────┐          ┌─────────────────────┐
+│   COMMAND ENGINE    │          │    CHAT ENGINE      │
+│  (src/core/commands)│          │  (existing API)     │
+│                     │          │                     │
+│  Parser → Registry  │          │  sendMessageStream  │
+│  → Resolver         │          │                     │
+│  → Executor         │          └─────────────────────┘
+└─────────────────────┘
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/core/commands/schema.ts` | CommandDefinition, CommandAction types |
+| `src/core/commands/command-definitions.ts` | 8 declarative command configs |
+| `src/core/commands/registry.ts` | CommandRegistry class (lookup, search) |
+| `src/core/commands/parser.ts` | Tokenizer, parseCommand, isCommand |
+| `src/core/commands/executor.ts` | ExecutionContext, executeCommand |
+| `src/core/commands/resolvers/` | journey.ts, lens.ts fuzzy matchers |
+| `components/Terminal/CommandPalette.tsx` | Searchable command picker UI |
+| `components/Terminal/StatsOverlay.tsx` | Session statistics display |
+| `components/Terminal/useCommands.ts` | React hook bridging core to Terminal |
+
+### Commands Available
+
+| Command | Aliases | Description |
+|---------|---------|-------------|
+| `/journey [name]` | `/j` | Start or pick a journey |
+| `/lens [name]` | `/l` | Switch or pick a lens |
+| `/plant` | `/p`, `/sprout` | Capture current response |
+| `/stats` | — | View session statistics |
+| `/garden` | `/g` | View captured sprouts |
+| `/explore` | `/e` | Enter explore mode |
+| `/help` | `/?`, `/commands` | Show command palette |
+| `/welcome` | — | Show welcome screen |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+K` / `Cmd+K` | Open command palette |
+| `/` in input | Trigger command hints |
+| Arrow keys | Navigate command palette |
+| `Enter` | Execute selected command |
+| `Escape` | Close palette |
+
+### Patterns Established
+
+| Pattern | Description |
+|---------|-------------|
+| **Registry Pattern** | Declarative mapping of triggers → actions |
+| **Discriminated Union** | Type-safe action handling via `type` field |
+| **Resolver Pattern** | Fuzzy matching with suggestions |
+| **Execution Context** | Dependency injection for handlers |
+| **Fallback Actions** | Graceful degradation when args missing |
+
+### Extension Guide
+
+**Adding a new command (no TypeScript changes):**
+```typescript
+// Add to command-definitions.ts
+{
+  id: 'my-command',
+  trigger: 'mycommand',
+  aliases: ['mc'],
+  description: 'Does something useful',
+  category: 'action',
+  action: { type: 'show-overlay', overlay: 'my-overlay' }
+}
+```
+
+**Adding a new resolver:**
+```typescript
+// Create resolvers/mytype.ts
+export const myResolver: Resolver<MyType> = {
+  type: 'mytype',
+  resolve(value, context) { /* fuzzy match */ },
+  getSuggestions(partial, context) { /* autocomplete */ }
+};
+```
+
+### Repurposing Potential
+
+The command architecture can power:
+- **Voice Commands**: Speech-to-text → parseCommand → executor
+- **API Endpoints**: `POST /api/commands { "command": "/journey ghost" }`
+- **CLI Tools**: Node.js CLI consuming `@core/commands`
+- **Macro System**: Chain commands with `/macro`
+- **Foundation Admin**: `/publish`, `/audit` commands
+- **Proto-Skills**: `/skill clinical-intake` → spawn skill context
+
+### DEX Alignment
+
+| Pillar | Implementation |
+|--------|----------------|
+| **Declarative Sovereignty** | Commands in JSON, not code |
+| **Capability Agnosticism** | Same commands regardless of AI model |
+| **Provenance** | Every execution loggable with context |
+| **Organic Scalability** | 8 → 80 commands without restructuring |
+
+---
+
 ## CI/CD and Deployment
 
 ### Git Worktree Setup

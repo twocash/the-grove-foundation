@@ -201,6 +201,107 @@
 
 ---
 
+## Architectural Significance
+
+### How This Moves the Architecture Forward
+
+The Kinetic Command System establishes a **declarative command layer** that fundamentally changes how the Terminal can evolve:
+
+1. **Separation of Intent from Implementation**
+   - Commands are defined as data (JSON) not code
+   - Actions are mapped through a registry pattern
+   - New commands require zero TypeScript changes
+
+2. **Pure TypeScript Core**
+   - The command engine lives in `src/core/commands/` with NO React dependencies
+   - Can be consumed by any surface (Terminal, Foundation, future mobile)
+   - Follows the project's three-layer architecture (Core → Hooks → Experiences)
+
+3. **Unified Overlay System Integration**
+   - Commands can trigger any overlay type via the registry
+   - `show-overlay` action is polymorphic over the discriminated union
+   - Adding new overlays automatically makes them command-accessible
+
+4. **DEX Compliance**
+   - **Declarative Sovereignty**: Domain experts add commands via JSON
+   - **Capability Agnosticism**: Commands work regardless of AI model
+   - **Provenance**: Every execution is loggable with full context
+
+### Patterns Unlocked
+
+| Pattern | Description | Where Used |
+|---------|-------------|------------|
+| **Registry Pattern** | Declarative mapping of triggers → actions | `CommandRegistry`, `OVERLAY_REGISTRY` |
+| **Discriminated Union** | Type-safe action handling via `type` discriminator | `CommandAction`, `TerminalOverlay` |
+| **Resolver Pattern** | Fuzzy matching with suggestions | `journeyResolver`, `lensResolver` |
+| **Execution Context** | Dependency injection for command handlers | `ExecutionContext` |
+| **Fallback Actions** | Graceful degradation when args missing | `fallback: 'show-journey-picker'` |
+
+### Repurposing Potential
+
+The command architecture can be directly repurposed for:
+
+1. **Voice Commands**
+   - Speech-to-text → `parseCommand()` → same execution pipeline
+   - Add `voiceTrigger` field to `CommandDefinition`
+
+2. **API Endpoints**
+   - REST: `POST /api/commands { "command": "/journey ghost" }`
+   - Same parser, registry, executor
+   - Add rate limiting and auth at API layer
+
+3. **CLI Tools**
+   - Node.js CLI consuming `@core/commands`
+   - `grove-cli journey ghost` → invokes same logic
+
+4. **Macro System**
+   - Chain commands: `/macro morning: /lens researcher && /journey ratchet`
+   - Store in `CommandDefinition.action` as `{ type: 'macro', commands: [...] }`
+
+5. **Foundation Admin Commands**
+   - `/publish` → Push changes to production
+   - `/audit <entity>` → Run integrity checks
+   - Same registry, different command definitions
+
+6. **Proto-Skill Integration**
+   - Commands become skill triggers: `/skill clinical-intake`
+   - Resolver validates skill availability
+   - Action spawns skill execution context
+
+### Extension Guide
+
+**Adding a Command (5 minutes):**
+```typescript
+// 1. Add to command-definitions.ts
+{
+  id: 'new-command',
+  trigger: 'new',
+  description: 'Does something new',
+  category: 'action',
+  action: { type: 'show-overlay', overlay: 'new-thing' }
+}
+
+// 2. If new action type, handle in executor.ts
+case 'new-action-type':
+  // implementation
+  break;
+```
+
+**Adding a Resolver (15 minutes):**
+```typescript
+// 1. Create resolvers/mytype.ts
+export const myResolver: Resolver<MyType> = {
+  type: 'mytype',
+  resolve(value, context) { /* fuzzy match */ },
+  getSuggestions(partial, context) { /* autocomplete */ }
+};
+
+// 2. Export from resolvers/index.ts
+// 3. Use in command: { type: 'mytype' }
+```
+
+---
+
 ## Future Enhancements
 
 1. **Command History** - Arrow up/down to recall previous commands

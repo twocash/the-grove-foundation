@@ -1,9 +1,11 @@
 # Sprint: terminal-kinetic-commands-v1
 
-**Version:** 1.0  
-**Status:** Planning  
-**Created:** 2024-12-25  
+**Version:** 1.0
+**Status:** ✅ Complete
+**Created:** 2024-12-25
+**Completed:** 2024-12-25
 **Author:** Claude (Planning Agent) + Jim Calhoun
+**Execution:** Claude Opus 4.5
 
 ---
 
@@ -225,15 +227,15 @@ components/Terminal/
 
 ## Success Criteria
 
-- [ ] `/journey` opens journey picker OR starts named journey
-- [ ] `/lens` opens lens picker OR switches to named lens
-- [ ] `/plant` captures context as sprout (stored locally for now)
-- [ ] `/stats` shows session statistics overlay
-- [ ] `/help` shows command palette
-- [ ] Command palette opens on "/" keystroke
-- [ ] Fuzzy matching works for journey/lens names
-- [ ] Adding new command = JSON entry only (no code)
-- [ ] All commands logged for cognitive archaeology
+- [x] `/journey` opens journey picker OR starts named journey
+- [x] `/lens` opens lens picker OR switches to named lens
+- [x] `/plant` captures context as sprout (stored locally for now)
+- [x] `/stats` shows session statistics overlay
+- [x] `/help` shows command palette
+- [x] Command palette opens on "/" keystroke (Ctrl+K)
+- [x] Fuzzy matching works for journey/lens names
+- [x] Adding new command = JSON entry only (no code)
+- [x] All commands logged for cognitive archaeology
 
 ---
 

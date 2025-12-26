@@ -62,6 +62,7 @@ The Grove has three distinct UI surfaces with inconsistent styling approaches:
 | **7** | Quantum Glass v1 | CSS-first design system | 2h | ✅ Complete |
 | **7.1** | Quantum Glass v1 Hotfix | Collection view cards | 30 min | ✅ Complete |
 | **7.2** | Quantum Glass v1.1 | Card System Unification | 1.5h | ✅ Complete |
+| **7.3** | Terminal Kinetic Commands v1 | Declarative command engine | 2h | ✅ Complete |
 | **8** | Declarative UI Config v1 | Extend lens-reactive touchpoints | 2h | 📋 Ready |
 | **9** | Responsive Excellence | All breakpoints, mobile | 3-4 days | 📋 Planned |
 | **10** | Animation & Micro-interactions | Polish, delight | 2-3 days | 📋 Planned |
@@ -316,6 +317,64 @@ Completed 2024-12-25. Unified all collection view cards and fixed inspector cont
 | lensAccents deleted | -80 lines |
 | Lucide imports removed | NodeGrid |
 | CSS utilities added | 6 classes |
+
+---
+
+## Sprint 7.3: Terminal Kinetic Commands v1 ✅ COMPLETE
+
+### Summary
+Completed 2024-12-25. Declarative command engine for Terminal slash commands.
+
+### Delivered
+- **Command Schema Types** — CommandDefinition, CommandAction, ParsedCommand
+- **CommandRegistry** — Lookup by trigger/alias, search, category filtering
+- **Command Parser** — Tokenizer with quoted strings, flags, subcommands
+- **Argument Resolvers** — Journey/Lens fuzzy matchers with suggestions
+- **Command Executor** — Action dispatch via ExecutionContext pattern
+- **CommandPalette UI** — Searchable picker with keyboard navigation
+- **StatsOverlay** — Session statistics display
+- **useCommands Hook** — React bridge to core command engine
+- **Terminal Integration** — "/" interception, Ctrl+K shortcut
+
+### Commands (8)
+| Command | Description |
+|---------|-------------|
+| `/journey [name]` | Start or pick journey |
+| `/lens [name]` | Switch or pick lens |
+| `/plant` | Capture as sprout |
+| `/stats` | Session statistics |
+| `/garden` | View sprouts |
+| `/explore` | Explore mode |
+| `/help` | Command palette |
+| `/welcome` | Welcome screen |
+
+### Patterns Established
+- **Registry Pattern** — Declarative trigger → action mapping
+- **Discriminated Union** — Type-safe action handling
+- **Resolver Pattern** — Fuzzy matching with suggestions
+- **Execution Context** — Dependency injection for handlers
+- **Fallback Actions** — Graceful degradation
+
+### Metrics
+| Metric | Value |
+|--------|-------|
+| New files | 13 |
+| New lines | ~800 |
+| Modified files | 6 |
+| Commands | 8 |
+| Build time | ~21s |
+
+### Architectural Significance
+Establishes a pure TypeScript command layer in `src/core/commands/` that can power:
+- Voice commands (speech → parseCommand)
+- API endpoints (`POST /api/commands`)
+- CLI tools (`grove-cli journey ghost`)
+- Macro system (`/macro`)
+- Foundation admin commands (`/publish`)
+- Proto-Skills (`/skill clinical-intake`)
+
+### Files
+- `docs/sprints/terminal-kinetic-commands-v1/` — Full Foundation Loop
 
 ---
 
@@ -638,3 +697,7 @@ src/core/ (shared)
 | 2024-12-25 | Sprint 7.2: Quantum Glass v1.1 complete |
 | | Card system unification, lensAccents deleted (-80 lines) |
 | | Inspector context fix, shared component updates |
+| 2024-12-25 | Sprint 7.3: Terminal Kinetic Commands v1 complete |
+| | Declarative command engine in `src/core/commands/` |
+| | 8 commands, resolver pattern, CommandPalette UI |
+| | Ctrl+K shortcut, Terminal "/" interception |
