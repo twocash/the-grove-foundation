@@ -1,10 +1,12 @@
 // components/Terminal/TerminalOverlayRenderer.tsx
 // Unified overlay renderer using declarative registry
 // Sprint: terminal-overlay-machine-v1
+// Sprint: terminal-kinetic-commands-v1 - Added command palette handlers
 
 import React from 'react';
 import { TerminalOverlay } from './types';
 import { OVERLAY_REGISTRY } from './overlay-registry';
+import { CommandDefinition } from '@core/commands';
 
 export interface OverlayHandlers {
   onDismiss: () => void;
@@ -12,6 +14,8 @@ export interface OverlayHandlers {
   onWelcomeChooseLens: () => void;
   onWizardComplete: (candidate: any, inputs: any) => Promise<void>;
   onWizardCancel: () => void;
+  // Command palette handlers (Sprint: terminal-kinetic-commands-v1)
+  onCommandSelect?: (command: CommandDefinition, subcommand?: string) => void;
 }
 
 interface Props {
@@ -52,6 +56,17 @@ function getPropsForOverlay(
       return { ...base, onBack: handlers.onDismiss };
     case 'wizard':
       return { ...base, onComplete: handlers.onWizardComplete, onCancel: handlers.onWizardCancel };
+    case 'command-palette':
+      return {
+        ...base,
+        onSelect: handlers.onCommandSelect ?? (() => {}),
+        onDismiss: handlers.onDismiss,
+        initialQuery: overlay.initialQuery ?? ''
+      };
+    case 'stats':
+      return { ...base, onDismiss: handlers.onDismiss };
+    case 'garden':
+      return { ...base, onClose: handlers.onDismiss, onViewFullStats: handlers.onDismiss };
     default:
       return base;
   }

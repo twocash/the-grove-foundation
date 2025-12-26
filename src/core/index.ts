@@ -17,3 +17,6 @@ export * from './transformers';
 
 // Cache (v0.14: Reality Projector)
 export * from './cache';
+
+// Commands (Sprint: terminal-kinetic-commands-v1)
+export * from './commands';

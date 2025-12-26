@@ -62,3 +62,9 @@ export { OVERLAY_REGISTRY } from './overlay-registry';
 export { shouldShowInput, isOverlayActive, getOverlayAnalytics } from './overlay-helpers';
 export type { TerminalOverlay, OverlayType } from './types';
 export { INITIAL_OVERLAY } from './types';
+
+// Kinetic Command System (Sprint: terminal-kinetic-commands-v1)
+export { CommandPalette } from './CommandPalette';
+export { StatsOverlay } from './StatsOverlay';
+export { useCommands } from './useCommands';
+export type { UseCommandsOptions, UseCommandsReturn } from './useCommands';

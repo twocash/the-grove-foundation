@@ -14,6 +14,7 @@ import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
 import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput, TerminalOverlayRenderer, isOverlayActive } from './Terminal/index';
+import { useCommands } from './Terminal/useCommands';
 import type { OverlayHandlers } from './Terminal/index';
 // Note: WelcomeInterstitial, LensPicker, JourneyList now rendered via TerminalOverlayRenderer
 import CognitiveBridge from './Terminal/CognitiveBridge';
@@ -233,6 +234,41 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Sprout capture (Sprint: Sprout System)
   const { capture: captureSprout } = useSproutCapture();
+
+  // Kinetic Command System (Sprint: terminal-kinetic-commands-v1)
+  const commands = useCommands({
+    schema,
+    customLenses: customLenses.map(c => ({ id: c.id, publicLabel: c.publicLabel })),
+    onShowOverlay: (overlayType) => {
+      actions.setOverlay({ type: overlayType as any });
+    },
+    onJourneyStart: (journeyId) => {
+      const journey = getJourney(journeyId);
+      if (journey) {
+        engStartJourney(journey);
+      }
+    },
+    onJourneyClear: () => {
+      engExitJourney();
+    },
+    onLensSwitch: (lensId) => {
+      engSelectLens(lensId);
+    },
+    onLensClear: () => {
+      engSelectLens('freestyle');
+    },
+    onAddSystemMessage: (message, suggestions) => {
+      const errorId = Date.now().toString();
+      setTerminalState(prev => ({
+        ...prev,
+        messages: [...prev.messages, {
+          id: errorId,
+          role: 'model',
+          text: `${message}${suggestions ? `\n\nDid you mean: ${suggestions.join(', ')}?` : ''}`
+        }]
+      }));
+    }
+  });
 
   // Journey completion state now managed by useTerminalState
   // (Sprint: Terminal Architecture Refactor v1.0 - Epic 4.1)
@@ -500,8 +536,27 @@ const Terminal: React.FC<TerminalProps> = ({
     },
     onWelcomeChooseLens: () => actions.setOverlay({ type: 'lens-picker' }),
     onWizardComplete: handleCustomLensComplete,
-    onWizardCancel: handleCustomLensCancel
-  }), [actions, engSelectLens, emit, currentArchetypeId, currentThread.length, updateCustomLensUsage, onLensSelected, handleCustomLensComplete, handleCustomLensCancel]);
+    onWizardCancel: handleCustomLensCancel,
+    // Command palette handlers (Sprint: terminal-kinetic-commands-v1)
+    onCommandSelect: async (command, subcommand) => {
+      await commands.executeFromPalette(command, subcommand);
+      actions.setOverlay({ type: 'none' });
+    }
+  }), [actions, engSelectLens, emit, currentArchetypeId, currentThread.length, updateCustomLensUsage, onLensSelected, handleCustomLensComplete, handleCustomLensCancel, commands]);
+
+  // Keyboard shortcuts for command palette (Sprint: terminal-kinetic-commands-v1)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+K or Cmd+K opens command palette
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        actions.setOverlay({ type: 'command-palette' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [actions]);
 
   // Check for reveal triggers
   useEffect(() => {
@@ -669,6 +724,15 @@ const Terminal: React.FC<TerminalProps> = ({
   const handleSend = async (manualQuery?: string, manualDisplay?: string, nodeId?: string) => {
     const textToSend = manualQuery !== undefined ? manualQuery : input;
     if (!textToSend.trim()) return;
+
+    // Command interception (Sprint: terminal-kinetic-commands-v1)
+    // Check if input is a slash command and execute it
+    if (commands.isCommand(textToSend)) {
+      const result = await commands.execute(textToSend);
+      actions.setInput('');
+      // If command failed and we didn't show a system message, the useCommands hook already handled it
+      return;
+    }
 
     const textToDisplay = manualDisplay !== undefined ? manualDisplay : textToSend;
 

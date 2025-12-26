@@ -60,7 +60,10 @@ export type TerminalOverlay =
   | { type: 'lens-picker' }
   | { type: 'journey-picker' }
   | { type: 'wizard'; wizardId?: string }
-  | { type: 'field-picker' };
+  | { type: 'field-picker' }
+  | { type: 'command-palette'; initialQuery?: string }
+  | { type: 'stats' }
+  | { type: 'garden' };
 
 export type OverlayType = TerminalOverlay['type'];
 
