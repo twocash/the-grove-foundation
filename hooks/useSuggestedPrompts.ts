@@ -1,6 +1,10 @@
 // hooks/useSuggestedPrompts.ts
 // Computes stage-aware, lens-filtered prompts with weighted random selection
 // Sprint: adaptive-engagement-v1
+//
+// ⚠️ TECHNICAL DEBT (TD-003): Prompt filtering logic is imperative.
+// Should be refactored to use declarative filter rules from schema.
+// See: docs/sprints/ROADMAP.md → Technical Debt Register
 
 import { useMemo, useCallback, useState, useRef } from 'react';
 import { useEngagementState } from './useEngagementBus';

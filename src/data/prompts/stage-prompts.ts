@@ -1,6 +1,14 @@
 // src/data/prompts/stage-prompts.ts
 // Stage-based suggested prompts configuration
 // Sprint: adaptive-engagement-v1
+//
+// ⚠️ TECHNICAL DEBT (TD-001): Journey suggestions are hardcoded here.
+// This should be refactored to Trellis DEX declarative architecture:
+// - Load prompts from JSON/API (not TypeScript)
+// - Filter journeys dynamically based on user's completed journeys
+// - Allow Foundation operators to configure via console
+// - Support A/B testing of journey suggestions
+// See: docs/sprints/ROADMAP.md → Technical Debt Register
 
 import type { StagePromptsConfig } from '../../core/schema/suggested-prompts';
 

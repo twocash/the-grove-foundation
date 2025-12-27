@@ -506,6 +506,54 @@ Document the design system for ongoing maintenance.
 
 ---
 
+## Technical Debt Register
+
+Items that need refactoring to align with Trellis DEX architecture (declarative UI).
+
+| ID | Component | Issue | Priority | Target Sprint |
+|----|-----------|-------|----------|---------------|
+| **TD-001** | `stage-prompts.ts` | Journey suggestions are hardcoded in TypeScript. Should be declarative data loaded from JSON/API with filtering based on completed journeys. | Medium | Declarative UI Config v2 |
+| **TD-002** | `stage-prompts.ts` | Stage thresholds (exchangeCount, topicsExplored) are hardcoded. Should be configurable via Foundation console. | Low | Declarative UI Config v2 |
+| **TD-003** | `useSuggestedPrompts.ts` | Prompt filtering logic is imperative. Should use declarative filter rules from schema. | Low | Declarative UI Config v2 |
+
+### TD-001: Journey Suggestions Hardcoded
+
+**Current State:**
+```typescript
+// src/data/prompts/stage-prompts.ts
+{
+  id: 'journey-simulation',
+  text: '🗺️ The Ghost in the Machine',
+  journeyId: 'simulation',
+  weight: 1.2,
+}
+```
+
+**Desired State (Trellis DEX):**
+```json
+// Declarative config loaded from GCS/API
+{
+  "stagePrompts": {
+    "ARRIVAL": {
+      "journeySuggestions": {
+        "source": "journeys",
+        "filter": { "status": "active", "difficulty": "beginner" },
+        "exclude": { "completed": true },
+        "maxDisplay": 2
+      }
+    }
+  }
+}
+```
+
+**Why This Matters:**
+- Currently can't filter out completed journeys
+- Can't A/B test journey suggestions
+- Requires code changes to adjust weights
+- Foundation operators can't configure via console
+
+---
+
 ## Risk Register
 
 | Risk | Probability | Impact | Mitigation |
