@@ -23,6 +23,8 @@ import {
   appendToHealthLog,
   getEngineVersion
 } from './lib/health-validator.js';
+import { supabaseAdmin } from './lib/supabase.js';
+import { generateSproutEmbedding, generateEmbedding } from './lib/embeddings.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -2033,6 +2035,285 @@ Generate collapsed reality. JSON only.`;
   } catch (error) {
     console.error('[Collapse] Error:', error.message);
     res.status(500).json({ error: error.message, fallback: true });
+  }
+});
+
+// ============================================================================
+// Sprout API (Server-Side Capture v1)
+// ============================================================================
+
+// POST /api/sprouts - Create a new sprout
+app.post('/api/sprouts', async (req, res) => {
+  try {
+    const { query, response, provenance, tags, note, sessionId } = req.body;
+
+    if (!query || !response) {
+      return res.status(400).json({ error: 'query and response are required' });
+    }
+
+    // Generate embedding for semantic search
+    let embedding = null;
+    try {
+      embedding = await generateSproutEmbedding(query, response);
+    } catch (embeddingError) {
+      console.warn('[Sprout] Embedding generation failed:', embeddingError.message);
+      // Continue without embedding - can backfill later
+    }
+
+    // Insert to database
+    const { data, error } = await supabaseAdmin
+      .from('sprouts')
+      .insert({
+        query,
+        response,
+        provenance: provenance || {},
+        tags: tags || [],
+        note: note || null,
+        session_id: sessionId || null,
+        embedding,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Sprout] Supabase insert error:', error);
+      return res.status(500).json({ error: 'Failed to save sprout' });
+    }
+
+    console.log('[Sprout] Created:', data.id.slice(0, 8));
+    res.json({ success: true, sprout: data });
+  } catch (error) {
+    console.error('[Sprout] POST error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/sprouts - List sprouts
+app.get('/api/sprouts', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = parseInt(req.query.offset) || 0;
+    const sessionId = req.query.sessionId;
+    const lifecycle = req.query.lifecycle;
+    const tagsParam = req.query.tags;
+
+    let query = supabaseAdmin
+      .from('sprouts')
+      .select('*', { count: 'exact' })
+      .order('captured_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (sessionId) {
+      query = query.eq('session_id', sessionId);
+    }
+    if (lifecycle) {
+      query = query.eq('lifecycle', lifecycle);
+    }
+    if (tagsParam) {
+      const tags = tagsParam.split(',');
+      query = query.overlaps('tags', tags);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('[Sprout] Supabase query error:', error);
+      return res.status(500).json({ error: 'Failed to fetch sprouts' });
+    }
+
+    res.json({
+      sprouts: data || [],
+      total: count || 0,
+      hasMore: (count || 0) > offset + limit,
+    });
+  } catch (error) {
+    console.error('[Sprout] GET error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/sprouts/:id - Get single sprout
+app.get('/api/sprouts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabaseAdmin
+      .from('sprouts')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Sprout not found' });
+    }
+
+    res.json({ sprout: data });
+  } catch (error) {
+    console.error('[Sprout] GET :id error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PATCH /api/sprouts/:id - Update sprout
+app.patch('/api/sprouts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tags, note, lifecycle } = req.body;
+
+    const updates = {};
+    if (tags !== undefined) updates.tags = tags;
+    if (note !== undefined) updates.note = note;
+    if (lifecycle !== undefined) updates.lifecycle = lifecycle;
+
+    const { data, error } = await supabaseAdmin
+      .from('sprouts')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Sprout] Supabase update error:', error);
+      return res.status(500).json({ error: 'Failed to update sprout' });
+    }
+
+    res.json({ success: true, sprout: data });
+  } catch (error) {
+    console.error('[Sprout] PATCH error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// DELETE /api/sprouts/:id - Delete sprout
+app.delete('/api/sprouts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { error } = await supabaseAdmin
+      .from('sprouts')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('[Sprout] Supabase delete error:', error);
+      return res.status(500).json({ error: 'Failed to delete sprout' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Sprout] DELETE error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST /api/sprouts/search - Vector similarity search
+app.post('/api/sprouts/search', async (req, res) => {
+  try {
+    const { query, limit = 10, threshold = 0.7 } = req.body;
+
+    if (!query) {
+      return res.status(400).json({ error: 'query is required' });
+    }
+
+    // Generate embedding for search query
+    const queryEmbedding = await generateEmbedding(query);
+
+    // Vector similarity search using pg_vector
+    const { data, error } = await supabaseAdmin.rpc('match_sprouts', {
+      query_embedding: queryEmbedding,
+      match_threshold: threshold,
+      match_count: limit,
+    });
+
+    if (error) {
+      console.error('[Sprout] Vector search error:', error);
+
+      // Fallback: If RPC doesn't exist, return empty results
+      if (error.code === 'PGRST202') {
+        console.warn('[Sprout] match_sprouts function not found. Run migration to add it.');
+        return res.json({ results: [], fallback: true });
+      }
+
+      return res.status(500).json({ error: 'Search failed' });
+    }
+
+    res.json({
+      results: (data || []).map((row) => ({
+        sprout: {
+          id: row.id,
+          query: row.query,
+          response: row.response,
+          provenance: row.provenance,
+          tags: row.tags,
+          note: row.note,
+          lifecycle: row.lifecycle,
+          captured_at: row.captured_at,
+        },
+        similarity: row.similarity,
+      })),
+    });
+  } catch (error) {
+    console.error('[Sprout] Search error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/sprouts/stats - Aggregate statistics
+app.get('/api/sprouts/stats', async (req, res) => {
+  try {
+    // Total count
+    const { count: total } = await supabaseAdmin
+      .from('sprouts')
+      .select('*', { count: 'exact', head: true });
+
+    // Count by lifecycle
+    const { data: allSprouts } = await supabaseAdmin
+      .from('sprouts')
+      .select('lifecycle');
+
+    const lifecycleCounts = { sprout: 0, sapling: 0, tree: 0 };
+    (allSprouts || []).forEach((row) => {
+      const lc = row.lifecycle;
+      if (lc in lifecycleCounts) lifecycleCounts[lc]++;
+    });
+
+    // Count by lens (top 10)
+    const { data: lensCounts } = await supabaseAdmin
+      .from('sprouts')
+      .select('provenance')
+      .not('provenance->lens->id', 'is', null);
+
+    const lensMap = new Map();
+    (lensCounts || []).forEach((row) => {
+      const lens = row.provenance?.lens;
+      if (lens?.id) {
+        const existing = lensMap.get(lens.id);
+        if (existing) {
+          existing.count++;
+        } else {
+          lensMap.set(lens.id, { id: lens.id, name: lens.name || 'Unknown', count: 1 });
+        }
+      }
+    });
+
+    const byLens = Array.from(lensMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Recent count (last 24 hours)
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await supabaseAdmin
+      .from('sprouts')
+      .select('*', { count: 'exact', head: true })
+      .gte('captured_at', yesterday);
+
+    res.json({
+      total: total || 0,
+      byLifecycle: lifecycleCounts,
+      byLens,
+      recentCount: recentCount || 0,
+    });
+  } catch (error) {
+    console.error('[Sprout] Stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

@@ -1,16 +1,22 @@
 // hooks/useSproutStorage.ts
 // Sprint: Sprout System
-// localStorage CRUD operations for sprout persistence
+// localStorage CRUD operations for sprout persistence with optional server sync
 
 import { useState, useCallback, useEffect } from 'react';
 import {
   Sprout,
   SproutStorage,
+  SproutProvenance,
   isValidSproutStorage,
   migrateStorageToV2,
   SPROUT_STORAGE_KEY,
   CURRENT_STORAGE_VERSION
 } from '../src/core/schema/sprout';
+import { getSessionId } from '../src/lib/session';
+
+// Check storage mode from environment variable
+// @ts-expect-error - Vite env variable
+const STORAGE_MODE = import.meta.env?.VITE_SPROUT_STORAGE || 'local';
 
 /**
  * Generate a session ID for this browser instance
@@ -108,9 +114,66 @@ export function useSproutStorage() {
   }, []);
 
   /**
-   * Add a new sprout to storage
+   * Add a new sprout to storage (supports both local and server modes)
    */
-  const addSprout = useCallback((sprout: Sprout): boolean => {
+  const addSprout = useCallback(async (sprout: Sprout): Promise<boolean> => {
+    // Server mode: POST to API, fall back to local on failure
+    if (STORAGE_MODE === 'server') {
+      try {
+        const response = await fetch('/api/sprouts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: sprout.query,
+            response: sprout.response,
+            provenance: sprout.provenance,
+            tags: sprout.tags,
+            note: sprout.notes,
+            sessionId: getSessionId(),
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        const { sprout: serverSprout } = await response.json();
+
+        // Map server response to client schema
+        const mappedSprout: Sprout = {
+          id: serverSprout.id,
+          query: serverSprout.query,
+          response: serverSprout.response,
+          provenance: serverSprout.provenance as SproutProvenance | undefined,
+          personaId: serverSprout.provenance?.lens?.id || null,
+          journeyId: serverSprout.provenance?.journey?.id || null,
+          hubId: serverSprout.provenance?.hub?.id || null,
+          nodeId: serverSprout.provenance?.node?.id || null,
+          tags: serverSprout.tags || [],
+          notes: serverSprout.note,
+          status: serverSprout.lifecycle || 'sprout',
+          capturedAt: serverSprout.captured_at,
+          sessionId: serverSprout.session_id || getSessionId(),
+          creatorId: null,
+        };
+
+        // Also save locally for offline access
+        const newStorage: SproutStorage = {
+          ...storage,
+          sprouts: [mappedSprout, ...storage.sprouts]
+        };
+        saveStorage(newStorage);
+        setStorage(newStorage);
+
+        console.log('[SproutStorage] Server saved sprout:', mappedSprout.id.slice(0, 8));
+        return true;
+      } catch (error) {
+        console.warn('[SproutStorage] Server save failed, falling back to local:', error);
+        // Fall through to local save
+      }
+    }
+
+    // Local mode (default or fallback)
     try {
       const newStorage: SproutStorage = {
         ...storage,
