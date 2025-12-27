@@ -5,7 +5,7 @@ export {
   type EngagementContext,
   type EngagementEvent,
   type Journey,
-  type JourneyStep,
+  type JourneyWaypoint,
   initialContext,
 } from './types';
 // Guards and actions are now defined inline in machine.ts using setup()

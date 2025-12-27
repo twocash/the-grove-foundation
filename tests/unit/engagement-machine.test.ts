@@ -1,22 +1,23 @@
 // tests/unit/engagement-machine.test.ts
+// Sprint: journey-system-v2 - Updated to use waypoints
 
 import { describe, test, expect, beforeEach } from 'vitest';
 import { createActor, type Actor } from 'xstate';
 import {
   engagementMachine,
-  type EngagementContext,
   type Journey
 } from '../../src/core/engagement';
 
 const mockJourney: Journey = {
   id: 'test-journey',
-  name: 'Test Journey',
-  hubId: 'test-hub',
-  steps: [
-    { id: 'step-1', title: 'Step 1', content: 'Content 1' },
-    { id: 'step-2', title: 'Step 2', content: 'Content 2' },
-    { id: 'step-3', title: 'Step 3', content: 'Content 3' },
+  title: 'Test Journey',
+  description: 'A test journey for unit tests',
+  waypoints: [
+    { id: 'waypoint-1', title: 'Waypoint 1', prompt: 'Prompt 1' },
+    { id: 'waypoint-2', title: 'Waypoint 2', prompt: 'Prompt 2' },
+    { id: 'waypoint-3', title: 'Waypoint 3', prompt: 'Prompt 3' },
   ],
+  completionMessage: 'Test journey complete!',
 };
 
 describe('Engagement Machine', () => {
@@ -29,11 +30,11 @@ describe('Engagement Machine', () => {
 
   describe('Initial State', () => {
     test('starts in anonymous session state', () => {
-      expect(actor.getSnapshot().matches('session.anonymous')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'anonymous' })).toBe(true);
     });
 
     test('starts with terminal closed', () => {
-      expect(actor.getSnapshot().matches('terminal.closed')).toBe(true);
+      expect(actor.getSnapshot().matches({ terminal: 'closed' })).toBe(true);
     });
 
     test('starts with null lens', () => {
@@ -48,7 +49,7 @@ describe('Engagement Machine', () => {
   describe('Session Transitions', () => {
     test('SELECT_LENS transitions from anonymous to lensActive', () => {
       actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });
-      expect(actor.getSnapshot().matches('session.lensActive')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'lensActive' })).toBe(true);
     });
 
     test('SELECT_LENS sets lens in context', () => {
@@ -67,7 +68,7 @@ describe('Engagement Machine', () => {
     test('START_JOURNEY transitions to journeyActive', () => {
       actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });
       actor.send({ type: 'START_JOURNEY', journey: mockJourney });
-      expect(actor.getSnapshot().matches('session.journeyActive')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'journeyActive' })).toBe(true);
     });
 
     test('START_JOURNEY initializes journey context', () => {
@@ -82,7 +83,7 @@ describe('Engagement Machine', () => {
       actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });
       actor.send({ type: 'START_JOURNEY', journey: mockJourney });
       actor.send({ type: 'EXIT_JOURNEY' });
-      expect(actor.getSnapshot().matches('session.lensActive')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'lensActive' })).toBe(true);
       expect(actor.getSnapshot().context.journey).toBeNull();
     });
 
@@ -90,20 +91,20 @@ describe('Engagement Machine', () => {
       actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });
       actor.send({ type: 'START_JOURNEY', journey: mockJourney });
       actor.send({ type: 'COMPLETE_JOURNEY' });
-      expect(actor.getSnapshot().matches('session.journeyComplete')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'journeyComplete' })).toBe(true);
     });
   });
 
   describe('Terminal Transitions', () => {
     test('OPEN_TERMINAL transitions to open', () => {
       actor.send({ type: 'OPEN_TERMINAL' });
-      expect(actor.getSnapshot().matches('terminal.open')).toBe(true);
+      expect(actor.getSnapshot().matches({ terminal: 'open' })).toBe(true);
     });
 
     test('CLOSE_TERMINAL transitions to closed', () => {
       actor.send({ type: 'OPEN_TERMINAL' });
       actor.send({ type: 'CLOSE_TERMINAL' });
-      expect(actor.getSnapshot().matches('terminal.closed')).toBe(true);
+      expect(actor.getSnapshot().matches({ terminal: 'closed' })).toBe(true);
     });
 
     test('terminal state is independent of session state', () => {
@@ -115,8 +116,8 @@ describe('Engagement Machine', () => {
       actor.send({ type: 'OPEN_TERMINAL' });
 
       // Both states independent
-      expect(actor.getSnapshot().matches('session.journeyActive')).toBe(true);
-      expect(actor.getSnapshot().matches('terminal.open')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'journeyActive' })).toBe(true);
+      expect(actor.getSnapshot().matches({ terminal: 'open' })).toBe(true);
     });
   });
 
@@ -125,7 +126,7 @@ describe('Engagement Machine', () => {
       // Try to start journey without lens
       actor.send({ type: 'START_JOURNEY', journey: mockJourney });
       // Should still be anonymous
-      expect(actor.getSnapshot().matches('session.anonymous')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'anonymous' })).toBe(true);
     });
 
     test('ADVANCE_STEP allowed when not at end', () => {
@@ -173,13 +174,14 @@ describe('Engagement Machine', () => {
 
       const newJourney: Journey = {
         id: 'new-journey',
-        name: 'New Journey',
-        hubId: 'new-hub',
-        steps: [{ id: 'step-a', title: 'Step A', content: 'Content A' }],
+        title: 'New Journey',
+        description: 'A new test journey',
+        waypoints: [{ id: 'waypoint-a', title: 'Waypoint A', prompt: 'Prompt A' }],
+        completionMessage: 'New journey complete!',
       };
 
       actor.send({ type: 'START_JOURNEY', journey: newJourney });
-      expect(actor.getSnapshot().matches('session.journeyActive')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'journeyActive' })).toBe(true);
       expect(actor.getSnapshot().context.journey).toEqual(newJourney);
     });
 
@@ -189,7 +191,7 @@ describe('Engagement Machine', () => {
       actor.send({ type: 'COMPLETE_JOURNEY' });
       actor.send({ type: 'EXIT_JOURNEY' });
 
-      expect(actor.getSnapshot().matches('session.lensActive')).toBe(true);
+      expect(actor.getSnapshot().matches({ session: 'lensActive' })).toBe(true);
       expect(actor.getSnapshot().context.journey).toBeNull();
     });
   });

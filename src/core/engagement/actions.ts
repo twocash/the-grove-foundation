@@ -28,7 +28,7 @@ export const actions = {
     journeyProgress: () => 0,
     journeyTotal: ({ event }) => {
       const e = event as Extract<EngagementEvent, { type: 'START_JOURNEY' }>;
-      return e.journey.steps.length;
+      return e.journey.waypoints.length;
     },
   }),
 

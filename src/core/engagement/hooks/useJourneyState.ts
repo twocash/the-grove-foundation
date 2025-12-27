@@ -1,9 +1,10 @@
 // src/core/engagement/hooks/useJourneyState.ts
+// Sprint: journey-system-v2 - Updated to use schema types (waypoints)
 
 import { useCallback, useMemo, useSyncExternalStore, useEffect } from 'react';
 import type { Actor } from 'xstate';
 import type { EngagementMachine } from '../machine';
-import type { Journey, JourneyStep } from '../types';
+import type { Journey, JourneyWaypoint } from '../../schema/journey';
 import {
   getCompletedJourneys,
   markJourneyCompleted,
@@ -23,7 +24,7 @@ export interface UseJourneyStateReturn {
   isComplete: boolean;
 
   // Computed
-  currentStep: JourneyStep | null;
+  currentWaypoint: JourneyWaypoint | null;
   progressPercent: number;
 
   // Actions
@@ -53,10 +54,10 @@ export function useJourneyState({ actor }: UseJourneyStateOptions): UseJourneySt
   const isActive = snapshot.matches('session.journeyActive');
   const isComplete = snapshot.matches('session.journeyComplete');
 
-  // Computed values
-  const currentStep = useMemo(() => {
-    if (!journey || !journey.steps) return null;
-    return journey.steps[journeyProgress] ?? null;
+  // Computed values - now uses waypoints
+  const currentWaypoint = useMemo(() => {
+    if (!journey || !journey.waypoints) return null;
+    return journey.waypoints[journeyProgress] ?? null;
   }, [journey, journeyProgress]);
 
   const progressPercent = useMemo(() => {
@@ -101,7 +102,7 @@ export function useJourneyState({ actor }: UseJourneyStateOptions): UseJourneySt
     journeyTotal,
     isActive,
     isComplete,
-    currentStep,
+    currentWaypoint,
     progressPercent,
     startJourney,
     advanceStep,

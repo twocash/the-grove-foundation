@@ -1,4 +1,5 @@
 // tests/unit/use-journey-state.test.ts
+// Sprint: journey-system-v2 - Updated to use waypoints
 // @vitest-environment jsdom
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
@@ -7,16 +8,18 @@ import { createActor } from 'xstate';
 import { engagementMachine } from '../../src/core/engagement';
 import { useJourneyState } from '../../src/core/engagement/hooks/useJourneyState';
 import { clearCompletedJourneys } from '../../src/core/engagement/persistence';
+import type { Journey } from '../../src/core/schema/journey';
 
-const mockJourney = {
+const mockJourney: Journey = {
   id: 'test-journey',
-  name: 'Test Journey',
-  hubId: 'test-hub',
-  steps: [
-    { id: 'step-1', title: 'Step 1', content: 'Content 1' },
-    { id: 'step-2', title: 'Step 2', content: 'Content 2' },
-    { id: 'step-3', title: 'Step 3', content: 'Content 3' },
+  title: 'Test Journey',
+  description: 'A test journey for unit tests',
+  waypoints: [
+    { id: 'waypoint-1', title: 'Waypoint 1', prompt: 'Prompt 1' },
+    { id: 'waypoint-2', title: 'Waypoint 2', prompt: 'Prompt 2' },
+    { id: 'waypoint-3', title: 'Waypoint 3', prompt: 'Prompt 3' },
   ],
+  completionMessage: 'Test journey complete!',
 };
 
 describe('useJourneyState', () => {
@@ -64,19 +67,19 @@ describe('useJourneyState', () => {
   });
 
   describe('computed values', () => {
-    test('currentStep returns null when no journey', () => {
+    test('currentWaypoint returns null when no journey', () => {
       const { result } = renderHook(() => useJourneyState({ actor }));
-      expect(result.current.currentStep).toBeNull();
+      expect(result.current.currentWaypoint).toBeNull();
     });
 
-    test('currentStep returns first step after start', () => {
+    test('currentWaypoint returns first waypoint after start', () => {
       const { result } = renderHook(() => useJourneyState({ actor }));
 
       act(() => {
         result.current.startJourney(mockJourney);
       });
 
-      expect(result.current.currentStep).toEqual(mockJourney.steps[0]);
+      expect(result.current.currentWaypoint).toEqual(mockJourney.waypoints[0]);
     });
 
     test('progressPercent is 0 when no journey', () => {
@@ -91,14 +94,14 @@ describe('useJourneyState', () => {
         result.current.startJourney(mockJourney);
       });
 
-      // Step 1 of 3 = 33%
+      // Waypoint 1 of 3 = 33%
       expect(result.current.progressPercent).toBe(33);
 
       act(() => {
         result.current.advanceStep();
       });
 
-      // Step 2 of 3 = 67%
+      // Waypoint 2 of 3 = 67%
       expect(result.current.progressPercent).toBe(67);
     });
   });
@@ -129,7 +132,7 @@ describe('useJourneyState', () => {
       });
 
       expect(result.current.journeyProgress).toBe(1);
-      expect(result.current.currentStep).toEqual(mockJourney.steps[1]);
+      expect(result.current.currentWaypoint).toEqual(mockJourney.waypoints[1]);
     });
 
     test('completeJourney transitions to complete state', () => {

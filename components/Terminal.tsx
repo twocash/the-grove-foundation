@@ -1089,10 +1089,15 @@ const Terminal: React.FC<TerminalProps> = ({
                   welcome={welcomeContent}
                   onPromptClick={(prompt, command, journeyId) => {
                     if (journeyId) {
-                      // Start journey via engagement bus
+                      // Start journey via XState + EngagementBus
                       const journey = getJourneyById(journeyId);
                       if (journey) {
-                        emit.journeyStarted(journeyId, journey.waypoints.length);
+                        // Sprint: journey-system-v2 - Call BOTH state systems
+                        engStartJourney(journey);  // XState state transition
+                        emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
+                      } else {
+                        console.warn(`[Terminal] Journey not found: ${journeyId}`);
+                        handleSend(prompt);  // Fallback: send as regular prompt
                       }
                     } else {
                       command ? handleSend(command) : handleSend(prompt);
@@ -1313,10 +1318,15 @@ const Terminal: React.FC<TerminalProps> = ({
                     welcome={welcomeContent}
                     onPromptClick={(prompt, command, journeyId) => {
                       if (journeyId) {
-                        // Start journey via engagement bus
+                        // Start journey via XState + EngagementBus
                         const journey = getJourneyById(journeyId);
                         if (journey) {
-                          emit.journeyStarted(journeyId, journey.waypoints.length);
+                          // Sprint: journey-system-v2 - Call BOTH state systems
+                          engStartJourney(journey);  // XState state transition
+                          emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
+                        } else {
+                          console.warn(`[Terminal] Journey not found: ${journeyId}`);
+                          handleSend(prompt);  // Fallback: send as regular prompt
                         }
                       } else {
                         command ? handleSend(command) : handleSend(prompt);

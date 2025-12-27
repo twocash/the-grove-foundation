@@ -1,25 +1,17 @@
 // src/core/engagement/types.ts
+// Sprint: journey-system-v2 - Aligned with schema types (waypoints)
 
-export interface JourneyStep {
-  id: string;
-  title: string;
-  content: string;
-}
-
-export interface Journey {
-  id: string;
-  name: string;
-  hubId: string;
-  steps: JourneyStep[];
-}
+// Re-export journey types from schema for consistency
+// The schema types are the canonical source of truth
+export type { Journey, JourneyWaypoint } from '../schema/journey';
 
 export interface EngagementContext {
   // Lens state
   lens: string | null;
   lensSource: 'url' | 'localStorage' | 'selection' | null;
 
-  // Journey state
-  journey: Journey | null;
+  // Journey state - uses schema Journey type with waypoints
+  journey: import('../schema/journey').Journey | null;
   journeyProgress: number;
   journeyTotal: number;
 
@@ -41,7 +33,7 @@ export const initialContext: EngagementContext = {
 export type EngagementEvent =
   | { type: 'SELECT_LENS'; lens: string; source: 'url' | 'localStorage' | 'selection' }
   | { type: 'CHANGE_LENS'; lens: string }
-  | { type: 'START_JOURNEY'; journey: Journey }
+  | { type: 'START_JOURNEY'; journey: import('../schema/journey').Journey }
   | { type: 'ADVANCE_STEP' }
   | { type: 'COMPLETE_JOURNEY' }
   | { type: 'EXIT_JOURNEY' }

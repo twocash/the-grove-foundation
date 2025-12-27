@@ -1,8 +1,10 @@
 // src/core/engagement/machine.ts
+// Sprint: journey-system-v2 - Updated to use schema types (waypoints)
 
 import { setup, assign } from 'xstate';
 import { initialContext } from './types';
-import type { EngagementContext, EngagementEvent, Journey } from './types';
+import type { EngagementContext, EngagementEvent } from './types';
+import type { Journey } from '../schema/journey';
 
 export const engagementMachine = setup({
   types: {
@@ -30,7 +32,7 @@ export const engagementMachine = setup({
         return {
           journey: event.journey,
           journeyProgress: 0,
-          journeyTotal: event.journey.steps.length,
+          journeyTotal: event.journey.waypoints.length,
         };
       }
       return {};
