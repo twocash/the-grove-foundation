@@ -36,6 +36,26 @@ Desired state: User lands → brief orientation → guided discovery that adapts
 | Journey config | Schema System (Pattern 3) | New schema file: `journey.ts` with declarative waypoints |
 | Prompt computation | Quantum Interface (Pattern 1) | New hook: `useSuggestedPrompts()` |
 
+## Canonical Source Audit
+
+| Capability Needed | Canonical Home | Current Approach | Recommendation |
+|-------------------|----------------|------------------|----------------|
+| Terminal prompts | `TerminalWelcome.tsx` | Static prompts from reality | **EXTEND** with stage-awareness |
+| Session ID | `src/lib/session.ts` | ✅ Canonical exists | **USE** existing |
+| Lens context | `useQuantumInterface()` | ✅ Canonical exists | **USE** existing |
+| Sprout storage | `useSproutStorage.ts` | ✅ Canonical exists | **EXTEND** to emit telemetry |
+| Server sync | `lib/supabase.js` | ✅ Canonical exists | **USE** existing |
+
+### No Duplication Certification
+
+I confirm this sprint does not create parallel implementations of existing capabilities. All new code:
+- Uses existing session ID infrastructure
+- Uses existing Supabase client
+- Extends existing hooks rather than creating parallel state
+- Integrates with existing Quantum Interface pattern
+
+---
+
 ## New Patterns Proposed
 
 ### Proposed: Session Engagement Telemetry (Pattern 11)
