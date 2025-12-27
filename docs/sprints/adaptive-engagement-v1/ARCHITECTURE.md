@@ -682,6 +682,33 @@ export function loadStagePrompts() {
 
 ---
 
+## Test Architecture
+
+### Test Categories
+
+| Category | Location | Purpose |
+|----------|----------|---------|
+| Unit | `tests/unit/` | Stage computation, prompt filtering, variable substitution |
+| Integration | `tests/integration/` | Hook behavior, telemetry flow, server sync |
+| E2E | `tests/e2e/` | User stage progression, journey entry |
+
+### Behavior Tests Needed
+
+| User Action | Expected Outcome | Test File |
+|-------------|------------------|-----------|
+| New user visits Terminal | ARRIVAL prompts visible | `adaptive-prompts.spec.ts` |
+| User sends 3 messages | Stage advances to ORIENTED | `adaptive-prompts.spec.ts` |
+| User captures sprout | Stage advances to ENGAGED | `adaptive-prompts.spec.ts` |
+| Returning user visits | Starts at ORIENTED (not ARRIVAL) | `adaptive-prompts.spec.ts` |
+| User switches lens | Prompts update immediately | `adaptive-prompts.spec.ts` |
+| User asks "Why Grove?" | Journey implicit entry triggers | `journey-implicit-entry.spec.ts` |
+
+### Health Integration
+
+Tests do not report to Health system in this sprint (future enhancement).
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests
