@@ -5,6 +5,14 @@
 import React from 'react';
 import { getPersonaColors } from '../../data/narratives-schema';
 
+// Stage display config
+const STAGE_DISPLAY: Record<string, { emoji: string; label: string }> = {
+  ARRIVAL: { emoji: '👋', label: 'New' },
+  ORIENTED: { emoji: '🧭', label: 'Orienting' },
+  EXPLORING: { emoji: '🔍', label: 'Exploring' },
+  ENGAGED: { emoji: '🌲', label: 'Engaged' },
+};
+
 interface TerminalHeaderProps {
   onMenuClick?: () => void;
   onMinimize?: () => void;  // Optional for embedded mode
@@ -20,6 +28,9 @@ interface TerminalHeaderProps {
   journeyName?: string;
   currentStreak?: number;
   showStreak?: boolean;
+  // Stage indicator
+  stage?: string;
+  exchangeCount?: number;
   onFieldClick?: () => void;
   onLensClick?: () => void;
   onJourneyClick?: () => void;
@@ -66,6 +77,8 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   journeyName,
   currentStreak,
   showStreak = true,
+  stage,
+  exchangeCount,
   onFieldClick,
   onLensClick,
   onJourneyClick,
@@ -73,6 +86,7 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
 }) => {
   const lensColors = lensColor ? getPersonaColors(lensColor) : null;
   const isEmbedded = variant === 'embedded';
+  const stageInfo = stage ? STAGE_DISPLAY[stage] : null;
 
   return (
     <div className={`px-4 py-2.5 border-b flex items-center gap-3 flex-nowrap ${
@@ -103,6 +117,20 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
         {isScholarMode && (
           <span className="bg-[var(--neon-green)] text-white px-1.5 py-0.5 rounded text-[8px] font-bold tracking-wider uppercase">
             Scholar
+          </span>
+        )}
+        {/* Stage Indicator */}
+        {stageInfo && (
+          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
+            isEmbedded
+              ? 'bg-[var(--chat-glass)] text-[var(--chat-text-muted)]'
+              : 'bg-[var(--glass-elevated)] text-[var(--glass-text-subtle)]'
+          }`}>
+            <span>{stageInfo.emoji}</span>
+            <span>{stageInfo.label}</span>
+            {exchangeCount !== undefined && exchangeCount > 0 && (
+              <span className="opacity-60">• {exchangeCount}</span>
+            )}
           </span>
         )}
       </div>

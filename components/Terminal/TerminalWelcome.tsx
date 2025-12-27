@@ -35,11 +35,21 @@ const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
     lensName,
   });
 
+  // Debug logging
+  console.log('[TerminalWelcome] Rendering with:', {
+    stage,
+    adaptivePromptsCount: adaptivePrompts.length,
+    lensId,
+    lensName,
+  });
+
   // Use adaptive prompts if available, fallback to static
   const displayPrompts: Array<{ id: string; text: string; command?: string }> =
     adaptivePrompts.length > 0
       ? adaptivePrompts.map(p => ({ id: p.id, text: p.text, command: p.command }))
       : welcome.prompts.map((text, i) => ({ id: `static-${i}`, text }));
+
+  console.log('[TerminalWelcome] displayPrompts:', displayPrompts.map(p => p.text));
 
   const stageInfo = STAGE_LABELS[stage] ?? STAGE_LABELS.ARRIVAL;
 

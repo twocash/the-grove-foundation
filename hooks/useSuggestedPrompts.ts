@@ -55,15 +55,28 @@ export function useSuggestedPrompts(
   const engagementState = useEngagementState();
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Compute stage from engagement bus state
-  const stage = useMemo(() => computeStageFromEngagement({
+  // Debug logging
+  console.log('[useSuggestedPrompts] engagementState:', {
     exchangeCount: engagementState.exchangeCount,
     topicsExplored: engagementState.topicsExplored,
     journeysCompleted: engagementState.journeysCompleted,
-  }), [engagementState.exchangeCount, engagementState.topicsExplored, engagementState.journeysCompleted]);
+  });
+
+  // Compute stage from engagement bus state
+  const stage = useMemo(() => {
+    const computed = computeStageFromEngagement({
+      exchangeCount: engagementState.exchangeCount,
+      topicsExplored: engagementState.topicsExplored,
+      journeysCompleted: engagementState.journeysCompleted,
+    });
+    console.log('[useSuggestedPrompts] Computed stage:', computed);
+    return computed;
+  }, [engagementState.exchangeCount, engagementState.topicsExplored, engagementState.journeysCompleted]);
 
   const prompts = useMemo(() => {
+    console.log('[useSuggestedPrompts] Looking up stage config for:', stage);
     const stageConfig = stagePromptsConfig.stages[stage];
+    console.log('[useSuggestedPrompts] stageConfig:', stageConfig ? `${stageConfig.prompts.length} prompts` : 'NOT FOUND');
     if (!stageConfig) return [];
 
     // Filter by lens

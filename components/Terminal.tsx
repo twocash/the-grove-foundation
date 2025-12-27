@@ -197,8 +197,24 @@ const Terminal: React.FC<TerminalProps> = ({
     setCustomLens: setRevealCustomLens,
     getMinutesActive,
     // NEW: Direct access to engagement bus for event emission
-    emit
+    emit,
+    // Stage tracking for adaptive engagement
+    engagementState
   } = useEngagementBridge();
+
+  // Compute engagement stage from state
+  const computedStage = useMemo(() => {
+    if (engagementState.journeysCompleted >= 1 || engagementState.exchangeCount >= 10) {
+      return 'ENGAGED';
+    }
+    if (engagementState.topicsExplored.length >= 2 || engagementState.exchangeCount >= 5) {
+      return 'EXPLORING';
+    }
+    if (engagementState.exchangeCount >= 3) {
+      return 'ORIENTED';
+    }
+    return 'ARRIVAL';
+  }, [engagementState.journeysCompleted, engagementState.exchangeCount, engagementState.topicsExplored.length]);
 
   // Quantum Interface for lens-reactive content (Sprint: terminal-quantum-welcome-v1)
   const { reality, activeLens: quantumLens, isCollapsing } = useQuantumInterface();
@@ -1043,6 +1059,8 @@ const Terminal: React.FC<TerminalProps> = ({
           journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
           currentStreak={currentStreak}
           showStreak={showStreakDisplay}
+          stage={computedStage}
+          exchangeCount={engagementState.exchangeCount}
           onLensClick={() => actions.setOverlay({ type: 'lens-picker' })}
           onJourneyClick={() => actions.setOverlay({ type: 'journey-picker' })}
           onStreakClick={() => handleOpenModal('stats')}
@@ -1167,6 +1185,8 @@ const Terminal: React.FC<TerminalProps> = ({
                 journeyName={getJourney(engActiveJourneyId || '')?.title || (currentThread.length > 0 ? 'Guided' : 'Self-Guided')}
                 currentStreak={currentStreak}
                 showStreak={showStreakDisplay}
+                stage={computedStage}
+                exchangeCount={engagementState.exchangeCount}
                 onLensClick={() => actions.setOverlay({ type: 'lens-picker' })}
                 onJourneyClick={() => actions.setOverlay({ type: 'journey-picker' })}
                 onStreakClick={() => actions.openModal('stats')}
