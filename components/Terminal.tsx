@@ -27,6 +27,7 @@ import { SproutProvenance } from '../src/core/schema/sprout';
 import { useOptionalWidgetUI } from '../src/widget/WidgetUIContext';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { getPersona } from '../data/default-personas';
+import { getJourneyById } from '../src/data/journeys';
 import { getFormattedTerminalWelcome, getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../src/data/quantum-content';
 import { useQuantumInterface } from '../src/surface/hooks/useQuantumInterface';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
@@ -1086,7 +1087,17 @@ const Terminal: React.FC<TerminalProps> = ({
               {terminalState.messages.length === 0 && session.activeLens && (
                 <TerminalWelcome
                   welcome={welcomeContent}
-                  onPromptClick={(prompt, command) => command ? handleSend(command) : handleSend(prompt)}
+                  onPromptClick={(prompt, command, journeyId) => {
+                    if (journeyId) {
+                      // Start journey via engagement bus
+                      const journey = getJourneyById(journeyId);
+                      if (journey) {
+                        emit.journeyStarted(journeyId, journey.waypoints.length);
+                      }
+                    } else {
+                      command ? handleSend(command) : handleSend(prompt);
+                    }
+                  }}
                   lensId={engLens}
                   lensName={activeLensData?.publicLabel}
                   variant="embedded"
@@ -1300,7 +1311,17 @@ const Terminal: React.FC<TerminalProps> = ({
                 {terminalState.messages.length === 0 && session.activeLens && (
                   <TerminalWelcome
                     welcome={welcomeContent}
-                    onPromptClick={(prompt, command) => command ? handleSend(command) : handleSend(prompt)}
+                    onPromptClick={(prompt, command, journeyId) => {
+                      if (journeyId) {
+                        // Start journey via engagement bus
+                        const journey = getJourneyById(journeyId);
+                        if (journey) {
+                          emit.journeyStarted(journeyId, journey.waypoints.length);
+                        }
+                      } else {
+                        command ? handleSend(command) : handleSend(prompt);
+                      }
+                    }}
                     lensId={engLens}
                     lensName={activeLensData?.publicLabel}
                     variant={variant}

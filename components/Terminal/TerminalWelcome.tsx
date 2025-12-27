@@ -11,7 +11,7 @@ import { useEngagementState } from '../../hooks/useEngagementBus';
 
 interface TerminalWelcomeProps {
   welcome: TerminalWelcomeType;
-  onPromptClick: (prompt: string, command?: string) => void;
+  onPromptClick: (prompt: string, command?: string, journeyId?: string) => void;
   lensId?: string | null;
   lensName?: string;
   variant?: 'overlay' | 'embedded';
@@ -43,17 +43,17 @@ const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
   console.log('[TerminalWelcome] Stage:', engagementState.stage, 'Prompts:', adaptivePrompts.length);
 
   // Use adaptive prompts if available, fallback to static
-  const displayPrompts: Array<{ id: string; text: string; command?: string }> =
+  const displayPrompts: Array<{ id: string; text: string; command?: string; journeyId?: string }> =
     adaptivePrompts.length > 0
-      ? adaptivePrompts.map(p => ({ id: p.id, text: p.text, command: p.command }))
+      ? adaptivePrompts.map(p => ({ id: p.id, text: p.text, command: p.command, journeyId: p.journeyId }))
       : welcome.prompts.map((text, i) => ({ id: `static-${i}`, text }));
 
   console.log('[TerminalWelcome] displayPrompts:', displayPrompts.map(p => p.text));
 
   const stageInfo = STAGE_LABELS[stage] ?? STAGE_LABELS.ARRIVAL;
 
-  const handlePromptClick = (prompt: { text: string; command?: string }) => {
-    onPromptClick(prompt.text, prompt.command);
+  const handlePromptClick = (prompt: { text: string; command?: string; journeyId?: string }) => {
+    onPromptClick(prompt.text, prompt.command, prompt.journeyId);
   };
 
   return (

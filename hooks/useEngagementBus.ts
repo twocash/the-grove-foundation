@@ -135,9 +135,12 @@ class EngagementBusSingleton {
             sessionStartedAt: new Date().toISOString(),
             lastActivityAt: new Date().toISOString(),
             minutesActive: 0,
-            // Preserve cross-session state
+            // Preserve cross-session state (with null checks for arrays)
             revealsShown: parsed.revealsShown || [],
             revealsAcknowledged: parsed.revealsAcknowledged || [],
+            topicsExplored: parsed.topicsExplored || [],
+            cardsVisited: parsed.cardsVisited || [],
+            allTopicsExplored: parsed.allTopicsExplored || [],
             hasCustomLens: parsed.hasCustomLens || false,
             terminatorModeUnlocked: parsed.terminatorModeUnlocked || false
           };
@@ -146,7 +149,13 @@ class EngagementBusSingleton {
         return {
           ...DEFAULT_ENGAGEMENT_STATE,
           ...parsed,
-          lastActivityAt: new Date().toISOString()
+          lastActivityAt: new Date().toISOString(),
+          // Defensive null checks for arrays
+          topicsExplored: parsed.topicsExplored || [],
+          cardsVisited: parsed.cardsVisited || [],
+          allTopicsExplored: parsed.allTopicsExplored || [],
+          revealsShown: parsed.revealsShown || [],
+          revealsAcknowledged: parsed.revealsAcknowledged || []
         };
       }
     } catch (err) {
@@ -303,9 +312,10 @@ class EngagementBusSingleton {
 
       case 'TOPIC_EXPLORED': {
         const payload = event.payload as EventPayloads['TOPIC_EXPLORED'];
-        if (!this.state.topicsExplored.includes(payload.topicId)) {
+        const currentTopics = this.state.topicsExplored || [];
+        if (!currentTopics.includes(payload.topicId)) {
           this.updateState({
-            topicsExplored: [...this.state.topicsExplored, payload.topicId]
+            topicsExplored: [...currentTopics, payload.topicId]
           });
         }
         break;
@@ -313,9 +323,10 @@ class EngagementBusSingleton {
 
       case 'CARD_VISITED': {
         const payload = event.payload as EventPayloads['CARD_VISITED'];
-        if (!this.state.cardsVisited.includes(payload.cardId)) {
+        const currentCards = this.state.cardsVisited || [];
+        if (!currentCards.includes(payload.cardId)) {
           this.updateState({
-            cardsVisited: [...this.state.cardsVisited, payload.cardId]
+            cardsVisited: [...currentCards, payload.cardId]
           });
         }
         break;
@@ -477,14 +488,33 @@ export function useEngagementBus(): EngagementBusAPI {
 
 /**
  * Hook for accessing engagement state with auto-updates
+ * Optimized to prevent unnecessary re-renders using shallow comparison
  */
 export function useEngagementState(): EngagementState {
   const bus = useMemo(() => getBus(), []);
   const [state, setState] = useState<EngagementState>(bus.getState());
+  const prevStateRef = useRef<EngagementState>(state);
 
   useEffect(() => {
     return bus.onStateChange((newState) => {
-      setState(newState);
+      // Shallow compare to prevent unnecessary re-renders
+      const prev = prevStateRef.current;
+      const hasChanged =
+        prev.exchangeCount !== newState.exchangeCount ||
+        prev.stage !== newState.stage ||
+        prev.activeLensId !== newState.activeLensId ||
+        prev.topicsExplored?.length !== newState.topicsExplored?.length ||
+        prev.cardsVisited?.length !== newState.cardsVisited?.length ||
+        prev.revealsShown?.length !== newState.revealsShown?.length ||
+        prev.journeysCompleted !== newState.journeysCompleted ||
+        prev.sproutsCaptured !== newState.sproutsCaptured ||
+        prev.minutesActive !== newState.minutesActive ||
+        prev.activeJourney?.lensId !== newState.activeJourney?.lensId;
+
+      if (hasChanged) {
+        prevStateRef.current = newState;
+        setState(newState);
+      }
     });
   }, [bus]);
 
