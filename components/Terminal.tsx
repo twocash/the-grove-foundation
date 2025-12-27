@@ -1165,13 +1165,23 @@ const Terminal: React.FC<TerminalProps> = ({
                   <button
                     key={prompt.id}
                     onClick={() => {
-                      if (prompt.command) {
+                      if (prompt.journeyId) {
+                        // Start journey
+                        const journey = getJourney(prompt.journeyId);
+                        if (journey) {
+                          engStartJourney(journey);
+                        }
+                      } else if (prompt.command) {
                         handleSend(prompt.command);
                       } else {
                         handleSend(prompt.text);
                       }
                     }}
-                    className="px-3 py-1.5 text-xs bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)] rounded-full hover:bg-[var(--chat-glass-hover)] hover:border-[var(--chat-border-accent)] transition-colors"
+                    className={`px-3 py-1.5 text-xs border rounded-full transition-colors ${
+                      prompt.journeyId
+                        ? 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50 hover:bg-emerald-900/60 hover:border-emerald-500/50'
+                        : 'bg-[var(--chat-glass)] text-[var(--chat-text)] border-[var(--chat-glass-border)] hover:bg-[var(--chat-glass-hover)] hover:border-[var(--chat-border-accent)]'
+                    }`}
                   >
                     {prompt.text}
                   </button>
@@ -1580,18 +1590,33 @@ const Terminal: React.FC<TerminalProps> = ({
                     </div>
                     <div className="space-y-1.5">
                       {stagePrompts.map(prompt => (
-                        <SuggestionChip
-                          key={prompt.id}
-                          prompt={prompt.text}
-                          onClick={() => {
-                            if (prompt.command) {
-                              // Handle command prompts (e.g., /garden, /sprout)
-                              handleSend(prompt.command);
-                            } else {
-                              handleSend(prompt.text);
-                            }
-                          }}
-                        />
+                        prompt.journeyId ? (
+                          // Journey suggestion - styled differently
+                          <button
+                            key={prompt.id}
+                            onClick={() => {
+                              const journey = getJourney(prompt.journeyId!);
+                              if (journey) {
+                                engStartJourney(journey);
+                              }
+                            }}
+                            className="w-full text-left px-3 py-2 text-sm bg-emerald-900/30 text-emerald-300 border border-emerald-700/40 rounded-lg hover:bg-emerald-900/50 hover:border-emerald-500/50 transition-colors"
+                          >
+                            {prompt.text}
+                          </button>
+                        ) : (
+                          <SuggestionChip
+                            key={prompt.id}
+                            prompt={prompt.text}
+                            onClick={() => {
+                              if (prompt.command) {
+                                handleSend(prompt.command);
+                              } else {
+                                handleSend(prompt.text);
+                              }
+                            }}
+                          />
+                        )
                       ))}
                     </div>
                   </div>

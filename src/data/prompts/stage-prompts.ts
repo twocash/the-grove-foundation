@@ -41,6 +41,21 @@ export const stagePromptsConfig: StagePromptsConfig = {
           lensAffinity: ['academic-researcher'],
           weight: 1.5,
         },
+        // Journey suggestions for new users
+        {
+          id: 'journey-simulation',
+          text: '🗺️ The Ghost in the Machine',
+          intent: 'demonstration',
+          journeyId: 'simulation',
+          weight: 1.2,
+        },
+        {
+          id: 'journey-stakes',
+          text: '🗺️ The $380 Billion Bet',
+          intent: 'motivation',
+          journeyId: 'stakes',
+          weight: 1.0,
+        },
       ],
     },
     ORIENTED: {
@@ -72,6 +87,21 @@ export const stagePromptsConfig: StagePromptsConfig = {
           intent: 'discovery',
           leadsTo: 'core-concepts',
         },
+        // Journey suggestions for orienting users
+        {
+          id: 'journey-ratchet',
+          text: '🗺️ The Ratchet',
+          intent: 'motivation',
+          journeyId: 'ratchet',
+          weight: 1.1,
+        },
+        {
+          id: 'journey-stakes',
+          text: '🗺️ The $380 Billion Bet',
+          intent: 'motivation',
+          journeyId: 'stakes',
+          weight: 1.0,
+        },
       ],
     },
     EXPLORING: {
@@ -99,6 +129,29 @@ export const stagePromptsConfig: StagePromptsConfig = {
           id: 'implications',
           text: 'What are the implications of this approach?',
           intent: 'depth',
+        },
+        // Deeper journeys for explorers
+        {
+          id: 'journey-diary',
+          text: "🗺️ The Agent's Inner Voice",
+          intent: 'depth',
+          journeyId: 'diary',
+          weight: 1.1,
+        },
+        {
+          id: 'journey-architecture',
+          text: '🗺️ Under the Hood',
+          intent: 'depth',
+          journeyId: 'architecture',
+          lensAffinity: ['technical-builder', 'systems-architect'],
+          weight: 1.2,
+        },
+        {
+          id: 'journey-emergence',
+          text: '🗺️ The Emergence Pattern',
+          intent: 'depth',
+          journeyId: 'emergence',
+          weight: 1.0,
         },
       ],
     },
@@ -128,6 +181,28 @@ export const stagePromptsConfig: StagePromptsConfig = {
           id: 'share-discovery',
           text: 'I found something interesting to share',
           intent: 'contribution',
+        },
+        // Advanced journeys for engaged users
+        {
+          id: 'journey-architecture',
+          text: '🗺️ Under the Hood',
+          intent: 'depth',
+          journeyId: 'architecture',
+          weight: 1.0,
+        },
+        {
+          id: 'journey-emergence',
+          text: '🗺️ The Emergence Pattern',
+          intent: 'depth',
+          journeyId: 'emergence',
+          weight: 1.0,
+        },
+        {
+          id: 'journey-simulation',
+          text: '🗺️ The Ghost in the Machine',
+          intent: 'reflection',
+          journeyId: 'simulation',
+          weight: 0.8,
         },
       ],
     },

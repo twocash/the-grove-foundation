@@ -30,6 +30,7 @@ export interface SuggestedPrompt {
   // Routing
   leadsTo?: string;    // Hub ID or route
   command?: string;    // Terminal command (e.g., "/sprout")
+  journeyId?: string;  // Start a journey (renders as journey card)
 
   // Dynamic
   dynamic?: boolean;
