@@ -300,7 +300,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
     return null;
-  }, [engLens, getCustomLens, customLenses]);
+  }, [engLens, getPersona, getCustomLens, customLenses]);
 
   const enabledPersonas = getEnabledPersonas();
 
