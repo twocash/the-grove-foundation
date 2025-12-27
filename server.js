@@ -2044,6 +2044,10 @@ Generate collapsed reality. JSON only.`;
 
 // POST /api/sprouts - Create a new sprout
 app.post('/api/sprouts', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const { query, response, provenance, tags, note, sessionId } = req.body;
 
@@ -2090,6 +2094,10 @@ app.post('/api/sprouts', async (req, res) => {
 
 // GET /api/sprouts - List sprouts
 app.get('/api/sprouts', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const limit = parseInt(req.query.limit) || 50;
     const offset = parseInt(req.query.offset) || 0;
@@ -2134,6 +2142,10 @@ app.get('/api/sprouts', async (req, res) => {
 
 // GET /api/sprouts/:id - Get single sprout
 app.get('/api/sprouts/:id', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const { id } = req.params;
     const { data, error } = await supabaseAdmin
@@ -2155,6 +2167,10 @@ app.get('/api/sprouts/:id', async (req, res) => {
 
 // PATCH /api/sprouts/:id - Update sprout
 app.patch('/api/sprouts/:id', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const { id } = req.params;
     const { tags, note, lifecycle } = req.body;
@@ -2185,6 +2201,10 @@ app.patch('/api/sprouts/:id', async (req, res) => {
 
 // DELETE /api/sprouts/:id - Delete sprout
 app.delete('/api/sprouts/:id', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const { id } = req.params;
     const { error } = await supabaseAdmin
@@ -2206,6 +2226,10 @@ app.delete('/api/sprouts/:id', async (req, res) => {
 
 // POST /api/sprouts/search - Vector similarity search
 app.post('/api/sprouts/search', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     const { query, limit = 10, threshold = 0.7 } = req.body;
 
@@ -2258,6 +2282,10 @@ app.post('/api/sprouts/search', async (req, res) => {
 
 // GET /api/sprouts/stats - Aggregate statistics
 app.get('/api/sprouts/stats', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
   try {
     // Total count
     const { count: total } = await supabaseAdmin
