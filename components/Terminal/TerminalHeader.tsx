@@ -122,17 +122,20 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
             Scholar
           </span>
         )}
-        {/* Stage Indicator */}
+        {/* Stage Indicator - always visible with inline styles for debugging */}
         {stageInfo && (
-          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
-            isEmbedded
-              ? 'bg-[var(--chat-glass)] text-[var(--chat-text-muted)]'
-              : 'bg-[var(--glass-elevated)] text-[var(--glass-text-subtle)]'
-          }`}>
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]"
+            style={{
+              backgroundColor: 'rgba(6, 78, 59, 0.7)',
+              color: '#6ee7b7',
+              border: '1px solid rgba(16, 185, 129, 0.5)',
+            }}
+          >
             <span>{stageInfo.emoji}</span>
-            <span>{stageInfo.label}</span>
+            <span style={{ fontWeight: 500 }}>{stageInfo.label}</span>
             {exchangeCount !== undefined && exchangeCount > 0 && (
-              <span className="opacity-60">• {exchangeCount}</span>
+              <span style={{ color: 'rgba(110, 231, 183, 0.7)' }}>• {exchangeCount}</span>
             )}
           </span>
         )}

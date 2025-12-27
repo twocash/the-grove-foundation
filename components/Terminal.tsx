@@ -18,8 +18,10 @@ import { useCommands } from './Terminal/useCommands';
 import type { OverlayHandlers } from './Terminal/index';
 // Note: WelcomeInterstitial, LensPicker, JourneyList now rendered via TerminalOverlayRenderer
 import CognitiveBridge from './Terminal/CognitiveBridge';
+import { GardenModal, StatsModal } from './Terminal/Modals';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
+import { useSuggestedPrompts } from '../hooks/useSuggestedPrompts';
 import { telemetryCollector } from '../src/lib/telemetry';
 import { SproutProvenance } from '../src/core/schema/sprout';
 import { useOptionalWidgetUI } from '../src/widget/WidgetUIContext';
@@ -327,6 +329,13 @@ const Terminal: React.FC<TerminalProps> = ({
     }
     return null;
   }, [engLens, getPersona, getCustomLens, customLenses]);
+
+  // Stage-aware suggested prompts (Sprint: adaptive-engagement-v1)
+  const { prompts: stagePrompts, stage: promptStage } = useSuggestedPrompts({
+    lensId: activeLensData?.id,
+    lensName: activeLensData?.publicLabel,
+    maxPrompts: 3,
+  });
 
   const enabledPersonas = getEnabledPersonas();
 
@@ -1133,6 +1142,34 @@ const Terminal: React.FC<TerminalProps> = ({
           )}
         </div>
 
+        {/* Suggestions Area for Embedded Mode - Sprint: adaptive-engagement-v1 */}
+        {shouldShowInput(overlay) && terminalState.messages.length > 0 && stagePrompts.length > 0 && (
+          <div className="px-4 py-3 border-t border-[var(--chat-border)] bg-[var(--chat-surface)]">
+            <div className="max-w-3xl mx-auto">
+              <div className="text-[9px] text-[var(--chat-text-accent)] font-bold uppercase tracking-widest mb-2">
+                Suggested for You
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {stagePrompts.map(prompt => (
+                  <button
+                    key={prompt.id}
+                    onClick={() => {
+                      if (prompt.command) {
+                        handleSend(prompt.command);
+                      } else {
+                        handleSend(prompt.text);
+                      }
+                    }}
+                    className="px-3 py-1.5 text-xs bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)] rounded-full hover:bg-[var(--chat-glass-hover)] hover:border-[var(--chat-border-accent)] transition-colors"
+                  >
+                    {prompt.text}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Input Area - only show when not in wizard/picker mode */}
         {/* Sprint: terminal-overlay-machine-v1 - use shouldShowInput derived state */}
         {shouldShowInput(overlay) && (
@@ -1156,6 +1193,22 @@ const Terminal: React.FC<TerminalProps> = ({
               embedded
               placeholder={inputPlaceholder}
             />
+            </div>
+          </div>
+        )}
+
+        {/* Modals for embedded mode - Sprint: adaptive-engagement-v1 */}
+        {showGardenModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-[var(--chat-bg)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+              <GardenModal onClose={() => actions.closeModal('garden')} />
+            </div>
+          </div>
+        )}
+        {showStatsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-[var(--chat-bg)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+              <StatsModal onClose={() => actions.closeModal('stats')} />
             </div>
           </div>
         )}
@@ -1497,6 +1550,29 @@ const Terminal: React.FC<TerminalProps> = ({
                       }
                     }}
                   />
+                ) : stagePrompts.length > 0 ? (
+                  /* Stage-aware suggested prompts - fallback when no narrative follow-ups */
+                  <div className="mb-4">
+                    <div className="text-[9px] text-[var(--neon-cyan)] font-bold uppercase tracking-widest mb-2">
+                      Suggested for You
+                    </div>
+                    <div className="space-y-1.5">
+                      {stagePrompts.map(prompt => (
+                        <SuggestionChip
+                          key={prompt.id}
+                          prompt={prompt.text}
+                          onClick={() => {
+                            if (prompt.command) {
+                              // Handle command prompts (e.g., /garden, /sprout)
+                              handleSend(prompt.command);
+                            } else {
+                              handleSend(prompt.text);
+                            }
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
 ) : null}
                 {/* Suggested Inquiry button removed - was taking up real estate without clear value */}
 

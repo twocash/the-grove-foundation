@@ -1,6 +1,6 @@
-// garden.ts - Switch to garden mode to view sprouts
+// garden.ts - View captured sprouts
 // Sprint: Sprout System Wiring
-// Changed from modal to mode switch per Foundation Refactor spec
+// Changed back to modal for non-widget contexts
 
 import { Command, CommandResult } from '../CommandRegistry';
 
@@ -11,9 +11,8 @@ export const gardenCommand: Command = {
   aliases: ['sprouts', 'contributions'],
 
   execute: (): CommandResult => {
-    // Switch to garden mode instead of opening modal
-    // This follows the Foundation Refactor spec where Garden is a MODE, not a modal
-    return { type: 'action', action: 'switch-mode', payload: { mode: 'garden' } };
+    // Open garden modal - works in both widget and non-widget contexts
+    return { type: 'modal', modal: 'garden' };
   }
 };
 
