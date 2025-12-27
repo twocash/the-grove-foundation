@@ -2140,6 +2140,71 @@ app.get('/api/sprouts', async (req, res) => {
   }
 });
 
+// GET /api/sprouts/stats - Aggregate statistics (must be before :id route)
+app.get('/api/sprouts/stats', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Supabase not configured' });
+  }
+
+  try {
+    // Total count
+    const { count: total } = await supabaseAdmin
+      .from('sprouts')
+      .select('*', { count: 'exact', head: true });
+
+    // Count by lifecycle
+    const { data: allSprouts } = await supabaseAdmin
+      .from('sprouts')
+      .select('lifecycle');
+
+    const lifecycleCounts = { sprout: 0, sapling: 0, tree: 0 };
+    (allSprouts || []).forEach((row) => {
+      const lc = row.lifecycle;
+      if (lc in lifecycleCounts) lifecycleCounts[lc]++;
+    });
+
+    // Count by lens (top 10)
+    const { data: lensCounts } = await supabaseAdmin
+      .from('sprouts')
+      .select('provenance')
+      .not('provenance->lens->id', 'is', null);
+
+    const lensMap = new Map();
+    (lensCounts || []).forEach((row) => {
+      const lens = row.provenance?.lens;
+      if (lens?.id) {
+        const existing = lensMap.get(lens.id);
+        if (existing) {
+          existing.count++;
+        } else {
+          lensMap.set(lens.id, { id: lens.id, name: lens.name || 'Unknown', count: 1 });
+        }
+      }
+    });
+
+    const byLens = Array.from(lensMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    // Recent count (last 24 hours)
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await supabaseAdmin
+      .from('sprouts')
+      .select('*', { count: 'exact', head: true })
+      .gte('captured_at', yesterday);
+
+    res.json({
+      total: total || 0,
+      byLifecycle: lifecycleCounts,
+      byLens,
+      recentCount: recentCount || 0,
+    });
+  } catch (error) {
+    console.error('[Sprout] Stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/sprouts/:id - Get single sprout
 app.get('/api/sprouts/:id', async (req, res) => {
   if (!supabaseAdmin) {
@@ -2276,71 +2341,6 @@ app.post('/api/sprouts/search', async (req, res) => {
     });
   } catch (error) {
     console.error('[Sprout] Search error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// GET /api/sprouts/stats - Aggregate statistics
-app.get('/api/sprouts/stats', async (req, res) => {
-  if (!supabaseAdmin) {
-    return res.status(503).json({ error: 'Supabase not configured' });
-  }
-
-  try {
-    // Total count
-    const { count: total } = await supabaseAdmin
-      .from('sprouts')
-      .select('*', { count: 'exact', head: true });
-
-    // Count by lifecycle
-    const { data: allSprouts } = await supabaseAdmin
-      .from('sprouts')
-      .select('lifecycle');
-
-    const lifecycleCounts = { sprout: 0, sapling: 0, tree: 0 };
-    (allSprouts || []).forEach((row) => {
-      const lc = row.lifecycle;
-      if (lc in lifecycleCounts) lifecycleCounts[lc]++;
-    });
-
-    // Count by lens (top 10)
-    const { data: lensCounts } = await supabaseAdmin
-      .from('sprouts')
-      .select('provenance')
-      .not('provenance->lens->id', 'is', null);
-
-    const lensMap = new Map();
-    (lensCounts || []).forEach((row) => {
-      const lens = row.provenance?.lens;
-      if (lens?.id) {
-        const existing = lensMap.get(lens.id);
-        if (existing) {
-          existing.count++;
-        } else {
-          lensMap.set(lens.id, { id: lens.id, name: lens.name || 'Unknown', count: 1 });
-        }
-      }
-    });
-
-    const byLens = Array.from(lensMap.values())
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-
-    // Recent count (last 24 hours)
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { count: recentCount } = await supabaseAdmin
-      .from('sprouts')
-      .select('*', { count: 'exact', head: true })
-      .gte('captured_at', yesterday);
-
-    res.json({
-      total: total || 0,
-      byLifecycle: lifecycleCounts,
-      byLens,
-      recentCount: recentCount || 0,
-    });
-  } catch (error) {
-    console.error('[Sprout] Stats error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
