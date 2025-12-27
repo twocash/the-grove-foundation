@@ -1,7 +1,37 @@
 // src/core/schema/engagement.ts
 // Engagement Bus type definitions - no React dependencies
+// Sprint: engagement-consolidation-v1
 
 import { ArchetypeId } from './lens';
+
+// ============================================================================
+// SESSION STAGE (consolidated from session-telemetry.ts)
+// ============================================================================
+
+/**
+ * SessionStage - Computed engagement level
+ */
+export type SessionStage = 'ARRIVAL' | 'ORIENTED' | 'EXPLORING' | 'ENGAGED';
+
+/**
+ * StageThresholds - Configurable progression thresholds
+ * Declarative configuration for stage computation (DEX-compliant)
+ */
+export interface StageThresholds {
+  oriented: {
+    minExchanges?: number;  // Default: 3
+    minVisits?: number;     // Default: 2
+  };
+  exploring: {
+    minExchanges?: number;  // Default: 5
+    minTopics?: number;     // Default: 2
+  };
+  engaged: {
+    minSprouts?: number;        // Default: 1
+    minVisits?: number;         // Default: 3
+    minTotalExchanges?: number; // Default: 15
+  };
+}
 
 // ============================================================================
 // EVENT TYPES
@@ -18,7 +48,8 @@ export type EngagementEventType =
   | 'REVEAL_SHOWN'
   | 'REVEAL_DISMISSED'
   | 'SESSION_STARTED'
-  | 'SESSION_RESUMED';
+  | 'SESSION_RESUMED'
+  | 'SPROUT_CAPTURED';
 
 export interface EngagementEvent<T extends EngagementEventType = EngagementEventType> {
   type: T;
@@ -39,6 +70,7 @@ export interface EventPayloads {
   REVEAL_DISMISSED: { revealType: RevealType; action: 'accepted' | 'declined' | 'dismissed' };
   SESSION_STARTED: { isReturningUser: boolean };
   SESSION_RESUMED: { previousSessionId: string; minutesSinceLastActivity: number };
+  SPROUT_CAPTURED: { sproutId: string; tags?: string[] };
 }
 
 // ============================================================================
@@ -93,6 +125,13 @@ export interface EngagementState {
 
   // Current journey (if active)
   activeJourney: ActiveJourney | null;
+
+  // Stage fields (consolidated from session-telemetry.ts)
+  stage: SessionStage;
+  totalExchangeCount: number;
+  sproutsCaptured: number;
+  allTopicsExplored: string[];
+  visitCount: number;
 }
 
 export interface ActiveJourney {

@@ -1,6 +1,7 @@
 // hooks/useSuggestedPrompts.ts
 // Computes stage-aware, lens-filtered prompts with weighted random selection
 // Sprint: adaptive-engagement-v1
+// Sprint: engagement-consolidation-v1 (uses EngagementBus stage directly)
 //
 // ⚠️ TECHNICAL DEBT (TD-003): Prompt filtering logic is imperative.
 // Should be refactored to use declarative filter rules from schema.
@@ -10,7 +11,7 @@ import { useMemo, useCallback, useState, useRef } from 'react';
 import { useEngagementState } from './useEngagementBus';
 import { stagePromptsConfig } from '../src/data/prompts/stage-prompts';
 import type { SuggestedPrompt } from '../src/core/schema/suggested-prompts';
-import type { SessionStage } from '../src/core/schema/session-telemetry';
+import type { SessionStage } from '../src/core/schema/engagement';
 
 interface UseSuggestedPromptsOptions {
   lensId?: string | null;
@@ -61,31 +62,6 @@ function weightedRandomSelect<T extends { weight?: number }>(
   return selected;
 }
 
-// Compute stage from engagement state
-function computeStageFromEngagement(state: {
-  exchangeCount: number;
-  topicsExplored: string[];
-  journeysCompleted: number;
-}): SessionStage {
-  // ENGAGED: Has completed journeys or significant engagement
-  if (state.journeysCompleted >= 1 || state.exchangeCount >= 10) {
-    return 'ENGAGED';
-  }
-
-  // EXPLORING: Multiple topics or deeper engagement
-  if (state.topicsExplored.length >= 2 || state.exchangeCount >= 5) {
-    return 'EXPLORING';
-  }
-
-  // ORIENTED: Some engagement
-  if (state.exchangeCount >= 3) {
-    return 'ORIENTED';
-  }
-
-  // ARRIVAL: New user
-  return 'ARRIVAL';
-}
-
 export function useSuggestedPrompts(
   options: UseSuggestedPromptsOptions = {}
 ): UseSuggestedPromptsResult {
@@ -103,22 +79,15 @@ export function useSuggestedPrompts(
 
   // Debug logging
   console.log('[useSuggestedPrompts] engagementState:', {
+    stage: engagementState.stage,
     exchangeCount: engagementState.exchangeCount,
     topicsExplored: engagementState.topicsExplored,
     journeysCompleted: engagementState.journeysCompleted,
     refreshKey,
   });
 
-  // Compute stage from engagement bus state
-  const stage = useMemo(() => {
-    const computed = computeStageFromEngagement({
-      exchangeCount: engagementState.exchangeCount,
-      topicsExplored: engagementState.topicsExplored,
-      journeysCompleted: engagementState.journeysCompleted,
-    });
-    console.log('[useSuggestedPrompts] Computed stage:', computed);
-    return computed;
-  }, [engagementState.exchangeCount, engagementState.topicsExplored, engagementState.journeysCompleted]);
+  // Use stage directly from EngagementBus (computed in updateState)
+  const stage = engagementState.stage;
 
   const prompts = useMemo(() => {
     console.log('[useSuggestedPrompts] Looking up stage config for:', stage);

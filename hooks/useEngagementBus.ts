@@ -1,5 +1,6 @@
 // hooks/useEngagementBus.ts - Core Engagement Bus implementation
 // Sprint 7: Unified event-driven engagement state management
+// Sprint: engagement-consolidation-v1 (stage computation, legacy migration)
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
@@ -20,6 +21,8 @@ import {
   DEFAULT_TRIGGERS,
   evaluateTriggers
 } from '../utils/engagementTriggers';
+import { computeSessionStage } from '../utils/stageComputation';
+import { DEFAULT_STAGE_THRESHOLDS } from '../src/core/config';
 
 // Storage keys
 const ENGAGEMENT_STATE_KEY = 'grove-engagement-state';
@@ -62,7 +65,55 @@ class EngagementBusSingleton {
   constructor() {
     this.state = this.loadState();
     this.eventHistory = this.loadEventHistory();
+    this.migrateFromLegacy();
+    this.state.stage = computeSessionStage(this.state, DEFAULT_STAGE_THRESHOLDS);
     this.startTimeTracking();
+  }
+
+  // --- Legacy Migration (engagement-consolidation-v1) ---
+
+  private migrateFromLegacy(): void {
+    const legacy = localStorage.getItem('grove-telemetry');
+    if (!legacy) return;
+
+    try {
+      const data = JSON.parse(legacy);
+      console.log('[EngagementBus] Migrating from legacy telemetry');
+
+      // Merge fields
+      if (data.totalExchangeCount) {
+        this.state.totalExchangeCount = Math.max(
+          this.state.totalExchangeCount || 0,
+          data.totalExchangeCount
+        );
+      }
+      if (data.sproutsCaptured) {
+        this.state.sproutsCaptured = Math.max(
+          this.state.sproutsCaptured || 0,
+          data.sproutsCaptured
+        );
+      }
+      if (data.visitCount) {
+        this.state.visitCount = Math.max(
+          this.state.visitCount || 1,
+          data.visitCount
+        );
+      }
+      if (data.allTopicsExplored?.length) {
+        const merged = [
+          ...(this.state.allTopicsExplored || []),
+          ...data.allTopicsExplored
+        ];
+        this.state.allTopicsExplored = Array.from(new Set(merged));
+      }
+
+      // Remove legacy key
+      localStorage.removeItem('grove-telemetry');
+      this.persistState();
+      console.log('[EngagementBus] Legacy migration complete');
+    } catch (e) {
+      console.warn('[EngagementBus] Failed to migrate legacy data:', e);
+    }
   }
 
   // --- Persistence ---
@@ -171,6 +222,9 @@ class EngagementBusSingleton {
       lastActivityAt: new Date().toISOString()
     };
 
+    // Recompute stage after state changes
+    this.state.stage = computeSessionStage(this.state, DEFAULT_STAGE_THRESHOLDS);
+
     this.persistState();
     this.evaluateAndNotify();
 
@@ -214,7 +268,14 @@ class EngagementBusSingleton {
     switch (event.type) {
       case 'EXCHANGE_SENT':
         this.updateState({
-          exchangeCount: this.state.exchangeCount + 1
+          exchangeCount: this.state.exchangeCount + 1,
+          totalExchangeCount: (this.state.totalExchangeCount || 0) + 1
+        });
+        break;
+
+      case 'SPROUT_CAPTURED':
+        this.updateState({
+          sproutsCaptured: (this.state.sproutsCaptured || 0) + 1
         });
         break;
 
@@ -483,7 +544,10 @@ export function useEngagementEmit() {
       emit('REVEAL_SHOWN', { revealType }),
 
     revealDismissed: (revealType: RevealType, action: 'accepted' | 'declined' | 'dismissed') =>
-      emit('REVEAL_DISMISSED', { revealType, action })
+      emit('REVEAL_DISMISSED', { revealType, action }),
+
+    sproutCaptured: (sproutId: string, tags?: string[]) =>
+      emit('SPROUT_CAPTURED', { sproutId, tags })
   }), [emit]);
 }
 

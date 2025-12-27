@@ -2,10 +2,12 @@
 // Declarative welcome card with adaptive prompts
 // Sprint: terminal-quantum-welcome-v1
 // Sprint: adaptive-engagement-v1 - Added stage-aware prompts
+// Sprint: engagement-consolidation-v1 - Uses unified EngagementBus state
 
 import React from 'react';
 import { TerminalWelcome as TerminalWelcomeType } from '../../src/core/schema/narrative';
 import { useSuggestedPrompts } from '../../hooks/useSuggestedPrompts';
+import { useEngagementState } from '../../hooks/useEngagementBus';
 
 interface TerminalWelcomeProps {
   welcome: TerminalWelcomeType;
@@ -30,18 +32,15 @@ const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
   lensName,
   variant = 'overlay'
 }) => {
+  // Get stage and prompts from unified EngagementBus
+  const engagementState = useEngagementState();
   const { prompts: adaptivePrompts, stage } = useSuggestedPrompts({
     lensId,
     lensName,
   });
 
   // Debug logging
-  console.log('[TerminalWelcome] Rendering with:', {
-    stage,
-    adaptivePromptsCount: adaptivePrompts.length,
-    lensId,
-    lensName,
-  });
+  console.log('[TerminalWelcome] Stage:', engagementState.stage, 'Prompts:', adaptivePrompts.length);
 
   // Use adaptive prompts if available, fallback to static
   const displayPrompts: Array<{ id: string; text: string; command?: string }> =
@@ -60,9 +59,12 @@ const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
   return (
     <div className="glass-welcome-card">
       {/* Stage indicator */}
-      <div className="text-xs text-[var(--glass-text-subtle)] mb-2 flex items-center gap-1">
+      <div className="text-xs text-[var(--glass-text-subtle)] mb-2 flex items-center gap-2">
         <span>{stageInfo.emoji}</span>
         <span>{stageInfo.label}</span>
+        {engagementState.exchangeCount > 0 && (
+          <span className="opacity-50">• {engagementState.exchangeCount} exchanges</span>
+        )}
       </div>
 
       <h2 className="text-xl font-medium text-[var(--glass-text-primary)] mb-3">

@@ -2,6 +2,9 @@
 // Barrel export for all Core config modules
 
 export {
+  // Stage Thresholds
+  DEFAULT_STAGE_THRESHOLDS,
+
   // Engagement
   DEFAULT_ENGAGEMENT_STATE,
 

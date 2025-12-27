@@ -51,6 +51,8 @@ export {
 
 // Engagement Bus types
 export {
+  type SessionStage,
+  type StageThresholds,
   type EngagementEventType,
   type EngagementEvent,
   type EventPayloads,

@@ -1,10 +1,11 @@
 // hooks/useSproutCapture.ts
 // Sprint: Sprout System
+// Sprint: engagement-consolidation-v1 - Uses unified EngagementBus
 // Hook for capturing LLM responses as sprouts with full provenance
 
 import { useCallback } from 'react';
 import { useSproutStorage } from './useSproutStorage';
-import { telemetryCollector } from '../src/lib/telemetry';
+import { useEngagementEmit } from './useEngagementBus';
 import {
   Sprout,
   SproutCaptureOptions,
@@ -25,6 +26,7 @@ export function useSproutCapture() {
     getSessionSprouts,
     sessionId
   } = useSproutStorage();
+  const emit = useEngagementEmit();
 
   /**
    * Capture a response as a sprout
@@ -82,13 +84,13 @@ export function useSproutCapture() {
         tags: sprout.tags,
         lens: provenance.lens?.name
       });
-      // Track sprout capture for adaptive engagement telemetry
-      telemetryCollector.update({ type: 'sprout' });
+      // Track sprout capture in EngagementBus for stage computation
+      emit.sproutCaptured(sprout.id, sprout.tags);
       return sprout;
     }
 
     return null;
-  }, [addSprout, sessionId]);
+  }, [addSprout, sessionId, emit]);
 
   /**
    * Parse command flags from /sprout command arguments

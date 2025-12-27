@@ -22,7 +22,7 @@ import { GardenModal, StatsModal } from './Terminal/Modals';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { useSuggestedPrompts } from '../hooks/useSuggestedPrompts';
-import { telemetryCollector } from '../src/lib/telemetry';
+// telemetryCollector removed - using useEngagementEmit instead (engagement-consolidation-v1)
 import { SproutProvenance } from '../src/core/schema/sprout';
 import { useOptionalWidgetUI } from '../src/widget/WidgetUIContext';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
@@ -380,8 +380,6 @@ const Terminal: React.FC<TerminalProps> = ({
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       // Emit journey started event (lens selection initiates a new journey)
       emit.journeyStarted(personaId, currentThread.length || 5); // Default thread length if not yet generated
-      // Track journey start for adaptive engagement telemetry
-      telemetryCollector.update({ type: 'journey_start', payload: { journeyId: personaId, explicit: true } });
       // Sprint: active-grove-v1 - Notify parent of lens selection
       if (onLensSelected) {
         onLensSelected(personaId);
@@ -415,8 +413,6 @@ const Terminal: React.FC<TerminalProps> = ({
       trackLensActivated(personaId, personaId.startsWith('custom-'));
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       emit.journeyStarted(personaId, currentThread.length || 5);
-      // Track journey start for adaptive engagement telemetry
-      telemetryCollector.update({ type: 'journey_start', payload: { journeyId: personaId, explicit: true } });
       if (onLensSelected) {
         onLensSelected(personaId);
       }
@@ -590,8 +586,6 @@ const Terminal: React.FC<TerminalProps> = ({
       trackLensActivated(personaId, personaId.startsWith('custom-'));
       emit.lensSelected(personaId, personaId.startsWith('custom-'), currentArchetypeId || undefined);
       emit.journeyStarted(personaId, currentThread.length || 5);
-      // Track journey start for adaptive engagement telemetry
-      telemetryCollector.update({ type: 'journey_start', payload: { journeyId: personaId, explicit: true } });
       // Custom lens usage tracking
       if (personaId.startsWith('custom-')) {
         updateCustomLensUsage(personaId);
@@ -825,8 +819,6 @@ const Terminal: React.FC<TerminalProps> = ({
             incrementJourneysCompleted();
             emit.journeyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000), session.visitedCards.length);
             trackJourneyCompleted(prevJourneyId, Math.round((Date.now() - journeyStartTime) / 60000));
-            // Track journey completion for adaptive engagement telemetry
-            telemetryCollector.update({ type: 'journey_complete', payload: { journeyId: prevJourneyId } });
             // Set title and show completion modal
             actions.setCompletedJourneyTitle(completedJourney.title || 'Your Journey');
             actions.setReveal('journeyCompletion', true);
@@ -845,8 +837,6 @@ const Terminal: React.FC<TerminalProps> = ({
     incrementExchangeCount();
     // Emit exchange sent event to Engagement Bus (response length will be updated after response)
     emit.exchangeSent(textToSend, 0, nodeId);
-    // Track exchange for adaptive engagement telemetry
-    telemetryCollector.update({ type: 'exchange' });
 
     const displayId = Date.now().toString();
     // PRESERVED: Scholar Mode (--verbose) display logic
@@ -922,15 +912,15 @@ const Terminal: React.FC<TerminalProps> = ({
 
       if (response.topic) {
         actions.setCurrentTopic(response.topic);
-        // Track topic for adaptive engagement telemetry
-        telemetryCollector.update({ type: 'topic', payload: { topicId: response.topic } });
+        // Track topic for adaptive engagement via EngagementBus
+        emit.topicExplored(response.topic, response.topic);
       } else {
         const topicMatch = accumulatedRawText.match(/\[\[TOPIC:(.*?)\]\]/);
         if (topicMatch && topicMatch[1]) {
           const topic = topicMatch[1].trim();
           actions.setCurrentTopic(topic);
-          // Track topic for adaptive engagement telemetry
-          telemetryCollector.update({ type: 'topic', payload: { topicId: topic } });
+          // Track topic for adaptive engagement via EngagementBus
+          emit.topicExplored(topic, topic);
         }
       }
 
@@ -1288,8 +1278,6 @@ const Terminal: React.FC<TerminalProps> = ({
                     // Emit journey started event
                     if (session.activeLens) {
                       emit.journeyStarted(session.activeLens, currentThread.length);
-                      // Track journey start for adaptive engagement telemetry
-                      telemetryCollector.update({ type: 'journey_start', payload: { journeyId: session.activeLens, explicit: true } });
                     }
                   }}
                   onJumpToCard={(cardId) => {
@@ -1406,8 +1394,6 @@ const Terminal: React.FC<TerminalProps> = ({
                               handleSend(entryNode.query, entryNode.label, entryNode.id);
                               // Emit journey started event
                               emit.journeyStarted(bridgeState.journeyId!, journey.estimatedMinutes || 5);
-                              // Track journey start for adaptive engagement telemetry
-                              telemetryCollector.update({ type: 'journey_start', payload: { journeyId: bridgeState.journeyId, explicit: true } });
                             } else {
                               console.log('[CognitiveBridge] FALLBACK - no entry node found');
                               // Fallback: Map topic clusters to appropriate personas (legacy behavior)

@@ -12,8 +12,19 @@ import {
   GlobalSettings,
   FeatureFlag,
   TopicHub,
-  SystemPromptVersion
+  SystemPromptVersion,
+  StageThresholds
 } from '../schema';
+
+// ============================================================================
+// STAGE THRESHOLDS (consolidated from session-telemetry.ts)
+// ============================================================================
+
+export const DEFAULT_STAGE_THRESHOLDS: StageThresholds = {
+  oriented: { minExchanges: 3, minVisits: 2 },
+  exploring: { minExchanges: 5, minTopics: 2 },
+  engaged: { minSprouts: 1, minVisits: 3, minTotalExchanges: 15 },
+};
 
 // ============================================================================
 // ENGAGEMENT DEFAULTS
@@ -36,7 +47,13 @@ export const DEFAULT_ENGAGEMENT_STATE: EngagementState = {
   revealsAcknowledged: [],
   terminatorModeUnlocked: false,
   terminatorModeActive: false,
-  activeJourney: null
+  activeJourney: null,
+  // Stage fields (consolidated)
+  stage: 'ARRIVAL',
+  totalExchangeCount: 0,
+  sproutsCaptured: 0,
+  allTopicsExplored: [],
+  visitCount: 1
 };
 
 // ============================================================================

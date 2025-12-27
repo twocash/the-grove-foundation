@@ -1,8 +1,9 @@
 // src/core/schema/suggested-prompts.ts
 // Suggested prompt types for adaptive engagement
 // Sprint: adaptive-engagement-v1
+// Sprint: engagement-consolidation-v1 - SessionStage from engagement.ts
 
-import type { SessionStage } from './session-telemetry';
+import type { SessionStage } from './engagement';
 
 /**
  * PromptIntent - What the prompt is trying to accomplish
