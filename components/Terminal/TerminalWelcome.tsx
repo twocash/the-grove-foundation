@@ -17,10 +17,10 @@ interface TerminalWelcomeProps {
 
 // Stage indicator labels
 const STAGE_LABELS: Record<string, { emoji: string; label: string }> = {
-  ARRIVAL: { emoji: '👋', label: 'Welcome' },
-  ORIENTED: { emoji: '🧭', label: 'Exploring' },
-  EXPLORING: { emoji: '🔍', label: 'Discovering' },
-  ENGAGED: { emoji: '🌱', label: 'Growing' },
+  ARRIVAL: { emoji: '👋', label: 'Getting Started' },
+  ORIENTED: { emoji: '🧭', label: 'Orienting' },
+  EXPLORING: { emoji: '🔍', label: 'Exploring' },
+  ENGAGED: { emoji: '🌲', label: 'Engaged' },
 };
 
 const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({

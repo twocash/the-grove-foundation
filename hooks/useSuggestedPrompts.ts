@@ -3,7 +3,7 @@
 // Sprint: adaptive-engagement-v1
 
 import { useMemo, useCallback, useState } from 'react';
-import { useSessionTelemetry } from './useSessionTelemetry';
+import { useEngagementState } from './useEngagementBus';
 import { stagePromptsConfig } from '../src/data/prompts/stage-prompts';
 import type { SuggestedPrompt } from '../src/core/schema/suggested-prompts';
 import type { SessionStage } from '../src/core/schema/session-telemetry';
@@ -23,15 +23,47 @@ interface UseSuggestedPromptsResult {
 // Known topic areas for fallbacks
 const TOPIC_AREAS = ['agents', 'economics', 'simulation', 'infrastructure', 'governance'];
 
+// Compute stage from engagement state
+function computeStageFromEngagement(state: {
+  exchangeCount: number;
+  topicsExplored: string[];
+  journeysCompleted: number;
+}): SessionStage {
+  // ENGAGED: Has completed journeys or significant engagement
+  if (state.journeysCompleted >= 1 || state.exchangeCount >= 10) {
+    return 'ENGAGED';
+  }
+
+  // EXPLORING: Multiple topics or deeper engagement
+  if (state.topicsExplored.length >= 2 || state.exchangeCount >= 5) {
+    return 'EXPLORING';
+  }
+
+  // ORIENTED: Some engagement
+  if (state.exchangeCount >= 3) {
+    return 'ORIENTED';
+  }
+
+  // ARRIVAL: New user
+  return 'ARRIVAL';
+}
+
 export function useSuggestedPrompts(
   options: UseSuggestedPromptsOptions = {}
 ): UseSuggestedPromptsResult {
   const { lensId, lensName, maxPrompts = 3 } = options;
-  const { telemetry } = useSessionTelemetry();
+  const engagementState = useEngagementState();
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Compute stage from engagement bus state
+  const stage = useMemo(() => computeStageFromEngagement({
+    exchangeCount: engagementState.exchangeCount,
+    topicsExplored: engagementState.topicsExplored,
+    journeysCompleted: engagementState.journeysCompleted,
+  }), [engagementState.exchangeCount, engagementState.topicsExplored, engagementState.journeysCompleted]);
+
   const prompts = useMemo(() => {
-    const stageConfig = stagePromptsConfig.stages[telemetry.stage];
+    const stageConfig = stagePromptsConfig.stages[stage];
     if (!stageConfig) return [];
 
     // Filter by lens
@@ -55,16 +87,16 @@ export function useSuggestedPrompts(
 
       let text = prompt.text;
 
-      // Build variables
-      const lastTopic = telemetry.topicsExplored.slice(-1)[0] ?? 'distributed AI';
-      const explored = new Set(telemetry.allTopicsExplored);
+      // Build variables from engagement state
+      const lastTopic = engagementState.topicsExplored.slice(-1)[0] ?? 'distributed AI';
+      const explored = new Set(engagementState.topicsExplored);
       const underexplored = TOPIC_AREAS.find(a => !explored.has(a)) ?? 'edge cases';
 
       const vars: Record<string, string> = {
         lastTopic,
         lensName: lensName ?? 'curious explorer',
-        topicA: telemetry.topicsExplored[0] ?? 'agents',
-        topicB: telemetry.topicsExplored[1] ?? 'economics',
+        topicA: engagementState.topicsExplored[0] ?? 'agents',
+        topicB: engagementState.topicsExplored[1] ?? 'economics',
         underexploredArea: underexplored,
       };
 
@@ -77,7 +109,7 @@ export function useSuggestedPrompts(
 
     return filtered.slice(0, maxPrompts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [telemetry.stage, telemetry.topicsExplored, lensId, lensName, maxPrompts, refreshKey]);
+  }, [stage, engagementState.topicsExplored, lensId, lensName, maxPrompts, refreshKey]);
 
   const refreshPrompts = useCallback(() => {
     setRefreshKey(k => k + 1);
@@ -85,7 +117,7 @@ export function useSuggestedPrompts(
 
   return {
     prompts,
-    stage: telemetry.stage,
+    stage,
     refreshPrompts,
   };
 }
