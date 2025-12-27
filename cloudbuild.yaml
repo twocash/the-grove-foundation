@@ -29,7 +29,7 @@ steps:
       - 'us-central1'
       - '--allow-unauthenticated'
       - '--update-secrets'
-      - 'GEMINI_API_KEY=GEMINI_API_KEY:latest'
+      - 'GEMINI_API_KEY=GEMINI_API_KEY:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest'
       - '--set-env-vars'
       - 'GCS_BUCKET_NAME=grove-assets'
 
