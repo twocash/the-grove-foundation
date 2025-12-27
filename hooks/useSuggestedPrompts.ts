@@ -1,8 +1,8 @@
 // hooks/useSuggestedPrompts.ts
-// Computes stage-aware, lens-filtered prompts
+// Computes stage-aware, lens-filtered prompts with weighted random selection
 // Sprint: adaptive-engagement-v1
 
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState, useRef } from 'react';
 import { useEngagementState } from './useEngagementBus';
 import { stagePromptsConfig } from '../src/data/prompts/stage-prompts';
 import type { SuggestedPrompt } from '../src/core/schema/suggested-prompts';
@@ -22,6 +22,40 @@ interface UseSuggestedPromptsResult {
 
 // Known topic areas for fallbacks
 const TOPIC_AREAS = ['agents', 'economics', 'simulation', 'infrastructure', 'governance'];
+
+/**
+ * Weighted random selection without replacement
+ * Selects n items from array, with probability proportional to weight
+ */
+function weightedRandomSelect<T extends { weight?: number }>(
+  items: T[],
+  count: number
+): T[] {
+  if (items.length <= count) return items;
+
+  const selected: T[] = [];
+  const remaining = [...items];
+
+  for (let i = 0; i < count && remaining.length > 0; i++) {
+    // Calculate total weight of remaining items
+    const totalWeight = remaining.reduce((sum, item) => sum + (item.weight ?? 1), 0);
+
+    // Pick a random point in the weight range
+    let random = Math.random() * totalWeight;
+
+    // Find the item at that point
+    for (let j = 0; j < remaining.length; j++) {
+      random -= remaining[j].weight ?? 1;
+      if (random <= 0) {
+        selected.push(remaining[j]);
+        remaining.splice(j, 1);
+        break;
+      }
+    }
+  }
+
+  return selected;
+}
 
 // Compute stage from engagement state
 function computeStageFromEngagement(state: {
@@ -55,11 +89,20 @@ export function useSuggestedPrompts(
   const engagementState = useEngagementState();
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Track last exchange count to auto-refresh when it changes
+  const lastExchangeCount = useRef(engagementState.exchangeCount);
+  if (engagementState.exchangeCount !== lastExchangeCount.current) {
+    lastExchangeCount.current = engagementState.exchangeCount;
+    // Force re-randomization on next render by incrementing key
+    setRefreshKey(k => k + 1);
+  }
+
   // Debug logging
   console.log('[useSuggestedPrompts] engagementState:', {
     exchangeCount: engagementState.exchangeCount,
     topicsExplored: engagementState.topicsExplored,
     journeysCompleted: engagementState.journeysCompleted,
+    refreshKey,
   });
 
   // Compute stage from engagement bus state
@@ -91,11 +134,11 @@ export function useSuggestedPrompts(
       return true;
     });
 
-    // Sort by weight (higher first)
-    filtered = [...filtered].sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1));
+    // Weighted random selection (higher weight = more likely to be picked)
+    const selected = weightedRandomSelect(filtered, maxPrompts);
 
-    // Substitute dynamic variables
-    filtered = filtered.map(prompt => {
+    // Substitute dynamic variables in selected prompts
+    const substituted = selected.map(prompt => {
       if (!prompt.dynamic) return prompt;
 
       let text = prompt.text;
@@ -120,7 +163,7 @@ export function useSuggestedPrompts(
       return { ...prompt, text };
     });
 
-    return filtered.slice(0, maxPrompts);
+    return substituted;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, engagementState.topicsExplored, lensId, lensName, maxPrompts, refreshKey]);
 

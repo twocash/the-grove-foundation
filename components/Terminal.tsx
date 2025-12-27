@@ -331,7 +331,7 @@ const Terminal: React.FC<TerminalProps> = ({
   }, [engLens, getPersona, getCustomLens, customLenses]);
 
   // Stage-aware suggested prompts (Sprint: adaptive-engagement-v1)
-  const { prompts: stagePrompts, stage: promptStage } = useSuggestedPrompts({
+  const { prompts: stagePrompts, stage: promptStage, refreshPrompts } = useSuggestedPrompts({
     lensId: activeLensData?.id,
     lensName: activeLensData?.publicLabel,
     maxPrompts: 3,
@@ -1146,8 +1146,19 @@ const Terminal: React.FC<TerminalProps> = ({
         {shouldShowInput(overlay) && terminalState.messages.length > 0 && stagePrompts.length > 0 && (
           <div className="px-4 py-3 border-t border-[var(--chat-border)] bg-[var(--chat-surface)]">
             <div className="max-w-3xl mx-auto">
-              <div className="text-[9px] text-[var(--chat-text-accent)] font-bold uppercase tracking-widest mb-2">
-                Suggested for You
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[9px] text-[var(--chat-text-accent)] font-bold uppercase tracking-widest">
+                  Suggested for You
+                </div>
+                <button
+                  onClick={refreshPrompts}
+                  className="text-[var(--chat-text-muted)] hover:text-[var(--chat-text-accent)] transition-colors p-1"
+                  title="Show different suggestions"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {stagePrompts.map(prompt => (
@@ -1553,8 +1564,19 @@ const Terminal: React.FC<TerminalProps> = ({
                 ) : stagePrompts.length > 0 ? (
                   /* Stage-aware suggested prompts - fallback when no narrative follow-ups */
                   <div className="mb-4">
-                    <div className="text-[9px] text-[var(--neon-cyan)] font-bold uppercase tracking-widest mb-2">
-                      Suggested for You
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[9px] text-[var(--neon-cyan)] font-bold uppercase tracking-widest">
+                        Suggested for You
+                      </div>
+                      <button
+                        onClick={refreshPrompts}
+                        className="text-[var(--glass-text-subtle)] hover:text-[var(--neon-cyan)] transition-colors p-1"
+                        title="Show different suggestions"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="space-y-1.5">
                       {stagePrompts.map(prompt => (
