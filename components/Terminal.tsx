@@ -204,16 +204,25 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Compute engagement stage from state
   const computedStage = useMemo(() => {
+    console.log('[Terminal] Computing stage from engagementState:', {
+      exchangeCount: engagementState.exchangeCount,
+      journeysCompleted: engagementState.journeysCompleted,
+      topicsExplored: engagementState.topicsExplored.length,
+    });
+
+    let stage: string;
     if (engagementState.journeysCompleted >= 1 || engagementState.exchangeCount >= 10) {
-      return 'ENGAGED';
+      stage = 'ENGAGED';
+    } else if (engagementState.topicsExplored.length >= 2 || engagementState.exchangeCount >= 5) {
+      stage = 'EXPLORING';
+    } else if (engagementState.exchangeCount >= 3) {
+      stage = 'ORIENTED';
+    } else {
+      stage = 'ARRIVAL';
     }
-    if (engagementState.topicsExplored.length >= 2 || engagementState.exchangeCount >= 5) {
-      return 'EXPLORING';
-    }
-    if (engagementState.exchangeCount >= 3) {
-      return 'ORIENTED';
-    }
-    return 'ARRIVAL';
+
+    console.log('[Terminal] Computed stage:', stage);
+    return stage;
   }, [engagementState.journeysCompleted, engagementState.exchangeCount, engagementState.topicsExplored.length]);
 
   // Quantum Interface for lens-reactive content (Sprint: terminal-quantum-welcome-v1)

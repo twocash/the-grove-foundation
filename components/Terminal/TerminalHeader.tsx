@@ -88,6 +88,9 @@ const TerminalHeader: React.FC<TerminalHeaderProps> = ({
   const isEmbedded = variant === 'embedded';
   const stageInfo = stage ? STAGE_DISPLAY[stage] : null;
 
+  // Debug logging
+  console.log('[TerminalHeader] Rendering with stage:', stage, 'exchangeCount:', exchangeCount, 'stageInfo:', stageInfo);
+
   return (
     <div className={`px-4 py-2.5 border-b flex items-center gap-3 flex-nowrap ${
       isEmbedded
