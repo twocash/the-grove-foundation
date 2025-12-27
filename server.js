@@ -2345,6 +2345,179 @@ app.post('/api/sprouts/search', async (req, res) => {
   }
 });
 
+// ============================================================================
+// Session Telemetry Sync API
+// Sprint: adaptive-engagement-v1
+// ============================================================================
+
+// Sync session telemetry to server
+app.post('/api/telemetry/session', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const {
+      sessionId,
+      visitCount,
+      totalExchangeCount,
+      allTopicsExplored,
+      sproutsCaptured,
+      completedJourneys,
+      stage,
+    } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'sessionId is required' });
+    }
+
+    const { error } = await supabaseAdmin
+      .from('session_telemetry')
+      .upsert({
+        session_id: sessionId,
+        visit_count: visitCount ?? 1,
+        total_exchange_count: totalExchangeCount ?? 0,
+        all_topics_explored: allTopicsExplored ?? [],
+        sprouts_captured: sproutsCaptured ?? 0,
+        completed_journeys: completedJourneys ?? [],
+        current_stage: stage ?? 'ARRIVAL',
+        last_visit: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'session_id',
+      });
+
+    if (error) {
+      console.warn('[Telemetry] Sync failed:', error);
+      return res.status(500).json({ error: 'Sync failed' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Telemetry] Sync error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get session telemetry from server
+app.get('/api/telemetry/session/:sessionId', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const { sessionId } = req.params;
+
+    const { data, error } = await supabaseAdmin
+      .from('session_telemetry')
+      .select('*')
+      .eq('session_id', sessionId)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    res.json({
+      sessionId: data.session_id,
+      visitCount: data.visit_count,
+      totalExchangeCount: data.total_exchange_count,
+      allTopicsExplored: data.all_topics_explored,
+      sproutsCaptured: data.sprouts_captured,
+      completedJourneys: data.completed_journeys,
+      stage: data.current_stage,
+      firstVisit: data.first_visit,
+      lastVisit: data.last_visit,
+    });
+  } catch (error) {
+    console.error('[Telemetry] Fetch error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update journey progress
+app.post('/api/telemetry/journey', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const {
+      sessionId,
+      journeyId,
+      currentWaypoint,
+      explicit,
+      completed,
+    } = req.body;
+
+    if (!sessionId || !journeyId) {
+      return res.status(400).json({ error: 'sessionId and journeyId are required' });
+    }
+
+    const updateData = {
+      session_id: sessionId,
+      journey_id: journeyId,
+      current_waypoint: currentWaypoint ?? 0,
+      explicit_start: explicit ?? false,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (completed) {
+      updateData.completed_at = new Date().toISOString();
+    }
+
+    const { error } = await supabaseAdmin
+      .from('journey_progress')
+      .upsert(updateData, {
+        onConflict: 'session_id,journey_id',
+      });
+
+    if (error) {
+      console.warn('[Telemetry] Journey sync failed:', error);
+      return res.status(500).json({ error: 'Sync failed' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[Telemetry] Journey sync error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get journey progress
+app.get('/api/telemetry/journey/:sessionId/:journeyId', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const { sessionId, journeyId } = req.params;
+
+    const { data, error } = await supabaseAdmin
+      .from('journey_progress')
+      .select('*')
+      .eq('session_id', sessionId)
+      .eq('journey_id', journeyId)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Journey progress not found' });
+    }
+
+    res.json({
+      sessionId: data.session_id,
+      journeyId: data.journey_id,
+      currentWaypoint: data.current_waypoint,
+      startedAt: data.started_at,
+      completedAt: data.completed_at,
+      explicit: data.explicit_start,
+    });
+  } catch (error) {
+    console.error('[Telemetry] Journey fetch error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

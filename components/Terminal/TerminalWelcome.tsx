@@ -1,23 +1,60 @@
 // components/Terminal/TerminalWelcome.tsx
-// Declarative welcome card consuming reality.terminal
+// Declarative welcome card with adaptive prompts
 // Sprint: terminal-quantum-welcome-v1
+// Sprint: adaptive-engagement-v1 - Added stage-aware prompts
 
 import React from 'react';
 import { TerminalWelcome as TerminalWelcomeType } from '../../src/core/schema/narrative';
+import { useSuggestedPrompts } from '../../hooks/useSuggestedPrompts';
 
 interface TerminalWelcomeProps {
   welcome: TerminalWelcomeType;
-  onPromptClick: (prompt: string) => void;
+  onPromptClick: (prompt: string, command?: string) => void;
+  lensId?: string | null;
+  lensName?: string;
   variant?: 'overlay' | 'embedded';
 }
+
+// Stage indicator labels
+const STAGE_LABELS: Record<string, { emoji: string; label: string }> = {
+  ARRIVAL: { emoji: '👋', label: 'Welcome' },
+  ORIENTED: { emoji: '🧭', label: 'Exploring' },
+  EXPLORING: { emoji: '🔍', label: 'Discovering' },
+  ENGAGED: { emoji: '🌱', label: 'Growing' },
+};
 
 const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
   welcome,
   onPromptClick,
+  lensId,
+  lensName,
   variant = 'overlay'
 }) => {
+  const { prompts: adaptivePrompts, stage } = useSuggestedPrompts({
+    lensId,
+    lensName,
+  });
+
+  // Use adaptive prompts if available, fallback to static
+  const displayPrompts: Array<{ id: string; text: string; command?: string }> =
+    adaptivePrompts.length > 0
+      ? adaptivePrompts.map(p => ({ id: p.id, text: p.text, command: p.command }))
+      : welcome.prompts.map((text, i) => ({ id: `static-${i}`, text }));
+
+  const stageInfo = STAGE_LABELS[stage] ?? STAGE_LABELS.ARRIVAL;
+
+  const handlePromptClick = (prompt: { text: string; command?: string }) => {
+    onPromptClick(prompt.text, prompt.command);
+  };
+
   return (
     <div className="glass-welcome-card">
+      {/* Stage indicator */}
+      <div className="text-xs text-[var(--glass-text-subtle)] mb-2 flex items-center gap-1">
+        <span>{stageInfo.emoji}</span>
+        <span>{stageInfo.label}</span>
+      </div>
+
       <h2 className="text-xl font-medium text-[var(--glass-text-primary)] mb-3">
         {welcome.heading}
       </h2>
@@ -26,14 +63,14 @@ const TerminalWelcome: React.FC<TerminalWelcomeProps> = ({
       </p>
 
       <div className="space-y-2 mb-4">
-        {welcome.prompts.map((prompt, i) => (
+        {displayPrompts.map((prompt) => (
           <button
-            key={i}
-            onClick={() => onPromptClick(prompt)}
+            key={prompt.id}
+            onClick={() => handlePromptClick(prompt)}
             className="glass-welcome-prompt"
           >
             <span className="text-[var(--neon-cyan)] mr-2">→</span>
-            {prompt}
+            {prompt.text}
           </button>
         ))}
       </div>

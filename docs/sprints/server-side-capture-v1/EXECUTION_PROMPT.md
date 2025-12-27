@@ -4,19 +4,19 @@
 
 You are implementing server-side persistence for Grove sprouts. The Sprout System client-side wiring is complete. Users can capture sprouts via `/sprout` command and view them in Garden mode. This sprint adds optional server persistence with vector search capability.
 
-**Goal:** When feature flag is enabled, sprouts persist to Supabase Postgres with embeddings for semantic search.
+**Goal:** When feature flag is enabled, sprouts persist to Supabase Postgres with Gemini embeddings for semantic search.
 
 ## Prerequisites
 
 Before starting, verify:
 
 ```bash
-# 1. Supabase project exists and credentials are set
-echo $SUPABASE_URL
-echo $SUPABASE_ANON_KEY
+# 1. Supabase project exists and credentials are set in .env.local
+# Project: The Grove Foundation
+# URL: https://cntzzxqgqsjzsvscunsp.supabase.co
 
-# 2. OpenAI API key for embeddings
-echo $OPENAI_API_KEY
+# 2. Gemini API key exists in .env
+cat .env | grep GEMINI
 
 # 3. Sprout system is working locally
 npm run dev
@@ -24,127 +24,51 @@ npm run dev
 ```
 
 **STOP** if any prerequisite is missing. The sprint requires:
-- Supabase project URL and keys
-- OpenAI API key
+- Supabase project URL and keys (in .env.local)
+- Gemini API key (in .env)
 - Working sprout capture (client-side)
 
 ---
 
-## Phase 1: Database Setup (Manual Step)
+## Phase 1: Database Setup ✅ ALREADY COMPLETE
 
-**This phase is done manually in Supabase Dashboard before CLI execution.**
+The `sprouts` table already exists in Supabase with 768-dimension vector support for Gemini embeddings.
 
-### 1.1 Create Supabase Project
-
-If not exists, create at https://supabase.com/dashboard
-
-### 1.2 Run Migration
-
-In Supabase SQL Editor, run:
-
+If you need to verify, run this in Supabase SQL Editor:
 ```sql
--- Enable vector extension
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Core sprouts table
-CREATE TABLE sprouts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  query TEXT NOT NULL,
-  response TEXT NOT NULL,
-  provenance JSONB DEFAULT '{}',
-  tags TEXT[] DEFAULT '{}',
-  note TEXT,
-  lifecycle TEXT DEFAULT 'sprout' CHECK (lifecycle IN ('sprout', 'sapling', 'tree')),
-  session_id TEXT,
-  captured_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  embedding VECTOR(1536)
-);
-
--- Indexes
-CREATE INDEX idx_sprouts_lifecycle ON sprouts(lifecycle);
-CREATE INDEX idx_sprouts_session ON sprouts(session_id);
-CREATE INDEX idx_sprouts_captured_at ON sprouts(captured_at DESC);
-CREATE INDEX idx_sprouts_tags ON sprouts USING GIN(tags);
-CREATE INDEX idx_sprouts_provenance ON sprouts USING GIN(provenance);
-
--- Vector index (IVFFlat)
-CREATE INDEX idx_sprouts_embedding ON sprouts 
-  USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
-
--- Updated timestamp trigger
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER sprouts_updated_at
-  BEFORE UPDATE ON sprouts
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
-
--- RLS for anonymous access (MVP)
-ALTER TABLE sprouts ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anon_insert" ON sprouts FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "anon_select" ON sprouts FOR SELECT TO anon USING (true);
+SELECT column_name, data_type 
+FROM information_schema.columns 
+WHERE table_name = 'sprouts'
+ORDER BY ordinal_position;
 ```
-
-### 1.3 Get Credentials
-
-From Supabase Dashboard → Settings → API:
-- `SUPABASE_URL` — Project URL
-- `SUPABASE_ANON_KEY` — anon/public key
-- `SUPABASE_SERVICE_ROLE_KEY` — service_role key (for server)
 
 ---
 
 ## Phase 2: Install Dependencies
 
 ```bash
-npm install @supabase/supabase-js openai
+npm install @supabase/supabase-js @google/generative-ai
 ```
 
 **Build gate:** `npm run build`
 
 ---
 
-## Phase 3: Environment Configuration
+## Phase 3: Environment Configuration ✅ ALREADY COMPLETE
 
-### 3.1 Create/Update .env.local
+The `.env.local` file already has Supabase credentials configured.
+The `.env` file already has `GEMINI_API_KEY`.
 
+Verify with:
 ```bash
-# Add to .env.local (create if not exists)
-cat >> .env.local << 'EOF'
-
-# Supabase
-SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-
-# OpenAI
-OPENAI_API_KEY=sk-...
-
-# Feature flag (set to 'server' to enable)
-NEXT_PUBLIC_SPROUT_STORAGE=local
-EOF
+type .env.local
+type .env
 ```
 
-### 3.2 Update .env.example
-
-Add template entries (no real values):
-
-```
-# Sprout Server Storage (optional)
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-OPENAI_API_KEY=
-NEXT_PUBLIC_SPROUT_STORAGE=local
-```
+You should see:
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` in .env.local
+- `GEMINI_API_KEY` in .env
+- `NEXT_PUBLIC_SPROUT_STORAGE=local` in .env.local (we'll change to `server` after testing)
 
 ---
 
@@ -197,35 +121,31 @@ export { supabaseAdmin } from './server';
 
 ---
 
-## Phase 5: Embedding Generation
+## Phase 5: Embedding Generation (Gemini)
 
 ### 5.1 Create src/lib/embeddings.ts
 
 ```typescript
 // src/lib/embeddings.ts
-// OpenAI embedding generation for semantic search
+// Gemini embedding generation for semantic search
 
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 /**
- * Generate embedding vector for text using OpenAI ada-002
- * @param text - Text to embed (max ~8000 tokens)
- * @returns 1536-dimension embedding vector
+ * Generate embedding vector for text using Gemini text-embedding-004
+ * @param text - Text to embed
+ * @returns 768-dimension embedding vector
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
-  // Truncate to avoid token limits
-  const truncatedText = text.slice(0, 8000);
+  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
   
-  const response = await openai.embeddings.create({
-    model: 'text-embedding-ada-002',
-    input: truncatedText,
-  });
+  // Truncate very long text to avoid issues
+  const truncatedText = text.slice(0, 10000);
   
-  return response.data[0].embedding;
+  const result = await model.embedContent(truncatedText);
+  return result.embedding.values;
 }
 
 /**
@@ -285,9 +205,16 @@ export function clearSessionId(): void {
 ### 7.1 Create Directory Structure
 
 ```bash
-mkdir -p src/app/api/sprouts/\[id\]
+mkdir -p src/app/api/sprouts/[id]
 mkdir -p src/app/api/sprouts/search
 mkdir -p src/app/api/sprouts/stats
+```
+
+Note: On Windows, create these folders manually or use:
+```powershell
+New-Item -ItemType Directory -Force -Path "src/app/api/sprouts/[id]"
+New-Item -ItemType Directory -Force -Path "src/app/api/sprouts/search"
+New-Item -ItemType Directory -Force -Path "src/app/api/sprouts/stats"
 ```
 
 ### 7.2 Create src/app/api/sprouts/route.ts
@@ -417,16 +344,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // GET /api/sprouts/:id
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const { data, error } = await supabaseAdmin
       .from('sprouts')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !data) {
@@ -449,6 +377,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PATCH /api/sprouts/:id
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { tags, note, lifecycle } = body;
 
@@ -460,7 +389,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { data, error } = await supabaseAdmin
       .from('sprouts')
       .update(updates)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -485,10 +414,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/sprouts/:id
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const { error } = await supabaseAdmin
       .from('sprouts')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Supabase delete error:', error);
@@ -532,7 +462,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate embedding for search query
+    // Generate embedding for search query using Gemini
     const queryEmbedding = await generateEmbedding(query);
 
     // Vector similarity search using pg_vector
@@ -582,52 +512,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-### 7.5 Add Vector Search Function to Supabase
-
-**Run this SQL in Supabase Dashboard:**
-
-```sql
--- Vector similarity search function
-CREATE OR REPLACE FUNCTION match_sprouts(
-  query_embedding VECTOR(1536),
-  match_threshold FLOAT DEFAULT 0.7,
-  match_count INT DEFAULT 10
-)
-RETURNS TABLE (
-  id UUID,
-  query TEXT,
-  response TEXT,
-  provenance JSONB,
-  tags TEXT[],
-  note TEXT,
-  lifecycle TEXT,
-  captured_at TIMESTAMPTZ,
-  similarity FLOAT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    s.id,
-    s.query,
-    s.response,
-    s.provenance,
-    s.tags,
-    s.note,
-    s.lifecycle,
-    s.captured_at,
-    1 - (s.embedding <=> query_embedding) AS similarity
-  FROM sprouts s
-  WHERE s.embedding IS NOT NULL
-    AND 1 - (s.embedding <=> query_embedding) > match_threshold
-  ORDER BY s.embedding <=> query_embedding
-  LIMIT match_count;
-END;
-$$;
-```
-
-### 7.6 Create src/app/api/sprouts/stats/route.ts
+### 7.5 Create src/app/api/sprouts/stats/route.ts
 
 ```typescript
 // src/app/api/sprouts/stats/route.ts
@@ -636,7 +521,7 @@ $$;
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Total count
     const { count: total } = await supabaseAdmin
@@ -644,17 +529,15 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true });
 
     // Count by lifecycle
-    const { data: lifecycleCounts } = await supabaseAdmin
+    const { data: allSprouts } = await supabaseAdmin
       .from('sprouts')
-      .select('lifecycle')
-      .then(async ({ data }) => {
-        const counts = { sprout: 0, sapling: 0, tree: 0 };
-        (data || []).forEach((row) => {
-          const lc = row.lifecycle as keyof typeof counts;
-          if (lc in counts) counts[lc]++;
-        });
-        return { data: counts };
-      });
+      .select('lifecycle');
+    
+    const lifecycleCounts = { sprout: 0, sapling: 0, tree: 0 };
+    (allSprouts || []).forEach((row) => {
+      const lc = row.lifecycle as keyof typeof lifecycleCounts;
+      if (lc in lifecycleCounts) lifecycleCounts[lc]++;
+    });
 
     // Count by lens (top 10)
     const { data: lensCounts } = await supabaseAdmin
@@ -688,7 +571,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       total: total || 0,
-      byLifecycle: lifecycleCounts || { sprout: 0, sapling: 0, tree: 0 },
+      byLifecycle: lifecycleCounts,
       byLens,
       recentCount: recentCount || 0,
     });
@@ -710,15 +593,18 @@ export async function GET(request: NextRequest) {
 
 ### 8.1 Update hooks/useSproutStorage.ts
 
-Add server mode support with localStorage fallback:
+Add server mode support. Find the file and add/modify:
 
+**At the top of the file, add these imports:**
 ```typescript
-// At top of file, add:
-import { getSessionId } from '@/lib/session';
+import { getSessionId } from '../src/lib/session';
 
 const STORAGE_MODE = process.env.NEXT_PUBLIC_SPROUT_STORAGE || 'local';
+```
 
-// In addSprout function, replace the implementation:
+**Replace or modify the addSprout function to include server support:**
+
+```typescript
 const addSprout = useCallback(async (
   sproutData: Omit<Sprout, 'id' | 'capturedAt'>
 ): Promise<Sprout> => {
@@ -786,9 +672,15 @@ const addSprout = useCallback(async (
 }, [saveToStorage]);
 ```
 
-### 8.2 Add Path Alias (if not exists)
+**Build gate:** `npm run build`
 
-Verify `tsconfig.json` has:
+---
+
+## Phase 9: TypeScript Configuration
+
+### 9.1 Verify Path Alias
+
+Check `tsconfig.json` has the `@/*` path alias:
 
 ```json
 {
@@ -800,18 +692,13 @@ Verify `tsconfig.json` has:
 }
 ```
 
-**Build gate:** `npm run build`
-
----
-
-## Phase 9: TypeScript Path Fix
-
-If `@/lib/...` imports fail, update the import paths to relative:
+If not present, add it. If the build fails with import errors, use relative paths instead:
 
 ```typescript
-// In API routes, use relative imports if @ alias not configured
+// Instead of:
+import { supabaseAdmin } from '@/lib/supabase/server';
+// Use:
 import { supabaseAdmin } from '../../../lib/supabase/server';
-import { generateSproutEmbedding } from '../../../lib/embeddings';
 ```
 
 ---
@@ -828,10 +715,12 @@ Must pass with no errors.
 
 ### 10.2 Local Test (localStorage mode)
 
-```bash
-# Ensure local mode
-echo "NEXT_PUBLIC_SPROUT_STORAGE=local" >> .env.local
+Ensure `.env.local` has:
+```
+NEXT_PUBLIC_SPROUT_STORAGE=local
+```
 
+```bash
 npm run dev
 ```
 
@@ -844,24 +733,25 @@ npm run dev
 
 ### 10.3 Server Test
 
-```bash
-# Switch to server mode
-# Edit .env.local: NEXT_PUBLIC_SPROUT_STORAGE=server
+Edit `.env.local` to change:
+```
+NEXT_PUBLIC_SPROUT_STORAGE=server
+```
 
+Restart dev server:
+```bash
 npm run dev
 ```
 
 1. Capture a sprout with `/sprout`
 2. Check Supabase Dashboard → Table Editor → sprouts
-3. Verify row exists with embedding
+3. Verify row exists with embedding (768 numbers in array)
 
-### 10.4 Vector Search Test
+### 10.4 Vector Search Test (Optional)
 
-```bash
-# In browser console or via curl
-curl -X POST http://localhost:3000/api/sprouts/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "distributed AI infrastructure"}'
+In browser console or PowerShell:
+```powershell
+Invoke-RestMethod -Uri "http://localhost:3000/api/sprouts/search" -Method POST -ContentType "application/json" -Body '{"query": "distributed AI"}'
 ```
 
 Should return semantically similar sprouts.
@@ -873,13 +763,13 @@ Should return semantically similar sprouts.
 - [ ] `npm run build` passes
 - [ ] Local mode: sprouts save to localStorage
 - [ ] Server mode: sprouts save to Supabase
-- [ ] Server mode: embeddings are generated
+- [ ] Server mode: embeddings are generated (768-dim Gemini)
 - [ ] Fallback: server failure → localStorage works
 - [ ] GET /api/sprouts returns sprout list
 - [ ] POST /api/sprouts/search returns similar sprouts
 - [ ] GET /api/sprouts/stats returns counts
 - [ ] Garden view shows sprouts from server
-- [ ] Dashboard widget shows server stats (if integrated)
+- [ ] No console errors in normal operation
 
 ---
 
@@ -888,7 +778,7 @@ Should return semantically similar sprouts.
 - Do NOT modify the Sprout client schema (src/core/schema/sprout.ts)
 - Do NOT delete localStorage functionality
 - Do NOT require authentication for MVP
-- Do NOT use a different embedding model without updating vector dimension
+- Do NOT change embedding dimension (768 for Gemini)
 - Do NOT skip build verification between phases
 - Do NOT commit API keys to git
 
@@ -901,15 +791,13 @@ Should return semantically similar sprouts.
 | `src/lib/supabase/client.ts` | CREATE |
 | `src/lib/supabase/server.ts` | CREATE |
 | `src/lib/supabase/index.ts` | CREATE |
-| `src/lib/embeddings.ts` | CREATE |
+| `src/lib/embeddings.ts` | CREATE (Gemini) |
 | `src/lib/session.ts` | CREATE |
 | `src/app/api/sprouts/route.ts` | CREATE |
 | `src/app/api/sprouts/[id]/route.ts` | CREATE |
 | `src/app/api/sprouts/search/route.ts` | CREATE |
 | `src/app/api/sprouts/stats/route.ts` | CREATE |
 | `hooks/useSproutStorage.ts` | MODIFY |
-| `.env.local` | MODIFY |
-| `.env.example` | MODIFY |
 | `package.json` | MODIFY (add deps) |
 
 ---
@@ -918,7 +806,7 @@ Should return semantically similar sprouts.
 
 - [ ] Feature flag controls storage mode
 - [ ] Server mode persists to Supabase
-- [ ] Embeddings generated for semantic search
+- [ ] Gemini embeddings generated for semantic search
 - [ ] Fallback to localStorage on server failure
 - [ ] All API routes functional
 - [ ] Build passes

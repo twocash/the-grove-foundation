@@ -4,6 +4,7 @@
 
 import { useCallback } from 'react';
 import { useSproutStorage } from './useSproutStorage';
+import { telemetryCollector } from '../src/lib/telemetry';
 import {
   Sprout,
   SproutCaptureOptions,
@@ -81,6 +82,8 @@ export function useSproutCapture() {
         tags: sprout.tags,
         lens: provenance.lens?.name
       });
+      // Track sprout capture for adaptive engagement telemetry
+      telemetryCollector.update({ type: 'sprout' });
       return sprout;
     }
 
