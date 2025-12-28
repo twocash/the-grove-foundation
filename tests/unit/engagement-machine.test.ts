@@ -166,6 +166,32 @@ describe('Engagement Machine', () => {
     });
   });
 
+  describe('Journey Switching', () => {
+    test('can switch to different journey while in journeyActive', () => {
+      actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });
+      actor.send({ type: 'START_JOURNEY', journey: mockJourney });
+      expect(actor.getSnapshot().matches({ session: 'journeyActive' })).toBe(true);
+      expect(actor.getSnapshot().context.journey?.id).toBe('test-journey');
+
+      const newJourney: Journey = {
+        id: 'different-journey',
+        title: 'Different Journey',
+        description: 'A different test journey',
+        waypoints: [
+          { id: 'wp-x', title: 'Waypoint X', prompt: 'Prompt X' },
+          { id: 'wp-y', title: 'Waypoint Y', prompt: 'Prompt Y' },
+        ],
+        completionMessage: 'Different journey complete!',
+      };
+
+      actor.send({ type: 'START_JOURNEY', journey: newJourney });
+      expect(actor.getSnapshot().matches({ session: 'journeyActive' })).toBe(true);
+      expect(actor.getSnapshot().context.journey?.id).toBe('different-journey');
+      expect(actor.getSnapshot().context.journeyProgress).toBe(0);
+      expect(actor.getSnapshot().context.journeyTotal).toBe(2);
+    });
+  });
+
   describe('Journey Complete State', () => {
     test('can start new journey from journeyComplete', () => {
       actor.send({ type: 'SELECT_LENS', lens: 'engineer', source: 'selection' });

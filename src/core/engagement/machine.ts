@@ -86,6 +86,10 @@ export const engagementMachine = setup({
             CHANGE_LENS: {
               actions: 'setLens',
             },
+            START_JOURNEY: {
+              // Stay in journeyActive, just update the journey context
+              actions: 'startJourney',
+            },
             ADVANCE_STEP: {
               actions: 'advanceStep',
               guard: 'notAtEnd',
