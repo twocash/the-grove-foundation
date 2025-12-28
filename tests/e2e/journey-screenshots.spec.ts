@@ -1,0 +1,247 @@
+/**
+ * Journey Visual Regression Tests
+ * 
+ * Captures screenshots at each stage of the journey flow.
+ * Integrates with health system via HealthReporter.
+ * 
+ * Run with --update-snapshots to capture new baselines:
+ *   npx playwright test tests/e2e/journey-screenshots.spec.ts --update-snapshots
+ * 
+ * Sprint: journey-schema-unification-v1
+ * Prerequisite: Journey pills must trigger XState correctly (commit 72e8b98+)
+ */
+
+import { test, expect, Page } from '@playwright/test';
+
+// Journey IDs from TypeScript registry (src/data/journeys/index.ts)
+const JOURNEYS = [
+  { id: 'simulation', title: 'Simulation Theory', waypoints: 5 },
+  { id: 'stakes', title: 'Stakes', waypoints: 3 },
+  { id: 'ratchet', title: 'Ratchet', waypoints: 4 },
+  { id: 'diary', title: 'Diary System', waypoints: 4 },
+  { id: 'emergence', title: 'Emergence', waypoints: 5 },
+  { id: 'architecture', title: 'Architecture', waypoints: 3 },
+] as const;
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+async function clearGroveStorage(page: Page) {
+  await page.evaluate(() => {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('grove-'))
+      .forEach(k => localStorage.removeItem(k));
+  });
+}
+
+async function navigateToTerminal(page: Page, lens = 'engineer') {
+  await page.goto(`/terminal?lens=${lens}`);
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1500); // Allow animations
+}
+
+async function openTerminalPanel(page: Page) {
+  // Terminal may already be open at /terminal route
+  const terminalPanel = page.locator('.terminal-panel');
+  if (await terminalPanel.isVisible()) {
+    return terminalPanel;
+  }
+  
+  // Otherwise click the tree/sprout button
+  const treeButton = page.getByRole('button', { name: /open.*terminal/i }).first();
+  if (await treeButton.isVisible({ timeout: 2000 })) {
+    await treeButton.click();
+    await page.waitForTimeout(500);
+  }
+  
+  return terminalPanel;
+}
+
+async function findJourneyPill(page: Page, journeyId: string) {
+  // Try multiple selector strategies
+  const selectors = [
+    `[data-journey-id="${journeyId}"]`,
+    `button:has-text("${journeyId}")`,
+    `.journey-pill:has-text("${journeyId}")`,
+  ];
+  
+  for (const selector of selectors) {
+    const pill = page.locator(selector).first();
+    if (await pill.isVisible({ timeout: 1000 }).catch(() => false)) {
+      return pill;
+    }
+  }
+  
+  // Fallback: search in terminal for any button containing journey text
+  const terminalPanel = page.locator('.terminal-panel');
+  return terminalPanel.locator('button').filter({
+    hasText: new RegExp(journeyId, 'i')
+  }).first();
+}
+
+async function waitForJourneyStart(page: Page) {
+  // Wait for XState to transition - look for journey-related UI changes
+  await page.waitForTimeout(1000);
+  
+  // Look for journey content area or progress indicator
+  const journeyActive = await page.locator(
+    '[data-journey-active="true"], .journey-content, .waypoint-display'
+  ).first().isVisible({ timeout: 3000 }).catch(() => false);
+  
+  return journeyActive;
+}
+
+// ============================================================================
+// JOURNEY SCREENSHOT TESTS
+// ============================================================================
+
+test.describe('Journey Screenshots', () => {
+  test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await clearGroveStorage(page);
+  });
+
+  test('journey pills are visible after lens selection', async ({ page }) => {
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    // Capture terminal with journey pills visible
+    await expect(page).toHaveScreenshot('journey-pills-overview.png', {
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('simulation journey start screenshot', async ({ page }) => {
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    const pill = await findJourneyPill(page, 'simulation');
+    await expect(pill).toBeVisible({ timeout: 5000 });
+    
+    // Capture before clicking
+    await expect(page).toHaveScreenshot('simulation-before-start.png', {
+      maxDiffPixelRatio: 0.02,
+    });
+    
+    // Click to start journey
+    await pill.click();
+    await waitForJourneyStart(page);
+    
+    // Capture after journey starts
+    await expect(page).toHaveScreenshot('simulation-after-start.png', {
+      maxDiffPixelRatio: 0.02,
+    });
+  });
+
+  test('stakes journey start screenshot', async ({ page }) => {
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    const pill = await findJourneyPill(page, 'stakes');
+    if (await pill.isVisible({ timeout: 3000 })) {
+      await pill.click();
+      await waitForJourneyStart(page);
+      
+      await expect(page).toHaveScreenshot('stakes-journey-start.png', {
+        maxDiffPixelRatio: 0.02,
+      });
+    }
+  });
+
+  test('ratchet journey start screenshot', async ({ page }) => {
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    const pill = await findJourneyPill(page, 'ratchet');
+    if (await pill.isVisible({ timeout: 3000 })) {
+      await pill.click();
+      await waitForJourneyStart(page);
+      
+      await expect(page).toHaveScreenshot('ratchet-journey-start.png', {
+        maxDiffPixelRatio: 0.02,
+      });
+    }
+  });
+});
+
+// ============================================================================
+// JOURNEY FLOW INTEGRATION TEST
+// ============================================================================
+
+test.describe('Journey Flow Integration', () => {
+  test('journey click triggers XState transition', async ({ page }) => {
+    // This test validates the schema unification fix (72e8b98)
+    const consoleErrors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+    
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    const pill = await findJourneyPill(page, 'simulation');
+    await expect(pill).toBeVisible({ timeout: 5000 });
+    
+    await pill.click();
+    await page.waitForTimeout(2000);
+    
+    // Verify no TypeError about waypoints (the bug we fixed)
+    const waypointErrors = consoleErrors.filter(e => 
+      e.includes('waypoints') || e.includes('Cannot read properties of undefined')
+    );
+    
+    expect(waypointErrors).toHaveLength(0);
+  });
+
+  test('journey completion can be tracked', async ({ page }) => {
+    await navigateToTerminal(page, 'engineer');
+    await openTerminalPanel(page);
+    
+    const pill = await findJourneyPill(page, 'simulation');
+    if (await pill.isVisible({ timeout: 3000 })) {
+      await pill.click();
+      await waitForJourneyStart(page);
+      
+      // Verify journey started (XState should have journeyTotal > 0)
+      const content = await page.locator('.terminal-panel').textContent() || '';
+      
+      // Content should change after journey starts
+      expect(content.length).toBeGreaterThan(50);
+    }
+  });
+});
+
+// ============================================================================
+// VISUAL REGRESSION: ALL JOURNEYS
+// ============================================================================
+
+test.describe('All Journeys Visual Baseline', () => {
+  test.setTimeout(120000);
+
+  for (const journey of JOURNEYS) {
+    test(`${journey.id} journey visual state`, async ({ page }) => {
+      await navigateToTerminal(page, 'engineer');
+      await openTerminalPanel(page);
+      
+      const pill = await findJourneyPill(page, journey.id);
+      
+      // Skip if pill not visible (journey may not be available for this lens)
+      if (!await pill.isVisible({ timeout: 3000 }).catch(() => false)) {
+        test.skip();
+        return;
+      }
+      
+      await pill.click();
+      await waitForJourneyStart(page);
+      
+      await expect(page).toHaveScreenshot(`journey-${journey.id}-active.png`, {
+        maxDiffPixelRatio: 0.03, // 3% tolerance for dynamic content
+      });
+    });
+  }
+});

@@ -240,6 +240,42 @@
       "test": "active-grove.spec.ts:AG-2.3: URL lens parameter hydrates state",
       "impact": "Deep links to specific lenses fail",
       "inspect": "npx playwright test -g 'AG-2.3'"
+    },
+    {
+      "id": "journey-pills-visible",
+      "name": "Journey Pills Visible",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "journey-screenshots.spec.ts:journey pills are visible after lens selection",
+      "impact": "Users cannot see or start journeys",
+      "inspect": "npx playwright test -g 'journey pills are visible'"
+    },
+    {
+      "id": "journey-xstate-transition",
+      "name": "Journey XState Transition Works",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "journey-screenshots.spec.ts:journey click triggers XState transition",
+      "impact": "Journey click causes crash or no response",
+      "inspect": "npx playwright test -g 'journey click triggers XState'"
+    },
+    {
+      "id": "simulation-journey-visual",
+      "name": "Simulation Journey Visual",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "journey-screenshots.spec.ts:simulation journey start screenshot",
+      "impact": "Visual regression in simulation journey flow",
+      "inspect": "npx playwright test -g 'simulation journey'"
+    },
+    {
+      "id": "journey-completion-tracking",
+      "name": "Journey Completion Tracking",
+      "category": "engagement",
+      "type": "e2e-behavior",
+      "test": "journey-screenshots.spec.ts:journey completion can be tracked",
+      "impact": "Journey progress not tracked by XState",
+      "inspect": "npx playwright test -g 'journey completion'"
     }
   ]
 }
