@@ -1268,6 +1268,22 @@ const Terminal: React.FC<TerminalProps> = ({
           </div>
         )}
 
+        {/* DEX-Compliant Journey Content for embedded mode (Sprint: journey-content-dex-v1) */}
+        {isJourneyActive && engJourney && currentWaypoint && (
+          <div className="flex-shrink-0 border-t border-[var(--chat-border)] bg-[var(--chat-bg)]">
+            <div className="max-w-3xl mx-auto p-4">
+              <JourneyContent
+                journey={engJourney}
+                currentWaypoint={currentWaypoint}
+                journeyProgress={journeyProgress}
+                journeyTotal={journeyTotal}
+                onAction={handleJourneyAction}
+                onExit={engExitJourney}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Input Area - only show when not in wizard/picker mode */}
         {/* Sprint: terminal-overlay-machine-v1 - use shouldShowInput derived state */}
         {shouldShowInput(overlay) && (
