@@ -277,9 +277,14 @@ const Terminal: React.FC<TerminalProps> = ({
       actions.setOverlay({ type: overlayType as any });
     },
     onJourneyStart: (journeyId) => {
-      const journey = getJourney(journeyId);
+      // Sprint: journey-system-v2 - TypeScript registry ONLY
+      const journey = getJourneyById(journeyId);
+      console.log('[Terminal] onJourneyStart lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
       if (journey) {
         engStartJourney(journey);
+        emit.journeyStarted(journeyId, journey.waypoints.length);
+      } else {
+        console.warn(`[Terminal] onJourneyStart: Journey not found in registry: ${journeyId}`);
       }
     },
     onJourneyClear: () => {
@@ -1089,14 +1094,15 @@ const Terminal: React.FC<TerminalProps> = ({
                   welcome={welcomeContent}
                   onPromptClick={(prompt, command, journeyId) => {
                     if (journeyId) {
-                      // Start journey via XState + EngagementBus
+                      // Start journey via XState (schema types with waypoints)
+                      // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
                       const journey = getJourneyById(journeyId);
+                      console.log('[Terminal] TerminalWelcome1 journey lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                       if (journey) {
-                        // Sprint: journey-system-v2 - Call BOTH state systems
                         engStartJourney(journey);  // XState state transition
                         emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
                       } else {
-                        console.warn(`[Terminal] Journey not found: ${journeyId}`);
+                        console.warn(`[Terminal] Journey not found in registry: ${journeyId}`);
                         handleSend(prompt);  // Fallback: send as regular prompt
                       }
                     } else {
@@ -1172,10 +1178,16 @@ const Terminal: React.FC<TerminalProps> = ({
                     key={prompt.id}
                     onClick={() => {
                       if (prompt.journeyId) {
-                        // Start journey
-                        const journey = getJourney(prompt.journeyId);
+                        // Start journey via XState (schema types with waypoints)
+                        // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
+                        const journey = getJourneyById(prompt.journeyId);
+                        console.log('[Terminal] Pill button journey lookup:', { journeyId: prompt.journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                         if (journey) {
                           engStartJourney(journey);
+                          emit.journeyStarted(prompt.journeyId, journey.waypoints.length);
+                        } else {
+                          console.warn(`[Terminal] Journey not found in registry: ${prompt.journeyId}`);
+                          handleSend(prompt.text);  // Fallback: send as regular prompt
                         }
                       } else if (prompt.command) {
                         handleSend(prompt.command);
@@ -1318,14 +1330,15 @@ const Terminal: React.FC<TerminalProps> = ({
                     welcome={welcomeContent}
                     onPromptClick={(prompt, command, journeyId) => {
                       if (journeyId) {
-                        // Start journey via XState + EngagementBus
+                        // Start journey via XState (schema types with waypoints)
+                        // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
                         const journey = getJourneyById(journeyId);
+                        console.log('[Terminal] TerminalWelcome2 journey lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                         if (journey) {
-                          // Sprint: journey-system-v2 - Call BOTH state systems
                           engStartJourney(journey);  // XState state transition
                           emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
                         } else {
-                          console.warn(`[Terminal] Journey not found: ${journeyId}`);
+                          console.warn(`[Terminal] Journey not found in registry: ${journeyId}`);
                           handleSend(prompt);  // Fallback: send as regular prompt
                         }
                       } else {
@@ -1411,20 +1424,24 @@ const Terminal: React.FC<TerminalProps> = ({
                               ? (schema.nodes as Record<string, { id: string; label: string; query: string }>)[entryNodeId]
                               : null;
 
+                            // Sprint: journey-system-v2 - Use registry journey for XState (has waypoints)
+                            const registryJourney = bridgeState.journeyId ? getJourneyById(bridgeState.journeyId) : null;
+
                             console.log('[CognitiveBridge] Journey lookup', {
-                              journey: journey ? { id: journey.id, title: journey.title, entryNode: journey.entryNode } : null,
+                              schemaJourney: journey ? { id: journey.id, title: journey.title, entryNode: journey.entryNode } : null,
+                              registryJourney: registryJourney ? { id: registryJourney.id, waypoints: registryJourney.waypoints.length } : null,
                               entryNodeId,
                               entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
                             });
 
-                            if (journey && entryNode) {
+                            if (registryJourney && entryNode) {
                               console.log('[CognitiveBridge] Starting journey with engStartJourney():', bridgeState.journeyId);
                               // V2.1: Use engagement state machine to set active journey state
-                              engStartJourney(journey);
+                              engStartJourney(registryJourney);
                               // Send the entry node's query to kick off the conversation
                               handleSend(entryNode.query, entryNode.label, entryNode.id);
                               // Emit journey started event
-                              emit.journeyStarted(bridgeState.journeyId!, journey.estimatedMinutes || 5);
+                              emit.journeyStarted(bridgeState.journeyId!, registryJourney.waypoints.length);
                             } else {
                               console.log('[CognitiveBridge] FALLBACK - no entry node found');
                               // Fallback: Map topic clusters to appropriate personas (legacy behavior)
@@ -1612,9 +1629,14 @@ const Terminal: React.FC<TerminalProps> = ({
                           <button
                             key={prompt.id}
                             onClick={() => {
-                              const journey = getJourney(prompt.journeyId!);
+                              // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
+                              const journey = getJourneyById(prompt.journeyId!);
                               if (journey) {
                                 engStartJourney(journey);
+                                emit.journeyStarted(prompt.journeyId!, journey.waypoints.length);
+                              } else {
+                                console.warn(`[Terminal] Journey pill click: Journey not found in registry: ${prompt.journeyId}`);
+                                handleSend(prompt.text);
                               }
                             }}
                             className="w-full text-left px-3 py-2 text-sm bg-emerald-900/30 text-emerald-300 border border-emerald-700/40 rounded-lg hover:bg-emerald-900/50 hover:border-emerald-500/50 transition-colors"
