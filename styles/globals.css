@@ -1095,6 +1095,23 @@ p {
   --chat-error: #ef4444;
   --chat-error-bg: rgba(239, 68, 68, 0.15);
   --chat-error-border: rgba(239, 68, 68, 0.3);
+
+  /* ============================================
+     CHAT SPAN TOKENS (kinetic-stream-rendering-v1)
+     Rhetorical span styling for AI responses
+     ============================================ */
+
+  /* Concept spans - clay/orange emphasis */
+  --chat-concept-text: #D95D39;
+  --chat-concept-bg: transparent;
+  --chat-concept-bg-hover: rgba(217, 93, 57, 0.1);
+
+  /* Action spans - primary green emphasis */
+  --chat-action-text: #4d7c0f;
+  --chat-action-bg: transparent;
+
+  /* Entity spans - muted slate */
+  --chat-entity-text: #64748b;
 }
 
 /* Chat container for responsive queries */
