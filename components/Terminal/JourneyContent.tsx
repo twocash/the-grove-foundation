@@ -129,7 +129,11 @@ export function JourneyContent({
   };
 
   return (
-    <div className="mb-6 rounded-lg border border-emerald-700/40 bg-emerald-900/20 p-4">
+    <div 
+      className="journey-content mb-6 rounded-lg border border-emerald-700/40 bg-emerald-900/20 p-4"
+      data-journey-active="true"
+      data-journey-id={journey.id}
+    >
       {/* Header: Section title and exit button */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

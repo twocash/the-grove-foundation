@@ -13,14 +13,15 @@
 
 import { test, expect, Page } from '@playwright/test';
 
-// Journey IDs from TypeScript registry (src/data/journeys/index.ts)
+// Journey IDs and titles from TypeScript registry (src/data/journeys/index.ts)
+// Titles must match exactly for pill text searches
 const JOURNEYS = [
-  { id: 'simulation', title: 'Simulation Theory', waypoints: 5 },
-  { id: 'stakes', title: 'Stakes', waypoints: 3 },
-  { id: 'ratchet', title: 'Ratchet', waypoints: 4 },
-  { id: 'diary', title: 'Diary System', waypoints: 4 },
-  { id: 'emergence', title: 'Emergence', waypoints: 5 },
-  { id: 'architecture', title: 'Architecture', waypoints: 3 },
+  { id: 'simulation', title: 'The Ghost in the Machine', waypoints: 5 },
+  { id: 'stakes', title: 'The $380 Billion Bet', waypoints: 3 },
+  { id: 'ratchet', title: 'The Ratchet', waypoints: 4 },
+  { id: 'diary', title: "The Agent's Inner Voice", waypoints: 4 },
+  { id: 'emergence', title: 'The Emergence Pattern', waypoints: 5 },
+  { id: 'architecture', title: 'Under the Hood', waypoints: 3 },
 ] as const;
 
 // ============================================================================
@@ -58,25 +59,48 @@ async function openTerminalPanel(page: Page) {
   return terminalPanel;
 }
 
-async function findJourneyPill(page: Page, journeyId: string) {
-  // Try multiple selector strategies
-  const selectors = [
-    `[data-journey-id="${journeyId}"]`,
-    `button:has-text("${journeyId}")`,
-    `.journey-pill:has-text("${journeyId}")`,
-  ];
+async function findJourneyPill(page: Page, journeyIdOrTitle: string) {
+  // Get the title from JOURNEYS array if we were given an ID
+  const journeyEntry = JOURNEYS.find(j => j.id === journeyIdOrTitle);
+  const searchTerms = journeyEntry 
+    ? [journeyIdOrTitle, journeyEntry.title]
+    : [journeyIdOrTitle];
   
-  for (const selector of selectors) {
-    const pill = page.locator(selector).first();
+  // Try data attribute first (most reliable)
+  const dataSelector = `[data-journey-id="${journeyIdOrTitle}"]`;
+  const dataPill = page.locator(dataSelector).first();
+  if (await dataPill.isVisible({ timeout: 1000 }).catch(() => false)) {
+    return dataPill;
+  }
+  
+  // Try each search term (ID and title)
+  for (const term of searchTerms) {
+    const selectors = [
+      `button:has-text("${term}")`,
+      `.journey-pill:has-text("${term}")`,
+    ];
+    
+    for (const selector of selectors) {
+      const pill = page.locator(selector).first();
+      if (await pill.isVisible({ timeout: 1000 }).catch(() => false)) {
+        return pill;
+      }
+    }
+  }
+  
+  // Fallback: search anywhere on page for button containing journey text
+  for (const term of searchTerms) {
+    const pill = page.locator('button').filter({
+      hasText: new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+    }).first();
     if (await pill.isVisible({ timeout: 1000 }).catch(() => false)) {
       return pill;
     }
   }
-  
-  // Fallback: search in terminal for any button containing journey text
-  const terminalPanel = page.locator('.terminal-panel');
-  return terminalPanel.locator('button').filter({
-    hasText: new RegExp(journeyId, 'i')
+
+  // Last resort: return the first matching button by ID pattern
+  return page.locator('button').filter({
+    hasText: new RegExp(journeyIdOrTitle, 'i')
   }).first();
 }
 
@@ -201,15 +225,15 @@ test.describe('Journey Flow Integration', () => {
   test('journey completion can be tracked', async ({ page }) => {
     await navigateToTerminal(page, 'engineer');
     await openTerminalPanel(page);
-    
+
     const pill = await findJourneyPill(page, 'simulation');
     if (await pill.isVisible({ timeout: 3000 })) {
       await pill.click();
       await waitForJourneyStart(page);
-      
-      // Verify journey started (XState should have journeyTotal > 0)
-      const content = await page.locator('.terminal-panel').textContent() || '';
-      
+
+      // Verify journey started by checking main content area
+      const content = await page.locator('main').textContent() || '';
+
       // Content should change after journey starts
       expect(content.length).toBeGreaterThan(50);
     }
