@@ -27,7 +27,7 @@ import { SproutProvenance } from '../src/core/schema/sprout';
 import { useOptionalWidgetUI } from '../src/widget/WidgetUIContext';
 import { Card, Persona, JourneyNode, Journey } from '../data/narratives-schema';
 import { getPersona } from '../data/default-personas';
-import { getJourneyById } from '../src/data/journeys';
+import { getCanonicalJourney } from '@core/journey';
 import { getFormattedTerminalWelcome, getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../src/data/quantum-content';
 import { useQuantumInterface } from '../src/surface/hooks/useQuantumInterface';
 import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/lens';
@@ -277,8 +277,8 @@ const Terminal: React.FC<TerminalProps> = ({
       actions.setOverlay({ type: overlayType as any });
     },
     onJourneyStart: (journeyId) => {
-      // Sprint: journey-system-v2 - TypeScript registry ONLY
-      const journey = getJourneyById(journeyId);
+      // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+      const journey = getCanonicalJourney(journeyId, schema);
       console.log('[Terminal] onJourneyStart lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
       if (journey) {
         engStartJourney(journey);
@@ -818,7 +818,7 @@ const Terminal: React.FC<TerminalProps> = ({
         if (prevJourneyId && nextJourneyId && prevJourneyId !== nextJourneyId) {
           // Journey transition detected! Complete the previous journey
           console.log('[Journey] Transition detected:', { from: prevJourneyId, to: nextJourneyId });
-          const completedJourney = schema?.journeys?.[prevJourneyId];
+          const completedJourney = getCanonicalJourney(prevJourneyId, schema);
           if (completedJourney) {
             // Record journey completion
             recordJourneyCompleted();
@@ -1095,14 +1095,14 @@ const Terminal: React.FC<TerminalProps> = ({
                   onPromptClick={(prompt, command, journeyId) => {
                     if (journeyId) {
                       // Start journey via XState (schema types with waypoints)
-                      // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
-                      const journey = getJourneyById(journeyId);
+                      // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+                      const journey = getCanonicalJourney(journeyId, schema);
                       console.log('[Terminal] TerminalWelcome1 journey lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                       if (journey) {
                         engStartJourney(journey);  // XState state transition
                         emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
                       } else {
-                        console.warn(`[Terminal] Journey not found in registry: ${journeyId}`);
+                        console.warn(`[Terminal] Journey not found: ${journeyId}`);
                         handleSend(prompt);  // Fallback: send as regular prompt
                       }
                     } else {
@@ -1179,14 +1179,14 @@ const Terminal: React.FC<TerminalProps> = ({
                     onClick={() => {
                       if (prompt.journeyId) {
                         // Start journey via XState (schema types with waypoints)
-                        // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
-                        const journey = getJourneyById(prompt.journeyId);
+                        // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+                        const journey = getCanonicalJourney(prompt.journeyId, schema);
                         console.log('[Terminal] Pill button journey lookup:', { journeyId: prompt.journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                         if (journey) {
                           engStartJourney(journey);
                           emit.journeyStarted(prompt.journeyId, journey.waypoints.length);
                         } else {
-                          console.warn(`[Terminal] Journey not found in registry: ${prompt.journeyId}`);
+                          console.warn(`[Terminal] Journey not found: ${prompt.journeyId}`);
                           handleSend(prompt.text);  // Fallback: send as regular prompt
                         }
                       } else if (prompt.command) {
@@ -1331,14 +1331,14 @@ const Terminal: React.FC<TerminalProps> = ({
                     onPromptClick={(prompt, command, journeyId) => {
                       if (journeyId) {
                         // Start journey via XState (schema types with waypoints)
-                        // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
-                        const journey = getJourneyById(journeyId);
+                        // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+                        const journey = getCanonicalJourney(journeyId, schema);
                         console.log('[Terminal] TerminalWelcome2 journey lookup:', { journeyId, found: !!journey, waypoints: journey?.waypoints?.length });
                         if (journey) {
                           engStartJourney(journey);  // XState state transition
                           emit.journeyStarted(journeyId, journey.waypoints.length);  // Telemetry
                         } else {
-                          console.warn(`[Terminal] Journey not found in registry: ${journeyId}`);
+                          console.warn(`[Terminal] Journey not found: ${journeyId}`);
                           handleSend(prompt);  // Fallback: send as regular prompt
                         }
                       } else {
@@ -1409,39 +1409,38 @@ const Terminal: React.FC<TerminalProps> = ({
                             });
 
                             // V2.1: Start the actual journey from the schema
+                            // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
                             console.log('[CognitiveBridge] onAccept clicked', {
                               journeyId: bridgeState.journeyId,
                               timeToDecisionMs,
                               schemaHasJourneys: !!schema?.journeys,
-                              schemaHasNodes: !!schema?.nodes,
-                              journeyKeys: schema?.journeys ? Object.keys(schema.journeys) : [],
-                              nodeKeys: schema?.nodes ? Object.keys(schema.nodes).slice(0, 5) : []
+                              schemaHasNodes: !!schema?.nodes
                             });
 
-                            const journey = schema?.journeys?.[bridgeState.journeyId!];
-                            const entryNodeId = journey?.entryNode;
+                            // Use unified lookup for canonical Journey type
+                            const journey = bridgeState.journeyId ? getCanonicalJourney(bridgeState.journeyId, schema) : null;
+
+                            // Get entry node from schema for initial prompt (legacy journeys have entryNode)
+                            const legacyJourney = schema?.journeys?.[bridgeState.journeyId!];
+                            const entryNodeId = legacyJourney?.entryNode ?? journey?.waypoints?.[0]?.id;
                             const entryNode = entryNodeId && schema?.nodes
                               ? (schema.nodes as Record<string, { id: string; label: string; query: string }>)[entryNodeId]
                               : null;
 
-                            // Sprint: journey-system-v2 - Use registry journey for XState (has waypoints)
-                            const registryJourney = bridgeState.journeyId ? getJourneyById(bridgeState.journeyId) : null;
-
                             console.log('[CognitiveBridge] Journey lookup', {
-                              schemaJourney: journey ? { id: journey.id, title: journey.title, entryNode: journey.entryNode } : null,
-                              registryJourney: registryJourney ? { id: registryJourney.id, waypoints: registryJourney.waypoints.length } : null,
+                              journey: journey ? { id: journey.id, waypoints: journey.waypoints.length } : null,
                               entryNodeId,
                               entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
                             });
 
-                            if (registryJourney && entryNode) {
+                            if (journey && entryNode) {
                               console.log('[CognitiveBridge] Starting journey with engStartJourney():', bridgeState.journeyId);
                               // V2.1: Use engagement state machine to set active journey state
-                              engStartJourney(registryJourney);
+                              engStartJourney(journey);
                               // Send the entry node's query to kick off the conversation
                               handleSend(entryNode.query, entryNode.label, entryNode.id);
                               // Emit journey started event
-                              emit.journeyStarted(bridgeState.journeyId!, registryJourney.waypoints.length);
+                              emit.journeyStarted(bridgeState.journeyId!, journey.waypoints.length);
                             } else {
                               console.log('[CognitiveBridge] FALLBACK - no entry node found');
                               // Fallback: Map topic clusters to appropriate personas (legacy behavior)
@@ -1629,13 +1628,13 @@ const Terminal: React.FC<TerminalProps> = ({
                           <button
                             key={prompt.id}
                             onClick={() => {
-                              // Sprint: journey-system-v2 - TypeScript registry ONLY (no narrative schema fallback)
-                              const journey = getJourneyById(prompt.journeyId!);
+                              // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+                              const journey = getCanonicalJourney(prompt.journeyId!, schema);
                               if (journey) {
                                 engStartJourney(journey);
                                 emit.journeyStarted(prompt.journeyId!, journey.waypoints.length);
                               } else {
-                                console.warn(`[Terminal] Journey pill click: Journey not found in registry: ${prompt.journeyId}`);
+                                console.warn(`[Terminal] Journey pill click: Journey not found: ${prompt.journeyId}`);
                                 handleSend(prompt.text);
                               }
                             }}

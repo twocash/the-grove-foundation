@@ -106,6 +106,11 @@ export const DEFAULT_PERSONA_PROMPT_CONFIG: Omit<PersonaPromptConfig, 'toneGuida
 
 export type JourneyStatus = 'active' | 'draft';
 
+/**
+ * @deprecated Use Journey from src/core/schema/journey.ts instead.
+ * This type lacks waypoints[] required by XState engagement machine.
+ * Migration: Use getCanonicalJourney() from src/core/journey/service.ts
+ */
 export interface Journey {
   id: string;
   title: string;

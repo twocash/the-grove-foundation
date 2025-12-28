@@ -9,7 +9,7 @@ import type { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
-import { getJourneyById } from '../../src/data/journeys';
+import { getCanonicalJourney } from '@core/journey';
 import { StatusBadge } from '../shared/ui';
 
 // Versioned journey type with metadata
@@ -175,12 +175,12 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
   const activeJourney = activeJourneyId ? getJourney(activeJourneyId) : null;
 
   const handleStart = (journeyId: string) => {
-    // Sprint: journey-system-v2 - Use TypeScript registry (has waypoints) NOT schema journeys
-    const registryJourney = getJourneyById(journeyId);
-    if (registryJourney) {
-      engStartJourney(registryJourney);
+    // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+    const journey = getCanonicalJourney(journeyId, schema);
+    if (journey) {
+      engStartJourney(journey);
     } else {
-      console.warn(`[JourneyList] Journey not found in registry: ${journeyId}`);
+      console.warn(`[JourneyList] Journey not found: ${journeyId}`);
     }
     if (mode === 'compact' && onBack) {
       onBack();  // Return to chat after selection
