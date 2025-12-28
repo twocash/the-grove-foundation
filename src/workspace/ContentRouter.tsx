@@ -127,10 +127,6 @@ function pathToView(path: string[]): string {
     'explore.groveProject.nodes': 'node-grid',
     'explore.groveProject.diary': 'diary-list',
     'explore.groveProject.sprouts': 'sprout-grid',
-    // Legacy paths (backward compatibility)
-    'explore.nodes': 'node-grid',
-    'explore.journeys': 'journey-list',
-    'explore.lenses': 'lens-picker',
     // Do - Coming Soon placeholders
     'do.chat': 'chat-placeholder',
     'do.apps': 'apps-placeholder',

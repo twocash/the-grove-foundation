@@ -20,7 +20,7 @@ import { useCommands } from './Terminal/useCommands';
 import type { OverlayHandlers } from './Terminal/index';
 // Note: WelcomeInterstitial, LensPicker, JourneyList now rendered via TerminalOverlayRenderer
 import CognitiveBridge from './Terminal/CognitiveBridge';
-import { GardenModal, StatsModal } from './Terminal/Modals';
+import { StatsModal } from './Terminal/Modals';
 import { useStreakTracking } from '../hooks/useStreakTracking';
 import { useSproutCapture } from '../hooks/useSproutCapture';
 import { useSuggestedPrompts } from '../hooks/useSuggestedPrompts';
@@ -118,7 +118,6 @@ const Terminal: React.FC<TerminalProps> = ({
   // Destructure modal states
   const showHelpModal = uiState.modals.help;
   const showStatsModal = uiState.modals.stats;
-  const showGardenModal = uiState.modals.garden;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -441,7 +440,7 @@ const Terminal: React.FC<TerminalProps> = ({
   };
 
   // Command Palette handlers (v0.16)
-  const handleOpenModal = (modal: 'help' | 'journeys' | 'stats' | 'garden') => {
+  const handleOpenModal = (modal: 'help' | 'journeys' | 'stats') => {
     actions.openModal(modal);
   };
 
@@ -1312,13 +1311,6 @@ const Terminal: React.FC<TerminalProps> = ({
         )}
 
         {/* Modals for embedded mode - Sprint: adaptive-engagement-v1 */}
-        {showGardenModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-[var(--chat-bg)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
-              <GardenModal onClose={() => actions.closeModal('garden')} />
-            </div>
-          </div>
-        )}
         {showStatsModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-[var(--chat-bg)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
@@ -1807,7 +1799,6 @@ const Terminal: React.FC<TerminalProps> = ({
         // Modal states
         showHelpModal={showHelpModal}
         showStatsModal={showStatsModal}
-        showGardenModal={showGardenModal}
 
         // Data
         currentArchetypeId={currentArchetypeId}
@@ -1848,11 +1839,6 @@ const Terminal: React.FC<TerminalProps> = ({
         // Handlers - Modals
         onCloseHelpModal={() => actions.closeModal('help')}
         onCloseStatsModal={() => actions.closeModal('stats')}
-        onCloseGardenModal={() => actions.closeModal('garden')}
-        onViewFullStats={() => {
-          actions.closeModal('garden');
-          actions.openModal('stats');
-        }}
 
         // Handlers - LensPicker (not used but required)
         onLensPickerBack={() => actions.setOverlay({ type: 'none' })}

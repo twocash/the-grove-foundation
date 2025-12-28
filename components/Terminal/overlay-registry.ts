@@ -11,7 +11,6 @@ import { JourneyList } from '../../src/explore/JourneyList';
 import { CustomLensWizard } from './CustomLensWizard';
 import { CommandPalette } from './CommandPalette';
 import { StatsOverlay } from './StatsOverlay';
-import GardenModal from './Modals/GardenModal';
 
 export interface OverlayConfig {
   component: ComponentType<any>;
@@ -52,10 +51,5 @@ export const OVERLAY_REGISTRY: Partial<Record<OverlayType, OverlayConfig>> = {
     component: StatsOverlay,
     hideInput: false,
     analytics: 'stats_viewed'
-  },
-  'garden': {
-    component: GardenModal,
-    hideInput: false,
-    analytics: 'garden_viewed'
   }
 };

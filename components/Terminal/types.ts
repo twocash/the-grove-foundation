@@ -62,8 +62,7 @@ export type TerminalOverlay =
   | { type: 'wizard'; wizardId?: string }
   | { type: 'field-picker' }
   | { type: 'command-palette'; initialQuery?: string }
-  | { type: 'stats' }
-  | { type: 'garden' };
+  | { type: 'stats' };
 
 export type OverlayType = TerminalOverlay['type'];
 
@@ -105,14 +104,12 @@ export interface ModalStates {
   help: boolean;
   journeys: boolean;
   stats: boolean;
-  garden: boolean;
 }
 
 export const INITIAL_MODAL_STATES: ModalStates = {
   help: false,
   journeys: false,
-  stats: false,
-  garden: false
+  stats: false
 };
 
 // ============================================================================
@@ -332,7 +329,6 @@ export interface TerminalFlowProps {
   // Modal states
   showHelpModal: boolean;
   showStatsModal: boolean;
-  showGardenModal: boolean;
 
   // Data
   currentArchetypeId: ArchetypeId | null;
@@ -373,8 +369,6 @@ export interface TerminalFlowProps {
   // Handlers - Modals
   onCloseHelpModal: () => void;
   onCloseStatsModal: () => void;
-  onCloseGardenModal: () => void;
-  onViewFullStats: () => void;
 
   // Handlers - LensPicker
   onLensPickerBack: () => void;

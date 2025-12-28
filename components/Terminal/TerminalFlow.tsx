@@ -10,7 +10,7 @@ import { ArchetypeId, LensCandidate, UserInputs } from '../../types/lens';
 import WelcomeInterstitial from './WelcomeInterstitial';
 import CustomLensWizard from './CustomLensWizard';
 import JourneyCompletion from './JourneyCompletion';
-import { HelpModal, StatsModal, GardenModal } from './Modals';
+import { HelpModal, StatsModal } from './Modals';
 import { LensPicker } from '../../src/explore/LensPicker';
 import SimulationReveal from './Reveals/SimulationReveal';
 import CustomLensOffer from './Reveals/CustomLensOffer';
@@ -51,7 +51,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
   // Modal states
   showHelpModal,
   showStatsModal,
-  showGardenModal,
 
   // Data
   currentArchetypeId,
@@ -92,8 +91,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
   // Handlers - Modals
   onCloseHelpModal,
   onCloseStatsModal,
-  onCloseGardenModal,
-  onViewFullStats,
 
   // Handlers - LensPicker
   onLensPickerBack,
@@ -180,12 +177,6 @@ const TerminalFlow: React.FC<TerminalFlowProps> = ({
 
       {showHelpModal && <HelpModal onClose={onCloseHelpModal} />}
       {showStatsModal && <StatsModal onClose={onCloseStatsModal} />}
-      {showGardenModal && (
-        <GardenModal
-          onClose={onCloseGardenModal}
-          onViewFullStats={onViewFullStats}
-        />
-      )}
     </>
   );
 };

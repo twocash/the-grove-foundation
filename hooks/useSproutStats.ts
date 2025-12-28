@@ -10,7 +10,7 @@ import { SproutStats, MAX_RECENT_SPROUTS } from '../src/core/schema/sprout';
  * Hook for aggregated sprout statistics
  *
  * Provides computed stats from sprout storage for display in
- * GardenModal and StatsModal.
+ * StatsModal and GardenView.
  */
 export function useSproutStats(): SproutStats {
   const { getSprouts, getSessionSprouts, sessionId } = useSproutStorage();

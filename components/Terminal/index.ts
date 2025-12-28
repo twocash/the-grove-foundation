@@ -21,7 +21,7 @@ export { default as SuggestionChip } from './SuggestionChip';
 // Command Palette components (v0.16)
 export { CommandInput, commandRegistry, useCommandParser } from './CommandInput';
 export type { Command, CommandContext, CommandResult } from './CommandInput';
-export { HelpModal, StatsModal, GardenModal } from './Modals';
+export { HelpModal, StatsModal } from './Modals';
 
 // Terminal Architecture Refactor v1.0 - Types
 export type {
