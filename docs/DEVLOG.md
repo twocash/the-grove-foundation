@@ -707,3 +707,56 @@ Sprint 4 is structurally complete. Optional cleanup tasks:
 ## 2025-12-18 23:27:59Z
 - Reviewed V2.1 migration open items and current V2.0 dependencies to scope audit deliverables. Sources: docs/V21_MIGRATION_OPEN_ITEMS.md, hooks/useNarrativeEngine.ts, components/Terminal.tsx.
 - Planned documentation updates (REPO_AUDIT, SPEC, ARCHITECTURE, MIGRATION_MAP, DECISIONS, SPRINTS) to align with V2.1 journey graph plan.
+
+---
+
+## 2025-12-27 | Tech Debt Cleanup v1 - Session 1
+
+### Objective
+Execute safe deletions of deprecated code identified during codebase audit.
+
+### Work Completed
+
+#### Task 1: Delete GardenModal.tsx
+**Context**: GardenModal was deprecated in favor of `src/widget/views/GardenView.tsx`. The `/garden` command now switches to garden mode instead of opening a modal.
+
+**Files Modified**:
+| File | Changes |
+|------|---------|
+| `components/Terminal.tsx` | Removed import, modal state, rendering, handlers |
+| `components/Terminal/TerminalFlow.tsx` | Removed import, props, handlers, rendering |
+| `components/Terminal/overlay-registry.ts` | Removed import and 'garden' registry entry |
+| `components/Terminal/types.ts` | Removed 'garden' from TerminalOverlay, ModalStates, TerminalFlowProps |
+| `components/Terminal/Modals/index.ts` | Removed GardenModal export |
+| `components/Terminal/index.ts` | Removed GardenModal from barrel export |
+| `hooks/useSproutStats.ts` | Updated JSDoc comment |
+
+**File Deleted**:
+- `components/Terminal/Modals/GardenModal.tsx` (178 lines)
+
+#### Task 2: Remove Legacy Route Aliases
+**Context**: Legacy route patterns (`explore.nodes`, `explore.journeys`, `explore.lenses`) were superseded by namespaced versions (`explore.groveProject.*`).
+
+**File Modified**:
+- `src/workspace/ContentRouter.tsx` - Removed 4 lines of legacy route mappings
+
+### Verification
+- ✅ Build passes (no TypeScript errors)
+- ✅ All 227 tests pass
+- ✅ No broken imports
+
+### Metrics
+- **Files Changed**: 9
+- **Lines Added**: 8
+- **Lines Deleted**: 226
+- **Net Reduction**: ~218 lines of deprecated code
+
+### Commit
+```
+595dee2 chore: remove deprecated GardenModal and legacy route aliases
+```
+
+### Next Sessions (Not in Scope)
+- Session 2: TerminalFlowState migration
+- Session 3: Legacy thread methods cleanup
+- Session 4: Cognitive Bridge decision + NarrativeEngineContext extraction
