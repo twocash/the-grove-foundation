@@ -195,3 +195,7 @@ export {
   isDEXLens,
   isDEXCard
 } from './dex';
+
+// Journey Provenance (DEX Pillar III)
+export * from './journey-provenance';
+export type { JourneyDisplayConfig, WaypointAction } from './journey';

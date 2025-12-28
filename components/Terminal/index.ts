@@ -68,3 +68,7 @@ export { CommandPalette } from './CommandPalette';
 export { StatsOverlay } from './StatsOverlay';
 export { useCommands } from './useCommands';
 export type { UseCommandsOptions, UseCommandsReturn } from './useCommands';
+
+// DEX Journey Content (Sprint: journey-content-dex-v1)
+export { JourneyContent } from './JourneyContent';
+export type { JourneyContentProps } from './JourneyContent';

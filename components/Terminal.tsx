@@ -13,7 +13,9 @@ import { useCustomLens } from '../hooks/useCustomLens';
 import { useEngagementBridge } from '../hooks/useEngagementBridge';
 import { useEngagement, useLensState, useJourneyState, useEntropyState } from '@core/engagement';
 import { useFeatureFlag } from '../hooks/useFeatureFlags';
-import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput, TerminalOverlayRenderer, isOverlayActive } from './Terminal/index';
+import { LensBadge, CustomLensWizard, JourneyCard, JourneyCompletion, JourneyNav, LoadingIndicator, TerminalHeader, TerminalPill, SuggestionChip, MarkdownRenderer, TerminalShell, TerminalFlow, useTerminalState, TerminalWelcome, shouldShowInput, TerminalOverlayRenderer, isOverlayActive, JourneyContent } from './Terminal/index';
+import type { WaypointAction } from '@core/schema/journey';
+import type { JourneyProvenance } from '@core/schema/journey-provenance';
 import { useCommands } from './Terminal/useCommands';
 import type { OverlayHandlers } from './Terminal/index';
 // Note: WelcomeInterstitial, LensPicker, JourneyList now rendered via TerminalOverlayRenderer
@@ -167,9 +169,13 @@ const Terminal: React.FC<TerminalProps> = ({
   const {
     journey: engJourney,
     isActive: isJourneyActive,
+    currentWaypoint,
+    journeyProgress,
+    journeyTotal,
     startJourney: engStartJourney,
     advanceStep,
-    exitJourney: engExitJourney
+    completeJourney,
+    exitJourney: engExitJourney,
   } = useJourneyState({ actor });
   const { entropy: engEntropy, updateEntropy: engUpdateEntropy, resetEntropy: engResetEntropy } = useEntropyState({ actor });
 
@@ -789,6 +795,59 @@ const Terminal: React.FC<TerminalProps> = ({
       firstCard: currentThread.length > 0 ? getThreadCard(0)?.label : null
     });
   }, [session.activeLens, currentThread, currentPosition, getThreadCard]);
+
+  /**
+   * Handle journey action from JourneyContent component.
+   * Routes action types to appropriate XState transitions and side effects.
+   * Sprint: journey-content-dex-v1
+   */
+  const handleJourneyAction = (
+    action: WaypointAction,
+    provenance: JourneyProvenance
+  ) => {
+    console.log('[Terminal] Journey action:', action.type, 'provenance:', provenance);
+
+    switch (action.type) {
+      case 'explore':
+        // Send the waypoint prompt to chat
+        if (currentWaypoint?.prompt) {
+          handleSend(currentWaypoint.prompt);
+        }
+        break;
+
+      case 'advance':
+        advanceStep();
+        break;
+
+      case 'complete':
+        completeJourney();
+        // Trigger completion UI elements
+        if (actions?.setReveal) {
+          actions.setReveal('journeyCompletion', true);
+        }
+        if (actions?.setCompletedJourneyTitle) {
+          actions.setCompletedJourneyTitle(engJourney?.title || '');
+        }
+        // Record analytics if available
+        if (typeof incrementJourneysCompleted === 'function') {
+          incrementJourneysCompleted();
+        }
+        break;
+
+      case 'branch':
+        console.warn('[Terminal] Branch action not yet implemented:', action.targetWaypoint);
+        break;
+
+      case 'custom':
+        if (action.command) {
+          handleSend(action.command);
+        }
+        break;
+
+      default:
+        console.warn('[Terminal] Unknown journey action type:', action.type);
+    }
+  };
 
   const handleSend = async (manualQuery?: string, manualDisplay?: string, nodeId?: string) => {
     const textToSend = manualQuery !== undefined ? manualQuery : input;
@@ -1511,8 +1570,18 @@ const Terminal: React.FC<TerminalProps> = ({
               <div className="border-t border-[var(--glass-border)] bg-[var(--glass-solid)]">
                 <div className="max-w-3xl mx-auto p-6">
 
-                {/* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */}
-                {v21JourneyContext?.isIncomplete ? (
+                {/* DEX-Compliant Journey Content (Sprint: journey-content-dex-v1) */}
+                {isJourneyActive && engJourney && currentWaypoint ? (
+                  <JourneyContent
+                    journey={engJourney}
+                    currentWaypoint={currentWaypoint}
+                    journeyProgress={journeyProgress}
+                    journeyTotal={journeyTotal}
+                    onAction={handleJourneyAction}
+                    onExit={engExitJourney}
+                  />
+                ) : v21JourneyContext?.isIncomplete ? (
+                  /* V2.1 Journey In Progress - incomplete journey (next node not yet defined) */
                   <div className="mb-4 bg-paper/50 border border-ink/10 rounded-lg p-4">
                     <div className="text-[10px] font-mono uppercase tracking-widest text-grove-forest mb-2">
                       Journey: {v21JourneyContext.journeyTitle}
