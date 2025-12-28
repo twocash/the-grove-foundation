@@ -1,7 +1,18 @@
 // src/core/engagement/actions.ts
+// Sprint: kinetic-stream-schema-v1 - Added stream actions
 
 import { assign } from 'xstate';
 import type { EngagementContext, EngagementEvent, Journey } from './types';
+import type { StreamItem } from '../schema/stream';
+import { parse } from '../transformers/RhetoricalParser';
+
+// ─────────────────────────────────────────────────────────────────
+// ID GENERATION
+// ─────────────────────────────────────────────────────────────────
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 // Action creators for use in machine definition
 export const actions = {
@@ -48,6 +59,84 @@ export const actions = {
     entropy: ({ event }) => {
       const e = event as Extract<EngagementEvent, { type: 'UPDATE_ENTROPY' }>;
       return e.value;
+    },
+  }),
+
+  // ─────────────────────────────────────────────────────────────────
+  // STREAM ACTIONS (Sprint: kinetic-stream-schema-v1)
+  // ─────────────────────────────────────────────────────────────────
+
+  createQueryItem: assign({
+    currentStreamItem: ({ event }) => {
+      const e = event as Extract<EngagementEvent, { type: 'START_QUERY' }>;
+      return {
+        id: generateId(),
+        type: 'query' as const,
+        content: e.prompt || '',
+        timestamp: Date.now(),
+        createdBy: 'user' as const,
+        role: 'user' as const
+      } satisfies StreamItem;
+    },
+    streamHistory: ({ context }) => [...(context as EngagementContext).streamHistory],
+  }),
+
+  createResponseItem: assign({
+    currentStreamItem: ({ context }) => {
+      // First, add the query to history if it exists
+      const ctx = context as EngagementContext;
+      return {
+        id: generateId(),
+        type: 'response' as const,
+        content: '',
+        timestamp: Date.now(),
+        createdBy: 'ai' as const,
+        role: 'assistant' as const,
+        isGenerating: true
+      } satisfies StreamItem;
+    },
+    streamHistory: ({ context }) => {
+      const ctx = context as EngagementContext;
+      if (ctx.currentStreamItem && ctx.currentStreamItem.type === 'query') {
+        return [...ctx.streamHistory, ctx.currentStreamItem];
+      }
+      return ctx.streamHistory;
+    },
+  }),
+
+  appendToResponse: assign({
+    currentStreamItem: ({ context, event }) => {
+      const ctx = context as EngagementContext;
+      const e = event as Extract<EngagementEvent, { type: 'STREAM_CHUNK' }>;
+      if (!ctx.currentStreamItem) return null;
+      return {
+        ...ctx.currentStreamItem,
+        content: ctx.currentStreamItem.content + (e.chunk || '')
+      };
+    },
+  }),
+
+  finalizeResponse: assign({
+    currentStreamItem: ({ context }) => {
+      const ctx = context as EngagementContext;
+      if (!ctx.currentStreamItem) return null;
+      const { spans } = parse(ctx.currentStreamItem.content);
+      return {
+        ...ctx.currentStreamItem,
+        isGenerating: false,
+        parsedSpans: spans
+      };
+    },
+    streamHistory: ({ context }) => {
+      const ctx = context as EngagementContext;
+      if (!ctx.currentStreamItem) return ctx.streamHistory;
+      const { spans } = parse(ctx.currentStreamItem.content);
+      const finalizedItem = {
+        ...ctx.currentStreamItem,
+        isGenerating: false,
+        parsedSpans: spans
+      };
+      return [...ctx.streamHistory, finalizedItem];
     },
   }),
 };

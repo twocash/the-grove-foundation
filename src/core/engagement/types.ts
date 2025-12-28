@@ -1,9 +1,12 @@
 // src/core/engagement/types.ts
 // Sprint: journey-system-v2 - Aligned with schema types (waypoints)
+// Sprint: kinetic-stream-schema-v1 - Added stream context
 
 // Re-export journey types from schema for consistency
 // The schema types are the canonical source of truth
 export type { Journey, JourneyWaypoint } from '../schema/journey';
+
+import type { StreamItem } from '../schema/stream';
 
 export interface EngagementContext {
   // Lens state
@@ -18,6 +21,10 @@ export interface EngagementContext {
   // Entropy state
   entropy: number;
   entropyThreshold: number;
+
+  // Stream state (Sprint: kinetic-stream-schema-v1)
+  currentStreamItem: StreamItem | null;
+  streamHistory: StreamItem[];
 }
 
 export const initialContext: EngagementContext = {
@@ -28,6 +35,8 @@ export const initialContext: EngagementContext = {
   journeyTotal: 0,
   entropy: 0,
   entropyThreshold: 0.7,
+  currentStreamItem: null,
+  streamHistory: [],
 };
 
 export type EngagementEvent =
@@ -39,4 +48,9 @@ export type EngagementEvent =
   | { type: 'EXIT_JOURNEY' }
   | { type: 'OPEN_TERMINAL' }
   | { type: 'CLOSE_TERMINAL' }
-  | { type: 'UPDATE_ENTROPY'; value: number };
+  | { type: 'UPDATE_ENTROPY'; value: number }
+  // Stream events (Sprint: kinetic-stream-schema-v1)
+  | { type: 'START_QUERY'; prompt: string }
+  | { type: 'START_RESPONSE' }
+  | { type: 'STREAM_CHUNK'; chunk: string }
+  | { type: 'FINALIZE_RESPONSE' };

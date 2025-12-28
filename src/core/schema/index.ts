@@ -199,3 +199,18 @@ export {
 // Journey Provenance (DEX Pillar III)
 export * from './journey-provenance';
 export type { JourneyDisplayConfig, WaypointAction } from './journey';
+
+// Kinetic Stream types (Sprint: kinetic-stream-schema-v1)
+export {
+  type JourneyPath,
+  type StreamItemType,
+  type RhetoricalSpanType,
+  type RhetoricalSpan,
+  type StreamItem,
+  isQueryItem,
+  isResponseItem,
+  hasSpans,
+  hasPaths,
+  fromChatMessage,
+  toChatMessage
+} from './stream';

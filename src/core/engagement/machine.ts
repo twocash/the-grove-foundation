@@ -1,10 +1,21 @@
 // src/core/engagement/machine.ts
 // Sprint: journey-system-v2 - Updated to use schema types (waypoints)
+// Sprint: kinetic-stream-schema-v1 - Added stream state and actions
 
 import { setup, assign } from 'xstate';
 import { initialContext } from './types';
 import type { EngagementContext, EngagementEvent } from './types';
 import type { Journey } from '../schema/journey';
+import type { StreamItem } from '../schema/stream';
+import { parse } from '../transformers/RhetoricalParser';
+
+// ─────────────────────────────────────────────────────────────────
+// ID GENERATION
+// ─────────────────────────────────────────────────────────────────
+
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 export const engagementMachine = setup({
   types: {
@@ -51,6 +62,68 @@ export const engagementMachine = setup({
         return { entropy: event.value };
       }
       return {};
+    }),
+
+    // Stream actions (Sprint: kinetic-stream-schema-v1)
+    createQueryItem: assign(({ event }) => {
+      if (event.type === 'START_QUERY') {
+        const item: StreamItem = {
+          id: generateId(),
+          type: 'query',
+          content: event.prompt || '',
+          timestamp: Date.now(),
+          createdBy: 'user',
+          role: 'user'
+        };
+        return { currentStreamItem: item };
+      }
+      return {};
+    }),
+
+    createResponseItem: assign(({ context }) => {
+      const item: StreamItem = {
+        id: generateId(),
+        type: 'response',
+        content: '',
+        timestamp: Date.now(),
+        createdBy: 'ai',
+        role: 'assistant',
+        isGenerating: true
+      };
+      // Add query to history before creating response
+      const newHistory = context.currentStreamItem?.type === 'query'
+        ? [...context.streamHistory, context.currentStreamItem]
+        : context.streamHistory;
+      return {
+        currentStreamItem: item,
+        streamHistory: newHistory
+      };
+    }),
+
+    appendToResponse: assign(({ context, event }) => {
+      if (event.type === 'STREAM_CHUNK' && context.currentStreamItem) {
+        return {
+          currentStreamItem: {
+            ...context.currentStreamItem,
+            content: context.currentStreamItem.content + (event.chunk || '')
+          }
+        };
+      }
+      return {};
+    }),
+
+    finalizeResponse: assign(({ context }) => {
+      if (!context.currentStreamItem) return {};
+      const { spans } = parse(context.currentStreamItem.content);
+      const finalizedItem: StreamItem = {
+        ...context.currentStreamItem,
+        isGenerating: false,
+        parsedSpans: spans
+      };
+      return {
+        currentStreamItem: finalizedItem,
+        streamHistory: [...context.streamHistory, finalizedItem]
+      };
     }),
   },
 }).createMachine({
@@ -136,6 +209,19 @@ export const engagementMachine = setup({
   on: {
     UPDATE_ENTROPY: {
       actions: 'updateEntropy',
+    },
+    // Stream events (Sprint: kinetic-stream-schema-v1)
+    START_QUERY: {
+      actions: 'createQueryItem',
+    },
+    START_RESPONSE: {
+      actions: 'createResponseItem',
+    },
+    STREAM_CHUNK: {
+      actions: 'appendToResponse',
+    },
+    FINALIZE_RESPONSE: {
+      actions: 'finalizeResponse',
     },
   },
 });
