@@ -1,8 +1,9 @@
 // components/Terminal/Stream/StreamRenderer.tsx
-// Polymorphic stream renderer - dispatches to appropriate block component
-// Sprint: kinetic-stream-rendering-v1
+// Polymorphic stream renderer with AnimatePresence for exit animations
+// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
 
 import React from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import type { StreamItem, RhetoricalSpan, JourneyPath } from '../../../src/core/schema/stream';
 import { QueryBlock } from './blocks/QueryBlock';
 import { ResponseBlock } from './blocks/ResponseBlock';
@@ -10,6 +11,7 @@ import { NavigationBlock } from './blocks/NavigationBlock';
 import { SystemBlock } from './blocks/SystemBlock';
 import CognitiveBridge from '../CognitiveBridge';
 import type { BridgeState } from '../types';
+import { blockVariants, reducedMotionVariants } from './motion/variants';
 
 export interface StreamRendererProps {
   items: StreamItem[];
@@ -34,32 +36,43 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
   onBridgeDismiss,
   loadingMessages
 }) => {
+  const reducedMotion = useReducedMotion();
+  const variants = reducedMotion ? reducedMotionVariants : blockVariants;
   const allItems = currentItem ? [...items, currentItem] : items;
 
   return (
     <div className="space-y-6" data-testid="stream-renderer">
-      {allItems.map((item) => (
-        <React.Fragment key={item.id}>
-          <StreamBlock
-            item={item}
-            onSpanClick={onSpanClick}
-            onPathClick={onPathClick}
-            onPromptSubmit={onPromptSubmit}
-            loadingMessages={loadingMessages}
-          />
-          {bridgeState?.visible &&
-           bridgeState.afterMessageId === item.id &&
-           bridgeState.journeyId &&
-           bridgeState.topicMatch && (
-            <CognitiveBridge
-              journeyId={bridgeState.journeyId}
-              topicMatch={bridgeState.topicMatch}
-              onAccept={onBridgeAccept!}
-              onDismiss={onBridgeDismiss!}
+      <AnimatePresence mode="popLayout">
+        {allItems.map((item) => (
+          <motion.div
+            key={item.id}
+            variants={variants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+          >
+            <StreamBlock
+              item={item}
+              onSpanClick={onSpanClick}
+              onPathClick={onPathClick}
+              onPromptSubmit={onPromptSubmit}
+              loadingMessages={loadingMessages}
             />
-          )}
-        </React.Fragment>
-      ))}
+            {bridgeState?.visible &&
+             bridgeState.afterMessageId === item.id &&
+             bridgeState.journeyId &&
+             bridgeState.topicMatch && (
+              <CognitiveBridge
+                journeyId={bridgeState.journeyId}
+                topicMatch={bridgeState.topicMatch}
+                onAccept={onBridgeAccept!}
+                onDismiss={onBridgeDismiss!}
+              />
+            )}
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

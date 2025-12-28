@@ -1,14 +1,16 @@
 // components/Terminal/Stream/blocks/ResponseBlock.tsx
-// AI response message block with span rendering
-// Sprint: kinetic-stream-rendering-v1
+// AI response message block with span rendering and motion
+// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { StreamItem, RhetoricalSpan } from '../../../../src/core/schema/stream';
 import { hasSpans, hasPaths } from '../../../../src/core/schema/stream';
 import { SpanRenderer } from '../SpanRenderer';
 import { MarkdownRenderer } from '../../MarkdownRenderer';
 import LoadingIndicator from '../../LoadingIndicator';
 import SuggestionChip from '../../SuggestionChip';
+import { responseVariants, staggerContainer, staggerItem } from '../motion/variants';
 
 export interface ResponseBlockProps {
   item: StreamItem;
@@ -27,7 +29,14 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
                   item.content.startsWith('Error:');
 
   return (
-    <div className="flex flex-col items-start" data-testid="response-block">
+    <motion.div
+      className="flex flex-col items-start"
+      data-testid="response-block"
+      variants={responseVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+    >
       <div className="flex items-center gap-2 mb-1.5 justify-start">
         <span className="text-xs font-semibold text-primary">The Grove</span>
       </div>
@@ -63,17 +72,23 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
       </div>
 
       {hasPaths(item) && !item.isGenerating && (
-        <div className="mt-3 space-y-1.5">
+        <motion.div
+          className="mt-3 space-y-1.5"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {item.suggestedPaths!.map((path) => (
-            <SuggestionChip
-              key={path.id}
-              prompt={path.label}
-              onClick={() => onPromptSubmit?.(path.label)}
-            />
+            <motion.div key={path.id} variants={staggerItem}>
+              <SuggestionChip
+                prompt={path.label}
+                onClick={() => onPromptSubmit?.(path.label)}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

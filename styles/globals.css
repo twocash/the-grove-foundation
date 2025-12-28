@@ -589,6 +589,18 @@ p {
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 150ms;
   --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --motion-ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --motion-ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --motion-ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  /* Streaming animation tokens (kinetic-stream-polish-v1) */
+  --streaming-cursor-color: var(--neon-green);
+  --streaming-char-delay: 50ms;
+
+  /* Floating input tokens (kinetic-stream-polish-v1) */
+  --input-float-offset: 16px;
+  --input-float-max-height: 200px;
 }
 
 /* Glass Panel - Blur container */
@@ -610,6 +622,85 @@ p {
 .glass-panel-solid {
   background: var(--glass-solid);
   border: 1px solid var(--glass-border);
+}
+
+/* Glass intensity variants (kinetic-stream-polish-v1) */
+.glass-panel-light {
+  --glass-blur-local: 8px;
+  --glass-bg-local: rgba(255, 255, 255, 0.03);
+}
+
+.glass-panel-medium {
+  --glass-blur-local: 12px;
+  --glass-bg-local: rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-heavy {
+  --glass-blur-local: 20px;
+  --glass-bg-local: rgba(255, 255, 255, 0.08);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .glass-panel-light,
+  .glass-panel-medium,
+  .glass-panel-heavy {
+    background: var(--glass-bg-local, var(--glass-panel));
+    backdrop-filter: blur(var(--glass-blur-local, 12px));
+    -webkit-backdrop-filter: blur(var(--glass-blur-local, 12px));
+  }
+}
+
+/* Streaming cursor (kinetic-stream-polish-v1) */
+.streaming-cursor {
+  color: var(--streaming-cursor-color);
+  font-weight: bold;
+}
+
+/* Floating input container (kinetic-stream-polish-v1) */
+.floating-input-container {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--input-float-offset);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.floating-input-panel {
+  pointer-events: auto;
+  max-height: var(--input-float-max-height);
+}
+
+/* New messages indicator (kinetic-stream-polish-v1) */
+.new-messages-indicator {
+  position: absolute;
+  bottom: calc(var(--input-float-offset) + 80px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--glass-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--glass-text-muted);
+  z-index: 11;
+  transition: all var(--duration-fast) var(--ease-out-expo);
+}
+
+.new-messages-indicator:hover {
+  background: var(--glass-elevated);
+  color: var(--glass-text-primary);
+}
+
+.new-messages-indicator .arrow {
+  font-size: 1.1em;
 }
 
 /* Glass Card - Interactive */

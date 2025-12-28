@@ -1,6 +1,6 @@
 // components/Terminal/Stream/index.ts
 // Stream module exports
-// Sprint: kinetic-stream-rendering-v1
+// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
 
 export { StreamRenderer } from './StreamRenderer';
 export type { StreamRendererProps } from './StreamRenderer';
@@ -10,3 +10,7 @@ export { QueryBlock } from './blocks/QueryBlock';
 export { ResponseBlock } from './blocks/ResponseBlock';
 export { NavigationBlock } from './blocks/NavigationBlock';
 export { SystemBlock } from './blocks/SystemBlock';
+
+// Motion infrastructure (kinetic-stream-polish-v1)
+export * from './motion';
+export { StreamingText } from './StreamingText';
