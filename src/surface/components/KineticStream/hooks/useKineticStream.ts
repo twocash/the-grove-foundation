@@ -8,11 +8,13 @@ import type {
   QueryStreamItem,
   ResponseStreamItem,
   LensOfferStreamItem,
+  JourneyOfferStreamItem,
   PivotContext
 } from '@core/schema/stream';
 import { parseNavigation } from '@core/transformers/NavigationParser';
 import { parse as parseRhetoric } from '@core/transformers/RhetoricalParser';
 import { parseLensOffer } from '@core/transformers/LensOfferParser';
+import { parseJourneyOffer } from '@core/transformers/JourneyOfferParser';
 import { sendMessageStream } from '../../../../../services/chatService';
 
 interface UseKineticStreamReturn {
@@ -23,6 +25,8 @@ interface UseKineticStreamReturn {
   clear: () => void;
   acceptLensOffer: (lensId: string) => void;
   dismissLensOffer: (offerId: string) => void;
+  acceptJourneyOffer: (journeyId: string) => void;
+  dismissJourneyOffer: (offerId: string) => void;
 }
 
 export function useKineticStream(): UseKineticStreamReturn {
@@ -93,15 +97,16 @@ export function useKineticStream(): UseKineticStreamReturn {
 
       // Parse completed response - chain parsers
       const { forks, cleanContent: navCleanContent } = parseNavigation(fullContent);
-      const { offer, cleanContent: lensCleanContent } = parseLensOffer(navCleanContent, responseId);
-      const { spans } = parseRhetoric(lensCleanContent);
+      const { offer: lensOffer, cleanContent: lensCleanContent } = parseLensOffer(navCleanContent, responseId);
+      const { offer: journeyOffer, cleanContent: journeyCleanContent } = parseJourneyOffer(lensCleanContent, responseId);
+      const { spans } = parseRhetoric(journeyCleanContent);
 
       // Finalize response
       const finalResponse: ResponseStreamItem = {
         id: responseId,
         type: 'response',
         timestamp: Date.now(),
-        content: lensCleanContent,
+        content: journeyCleanContent,
         isGenerating: false,
         role: 'assistant',
         createdBy: 'ai',
@@ -111,8 +116,11 @@ export function useKineticStream(): UseKineticStreamReturn {
 
       // Build items to add
       const newItems: StreamItem[] = [finalResponse];
-      if (offer) {
-        newItems.push(offer);
+      if (lensOffer) {
+        newItems.push(lensOffer);
+      }
+      if (journeyOffer) {
+        newItems.push(journeyOffer);
       }
 
       setItems(prev => [...prev, ...newItems]);
@@ -193,5 +201,35 @@ export function useKineticStream(): UseKineticStreamReturn {
     }));
   }, []);
 
-  return { items, currentItem, isLoading, submit, clear, acceptLensOffer, dismissLensOffer };
+  const acceptJourneyOffer = useCallback((journeyId: string) => {
+    // Update offer status to accepted
+    setItems(prev => prev.map(item => {
+      if (item.type === 'journey_offer' && (item as JourneyOfferStreamItem).journeyId === journeyId) {
+        return { ...item, status: 'accepted' } as JourneyOfferStreamItem;
+      }
+      return item;
+    }));
+    // Note: Actual journey start is handled by ExploreShell which has access to schema
+  }, []);
+
+  const dismissJourneyOffer = useCallback((offerId: string) => {
+    setItems(prev => prev.map(item => {
+      if (item.type === 'journey_offer' && item.id === offerId) {
+        return { ...item, status: 'dismissed' } as JourneyOfferStreamItem;
+      }
+      return item;
+    }));
+  }, []);
+
+  return {
+    items,
+    currentItem,
+    isLoading,
+    submit,
+    clear,
+    acceptLensOffer,
+    dismissLensOffer,
+    acceptJourneyOffer,
+    dismissJourneyOffer
+  };
 }

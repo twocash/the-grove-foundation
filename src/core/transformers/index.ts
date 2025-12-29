@@ -20,3 +20,7 @@ export {
   parseLensOffer,
   type ParsedLensOffer
 } from './LensOfferParser';
+export {
+  parseJourneyOffer,
+  type ParsedJourneyOffer
+} from './JourneyOfferParser';

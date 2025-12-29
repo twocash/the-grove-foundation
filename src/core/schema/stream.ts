@@ -38,6 +38,13 @@ export interface JourneyFork {
 export type LensOfferStatus = 'pending' | 'accepted' | 'dismissed';
 
 // ─────────────────────────────────────────────────────────────────
+// JOURNEY OFFER (Inline journey recommendation)
+// Sprint: journey-offer-v1
+// ─────────────────────────────────────────────────────────────────
+
+export type JourneyOfferStatus = 'pending' | 'accepted' | 'dismissed';
+
+// ─────────────────────────────────────────────────────────────────
 // PIVOT CONTEXT
 // Sprint: kinetic-stream-reset-v2
 // ─────────────────────────────────────────────────────────────────
@@ -54,12 +61,13 @@ export interface PivotContext {
 // ─────────────────────────────────────────────────────────────────
 
 export type StreamItemType =
-  | 'query'       // User input
-  | 'response'    // AI response
-  | 'navigation'  // Journey fork
-  | 'reveal'      // Concept reveal
-  | 'system'      // Status messages
-  | 'lens_offer'; // Inline lens recommendation
+  | 'query'         // User input
+  | 'response'      // AI response
+  | 'navigation'    // Journey fork
+  | 'reveal'        // Concept reveal
+  | 'system'        // Status messages
+  | 'lens_offer'    // Inline lens recommendation
+  | 'journey_offer'; // Inline journey recommendation
 
 // ─────────────────────────────────────────────────────────────────
 // RHETORICAL SPANS
@@ -133,6 +141,17 @@ export interface LensOfferStreamItem extends BaseStreamItem {
   sourceResponseId: string;
 }
 
+export interface JourneyOfferStreamItem extends BaseStreamItem {
+  type: 'journey_offer';
+  journeyId: string;
+  journeyName: string;
+  reason: string;
+  previewText: string;
+  estimatedMinutes?: number;
+  status: JourneyOfferStatus;
+  sourceResponseId: string;
+}
+
 export interface RevealStreamItem extends BaseStreamItem {
   type: 'reveal';
   content: string;
@@ -153,6 +172,7 @@ export type StreamItem =
   | NavigationStreamItem
   | SystemStreamItem
   | LensOfferStreamItem
+  | JourneyOfferStreamItem
   | RevealStreamItem;
 
 // Legacy interface for backward compatibility
@@ -195,6 +215,10 @@ export function isRevealItem(item: StreamItem): item is RevealStreamItem {
 
 export function isLensOfferItem(item: StreamItem): item is LensOfferStreamItem {
   return item.type === 'lens_offer';
+}
+
+export function isJourneyOfferItem(item: StreamItem): item is JourneyOfferStreamItem {
+  return item.type === 'journey_offer';
 }
 
 export function hasSpans(item: StreamItem): item is (ResponseStreamItem | RevealStreamItem) & { parsedSpans: RhetoricalSpan[] } {

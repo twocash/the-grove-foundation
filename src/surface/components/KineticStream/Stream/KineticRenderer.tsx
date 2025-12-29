@@ -10,6 +10,7 @@ import { ResponseObject } from './blocks/ResponseObject';
 import { NavigationObject } from './blocks/NavigationObject';
 import { SystemObject } from './blocks/SystemObject';
 import { LensOfferObject } from './blocks/LensOfferObject';
+import { JourneyOfferObject } from './blocks/JourneyOfferObject';
 import { ScrollAnchor } from './ScrollAnchor';
 import { blockVariants, reducedMotionVariants } from './motion/variants';
 
@@ -22,6 +23,8 @@ export interface KineticRendererProps {
   onPromptSubmit?: (prompt: string) => void;
   onLensAccept?: (lensId: string) => void;
   onLensDismiss?: (offerId: string) => void;
+  onJourneyAccept?: (journeyId: string) => void;
+  onJourneyDismiss?: (offerId: string) => void;
 }
 
 export const KineticRenderer: React.FC<KineticRendererProps> = ({
@@ -32,7 +35,9 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
   onForkSelect,
   onPromptSubmit,
   onLensAccept,
-  onLensDismiss
+  onLensDismiss,
+  onJourneyAccept,
+  onJourneyDismiss
 }) => {
   const reducedMotion = useReducedMotion();
   const variants = reducedMotion ? reducedMotionVariants : blockVariants;
@@ -57,6 +62,8 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
               onPromptSubmit={onPromptSubmit}
               onLensAccept={onLensAccept}
               onLensDismiss={onLensDismiss}
+              onJourneyAccept={onJourneyAccept}
+              onJourneyDismiss={onJourneyDismiss}
             />
           </motion.div>
         ))}
@@ -75,6 +82,8 @@ interface KineticBlockProps {
   onPromptSubmit?: (prompt: string) => void;
   onLensAccept?: (lensId: string) => void;
   onLensDismiss?: (offerId: string) => void;
+  onJourneyAccept?: (journeyId: string) => void;
+  onJourneyDismiss?: (offerId: string) => void;
 }
 
 const KineticBlock: React.FC<KineticBlockProps> = ({
@@ -83,7 +92,9 @@ const KineticBlock: React.FC<KineticBlockProps> = ({
   onForkSelect,
   onPromptSubmit,
   onLensAccept,
-  onLensDismiss
+  onLensDismiss,
+  onJourneyAccept,
+  onJourneyDismiss
 }) => {
   switch (item.type) {
     case 'query':
@@ -107,6 +118,14 @@ const KineticBlock: React.FC<KineticBlockProps> = ({
           item={item}
           onAccept={onLensAccept}
           onDismiss={onLensDismiss}
+        />
+      );
+    case 'journey_offer':
+      return (
+        <JourneyOfferObject
+          item={item}
+          onAccept={onJourneyAccept}
+          onDismiss={onJourneyDismiss}
         />
       );
     default:

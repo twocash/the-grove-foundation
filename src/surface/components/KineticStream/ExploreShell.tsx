@@ -18,7 +18,16 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   initialLens,
   initialJourney
 }) => {
-  const { items, currentItem, isLoading, submit, acceptLensOffer, dismissLensOffer } = useKineticStream();
+  const {
+    items,
+    currentItem,
+    isLoading,
+    submit,
+    acceptLensOffer,
+    dismissLensOffer,
+    acceptJourneyOffer,
+    dismissJourneyOffer
+  } = useKineticStream();
 
   // Determine if currently streaming
   const isStreaming = Boolean(
@@ -73,6 +82,16 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     dismissLensOffer(offerId);
   }, [dismissLensOffer]);
 
+  const handleJourneyAccept = useCallback((journeyId: string) => {
+    acceptJourneyOffer(journeyId);
+    // TODO: Start actual journey when schema/journey system is integrated
+    console.log('[ExploreShell] Journey accepted:', journeyId);
+  }, [acceptJourneyOffer]);
+
+  const handleJourneyDismiss = useCallback((offerId: string) => {
+    dismissJourneyOffer(offerId);
+  }, [dismissJourneyOffer]);
+
   return (
     <div className="kinetic-surface flex flex-col h-screen bg-[var(--glass-void)]">
       {/* Header area */}
@@ -94,6 +113,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
             onPromptSubmit={handleSubmit}
             onLensAccept={handleLensAccept}
             onLensDismiss={handleLensDismiss}
+            onJourneyAccept={handleJourneyAccept}
+            onJourneyDismiss={handleJourneyDismiss}
           />
         </div>
       </main>
