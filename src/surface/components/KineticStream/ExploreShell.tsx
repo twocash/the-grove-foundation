@@ -1,18 +1,27 @@
 // src/surface/components/KineticStream/ExploreShell.tsx
 // Main container for the Kinetic exploration experience
-// Sprint: kinetic-experience-v1, kinetic-scroll-v1
+// Sprint: kinetic-experience-v1, kinetic-scroll-v1, kinetic-context-v1
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { KineticRenderer } from './Stream/KineticRenderer';
 import { CommandConsole } from './CommandConsole';
+import { KineticHeader } from './KineticHeader';
+import { KineticWelcome } from './KineticWelcome';
 import { useKineticStream } from './hooks/useKineticStream';
 import { useKineticScroll } from './hooks/useKineticScroll';
+import { useEngagement, useLensState, useJourneyState } from '../../../core/engagement';
+import { useSuggestedPrompts } from '../../../../hooks/useSuggestedPrompts';
+import { getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../../../data/quantum-content';
+import { getPersona } from '../../../../data/default-personas';
+import { LensPicker } from '../../../explore/LensPicker';
 import type { RhetoricalSpan, JourneyFork, PivotContext } from '@core/schema/stream';
 
 export interface ExploreShellProps {
   initialLens?: string;
   initialJourney?: string;
 }
+
+type OverlayType = 'none' | 'lens-picker' | 'journey-picker';
 
 export const ExploreShell: React.FC<ExploreShellProps> = ({
   initialLens,
@@ -28,6 +37,40 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     acceptJourneyOffer,
     dismissJourneyOffer
   } = useKineticStream();
+
+  // Engagement hooks
+  const { actor } = useEngagement();
+  const { lens, selectLens } = useLensState({ actor });
+  const {
+    journey,
+    isActive: isJourneyActive,
+    startJourney: engStartJourney,
+  } = useJourneyState({ actor });
+
+  // Derived lens data
+  const lensData = useMemo(() => lens ? getPersona(lens) : null, [lens]);
+
+  // Suggested prompts
+  const { prompts: suggestedPrompts, stage } = useSuggestedPrompts({
+    lensId: lens,
+    lensName: lensData?.publicLabel,
+    maxPrompts: 3,
+  });
+
+  // Welcome content
+  const welcomeContent = useMemo(() =>
+    getTerminalWelcome(lens, undefined) || DEFAULT_TERMINAL_WELCOME,
+    [lens]
+  );
+
+  // Overlay state
+  const [overlay, setOverlay] = useState<{ type: OverlayType }>({ type: 'none' });
+
+  // Exchange count
+  const exchangeCount = useMemo(() =>
+    items.filter(i => i.type === 'query').length,
+    [items]
+  );
 
   // Determine if currently streaming
   const isStreaming = Boolean(
@@ -76,7 +119,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   const handleLensAccept = useCallback((lensId: string) => {
     acceptLensOffer(lensId);
-  }, [acceptLensOffer]);
+    selectLens(lensId);
+  }, [acceptLensOffer, selectLens]);
 
   const handleLensDismiss = useCallback((offerId: string) => {
     dismissLensOffer(offerId);
@@ -84,7 +128,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   const handleJourneyAccept = useCallback((journeyId: string) => {
     acceptJourneyOffer(journeyId);
-    // TODO: Start actual journey when schema/journey system is integrated
+    // TODO (kinetic-context-v1): When schema is available, call:
+    // const journey = getCanonicalJourney(journeyId, schema);
+    // if (journey) { engStartJourney(journey); }
     console.log('[ExploreShell] Journey accepted:', journeyId);
   }, [acceptJourneyOffer]);
 
@@ -92,18 +138,46 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     dismissJourneyOffer(offerId);
   }, [dismissJourneyOffer]);
 
+  const handleLensAfterSelect = useCallback((personaId: string) => {
+    // LensPicker already calls selectLens internally
+    setOverlay({ type: 'none' });
+    localStorage.setItem('grove-session-established', 'true');
+  }, []);
+
+  const handlePromptClick = useCallback((prompt: string, command?: string, journeyId?: string) => {
+    if (journeyId) {
+      console.log('[KineticWelcome] Journey prompt clicked:', journeyId);
+    }
+    submit(command || prompt);
+  }, [submit]);
+
   return (
     <div className="kinetic-surface flex flex-col h-screen bg-[var(--glass-void)]">
-      {/* Header area */}
-      <header className="flex-none p-4 border-b border-[var(--glass-border)]">
-        <h1 className="text-base font-sans font-semibold text-[var(--glass-text-primary)]">
-          Explore The Grove
-        </h1>
-      </header>
+      {/* Header with context pills */}
+      <KineticHeader
+        lensName={lensData?.publicLabel || 'Choose Lens'}
+        lensColor={lensData?.color}
+        onLensClick={() => setOverlay({ type: 'lens-picker' })}
+        journeyName={journey?.title || (isJourneyActive ? 'Guided' : 'Self-Guided')}
+        onJourneyClick={() => setOverlay({ type: 'journey-picker' })}
+        stage={stage}
+        exchangeCount={exchangeCount}
+      />
 
       {/* Stream area - attach scrollRef */}
       <main ref={scrollRef} className="flex-1 overflow-y-auto p-6">
         <div className="max-w-3xl mx-auto pb-32">
+          {/* Welcome when no messages */}
+          {items.length === 0 && (
+            <KineticWelcome
+              content={welcomeContent}
+              prompts={suggestedPrompts}
+              stage={stage}
+              exchangeCount={exchangeCount}
+              onPromptClick={handlePromptClick}
+            />
+          )}
+
           <KineticRenderer
             items={items}
             currentItem={currentItem}
@@ -128,6 +202,19 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         onScrollToBottom={() => scrollToBottom(true)}
         isStreaming={isStreaming}
       />
+
+      {/* Lens Picker Overlay */}
+      {overlay.type === 'lens-picker' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto">
+            <LensPicker
+              mode="compact"
+              onBack={() => setOverlay({ type: 'none' })}
+              onAfterSelect={handleLensAfterSelect}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
