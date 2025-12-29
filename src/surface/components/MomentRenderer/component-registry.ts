@@ -1,6 +1,6 @@
 // src/surface/components/MomentRenderer/component-registry.ts
 // Lazy Component Registry for Moment Rendering
-// Sprint: engagement-orchestrator-v1
+// Sprint: moment-ui-integration-v1
 
 import { lazy, ComponentType } from 'react';
 
@@ -10,12 +10,9 @@ import { lazy, ComponentType } from 'react';
 
 // Lazy-load moment components to enable code splitting
 const componentMap: Record<string, ComponentType<any>> = {
-  // These will be connected when the UI integration sprint runs
-  // For now, they're placeholders for the existing reveal components
-  // SimulationReveal: lazy(() => import('../../../../components/Terminal/Reveals/SimulationReveal')),
-  // CustomLensOffer: lazy(() => import('../../../../components/Terminal/Reveals/CustomLensOffer')),
-  // TerminatorMode: lazy(() => import('../../../../components/Terminal/Reveals/TerminatorMode')),
-  // FounderStory: lazy(() => import('../../../../components/Terminal/Reveals/FounderStory')),
+  SimulationReveal: lazy(() => import('./reveals/SimulationReveal')),
+  CustomLensOffer: lazy(() => import('./reveals/CustomLensOffer')),
+  EntropyJourneyOffer: lazy(() => import('./reveals/EntropyJourneyOffer')),
 };
 
 // =============================================================================

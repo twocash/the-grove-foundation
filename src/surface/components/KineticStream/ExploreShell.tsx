@@ -13,6 +13,8 @@ import { useEngagement, useLensState, useJourneyState } from '../../../core/enga
 import { getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../../../data/quantum-content';
 import { getPersona } from '../../../../data/default-personas';
 import { LensPicker } from '../../../explore/LensPicker';
+import { useMoments } from '@surface/hooks/useMoments';
+import { MomentOverlay } from '../MomentRenderer';
 import type { RhetoricalSpan, JourneyFork, PivotContext } from '@core/schema/stream';
 
 export interface ExploreShellProps {
@@ -45,6 +47,13 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     isActive: isJourneyActive,
     startJourney: engStartJourney,
   } = useJourneyState({ actor });
+
+  // Moment overlay integration
+  const {
+    activeMoment: overlayMoment,
+    executeAction: executeOverlayAction,
+    dismissMoment: dismissOverlay
+  } = useMoments({ surface: 'overlay' });
 
   // Derived lens data
   const lensData = useMemo(() => lens ? getPersona(lens) : null, [lens]);
@@ -222,6 +231,16 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
             />
           </div>
         </div>
+      )}
+
+      {/* Moment Overlay - engagement-triggered reveals */}
+      {overlayMoment && (
+        <MomentOverlay
+          moment={overlayMoment}
+          onAction={executeOverlayAction}
+          onDismiss={dismissOverlay}
+          activeLens={lens}
+        />
       )}
     </div>
   );

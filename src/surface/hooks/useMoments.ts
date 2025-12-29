@@ -1,6 +1,6 @@
 // src/surface/hooks/useMoments.ts
 // React Hook for Consuming Moments
-// Sprint: engagement-orchestrator-v1
+// Sprint: moment-ui-integration-v1
 
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useSelector } from '@xstate/react';
@@ -9,6 +9,7 @@ import { getEligibleMoments, createDefaultEvaluationContext, type MomentEvaluati
 import { useEngagement } from '@core/engagement/context';
 import { useEngagementEmit } from '../../../hooks/useEngagementBus';
 import { loadMoments } from '../../data/moments';
+import { useMomentActions } from './useMomentActions';
 
 // =============================================================================
 // Cached Moments (module level)
@@ -48,6 +49,7 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
   const { surface, limit } = options;
   const { actor } = useEngagement();
   const emit = useEngagementEmit();
+  const { executeAction: executeMomentAction } = useMomentActions();
 
   // Get moments at component mount
   const [allMoments] = useState(getMoments);
@@ -102,6 +104,9 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
       return undefined;
     }
 
+    // Execute the action type-specific behavior (journey start, lens select, etc.)
+    executeMomentAction(action);
+
     // Apply flag side effects via XState
     if (action.setFlags) {
       Object.entries(action.setFlags).forEach(([key, value]) => {
@@ -123,7 +128,7 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
     emit.momentActioned(momentId, actionId, action.type);
 
     return action;
-  }, [allMoments, actor, emit]);
+  }, [allMoments, actor, emit, executeMomentAction]);
 
   // Dismiss handler (convenience wrapper)
   const dismissMoment = useCallback((momentId: string) => {
