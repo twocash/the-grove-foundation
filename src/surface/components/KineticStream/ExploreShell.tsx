@@ -10,7 +10,6 @@ import { KineticWelcome } from './KineticWelcome';
 import { useKineticStream } from './hooks/useKineticStream';
 import { useKineticScroll } from './hooks/useKineticScroll';
 import { useEngagement, useLensState, useJourneyState } from '../../../core/engagement';
-import { useSuggestedPrompts } from '../../../../hooks/useSuggestedPrompts';
 import { getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../../../data/quantum-content';
 import { getPersona } from '../../../../data/default-personas';
 import { LensPicker } from '../../../explore/LensPicker';
@@ -50,18 +49,27 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // Derived lens data
   const lensData = useMemo(() => lens ? getPersona(lens) : null, [lens]);
 
-  // Suggested prompts
-  const { prompts: suggestedPrompts, stage } = useSuggestedPrompts({
-    lensId: lens,
-    lensName: lensData?.publicLabel,
-    maxPrompts: 3,
-  });
-
-  // Welcome content
+  // Welcome content - use static prompts from welcomeContent for now
+  // TODO: Integrate useSuggestedPrompts once engagement systems are unified
   const welcomeContent = useMemo(() =>
     getTerminalWelcome(lens, undefined) || DEFAULT_TERMINAL_WELCOME,
     [lens]
   );
+
+  // Convert static prompts to the expected format
+  const staticPrompts = useMemo(() =>
+    welcomeContent.prompts.map((text, i) => ({ id: `static-${i}`, text })),
+    [welcomeContent.prompts]
+  );
+
+  // Stage is derived from exchange count for now
+  const stage = useMemo(() => {
+    const count = items.filter(i => i.type === 'query').length;
+    if (count === 0) return 'ARRIVAL';
+    if (count < 3) return 'ORIENTED';
+    if (count < 6) return 'EXPLORING';
+    return 'ENGAGED';
+  }, [items]);
 
   // Overlay state
   const [overlay, setOverlay] = useState<{ type: OverlayType }>({ type: 'none' });
@@ -171,7 +179,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
           {items.length === 0 && (
             <KineticWelcome
               content={welcomeContent}
-              prompts={suggestedPrompts}
+              prompts={staticPrompts}
               stage={stage}
               exchangeCount={exchangeCount}
               onPromptClick={handlePromptClick}
