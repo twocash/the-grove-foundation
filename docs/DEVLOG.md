@@ -760,3 +760,243 @@ Execute safe deletions of deprecated code identified during codebase audit.
 - Session 2: TerminalFlowState migration
 - Session 3: Legacy thread methods cleanup
 - Session 4: Cognitive Bridge decision + NarrativeEngineContext extraction
+
+---
+
+## 2025-12-28 | Kinetic Experience v1 - Complete
+
+### Objective
+Create a new exploration surface at `/explore` implementing the Kinetic Stream vision as a fresh implementation independent from Terminal components.
+
+### Work Completed
+
+#### Epic 1: Foundation & Route
+- Created `src/surface/components/KineticStream/` directory structure
+- Implemented `ExploreShell.tsx` - Main container with header, stream area, command console
+- Implemented `useKineticStream.ts` hook - Stream state management with chat API integration
+- Created `ExplorePage.tsx` route handler
+- Added `/explore` route to `src/router/routes.tsx`
+
+#### Epic 2: Stream Rendering
+- **Motion System**: `variants.ts` with block, stagger, and reduced-motion variants
+- **GlassContainer**: Blur/glass effect wrapper with intensity and variant props
+- **KineticRenderer**: Polymorphic renderer using discriminated union pattern
+- **Block Components**:
+  - `QueryObject.tsx` - User query display with pivot indicator
+  - `ResponseObject.tsx` - AI response with glass styling, concepts, and navigation forks
+  - `NavigationObject.tsx` - Fork button groups (deep_dive, pivot, apply, challenge)
+  - `SystemObject.tsx` - System message display
+- **CommandConsole**: Floating input at bottom with loading state
+
+#### Epic 3: Active Rhetoric
+- `ConceptSpan.tsx` - Clickable concept highlight with keyboard support
+- `RhetoricRenderer.tsx` - Content renderer that injects concept spans at parsed positions
+
+#### Typography Unification
+- Switched all Kinetic Stream components to Inter (`font-sans`) at 13px
+- Updated global typography to deprecate EB Garamond
+- Set `body`, `h1-h6`, and `p` to use Inter globally
+- Updated CSS tokens for kinetic-fork, kinetic-concept, kinetic-console
+
+### Files Created (18 TypeScript files)
+| File | Purpose |
+|------|---------|
+| `src/surface/pages/ExplorePage.tsx` | Route handler |
+| `src/surface/components/KineticStream/index.ts` | Main exports |
+| `src/surface/components/KineticStream/ExploreShell.tsx` | Container shell |
+| `src/surface/components/KineticStream/hooks/useKineticStream.ts` | Stream state |
+| `src/surface/components/KineticStream/hooks/index.ts` | Hook exports |
+| `src/surface/components/KineticStream/Stream/KineticRenderer.tsx` | Polymorphic renderer |
+| `src/surface/components/KineticStream/Stream/index.ts` | Stream exports |
+| `src/surface/components/KineticStream/Stream/motion/variants.ts` | Framer Motion variants |
+| `src/surface/components/KineticStream/Stream/motion/GlassContainer.tsx` | Glass wrapper |
+| `src/surface/components/KineticStream/Stream/motion/index.ts` | Motion exports |
+| `src/surface/components/KineticStream/Stream/blocks/QueryObject.tsx` | User query |
+| `src/surface/components/KineticStream/Stream/blocks/ResponseObject.tsx` | AI response |
+| `src/surface/components/KineticStream/Stream/blocks/NavigationObject.tsx` | Fork buttons |
+| `src/surface/components/KineticStream/Stream/blocks/SystemObject.tsx` | System messages |
+| `src/surface/components/KineticStream/Stream/blocks/index.ts` | Block exports |
+| `src/surface/components/KineticStream/ActiveRhetoric/ConceptSpan.tsx` | Concept highlight |
+| `src/surface/components/KineticStream/ActiveRhetoric/RhetoricRenderer.tsx` | Span injector |
+| `src/surface/components/KineticStream/ActiveRhetoric/index.ts` | Rhetoric exports |
+| `src/surface/components/KineticStream/CommandConsole/index.tsx` | Input console |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/router/routes.tsx` | Added `/explore` route with lazy loading |
+| `styles/globals.css` | Added kinetic tokens, switched global typography to Inter |
+
+### Verification
+- ✅ No Terminal imports in KineticStream (`grep` returns empty)
+- ✅ TypeScript check passes for KineticStream files
+- ✅ Build succeeds (`ExplorePage-Bo4gXori.js` - 9.67 kB)
+- ✅ Route `/explore` accessible and functional
+- ✅ Chat flow works end-to-end with streaming
+
+### Architecture Highlights
+- **Zero Terminal Dependencies**: Complete isolation from `components/Terminal/`
+- **Reuses Core**: `@core/schema/stream`, `@core/transformers/*`
+- **Discriminated Unions**: Type-safe StreamItem handling
+- **Glass Design System**: Consistent with Quantum Glass tokens
+- **Accessibility**: Keyboard support on concept spans
+
+### Typography Decision
+Deprecated EB Garamond globally in favor of Inter for consistency:
+- Body text: Inter 13px
+- Headings: Inter with -0.02em letter-spacing
+- Fork buttons: Inter 13px (0.8125rem)
+- Console input: Inter 14px (0.875rem)
+
+---
+
+## 2025-12-28 | Lens Offer v1 - Complete
+
+### Objective
+Add inline lens recommendation cards to the Kinetic Stream at `/explore`, allowing the LLM to suggest perspective changes during conversation.
+
+### Work Completed
+
+#### Epic 1: Schema & Parser
+- Extended `src/core/schema/stream.ts` with:
+  - `LensOfferStatus` type (`'pending' | 'accepted' | 'dismissed'`)
+  - `LensOfferStreamItem` interface
+  - `isLensOfferItem` type guard
+  - Updated `StreamItemType` and `StreamItem` unions
+- Created `src/core/transformers/LensOfferParser.ts`:
+  - Parses `<lens_offer id="..." name="..." reason="..." preview="..." />` tags
+  - Returns `ParsedLensOffer` with offer and cleaned content
+- Exported from `src/core/transformers/index.ts`
+
+#### Epic 2: Component & Renderer
+- Created `LensOfferObject.tsx` component:
+  - Glass card with lens badge, name, reason, preview text
+  - Accept/dismiss button actions
+  - Accepted state shows checkmark confirmation, then fades out
+  - Dismissed state hides immediately
+- Added to `blocks/index.ts` exports
+- Wired into `KineticRenderer.tsx`:
+  - Added `lens_offer` case to switch statement
+  - Added `onLensAccept` and `onLensDismiss` props
+
+#### Epic 3: Hook & Shell Integration
+- Extended `useKineticStream.ts`:
+  - Added `activeLensId` state tracking
+  - Chained `parseLensOffer` into parsing pipeline
+  - Added `acceptLensOffer` handler that:
+    - Marks offer as accepted
+    - Sets active lens
+    - Re-submits last query with new lens (600ms delay for UI feedback)
+  - Added `dismissLensOffer` handler
+  - Passes `personaTone` option to chatService for lens context
+- Wired handlers in `ExploreShell.tsx`
+
+#### Documentation
+- Created `docs/prompts/lens-offer-instruction.md`:
+  - System prompt language for LLM to output lens offers
+  - Syntax reference and available lens IDs
+  - When to offer / when not to offer guidelines
+  - Formatting rules
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `src/core/transformers/LensOfferParser.ts` | Parse `<lens_offer>` tags from LLM output |
+| `src/surface/components/KineticStream/Stream/blocks/LensOfferObject.tsx` | Lens suggestion card component |
+| `docs/prompts/lens-offer-instruction.md` | LLM system prompt instructions |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/core/schema/stream.ts` | Added LensOfferStatus, LensOfferStreamItem, type guard |
+| `src/core/transformers/index.ts` | Added LensOfferParser export |
+| `src/surface/components/KineticStream/Stream/blocks/index.ts` | Added LensOfferObject export |
+| `src/surface/components/KineticStream/Stream/KineticRenderer.tsx` | Added lens_offer case and props |
+| `src/surface/components/KineticStream/hooks/useKineticStream.ts` | Added lens parsing, state, handlers |
+| `src/surface/components/KineticStream/ExploreShell.tsx` | Wired lens offer handlers |
+
+### Verification
+- ✅ TypeScript compiles (no errors in lens-offer files)
+- ✅ Build succeeds
+- ✅ Lens offer cards render correctly
+- ✅ Accept shows confirmation, then re-submits query with new lens
+- ✅ Dismiss hides the card
+- ✅ Lens persists for subsequent queries
+
+### Behavior Flow
+1. LLM outputs `<lens_offer id="academic" name="Academic Lens" reason="..." preview="..." />`
+2. Parser extracts offer, cleans content
+3. `LensOfferObject` renders as interactive card
+4. User clicks "Explore with Academic Lens"
+5. Card shows "Switched to Academic Lens" ✓
+6. After 600ms, last query re-submits with `personaTone: 'academic'`
+7. All future queries use academic lens until changed
+
+---
+
+## 2025-12-28 | Kinetic Scroll v1 - Complete
+
+### Objective
+Implement "Sticky-Release" scroll physics for the Kinetic Stream to prevent jitter during LLM streaming while giving users control to review history.
+
+### The Problem
+Streaming text pushes content down. Without scroll management:
+- User loses reading position
+- Auto-scroll on every token causes "jitter"
+- No way to review history while AI is talking
+
+### The Solution: Sticky-Release Model
+1. **Magnet** - User at bottom (within 50px) stays locked to bottom
+2. **Release** - Scroll up past threshold breaks the lock
+3. **Re-engage** - Scroll to bottom, click FAB, or submit new query
+
+### Work Completed
+
+#### useKineticScroll Hook
+- Created `src/surface/components/KineticStream/hooks/useKineticScroll.ts`
+- Tracks scroll position relative to 50px bottom threshold
+- Uses `useLayoutEffect` for flicker-free auto-scroll during streaming
+- Returns `scrollRef`, `bottomRef`, `isAtBottom`, `showScrollButton`, `scrollToBottom`
+
+#### ScrollAnchor Component
+- Created `src/surface/components/KineticStream/Stream/ScrollAnchor.tsx`
+- Invisible 1px element at stream end for reliable `scrollIntoView`
+
+#### ScrollToBottomFab Component
+- Created `src/surface/components/KineticStream/CommandConsole/ScrollToBottomFab.tsx`
+- Floating action button with ArrowDown icon
+- Pulsing green dot indicator when streaming is active
+- Animated entrance/exit with Framer Motion
+
+#### Integration
+- Updated `KineticRenderer` with optional `bottomRef` prop and `ScrollAnchor`
+- Updated `CommandConsole` with FAB props (`showScrollButton`, `onScrollToBottom`, `isStreaming`)
+- Updated `ExploreShell` with full scroll integration:
+  - `scrollRef` on main container
+  - `bottomRef` passed to renderer
+  - Instant scroll on new query submission
+  - Smooth scroll on FAB click
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `src/surface/components/KineticStream/hooks/useKineticScroll.ts` | Sticky-release scroll physics hook |
+| `src/surface/components/KineticStream/Stream/ScrollAnchor.tsx` | Invisible scroll target |
+| `src/surface/components/KineticStream/CommandConsole/ScrollToBottomFab.tsx` | Floating scroll button |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/surface/components/KineticStream/hooks/index.ts` | Added useKineticScroll export |
+| `src/surface/components/KineticStream/Stream/KineticRenderer.tsx` | Added bottomRef prop and ScrollAnchor |
+| `src/surface/components/KineticStream/CommandConsole/index.tsx` | Added FAB integration |
+| `src/surface/components/KineticStream/ExploreShell.tsx` | Full scroll integration |
+
+### Verification
+- ✅ TypeScript compiles (no errors in scroll files)
+- ✅ Build succeeds (ExplorePage: 17.32 kB)
+- ✅ Auto-scroll during streaming without jitter
+- ✅ User can scroll up to break lock
+- ✅ FAB appears with pulsing indicator during streaming
+- ✅ FAB click smooth-scrolls to bottom
+- ✅ New query submission instant-scrolls to bottom
