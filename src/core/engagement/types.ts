@@ -6,7 +6,7 @@
 // The schema types are the canonical source of truth
 export type { Journey, JourneyWaypoint } from '../schema/journey';
 
-import type { StreamItem } from '../schema/stream';
+import type { StreamItem, RhetoricalSpan, JourneyFork } from '../schema/stream';
 
 export interface EngagementContext {
   // Lens state
@@ -25,6 +25,10 @@ export interface EngagementContext {
   // Stream state (Sprint: kinetic-stream-schema-v1)
   currentStreamItem: StreamItem | null;
   streamHistory: StreamItem[];
+
+  // Moment orchestration state (Sprint: engagement-orchestrator-v1)
+  flags: Record<string, boolean>;
+  momentCooldowns: Record<string, number>;  // momentId -> lastShownTimestamp
 }
 
 export const initialContext: EngagementContext = {
@@ -37,6 +41,9 @@ export const initialContext: EngagementContext = {
   entropyThreshold: 0.7,
   currentStreamItem: null,
   streamHistory: [],
+  // Moment orchestration (Sprint: engagement-orchestrator-v1)
+  flags: {},
+  momentCooldowns: {},
 };
 
 export type EngagementEvent =
@@ -53,4 +60,12 @@ export type EngagementEvent =
   | { type: 'START_QUERY'; prompt: string }
   | { type: 'START_RESPONSE' }
   | { type: 'STREAM_CHUNK'; chunk: string }
-  | { type: 'FINALIZE_RESPONSE' };
+  | { type: 'FINALIZE_RESPONSE' }
+  // Kinetic stream events (Sprint: kinetic-stream-reset-v2)
+  | { type: 'USER.CLICK_PIVOT'; span: RhetoricalSpan; responseId: string }
+  | { type: 'USER.SELECT_FORK'; fork: JourneyFork; responseId: string }
+  // Moment orchestration events (Sprint: engagement-orchestrator-v1)
+  | { type: 'SET_FLAG'; key: string; value: boolean }
+  | { type: 'SET_COOLDOWN'; momentId: string; timestamp: number }
+  | { type: 'CLEAR_FLAGS' }
+  | { type: 'CLEAR_COOLDOWNS' };

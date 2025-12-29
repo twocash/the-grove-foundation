@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "id": "entropy-journey-offer",
+    "type": "moment",
+    "title": "Entropy Journey Offer",
+    "description": "Offers structured journey when conversation complexity is high",
+    "icon": "Compass",
+    "color": "amber",
+    "createdAt": "2025-01-15T00:00:00Z",
+    "updatedAt": "2025-01-15T00:00:00Z",
+    "createdBy": { "type": "system" },
+    "status": "active",
+    "tags": ["engagement", "guidance"]
+  },
+  "payload": {
+    "trigger": {
+      "entropy": { "min": 0.7 },
+      "flags": { "journeyOfferShown": false }
+    },
+    "content": {
+      "type": "card",
+      "heading": "Feeling the complexity?",
+      "body": "Your exploration is getting deep. Would you like a structured path to help navigate these ideas?",
+      "icon": "Compass"
+    },
+    "surface": "inline",
+    "priority": 60,
+    "cooldown": 300000,
+    "actions": [
+      { "id": "accept", "label": "Show me a journey", "type": "navigate", "target": "journey-picker", "variant": "primary" },
+      { "id": "dismiss", "label": "I'll keep exploring", "type": "dismiss", "variant": "ghost" }
+    ],
+    "enabled": true
+  }
+}

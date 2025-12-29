@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "id": "welcome-arrival",
+    "type": "moment",
+    "title": "Welcome - First Visit",
+    "description": "Initial welcome for users who haven't selected a lens",
+    "icon": "Home",
+    "createdAt": "2025-01-15T00:00:00Z",
+    "updatedAt": "2025-01-15T00:00:00Z",
+    "createdBy": { "type": "system" },
+    "status": "active",
+    "tags": ["onboarding"]
+  },
+  "payload": {
+    "trigger": {
+      "stage": ["ARRIVAL"],
+      "flags": { "welcomeCompleted": false }
+    },
+    "content": {
+      "type": "card",
+      "heading": "Welcome to The Grove",
+      "body": "A space for exploring ideas about distributed AI. Choose how you'd like to begin."
+    },
+    "surface": "welcome",
+    "priority": 100,
+    "once": false,
+    "actions": [
+      { "id": "show-lens-picker", "label": "Choose Lens", "type": "navigate", "target": "lens-picker", "variant": "primary" },
+      { "id": "start-wizard", "label": "Create Lens", "type": "navigate", "target": "wizard", "variant": "secondary" },
+      { "id": "select-freestyle", "label": "Explore", "type": "selectLens", "lensId": "freestyle", "setFlags": { "welcomeCompleted": true }, "variant": "ghost" }
+    ],
+    "enabled": true
+  }
+}

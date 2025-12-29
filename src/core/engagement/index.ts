@@ -54,3 +54,13 @@ export {
   type EngagementContextValue,
   type EngagementProviderProps,
 } from './context';
+
+// Moment Evaluator (Sprint: engagement-orchestrator-v1)
+export {
+  evaluateTrigger,
+  getEligibleMoments,
+  getTopMoment,
+  createDefaultEvaluationContext,
+  type MomentEvaluationContext,
+  type EvaluationResult,
+} from './moment-evaluator';

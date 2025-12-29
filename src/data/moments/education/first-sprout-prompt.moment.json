@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "id": "first-sprout-prompt",
+    "type": "moment",
+    "title": "First Sprout Prompt",
+    "description": "Encourages capturing first insight after meaningful exchange",
+    "icon": "Sprout",
+    "color": "green",
+    "createdAt": "2025-01-15T00:00:00Z",
+    "updatedAt": "2025-01-15T00:00:00Z",
+    "createdBy": { "type": "system" },
+    "status": "active",
+    "tags": ["education", "feature-discovery"]
+  },
+  "payload": {
+    "trigger": {
+      "exchangeCount": { "min": 3 },
+      "sproutsCaptured": { "max": 0 },
+      "flags": { "sproutPromptShown": false }
+    },
+    "content": {
+      "type": "text",
+      "body": "Found something useful? Use /plant to capture it as a sprout.",
+      "icon": "Sprout"
+    },
+    "surface": "toast",
+    "priority": 40,
+    "once": true,
+    "actions": [
+      { "id": "dismiss", "label": "Got it", "type": "dismiss", "setFlags": { "sproutPromptShown": true }, "variant": "ghost" }
+    ],
+    "enabled": true
+  }
+}

@@ -49,7 +49,11 @@ export type EngagementEventType =
   | 'REVEAL_DISMISSED'
   | 'SESSION_STARTED'
   | 'SESSION_RESUMED'
-  | 'SPROUT_CAPTURED';
+  | 'SPROUT_CAPTURED'
+  // Moment telemetry (Sprint: engagement-orchestrator-v1)
+  | 'MOMENT_SHOWN'
+  | 'MOMENT_ACTIONED'
+  | 'MOMENT_DISMISSED';
 
 export interface EngagementEvent<T extends EngagementEventType = EngagementEventType> {
   type: T;
@@ -71,6 +75,10 @@ export interface EventPayloads {
   SESSION_STARTED: { isReturningUser: boolean };
   SESSION_RESUMED: { previousSessionId: string; minutesSinceLastActivity: number };
   SPROUT_CAPTURED: { sproutId: string; tags?: string[] };
+  // Moment telemetry payloads (Sprint: engagement-orchestrator-v1)
+  MOMENT_SHOWN: { momentId: string; surface: string; timestamp: number };
+  MOMENT_ACTIONED: { momentId: string; actionId: string; actionType: string; timestamp: number };
+  MOMENT_DISMISSED: { momentId: string; timestamp: number };
 }
 
 // ============================================================================

@@ -577,7 +577,17 @@ export function useEngagementEmit() {
       emit('REVEAL_DISMISSED', { revealType, action }),
 
     sproutCaptured: (sproutId: string, tags?: string[]) =>
-      emit('SPROUT_CAPTURED', { sproutId, tags })
+      emit('SPROUT_CAPTURED', { sproutId, tags }),
+
+    // Moment telemetry (Sprint: engagement-orchestrator-v1)
+    momentShown: (momentId: string, surface: string) =>
+      emit('MOMENT_SHOWN', { momentId, surface, timestamp: Date.now() }),
+
+    momentActioned: (momentId: string, actionId: string, actionType: string) =>
+      emit('MOMENT_ACTIONED', { momentId, actionId, actionType, timestamp: Date.now() }),
+
+    momentDismissed: (momentId: string) =>
+      emit('MOMENT_DISMISSED', { momentId, timestamp: Date.now() })
   }), [emit]);
 }
 

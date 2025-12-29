@@ -26,6 +26,10 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
         }
+      },
+      watch: {
+        // Exclude telemetry logs and data files that update during runtime
+        ignored: ['**/data/**', '**/concept-stream.jsonl']
       }
     },
     plugins: [react()],
@@ -45,6 +49,7 @@ export default defineConfig(({ mode }) => {
         '@foundation': path.resolve(__dirname, './src/foundation'),
         '@widget': path.resolve(__dirname, './src/widget'),
         '@garden': path.resolve(__dirname, './src/garden'),
+        '@data': path.resolve(__dirname, './src/data'),
       }
     }
   };

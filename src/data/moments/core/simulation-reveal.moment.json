@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "id": "simulation-reveal",
+    "type": "moment",
+    "title": "The Simulation Reveal",
+    "description": "Reveals that the user is already experiencing Grove's architecture",
+    "icon": "Sparkles",
+    "color": "amber",
+    "createdAt": "2025-01-15T00:00:00Z",
+    "updatedAt": "2025-01-15T00:00:00Z",
+    "createdBy": {
+      "type": "human",
+      "actorId": "jim"
+    },
+    "status": "active",
+    "tags": ["onboarding", "reveal", "meta"]
+  },
+  "payload": {
+    "trigger": {
+      "journeysCompleted": { "min": 1 },
+      "flags": { "simulationRevealed": false }
+    },
+    "content": {
+      "type": "component",
+      "component": "SimulationReveal",
+      "variants": {
+        "academic": {
+          "props": { "opening": "This terminal is a working prototype of the research infrastructure we're proposing." }
+        },
+        "engineer": {
+          "props": { "opening": "The architecture you've been exploring? You're running on it." }
+        },
+        "concerned-citizen": {
+          "props": { "opening": "You just experienced what distributed AI feels like — no Big Tech in the loop." }
+        }
+      }
+    },
+    "surface": "overlay",
+    "priority": 90,
+    "once": true,
+    "actions": [
+      {
+        "id": "acknowledge",
+        "label": "Continue Exploring",
+        "type": "dismiss",
+        "variant": "primary",
+        "setFlags": { "simulationRevealed": true }
+      },
+      {
+        "id": "how-it-works",
+        "label": "How does this work?",
+        "type": "startJourney",
+        "journeyId": "architecture",
+        "setFlags": { "simulationRevealed": true },
+        "variant": "secondary"
+      }
+    ],
+    "enabled": true
+  }
+}

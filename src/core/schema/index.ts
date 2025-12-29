@@ -214,3 +214,28 @@ export {
   fromChatMessage,
   toChatMessage
 } from './stream';
+
+// Engagement Moment types (Sprint: engagement-orchestrator-v1)
+export {
+  type MomentSurface,
+  type NumericRange,
+  type TriggerStage,
+  type TriggerSchedule,
+  type MomentTrigger,
+  type ButtonVariant,
+  type PromptDefinition,
+  type MomentContentType,
+  type ContentVariant,
+  type MomentContent,
+  type MomentActionType,
+  type MomentAction,
+  type MomentPayload,
+  type MomentMeta,
+  type Moment,
+  type MomentObject,
+  isMoment,
+  isValidSurface,
+  createMoment,
+  DEFAULT_MOMENT_PRIORITY,
+  MOMENT_SURFACES
+} from './moment';

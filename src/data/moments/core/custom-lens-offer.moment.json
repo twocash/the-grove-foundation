@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "id": "custom-lens-offer",
+    "type": "moment",
+    "title": "Custom Lens Offer",
+    "description": "Offers custom lens creation after sustained engagement",
+    "icon": "Sparkles",
+    "color": "cyan",
+    "createdAt": "2025-01-15T00:00:00Z",
+    "updatedAt": "2025-01-15T00:00:00Z",
+    "createdBy": { "type": "human", "actorId": "jim" },
+    "status": "active",
+    "tags": ["engagement", "conversion"]
+  },
+  "payload": {
+    "trigger": {
+      "exchangeCount": { "min": 8 },
+      "stage": ["EXPLORING", "ENGAGED"],
+      "hasCustomLens": false,
+      "flags": { "customLensOffered": false }
+    },
+    "content": {
+      "type": "card",
+      "heading": "Ready for your own lens?",
+      "body": "You've been exploring with a preset perspective. Want to create one tailored to your specific interests?",
+      "icon": "Sparkles"
+    },
+    "surface": "inline",
+    "priority": 50,
+    "once": true,
+    "actions": [
+      { "id": "accept", "label": "Create My Lens", "type": "navigate", "target": "wizard", "variant": "primary", "setFlags": { "customLensOffered": true } },
+      { "id": "dismiss", "label": "Not now", "type": "dismiss", "variant": "ghost", "setFlags": { "customLensOffered": true } }
+    ],
+    "enabled": true
+  }
+}

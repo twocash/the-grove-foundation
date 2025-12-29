@@ -1,13 +1,15 @@
 // src/core/engagement/machine.ts
 // Sprint: journey-system-v2 - Updated to use schema types (waypoints)
 // Sprint: kinetic-stream-schema-v1 - Added stream state and actions
+// Sprint: kinetic-stream-reset-v2 - Added pivot/fork events and NavigationParser
 
 import { setup, assign } from 'xstate';
 import { initialContext } from './types';
 import type { EngagementContext, EngagementEvent } from './types';
 import type { Journey } from '../schema/journey';
-import type { StreamItem } from '../schema/stream';
+import type { StreamItem, QueryStreamItem, ResponseStreamItem } from '../schema/stream';
 import { parse } from '../transformers/RhetoricalParser';
+import { parseNavigation } from '../transformers/NavigationParser';
 
 // ─────────────────────────────────────────────────────────────────
 // ID GENERATION
@@ -101,11 +103,13 @@ export const engagementMachine = setup({
     }),
 
     appendToResponse: assign(({ context, event }) => {
-      if (event.type === 'STREAM_CHUNK' && context.currentStreamItem) {
+      const item = context.currentStreamItem;
+      // Only append to response items
+      if (event.type === 'STREAM_CHUNK' && item && item.type === 'response') {
         return {
           currentStreamItem: {
-            ...context.currentStreamItem,
-            content: context.currentStreamItem.content + (event.chunk || '')
+            ...item,
+            content: item.content + (event.chunk || '')
           }
         };
       }
@@ -113,18 +117,94 @@ export const engagementMachine = setup({
     }),
 
     finalizeResponse: assign(({ context }) => {
-      if (!context.currentStreamItem) return {};
-      const { spans } = parse(context.currentStreamItem.content);
-      const finalizedItem: StreamItem = {
-        ...context.currentStreamItem,
+      const item = context.currentStreamItem;
+      // Only finalize response items
+      if (!item || item.type !== 'response') return {};
+
+      // Parse navigation block first, then rhetoric on clean content
+      const { forks, cleanContent } = parseNavigation(item.content);
+      const { spans } = parse(cleanContent);
+
+      const finalizedItem: ResponseStreamItem = {
+        ...item,
+        content: cleanContent,
         isGenerating: false,
-        parsedSpans: spans
+        parsedSpans: spans,
+        navigation: forks.length > 0 ? forks : undefined
       };
       return {
         currentStreamItem: finalizedItem,
         streamHistory: [...context.streamHistory, finalizedItem]
       };
     }),
+
+    // Pivot click action (Sprint: kinetic-stream-reset-v2)
+    handlePivotClick: assign(({ context, event }) => {
+      if (event.type !== 'USER.CLICK_PIVOT') return {};
+
+      const pivotQuery: QueryStreamItem = {
+        id: generateId(),
+        type: 'query',
+        content: `Tell me more about ${event.span.text}`,
+        timestamp: Date.now(),
+        role: 'user',
+        createdBy: 'user',
+        pivot: {
+          sourceResponseId: event.responseId,
+          sourceText: event.span.text,
+          sourceContext: '',
+          targetId: event.span.conceptId
+        }
+      };
+
+      return {
+        currentStreamItem: pivotQuery,
+        streamHistory: [...context.streamHistory, pivotQuery]
+      };
+    }),
+
+    // Fork select action (Sprint: kinetic-stream-reset-v2)
+    handleForkSelect: assign(({ context, event }) => {
+      if (event.type !== 'USER.SELECT_FORK') return {};
+
+      const forkQuery: QueryStreamItem = {
+        id: generateId(),
+        type: 'query',
+        content: event.fork.queryPayload || event.fork.label,
+        timestamp: Date.now(),
+        role: 'user',
+        createdBy: 'user',
+        intent: event.fork.type
+      };
+
+      return {
+        currentStreamItem: forkQuery,
+        streamHistory: [...context.streamHistory, forkQuery]
+      };
+    }),
+
+    // Moment orchestration actions (Sprint: engagement-orchestrator-v1)
+    setFlag: assign(({ context, event }) => {
+      if (event.type !== 'SET_FLAG') return {};
+      return {
+        flags: { ...context.flags, [event.key]: event.value }
+      };
+    }),
+
+    setCooldown: assign(({ context, event }) => {
+      if (event.type !== 'SET_COOLDOWN') return {};
+      return {
+        momentCooldowns: { ...context.momentCooldowns, [event.momentId]: event.timestamp }
+      };
+    }),
+
+    clearFlags: assign(() => ({
+      flags: {}
+    })),
+
+    clearCooldowns: assign(() => ({
+      momentCooldowns: {}
+    })),
   },
 }).createMachine({
   id: 'engagement',
@@ -222,6 +302,26 @@ export const engagementMachine = setup({
     },
     FINALIZE_RESPONSE: {
       actions: 'finalizeResponse',
+    },
+    // Kinetic stream events (Sprint: kinetic-stream-reset-v2)
+    'USER.CLICK_PIVOT': {
+      actions: 'handlePivotClick',
+    },
+    'USER.SELECT_FORK': {
+      actions: 'handleForkSelect',
+    },
+    // Moment orchestration events (Sprint: engagement-orchestrator-v1)
+    SET_FLAG: {
+      actions: 'setFlag',
+    },
+    SET_COOLDOWN: {
+      actions: 'setCooldown',
+    },
+    CLEAR_FLAGS: {
+      actions: 'clearFlags',
+    },
+    CLEAR_COOLDOWNS: {
+      actions: 'clearCooldowns',
     },
   },
 });

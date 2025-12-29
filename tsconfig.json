@@ -26,7 +26,9 @@
       "@foundation/*": ["./src/foundation/*"],
       "@widget": ["./src/widget"],
       "@widget/*": ["./src/widget/*"],
-      "@garden/*": ["./src/garden/*"]
+      "@garden/*": ["./src/garden/*"],
+      "@data": ["./src/data"],
+      "@data/*": ["./src/data/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
