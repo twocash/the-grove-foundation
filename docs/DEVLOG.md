@@ -5,6 +5,193 @@
 
 ---
 
+## 2025-12-29 | Kinetic Cultivation v1 - Complete
+
+### Objective
+Add Sprout capture functionality to the Kinetic Stream at `/explore`, enabling users to select text and save valuable LLM responses as "sprouts" with full provenance tracking.
+
+### Deviations from Original Plan
+
+| Planned | Actual | Rationale |
+|---------|--------|-----------|
+| Create Zustand `sproutStore` | Reused existing `useSproutStorage` | Avoid parallel state systems (Anti-Pattern 1) |
+| Visual baseline screenshots | Not captured | Feature completed but baseline tests not run |
+| Flight animation (orb to tray) | Simplified transition | Kept scope focused; can add later |
+
+### Surprises & Discoveries
+
+1. **Vite Glob Import Caching**: JSON files loaded via `import.meta.glob` are cached at build time. Editing `.moment.json` files requires dev server restart to pick up changes. The cache bust comment in `moment-loader.ts` helps force re-evaluation.
+
+2. **React State Isolation**: Two separate calls to `useSproutStorage()` create independent hook instances that don't share state. Fixed by lifting state to parent and passing props (SproutTray now receives `sprouts` as prop from ExploreShell).
+
+3. **Auto-scroll Timing**: `useLayoutEffect` prevents flicker but `isAtBottom` can get stuck `false` due to forced reflow timing between state updates. Fixed by always scrolling and resetting `isAtBottom` to `true` when `items.length` changes.
+
+4. **Moment Action Variants**: Secondary actions in MomentObject require `variant: "secondary"` in the JSON. Added "Choose Existing" button to custom-lens-offer moment with proper navigation wiring.
+
+### Learnings
+
+1. **Selection Action Pattern**: Text selection + floating pill + capture card is a reusable pattern for content capture. Key elements:
+   - `useTextSelection` hook with debounce and container filtering
+   - `MagneticPill` with spring physics and viewport collision
+   - `SproutCaptureCard` with context auto-fill from hooks
+
+2. **Props vs Hook Instances**: When child components need to react to parent state changes, pass data as props rather than having child call the same hook (creates separate instance).
+
+3. **E2E Test Robustness**: Playwright tests should use `data-testid` selectors and verify button existence before testing behavior. Flexible locators prevent false failures from text changes.
+
+### Work Completed
+
+#### Epic 1: The Grasp (Text Selection + MagneticPill)
+- Created `useTextSelection.ts` hook for detecting text selection within a container
+- Created `MagneticPill.tsx` - Floating button that appears near selection with magnetic scale effect
+- Created `sprout-capture.config.ts` with UI dimensions, animation settings, and default action
+- Added `data-message-id` attribute to ResponseObject for selection context
+
+**Key Pattern**: Selection detection uses `selectionchange` event with debounce and `containsNode` check
+
+#### Epic 2: The Seed Packet (Capture Card)
+- Created `useCaptureState.ts` hook for managing capture modal state
+- Created `SproutCaptureCard.tsx` - Modal card with selection preview, tag input, context badges
+- Integrated with existing `useSproutStorage` hook for persistence
+- Added XState telemetry via `SPROUT_CAPTURED` event
+
+**XState Integration**: All telemetry flows through `actor.send()` instead of legacy engagement bus
+
+#### Epic 3: The Tray (Sprout Store + Tray)
+- Created `SproutCard.tsx` - Individual sprout display with delete action
+- Created `SproutTray.tsx` - Collapsible side tray showing captured sprouts
+- Added CSS tokens for tray styling in globals.css
+- Tray expands on hover, shows sprout count badge when collapsed
+
+#### Epic 4: Pilot's Controls (Keyboard Shortcuts)
+- Created `useKineticShortcuts.ts` - Platform-aware keyboard shortcut handler
+- Created `KeyboardHUD.tsx` - Overlay showing available shortcuts
+- Added shortcuts: Cmd/Ctrl+S (capture selection), Cmd/Ctrl+/ (show help)
+
+**Platform Detection**: Uses `navigator.platform` for Mac vs Windows modifier keys
+
+#### Epic 5: Polish (Adapter + Final Tests)
+- Created `sproutAdapter.ts` with flattenSprout, nestSprout, migrateSprout utilities
+- Provides backward compatibility for legacy flat provenance format
+- All 376 existing tests continue to pass
+
+### Files Created (12 TypeScript files)
+
+| File | Purpose |
+|------|---------|
+| `src/surface/components/KineticStream/Capture/config/sprout-capture.config.ts` | UI and animation configuration |
+| `src/surface/components/KineticStream/Capture/hooks/useTextSelection.ts` | Text selection detection |
+| `src/surface/components/KineticStream/Capture/hooks/useCaptureState.ts` | Capture modal state |
+| `src/surface/components/KineticStream/Capture/hooks/useKineticShortcuts.ts` | Keyboard shortcuts |
+| `src/surface/components/KineticStream/Capture/components/MagneticPill.tsx` | Floating capture button |
+| `src/surface/components/KineticStream/Capture/components/SproutCaptureCard.tsx` | Capture form card |
+| `src/surface/components/KineticStream/Capture/components/SproutCard.tsx` | Sprout display card |
+| `src/surface/components/KineticStream/Capture/components/SproutTray.tsx` | Collapsible sprout tray |
+| `src/surface/components/KineticStream/Capture/components/KeyboardHUD.tsx` | Shortcuts help overlay |
+| `src/surface/components/KineticStream/Capture/utils/sproutAdapter.ts` | Legacy format adapter |
+| `src/surface/components/KineticStream/Capture/index.ts` | Barrel exports |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `src/surface/components/KineticStream/ExploreShell.tsx` | Full capture flow integration |
+| `src/surface/components/KineticStream/Stream/blocks/ResponseObject.tsx` | Added data-message-id |
+| `styles/globals.css` | Added tray CSS tokens |
+| `hooks/useSproutCapture.ts` | Fixed XState dependency (emit→actor) |
+
+### Key Technical Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| XState over engagement bus | All telemetry via `actor.send()` per project direction |
+| Existing useSproutStorage | Reuse proven localStorage persistence |
+| Platform-aware shortcuts | Cmd on Mac, Ctrl on Windows for native feel |
+| Tray hover expansion | Keeps primary content area unobstructed |
+
+### Verification
+- ✅ Build passes (54.12s)
+- ✅ All 376 tests pass
+- ✅ Text selection triggers MagneticPill
+- ✅ Capture card saves sprout with provenance
+- ✅ Tray shows captured sprouts
+- ✅ Keyboard shortcuts work on both platforms
+
+---
+
+## 2025-12-29 | Moment UI Integration Sprint
+
+### Session Summary
+- **Branch**: `kinetic-stream-feature`
+- **Objective**: Wire Moment system to Kinetic Stream UI surfaces
+
+### Work Completed
+
+#### 1. Custom Lens Wizard Integration
+- Fixed wizard navigation breaking `/explore` experience
+- Previously: clicking "Create My Lens" did `window.location.href = '/?lens=custom&wizard=true'`
+- Now: wizard opens as overlay within ExploreShell (follows LensPicker pattern)
+- Added `handleWizardComplete` callback to save lens and set `customLensCreated` flag
+- Lens pill now updates after wizard completion (checks both preset personas AND custom lenses)
+
+**Files Modified**:
+- `src/surface/components/KineticStream/ExploreShell.tsx` - Wizard overlay integration
+- `src/data/moments/core/custom-lens-offer.moment.json` - Added `customLensCreated` flag check
+
+#### 2. Journey Offer Moment
+- Fixed trigger that never fired (entropy was always 0, never calculated)
+- Removed `entropy: { min: 0.4 }` requirement (entropy infrastructure not implemented)
+- Changed `exchangeCount` from `{ min: 5 }` to `{ min: 3 }`
+- Changed surface from `overlay` to `inline` (appears in stream like custom-lens-offer)
+- Added `stage: ["EXPLORING", "ENGAGED"]` requirement
+
+**Files Modified**:
+- `src/data/moments/engagement/entropy-journey-offer.moment.json` - Trigger simplification
+
+#### 3. Journey Picker Overlay
+- Created new journey picker overlay in ExploreShell
+- Uses `glass-card` styling to match LensPicker
+- Lists all 6 journeys with title, description, estimated time
+- `handleJourneySelect` starts journey and sets `journeyOfferShown` flag
+
+**Key Code**:
+```typescript
+const handleJourneySelect = useCallback((journeyId: string) => {
+  const journey = journeys.find(j => j.id === journeyId);
+  if (journey) {
+    engStartJourney(journey);
+    actor.send({ type: 'SET_FLAG', key: 'journeyOfferShown', value: true });
+  }
+  setOverlay({ type: 'none' });
+}, [engStartJourney, actor]);
+```
+
+#### 4. Debug Logging
+- Added evaluation context logging to `useMoments.ts`
+- Logs `exchangeCount`, `stage`, `flags` on each evaluation
+- Helps diagnose why moments aren't triggering
+
+#### 5. Infrastructure Ticket Created
+- Created `docs/sprints/entropy-calculation-v1/TICKET.md`
+- Documents that entropy is never calculated (always 0)
+- Includes 5-step implementation plan
+- Defines what entropy should represent (conversation divergence)
+
+### Technical Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| Wizard as overlay, not route | Preserves stream state, follows existing LensPicker pattern |
+| Remove entropy from journey trigger | Entropy not implemented; would block journey offers forever |
+| Journey picker inline | Consistent with other moment interactions |
+| Use `glass-card` class | Design consistency across all picker overlays |
+
+### Known Issues
+- Entropy calculation not implemented (ticket created)
+- Engagement bridge deprecated but still used in legacy Terminal.tsx
+
+---
+
 ## 2025-12-16 | Phase 0: Documentation & Planning
 
 ### Session Start

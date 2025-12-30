@@ -585,6 +585,72 @@ interface WizardSchema {
 
 ---
 
+### Pattern 11: Selection Action (Sprout Capture)
+
+**Need:** Capturing user-selected content with provenance for later retrieval and attribution.
+
+**Philosophy:** Insights are not output by the AI—they emerge through human attention. When a user selects text, they are collapsing the wave function, identifying what matters. The Selection Action pattern captures this moment of human judgment along with full provenance (lens, journey, node, session).
+
+**The Principle:**
+> **Selection is attention. Attention is value. Capture the moment of collapse.**
+
+**Use:** Selection detection hook + floating capture UI + provenance-aware storage
+
+**Files:**
+```
+src/surface/components/KineticStream/Capture/
+├── config/sprout-capture.config.ts    → UI dimensions, animation timing
+├── hooks/useTextSelection.ts          → Selection detection with container filtering
+├── hooks/useCaptureState.ts           → Modal state machine
+├── components/MagneticPill.tsx        → Floating action button with spring physics
+├── components/SproutCaptureCard.tsx   → Capture form with context auto-fill
+├── components/SproutCard.tsx          → Display card for tray
+├── components/SproutTray.tsx          → Collapsible side tray
+└── utils/sproutAdapter.ts             → Legacy format migration
+```
+
+**Key Technical Decisions:**
+
+| Decision | Rationale |
+|----------|-----------|
+| `useLayoutEffect` for selection | Prevents 1-frame position flash |
+| Debounce selection changes (50ms) | Avoids jitter during drag |
+| Container filtering via `[data-message-id]` | Only capture from content, not chrome |
+| Props from parent, not separate hook instance | Shared state for reactivity |
+| XState telemetry via `actor.send()` | Unified engagement tracking |
+
+**Selection Detection Flow:**
+```
+User selects text in [data-message-id] container
+    ↓
+useTextSelection fires (with debounce)
+    ↓
+Returns SelectionState { text, rect, messageId, contextSpan }
+    ↓
+MagneticPill renders at selection end
+    ↓
+Click → SproutCaptureCard opens
+    ↓
+Confirm → Sprout saved with provenance
+    ↓
+actor.send({ type: 'SPROUT_CAPTURED' })
+```
+
+**Extend by:**
+1. Add new capture targets beyond text (images, code blocks)
+2. Create different capture card variants per content type
+3. Add keyboard shortcuts via `useKineticShortcuts`
+
+**DO NOT:**
+- ❌ Create separate storage hooks for captured content (use existing `useSproutStorage`)
+- ❌ Hardcode message ID extraction in components (use `data-message-id` attribute)
+- ❌ Skip provenance—every capture must trace back to source context
+- ❌ Use separate hook instances in parent and child (props for shared state)
+
+**Sprint:** kinetic-cultivation-v1 (December 2024)
+
+---
+
 ## Anti-Patterns (The Violations)
 
 These patterns violate DEX principles. If you catch yourself doing these, stop and reconsider.
@@ -785,5 +851,5 @@ When in doubt, return to the core thesis:
 
 ---
 
-*Last updated: December 2024*
+*Last updated: December 29, 2024*
 *Canonical location: PROJECT_PATTERNS.md (repository root)*

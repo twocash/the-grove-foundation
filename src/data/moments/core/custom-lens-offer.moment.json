@@ -14,10 +14,10 @@
   },
   "payload": {
     "trigger": {
-      "exchangeCount": { "min": 8 },
-      "stage": ["EXPLORING", "ENGAGED"],
+      "exchangeCount": { "min": 1 },
+      "stage": ["ARRIVAL", "ORIENTED", "EXPLORING", "ENGAGED"],
       "hasCustomLens": false,
-      "flags": { "customLensOffered": false }
+      "flags": { "customLensOffered": false, "customLensCreated": false }
     },
     "content": {
       "type": "card",
@@ -30,6 +30,7 @@
     "once": true,
     "actions": [
       { "id": "accept", "label": "Create My Lens", "type": "navigate", "target": "wizard", "variant": "primary", "setFlags": { "customLensOffered": true } },
+      { "id": "choose-existing", "label": "Choose Existing", "type": "navigate", "target": "lens-picker", "variant": "secondary", "setFlags": { "customLensOffered": true } },
       { "id": "dismiss", "label": "Not now", "type": "dismiss", "variant": "ghost", "setFlags": { "customLensOffered": true } }
     ],
     "enabled": true

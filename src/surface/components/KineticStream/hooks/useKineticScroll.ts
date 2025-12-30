@@ -58,18 +58,26 @@ export function useKineticScroll(
   // 2. The Magnet - Auto-scroll during streaming (Layout Effect prevents flicker)
   useLayoutEffect(() => {
     const viewport = scrollRef.current;
-    if (!viewport || !isStreaming || !isAtBottom) return;
+    if (!viewport) return;
 
     // Determine scroll behavior based on change type
     const itemsChanged = deps[0] !== prevItemsLength.current;
     const contentChanged = deps[1] !== prevContentLength.current;
 
-    // Update refs
+    // Update refs first
     prevItemsLength.current = deps[0];
     prevContentLength.current = deps[1];
 
-    if (itemsChanged || contentChanged) {
-      // Use scrollTop directly for reliable nested container scrolling
+    // Always scroll when new items are added (query submitted, response finalized)
+    // This prevents losing scroll position due to re-render timing issues
+    if (itemsChanged) {
+      viewport.scrollTop = viewport.scrollHeight;
+      setIsAtBottom(true); // Reset sticky state
+      return;
+    }
+
+    // For streaming content changes, only scroll if sticky (at bottom)
+    if (isStreaming && contentChanged && isAtBottom) {
       viewport.scrollTop = viewport.scrollHeight;
     }
   }, [deps, isStreaming, isAtBottom]);

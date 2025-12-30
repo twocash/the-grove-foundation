@@ -2,7 +2,7 @@
 // Main container for the Kinetic exploration experience
 // Sprint: kinetic-experience-v1, kinetic-scroll-v1, kinetic-context-v1
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { KineticRenderer } from './Stream/KineticRenderer';
 import { CommandConsole } from './CommandConsole';
 import { KineticHeader } from './KineticHeader';
@@ -13,16 +13,34 @@ import { useEngagement, useLensState, useJourneyState } from '../../../core/enga
 import { getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../../../data/quantum-content';
 import { getPersona } from '../../../../data/default-personas';
 import { LensPicker } from '../../../explore/LensPicker';
+import { CustomLensWizard } from '../../../../components/Terminal/CustomLensWizard';
+import { useCustomLens } from '../../../../hooks/useCustomLens';
 import { useMoments } from '@surface/hooks/useMoments';
+import type { LensCandidate, UserInputs } from '../../../../types/lens';
+import { useMomentStream } from '@surface/hooks/useMomentStream';
 import { MomentOverlay } from '../MomentRenderer';
-import type { RhetoricalSpan, JourneyFork, PivotContext } from '@core/schema/stream';
+import { AnimatePresence } from 'framer-motion';
+import {
+  useTextSelection,
+  useCaptureState,
+  useKineticShortcuts,
+  MagneticPill,
+  SproutCaptureCard,
+  SproutTray,
+  KeyboardHUD
+} from './Capture';
+import type { Shortcut } from './Capture';
+import { useSproutStorage } from '../../../../hooks/useSproutStorage';
+import type { Sprout, SproutProvenance } from '@core/schema/sprout';
+import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@core/schema/stream';
+import { journeys } from '../../../data/journeys';
 
 export interface ExploreShellProps {
   initialLens?: string;
   initialJourney?: string;
 }
 
-type OverlayType = 'none' | 'lens-picker' | 'journey-picker';
+type OverlayType = 'none' | 'lens-picker' | 'journey-picker' | 'custom-lens-wizard';
 
 export const ExploreShell: React.FC<ExploreShellProps> = ({
   initialLens,
@@ -36,7 +54,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     acceptLensOffer,
     dismissLensOffer,
     acceptJourneyOffer,
-    dismissJourneyOffer
+    dismissJourneyOffer,
+    resubmitWithLens
   } = useKineticStream();
 
   // Engagement hooks
@@ -48,6 +67,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     startJourney: engStartJourney,
   } = useJourneyState({ actor });
 
+  // Custom lens management
+  const { saveCustomLens, getCustomLens } = useCustomLens();
+
   // Moment overlay integration
   const {
     activeMoment: overlayMoment,
@@ -55,8 +77,47 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     dismissMoment: dismissOverlay
   } = useMoments({ surface: 'overlay' });
 
-  // Derived lens data
-  const lensData = useMemo(() => lens ? getPersona(lens) : null, [lens]);
+  // Handle moment navigation (wizard, lens-picker, etc.)
+  const handleMomentNavigate = useCallback((target: string) => {
+    console.log('[ExploreShell] Moment navigation:', target);
+    switch (target) {
+      case 'wizard':
+        setOverlay({ type: 'custom-lens-wizard' });
+        break;
+      case 'lens-picker':
+        setOverlay({ type: 'lens-picker' });
+        break;
+      case 'journey-picker':
+        setOverlay({ type: 'journey-picker' });
+        break;
+      default:
+        console.warn('[ExploreShell] Unknown navigation target:', target);
+    }
+  }, []);
+
+  // Inline moment injection
+  const {
+    momentItems,
+    handleMomentAction,
+    handleMomentDismiss
+  } = useMomentStream({ onNavigate: handleMomentNavigate });
+
+  // Merge stream items with moment items
+  const allItems = useMemo<StreamItem[]>(() => {
+    return [...items, ...momentItems];
+  }, [items, momentItems]);
+
+  // Derived lens data - check preset personas first, then custom lenses
+  const lensData = useMemo(() => {
+    if (!lens) return null;
+    // Try preset persona first
+    const preset = getPersona(lens);
+    if (preset) return preset;
+    // Fall back to custom lens
+    const custom = getCustomLens(lens);
+    if (custom) return { publicLabel: custom.publicLabel, color: custom.color };
+    return null;
+  }, [lens, getCustomLens]);
 
   // Welcome content - use static prompts from welcomeContent for now
   // TODO: Integrate useSuggestedPrompts once engagement systems are unified
@@ -73,20 +134,20 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Stage is derived from exchange count for now
   const stage = useMemo(() => {
-    const count = items.filter(i => i.type === 'query').length;
+    const count = allItems.filter(i => i.type === 'query').length;
     if (count === 0) return 'ARRIVAL';
     if (count < 3) return 'ORIENTED';
     if (count < 6) return 'EXPLORING';
     return 'ENGAGED';
-  }, [items]);
+  }, [allItems]);
 
   // Overlay state
   const [overlay, setOverlay] = useState<{ type: OverlayType }>({ type: 'none' });
 
   // Exchange count
   const exchangeCount = useMemo(() =>
-    items.filter(i => i.type === 'query').length,
-    [items]
+    allItems.filter(i => i.type === 'query').length,
+    [allItems]
   );
 
   // Determine if currently streaming
@@ -96,12 +157,118 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     currentItem.isGenerating
   );
 
+  // Sprout storage for capture (Sprint: kinetic-cultivation-v1)
+  const {
+    addSprout,
+    sessionId,
+    getSprouts,
+    deleteSprout,
+    getSessionSproutsCount
+  } = useSproutStorage();
+
+  // Get sprouts for tray (reactive)
+  const sprouts = getSprouts();
+  const sessionSproutCount = getSessionSproutsCount();
+
+  // Stream container ref for text selection (Sprint: kinetic-cultivation-v1)
+  const streamContainerRef = useRef<HTMLDivElement>(null);
+  const selection = useTextSelection(streamContainerRef);
+  const {
+    state: captureState,
+    startCapture,
+    cancelCapture,
+    completeCapture
+  } = useCaptureState();
+
+  // Handle capture activation (pill click)
+  const handleCaptureActivate = useCallback(() => {
+    if (!selection) return;
+    startCapture(selection);
+    console.log('[Capture] Card opened with selection:', {
+      text: selection.text.slice(0, 50),
+      messageId: selection.messageId,
+    });
+  }, [selection, startCapture]);
+
+  // Handle capture confirmation (Sprint: kinetic-cultivation-v1)
+  const handleCaptureConfirm = useCallback(async (tags: string[]) => {
+    if (!captureState.selection) return;
+
+    // Build provenance from current context
+    const provenance: SproutProvenance = {
+      lens: lens ? { id: lens, name: lensData?.publicLabel || lens } : null,
+      hub: null, // Could be derived from the message if we tracked it
+      journey: journey ? { id: journey.id, name: journey.title } : null,
+      node: null,
+      knowledgeFiles: [],
+      generatedAt: new Date().toISOString()
+    };
+
+    // Create sprout from selection
+    const sprout: Sprout = {
+      id: crypto.randomUUID(),
+      capturedAt: new Date().toISOString(),
+      response: captureState.selection.text,
+      query: captureState.selection.contextSpan,
+      provenance,
+      personaId: lens || null,
+      journeyId: journey?.id || null,
+      hubId: null,
+      nodeId: captureState.selection.messageId,
+      status: 'sprout',
+      tags,
+      notes: null,
+      sessionId,
+      creatorId: null
+    };
+
+    // Persist to storage
+    const success = await addSprout(sprout);
+    if (success) {
+      // Track capture via XState
+      actor.send({
+        type: 'SPROUT_CAPTURED',
+        sproutId: sprout.id,
+        journeyId: journey?.id,
+        hubId: undefined
+      });
+      console.log('[Capture] Sprout planted:', sprout.id.slice(0, 8));
+    }
+
+    completeCapture();
+  }, [captureState.selection, lens, lensData, journey, sessionId, addSprout, actor, completeCapture]);
+
+  // Keyboard HUD state (Sprint: kinetic-cultivation-v1)
+  const [showKeyboardHUD, setShowKeyboardHUD] = useState(false);
+
+  // Keyboard shortcuts (Sprint: kinetic-cultivation-v1)
+  const shortcuts: Shortcut[] = useMemo(() => [
+    {
+      key: 's',
+      modifiers: ['meta', 'ctrl'],
+      action: () => {
+        if (selection && !captureState.isCapturing) {
+          handleCaptureActivate();
+        } else {
+          console.log('[Shortcuts] No text selected');
+        }
+      }
+    },
+    {
+      key: '/',
+      modifiers: ['meta', 'ctrl'],
+      action: () => setShowKeyboardHUD(true)
+    }
+  ], [selection, captureState.isCapturing, handleCaptureActivate]);
+
+  useKineticShortcuts(shortcuts);
+
   // Scroll management
   const scrollDeps = useMemo<[number, number, string | null]>(() => [
-    items.length,
+    allItems.length,
     (currentItem && 'content' in currentItem) ? (currentItem.content?.length ?? 0) : 0,
     currentItem?.id ?? null
-  ], [items.length, currentItem]);
+  ], [allItems.length, currentItem]);
 
   const {
     scrollRef,
@@ -159,7 +326,50 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     // LensPicker already calls selectLens internally
     setOverlay({ type: 'none' });
     localStorage.setItem('grove-session-established', 'true');
+
+    // Re-submit last query with new lens if there's an existing conversation
+    if (items.some(i => i.type === 'query')) {
+      resubmitWithLens(personaId);
+    }
+  }, [items, resubmitWithLens]);
+
+  // Handle custom lens wizard completion
+  const handleWizardComplete = useCallback(async (
+    candidate: LensCandidate,
+    userInputs: UserInputs
+  ) => {
+    try {
+      const newLens = await saveCustomLens(candidate, userInputs);
+      selectLens(newLens.id);
+      setOverlay({ type: 'none' });
+      // Set flag to prevent re-offering the custom lens moment
+      actor.send({ type: 'SET_FLAG', key: 'customLensCreated', value: true });
+      console.log('[ExploreShell] Custom lens created:', newLens.id);
+    } catch (error) {
+      console.error('[ExploreShell] Failed to save custom lens:', error);
+    }
+  }, [saveCustomLens, selectLens, actor]);
+
+  const handleWizardCancel = useCallback(() => {
+    setOverlay({ type: 'none' });
   }, []);
+
+  // Handle journey selection from picker
+  const handleJourneySelect = useCallback((journeyId: string) => {
+    const selectedJourney = journeys.find(j => j.id === journeyId);
+    if (selectedJourney) {
+      engStartJourney(selectedJourney);
+      actor.send({ type: 'SET_FLAG', key: 'journeyOfferShown', value: true });
+      console.log('[ExploreShell] Journey started from picker:', journeyId);
+
+      // Submit the first waypoint's prompt to begin the journey
+      if (selectedJourney.waypoints && selectedJourney.waypoints.length > 0) {
+        const firstWaypoint = selectedJourney.waypoints[0];
+        submit(firstWaypoint.prompt);
+      }
+    }
+    setOverlay({ type: 'none' });
+  }, [engStartJourney, actor, submit]);
 
   const handlePromptClick = useCallback((prompt: string, command?: string, journeyId?: string) => {
     if (journeyId) {
@@ -181,11 +391,12 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         exchangeCount={exchangeCount}
       />
 
-      {/* Stream area - attach scrollRef */}
+      {/* Stream area - attach scrollRef and capture ref */}
       <main ref={scrollRef} className="flex-1 overflow-y-auto p-6">
+        <div ref={streamContainerRef}>
         <div className="max-w-3xl mx-auto pb-32">
           {/* Welcome when no messages */}
-          {items.length === 0 && (
+          {allItems.length === 0 && (
             <KineticWelcome
               content={welcomeContent}
               prompts={staticPrompts}
@@ -196,7 +407,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
           )}
 
           <KineticRenderer
-            items={items}
+            items={allItems}
             currentItem={currentItem}
             bottomRef={bottomRef}
             onConceptClick={handleConceptClick}
@@ -206,7 +417,10 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
             onLensDismiss={handleLensDismiss}
             onJourneyAccept={handleJourneyAccept}
             onJourneyDismiss={handleJourneyDismiss}
+            onMomentAction={handleMomentAction}
+            onMomentDismiss={handleMomentDismiss}
           />
+        </div>
         </div>
       </main>
 
@@ -233,6 +447,48 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         </div>
       )}
 
+      {/* Journey Picker Overlay */}
+      {overlay.type === 'journey-picker' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[var(--glass-text-primary)]">Choose a Journey</h2>
+              <button
+                onClick={() => setOverlay({ type: 'none' })}
+                className="text-[var(--glass-text-muted)] hover:text-[var(--glass-text-primary)] text-xl"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="space-y-3">
+              {journeys.map((j) => (
+                <button
+                  key={j.id}
+                  onClick={() => handleJourneySelect(j.id)}
+                  className="glass-card w-full text-left p-4 cursor-pointer"
+                >
+                  <div className="font-medium text-[var(--glass-text-primary)]">{j.title}</div>
+                  <div className="text-sm text-[var(--glass-text-muted)] mt-1 italic">"{j.description}"</div>
+                  <div className="text-xs text-[var(--neon-cyan)] mt-2">{j.estimatedTime}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Lens Wizard Overlay */}
+      {overlay.type === 'custom-lens-wizard' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-auto">
+            <CustomLensWizard
+              onComplete={handleWizardComplete}
+              onCancel={handleWizardCancel}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Moment Overlay - engagement-triggered reveals */}
       {overlayMoment && (
         <MomentOverlay
@@ -242,6 +498,43 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
           activeLens={lens}
         />
       )}
+
+      {/* Sprout capture UI (Sprint: kinetic-cultivation-v1) */}
+      <AnimatePresence mode="wait">
+        {selection && !captureState.isCapturing && (
+          <MagneticPill
+            key="pill"
+            position={{ x: selection.rect.right, y: selection.rect.bottom }}
+            onActivate={handleCaptureActivate}
+            layoutId="sprout-capture"
+          />
+        )}
+        {captureState.isCapturing && captureState.selection && (
+          <SproutCaptureCard
+            key="card"
+            selection={captureState.selection}
+            lensName={lensData?.publicLabel}
+            journeyName={journey?.title}
+            onCapture={handleCaptureConfirm}
+            onCancel={cancelCapture}
+            layoutId="sprout-capture"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sprout Tray (Sprint: kinetic-cultivation-v1) */}
+      <SproutTray
+        sprouts={sprouts}
+        onDelete={deleteSprout}
+        sessionCount={sessionSproutCount}
+      />
+
+      {/* Keyboard HUD (Sprint: kinetic-cultivation-v1) */}
+      <AnimatePresence>
+        {showKeyboardHUD && (
+          <KeyboardHUD onDismiss={() => setShowKeyboardHUD(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

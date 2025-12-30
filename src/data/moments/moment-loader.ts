@@ -1,6 +1,7 @@
 // src/data/moments/moment-loader.ts
 // Moment JSON File Loader
 // Sprint: engagement-orchestrator-v1
+// Cache bust: 2025-12-29-003
 
 import type { Moment } from '@core/schema/moment';
 import { isMoment } from '@core/schema/moment';

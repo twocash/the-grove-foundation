@@ -16,6 +16,8 @@ import { parse as parseRhetoric } from '@core/transformers/RhetoricalParser';
 import { parseLensOffer } from '@core/transformers/LensOfferParser';
 import { parseJourneyOffer } from '@core/transformers/JourneyOfferParser';
 import { sendMessageStream } from '../../../../../services/chatService';
+import { useEngagement } from '@core/engagement';
+import { calculateEntropy, type EntropyInputs } from '@core/engine/entropyCalculator';
 
 interface UseKineticStreamReturn {
   items: StreamItem[];
@@ -27,6 +29,8 @@ interface UseKineticStreamReturn {
   dismissLensOffer: (offerId: string) => void;
   acceptJourneyOffer: (journeyId: string) => void;
   dismissJourneyOffer: (offerId: string) => void;
+  /** Re-submit the last query with a new lens (for lens picker) */
+  resubmitWithLens: (lensId: string) => void;
 }
 
 export function useKineticStream(): UseKineticStreamReturn {
@@ -36,6 +40,7 @@ export function useKineticStream(): UseKineticStreamReturn {
   const [activeLensId, setActiveLensId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const itemsRef = useRef<StreamItem[]>([]);
+  const { actor } = useEngagement();
 
   // Keep ref in sync with state
   itemsRef.current = items;
@@ -64,6 +69,10 @@ export function useKineticStream(): UseKineticStreamReturn {
     setItems(prev => [...prev, queryItem]);
     setIsLoading(true);
 
+    // Notify XState of query start (for engagement tracking)
+    actor.send({ type: 'START_QUERY', prompt: query });
+    actor.send({ type: 'START_RESPONSE' });
+
     // Create response item placeholder
     const responseId = `response-${Date.now()}`;
     const responseItem: ResponseStreamItem = {
@@ -81,7 +90,7 @@ export function useKineticStream(): UseKineticStreamReturn {
       let fullContent = '';
 
       // Stream response using chatService
-      await sendMessageStream(
+      const chatResponse = await sendMessageStream(
         query,
         (chunk: string) => {
           fullContent += chunk;
@@ -94,6 +103,11 @@ export function useKineticStream(): UseKineticStreamReturn {
           personaTone: effectiveLensId || undefined
         }
       );
+
+      // Emit hub visit for entropy tracking (Sprint: entropy-calculation-v1)
+      if (chatResponse.hubId) {
+        actor.send({ type: 'HUB_VISITED', hubId: chatResponse.hubId });
+      }
 
       // Parse completed response - chain parsers
       const { forks, cleanContent: navCleanContent } = parseNavigation(fullContent);
@@ -126,6 +140,24 @@ export function useKineticStream(): UseKineticStreamReturn {
       setItems(prev => [...prev, ...newItems]);
       setCurrentItem(null);
 
+      // Notify XState of response completion (updates streamHistory for moment evaluation)
+      actor.send({ type: 'FINALIZE_RESPONSE' });
+      console.log('[useKineticStream] Exchange complete, XState notified');
+
+      // Calculate and update entropy (Sprint: entropy-calculation-v1)
+      const snapshot = actor.getSnapshot();
+      const ctx = snapshot.context;
+      const entropyInputs: EntropyInputs = {
+        hubsVisited: ctx.hubsVisited || [],
+        exchangeCount: ctx.streamHistory.filter((i: StreamItem) => i.type === 'query').length,
+        pivotCount: ctx.pivotCount || 0,
+        journeyWaypointsHit: ctx.journeyProgress || 0,
+        journeyWaypointsTotal: ctx.journeyTotal || 0,
+        consecutiveHubRepeats: ctx.consecutiveHubRepeats || 0,
+      };
+      const newEntropy = calculateEntropy(entropyInputs);
+      actor.send({ type: 'UPDATE_ENTROPY', value: newEntropy });
+
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
         console.error('Stream error:', error);
@@ -145,7 +177,7 @@ export function useKineticStream(): UseKineticStreamReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [activeLensId]);
+  }, [activeLensId, actor]);
 
   const clear = useCallback(() => {
     setItems([]);
@@ -221,6 +253,31 @@ export function useKineticStream(): UseKineticStreamReturn {
     }));
   }, []);
 
+  /**
+   * Re-submit the last query with a new lens
+   * Used by lens picker to refresh the response with new perspective
+   */
+  const resubmitWithLens = useCallback((lensId: string) => {
+    const currentItems = itemsRef.current;
+
+    // Find the last query in the stream
+    let queryToResubmit: string | null = null;
+    for (let i = currentItems.length - 1; i >= 0; i--) {
+      if (currentItems[i].type === 'query') {
+        queryToResubmit = (currentItems[i] as QueryStreamItem).content;
+        break;
+      }
+    }
+
+    // Set the active lens
+    setActiveLensId(lensId);
+
+    // Re-submit the query with the new lens
+    if (queryToResubmit) {
+      submit(queryToResubmit, undefined, lensId);
+    }
+  }, [submit]);
+
   return {
     items,
     currentItem,
@@ -230,6 +287,7 @@ export function useKineticStream(): UseKineticStreamReturn {
     acceptLensOffer,
     dismissLensOffer,
     acceptJourneyOffer,
-    dismissJourneyOffer
+    dismissJourneyOffer,
+    resubmitWithLens
   };
 }

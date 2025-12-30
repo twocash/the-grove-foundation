@@ -68,7 +68,7 @@ export const LensOfferObject: React.FC<LensOfferObjectProps> = ({
           <div className="flex-1 min-w-0">
             {/* Lens badge */}
             <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--grove-forest)]/20 text-[var(--grove-forest)] border border-[var(--grove-forest)]/30">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold text-emerald-300 border border-emerald-300/60">
                 <LensIcon className="w-3 h-3 mr-1" />
                 Lens Suggestion
               </span>
