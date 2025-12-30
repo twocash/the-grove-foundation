@@ -1,0 +1,73 @@
+{
+  "$schema": "./research-purposes.schema.json",
+  "version": "1.0.0",
+  "purposes": [
+    {
+      "id": "skeleton",
+      "label": "Build Skeleton",
+      "icon": "🦴",
+      "description": "Foundational research for Grove architecture",
+      "promptFraming": "Establish authoritative sources and baseline understanding for this topic. Focus on peer-reviewed sources, established frameworks, and foundational concepts. Prioritize breadth over depth to create a comprehensive scaffold."
+    },
+    {
+      "id": "thread",
+      "label": "Extend Thread",
+      "icon": "🧵",
+      "description": "Deepen an existing line of thought",
+      "promptFraming": "Build on what exists, find logical next steps. Look for recent developments, adjacent ideas, and natural extensions of this thinking. Follow the thread to see where it leads."
+    },
+    {
+      "id": "challenge",
+      "label": "Challenge Assumption",
+      "icon": "⚔️",
+      "description": "Stress-test a belief or claim",
+      "promptFraming": "Find counter-arguments, edge cases, and critiques. Steelman opposing views. Identify conditions under which this claim might fail. Be adversarial but fair."
+    },
+    {
+      "id": "gap",
+      "label": "Fill Gap",
+      "icon": "🕳️",
+      "description": "Something is missing, need to find it",
+      "promptFraming": "Comprehensive survey of what exists on this topic. Identify what has been written, who the key thinkers are, and where the conversation currently stands. Map the territory."
+    },
+    {
+      "id": "validate",
+      "label": "Validate Claim",
+      "icon": "✓",
+      "description": "Confirm something believed to be true",
+      "promptFraming": "Find supporting evidence for this claim. Note confidence levels, identify the strongest sources, and flag any caveats or limitations. Be honest about certainty."
+    }
+  ],
+  "clueTypes": [
+    {
+      "id": "url",
+      "label": "URL",
+      "icon": "🔗",
+      "placeholder": "https://example.com/article"
+    },
+    {
+      "id": "citation",
+      "label": "Citation",
+      "icon": "📖",
+      "placeholder": "Author (Year). Title. Journal."
+    },
+    {
+      "id": "author",
+      "label": "Author/Expert",
+      "icon": "👤",
+      "placeholder": "Name of expert or researcher"
+    },
+    {
+      "id": "concept",
+      "label": "Concept",
+      "icon": "💡",
+      "placeholder": "Key term or framework"
+    },
+    {
+      "id": "question",
+      "label": "Question",
+      "icon": "❓",
+      "placeholder": "Specific question to answer"
+    }
+  ]
+}

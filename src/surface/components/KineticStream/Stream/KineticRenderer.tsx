@@ -11,6 +11,7 @@ import { NavigationObject } from './blocks/NavigationObject';
 import { SystemObject } from './blocks/SystemObject';
 import { LensOfferObject } from './blocks/LensOfferObject';
 import { JourneyOfferObject } from './blocks/JourneyOfferObject';
+import { MomentObject } from './blocks/MomentObject';
 import { ScrollAnchor } from './ScrollAnchor';
 import { blockVariants, reducedMotionVariants } from './motion/variants';
 
@@ -25,6 +26,8 @@ export interface KineticRendererProps {
   onLensDismiss?: (offerId: string) => void;
   onJourneyAccept?: (journeyId: string) => void;
   onJourneyDismiss?: (offerId: string) => void;
+  onMomentAction?: (momentId: string, actionId: string) => void;
+  onMomentDismiss?: (momentId: string) => void;
 }
 
 export const KineticRenderer: React.FC<KineticRendererProps> = ({
@@ -37,7 +40,9 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
   onLensAccept,
   onLensDismiss,
   onJourneyAccept,
-  onJourneyDismiss
+  onJourneyDismiss,
+  onMomentAction,
+  onMomentDismiss
 }) => {
   const reducedMotion = useReducedMotion();
   const variants = reducedMotion ? reducedMotionVariants : blockVariants;
@@ -64,6 +69,8 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
               onLensDismiss={onLensDismiss}
               onJourneyAccept={onJourneyAccept}
               onJourneyDismiss={onJourneyDismiss}
+              onMomentAction={onMomentAction}
+              onMomentDismiss={onMomentDismiss}
             />
           </motion.div>
         ))}
@@ -84,6 +91,8 @@ interface KineticBlockProps {
   onLensDismiss?: (offerId: string) => void;
   onJourneyAccept?: (journeyId: string) => void;
   onJourneyDismiss?: (offerId: string) => void;
+  onMomentAction?: (momentId: string, actionId: string) => void;
+  onMomentDismiss?: (momentId: string) => void;
 }
 
 const KineticBlock: React.FC<KineticBlockProps> = ({
@@ -94,7 +103,9 @@ const KineticBlock: React.FC<KineticBlockProps> = ({
   onLensAccept,
   onLensDismiss,
   onJourneyAccept,
-  onJourneyDismiss
+  onJourneyDismiss,
+  onMomentAction,
+  onMomentDismiss
 }) => {
   switch (item.type) {
     case 'query':
@@ -126,6 +137,14 @@ const KineticBlock: React.FC<KineticBlockProps> = ({
           item={item}
           onAccept={onJourneyAccept}
           onDismiss={onJourneyDismiss}
+        />
+      );
+    case 'moment':
+      return (
+        <MomentObject
+          item={item}
+          onAction={onMomentAction}
+          onDismiss={onMomentDismiss}
         />
       );
     default:

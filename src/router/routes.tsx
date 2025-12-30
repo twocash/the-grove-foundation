@@ -7,6 +7,12 @@ import { RouteObject, Navigate } from 'react-router-dom';
 // Lazy load Foundation workspace (new three-column layout)
 const FoundationWorkspace = lazy(() => import('../foundation/FoundationWorkspace'));
 
+// Dev components for testing
+const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
+
+// Kinetic Stream exploration surface
+const ExplorePage = lazy(() => import('../surface/pages/ExplorePage'));
+
 // Lazy load Grove Workspace for code splitting
 const GroveWorkspace = lazy(() => import('../workspace/GroveWorkspace').then(m => ({ default: m.GroveWorkspace })));
 
@@ -70,6 +76,16 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<WorkspaceLoadingFallback />}>
             <GroveWorkspace />
+          </Suspense>
+        ),
+      },
+
+      // Kinetic Stream exploration surface
+      {
+        path: '/explore',
+        element: (
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <ExplorePage />
           </Suspense>
         ),
       },
@@ -154,6 +170,16 @@ export const routes: RouteObject[] = [
             ),
           },
         ],
+      },
+
+      // Dev routes for testing (remove in production)
+      {
+        path: '/dev/stream-demo',
+        element: (
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <StreamDemo />
+          </Suspense>
+        ),
       },
 
       // Catch-all redirect to home

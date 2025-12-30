@@ -9,6 +9,7 @@ import {
   SproutProvenance,
   isValidSproutStorage,
   migrateStorageToV2,
+  migrateStorageToV3,
   SPROUT_STORAGE_KEY,
   CURRENT_STORAGE_VERSION
 } from '../src/core/schema/sprout';
@@ -54,10 +55,11 @@ function loadStorage(): SproutStorage {
 
     const parsed = JSON.parse(raw);
     if (isValidSproutStorage(parsed)) {
-      // Migrate if needed, ensure session ID is current
-      const migrated = migrateStorageToV2(parsed);
+      // Migrate through all versions (v1 → v2 → v3), ensure session ID is current
+      const migratedV2 = migrateStorageToV2(parsed);
+      const migratedV3 = migrateStorageToV3(migratedV2);
       return {
-        ...migrated,
+        ...migratedV3,
         sessionId: getOrCreateSessionId()
       };
     }
@@ -140,6 +142,12 @@ export function useSproutStorage() {
         const { sprout: serverSprout } = await response.json();
 
         // Map server response to client schema
+        // Map lifecycle to stage (sprout-declarative-v1)
+        const lifecycleToStage: Record<string, Sprout['stage']> = {
+          'sprout': 'tender',
+          'sapling': 'rooting',
+          'tree': 'established'
+        };
         const mappedSprout: Sprout = {
           id: serverSprout.id,
           query: serverSprout.query,
@@ -152,6 +160,7 @@ export function useSproutStorage() {
           tags: serverSprout.tags || [],
           notes: serverSprout.note,
           status: serverSprout.lifecycle || 'sprout',
+          stage: serverSprout.stage || lifecycleToStage[serverSprout.lifecycle] || 'tender',
           capturedAt: serverSprout.captured_at,
           sessionId: serverSprout.session_id || getSessionId(),
           creatorId: null,

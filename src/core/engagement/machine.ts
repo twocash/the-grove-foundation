@@ -8,8 +8,17 @@ import { initialContext } from './types';
 import type { EngagementContext, EngagementEvent } from './types';
 import type { Journey } from '../schema/journey';
 import type { StreamItem, QueryStreamItem, ResponseStreamItem } from '../schema/stream';
+import type {
+  JourneyCompletion,
+  TopicExploration,
+  SproutCapture,
+} from '../schema/telemetry';
 import { parse } from '../transformers/RhetoricalParser';
 import { parseNavigation } from '../transformers/NavigationParser';
+import { setCumulativeMetricsV2, getHydratedContextOverrides } from './persistence';
+
+// Sprint: dex-telemetry-compliance-v1 - Field scoping
+const DEFAULT_FIELD_ID = 'grove';
 
 // ─────────────────────────────────────────────────────────────────
 // ID GENERATION
@@ -17,6 +26,13 @@ import { parseNavigation } from '../transformers/NavigationParser';
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Sprint: xstate-telemetry-v1
+function isCustomLensId(lensId: string | null): boolean {
+  if (!lensId) return false;
+  return lensId.startsWith('custom-') ||
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lensId);
 }
 
 export const engagementMachine = setup({
@@ -205,11 +221,109 @@ export const engagementMachine = setup({
     clearCooldowns: assign(() => ({
       momentCooldowns: {}
     })),
+
+    // Hub tracking actions (Sprint: entropy-calculation-v1)
+    hubVisited: assign(({ context, event }) => {
+      if (event.type !== 'HUB_VISITED') return {};
+      const hubs = new Set(context.hubsVisited);
+      hubs.add(event.hubId);
+      return {
+        hubsVisited: Array.from(hubs),
+        consecutiveHubRepeats: event.hubId === context.lastHubId
+          ? context.consecutiveHubRepeats + 1
+          : 0,
+        lastHubId: event.hubId
+      };
+    }),
+
+    pivotClicked: assign(({ context }) => ({
+      pivotCount: context.pivotCount + 1
+    })),
+
+    resetHubTracking: assign(() => ({
+      hubsVisited: [],
+      lastHubId: null,
+      consecutiveHubRepeats: 0,
+      pivotCount: 0
+    })),
+
+    // Sprint: dex-telemetry-compliance-v1 - Provenance-tracked metrics
+    addJourneyCompletion: assign(({ context, event }) => {
+      if (event.type !== 'JOURNEY_COMPLETED_TRACKED') return {};
+      const completion: JourneyCompletion = {
+        fieldId: DEFAULT_FIELD_ID,
+        timestamp: Date.now(),
+        journeyId: event.journeyId,
+        durationMs: event.durationMs,
+      };
+      return { journeyCompletions: [...context.journeyCompletions, completion] };
+    }),
+
+    addSproutCapture: assign(({ context, event }) => {
+      if (event.type !== 'SPROUT_CAPTURED') return {};
+      const capture: SproutCapture = {
+        fieldId: DEFAULT_FIELD_ID,
+        timestamp: Date.now(),
+        sproutId: event.sproutId,
+        journeyId: event.journeyId,
+        hubId: event.hubId,
+      };
+      return { sproutCaptures: [...context.sproutCaptures, capture] };
+    }),
+
+    addTopicExploration: assign(({ context, event }) => {
+      if (event.type !== 'TOPIC_EXPLORED') return {};
+      const exists = context.topicExplorations.some(t => t.topicId === event.topicId);
+      if (exists) return {};
+      const exploration: TopicExploration = {
+        fieldId: DEFAULT_FIELD_ID,
+        timestamp: Date.now(),
+        topicId: event.topicId,
+        hubId: event.hubId,
+      };
+      return { topicExplorations: [...context.topicExplorations, exploration] };
+    }),
+
+    updateHasCustomLens: assign(({ context }) => ({
+      hasCustomLens: isCustomLensId(context.lens),
+    })),
+
+    persistMetrics: ({ context }) => {
+      setCumulativeMetricsV2({
+        version: 2,
+        fieldId: DEFAULT_FIELD_ID,
+        journeyCompletions: context.journeyCompletions,
+        topicExplorations: context.topicExplorations,
+        sproutCaptures: context.sproutCaptures,
+        sessionCount: context.sessionCount,
+        lastSessionAt: Date.now(),
+      });
+    },
+
+    // Sprint: xstate-telemetry-v1 - Telemetry logging
+    logMomentShown: ({ event }) => {
+      if (event.type !== 'MOMENT_SHOWN') return;
+      console.log('[Telemetry] Moment shown:', event.momentId, event.surface);
+    },
+
+    logMomentActioned: ({ event }) => {
+      if (event.type !== 'MOMENT_ACTIONED') return;
+      console.log('[Telemetry] Moment actioned:', event.momentId, event.actionId, event.actionType);
+    },
+
+    logMomentDismissed: ({ event }) => {
+      if (event.type !== 'MOMENT_DISMISSED') return;
+      console.log('[Telemetry] Moment dismissed:', event.momentId);
+    },
   },
 }).createMachine({
   id: 'engagement',
   type: 'parallel',
-  context: initialContext,
+  // Sprint: xstate-telemetry-v1 - Hydrate context from localStorage on machine creation
+  context: () => ({
+    ...initialContext,
+    ...getHydratedContextOverrides(),
+  }),
   states: {
     session: {
       initial: 'anonymous',
@@ -218,14 +332,14 @@ export const engagementMachine = setup({
           on: {
             SELECT_LENS: {
               target: 'lensActive',
-              actions: 'setLens',
+              actions: ['setLens', 'updateHasCustomLens'],
             },
           },
         },
         lensActive: {
           on: {
             CHANGE_LENS: {
-              actions: 'setLens',
+              actions: ['setLens', 'updateHasCustomLens'],
             },
             START_JOURNEY: {
               target: 'journeyActive',
@@ -237,7 +351,7 @@ export const engagementMachine = setup({
         journeyActive: {
           on: {
             CHANGE_LENS: {
-              actions: 'setLens',
+              actions: ['setLens', 'updateHasCustomLens'],
             },
             START_JOURNEY: {
               // Stay in journeyActive, just update the journey context
@@ -260,7 +374,7 @@ export const engagementMachine = setup({
         journeyComplete: {
           on: {
             CHANGE_LENS: {
-              actions: 'setLens',
+              actions: ['setLens', 'updateHasCustomLens'],
             },
             START_JOURNEY: {
               target: 'journeyActive',
@@ -322,6 +436,36 @@ export const engagementMachine = setup({
     },
     CLEAR_COOLDOWNS: {
       actions: 'clearCooldowns',
+    },
+    // Hub tracking events (Sprint: entropy-calculation-v1)
+    HUB_VISITED: {
+      actions: 'hubVisited',
+    },
+    PIVOT_CLICKED: {
+      actions: 'pivotClicked',
+    },
+    RESET_HUB_TRACKING: {
+      actions: 'resetHubTracking',
+    },
+    // Sprint: dex-telemetry-compliance-v1 - Cumulative metric events with provenance
+    JOURNEY_COMPLETED_TRACKED: {
+      actions: ['addJourneyCompletion', 'persistMetrics'],
+    },
+    SPROUT_CAPTURED: {
+      actions: ['addSproutCapture', 'persistMetrics'],
+    },
+    TOPIC_EXPLORED: {
+      actions: ['addTopicExploration', 'persistMetrics'],
+    },
+    // Sprint: xstate-telemetry-v1 - Telemetry events (logging only)
+    MOMENT_SHOWN: {
+      actions: 'logMomentShown',
+    },
+    MOMENT_ACTIONED: {
+      actions: 'logMomentActioned',
+    },
+    MOMENT_DISMISSED: {
+      actions: 'logMomentDismissed',
     },
   },
 });

@@ -29,6 +29,7 @@ export interface ChatResponse {
   sessionId: string;
   breadcrumb: string | null;
   topic: string | null;
+  hubId: string | null;  // Sprint: entropy-calculation-v1
 }
 
 export interface ChatHealthStatus {
@@ -128,7 +129,8 @@ export async function sendMessageStream(
       let responseData: ChatResponse = {
         sessionId: sessionId || currentSessionId || '',
         breadcrumb: null,
-        topic: null
+        topic: null,
+        hubId: null  // Sprint: entropy-calculation-v1
       };
 
       const processChunk = async () => {
@@ -166,7 +168,8 @@ export async function sendMessageStream(
                   responseData = {
                     sessionId: data.sessionId || responseData.sessionId,
                     breadcrumb: data.breadcrumb,
-                    topic: data.topic
+                    topic: data.topic,
+                    hubId: data.hubId || null  // Sprint: entropy-calculation-v1
                   };
                   // Update current session ID
                   if (data.sessionId) {

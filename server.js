@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -663,10 +664,49 @@ function migrateV1ToV2(v1Data) {
 }
 
 // GET Narrative Graph (with auto-migration support)
-// Tries new split file structure first, falls back to narratives.json
+// Tries local files first (dev), then GCS split structure, then narratives.json
 app.get('/api/narrative', async (req, res) => {
     try {
-        // Try loading from new split file structure
+        // DEV MODE: Try local files first when GCS not configured
+        if (!isGCSConfigured()) {
+            try {
+                const [hubsData, journeysData, nodesData, lensesData, flagsData] = [
+                    loadJsonFromLocal('knowledge/hubs.json'),
+                    loadJsonFromLocal('exploration/journeys.json'),
+                    loadJsonFromLocal('exploration/nodes.json'),
+                    loadJsonFromLocal('presentation/lenses.json'),
+                    loadJsonFromLocal('infrastructure/feature-flags.json')
+                ];
+
+                // Load globalSettings from local narratives.json
+                let globalSettings = DEFAULT_GLOBAL_SETTINGS_V2;
+                try {
+                    const narratives = loadJsonFromLocal('narratives.json');
+                    if (narratives.globalSettings) {
+                        globalSettings = narratives.globalSettings;
+                        globalSettings.featureFlags = flagsData.featureFlags;
+                    }
+                } catch (e) {
+                    console.log('[Narrative API] No local narratives.json, using defaults');
+                }
+
+                console.log('[Narrative API] Loaded from LOCAL files (dev mode)');
+                return res.json({
+                    version: CURRENT_SCHEMA_VERSION,
+                    globalSettings,
+                    hubs: hubsData.hubs,
+                    journeys: journeysData.journeys,
+                    nodes: nodesData.nodes,
+                    lensRealities: lensesData.lensRealities,
+                    defaultReality: lensesData.defaultReality
+                });
+            } catch (localErr) {
+                console.log('[Narrative API] Local files failed:', localErr.message);
+                // Fall through to GCS attempt
+            }
+        }
+
+        // PRODUCTION: Try loading from GCS split file structure
         try {
             const [hubsData, journeysData, nodesData, lensesData, flagsData] = await Promise.all([
                 loadJsonFromGCS('knowledge/hubs.json'),
@@ -676,10 +716,9 @@ app.get('/api/narrative', async (req, res) => {
                 loadJsonFromGCS('infrastructure/feature-flags.json')
             ]);
 
-            console.log('[Narrative API] Loaded from split file structure');
+            console.log('[Narrative API] Loaded from GCS split file structure');
 
             // Merge split files into unified response format
-            // Still need globalSettings from narratives.json for non-migrated fields
             const narrativesFile = storage.bucket(BUCKET_NAME).file('narratives.json');
             const [narrativesExists] = await narrativesFile.exists();
             let globalSettings = DEFAULT_GLOBAL_SETTINGS_V2;
@@ -689,7 +728,6 @@ app.get('/api/narrative', async (req, res) => {
                 const narratives = JSON.parse(content.toString());
                 if (narratives.globalSettings) {
                     globalSettings = narratives.globalSettings;
-                    // Override featureFlags with split file version
                     globalSettings.featureFlags = flagsData.featureFlags;
                 }
             }
@@ -704,15 +742,14 @@ app.get('/api/narrative', async (req, res) => {
                 defaultReality: lensesData.defaultReality
             });
         } catch (splitErr) {
-            console.log('[Narrative API] Split files not found, falling back to narratives.json');
+            console.log('[Narrative API] GCS split files not found, falling back to narratives.json');
         }
 
-        // Fallback to legacy narratives.json
+        // Fallback to legacy narratives.json from GCS
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
         const [exists] = await file.exists();
 
         if (!exists) {
-            // Return empty modern schema for new installations
             return res.json({
                 version: CURRENT_SCHEMA_VERSION,
                 globalSettings: DEFAULT_GLOBAL_SETTINGS_V2,
@@ -725,14 +762,12 @@ app.get('/api/narrative', async (req, res) => {
         const [content] = await file.download();
         const json = JSON.parse(content.toString());
 
-        // Auto-migrate legacy schema on read (doesn't save - client handles that)
         if (isLegacySchema(json)) {
             console.log("Migrating legacy schema to modern format...");
             const modernSchema = migrateV1ToV2(json);
             return res.json(modernSchema);
         }
 
-        // Modern schema - return as-is
         res.json(json);
     } catch (error) {
         console.error("Error reading narrative graph:", error);
@@ -905,24 +940,55 @@ You are **The Grove Terminal**. You have two operating modes.
 - Aim for 2-4 bold phrases per response to give users natural exploration paths
 - Example: "The **Ratchet Effect** means AI costs keep dropping, creating a **dependency trap** for cloud users."
 
+**NAVIGATION OPTIONS (OPTIONAL):**
+When your response naturally leads to multiple distinct directions, include a navigation block:
+<navigation>
+[
+  {"id": "nav-1", "label": "Deep dive into X", "type": "deep_dive"},
+  {"id": "nav-2", "label": "Explore related Y", "type": "pivot"},
+  {"id": "nav-3", "label": "How to apply this", "type": "apply"}
+]
+</navigation>
+
+Types:
+- deep_dive: Go deeper into the current topic
+- pivot: Shift to a related but different topic
+- apply: Practical application or implementation
+
+Only include 2-4 options. Skip navigation if the topic is self-contained.
+
 **MANDATORY FOOTER (BOTH MODES):**
 At the very end of your response, strictly append these two tags:
 [[BREADCRUMB: <The single most interesting follow-up question>]]
 [[TOPIC: <A 2-3 word label for the current subject>]]
 `;
 
-// Helper: Fetch narratives.json from GCS (for topicHubs, personas, etc.)
+// Helper: Fetch narratives.json (local first for dev, then GCS)
 async function fetchNarratives() {
+    // DEV MODE: Try local files first when GCS not configured
+    if (!isGCSConfigured()) {
+        try {
+            const narratives = loadJsonFromLocal('narratives.json');
+            console.log('[fetchNarratives] Loaded from LOCAL file (dev mode)');
+            return narratives;
+        } catch (localErr) {
+            console.log('[fetchNarratives] Local file failed:', localErr.message);
+            // Fall through to GCS attempt
+        }
+    }
+
+    // PRODUCTION: Try GCS
     try {
         const file = storage.bucket(BUCKET_NAME).file('narratives.json');
         const [exists] = await file.exists();
 
         if (!exists) {
-            console.log('No narratives.json found');
+            console.log('No narratives.json found in GCS');
             return null;
         }
 
         const [content] = await file.download();
+        console.log('[fetchNarratives] Loaded from GCS');
         return JSON.parse(content.toString());
     } catch (error) {
         console.error('Error fetching narratives:', error.message);
@@ -938,6 +1004,23 @@ async function loadJsonFromGCS(path) {
     const file = storage.bucket(BUCKET_NAME).file(path);
     const [content] = await file.download();
     return JSON.parse(content.toString());
+}
+
+/**
+ * Load JSON file from local data directory (development fallback)
+ * @param {string} relativePath - Path relative to data/ (e.g., 'knowledge/hubs.json')
+ */
+function loadJsonFromLocal(relativePath) {
+    const fullPath = path.join(__dirname, 'data', relativePath);
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    return JSON.parse(content);
+}
+
+/**
+ * Check if GCS is properly configured
+ */
+function isGCSConfigured() {
+    return !!(process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_CLOUD_PROJECT);
 }
 
 /**
@@ -1424,7 +1507,7 @@ app.post('/api/chat', async (req, res) => {
             // Fetch RAG context using unified registry
             // - If journeyId provided: Deterministic Mode (load linkedHubId)
             // - Otherwise: Discovery Mode (route by query tags)
-            const [ragContext, baseSystemPrompt] = await Promise.all([
+            const [ragResult, baseSystemPrompt] = await Promise.all([
                 fetchRagContext(message, narratives, journeyId),
                 fetchActiveSystemPrompt()
             ]);
@@ -1432,9 +1515,11 @@ app.post('/api/chat', async (req, res) => {
                 baseSystemPrompt,
                 personaTone,
                 sectionContext,
-                ragContext,
+                ragContext: ragResult,
                 terminatorMode
             });
+            // Store matched hub for entropy tracking (Sprint: entropy-calculation-v1)
+            var matchedHubId = ragResult.matchedHub || null;
 
             // Create new Gemini chat session
             const chat = genai.chats.create({
@@ -1449,7 +1534,8 @@ app.post('/api/chat', async (req, res) => {
                 chat,
                 lastActivity: Date.now(),
                 personaTone,
-                sectionContext
+                sectionContext,
+                matchedHubId  // Store hub for entropy tracking (Sprint: entropy-calculation-v1)
             };
 
             chatSessions.set(chatSessionId, session);
@@ -1508,7 +1594,8 @@ app.post('/api/chat', async (req, res) => {
                     type: 'done',
                     sessionId: chatSessionId,
                     breadcrumb: breadcrumbMatch ? breadcrumbMatch[1].trim() : null,
-                    topic: topicMatch ? topicMatch[1].trim() : null
+                    topic: topicMatch ? topicMatch[1].trim() : null,
+                    hubId: session.matchedHubId || null  // Sprint: entropy-calculation-v1
                 })}\n\n`);
 
                 res.end();

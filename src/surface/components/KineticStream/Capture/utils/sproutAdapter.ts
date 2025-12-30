@@ -43,6 +43,14 @@ export function nestSprout(legacy: LegacySprout): Sprout {
     generatedAt: legacy.capturedAt,
   };
 
+  // Map old status to new stage (sprout-declarative-v1)
+  const stageMap: Record<string, Sprout['stage']> = {
+    'sprout': 'tender',
+    'sapling': 'rooting',
+    'tree': 'established'
+  };
+  const stage = (legacy as Sprout).stage ?? stageMap[legacy.status] ?? 'tender';
+
   return {
     ...legacy,
     provenance,
@@ -51,6 +59,7 @@ export function nestSprout(legacy: LegacySprout): Sprout {
     hubId: null,
     nodeId: legacy.nodeId ?? null,
     status: legacy.status ?? 'sprout',
+    stage,
     creatorId: legacy.creatorId ?? null,
   };
 }

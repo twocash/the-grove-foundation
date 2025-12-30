@@ -7,6 +7,11 @@
 export type { Journey, JourneyWaypoint } from '../schema/journey';
 
 import type { StreamItem, RhetoricalSpan, JourneyFork } from '../schema/stream';
+import type {
+  JourneyCompletion,
+  TopicExploration,
+  SproutCapture,
+} from '../schema/telemetry';
 
 export interface EngagementContext {
   // Lens state
@@ -29,6 +34,24 @@ export interface EngagementContext {
   // Moment orchestration state (Sprint: engagement-orchestrator-v1)
   flags: Record<string, boolean>;
   momentCooldowns: Record<string, number>;  // momentId -> lastShownTimestamp
+
+  // Hub tracking for entropy (Sprint: entropy-calculation-v1)
+  hubsVisited: string[];
+  lastHubId: string | null;
+  consecutiveHubRepeats: number;
+  pivotCount: number;
+
+  // Session tracking (Sprint: xstate-telemetry-v1)
+  sessionStartedAt: number;
+  sessionCount: number;
+
+  // Cumulative metrics with provenance (Sprint: dex-telemetry-compliance-v1)
+  journeyCompletions: JourneyCompletion[];
+  topicExplorations: TopicExploration[];
+  sproutCaptures: SproutCapture[];
+
+  // Detection (Sprint: xstate-telemetry-v1)
+  hasCustomLens: boolean;
 }
 
 export const initialContext: EngagementContext = {
@@ -44,6 +67,20 @@ export const initialContext: EngagementContext = {
   // Moment orchestration (Sprint: engagement-orchestrator-v1)
   flags: {},
   momentCooldowns: {},
+  // Hub tracking for entropy (Sprint: entropy-calculation-v1)
+  hubsVisited: [],
+  lastHubId: null,
+  consecutiveHubRepeats: 0,
+  pivotCount: 0,
+  // Session tracking (Sprint: xstate-telemetry-v1)
+  sessionStartedAt: Date.now(),
+  sessionCount: 1,
+  // Cumulative metrics with provenance (Sprint: dex-telemetry-compliance-v1)
+  journeyCompletions: [],
+  topicExplorations: [],
+  sproutCaptures: [],
+  // Detection (Sprint: xstate-telemetry-v1)
+  hasCustomLens: false,
 };
 
 export type EngagementEvent =
@@ -68,4 +105,18 @@ export type EngagementEvent =
   | { type: 'SET_FLAG'; key: string; value: boolean }
   | { type: 'SET_COOLDOWN'; momentId: string; timestamp: number }
   | { type: 'CLEAR_FLAGS' }
-  | { type: 'CLEAR_COOLDOWNS' };
+  | { type: 'CLEAR_COOLDOWNS' }
+  // Hub tracking events (Sprint: entropy-calculation-v1)
+  | { type: 'HUB_VISITED'; hubId: string }
+  | { type: 'PIVOT_CLICKED' }
+  | { type: 'RESET_HUB_TRACKING' }
+  // Session events (Sprint: xstate-telemetry-v1)
+  | { type: 'SESSION_STARTED' }
+  // Cumulative metric events (Sprint: dex-telemetry-compliance-v1)
+  | { type: 'JOURNEY_COMPLETED_TRACKED'; journeyId: string; durationMs?: number }
+  | { type: 'SPROUT_CAPTURED'; sproutId: string; journeyId?: string; hubId?: string }
+  | { type: 'TOPIC_EXPLORED'; topicId: string; hubId: string }
+  // Telemetry events (Sprint: xstate-telemetry-v1)
+  | { type: 'MOMENT_SHOWN'; momentId: string; surface: string }
+  | { type: 'MOMENT_ACTIONED'; momentId: string; actionId: string; actionType: string }
+  | { type: 'MOMENT_DISMISSED'; momentId: string };

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "research-purposes.schema.json",
+  "title": "Research Purposes Configuration",
+  "description": "Defines research intent types and clue categories",
+  "type": "object",
+  "required": ["version", "purposes", "clueTypes"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "purposes": {
+      "type": "array",
+      "description": "Research purpose types",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "description", "promptFraming"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["skeleton", "thread", "challenge", "gap", "validate"]
+          },
+          "label": { "type": "string" },
+          "icon": { "type": "string" },
+          "description": { "type": "string" },
+          "promptFraming": {
+            "type": "string",
+            "description": "Instructions included in generated research prompt"
+          }
+        }
+      }
+    },
+    "clueTypes": {
+      "type": "array",
+      "description": "Types of research clues",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "placeholder"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["url", "citation", "author", "concept", "question"]
+          },
+          "label": { "type": "string" },
+          "icon": { "type": "string" },
+          "placeholder": { "type": "string" }
+        }
+      }
+    }
+  }
+}

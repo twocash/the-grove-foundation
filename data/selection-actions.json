@@ -1,0 +1,26 @@
+{
+  "$schema": "./selection-actions.schema.json",
+  "version": "1.0.0",
+  "actions": [
+    {
+      "id": "sprout",
+      "label": "Plant Sprout",
+      "icon": "🌱",
+      "description": "Capture insight as-is",
+      "defaultStage": "tender",
+      "captureCard": "SproutCaptureCard",
+      "fields": ["tags"],
+      "shortcut": "s"
+    },
+    {
+      "id": "research-directive",
+      "label": "Research Directive",
+      "icon": "🔬",
+      "description": "Build structured research brief",
+      "defaultStage": "rooting",
+      "captureCard": "ResearchManifestCard",
+      "fields": ["purpose", "clues", "directions", "tags"],
+      "shortcut": "r"
+    }
+  ]
+}

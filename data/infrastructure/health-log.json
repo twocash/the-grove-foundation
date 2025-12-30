@@ -3,6 +3,1488 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "364bb0b4-f455-42fa-b5ec-d485f14f8969",
+      "timestamp": "2025-12-28T07:19:30.108Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "terminal-shows-initial-welcome-message",
+              "name": "terminal shows initial welcome message",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-input-field",
+              "name": "terminal has input field",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-type-in-terminal-input",
+              "name": "can type in terminal input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-header-shows-controls",
+              "name": "terminal header shows controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "minimize-button-collapses-terminal-to-pill",
+              "name": "minimize button collapses terminal to pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-expand-from-minimized-pill",
+              "name": "can expand from minimized pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "typing-slash-shows-command-detection",
+              "name": "typing slash shows command detection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "help-command-recognized",
+              "name": "/help command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stats-command-recognized",
+              "name": "/stats command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "welcome-message-uses-arrow-formatting-for-prompts",
+              "name": "welcome message uses arrow formatting for prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-scrollable-message-area",
+              "name": "terminal has scrollable message area",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-has-correct-aria-attributes",
+              "name": "terminal drawer has correct ARIA attributes",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-button-has-accessible-label",
+              "name": "FAB button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "close-button-has-accessible-label",
+              "name": "close button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-opens-via-fab-button",
+              "name": "terminal opens via FAB button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-closes-via-close-button",
+              "name": "terminal closes via close button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-academic-lens",
+              "name": "URL lens parameter initializes academic lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-engineer-lens",
+              "name": "URL lens parameter initializes engineer lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "default-terminal-shows-generic-welcome-without-lens",
+              "name": "default terminal shows generic welcome without lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-toggles-terminal-state",
+              "name": "FAB toggles terminal state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-animation-classes-are-correct",
+              "name": "terminal drawer animation classes are correct",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "genesis-page-renders-with-paper-aesthetic",
+              "name": "Genesis page renders with paper aesthetic",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 6495
+            },
+            {
+              "id": "genesis-route-uses-genesis-surface",
+              "name": "Genesis route uses genesis surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 6448
+            },
+            {
+              "id": "app-loads-with-engagementprovider",
+              "name": "app loads with EngagementProvider",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 7676
+            },
+            {
+              "id": "landing-page-loads-without-critical-console-errors",
+              "name": "landing page loads without critical console errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 7877
+            },
+            {
+              "id": "surface-theme-loads-for-genesis-route",
+              "name": "Surface theme loads for genesis route",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "theme-loading.spec.ts",
+              "duration": 6708
+            },
+            {
+              "id": "genesis-initial-state-baseline",
+              "name": "genesis initial state baseline",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 10148
+            },
+            {
+              "id": "page-loads-in-hero-mode-by-default",
+              "name": "page loads in hero mode by default",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 10877
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10870
+            },
+            {
+              "id": "page-renders-main-content",
+              "name": "page renders main content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 2907
+            },
+            {
+              "id": "engagement-hooks-work-after-migration",
+              "name": "engagement hooks work after migration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 3474
+            },
+            {
+              "id": "foundation-route-uses-foundation-surface",
+              "name": "Foundation route uses foundation surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 4714
+            },
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 12784
+            },
+            {
+              "id": "genesis-does-not-load-foundation-theme-json",
+              "name": "Genesis does not load Foundation theme JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 6316
+            },
+            {
+              "id": "terminal-panel-is-accessible",
+              "name": "terminal panel is accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 2770
+            },
+            {
+              "id": "genesis-hero-section-has-correct-typography",
+              "name": "Genesis hero section has correct typography",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3337
+            },
+            {
+              "id": "foundation-quantum-theme-loads-for-foundation-route",
+              "name": "Foundation quantum theme loads for foundation route",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 4306
+            },
+            {
+              "id": "theme-switches-when-navigating-between-surfaces",
+              "name": "Theme switches when navigating between surfaces",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 5870
+            },
+            {
+              "id": "content-rail-has-proper-structure",
+              "name": "content rail has proper structure",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6676
+            },
+            {
+              "id": "theme-json-files-are-valid-json",
+              "name": "Theme JSON files are valid JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 442
+            },
+            {
+              "id": "theme-inheritance-works-terminal-extends-surface",
+              "name": "Theme inheritance works (terminal extends surface)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 26
+            },
+            {
+              "id": "foundation-dashboard-loads",
+              "name": "foundation dashboard loads",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3853
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7103
+            },
+            {
+              "id": "genesis-maintains-ink-text-color",
+              "name": "Genesis maintains ink text color",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3880
+            },
+            {
+              "id": "foundation-has-dark-mode-class-applied",
+              "name": "Foundation has dark mode class applied",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 4012
+            },
+            {
+              "id": "css-variables-are-injected-on-page-load",
+              "name": "CSS variables are injected on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 3910
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 9280
+            },
+            {
+              "id": "activetree-is-visible-in-hero-section",
+              "name": "ActiveTree is visible in hero section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5520
+            },
+            {
+              "id": "no-javascript-exceptions-on-page-load",
+              "name": "no JavaScript exceptions on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 5253
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5699
+            },
+            {
+              "id": "genesis-grain-texture-is-visible",
+              "name": "Genesis grain texture is visible",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected: \u001b[32m\"http://localhost:3000/\"\u001b[39m\nReceived: \u001b[31m\"\"\u001b[39m\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 5000ms\u001b[22m\n",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 2012
+            },
+            {
+              "id": "theme-tokens-are-applied-to-foundation-components",
+              "name": "Theme tokens are applied to Foundation components",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"bg-theme-bg-secondary\"\u001b[39m\nReceived string:    \u001b[31m\"flex-1 p-3 space-y-1 overflow-y-auto\"\u001b[39m",
+              "file": "surface-theming.spec.ts",
+              "duration": 3368
+            },
+            {
+              "id": "theme-mode-persistence-works",
+              "name": "Theme mode persistence works",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 5649
+            },
+            {
+              "id": "genesis-expanded-page-baseline",
+              "name": "genesis expanded page baseline",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  66881 pixels (ratio 0.08 of all image pixels) are different.\n\n  Snapshot: genesis-expanded-baseline.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(genesis-expanded-baseline.png)\" with timeout 60000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 66881 pixels (ratio 0.08 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - 66881 pixels (ratio 0.08 of all image pixels) are different.\u001b[22m\n",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 17119
+            },
+            {
+              "id": "can-navigate-to-foundation-from-home",
+              "name": "can navigate to foundation from home",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4985
+            },
+            {
+              "id": "activetree-has-pulsing-mode-initially",
+              "name": "ActiveTree has pulsing mode initially",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5444
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5336
+            },
+            {
+              "id": "terminal-route-loads-correct-theme",
+              "name": "Terminal route loads correct theme",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3981
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  72994 pixels (ratio 0.08 of all image pixels) are different.\n\n  Snapshot: stakes-journey-start.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(stakes-journey-start.png)\" with timeout 5000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 72994 pixels (ratio 0.08 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - 72994 pixels (ratio 0.08 of all image pixels) are different.\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 9693
+            },
+            {
+              "id": "clicking-tree-triggers-split-layout",
+              "name": "clicking tree triggers split layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5331
+            },
+            {
+              "id": "marketing-routes-use-surface-theme",
+              "name": "Marketing routes use surface theme",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3759
+            },
+            {
+              "id": "genesis-split-layout-baseline",
+              "name": "genesis split layout baseline",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveScreenshot\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\n  17169 pixels (ratio 0.02 of all image pixels) are different.\n\n  Snapshot: genesis-split-baseline.png\n\nCall log:\n\u001b[2m  - Expect \"toHaveScreenshot(genesis-split-baseline.png)\" with timeout 5000ms\u001b[22m\n\u001b[2m    - verifying given screenshot expectation\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - 17169 pixels (ratio 0.02 of all image pixels) are different.\u001b[22m\n\u001b[2m  - waiting 100ms before taking screenshot\u001b[22m\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m    - disabled all CSS animations\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\u001b[2m  - captured a stable screenshot\u001b[22m\n\u001b[2m  - 17169 pixels (ratio 0.02 of all image pixels) are different.\u001b[22m\n",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 6228
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5063
+            },
+            {
+              "id": "terminal-panel-has-aria-attributes",
+              "name": "terminal panel has ARIA attributes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4461
+            },
+            {
+              "id": "can-navigate-between-foundation-consoles",
+              "name": "can navigate between foundation consoles",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 10536
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4540
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6105
+            },
+            {
+              "id": "terminal-shows-lens-picker-after-tree-click",
+              "name": "terminal shows lens picker after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3782
+            },
+            {
+              "id": "desktop-shows-50-50-split",
+              "name": "desktop shows 50/50 split",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1994
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5025
+            },
+            {
+              "id": "tablet-shows-40-terminal-width",
+              "name": "tablet shows 40% terminal width",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1807
+            },
+            {
+              "id": "mobile-shows-bottom-sheet",
+              "name": "mobile shows bottom sheet",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1846
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6966
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4270
+            },
+            {
+              "id": "activetree-has-proper-aria-labels",
+              "name": "ActiveTree has proper ARIA labels",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1748
+            },
+            {
+              "id": "content-rail-hides-terminal-when-not-visible",
+              "name": "content rail hides terminal when not visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 1933
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4544
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6070
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4506
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6157
+            },
+            {
+              "id": "ag-1-5-lens-picker-shows-persona-options-after-tree-click",
+              "name": "AG-1.5: lens picker shows persona options after tree click",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /(Observer|Engineer|Investor|Builder|Citizen)/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /(Observer|Engineer|Investor|Builder|Citizen)/i }).first()\u001b[22m\n",
+              "file": "active-grove.spec.ts",
+              "duration": 8794
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4830
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7365
+            },
+            {
+              "id": "ag-1-6-selecting-a-lens-updates-engagement-state",
+              "name": "AG-1.6: selecting a lens updates engagement state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4580
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4628
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 5806
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4616
+            },
+            {
+              "id": "ag-1-7-content-rail-shows-hero-section-with-dynamic-content",
+              "name": "AG-1.7: content rail shows hero section with dynamic content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7330
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 4021
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4602
+            },
+            {
+              "id": "ag-1-9-lens-persists-across-page-reload",
+              "name": "AG-1.9: lens persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4693
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3987
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4799
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3984
+            },
+            {
+              "id": "ag-2-3-url-lens-parameter-hydrates-state",
+              "name": "AG-2.3: URL lens parameter hydrates state",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 4284
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3936
+            },
+            {
+              "id": "ag-2-3b-url-lens-skips-lens-picker",
+              "name": "AG-2.3b: URL lens skips lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3913
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 3726
+            },
+            {
+              "id": "ag-2-4-invalid-url-lens-falls-back-gracefully",
+              "name": "AG-2.4: invalid URL lens falls back gracefully",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4239
+            },
+            {
+              "id": "ag-2-5-multiple-seedling-clicks-are-idempotent",
+              "name": "AG-2.5: multiple seedling clicks are idempotent",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6138
+            },
+            {
+              "id": "ag-2-7-corrupted-localstorage-recovers-gracefully",
+              "name": "AG-2.7: corrupted localStorage recovers gracefully",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoThrow\u001b[2m()\u001b[22m\n\nError name:    \u001b[31m\"SyntaxError\"\u001b[39m\nError message: \u001b[31m\"Unexpected token 'o', \\\"not-valid-json{{{\\\" is not valid JSON\"\u001b[39m\n\n    \u001b[0m \u001b[90m 477 |\u001b[39m     \u001b[90m// Either null (reset) or valid JSON\u001b[39m\n     \u001b[90m 478 |\u001b[39m     \u001b[36mif\u001b[39m (newState) {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 479 |\u001b[39m       expect(() \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(newState))\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoThrow()\n     \u001b[90m     |\u001b[39m                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 480 |\u001b[39m     }\n     \u001b[90m 481 |\u001b[39m   })\n     \u001b[90m 482 |\u001b[39m })\u001b[0m\n\n      \u001b[2mat \u001b[22mfile:/C:/GitHub/the-grove-foundation/tests/e2e/active-grove.spec.ts\u001b[2m:479:25\u001b[22m\n      \u001b[2mat Object.<anonymous> (\u001b[22mnode_modules/playwright/lib/common/expectBundleImpl.js\u001b[2m:293:1495)\u001b[22m\n      \u001b[2mat Object.w [as toThrow] (\u001b[22mnode_modules/playwright/lib/common/expectBundleImpl.js\u001b[2m:338:895)\u001b[22m\n      \u001b[2mat callback (\u001b[22mnode_modules/playwright/lib/matchers/expect.js\u001b[2m:260:40)\u001b[22m\n      \u001b[2mat Zone.run (\u001b[22mnode_modules/playwright-core/lib/server/utils/zones.js\u001b[2m:42:36)\u001b[22m\n      \u001b[2mat Proxy.toThrow (\u001b[22mnode_modules/playwright/lib/matchers/expect.js\u001b[2m:261:79)\u001b[22m\n      \u001b[2mat \u001b[22mfile:/C:/GitHub/the-grove-foundation/tests/e2e/active-grove.spec.ts\u001b[2m:479:46\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:322:9\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/testInfo.js\u001b[2m:311:11\u001b[22m\n      \u001b[2mat TimeoutManager.withRunnable (\u001b[22mnode_modules/playwright/lib/worker/timeoutManager.js\u001b[2m:67:14)\u001b[22m\n      \u001b[2mat TestInfoImpl._runWithTimeout (\u001b[22mnode_modules/playwright/lib/worker/testInfo.js\u001b[2m:309:7)\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:320:7\u001b[22m\n      \u001b[2mat WorkerMain._runTest (\u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:295:5)\u001b[22m\n      \u001b[2mat WorkerMain.runTestGroup (\u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:199:11)\u001b[22m\n      \u001b[2mat process.<anonymous> (\u001b[22mnode_modules/playwright/lib/common/process.js\u001b[2m:65:22)\u001b[22m",
+              "file": "active-grove.spec.ts",
+              "duration": 6191
+            },
+            {
+              "id": "gen-1-new-user-flow-tree-click-split-lens-select-collapsing-unlocked",
+              "name": "GEN-1: new user flow - tree click → split → lens select → collapsing → unlocked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4394
+            },
+            {
+              "id": "gen-2-returning-user-flow-tree-click-triggers-headline-collapse-not-skip-to-unlocked",
+              "name": "GEN-2: returning user flow - tree click triggers headline collapse (not skip to unlocked)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8282
+            },
+            {
+              "id": "gen-3-lens-switch-via-header-picker-triggers-headline-update",
+              "name": "GEN-3: lens switch via header picker triggers headline update",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7605
+            },
+            {
+              "id": "gen-4-auto-scroll-to-section-2-after-headline-collapse-completes",
+              "name": "GEN-4: auto-scroll to Section 2 after headline collapse completes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 10401
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 105,
+        "passed": 68,
+        "failed": 11,
+        "warnings": 26
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T07:19:30.111Z"
+      }
+    },
+    {
+      "id": "63220bef-4ff3-4e28-8821-da25b005143a",
+      "timestamp": "2025-12-28T04:53:27.949Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6797
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 10535
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6035
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5442
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 9656
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4705
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6184
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5977
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4509
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4576
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4484
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4563
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 12,
+        "passed": 6,
+        "failed": 2,
+        "warnings": 4
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T04:53:27.951Z"
+      }
+    },
+    {
+      "id": "8e0825d6-1a7c-4e8e-9127-42a940c0c821",
+      "timestamp": "2025-12-28T04:53:26.744Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "warn",
+          "checks": [
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7170
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 8177
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6696
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6693
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7045
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5184
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5325
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6544
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5089
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5244
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4859
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5181
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 12,
+        "passed": 7,
+        "failed": 0,
+        "warnings": 5
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T04:53:26.746Z"
+      }
+    },
+    {
+      "id": "bc406bf1-d6ec-4b09-bc2c-4da1ef0fbdff",
+      "timestamp": "2025-12-28T04:51:20.191Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7468
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 8883
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7586
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6258
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7175
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 30050
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5983
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6737
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5028
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5482
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4893
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5013
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 12,
+        "passed": 6,
+        "failed": 1,
+        "warnings": 5
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T04:51:20.193Z"
+      }
+    },
+    {
+      "id": "e8cca1ca-d1ad-43c0-8ce4-75e6ef0c1a7f",
+      "timestamp": "2025-12-28T04:46:55.730Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7291
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 11394
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6992
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6231
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 10341
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5133
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5178
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5170
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5135
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4933
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4984
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5098
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 12,
+        "passed": 4,
+        "failed": 2,
+        "warnings": 6
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T04:46:55.732Z"
+      }
+    },
+    {
+      "id": "6697da0b-e596-4784-a727-74209b69211a",
+      "timestamp": "2025-12-28T04:46:27.674Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 12646
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 10778
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5484
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5434
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 9655
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4758
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4607
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4600
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4602
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4487
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4664
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4580
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 12,
+        "passed": 4,
+        "failed": 2,
+        "warnings": 6
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2025-12-28T04:46:27.682Z"
+      }
+    },
+    {
       "id": "981adc70-ae75-429e-94e8-52cafd6cb5d9",
       "timestamp": "2025-12-24T19:52:41.855Z",
       "configVersion": "external",

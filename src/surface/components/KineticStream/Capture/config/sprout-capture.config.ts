@@ -23,10 +23,10 @@ export const SPROUT_CAPTURE_CONFIG = {
   ui: {
     selection: {
       minLength: 3,
-      debounceMs: 50,
+      debounceMs: 200,
     },
     pill: {
-      magneticScale: 1.15,
+      magneticScale: 1.0,  // Disabled: was causing perceived "jump" on approach
       magneticDistance: 50,
     },
     card: {

@@ -6,8 +6,9 @@ import { useMemo, useCallback, useState, useEffect } from 'react';
 import { useSelector } from '@xstate/react';
 import type { Moment, MomentSurface, MomentAction } from '@core/schema/moment';
 import { getEligibleMoments, createDefaultEvaluationContext, type MomentEvaluationContext } from '@core/engagement/moment-evaluator';
+import { computeMomentStage } from '@core/config/defaults';
+import { computeMetrics, type CumulativeMetricsV2 } from '@core/schema/telemetry';
 import { useEngagement } from '@core/engagement/context';
-import { useEngagementEmit } from '../../../hooks/useEngagementBus';
 import { loadMoments } from '../../data/moments';
 import { useMomentActions } from './useMomentActions';
 
@@ -48,29 +49,52 @@ export interface UseMomentsReturn {
 export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
   const { surface, limit } = options;
   const { actor } = useEngagement();
-  const emit = useEngagementEmit();
   const { executeAction: executeMomentAction } = useMomentActions();
 
   // Get moments at component mount
-  const [allMoments] = useState(getMoments);
+  const [allMoments] = useState(() => getMoments());
 
   // Select relevant state from XState actor
   const xstateContext = useSelector(actor, (state) => state.context);
 
   // Convert XState context to MomentEvaluationContext
+  // Sprint: dex-telemetry-compliance-v1 - Uses declarative stage and computed metrics
   const evaluationContext = useMemo((): MomentEvaluationContext => {
     const base = createDefaultEvaluationContext();
+    const exchangeCount = xstateContext.streamHistory.filter(item => item.type === 'query').length;
+
+    // Sprint: dex-telemetry-compliance-v1 - Declarative stage computation
+    const stage = computeMomentStage(exchangeCount);
+
+    // Compute minutesActive from sessionStartedAt
+    const minutesActive = Math.floor((Date.now() - xstateContext.sessionStartedAt) / 60000);
+
+    // Sprint: dex-telemetry-compliance-v1 - Compute metrics from provenance arrays
+    const metricsV2: CumulativeMetricsV2 = {
+      version: 2,
+      fieldId: 'grove',
+      journeyCompletions: xstateContext.journeyCompletions,
+      topicExplorations: xstateContext.topicExplorations,
+      sproutCaptures: xstateContext.sproutCaptures,
+      sessionCount: xstateContext.sessionCount,
+      lastSessionAt: Date.now(),
+    };
+    const computed = computeMetrics(metricsV2);
 
     // Map XState context to evaluation context
     return {
       ...base,
-      exchangeCount: xstateContext.streamHistory.filter(item => item.type === 'query').length,
-      journeysCompleted: xstateContext.journey ? 1 : 0, // Simplified - future: track completions
-      sproutsCaptured: 0, // Would need to track in context
+      stage,
+      exchangeCount,
+      journeysCompleted: computed.journeysCompleted,
+      sproutsCaptured: computed.sproutsCaptured,
+      topicsExplored: computed.topicsExplored,
       entropy: xstateContext.entropy,
+      minutesActive,
+      sessionCount: xstateContext.sessionCount,
       activeLens: xstateContext.lens,
       activeJourney: xstateContext.journey?.id || null,
-      hasCustomLens: false, // Would need custom lens detection
+      hasCustomLens: xstateContext.hasCustomLens,
       flags: xstateContext.flags,
       momentCooldowns: xstateContext.momentCooldowns,
     };
@@ -78,7 +102,13 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
 
   // Evaluate eligible moments for this surface
   const moments = useMemo(() => {
+    console.log('[Moments] Evaluating for surface:', surface, 'context:', {
+      exchangeCount: evaluationContext.exchangeCount,
+      stage: evaluationContext.stage,
+      flags: evaluationContext.flags
+    });
     const eligible = getEligibleMoments(allMoments, evaluationContext, surface);
+    console.log('[Moments] Eligible moments:', eligible.map(m => m.meta.id));
 
     // Apply limit (overlays typically show one at a time)
     const effectiveLimit = limit ?? (surface === 'overlay' ? 1 : undefined);
@@ -87,12 +117,12 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
 
   const activeMoment = moments[0] ?? null;
 
-  // Track moment shown
+  // Track moment shown - Sprint: xstate-telemetry-v1
   useEffect(() => {
     if (activeMoment) {
-      emit.momentShown(activeMoment.meta.id, surface);
+      actor.send({ type: 'MOMENT_SHOWN', momentId: activeMoment.meta.id, surface });
     }
-  }, [activeMoment?.meta.id, surface, emit]);
+  }, [activeMoment?.meta.id, surface, actor]);
 
   // Execute action handler
   const executeAction = useCallback((momentId: string, actionId: string): MomentAction | undefined => {
@@ -124,13 +154,13 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
       actor.send({ type: 'SET_COOLDOWN', momentId: moment.meta.id, timestamp: Date.now() });
     }
 
-    // Emit telemetry
-    emit.momentActioned(momentId, actionId, action.type);
+    // Emit telemetry - Sprint: xstate-telemetry-v1
+    actor.send({ type: 'MOMENT_ACTIONED', momentId, actionId, actionType: action.type });
 
     return action;
-  }, [allMoments, actor, emit, executeMomentAction]);
+  }, [allMoments, actor, executeMomentAction]);
 
-  // Dismiss handler (convenience wrapper)
+  // Dismiss handler (convenience wrapper) - Sprint: xstate-telemetry-v1
   const dismissMoment = useCallback((momentId: string) => {
     const moment = allMoments.find(m => m.meta.id === momentId);
     if (!moment) return;
@@ -147,9 +177,9 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
       if (moment.payload.cooldown) {
         actor.send({ type: 'SET_COOLDOWN', momentId: moment.meta.id, timestamp: Date.now() });
       }
-      emit.momentDismissed(momentId);
+      actor.send({ type: 'MOMENT_DISMISSED', momentId });
     }
-  }, [allMoments, executeAction, actor, emit]);
+  }, [allMoments, executeAction, actor]);
 
   return {
     moments,

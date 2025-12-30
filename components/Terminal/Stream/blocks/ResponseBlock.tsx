@@ -1,20 +1,24 @@
 // components/Terminal/Stream/blocks/ResponseBlock.tsx
-// AI response message block with span rendering and motion
-// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
+// AI response message block with glass effect, streaming text, and motion
+// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1, kinetic-stream-reset-v2
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import type { StreamItem, RhetoricalSpan } from '../../../../src/core/schema/stream';
-import { hasSpans, hasPaths } from '../../../../src/core/schema/stream';
+import type { ResponseStreamItem, RhetoricalSpan, JourneyFork } from '../../../../src/core/schema/stream';
+import { hasSpans, hasPaths, hasNavigation } from '../../../../src/core/schema/stream';
+import { GlassPanel } from '../motion/GlassPanel';
 import { SpanRenderer } from '../SpanRenderer';
+import { StreamingText } from '../StreamingText';
 import { MarkdownRenderer } from '../../MarkdownRenderer';
 import LoadingIndicator from '../../LoadingIndicator';
 import SuggestionChip from '../../SuggestionChip';
+import { NavigationBlock } from './NavigationBlock';
 import { responseVariants, staggerContainer, staggerItem } from '../motion/variants';
 
 export interface ResponseBlockProps {
-  item: StreamItem;
+  item: ResponseStreamItem;
   onSpanClick?: (span: RhetoricalSpan) => void;
+  onForkSelect?: (fork: JourneyFork) => void;
   onPromptSubmit?: (prompt: string) => void;
   loadingMessages?: string[];
 }
@@ -22,6 +26,7 @@ export interface ResponseBlockProps {
 export const ResponseBlock: React.FC<ResponseBlockProps> = ({
   item,
   onSpanClick,
+  onForkSelect,
   onPromptSubmit,
   loadingMessages
 }) => {
@@ -38,15 +43,18 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
       exit="exit"
     >
       <div className="flex items-center gap-2 mb-1.5 justify-start">
-        <span className="text-xs font-semibold text-primary">The Grove</span>
+        <span className="text-xs font-semibold text-[var(--neon-green)]">The Grove</span>
       </div>
 
       <div className="max-w-[90%] md:max-w-[85%]">
-        <div className={`px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm ${
-          isError
-            ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
-            : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-border-dark'
-        }`}>
+        <GlassPanel
+          intensity="medium"
+          className={`glass-message px-5 py-3.5 ${
+            isError
+              ? 'glass-message-error'
+              : 'glass-message-assistant'
+          }`}
+        >
           {item.isGenerating && !item.content ? (
             <LoadingIndicator messages={loadingMessages} />
           ) : (
@@ -57,18 +65,23 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
                   spans={item.parsedSpans}
                   onSpanClick={onSpanClick}
                 />
+              ) : item.isGenerating ? (
+                // Use StreamingText for active streaming with character reveal
+                <StreamingText
+                  content={item.content}
+                  isStreaming={true}
+                  className="text-[var(--glass-text-body)]"
+                />
               ) : (
+                // Use MarkdownRenderer for completed responses
                 <MarkdownRenderer
                   content={item.content}
                   onPromptClick={onPromptSubmit}
                 />
               )}
-              {item.isGenerating && (
-                <span className="inline-block w-1.5 h-3 ml-1 bg-slate-500 dark:bg-slate-400 cursor-blink align-middle" />
-              )}
             </div>
           )}
-        </div>
+        </GlassPanel>
       </div>
 
       {hasPaths(item) && !item.isGenerating && (
@@ -87,6 +100,13 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
             </motion.div>
           ))}
         </motion.div>
+      )}
+
+      {hasNavigation(item) && !item.isGenerating && (
+        <NavigationBlock
+          forks={item.navigation!}
+          onSelect={onForkSelect}
+        />
       )}
     </motion.div>
   );

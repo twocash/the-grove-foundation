@@ -1,10 +1,11 @@
 // components/Terminal/Stream/blocks/QueryBlock.tsx
-// User query message block with slide-in animation
+// User query message block with glass effect and slide-in animation
 // Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { StreamItem } from '../../../../src/core/schema/stream';
+import { GlassPanel } from '../motion/GlassPanel';
 import { queryVariants } from '../motion/variants';
 
 export interface QueryBlockProps {
@@ -24,14 +25,17 @@ export const QueryBlock: React.FC<QueryBlockProps> = ({ item }) => {
       exit="exit"
     >
       <div className="flex items-center gap-2 mb-1.5 justify-end">
-        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+        <span className="text-xs font-semibold text-[var(--glass-text-subtle)]">
           You
         </span>
       </div>
       <div className="max-w-[85%] md:max-w-[70%]">
-        <div className="bg-primary text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md">
+        <GlassPanel
+          intensity="light"
+          className="glass-message glass-message-user px-5 py-3.5"
+        >
           <p className="text-sm md:text-base leading-relaxed">{displayContent}</p>
-        </div>
+        </GlassPanel>
       </div>
     </motion.div>
   );

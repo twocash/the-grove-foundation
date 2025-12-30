@@ -27,6 +27,38 @@ export const DEFAULT_STAGE_THRESHOLDS: StageThresholds = {
 };
 
 // ============================================================================
+// MOMENT STAGE THRESHOLDS (Sprint: dex-telemetry-compliance-v1)
+// DEX Pillar: Declarative Sovereignty
+// ============================================================================
+
+/**
+ * Simple exchange-count-based stage thresholds for moment evaluation.
+ * These define how many exchanges are needed to reach each stage.
+ */
+export const MOMENT_STAGE_THRESHOLDS = {
+  ARRIVAL: 0,
+  ORIENTED: 1,
+  EXPLORING: 3,
+  ENGAGED: 6,
+} as const;
+
+export type MomentEngagementStage = keyof typeof MOMENT_STAGE_THRESHOLDS;
+
+/**
+ * Compute engagement stage from exchange count.
+ * Uses declarative thresholds instead of hardcoded values.
+ */
+export function computeMomentStage(
+  exchangeCount: number,
+  thresholds: typeof MOMENT_STAGE_THRESHOLDS = MOMENT_STAGE_THRESHOLDS
+): MomentEngagementStage {
+  if (exchangeCount >= thresholds.ENGAGED) return 'ENGAGED';
+  if (exchangeCount >= thresholds.EXPLORING) return 'EXPLORING';
+  if (exchangeCount >= thresholds.ORIENTED) return 'ORIENTED';
+  return 'ARRIVAL';
+}
+
+// ============================================================================
 // ENGAGEMENT DEFAULTS
 // ============================================================================
 

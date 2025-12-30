@@ -1,48 +1,93 @@
 // components/Terminal/Stream/blocks/NavigationBlock.tsx
-// Journey navigation fork block with stagger animation
-// Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1
+// Journey navigation fork block with visual hierarchy
+// Sprint: kinetic-stream-reset-v2
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import type { StreamItem, JourneyPath } from '../../../../src/core/schema/stream';
-import { hasPaths } from '../../../../src/core/schema/stream';
-import SuggestionChip from '../../SuggestionChip';
+import type { JourneyFork, JourneyForkType } from '../../../../src/core/schema/stream';
 import { staggerContainer, staggerItem } from '../motion/variants';
 
 export interface NavigationBlockProps {
-  item: StreamItem;
-  onPathClick?: (path: JourneyPath) => void;
+  forks: JourneyFork[];
+  onSelect?: (fork: JourneyFork) => void;
 }
 
 export const NavigationBlock: React.FC<NavigationBlockProps> = ({
-  item,
-  onPathClick
+  forks,
+  onSelect
 }) => {
-  if (!hasPaths(item)) return null;
+  const grouped = useMemo(() => ({
+    deep_dive: forks.filter(f => f.type === 'deep_dive'),
+    pivot: forks.filter(f => f.type === 'pivot'),
+    apply: forks.filter(f => f.type === 'apply'),
+    challenge: forks.filter(f => f.type === 'challenge')
+  }), [forks]);
+
+  if (forks.length === 0) return null;
 
   return (
     <motion.div
-      className="flex flex-col items-start"
-      data-testid="navigation-block"
+      className="mt-6 pt-4 border-t border-[var(--glass-border)] space-y-3"
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
+      data-testid="navigation-block"
     >
-      <div className="text-xs font-semibold text-primary mb-2">
-        Continue your exploration:
-      </div>
-      <div className="space-y-1.5">
-        {item.suggestedPaths!.map((path) => (
-          <motion.div key={path.id} variants={staggerItem}>
-            <SuggestionChip
-              prompt={path.label}
-              onClick={() => onPathClick?.(path)}
-            />
-          </motion.div>
-        ))}
-      </div>
+      {grouped.deep_dive.length > 0 && (
+        <ForkGroup forks={grouped.deep_dive} variant="primary" onSelect={onSelect} />
+      )}
+      {grouped.pivot.length > 0 && (
+        <ForkGroup forks={grouped.pivot} variant="secondary" onSelect={onSelect} />
+      )}
+      {grouped.apply.length > 0 && (
+        <ForkGroup forks={grouped.apply} variant="tertiary" onSelect={onSelect} />
+      )}
+      {grouped.challenge.length > 0 && (
+        <ForkGroup forks={grouped.challenge} variant="quaternary" onSelect={onSelect} />
+      )}
     </motion.div>
   );
 };
+
+const ForkGroup: React.FC<{
+  forks: JourneyFork[];
+  variant: 'primary' | 'secondary' | 'tertiary' | 'quaternary';
+  onSelect?: (fork: JourneyFork) => void;
+}> = ({ forks, variant, onSelect }) => (
+  <div className="flex flex-wrap gap-2">
+    {forks.map(fork => (
+      <motion.div key={fork.id} variants={staggerItem}>
+        <ForkButton fork={fork} variant={variant} onClick={() => onSelect?.(fork)} />
+      </motion.div>
+    ))}
+  </div>
+);
+
+const FORK_ICONS: Record<JourneyForkType, string> = {
+  deep_dive: '↓',
+  pivot: '→',
+  apply: '✓',
+  challenge: '?'
+};
+
+const ForkButton: React.FC<{
+  fork: JourneyFork;
+  variant: 'primary' | 'secondary' | 'tertiary' | 'quaternary';
+  onClick: () => void;
+}> = ({ fork, variant, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`
+      fork-button fork-button--${variant}
+      px-4 py-2 rounded-full text-sm font-medium
+      transition-all duration-200
+      hover:scale-105 active:scale-95
+    `}
+    data-testid="fork-button"
+  >
+    <span className="mr-2">{FORK_ICONS[fork.type]}</span>
+    {fork.label}
+  </button>
+);
 
 export default NavigationBlock;

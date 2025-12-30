@@ -1,0 +1,80 @@
+{
+  "$schema": "./sprout-stages.schema.json",
+  "version": "1.0.0",
+  "stages": [
+    {
+      "id": "tender",
+      "label": "Tender",
+      "icon": "🌱",
+      "color": "green-300",
+      "description": "Just captured, no research intent",
+      "active": true
+    },
+    {
+      "id": "rooting",
+      "label": "Rooting",
+      "icon": "🔬",
+      "color": "cyan-400",
+      "description": "Has research manifest, accumulating clues",
+      "active": true
+    },
+    {
+      "id": "branching",
+      "label": "Branching",
+      "icon": "📋",
+      "color": "blue-400",
+      "description": "Prompt generated, ready to execute",
+      "active": true
+    },
+    {
+      "id": "hardened",
+      "label": "Hardened",
+      "icon": "🌸",
+      "color": "violet-400",
+      "description": "Research harvested, needs review",
+      "active": false
+    },
+    {
+      "id": "grafted",
+      "label": "Grafted",
+      "icon": "🔗",
+      "color": "amber-400",
+      "description": "Connected to other sprouts",
+      "active": false
+    },
+    {
+      "id": "established",
+      "label": "Established",
+      "icon": "📚",
+      "color": "emerald-500",
+      "description": "Promoted to Knowledge Commons",
+      "active": true
+    },
+    {
+      "id": "dormant",
+      "label": "Dormant",
+      "icon": "💤",
+      "color": "gray-400",
+      "description": "Archived but preserved",
+      "active": true
+    },
+    {
+      "id": "withered",
+      "label": "Withered",
+      "icon": "🍂",
+      "color": "stone-500",
+      "description": "Abandoned",
+      "active": true
+    }
+  ],
+  "transitions": {
+    "tender": ["rooting", "dormant", "withered"],
+    "rooting": ["branching", "tender", "dormant"],
+    "branching": ["hardened", "rooting"],
+    "hardened": ["established", "rooting", "dormant"],
+    "grafted": ["established", "dormant"],
+    "established": [],
+    "dormant": ["tender", "rooting"],
+    "withered": []
+  }
+}

@@ -615,6 +615,16 @@ body {
   /* Floating input tokens (kinetic-stream-polish-v1) */
   --input-float-offset: 16px;
   --input-float-max-height: 200px;
+
+  /* Sprout Tray tokens (kinetic-cultivation-v1) */
+  --tray-width-collapsed: 48px;
+  --tray-width-expanded: 240px;
+  --tray-bg: rgba(17, 24, 39, 0.85);
+  --tray-bg-hover: rgba(17, 24, 39, 0.95);
+  --tray-border: rgba(255, 255, 255, 0.1);
+  --tray-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --tray-badge-bg: var(--neon-green);
+  --tray-badge-text: white;
 }
 
 /* Glass Panel - Blur container */

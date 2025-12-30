@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import type { StreamItem, RhetoricalSpan, JourneyPath } from '../../../src/core/schema/stream';
+import type { StreamItem, RhetoricalSpan, JourneyPath, JourneyFork } from '../../../src/core/schema/stream';
 import { QueryBlock } from './blocks/QueryBlock';
 import { ResponseBlock } from './blocks/ResponseBlock';
 import { NavigationBlock } from './blocks/NavigationBlock';
@@ -18,6 +18,7 @@ export interface StreamRendererProps {
   currentItem?: StreamItem | null;
   onSpanClick?: (span: RhetoricalSpan) => void;
   onPathClick?: (path: JourneyPath) => void;
+  onForkSelect?: (fork: JourneyFork) => void;
   onPromptSubmit?: (prompt: string) => void;
   bridgeState?: BridgeState;
   onBridgeAccept?: () => void;
@@ -30,6 +31,7 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
   currentItem,
   onSpanClick,
   onPathClick,
+  onForkSelect,
   onPromptSubmit,
   bridgeState,
   onBridgeAccept,
@@ -56,6 +58,7 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
               item={item}
               onSpanClick={onSpanClick}
               onPathClick={onPathClick}
+              onForkSelect={onForkSelect}
               onPromptSubmit={onPromptSubmit}
               loadingMessages={loadingMessages}
             />
@@ -81,6 +84,7 @@ interface StreamBlockProps {
   item: StreamItem;
   onSpanClick?: (span: RhetoricalSpan) => void;
   onPathClick?: (path: JourneyPath) => void;
+  onForkSelect?: (fork: JourneyFork) => void;
   onPromptSubmit?: (prompt: string) => void;
   loadingMessages?: string[];
 }
@@ -89,6 +93,7 @@ const StreamBlock: React.FC<StreamBlockProps> = ({
   item,
   onSpanClick,
   onPathClick,
+  onForkSelect,
   onPromptSubmit,
   loadingMessages
 }) => {
@@ -100,12 +105,13 @@ const StreamBlock: React.FC<StreamBlockProps> = ({
         <ResponseBlock
           item={item}
           onSpanClick={onSpanClick}
+          onForkSelect={onForkSelect}
           onPromptSubmit={onPromptSubmit}
           loadingMessages={loadingMessages}
         />
       );
     case 'navigation':
-      return <NavigationBlock item={item} onPathClick={onPathClick} />;
+      return <NavigationBlock forks={item.forks} onSelect={onForkSelect} />;
     case 'system':
       return <SystemBlock item={item} />;
     case 'reveal':

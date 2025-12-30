@@ -25,7 +25,7 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
   const isError = item.content.startsWith('Error:');
 
   return (
-    <div className="flex flex-col items-start" data-testid="response-object">
+    <div className="flex flex-col items-start" data-testid="response-object" data-message-id={item.id}>
       <div className="flex items-center gap-2 mb-2">
         <span className="text-xs font-sans font-semibold text-[var(--neon-green)]">The Grove</span>
         {item.isGenerating && (

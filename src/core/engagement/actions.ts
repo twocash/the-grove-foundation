@@ -108,10 +108,12 @@ export const actions = {
     currentStreamItem: ({ context, event }) => {
       const ctx = context as EngagementContext;
       const e = event as Extract<EngagementEvent, { type: 'STREAM_CHUNK' }>;
-      if (!ctx.currentStreamItem) return null;
+      const item = ctx.currentStreamItem;
+      // Only append to response items
+      if (!item || item.type !== 'response') return item;
       return {
-        ...ctx.currentStreamItem,
-        content: ctx.currentStreamItem.content + (e.chunk || '')
+        ...item,
+        content: item.content + (e.chunk || '')
       };
     },
   }),
@@ -119,20 +121,24 @@ export const actions = {
   finalizeResponse: assign({
     currentStreamItem: ({ context }) => {
       const ctx = context as EngagementContext;
-      if (!ctx.currentStreamItem) return null;
-      const { spans } = parse(ctx.currentStreamItem.content);
+      const item = ctx.currentStreamItem;
+      // Only finalize response items
+      if (!item || item.type !== 'response') return item;
+      const { spans } = parse(item.content);
       return {
-        ...ctx.currentStreamItem,
+        ...item,
         isGenerating: false,
         parsedSpans: spans
       };
     },
     streamHistory: ({ context }) => {
       const ctx = context as EngagementContext;
-      if (!ctx.currentStreamItem) return ctx.streamHistory;
-      const { spans } = parse(ctx.currentStreamItem.content);
+      const item = ctx.currentStreamItem;
+      // Only finalize response items
+      if (!item || item.type !== 'response') return ctx.streamHistory;
+      const { spans } = parse(item.content);
       const finalizedItem = {
-        ...ctx.currentStreamItem,
+        ...item,
         isGenerating: false,
         parsedSpans: spans
       };

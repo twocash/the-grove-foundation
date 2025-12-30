@@ -1,11 +1,11 @@
 // hooks/useSproutCapture.ts
 // Sprint: Sprout System
-// Sprint: engagement-consolidation-v1 - Uses unified EngagementBus
+// Sprint: kinetic-cultivation-v1 - Uses XState for telemetry
 // Hook for capturing LLM responses as sprouts with full provenance
 
 import { useCallback } from 'react';
 import { useSproutStorage } from './useSproutStorage';
-import { useEngagementEmit } from './useEngagementBus';
+import { useEngagement } from '../src/core/engagement/context';
 import {
   Sprout,
   SproutCaptureOptions,
@@ -26,7 +26,7 @@ export function useSproutCapture() {
     getSessionSprouts,
     sessionId
   } = useSproutStorage();
-  const emit = useEngagementEmit();
+  const { actor } = useEngagement();
 
   /**
    * Capture a response as a sprout
@@ -84,13 +84,18 @@ export function useSproutCapture() {
         tags: sprout.tags,
         lens: provenance.lens?.name
       });
-      // Track sprout capture in EngagementBus for stage computation
-      emit.sproutCaptured(sprout.id, sprout.tags);
+      // Sprint: kinetic-cultivation-v1 - Track sprout capture via XState
+      actor.send({
+        type: 'SPROUT_CAPTURED',
+        sproutId: sprout.id,
+        journeyId: provenance.journey?.id,
+        hubId: provenance.hub?.id
+      });
       return sprout;
     }
 
     return null;
-  }, [addSprout, sessionId, emit]);
+  }, [addSprout, sessionId, actor]);
 
   /**
    * Parse command flags from /sprout command arguments

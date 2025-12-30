@@ -36,6 +36,12 @@ import { LensCandidate, UserInputs, isCustomLens, ArchetypeId } from '../types/l
 // Reveal components now handled by TerminalFlow (Epic 4.3)
 // SimulationReveal, CustomLensOffer, TerminatorMode, FounderStory, ConversionCTA
 import { CommandInput } from './Terminal/CommandInput';
+// Sprint: kinetic-stream-polish-v1 - Glass effects and animations
+import { StreamRenderer } from './Terminal/Stream/StreamRenderer';
+import { fromChatMessage, type StreamItem, type ResponseStreamItem } from '../src/core/schema/stream';
+// Sprint: kinetic-stream-reset-v2 - Navigation and rhetoric parsing
+import { parseNavigation } from '../src/core/transformers/NavigationParser';
+import { parse as parseRhetoric } from '../src/core/transformers/RhetoricalParser';
 // Modals now rendered by TerminalFlow (Epic 4.3)
 import {
   trackLensActivated,
@@ -1113,6 +1119,35 @@ const Terminal: React.FC<TerminalProps> = ({
   // V2.1 Journey end detection - no next nodes available AND not in an incomplete journey
   const isJourneyEnd = currentNodeId && nextNodes.length === 0 && !v21JourneyContext?.isIncomplete;
 
+  // Sprint: kinetic-stream-reset-v2 - Parse navigation blocks and rhetorical spans
+  // Convert ChatMessage[] to StreamItem[] with navigation and rhetoric parsing
+  const parsedStreamItems: StreamItem[] = useMemo(() => {
+    return terminalState.messages.map((msg) => {
+      const item = fromChatMessage(msg);
+
+      // Preserve streaming state (only responses have isGenerating)
+      if (msg.isStreaming && item.type === 'response') {
+        return { ...item, isGenerating: true };
+      }
+
+      // For completed responses, parse navigation and rhetorical spans
+      if (item.type === 'response' && !msg.isStreaming) {
+        const { forks, cleanContent } = parseNavigation(item.content);
+        const { spans } = parseRhetoric(cleanContent);
+
+        const enhanced: ResponseStreamItem = {
+          ...item,
+          content: cleanContent,
+          parsedSpans: spans.length > 0 ? spans : undefined,
+          navigation: forks.length > 0 ? forks : undefined
+        };
+        return enhanced;
+      }
+
+      return item;
+    });
+  }, [terminalState.messages]);
+
   // ============================================================================
   // EMBEDDED MODE RENDERING (Sprint: active-grove-v1)
   // Bypasses TerminalShell chrome for split layout integration
@@ -1172,19 +1207,27 @@ const Terminal: React.FC<TerminalProps> = ({
                   variant="embedded"
                 />
               )}
-              {terminalState.messages.map((msg) => {
-                const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
+              {/* Sprint: kinetic-stream-reset-v2 - Use parsed items with navigation */}
+              {parsedStreamItems.map((item) => {
+                // Skip NavigationStreamItem (handled separately)
+                if (item.type === 'navigation') return null;
+                const isQuery = item.type === 'query';
+                const isResponse = item.type === 'response';
+                const content = 'content' in item ? item.content : '';
+                const isSystemError = content.startsWith('SYSTEM ERROR') || content.startsWith('Error:');
+                const hasNav = isResponse && 'navigation' in item && item.navigation && item.navigation.length > 0;
+                const isStreaming = isResponse && 'isGenerating' in item && item.isGenerating;
                 return (
-                  <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`flex items-center gap-2 mb-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <span className={`text-xs font-medium ${msg.role === 'user' ? 'text-[var(--chat-text-muted)]' : 'text-[var(--chat-text-accent)]'}`}>
-                        {msg.role === 'user' ? 'You' : 'The Grove'}
+                  <div key={item.id} className={`flex flex-col ${isQuery ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex items-center gap-2 mb-1 ${isQuery ? 'justify-end' : 'justify-start'}`}>
+                      <span className={`text-xs font-medium ${isQuery ? 'text-[var(--chat-text-muted)]' : 'text-[var(--chat-text-accent)]'}`}>
+                        {isQuery ? 'You' : 'The Grove'}
                       </span>
                     </div>
-                    <div className={`${msg.role === 'user' ? 'max-w-[85%]' : 'max-w-[90%]'}`}>
-                      {msg.role === 'user' ? (
+                    <div className={`${isQuery ? 'max-w-[85%]' : 'max-w-[90%]'}`}>
+                      {isQuery ? (
                         <div className="bg-[var(--chat-accent)] text-[var(--chat-accent-text)] px-4 py-2.5 rounded-xl rounded-tr-sm text-sm">
-                          {msg.text.replace(' --verbose', '')}
+                          {content.replace(' --verbose', '')}
                         </div>
                       ) : (
                         <div className={`px-4 py-2.5 rounded-xl rounded-tl-sm text-sm ${
@@ -1192,12 +1235,29 @@ const Terminal: React.FC<TerminalProps> = ({
                             ? 'bg-[var(--chat-error-bg)] text-red-300 border border-[var(--chat-error-border)]'
                             : 'bg-[var(--chat-glass)] text-[var(--chat-text)] border border-[var(--chat-glass-border)]'
                         }`}>
-                          {msg.isStreaming && !msg.text ? (
+                          {isStreaming && !content ? (
                             <LoadingIndicator messages={globalSettings?.loadingMessages} />
                           ) : (
                             <>
-                              <MarkdownRenderer content={msg.text} onPromptClick={handleSuggestion} />
-                              {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-[var(--chat-accent)] cursor-blink align-middle"></span>}
+                              <MarkdownRenderer content={content} onPromptClick={handleSuggestion} />
+                              {isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-[var(--chat-accent)] cursor-blink align-middle"></span>}
+                              {/* Sprint: kinetic-stream-reset-v2 - Navigation buttons */}
+                              {hasNav && (
+                                <div className="mt-4 pt-3 border-t border-[var(--chat-border)]">
+                                  <div className="flex flex-wrap gap-2">
+                                    {(item as any).navigation.map((fork: any) => (
+                                      <button
+                                        key={fork.id}
+                                        onClick={() => handleSuggestion(fork.queryPayload || fork.label)}
+                                        className={`fork-button fork-button--${fork.type === 'deep_dive' ? 'primary' : fork.type === 'challenge' ? 'quaternary' : fork.type === 'apply' ? 'tertiary' : 'secondary'}`}
+                                      >
+                                        <span className="mr-2">{fork.type === 'deep_dive' ? '↓' : fork.type === 'challenge' ? '?' : fork.type === 'apply' ? '✓' : '→'}</span>
+                                        {fork.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>
@@ -1417,132 +1477,85 @@ const Terminal: React.FC<TerminalProps> = ({
                     variant={variant}
                   />
                 )}
-                {terminalState.messages.map((msg) => {
-                  const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
-                  const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
+                {/* Sprint: kinetic-stream-polish-v1 - StreamRenderer with glass effects */}
+                {/* Sprint: kinetic-stream-reset-v2 - Use parsed items with navigation blocks */}
+                <StreamRenderer
+                  items={parsedStreamItems}
+                  bridgeState={bridgeState}
+                  onBridgeAccept={() => {
+                    // Track timing for analytics
+                    const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
+                    trackCognitiveBridgeAccepted({
+                      journeyId: bridgeState.journeyId!,
+                      timeToDecisionMs
+                    });
 
-                  return (
-                    <React.Fragment key={msg.id}>
-                      <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                        {/* Message Label */}
-                        <div className={`flex items-center gap-2 mb-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          {msg.role === 'user' ? (
-                            <span className="text-xs font-semibold text-[var(--glass-text-subtle)]">You</span>
-                          ) : (
-                            <span className="text-xs font-semibold text-[var(--neon-green)]">The Grove</span>
-                          )}
-                        </div>
-                        {/* Message Bubble */}
-                        <div className={`${msg.role === 'user' ? 'max-w-[85%] md:max-w-[70%]' : 'max-w-[90%] md:max-w-[85%]'}`}>
-                          {msg.role === 'user' ? (
-                            <div className="glass-message glass-message-user">
-                              <p className="text-sm md:text-base leading-relaxed">
-                                {msg.text.replace(' --verbose', '')}
-                              </p>
-                            </div>
-                          ) : (
-                            <div className={`glass-message ${
-                              isSystemError
-                                ? 'glass-message-error'
-                                : 'glass-message-assistant'
-                            }`}>
-                              {msg.isStreaming && !msg.text ? (
-                                /* Show loading messages while waiting for first chunk */
-                                <LoadingIndicator messages={globalSettings?.loadingMessages} />
-                              ) : (
-                                <>
-                                  <MarkdownRenderer
-                                    content={msg.text}
-                                    onPromptClick={handleSuggestion}
-                                  />
-                                  {msg.isStreaming && <span className="inline-block w-1.5 h-3 ml-1 bg-slate-500 dark:bg-slate-400 cursor-blink align-middle"></span>}
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {/* Cognitive Bridge - inline injection after triggering message */}
-                      {showBridgeAfterThis && bridgeState.journeyId && bridgeState.topicMatch && (
-                        <CognitiveBridge
-                          journeyId={bridgeState.journeyId}
-                          topicMatch={bridgeState.topicMatch}
-                          onAccept={() => {
-                            // Track timing for analytics
-                            const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
-                            trackCognitiveBridgeAccepted({
-                              journeyId: bridgeState.journeyId!,
-                              timeToDecisionMs
-                            });
+                    // V2.1: Start the actual journey from the schema
+                    // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
+                    console.log('[CognitiveBridge] onAccept clicked', {
+                      journeyId: bridgeState.journeyId,
+                      timeToDecisionMs,
+                      schemaHasJourneys: !!schema?.journeys,
+                      schemaHasNodes: !!schema?.nodes
+                    });
 
-                            // V2.1: Start the actual journey from the schema
-                            // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
-                            console.log('[CognitiveBridge] onAccept clicked', {
-                              journeyId: bridgeState.journeyId,
-                              timeToDecisionMs,
-                              schemaHasJourneys: !!schema?.journeys,
-                              schemaHasNodes: !!schema?.nodes
-                            });
+                    // Use unified lookup for canonical Journey type
+                    const journey = bridgeState.journeyId ? getCanonicalJourney(bridgeState.journeyId, schema) : null;
 
-                            // Use unified lookup for canonical Journey type
-                            const journey = bridgeState.journeyId ? getCanonicalJourney(bridgeState.journeyId, schema) : null;
+                    // Get entry node from schema for initial prompt (legacy journeys have entryNode)
+                    const legacyJourney = schema?.journeys?.[bridgeState.journeyId!];
+                    const entryNodeId = legacyJourney?.entryNode ?? journey?.waypoints?.[0]?.id;
+                    const entryNode = entryNodeId && schema?.nodes
+                      ? (schema.nodes as Record<string, { id: string; label: string; query: string }>)[entryNodeId]
+                      : null;
 
-                            // Get entry node from schema for initial prompt (legacy journeys have entryNode)
-                            const legacyJourney = schema?.journeys?.[bridgeState.journeyId!];
-                            const entryNodeId = legacyJourney?.entryNode ?? journey?.waypoints?.[0]?.id;
-                            const entryNode = entryNodeId && schema?.nodes
-                              ? (schema.nodes as Record<string, { id: string; label: string; query: string }>)[entryNodeId]
-                              : null;
+                    console.log('[CognitiveBridge] Journey lookup', {
+                      journey: journey ? { id: journey.id, waypoints: journey.waypoints.length } : null,
+                      entryNodeId,
+                      entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
+                    });
 
-                            console.log('[CognitiveBridge] Journey lookup', {
-                              journey: journey ? { id: journey.id, waypoints: journey.waypoints.length } : null,
-                              entryNodeId,
-                              entryNode: entryNode ? { id: entryNode.id, label: entryNode.label } : null
-                            });
+                    if (journey && entryNode) {
+                      console.log('[CognitiveBridge] Starting journey with engStartJourney():', bridgeState.journeyId);
+                      // V2.1: Use engagement state machine to set active journey state
+                      engStartJourney(journey);
+                      // Send the entry node's query to kick off the conversation
+                      handleSend(entryNode.query, entryNode.label, entryNode.id);
+                      // Emit journey started event
+                      emit.journeyStarted(bridgeState.journeyId!, journey.waypoints.length);
+                    } else {
+                      console.log('[CognitiveBridge] FALLBACK - no entry node found');
+                      // Fallback: Map topic clusters to appropriate personas (legacy behavior)
+                      const clusterToPersona: Record<string, string> = {
+                        'ratchet': 'engineer',      // Technical AI capability concepts
+                        'economics': 'family-office', // Financial/investment focus
+                        'architecture': 'engineer',   // Technical architecture
+                        'knowledge-commons': 'academic', // Research/publication focus
+                        'observer': 'concerned-citizen'  // Meta/philosophical themes
+                      };
 
-                            if (journey && entryNode) {
-                              console.log('[CognitiveBridge] Starting journey with engStartJourney():', bridgeState.journeyId);
-                              // V2.1: Use engagement state machine to set active journey state
-                              engStartJourney(journey);
-                              // Send the entry node's query to kick off the conversation
-                              handleSend(entryNode.query, entryNode.label, entryNode.id);
-                              // Emit journey started event
-                              emit.journeyStarted(bridgeState.journeyId!, journey.waypoints.length);
-                            } else {
-                              console.log('[CognitiveBridge] FALLBACK - no entry node found');
-                              // Fallback: Map topic clusters to appropriate personas (legacy behavior)
-                              const clusterToPersona: Record<string, string> = {
-                                'ratchet': 'engineer',      // Technical AI capability concepts
-                                'economics': 'family-office', // Financial/investment focus
-                                'architecture': 'engineer',   // Technical architecture
-                                'knowledge-commons': 'academic', // Research/publication focus
-                                'observer': 'concerned-citizen'  // Meta/philosophical themes
-                              };
+                      const cluster = bridgeState.topicMatch;
+                      const targetPersona = cluster ? clusterToPersona[cluster] : null;
 
-                              const cluster = bridgeState.topicMatch;
-                              const targetPersona = cluster ? clusterToPersona[cluster] : null;
-
-                              if (targetPersona) {
-                                engSelectLens(targetPersona);
-                              }
-                            }
-                            actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
-                          }}
-                          onDismiss={() => {
-                            // Track timing for analytics
-                            const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
-                            trackCognitiveBridgeDismissed({
-                              journeyId: bridgeState.journeyId!,
-                              timeToDecisionMs
-                            });
-                            // recordEntropyDismiss() - DISABLED: Epic 7 migration
-                            actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
-                          }}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
+                      if (targetPersona) {
+                        engSelectLens(targetPersona);
+                      }
+                    }
+                    actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
+                  }}
+                  onBridgeDismiss={() => {
+                    // Track timing for analytics
+                    const timeToDecisionMs = bridgeState.shownAt ? Date.now() - bridgeState.shownAt : 0;
+                    trackCognitiveBridgeDismissed({
+                      journeyId: bridgeState.journeyId!,
+                      timeToDecisionMs
+                    });
+                    // recordEntropyDismiss() - DISABLED: Epic 7 migration
+                    actions.setBridgeState({ visible: false, journeyId: null, topicMatch: null, afterMessageId: null, shownAt: null, entropyScore: null, exchangeCount: null });
+                  }}
+                  onPromptSubmit={handleSuggestion}
+                  loadingMessages={globalSettings?.loadingMessages}
+                />
 
                 {/* v0.14: Inline Journey Completion (moved from fixed modal) */}
                 {showJourneyCompletion && (

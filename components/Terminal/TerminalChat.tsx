@@ -1,13 +1,14 @@
 // components/Terminal/TerminalChat.tsx
-// Chat UI component - messages, input, suggestions
-// Sprint: kinetic-stream-rendering-v1 (integration)
+// Chat UI component - now using StreamRenderer with Kinetic Stream architecture
+// Sprint: kinetic-stream-bridge-v1 (integration)
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { ChatMessage } from '../../types';
-import LoadingIndicator from './LoadingIndicator';
-import CognitiveBridge from './CognitiveBridge';
+import { fromChatMessage, type StreamItem, type RhetoricalSpan, type JourneyFork, type ResponseStreamItem } from '../../src/core/schema/stream';
+import { StreamRenderer } from './Stream/StreamRenderer';
 import { BridgeState } from './types';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { parseNavigation } from '../../src/core/transformers/NavigationParser';
+import { parse as parseRhetoric } from '../../src/core/transformers/RhetoricalParser';
 
 // ============================================================================
 // TERMINAL CHAT PROPS
@@ -23,6 +24,8 @@ export interface TerminalChatProps {
   onBridgeDismiss: () => void;
   // Bold text click handler
   onPromptClick?: (prompt: string) => void;
+  // Fork selection handler (kinetic-stream-reset-v2)
+  onForkSelect?: (fork: JourneyFork) => void;
   // Refs from parent for programmatic control
   messagesEndRef?: React.RefObject<HTMLDivElement>;
 }
@@ -30,10 +33,13 @@ export interface TerminalChatProps {
 /**
  * TerminalChat - The chat message display area
  *
+ * Now uses StreamRenderer for glass effects and motion animations.
+ * ChatMessage[] is converted to StreamItem[] via the adapter.
+ *
  * Responsibilities:
- * - Render message list with user/model bubbles
- * - Handle loading states with animated messages
- * - Inline Cognitive Bridge injection
+ * - Convert ChatMessage[] to StreamItem[]
+ * - Delegate rendering to StreamRenderer
+ * - Handle loading states
  * - Auto-scroll to bottom on new messages
  */
 const TerminalChat: React.FC<TerminalChatProps> = ({
@@ -44,77 +50,79 @@ const TerminalChat: React.FC<TerminalChatProps> = ({
   onBridgeAccept,
   onBridgeDismiss,
   onPromptClick,
+  onForkSelect,
   messagesEndRef: externalMessagesEndRef
 }) => {
   const internalMessagesEndRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = externalMessagesEndRef || internalMessagesEndRef;
+
+  // Convert ChatMessage[] to StreamItem[]
+  // Memoize to avoid re-conversion on every render
+  // Sprint: kinetic-stream-reset-v2 - Parse navigation and rhetoric for responses
+  const streamItems: StreamItem[] = useMemo(() => {
+    return messages.map((msg) => {
+      const item = fromChatMessage(msg);
+
+      // Preserve streaming state (only responses have isGenerating)
+      if (msg.isStreaming && item.type === 'response') {
+        return { ...item, isGenerating: true };
+      }
+
+      // For completed responses, parse navigation and rhetorical spans
+      if (item.type === 'response' && !msg.isStreaming) {
+        const { forks, cleanContent } = parseNavigation(item.content);
+        const { spans } = parseRhetoric(cleanContent);
+
+        const enhanced: ResponseStreamItem = {
+          ...item,
+          content: cleanContent,
+          parsedSpans: spans.length > 0 ? spans : undefined,
+          navigation: forks.length > 0 ? forks : undefined
+        };
+        return enhanced;
+      }
+
+      return item;
+    });
+  }, [messages]);
+
+  // Create current item for streaming state
+  const currentItem: StreamItem | null = useMemo(() => {
+    if (isLoading && messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.isStreaming) {
+        return null; // Already in streamItems with isGenerating
+      }
+    }
+    return null;
+  }, [isLoading, messages]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, messagesEndRef]);
 
+  // Handle span clicks (bold text → prompt)
+  const handleSpanClick = (span: RhetoricalSpan) => {
+    if (onPromptClick && span.type === 'concept') {
+      onPromptClick(span.text);
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 terminal-scroll bg-white dark:bg-background-dark">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {messages.map((msg) => {
-          const isSystemError = msg.text.startsWith('SYSTEM ERROR') || msg.text.startsWith('Error:');
-          const showBridgeAfterThis = bridgeState.visible && bridgeState.afterMessageId === msg.id;
-
-          return (
-            <React.Fragment key={msg.id}>
-              <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                {/* Message Label */}
-                <div className={`flex items-center gap-2 mb-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  {msg.role === 'user' ? (
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">You</span>
-                  ) : (
-                    <span className="text-xs font-semibold text-primary">The Grove</span>
-                  )}
-                </div>
-                {/* Message Bubble */}
-                <div className={`${msg.role === 'user' ? 'max-w-[85%] md:max-w-[70%]' : 'max-w-[90%] md:max-w-[85%]'}`}>
-                  {msg.role === 'user' ? (
-                    <div className="bg-primary text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md">
-                      <p className="text-sm md:text-base leading-relaxed">
-                        {msg.text.replace(' --verbose', '')}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className={`px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm ${
-                      isSystemError
-                        ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
-                        : 'bg-slate-100 dark:bg-surface-dark text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-border-dark'
-                    }`}>
-                      {msg.isStreaming && !msg.text ? (
-                        <LoadingIndicator messages={loadingMessages} />
-                      ) : (
-                        <>
-                          <MarkdownRenderer
-                            content={msg.text}
-                            onPromptClick={onPromptClick}
-                          />
-                          {msg.isStreaming && (
-                            <span className="inline-block w-1.5 h-3 ml-1 bg-slate-500 dark:bg-slate-400 cursor-blink align-middle"></span>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Cognitive Bridge - inline injection after triggering message */}
-              {showBridgeAfterThis && bridgeState.journeyId && bridgeState.topicMatch && (
-                <CognitiveBridge
-                  journeyId={bridgeState.journeyId}
-                  topicMatch={bridgeState.topicMatch}
-                  onAccept={onBridgeAccept}
-                  onDismiss={onBridgeDismiss}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
+      <div className="max-w-3xl mx-auto">
+        <StreamRenderer
+          items={streamItems}
+          currentItem={currentItem}
+          onSpanClick={handleSpanClick}
+          onForkSelect={onForkSelect}
+          onPromptSubmit={onPromptClick}
+          bridgeState={bridgeState}
+          onBridgeAccept={onBridgeAccept}
+          onBridgeDismiss={onBridgeDismiss}
+          loadingMessages={loadingMessages}
+        />
         <div ref={messagesEndRef} />
       </div>
     </div>

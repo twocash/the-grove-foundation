@@ -1,6 +1,7 @@
 // src/core/schema/sprout.ts
-// Sprint: Sprout System
+// Sprint: Sprout System → sprout-declarative-v1
 // Sprout data model for capturing LLM responses with full provenance
+// v3: Adds 8-stage botanical lifecycle and ResearchManifest support
 
 /**
  * Provenance - Human-readable lineage of an insight
@@ -85,8 +86,17 @@ export interface Sprout {
   // Lifecycle
   // ─────────────────────────────────────────────────────────────
 
-  /** Current status in the contribution lifecycle */
+  /** 
+   * @deprecated Use stage instead 
+   * Current status in the contribution lifecycle 
+   */
   status: SproutStatus;
+
+  /** Growth stage in botanical lifecycle (sprout-declarative-v1) */
+  stage: SproutStage;
+
+  /** Research manifest for research sprouts (sprout-declarative-v1) */
+  researchManifest?: ResearchManifest;
 
   /** User-assigned tags for categorization */
   tags: string[];
@@ -108,18 +118,102 @@ export interface Sprout {
 /**
  * Sprout lifecycle status
  *
+ * @deprecated Use SproutStage instead
  * MVP only uses 'sprout'. Future phases will implement:
  * - sapling: Under review by curator
  * - tree: Published to Knowledge Commons
  */
 export type SproutStatus = 'sprout' | 'sapling' | 'tree';
 
+// ─────────────────────────────────────────────────────────────
+// Sprout Stage (8-stage botanical lifecycle) - sprout-declarative-v1
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Botanical growth stages for sprouts.
+ * Full lifecycle from Foundation Refactor Spec.
+ * 
+ * Stage progression:
+ * - tender: Just captured, no research intent
+ * - rooting: Has research manifest, accumulating clues
+ * - branching: Prompt generated, ready to execute
+ * - hardened: Research harvested, needs review
+ * - grafted: Connected to other sprouts
+ * - established: Promoted to Knowledge Commons
+ * - dormant: Archived but preserved
+ * - withered: Abandoned
+ */
+export type SproutStage =
+  | 'tender'
+  | 'rooting'
+  | 'branching'
+  | 'hardened'
+  | 'grafted'
+  | 'established'
+  | 'dormant'
+  | 'withered';
+
+// ─────────────────────────────────────────────────────────────
+// Research Manifest - sprout-declarative-v1
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Research intent categories
+ */
+export type ResearchPurpose = 'skeleton' | 'thread' | 'challenge' | 'gap' | 'validate';
+
+/**
+ * Types of research clues
+ */
+export type ClueType = 'url' | 'citation' | 'author' | 'concept' | 'question';
+
+/**
+ * A single research clue - a hint for where to look
+ */
+export interface ResearchClue {
+  /** Type of clue */
+  type: ClueType;
+  /** The clue value (URL, name, concept, etc.) */
+  value: string;
+  /** Optional annotation */
+  note?: string;
+}
+
+/**
+ * Research manifest for research-type sprouts.
+ * Accumulates clues and directions until ready to generate a prompt.
+ */
+export interface ResearchManifest {
+  /** Research intent */
+  purpose: ResearchPurpose;
+
+  /** Accumulated research clues */
+  clues: ResearchClue[];
+
+  /** Research directions/questions to pursue */
+  directions: string[];
+
+  /** Generated prompt (if any) */
+  promptGenerated?: {
+    templateId: string;
+    generatedAt: string;
+    rawPrompt: string;
+  };
+
+  /** Harvested research output */
+  harvest?: {
+    raw: string;
+    harvestedAt: string;
+    addedToKnowledge?: boolean;
+  };
+}
+
 /**
  * localStorage schema for sprout persistence
  */
 export interface SproutStorage {
-  /** Schema version for migrations (v2 adds provenance) */
-  version: 1 | 2;
+  /** Schema version for migrations (v2 adds provenance, v3 adds stage) */
+  version: 1 | 2 | 3;
 
   /** All captured sprouts */
   sprouts: Sprout[];
@@ -129,7 +223,7 @@ export interface SproutStorage {
 }
 
 /** Current storage schema version */
-export const CURRENT_STORAGE_VERSION = 2;
+export const CURRENT_STORAGE_VERSION = 3;
 
 /**
  * Options for capturing a sprout
@@ -210,13 +304,13 @@ export function isSprout(obj: unknown): obj is Sprout {
 }
 
 /**
- * Check if storage object is valid (supports v1 and v2)
+ * Check if storage object is valid (supports v1, v2, and v3)
  */
 export function isValidSproutStorage(obj: unknown): obj is SproutStorage {
   if (!obj || typeof obj !== 'object') return false;
   const s = obj as Partial<SproutStorage>;
   return (
-    (s.version === 1 || s.version === 2) &&
+    (s.version === 1 || s.version === 2 || s.version === 3) &&
     Array.isArray(s.sprouts) &&
     typeof s.sessionId === 'string'
   );
@@ -245,6 +339,40 @@ export function migrateStorageToV2(storage: SproutStorage): SproutStorage {
     version: 2,
     sprouts: migratedSprouts,
     sessionId: storage.sessionId
+  };
+}
+
+/**
+ * Migrate v2 storage to v3 (adds stage field from status)
+ * sprout-declarative-v1
+ */
+export function migrateStorageToV3(storage: SproutStorage): SproutStorage {
+  if (storage.version === 3) return storage;
+
+  // First ensure we're at v2
+  const v2Storage = storage.version === 1 ? migrateStorageToV2(storage) : storage;
+
+  // Map old status to new stage
+  const mapStatusToStage = (status: SproutStatus): SproutStage => {
+    const mapping: Record<SproutStatus, SproutStage> = {
+      'sprout': 'tender',
+      'sapling': 'rooting',
+      'tree': 'established'
+    };
+    return mapping[status] ?? 'tender';
+  };
+
+  // Migrate v2 sprouts: add stage field
+  const migratedSprouts = v2Storage.sprouts.map(sprout => ({
+    ...sprout,
+    stage: (sprout as Sprout).stage ?? mapStatusToStage(sprout.status),
+    // researchManifest remains undefined for existing sprouts
+  }));
+
+  return {
+    version: 3,
+    sprouts: migratedSprouts,
+    sessionId: v2Storage.sessionId
   };
 }
 

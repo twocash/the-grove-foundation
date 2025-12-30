@@ -81,6 +81,7 @@ export const SproutCaptureCard: React.FC<SproutCaptureCardProps> = ({
   return (
     <motion.div
       layoutId={layoutId}
+      data-capture-ui="card"
       className="fixed z-50 w-80 rounded-xl overflow-hidden
                  bg-[var(--glass-solid)] border border-[var(--glass-border)]
                  backdrop-blur-xl shadow-2xl"
@@ -88,6 +89,7 @@ export const SproutCaptureCard: React.FC<SproutCaptureCardProps> = ({
         left: cardX,
         top: cardY,
       }}
+      onMouseDown={(e) => e.preventDefault()}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}

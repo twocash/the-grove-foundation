@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sprout-stages.schema.json",
+  "title": "Sprout Stages Configuration",
+  "description": "Defines the botanical lifecycle stages for sprouts",
+  "type": "object",
+  "required": ["version", "stages", "transitions"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "stages": {
+      "type": "array",
+      "description": "All possible sprout stages",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "color", "description", "active"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["tender", "rooting", "branching", "hardened", "grafted", "established", "dormant", "withered"]
+          },
+          "label": { "type": "string" },
+          "icon": { "type": "string" },
+          "color": { "type": "string", "description": "Tailwind color class suffix" },
+          "description": { "type": "string" },
+          "active": { "type": "boolean", "description": "Whether this stage is currently implemented" }
+        }
+      }
+    },
+    "transitions": {
+      "type": "object",
+      "description": "Valid stage transitions. Keys are source stages, values are arrays of valid target stages.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["tender", "rooting", "branching", "hardened", "grafted", "established", "dormant", "withered"]
+        }
+      }
+    }
+  }
+}

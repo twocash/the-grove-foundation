@@ -57,8 +57,12 @@ export interface EvaluationResult {
  * Check if a value is within a numeric range
  */
 function inRange(value: number, range: NumericRange): boolean {
-  if (range.min !== undefined && value < range.min) return false;
-  if (range.max !== undefined && value > range.max) return false;
+  if (range.min !== undefined && value < range.min) {
+    return false;
+  }
+  if (range.max !== undefined && value > range.max) {
+    return false;
+  }
   return true;
 }
 

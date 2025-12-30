@@ -24,12 +24,16 @@ import {
   useTextSelection,
   useCaptureState,
   useKineticShortcuts,
+  useSelectionActions,
   MagneticPill,
+  SelectionHighlight,
   SproutCaptureCard,
+  ResearchManifestCard,
   SproutTray,
   KeyboardHUD
 } from './Capture';
-import type { Shortcut } from './Capture';
+import type { Shortcut, SelectionAction } from './Capture';
+import type { ResearchManifest, SproutStage } from '@core/schema/sprout';
 import { useSproutStorage } from '../../../../hooks/useSproutStorage';
 import type { Sprout, SproutProvenance } from '@core/schema/sprout';
 import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@core/schema/stream';
@@ -170,9 +174,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   const sprouts = getSprouts();
   const sessionSproutCount = getSessionSproutsCount();
 
-  // Stream container ref for text selection (Sprint: kinetic-cultivation-v1)
+  // Stream container ref for text selection (Sprint: kinetic-cultivation-v1, selection-model-fix-v1)
   const streamContainerRef = useRef<HTMLDivElement>(null);
-  const selection = useTextSelection(streamContainerRef);
+  const { selection, lockSelection, unlockSelection } = useTextSelection(streamContainerRef);
   const {
     state: captureState,
     startCapture,
@@ -180,19 +184,61 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     completeCapture
   } = useCaptureState();
 
-  // Handle capture activation (pill click)
+  // Persistent highlight rects - survives through entire capture flow
+  const [highlightRects, setHighlightRects] = useState<{ top: number; left: number; width: number; height: number }[]>([]);
+
+  // Sync highlight rects from selection (only when not capturing)
+  React.useEffect(() => {
+    if (!captureState.isCapturing && selection?.rects) {
+      setHighlightRects(selection.rects);
+    }
+  }, [selection?.rects, captureState.isCapturing]);
+
+  // Clear highlight rects only when capture flow ends AND no new selection
+  const clearHighlight = useCallback(() => {
+    setHighlightRects([]);
+  }, []);
+
+  // Multi-action selection (Sprint: sprout-declarative-v1)
+  const { actions: selectionActions, getActionById } = useSelectionActions();
+  const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
+  const selectedAction = selectedActionId ? getActionById(selectedActionId) : null;
+
+  // Handle capture activation (pill click or action menu selection)
+  const handleActionSelect = useCallback((actionId: string) => {
+    if (!selection) return;
+    lockSelection(); // Lock selection to prevent updates during capture
+    setSelectedActionId(actionId);
+    startCapture(selection);
+    const action = getActionById(actionId);
+    console.log('[Capture] Card opened with action:', {
+      actionId,
+      actionLabel: action?.label,
+      text: selection.text.slice(0, 50),
+      messageId: selection.messageId,
+    });
+  }, [selection, startCapture, getActionById, lockSelection]);
+
+  // Legacy handler for backward compatibility
   const handleCaptureActivate = useCallback(() => {
     if (!selection) return;
+    lockSelection(); // Lock selection to prevent updates during capture
+    // Default to first action (sprout)
+    setSelectedActionId(selectionActions[0]?.id || 'sprout');
     startCapture(selection);
     console.log('[Capture] Card opened with selection:', {
       text: selection.text.slice(0, 50),
       messageId: selection.messageId,
     });
-  }, [selection, startCapture]);
+  }, [selection, startCapture, selectionActions, lockSelection]);
 
-  // Handle capture confirmation (Sprint: kinetic-cultivation-v1)
+  // Handle capture confirmation (Sprint: kinetic-cultivation-v1, sprout-declarative-v1)
   const handleCaptureConfirm = useCallback(async (tags: string[]) => {
     if (!captureState.selection) return;
+
+    // Get stage from selected action (sprout-declarative-v1)
+    const action = selectedActionId ? getActionById(selectedActionId) : null;
+    const stage = (action?.defaultStage as Sprout['stage']) || 'tender';
 
     // Build provenance from current context
     const provenance: SproutProvenance = {
@@ -216,6 +262,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       hubId: null,
       nodeId: captureState.selection.messageId,
       status: 'sprout',
+      stage, // sprout-declarative-v1: Use action-specific stage
       tags,
       notes: null,
       sessionId,
@@ -232,11 +279,71 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         journeyId: journey?.id,
         hubId: undefined
       });
-      console.log('[Capture] Sprout planted:', sprout.id.slice(0, 8));
+      console.log('[Capture] Sprout planted:', sprout.id.slice(0, 8), 'stage:', stage);
     }
 
+    // Reset action selection and unlock
+    setSelectedActionId(null);
+    unlockSelection();
     completeCapture();
-  }, [captureState.selection, lens, lensData, journey, sessionId, addSprout, actor, completeCapture]);
+    clearHighlight();
+  }, [captureState.selection, selectedActionId, getActionById, lens, lensData, journey, sessionId, addSprout, actor, completeCapture, unlockSelection, clearHighlight]);
+
+  // Handle research manifest capture (Sprint: sprout-declarative-v1)
+  const handleResearchCapture = useCallback(async (manifest: ResearchManifest, tags: string[], captureStage?: SproutStage) => {
+    if (!captureState.selection) return;
+
+    // Build provenance from current context
+    const provenance: SproutProvenance = {
+      lens: lens ? { id: lens, name: lensData?.publicLabel || lens } : null,
+      hub: null,
+      journey: journey ? { id: journey.id, name: journey.title } : null,
+      node: null,
+      knowledgeFiles: [],
+      generatedAt: new Date().toISOString()
+    };
+
+    // Determine stage: use passed stage or default based on whether prompt was generated
+    const stage: SproutStage = captureStage || (manifest.promptGenerated ? 'branching' : 'rooting');
+
+    // Create research sprout with manifest
+    const sprout: Sprout = {
+      id: crypto.randomUUID(),
+      capturedAt: new Date().toISOString(),
+      response: captureState.selection.text,
+      query: captureState.selection.contextSpan,
+      provenance,
+      personaId: lens || null,
+      journeyId: journey?.id || null,
+      hubId: null,
+      nodeId: captureState.selection.messageId,
+      status: 'sprout',
+      stage, // Use determined stage
+      researchManifest: manifest,
+      tags,
+      notes: null,
+      sessionId,
+      creatorId: null
+    };
+
+    // Persist to storage
+    const success = await addSprout(sprout);
+    if (success) {
+      actor.send({
+        type: 'SPROUT_CAPTURED',
+        sproutId: sprout.id,
+        journeyId: journey?.id,
+        hubId: undefined
+      });
+      console.log('[Capture] Research directive created:', sprout.id.slice(0, 8), 'purpose:', manifest.purpose, 'stage:', stage);
+    }
+
+    // Reset action selection and unlock
+    setSelectedActionId(null);
+    unlockSelection();
+    completeCapture();
+    clearHighlight();
+  }, [captureState.selection, lens, lensData, journey, sessionId, addSprout, actor, completeCapture, unlockSelection, clearHighlight]);
 
   // Keyboard HUD state (Sprint: kinetic-cultivation-v1)
   const [showKeyboardHUD, setShowKeyboardHUD] = useState(false);
@@ -342,13 +449,19 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       const newLens = await saveCustomLens(candidate, userInputs);
       selectLens(newLens.id);
       setOverlay({ type: 'none' });
+      localStorage.setItem('grove-session-established', 'true');
       // Set flag to prevent re-offering the custom lens moment
       actor.send({ type: 'SET_FLAG', key: 'customLensCreated', value: true });
       console.log('[ExploreShell] Custom lens created:', newLens.id);
+
+      // Re-submit last query with new lens if there's an existing conversation
+      if (items.some(i => i.type === 'query')) {
+        resubmitWithLens(newLens.id);
+      }
     } catch (error) {
       console.error('[ExploreShell] Failed to save custom lens:', error);
     }
-  }, [saveCustomLens, selectLens, actor]);
+  }, [saveCustomLens, selectLens, actor, items, resubmitWithLens]);
 
   const handleWizardCancel = useCallback(() => {
     setOverlay({ type: 'none' });
@@ -499,24 +612,47 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         />
       )}
 
-      {/* Sprout capture UI (Sprint: kinetic-cultivation-v1) */}
+      {/* Sprout capture UI (Sprint: kinetic-cultivation-v1, sprout-declarative-v1) */}
+      {/* Selection highlight overlay - persists through entire capture flow */}
+      <AnimatePresence>
+        {highlightRects.length > 0 && (
+          <SelectionHighlight
+            key="selection-highlight"
+            rects={highlightRects}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode="wait">
         {selection && !captureState.isCapturing && (
           <MagneticPill
             key="pill"
             position={{ x: selection.rect.right, y: selection.rect.bottom }}
+            actions={selectionActions}
+            onActionSelect={handleActionSelect}
             onActivate={handleCaptureActivate}
             layoutId="sprout-capture"
           />
         )}
-        {captureState.isCapturing && captureState.selection && (
+        {captureState.isCapturing && captureState.selection && selectedActionId === 'research-directive' && (
+          <ResearchManifestCard
+            key="research-card"
+            selection={captureState.selection}
+            lensName={lensData?.publicLabel}
+            journeyName={journey?.title}
+            onCapture={handleResearchCapture}
+            onCancel={() => { setSelectedActionId(null); unlockSelection(); cancelCapture(); clearHighlight(); }}
+            layoutId="sprout-capture"
+          />
+        )}
+        {captureState.isCapturing && captureState.selection && selectedActionId !== 'research-directive' && (
           <SproutCaptureCard
-            key="card"
+            key="sprout-card"
             selection={captureState.selection}
             lensName={lensData?.publicLabel}
             journeyName={journey?.title}
             onCapture={handleCaptureConfirm}
-            onCancel={cancelCapture}
+            onCancel={() => { setSelectedActionId(null); unlockSelection(); cancelCapture(); clearHighlight(); }}
             layoutId="sprout-capture"
           />
         )}

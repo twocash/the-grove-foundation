@@ -5,3 +5,4 @@ export * from './workspace-state';
 export * from './useWorkspaceState';
 export * from './useKeyboardNavigation';
 export * from './versioned-artifact';
+export { generateResearchPrompt, generateAndRecordPrompt } from './prompt-generator';

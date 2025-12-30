@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "selection-actions.schema.json",
+  "title": "Selection Actions Configuration",
+  "description": "Defines available actions when text is selected in the Kinetic Stream",
+  "type": "object",
+  "required": ["version", "actions"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of this config"
+    },
+    "actions": {
+      "type": "array",
+      "description": "Available selection actions",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "icon", "description", "defaultStage", "captureCard", "fields"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique action identifier"
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable action name"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Emoji or icon identifier"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief action description"
+          },
+          "defaultStage": {
+            "type": "string",
+            "enum": ["tender", "rooting", "branching", "hardened", "grafted", "established", "dormant", "withered"],
+            "description": "Initial stage for sprouts created by this action"
+          },
+          "captureCard": {
+            "type": "string",
+            "description": "Component name to render for this action"
+          },
+          "fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Fields available in the capture card"
+          },
+          "shortcut": {
+            "type": "string",
+            "description": "Single-key keyboard shortcut"
+          }
+        }
+      }
+    }
+  }
+}

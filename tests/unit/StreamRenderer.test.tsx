@@ -6,7 +6,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { StreamRenderer } from '../../components/Terminal/Stream/StreamRenderer';
-import type { StreamItem, RhetoricalSpan, JourneyPath } from '../../src/core/schema/stream';
+import type { StreamItem, RhetoricalSpan, JourneyPath, QueryStreamItem, ResponseStreamItem, NavigationStreamItem, SystemStreamItem } from '../../src/core/schema/stream';
 
 // Mock CognitiveBridge to avoid complex dependencies
 vi.mock('../../components/Terminal/CognitiveBridge', () => ({
@@ -23,27 +23,58 @@ vi.mock('../../components/Terminal/CognitiveBridge', () => ({
 }));
 
 describe('StreamRenderer', () => {
-  // Helper to create stream items
-  const createItem = (overrides: Partial<StreamItem> = {}): StreamItem => ({
+  // Helper to create query items
+  const createQueryItem = (content: string, overrides: Partial<QueryStreamItem> = {}): QueryStreamItem => ({
+    id: `query-${Date.now()}`,
+    type: 'query',
+    timestamp: Date.now(),
+    content,
+    role: 'user',
+    createdBy: 'user',
+    ...overrides,
+  });
+
+  // Helper to create response items
+  const createResponseItem = (content: string, overrides: Partial<ResponseStreamItem> = {}): ResponseStreamItem => ({
+    id: `response-${Date.now()}`,
+    type: 'response',
+    timestamp: Date.now(),
+    content,
+    role: 'assistant',
+    createdBy: 'ai',
+    isGenerating: false,
+    ...overrides,
+  });
+
+  // Helper to create navigation items
+  const createNavigationItem = (paths: JourneyPath[]): NavigationStreamItem => ({
+    id: `nav-${Date.now()}`,
+    type: 'navigation',
+    timestamp: Date.now(),
+    forks: paths.map(p => ({ id: p.id, label: p.label, type: 'pivot' as const })),
+    sourceResponseId: 'response-1',
+  });
+
+  // Helper to create system items
+  const createSystemItem = (content: string): SystemStreamItem => ({
+    id: `system-${Date.now()}`,
+    type: 'system',
+    timestamp: Date.now(),
+    content,
+    createdBy: 'system',
+  });
+
+  // Legacy helper for backward compatibility in tests
+  const createItem = (overrides: Partial<ResponseStreamItem> = {}): ResponseStreamItem => ({
     id: `item-${Date.now()}`,
     type: 'response',
     timestamp: Date.now(),
     content: 'Test content',
+    role: 'assistant',
     createdBy: 'ai',
+    isGenerating: false,
     ...overrides,
   });
-
-  const createQueryItem = (content: string): StreamItem =>
-    createItem({ type: 'query', content, createdBy: 'user' });
-
-  const createResponseItem = (content: string): StreamItem =>
-    createItem({ type: 'response', content, createdBy: 'ai' });
-
-  const createNavigationItem = (paths: JourneyPath[]): StreamItem =>
-    createItem({ type: 'navigation', content: '', suggestedPaths: paths });
-
-  const createSystemItem = (content: string): StreamItem =>
-    createItem({ type: 'system', content, createdBy: 'system' });
 
   describe('basic rendering', () => {
     it('renders empty when no items', () => {
@@ -108,7 +139,7 @@ describe('StreamRenderer', () => {
       expect(screen.getByTestId('response-block')).toBeInTheDocument();
     });
 
-    it('shows blinking cursor when generating with content', () => {
+    it('renders response block when generating with content', () => {
       const items = [
         createItem({
           type: 'response',
@@ -119,8 +150,12 @@ describe('StreamRenderer', () => {
 
       render(<StreamRenderer items={items} />);
 
-      // Check for cursor-blink class
-      expect(document.querySelector('.cursor-blink')).toBeInTheDocument();
+      // Check that the response block is rendered during streaming
+      const responseBlock = screen.getByTestId('response-block');
+      expect(responseBlock).toBeInTheDocument();
+      // StreamingText component animates content, so we verify the block exists
+      // and contains "The Grove" label indicating it's an AI response
+      expect(responseBlock).toHaveTextContent('The Grove');
     });
 
     it('applies error styling for error messages', () => {
@@ -129,7 +164,8 @@ describe('StreamRenderer', () => {
       render(<StreamRenderer items={items} />);
 
       const responseBlock = screen.getByTestId('response-block');
-      expect(responseBlock.querySelector('.bg-red-50')).toBeInTheDocument();
+      // Glass design system uses glass-message-error class for errors
+      expect(responseBlock.querySelector('.glass-message-error')).toBeInTheDocument();
     });
   });
 
@@ -148,15 +184,16 @@ describe('StreamRenderer', () => {
       expect(screen.getByText('Explore infrastructure')).toBeInTheDocument();
     });
 
-    it('calls onPathClick when path is clicked', () => {
-      const onPathClick = vi.fn();
+    it('calls onForkSelect when fork is clicked', () => {
+      const onForkSelect = vi.fn();
       const paths: JourneyPath[] = [{ id: 'path-1', label: 'Click me' }];
       const items = [createNavigationItem(paths)];
 
-      render(<StreamRenderer items={items} onPathClick={onPathClick} />);
+      render(<StreamRenderer items={items} onForkSelect={onForkSelect} />);
 
       fireEvent.click(screen.getByText('Click me'));
-      expect(onPathClick).toHaveBeenCalledWith(paths[0]);
+      // NavigationItem converts JourneyPath to JourneyFork with type: 'pivot'
+      expect(onForkSelect).toHaveBeenCalledWith({ id: 'path-1', label: 'Click me', type: 'pivot' });
     });
   });
 
@@ -293,7 +330,13 @@ describe('StreamRenderer', () => {
 
   describe('unknown item types', () => {
     it('handles reveal type gracefully', () => {
-      const items = [createItem({ type: 'reveal', content: 'Reveal content' })];
+      const revealItem: StreamItem = {
+        id: 'reveal-1',
+        type: 'reveal',
+        timestamp: Date.now(),
+        content: 'Reveal content',
+      };
+      const items = [revealItem];
 
       // Should not crash, reveal blocks return null
       render(<StreamRenderer items={items} />);
@@ -302,7 +345,7 @@ describe('StreamRenderer', () => {
 
     it('logs warning for unknown types', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const items = [createItem({ type: 'unknown' as any, content: 'Unknown' })];
+      const items = [{ ...createItem(), type: 'unknown' as any }];
 
       render(<StreamRenderer items={items} />);
 

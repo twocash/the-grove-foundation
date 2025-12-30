@@ -67,7 +67,8 @@ export type StreamItemType =
   | 'reveal'        // Concept reveal
   | 'system'        // Status messages
   | 'lens_offer'    // Inline lens recommendation
-  | 'journey_offer'; // Inline journey recommendation
+  | 'journey_offer' // Inline journey recommendation
+  | 'moment';       // Engagement-triggered moment
 
 // ─────────────────────────────────────────────────────────────────
 // RHETORICAL SPANS
@@ -162,6 +163,28 @@ export interface RevealStreamItem extends BaseStreamItem {
   suggestedPaths?: JourneyPath[];
 }
 
+export type MomentStreamStatus = 'pending' | 'actioned' | 'dismissed';
+
+export interface MomentStreamItem extends BaseStreamItem {
+  type: 'moment';
+  momentId: string;
+  momentTitle: string;
+  content: {
+    heading?: string;
+    body?: string;
+    icon?: string;
+  };
+  actions: Array<{
+    id: string;
+    label: string;
+    type: string;
+    variant?: string;
+    journeyId?: string;
+    lensId?: string;
+  }>;
+  status: MomentStreamStatus;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // STREAM ITEM UNION
 // ─────────────────────────────────────────────────────────────────
@@ -173,7 +196,8 @@ export type StreamItem =
   | SystemStreamItem
   | LensOfferStreamItem
   | JourneyOfferStreamItem
-  | RevealStreamItem;
+  | RevealStreamItem
+  | MomentStreamItem;
 
 // Legacy interface for backward compatibility
 export interface LegacyStreamItem {
@@ -219,6 +243,10 @@ export function isLensOfferItem(item: StreamItem): item is LensOfferStreamItem {
 
 export function isJourneyOfferItem(item: StreamItem): item is JourneyOfferStreamItem {
   return item.type === 'journey_offer';
+}
+
+export function isMomentItem(item: StreamItem): item is MomentStreamItem {
+  return item.type === 'moment';
 }
 
 export function hasSpans(item: StreamItem): item is (ResponseStreamItem | RevealStreamItem) & { parsedSpans: RhetoricalSpan[] } {

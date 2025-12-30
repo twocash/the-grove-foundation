@@ -1,6 +1,10 @@
 // src/core/transformers/JourneyOfferParser.ts
 // Extract <journey_offer> tags from LLM output
 // Sprint: journey-offer-v1
+//
+// @deprecated SECONDARY PATH - Prefer Moment-based offers (moment-ui-integration-v1)
+// This parser remains for backwards compatibility if LLM emits offer tags,
+// but the primary mechanism is now client-side Moments via useMomentStream.
 
 import type { JourneyOfferStreamItem, JourneyOfferStatus } from '../schema/stream';
 

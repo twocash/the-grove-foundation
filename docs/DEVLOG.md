@@ -5,6 +5,92 @@
 
 ---
 
+## 2025-12-30 | Selection Model Fix v1 - Complete
+
+### Objective
+Fix broken text selection behavior in the Sprout capture system. Selection was unreliable: pill would bounce away from cursor, selection would clear on pill click, and visual highlight would disappear during capture flow.
+
+### Root Cause Analysis
+
+The original implementation used continuous `selectionchange` event listening, which caused:
+1. **Pill bounce**: Selection rect kept updating as cursor moved, making pill jump
+2. **Focus theft**: Clicking pill would trigger focus changes that cleared browser selection
+3. **Visual feedback loss**: Browser's native highlight disappeared when focus shifted to capture UI
+
+### Solution Architecture
+
+| Problem | Solution |
+|---------|----------|
+| Continuous `selectionchange` updates | Mouseup-based capture (only capture on mouse release) |
+| Focus theft on pill click | `onMouseDown={(e) => e.preventDefault()}` on all capture UI |
+| Selection clear on outside click | `data-capture-ui` attribute to identify capture elements |
+| Highlight disappears | Custom `SelectionHighlight` overlay with persistent `highlightRects` state |
+| Magnetic scaling causes perceived jump | Disabled magnetic effect (`magneticScale: 1.0`) |
+
+### Key Implementation Details
+
+#### Mouseup-Based Selection (replaces selectionchange)
+```typescript
+// Track selection via mousedown/mouseup instead of continuous selectionchange
+const handleMouseDown = (e: MouseEvent) => {
+  if (container.contains(target) && !target.closest('[data-capture-ui]')) {
+    isSelectingRef.current = true;
+    if (!isLocked) setSelection(null);
+  }
+};
+
+const handleMouseUp = (e: MouseEvent) => {
+  if (!isSelectingRef.current) return;
+  isSelectingRef.current = false;
+  requestAnimationFrame(() => captureSelection());
+};
+```
+
+#### Selection Locking Pattern
+- `lockSelection()`: Called when capture starts, prevents updates during flow
+- `unlockSelection()`: Called on cancel/complete, re-enables selection
+- Selection state frozen during entire capture flow
+
+#### Persistent Highlight Overlay
+- `highlightRects` state syncs from `selection.rects` when not capturing
+- Freezes in place during capture (sync effect skipped when `isCapturing`)
+- Clears only on explicit `clearHighlight()` call (cancel/complete)
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `Capture/components/SelectionHighlight.tsx` | Custom highlight overlay for selected text |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `Capture/hooks/useTextSelection.ts` | Complete rewrite: mouseup-based capture, locking, rects array |
+| `Capture/components/MagneticPill.tsx` | Added `data-capture-ui="pill"` |
+| `Capture/components/ActionMenu.tsx` | Added `data-capture-ui="menu"` |
+| `Capture/components/SproutCaptureCard.tsx` | Added `data-capture-ui="card"`, `onMouseDown` |
+| `Capture/components/ResearchManifestCard.tsx` | Added `data-capture-ui="card"`, `onMouseDown` |
+| `Capture/config/sprout-capture.config.ts` | Disabled magnetic scaling (`magneticScale: 1.0`) |
+| `Capture/index.ts` | Export `SelectionHighlight`, `SelectionRect` type |
+| `ExploreShell.tsx` | Added `highlightRects` state, `clearHighlight()`, updated render logic |
+
+### Learnings
+
+1. **Browser Selection API limitations**: Native selection highlight disappears when focus shifts. For persistent visual feedback, a custom overlay is required.
+
+2. **Event timing matters**: `selectionchange` fires during drag, not just on completion. For stable UI, capture state only on `mouseup`.
+
+3. **Focus prevention**: `e.preventDefault()` on `mousedown` prevents focus shift but must be on ALL interactive elements in the capture UI.
+
+4. **State isolation for animations**: Magnetic scaling (spring animation) combined with position changes creates perceived "jumping". Disable animation when precision matters.
+
+### Test Results
+- All 376 tests pass
+- Build succeeds
+
+---
+
 ## 2025-12-29 | Kinetic Cultivation v1 - Complete
 
 ### Objective

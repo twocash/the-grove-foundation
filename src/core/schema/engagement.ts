@@ -53,7 +53,10 @@ export type EngagementEventType =
   // Moment telemetry (Sprint: engagement-orchestrator-v1)
   | 'MOMENT_SHOWN'
   | 'MOMENT_ACTIONED'
-  | 'MOMENT_DISMISSED';
+  | 'MOMENT_DISMISSED'
+  // Hub tracking for entropy (Sprint: entropy-calculation-v1)
+  | 'HUB_VISITED'
+  | 'PIVOT_CLICKED';
 
 export interface EngagementEvent<T extends EngagementEventType = EngagementEventType> {
   type: T;
@@ -79,6 +82,9 @@ export interface EventPayloads {
   MOMENT_SHOWN: { momentId: string; surface: string; timestamp: number };
   MOMENT_ACTIONED: { momentId: string; actionId: string; actionType: string; timestamp: number };
   MOMENT_DISMISSED: { momentId: string; timestamp: number };
+  // Hub tracking payloads (Sprint: entropy-calculation-v1)
+  HUB_VISITED: { hubId: string };
+  PIVOT_CLICKED: Record<string, never>;
 }
 
 // ============================================================================

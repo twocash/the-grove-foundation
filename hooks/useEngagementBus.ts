@@ -587,7 +587,14 @@ export function useEngagementEmit() {
       emit('MOMENT_ACTIONED', { momentId, actionId, actionType, timestamp: Date.now() }),
 
     momentDismissed: (momentId: string) =>
-      emit('MOMENT_DISMISSED', { momentId, timestamp: Date.now() })
+      emit('MOMENT_DISMISSED', { momentId, timestamp: Date.now() }),
+
+    // Hub tracking for entropy (Sprint: entropy-calculation-v1)
+    hubVisited: (hubId: string) =>
+      emit('HUB_VISITED', { hubId }),
+
+    pivotClicked: () =>
+      emit('PIVOT_CLICKED', {})
   }), [emit]);
 }
 
