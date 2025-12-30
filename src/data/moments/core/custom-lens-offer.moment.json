@@ -14,7 +14,7 @@
   },
   "payload": {
     "trigger": {
-      "exchangeCount": { "min": 1 },
+      "exchangeCount": { "min": 2 },
       "stage": ["ARRIVAL", "ORIENTED", "EXPLORING", "ENGAGED"],
       "hasCustomLens": false,
       "flags": { "customLensOffered": false, "customLensCreated": false }
