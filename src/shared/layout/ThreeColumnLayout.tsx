@@ -33,7 +33,7 @@ export function ThreeColumnLayout({
   header,
 }: ThreeColumnLayoutProps) {
   return (
-    <div className={`flex flex-col h-screen overflow-hidden bg-background-light dark:bg-background-dark ${className}`}>
+    <div className={`flex flex-col h-screen overflow-hidden bg-[var(--glass-void)] ${className}`}>
       {/* Header */}
       {header}
 
@@ -42,13 +42,13 @@ export function ThreeColumnLayout({
         {/* Navigation */}
         <aside
           style={{ width: navWidth }}
-          className="flex-shrink-0 border-r border-border-light dark:border-border-dark overflow-y-auto bg-surface-light dark:bg-surface-dark"
+          className="flex-shrink-0 border-r border-[var(--glass-border)] overflow-y-auto bg-[var(--glass-solid)]"
         >
           {navigation}
         </aside>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
+        <main className="flex-1 overflow-y-auto bg-[var(--glass-void)]">
           {content}
         </main>
 
@@ -56,7 +56,7 @@ export function ThreeColumnLayout({
         {inspector && inspectorOpen && (
           <aside
             style={{ width: inspectorWidth }}
-            className="flex-shrink-0 border-l border-border-light dark:border-border-dark overflow-y-auto bg-surface-light dark:bg-surface-dark"
+            className="flex-shrink-0 border-l border-[var(--glass-border)] overflow-y-auto bg-[var(--glass-solid)]"
           >
             {inspector}
           </aside>
