@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+// Load .env.local first (local dev), then .env as fallback
+dotenv.config({ path: '.env.local' });
+dotenv.config(); // Load .env as fallback (won't override existing vars)
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -1438,6 +1441,65 @@ async function fetchRagContext(message = '', narratives = null, activeJourneyId 
 /**
  * Legacy RAG loader (fallback if no manifest)
  */
+/**
+ * Fetch RAG context from Supabase Kinetic Pipeline (Epic 5)
+ * Used by /explore route - strangler fig pattern
+ * @param {string} message - User query for semantic search
+ * @param {Object} options - Configuration options
+ * @returns {Promise<string|Object>} Context string or result object
+ */
+async function fetchRagContextKinetic(message, options = {}) {
+    try {
+        const knowledge = await getKnowledgeModule();
+        if (!knowledge) {
+            console.log('[RAG-Kinetic] Knowledge module not available, falling back to GCS');
+            return await fetchRagContext(message);
+        }
+
+        console.log('[RAG-Kinetic] Using Supabase pipeline for context');
+
+        // Use semantic search to find relevant documents
+        const { context, sources } = await knowledge.getContextForQuery(message, {
+            limit: options.limit || 5,
+            threshold: options.threshold || 0.4,
+        });
+
+        if (!context || context.length === 0) {
+            console.log('[RAG-Kinetic] No Supabase context found, falling back to GCS');
+            return await fetchRagContext(message);
+        }
+
+        // Log what we found
+        console.log(`[RAG-Kinetic] Found ${sources.length} relevant documents:`);
+        sources.forEach(s => {
+            console.log(`  - ${s.title} (similarity: ${Math.round(s.similarity * 100)}%)`);
+        });
+
+        const totalBytes = context.length;
+        console.log(`[RAG-Kinetic] Total context: ${totalBytes} bytes (~${Math.round(totalBytes / 4)} tokens)`);
+
+        // Return in same format as fetchRagContext for compatibility
+        if (options.returnObject) {
+            return {
+                context,
+                sources,
+                tier1Bytes: 0,
+                tier2Bytes: totalBytes,
+                matchedHub: sources[0]?.id || null,
+                mode: 'kinetic',
+                filesLoaded: sources.map(s => s.title),
+            };
+        }
+
+        return context;
+
+    } catch (error) {
+        console.error('[RAG-Kinetic] Error:', error.message);
+        console.log('[RAG-Kinetic] Falling back to GCS');
+        return await fetchRagContext(message);
+    }
+}
+
 async function fetchRagContextLegacy() {
     const MAX_BYTES = 50000;
 
@@ -1480,7 +1542,8 @@ app.post('/api/chat', async (req, res) => {
             personaTone,
             verboseMode = false,
             terminatorMode = false,
-            journeyId = null  // NEW: Optional journey ID for Deterministic RAG Mode
+            journeyId = null,  // Optional journey ID for Deterministic RAG Mode
+            useKineticPipeline = true  // Epic 5: Supabase pipeline is now default for all routes
         } = req.body;
 
         if (!message) {
@@ -1501,16 +1564,25 @@ app.post('/api/chat', async (req, res) => {
         let session = chatSessions.get(chatSessionId);
 
         if (!session) {
-            // Fetch narratives (unified registry with hubs, journeys, etc.)
-            const narratives = await fetchNarratives();
+            // Fetch RAG context - use Kinetic Pipeline (Supabase) or GCS based on flag
+            let ragResult;
+            let baseSystemPrompt;
 
-            // Fetch RAG context using unified registry
-            // - If journeyId provided: Deterministic Mode (load linkedHubId)
-            // - Otherwise: Discovery Mode (route by query tags)
-            const [ragResult, baseSystemPrompt] = await Promise.all([
-                fetchRagContext(message, narratives, journeyId),
-                fetchActiveSystemPrompt()
-            ]);
+            if (useKineticPipeline) {
+                // Epic 5: Strangler Fig - /explore uses Supabase pipeline
+                console.log('[Chat] Using Kinetic Pipeline (Supabase)');
+                [ragResult, baseSystemPrompt] = await Promise.all([
+                    fetchRagContextKinetic(message, { returnObject: false }),
+                    fetchActiveSystemPrompt()
+                ]);
+            } else {
+                // Default: GCS pipeline (for /genesis and other routes)
+                const narratives = await fetchNarratives();
+                [ragResult, baseSystemPrompt] = await Promise.all([
+                    fetchRagContext(message, narratives, journeyId),
+                    fetchActiveSystemPrompt()
+                ]);
+            }
             const systemPrompt = buildSystemPrompt({
                 baseSystemPrompt,
                 personaTone,
@@ -2602,6 +2674,304 @@ app.get('/api/telemetry/journey/:sessionId/:journeyId', async (req, res) => {
   } catch (error) {
     console.error('[Telemetry] Journey fetch error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================================================
+// Knowledge Pipeline API (kinetic-pipeline-v1)
+// ============================================================================
+
+// Dynamic import for knowledge module
+let knowledgeModule = null;
+async function getKnowledgeModule() {
+  if (!knowledgeModule) {
+    try {
+      knowledgeModule = await import('./lib/knowledge/index.js');
+    } catch (e) {
+      console.error('[Knowledge] Failed to load module:', e.message);
+    }
+  }
+  return knowledgeModule;
+}
+
+// Upload document
+app.post('/api/knowledge/upload', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { title, content, tier, sourceType, sourceUrl, fileType } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Title and content are required' });
+    }
+
+    const result = await knowledge.ingestDocument({
+      title,
+      content,
+      tier,
+      sourceType,
+      sourceUrl,
+      fileType,
+    });
+
+    console.log(`[Knowledge] Document uploaded: ${result.id}`);
+    res.json(result);
+  } catch (error) {
+    console.error('[Knowledge] Upload error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List documents
+app.get('/api/knowledge/documents', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { tier, status, archived, limit, offset } = req.query;
+
+    const documents = await knowledge.listDocuments({
+      tier: tier || undefined,
+      embeddingStatus: status || undefined,
+      archived: archived === 'true',
+      limit: limit ? parseInt(limit, 10) : 50,
+      offset: offset ? parseInt(offset, 10) : 0,
+    });
+
+    res.json({ documents, count: documents.length });
+  } catch (error) {
+    console.error('[Knowledge] List error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single document
+app.get('/api/knowledge/documents/:id', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const document = await knowledge.getDocument(req.params.id);
+
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    res.json(document);
+  } catch (error) {
+    console.error('[Knowledge] Get document error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get pipeline stats
+app.get('/api/knowledge/stats', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const stats = await knowledge.getPipelineStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('[Knowledge] Stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trigger embedding for pending documents
+app.post('/api/knowledge/embed', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { documentIds, limit } = req.body;
+
+    if (documentIds && documentIds.length > 0) {
+      // Embed specific documents
+      const errors = [];
+      let processed = 0;
+      for (const id of documentIds) {
+        try {
+          await knowledge.embedDocument(id);
+          processed++;
+        } catch (error) {
+          errors.push(`${id}: ${error.message}`);
+        }
+      }
+      return res.json({ processed, errors });
+    }
+
+    // Embed all pending
+    const result = await knowledge.embedPendingDocuments(limit || 10);
+    res.json(result);
+  } catch (error) {
+    console.error('[Knowledge] Embed error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Semantic search
+app.get('/api/knowledge/search', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { q, limit, threshold } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ error: 'Query parameter q is required' });
+    }
+
+    const results = await knowledge.searchDocuments(q, {
+      limit: limit ? parseInt(limit, 10) : 10,
+      threshold: threshold ? parseFloat(threshold) : 0.5,
+    });
+
+    res.json({ results });
+  } catch (error) {
+    console.error('[Knowledge] Search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trigger clustering
+app.post('/api/knowledge/cluster', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { minClusterSize, similarityThreshold } = req.body;
+
+    const result = await knowledge.clusterDocuments({
+      minClusterSize: minClusterSize || 2,
+      similarityThreshold: similarityThreshold || 0.7,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('[Knowledge] Cluster error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get suggested hubs
+app.get('/api/knowledge/hubs', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { status, limit } = req.query;
+    const hubs = await knowledge.getSuggestedHubs({
+      status: status || undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+
+    res.json({ hubs });
+  } catch (error) {
+    console.error('[Knowledge] Get hubs error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trigger journey synthesis
+app.post('/api/knowledge/synthesize', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { includeSuggested } = req.body;
+
+    const result = await knowledge.synthesizeJourneys({
+      includeSuggested: includeSuggested !== false,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('[Knowledge] Synthesize error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get suggested journeys
+app.get('/api/knowledge/journeys', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { status, hubId, limit } = req.query;
+    const journeys = await knowledge.getSuggestedJourneys({
+      status: status || undefined,
+      hubId: hubId || undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+
+    res.json({ journeys });
+  } catch (error) {
+    console.error('[Knowledge] Get journeys error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get journey with nodes
+app.get('/api/knowledge/journeys/:id', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const journey = await knowledge.getJourneyWithNodes(req.params.id);
+    res.json(journey);
+  } catch (error) {
+    console.error('[Knowledge] Get journey error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get context for chat query (Supabase-backed)
+app.post('/api/knowledge/context', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { message, limit, threshold } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const result = await knowledge.getContextForQuery(message, {
+      limit: limit || 5,
+      threshold: threshold || 0.5,
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('[Knowledge] Context error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
