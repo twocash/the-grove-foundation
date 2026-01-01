@@ -5,6 +5,187 @@
 
 ---
 
+## 2026-01-01 | Query Expansion for Semantic Search
+
+### Objective
+Improve RAG relevance by expanding user queries with contextual terms before semantic search. Short queries like "Mung Chiang" or "Purdue" had 0% similarity to relevant documents because semantic embeddings capture meaning, not keywords.
+
+### Problem
+Semantic search finds documents based on **conceptual similarity**, not keyword matching. When a user asks "How would Mung Chiang view Grove?", the embedding of "Mung Chiang" doesn't semantically overlap with documents that mention him briefly in context of Purdue's strategic positioning.
+
+| Query | Before Expansion | After Expansion |
+|-------|------------------|-----------------|
+| "Mung Chiang" | 0% match | 68% match |
+| "Purdue" | 0% match | 47% match |
+| "How would Mung Chiang view Grove?" | No Purdue docs | Finds RESEARCH_Purdue_Academic_Penetration |
+
+### Solution Architecture
+
+```
+User Query: "Mung Chiang"
+           ↓
+   shouldExpandQuery() → true (short query, proper noun)
+           ↓
+   expandQuery() via Gemini 2.0 Flash
+           ↓
+Expanded: "Mung Chiang Purdue University president network theory distributed systems"
+           ↓
+   generateEmbedding() → search_documents RPC
+           ↓
+Results: Purdue docs at 68% similarity
+```
+
+**Expansion Triggers** (`shouldExpandQuery()`):
+- Short queries (≤3 words)
+- Proper nouns (capitalized words)
+- Questions (what/how/why/who/where/when)
+
+**Expansion Prompt**:
+LLM enriches queries with related concepts, synonyms, and contextual terms while keeping original terms intact. Examples:
+- "Purdue" → "Purdue University academic institution higher education research"
+- "ratchet effect" → "ratchet effect AI capability growth exponential improvement training compute scaling"
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `lib/knowledge/expand.js` | **NEW** - Query expansion using Gemini 2.0 Flash |
+| `lib/knowledge/search.js` | Integrated expansion into `searchDocuments()` and `getContextForQuery()` |
+| `lib/knowledge/index.js` | Added exports for `expandQuery`, `shouldExpandQuery` |
+
+### Coverage
+
+| Surface | Integration Point |
+|---------|-------------------|
+| Terminal/Genesis | `getContextForQuery()` → auto-expands |
+| Explore | `searchDocuments()` → auto-expands |
+| API | `/api/knowledge/search` → auto-expands |
+
+### Configuration
+
+Expansion can be disabled per-call:
+```typescript
+await searchDocuments(query, { expand: false });
+await getContextForQuery(query, { expand: false });
+```
+
+### Verification
+- ✅ "Mung Chiang" query finds Purdue documents (68% similarity)
+- ✅ Chat response correctly discusses Mung Chiang's perspective on Grove
+- ✅ Server logs show expansion: `[Expand] "Mung Chiang..." → "Mung Chiang Purdue University president..."`
+- ✅ All surfaces (Terminal, Explore, API) receive expanded queries
+
+### Commits
+- `780f95d` feat(rag): add query expansion for improved semantic search
+
+---
+
+## 2026-01-01 | Bedrock Console Factory + Lens Schema Migration
+
+### Objective
+Create reusable console factory pattern for Bedrock admin consoles and migrate Lens Workshop from fabricated schema to real Persona fields from the Narrative Engine.
+
+### Work Completed
+
+#### HOTFIX-001: Console Factory Pattern
+
+Created `createBedrockConsole<T>()` factory function that generates complete admin consoles from minimal configuration. This enables building future consoles (PersonaGallery, JourneyStudio, HubTopology) with ~400 lines instead of 800+.
+
+**Key Files Created**:
+| File | Purpose |
+|------|---------|
+| `src/bedrock/patterns/console-factory.tsx` | Factory function that generates complete consoles |
+| `src/bedrock/patterns/console-factory.types.ts` | Type interfaces (ObjectCardProps, ObjectEditorProps, etc.) |
+
+**Files Modified**:
+| File | Changes |
+|------|---------|
+| `src/bedrock/context/BedrockUIContext.tsx` | Added inspector registration via `openInspector()`, `closeInspector()`, `updateInspector()` |
+| `src/bedrock/BedrockWorkspace.tsx` | Now reads inspector from context instead of inline rendering |
+| `src/bedrock/patterns/index.ts` | Added factory exports |
+
+**Usage Pattern**:
+```typescript
+export const LensWorkshop = createBedrockConsole<LensPayload>({
+  config: lensWorkshopConfig,
+  useData: useLensData,
+  CardComponent: LensCard,
+  EditorComponent: LensEditor,
+  copilotTitle: 'Lens Copilot',
+});
+```
+
+#### HOTFIX-002: Lens Schema Migration
+
+Migrated Lens Workshop from fabricated filter-based schema to real Persona fields from `data/default-personas.ts`. The Lens is now a **prompt engineering object** - `toneGuidance` is the core field injected into LLM system prompts.
+
+**Key Files Created**:
+| File | Purpose |
+|------|---------|
+| `src/bedrock/consoles/LensWorkshop/lens-transforms.ts` | `personaToLens()`, `lensToPersona()`, `createDefaultLens()` |
+
+**Files Modified**:
+| File | Changes |
+|------|---------|
+| `src/bedrock/types/lens.ts` | New `LensPayload` with real Persona fields |
+| `src/bedrock/consoles/LensWorkshop/useLensData.ts` | Loads 8 lenses from `DEFAULT_PERSONAS` |
+| `src/bedrock/consoles/LensWorkshop/LensCard.tsx` | Shows earthy colors, narrative style, vocabulary level |
+| `src/bedrock/consoles/LensWorkshop/LensEditor.tsx` | Voice Prompt hero field, Arc Emphasis sliders |
+| `src/bedrock/consoles/LensWorkshop/LensWorkshop.config.ts` | Updated metrics and filters |
+
+**New LensPayload Fields**:
+- `toneGuidance` - THE MAIN FIELD (injected into LLM prompt)
+- `color` - Earthy palette: forest, moss, amber, clay, slate, fig, stone
+- `narrativeStyle` - balanced, evidence-first, stakes-heavy, mechanics-deep, resolution-oriented
+- `arcEmphasis` - 5 sliders (hook, stakes, mechanics, evidence, resolution) on 1-4 scale
+- `vocabularyLevel` - accessible, technical, academic, executive
+- `emotionalRegister` - warm, neutral, urgent, measured
+- `openingPhase`, `defaultThreadLength`, `entryPoints`, `suggestedThread`
+
+**Default Lenses (8)**:
+1. Freestyle - Explore freely
+2. Concerned Citizen - Big Tech fears, accessible language
+3. Academic - Evidence-first, epistemic humility
+4. Engineer - Technical deep-dive, architecture focus
+5. Geopolitical Analyst - Power dynamics, systemic risk
+6. Big AI / Tech Exec - Corporate perspective
+7. Family Office / Investor - Investment thesis
+8. Simulation Theorist - Post-human philosophy
+
+### Architecture Gap Discovered
+
+**Lens Workshop and /explore are currently disconnected:**
+
+| Component | Data Source | Storage |
+|-----------|-------------|---------|
+| Lens Workshop | `DEFAULT_PERSONAS` → transform | `localStorage['grove-bedrock-lenses-v2']` |
+| /explore | `getEnabledPersonas()` via NarrativeEngineContext | `/api/narrative` → GCS, fallback to `DEFAULT_PERSONAS` |
+
+**Current Flow**:
+- Lens Workshop loads from `DEFAULT_PERSONAS`, saves to its own localStorage key
+- /explore reads from NarrativeEngineContext which loads from `/api/narrative` (GCS-backed)
+- Edits in Lens Workshop do NOT appear in /explore
+
+**Recommended Fix** (Future Sprint):
+1. **Option A (Proper)**: Lens Workshop saves to `/api/admin/narrative` so edits persist to GCS
+2. **Option B (Quick)**: Add local bridge syncing Lens Workshop edits to format /explore reads
+
+This architectural decision affects whether Bedrock admin edits flow to the Surface experience.
+
+### Verification
+- ✅ Build passes
+- ✅ No bedrock-related TypeScript errors
+- ✅ 8 default lenses load correctly
+- ✅ Arc Emphasis shows 5 sliders (1-4 scale)
+- ✅ Earthy color palette applied
+- ✅ localStorage persistence working (`grove-bedrock-lenses-v2`)
+
+### Commits
+- Branch: `hotfix/console-factory`
+- Branch: `hotfix/lens-schema`
+
+---
+
 ## 2025-12-30 | Selection Model Fix v1 - Complete
 
 ### Objective
