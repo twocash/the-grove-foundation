@@ -1461,7 +1461,7 @@ async function fetchRagContextKinetic(message, options = {}) {
         // Use semantic search to find relevant documents
         const { context, sources } = await knowledge.getContextForQuery(message, {
             limit: options.limit || 5,
-            threshold: options.threshold || 0.4,
+            threshold: options.threshold || 0.3,  // Lower for conversational queries
         });
 
         if (!context || context.length === 0) {
