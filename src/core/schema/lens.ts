@@ -21,7 +21,8 @@ export type ArchetypeId =
   | 'concerned-citizen'
   | 'geopolitical'
   | 'big-ai-exec'
-  | 'family-office';
+  | 'family-office'
+  | 'dr-chiang';
 
 export type NarrativePhase = 'hook' | 'stakes' | 'mechanics' | 'evidence' | 'resolution';
 
@@ -329,7 +330,8 @@ export const PERSONA_TO_ARCHETYPE: Record<string, ArchetypeId> = {
   'engineer': 'engineer',
   'geopolitical': 'geopolitical',
   'big-ai-exec': 'big-ai-exec',
-  'family-office': 'family-office'
+  'family-office': 'family-office',
+  'dr-chiang': 'dr-chiang'
 };
 
 export function getArchetypeForPersona(persona: PersonaOrLens | Persona | null): ArchetypeId | null {

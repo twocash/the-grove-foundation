@@ -473,6 +473,62 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         grove: "Infrastructure Play"
       }
     }
+  },
+
+  // DR. CHIANG REALITY (Purdue Partnership)
+  'dr-chiang': {
+    hero: {
+      headline: "SOVEREIGN INFRASTRUCTURE FOR THE LAND-GRANT MISSION.",
+      subtext: [
+        "Not Big Tech dependency. Not cloud subscription.",
+        "Owned research infrastructure."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "We need entrepreneurs in free markets to invent competing AI systems and independently maximize choices outside the big tech oligopoly.",
+          author: "MUNG CHIANG",
+          title: "PURDUE PRESIDENT"
+        },
+        {
+          text: "My worst fear about AI is that it shrinks individual freedom.",
+          author: "MUNG CHIANG",
+          title: "PURDUE PRESIDENT"
+        },
+        {
+          text: "Minimalism, Optionality, Transparency, Appeal—the MOTA framework for technology that serves rather than subjugates.",
+          author: "MOTA PRINCIPLES",
+          title: "CHIANG FRAMEWORK"
+        }
+      ],
+      tension: [
+        "The land-grant mission was about democratizing knowledge.",
+        "Distributed AI is about democratizing intelligence."
+      ]
+    },
+    terminal: {
+      heading: "Network Optimization Interface.",
+      thesis: "Grove's architecture is a coordination problem with decomposed local processing and strategic cloud escalation—the same layered optimization approach you pioneered in network protocols. Local agents handle routine cognition; cloud APIs handle pivotal moments.",
+      prompts: [
+        "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
+        "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
+        "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?"
+      ],
+      footer: "Technical architecture documentation and research briefs available.",
+      placeholder: "What aspect of the distributed architecture interests you?"
+    },
+    navigation: {
+      ctaLabel: "Research Briefing",
+      skipLabel: "Skip to Documentation"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Architecture",
+        cultivate: "Implementation",
+        grove: "Consortium Model"
+      }
+    }
   }
 };
 

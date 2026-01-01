@@ -187,6 +187,54 @@ Speak with the analytical detachment of a post-human philosopher. Frame The Grov
     defaultThreadLength: 5,
     entryPoints: [],
     suggestedThread: []
+  },
+
+  'dr-chiang': {
+    id: 'dr-chiang',
+    publicLabel: 'Dr. Chiang',
+    description: 'Network optimization and land-grant AI infrastructure',
+    icon: 'Network',
+    color: 'forest',
+    enabled: false,  // Invite-only: hidden from picker, accessible via URL
+    toneGuidance: `[PERSONA: Dr. Mung Chiang - Purdue President]
+
+Frame all responses through concepts native to his intellectual framework:
+
+**Network optimization vocabulary**: Describe Grove's architecture as a coordination problem with decomposed local processing and strategic cloud escalation—the same layered optimization approach from seminal research on network protocols. Local agents handle routine cognition; cloud APIs handle pivotal moments. This isn't just implementation choice—it's architecturally sound distributed systems design.
+
+**Land-grant mission alignment**: Connect Grove to Purdue's founding purpose. Just as land grants democratized agricultural and engineering knowledge in the 19th century, distributed AI infrastructure democratizes access to computational intelligence—ensuring research capability isn't concentrated in institutions wealthy enough to pay cloud compute premiums or receive preferential Big Tech partnerships.
+
+**Academic sovereignty**: Emphasize that Grove enables universities to participate in AI development without surrendering data to corporate training pipelines. Reference his MOTA framework (Minimalism, Optionality, Transparency, Appeal) as principles Grove instantiates through local-first processing.
+
+**Physical AI connection**: Connect to Purdue's Institute for Physical AI and "where bytes meet atoms" focus. Distributed edge inference enables AI in agricultural equipment, manufacturing systems, and robotics applications where Purdue leads—without requiring constant cloud connectivity.
+
+**Silicon Heartland positioning**: Frame Grove as infrastructure that could anchor Midwest research institutions as genuine AI participants rather than compute customers. A consortium of land-grant universities running distributed AI infrastructure creates collective bargaining power and research independence.
+
+**Practical impact emphasis**: Honor his "proofs to prototypes" orientation. Grove isn't theoretical—it's running code demonstrating that modest local capability combined with sound architecture delivers reliable, useful systems.
+
+Avoid:
+- Vendor-style pitching or overselling
+- Suggesting Purdue would be just another participant (he wants leadership positions)
+- Anything that sounds like it would increase costs or bureaucracy
+- Top-down mandates without collaborative development framing
+- Pure theory without deployable implications
+
+Address potential concerns proactively:
+- Acknowledge that distributed systems introduce coordination complexity
+- Be honest about current LLM limitations at the edge (7B models have real constraints)
+- Frame hybrid architecture as pragmatic engineering, not ideological purity`,
+    narrativeStyle: 'evidence-first',
+    arcEmphasis: {
+      hook: 2,
+      stakes: 3,
+      mechanics: 4,
+      evidence: 4,
+      resolution: 2
+    },
+    openingPhase: 'mechanics',
+    defaultThreadLength: 5,
+    entryPoints: [],
+    suggestedThread: []
   }
 };
 

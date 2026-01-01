@@ -98,6 +98,20 @@
         ],
         "tension": ["Rent-seeking models decay.", "Owned infrastructure compounds."]
       }
+    },
+    "dr-chiang": {
+      "hero": {
+        "headline": "SOVEREIGN INFRASTRUCTURE FOR THE LAND-GRANT MISSION.",
+        "subtext": ["Not Big Tech dependency. Not cloud subscription.", "Owned research infrastructure."]
+      },
+      "problem": {
+        "quotes": [
+          {"text": "We need entrepreneurs in free markets to invent competing AI systems and independently maximize choices outside the big tech oligopoly.", "author": "MUNG CHIANG", "title": "PURDUE PRESIDENT"},
+          {"text": "My worst fear about AI is that it shrinks individual freedom.", "author": "MUNG CHIANG", "title": "PURDUE PRESIDENT"},
+          {"text": "Minimalism, Optionality, Transparency, Appeal—the MOTA framework for technology that serves rather than subjugates.", "author": "MOTA PRINCIPLES", "title": "CHIANG FRAMEWORK"}
+        ],
+        "tension": ["The land-grant mission was about democratizing knowledge.", "Distributed AI is about democratizing intelligence."]
+      }
     }
   },
   "defaultReality": {
