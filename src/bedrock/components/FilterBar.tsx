@@ -37,7 +37,7 @@ export function FilterBar({
       {activeFilterCount > 0 && (
         <button
           onClick={onClearFilters}
-          className="flex items-center gap-1 px-3 py-1.5 text-sm text-foreground-muted hover:text-foreground-light dark:hover:text-foreground-dark transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 text-sm text-[var(--glass-text-muted)] hover:text-[var(--glass-text-primary)] transition-colors"
         >
           <span className="material-symbols-outlined text-base">close</span>
           Clear ({activeFilterCount})
@@ -107,11 +107,11 @@ function FilterDropdown({
       <button
         onClick={onToggle}
         className={`
-          flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm
+          flex items-center gap-2 px-3 py-2 rounded-lg text-sm
           border transition-colors
           ${hasValue
-            ? 'border-primary bg-primary/10 text-primary'
-            : 'border-border-light dark:border-border-dark hover:border-primary/50'
+            ? 'border-[var(--neon-cyan)]/60 bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]'
+            : 'border-[var(--glass-border-bright)] bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] hover:border-[var(--neon-cyan)]/50'
           }
         `}
       >
@@ -125,7 +125,7 @@ function FilterDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-1 w-48 bg-[var(--glass-solid)] border border-[var(--glass-border-bright)] rounded-lg shadow-lg shadow-black/30 z-50">
           <div className="py-1">
             {/* Clear option */}
             {hasValue && (
@@ -135,12 +135,12 @@ function FilterDropdown({
                     onChange(option.multiple ? [] : '');
                     onClose();
                   }}
-                  className="w-full px-3 py-2 text-left text-sm text-foreground-muted hover:bg-surface-hover flex items-center gap-2"
+                  className="w-full px-3 py-2 text-left text-sm text-[var(--glass-text-muted)] hover:bg-[var(--glass-panel)] flex items-center gap-2"
                 >
                   <span className="material-symbols-outlined text-base">close</span>
                   Clear filter
                 </button>
-                <div className="border-t border-border-light dark:border-border-dark my-1" />
+                <div className="border-t border-[var(--glass-border)] my-1" />
               </>
             )}
 
@@ -168,14 +168,14 @@ function FilterDropdown({
                   className={`
                     w-full px-3 py-2 text-left text-sm flex items-center justify-between
                     ${isSelected
-                      ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-surface-hover text-foreground-light dark:text-foreground-dark'
+                      ? 'bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]'
+                      : 'hover:bg-[var(--glass-panel)] text-[var(--glass-text-secondary)]'
                     }
                   `}
                 >
                   <span>{filterValue.label}</span>
                   {filterValue.count !== undefined && (
-                    <span className="text-xs text-foreground-muted">{filterValue.count}</span>
+                    <span className="text-xs text-[var(--glass-text-muted)]">{filterValue.count}</span>
                   )}
                   {isSelected && (
                     <span className="material-symbols-outlined text-base">check</span>

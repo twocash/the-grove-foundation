@@ -40,7 +40,7 @@ export function SearchInput({
 
   return (
     <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-lg text-foreground-muted">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-lg text-[var(--glass-text-muted)]">
         search
       </span>
       <input
@@ -49,19 +49,19 @@ export function SearchInput({
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className="
-          w-full pl-10 pr-10 py-2 rounded-lg
-          bg-surface-light dark:bg-surface-dark
-          border border-border-light dark:border-border-dark
-          text-foreground-light dark:text-foreground-dark
-          placeholder-foreground-muted
-          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
-          text-sm
+          w-full pl-10 pr-10 py-2.5 rounded-lg
+          bg-[var(--glass-solid)]
+          border border-[var(--glass-border-bright)]
+          text-[var(--glass-text-primary)]
+          placeholder-[var(--glass-text-muted)]
+          focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 focus:border-[var(--neon-cyan)]/60
+          text-sm transition-colors
         "
       />
       {localValue && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-light dark:hover:text-foreground-dark transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--glass-text-muted)] hover:text-[var(--glass-text-primary)] transition-colors"
         >
           <span className="material-symbols-outlined text-lg">close</span>
         </button>

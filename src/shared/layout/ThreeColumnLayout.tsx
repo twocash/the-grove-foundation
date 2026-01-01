@@ -4,8 +4,8 @@
 import { type ReactNode } from 'react';
 
 interface ThreeColumnLayoutProps {
-  /** Left navigation column content */
-  navigation: ReactNode;
+  /** Left navigation column content (optional - omit for two-column layout) */
+  navigation?: ReactNode;
   /** Center content area */
   content: ReactNode;
   /** Right inspector panel content (optional) */
@@ -39,13 +39,15 @@ export function ThreeColumnLayout({
 
       {/* Three columns */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Navigation */}
-        <aside
-          style={{ width: navWidth }}
-          className="flex-shrink-0 border-r border-[var(--glass-border)] overflow-y-auto bg-[var(--glass-solid)]"
-        >
-          {navigation}
-        </aside>
+        {/* Navigation (optional) */}
+        {navigation && (
+          <aside
+            style={{ width: navWidth }}
+            className="flex-shrink-0 border-r border-[var(--glass-border)] overflow-y-auto bg-[var(--glass-solid)]"
+          >
+            {navigation}
+          </aside>
+        )}
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-[var(--glass-void)]">

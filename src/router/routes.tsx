@@ -7,6 +7,15 @@ import { RouteObject, Navigate } from 'react-router-dom';
 // Lazy load Foundation workspace (new three-column layout)
 const FoundationWorkspace = lazy(() => import('../foundation/FoundationWorkspace'));
 
+// Lazy load Bedrock workspace (enterprise reference implementation)
+const BedrockWorkspace = lazy(() => import('../bedrock/BedrockWorkspace'));
+
+// Lazy load Bedrock consoles
+const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
+const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
+const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
+const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor').then(m => ({ default: m.PipelineMonitor })));
+
 // Dev components for testing
 const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
 
@@ -166,6 +175,54 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <SproutQueue />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+
+      // Bedrock (enterprise reference implementation)
+      {
+        path: '/bedrock',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <BedrockWorkspace />
+          </Suspense>
+        ),
+        children: [
+          // Default route - Dashboard
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <BedrockDashboard />
+              </Suspense>
+            ),
+          },
+          // Knowledge Garden
+          {
+            path: 'garden',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <GardenConsole />
+              </Suspense>
+            ),
+          },
+          // Lens Workshop
+          {
+            path: 'lenses',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <LensWorkshop />
+              </Suspense>
+            ),
+          },
+          // Pipeline Monitor (kinetic-pipeline-v1)
+          {
+            path: 'pipeline',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <PipelineMonitor />
               </Suspense>
             ),
           },
