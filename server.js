@@ -1023,7 +1023,14 @@ function loadJsonFromLocal(relativePath) {
  * Check if GCS is properly configured
  */
 function isGCSConfigured() {
-    return !!(process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_CLOUD_PROJECT);
+    // Cloud Run provides GCS access via default service account (no env vars needed)
+    // Check for explicit credentials OR running in Cloud Run/GCE environment
+    return !!(
+        process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+        process.env.GOOGLE_CLOUD_PROJECT ||
+        process.env.K_SERVICE ||  // Cloud Run sets this
+        process.env.GCS_BUCKET_NAME  // Our explicit config
+    );
 }
 
 /**
