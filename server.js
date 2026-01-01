@@ -2975,6 +2975,34 @@ app.post('/api/knowledge/context', async (req, res) => {
   }
 });
 
+// Health check for knowledge pipeline
+app.get('/api/knowledge/health', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({
+        healthy: false,
+        status: 'unavailable',
+        message: 'Knowledge module not available',
+      });
+    }
+
+    const quick = req.query.quick === 'true';
+    const health = quick
+      ? await knowledge.checkQuickHealth()
+      : await knowledge.checkPipelineHealth();
+
+    res.status(health.healthy ? 200 : 503).json(health);
+  } catch (error) {
+    console.error('[Knowledge] Health check error:', error);
+    res.status(500).json({
+      healthy: false,
+      status: 'error',
+      message: error.message,
+    });
+  }
+});
+
 // SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
