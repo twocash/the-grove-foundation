@@ -3,7 +3,8 @@
 
 export * from './schema';
 export { parseIntent, isSupportedIntent } from './parser';
-export { generatePatch, getValueAtPath, getFieldNameFromPath } from './patch-generator';
+export { generatePatch, getValueAtPath, getFieldNameFromPath, applyPatches } from './patch-generator';
+export type { PatchOperation } from './patch-generator';
 export { validatePatch } from './validator';
 export {
   generateResponseMessage,

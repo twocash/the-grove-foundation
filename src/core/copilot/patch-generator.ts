@@ -1,8 +1,31 @@
 // src/core/copilot/patch-generator.ts
 // Generate JSON patches from parsed intents
 
-import type { ParsedIntent, JsonPatch } from './schema';
+import { applyPatch } from 'fast-json-patch';
+import type { ParsedIntent, JsonPatch, JsonPatchOperation } from './schema';
 import type { GroveObject } from '@core/schema/grove-object';
+
+// Re-export for convenience
+export type PatchOperation = JsonPatchOperation;
+
+/**
+ * Apply JSON patches to a GroveObject and return the patched result.
+ * Uses fast-json-patch under the hood.
+ */
+export function applyPatches<T>(
+  object: GroveObject<T>,
+  patches: PatchOperation[]
+): GroveObject<T> {
+  // Clone to avoid mutation
+  const cloned = JSON.parse(JSON.stringify(object));
+
+  // Apply each patch
+  for (const patch of patches) {
+    applyPatch(cloned, [patch]);
+  }
+
+  return cloned;
+}
 
 /**
  * Map of common field names to JSON paths
