@@ -21,7 +21,8 @@ export type ArchetypeId =
   | 'concerned-citizen'
   | 'geopolitical'
   | 'big-ai-exec'
-  | 'family-office';
+  | 'family-office'
+  | 'dr-chiang';
 
 export type NarrativePhase = 'hook' | 'stakes' | 'mechanics' | 'evidence' | 'resolution';
 

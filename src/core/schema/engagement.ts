@@ -146,6 +146,12 @@ export interface EngagementState {
   sproutsCaptured: number;
   allTopicsExplored: string[];
   visitCount: number;
+
+  // Context Fields additions (Sprint: genesis-context-fields-v1)
+  /** Computed entropy (0.0-1.0) */
+  computedEntropy: number;
+  /** Active moments (temporary high-signal events) */
+  activeMoments: string[];
 }
 
 export interface ActiveJourney {

@@ -1,42 +1,54 @@
 // src/bedrock/context/BedrockUIContext.tsx
-// UI state context for Bedrock workspace
-// Sprint: bedrock-foundation-v1
+// UI context for Bedrock workspace - manages inspector and console state
+// Sprint: bedrock-foundation-v1, hotfix/console-factory
 
-import React, { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
+import type { InspectorConfig } from '../patterns/console-factory.types';
 
 // =============================================================================
 // Types
 // =============================================================================
 
-interface SelectedItem {
-  id: string;
-  type: string;
-}
-
 interface BedrockUIState {
-  /** Currently selected item in the main view */
-  selectedItem: SelectedItem | null;
-  /** Whether the inspector panel is open */
+  /** Currently active console ID */
+  activeConsole: string;
+  /** Currently selected object ID (for tracking) */
+  selectedObjectId: string | null;
+
+  // Inspector state
+  /** Whether inspector is open */
   inspectorOpen: boolean;
-  /** Whether the copilot panel is open */
-  copilotOpen: boolean;
-  /** Current active console ID */
-  activeConsole: string | null;
+  /** Inspector panel title */
+  inspectorTitle: string;
+  /** Inspector panel subtitle */
+  inspectorSubtitle: ReactNode;
+  /** Inspector panel icon */
+  inspectorIcon: string | undefined;
+  /** Inspector panel content (editor) */
+  inspectorContent: ReactNode;
+  /** Copilot panel content */
+  copilotContent: ReactNode;
 }
 
 interface BedrockUIActions {
-  /** Select an item to show in inspector */
-  selectItem: (item: SelectedItem | null) => void;
-  /** Toggle inspector panel visibility */
-  toggleInspector: () => void;
-  /** Set inspector panel visibility */
-  setInspectorOpen: (open: boolean) => void;
-  /** Toggle copilot panel visibility */
-  toggleCopilot: () => void;
-  /** Set copilot panel visibility */
-  setCopilotOpen: (open: boolean) => void;
-  /** Set active console */
-  setActiveConsole: (consoleId: string | null) => void;
+  /** Set active console ID */
+  setActiveConsole: (id: string) => void;
+  /** Set selected object ID */
+  setSelectedObjectId: (id: string | null) => void;
+
+  // Inspector actions
+  /** Open inspector with config */
+  openInspector: (config: InspectorConfig) => void;
+  /** Close inspector */
+  closeInspector: () => void;
+  /** Update inspector content without closing */
+  updateInspector: (config: Partial<InspectorConfig>) => void;
 }
 
 type BedrockUIContextValue = BedrockUIState & BedrockUIActions;
@@ -53,47 +65,66 @@ const BedrockUIContext = createContext<BedrockUIContextValue | null>(null);
 
 interface BedrockUIProviderProps {
   children: ReactNode;
-  defaultInspectorOpen?: boolean;
-  defaultCopilotOpen?: boolean;
 }
 
-export function BedrockUIProvider({
-  children,
-  defaultInspectorOpen = true,
-  defaultCopilotOpen = false,
-}: BedrockUIProviderProps) {
-  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
-  const [inspectorOpen, setInspectorOpen] = useState(defaultInspectorOpen);
-  const [copilotOpen, setCopilotOpen] = useState(defaultCopilotOpen);
-  const [activeConsole, setActiveConsole] = useState<string | null>(null);
+export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
+  // Console state
+  const [activeConsole, setActiveConsole] = useState('dashboard');
+  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
 
-  const selectItem = useCallback((item: SelectedItem | null) => {
-    setSelectedItem(item);
-    // Auto-open inspector when selecting an item
-    if (item && !inspectorOpen) {
-      setInspectorOpen(true);
-    }
-  }, [inspectorOpen]);
+  // Inspector state
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspectorTitle, setInspectorTitle] = useState('');
+  const [inspectorSubtitle, setInspectorSubtitle] = useState<ReactNode>(null);
+  const [inspectorIcon, setInspectorIcon] = useState<string | undefined>();
+  const [inspectorContent, setInspectorContent] = useState<ReactNode>(null);
+  const [copilotContent, setCopilotContent] = useState<ReactNode>(null);
 
-  const toggleInspector = useCallback(() => {
-    setInspectorOpen(prev => !prev);
+  // Open inspector with full config
+  const openInspector = useCallback((config: InspectorConfig) => {
+    setInspectorTitle(config.title);
+    setInspectorSubtitle(config.subtitle ?? null);
+    setInspectorIcon(config.icon);
+    setInspectorContent(config.content);
+    setCopilotContent(config.copilot ?? null);
+    setInspectorOpen(true);
   }, []);
 
-  const toggleCopilot = useCallback(() => {
-    setCopilotOpen(prev => !prev);
+  // Close inspector and clear content
+  const closeInspector = useCallback(() => {
+    setInspectorOpen(false);
+    // Small delay before clearing content for smooth animation
+    setTimeout(() => {
+      setInspectorContent(null);
+      setCopilotContent(null);
+    }, 200);
+  }, []);
+
+  // Update inspector without closing (for live updates)
+  const updateInspector = useCallback((config: Partial<InspectorConfig>) => {
+    if (config.title !== undefined) setInspectorTitle(config.title);
+    if (config.subtitle !== undefined) setInspectorSubtitle(config.subtitle);
+    if (config.icon !== undefined) setInspectorIcon(config.icon);
+    if (config.content !== undefined) setInspectorContent(config.content);
+    if (config.copilot !== undefined) setCopilotContent(config.copilot);
   }, []);
 
   const value: BedrockUIContextValue = {
-    selectedItem,
-    inspectorOpen,
-    copilotOpen,
+    // State
     activeConsole,
-    selectItem,
-    toggleInspector,
-    setInspectorOpen,
-    toggleCopilot,
-    setCopilotOpen,
+    selectedObjectId,
+    inspectorOpen,
+    inspectorTitle,
+    inspectorSubtitle,
+    inspectorIcon,
+    inspectorContent,
+    copilotContent,
+    // Actions
     setActiveConsole,
+    setSelectedObjectId,
+    openInspector,
+    closeInspector,
+    updateInspector,
   };
 
   return (
@@ -119,4 +150,4 @@ export function useBedrockUI(): BedrockUIContextValue {
 // Exports
 // =============================================================================
 
-export type { BedrockUIState, BedrockUIActions, SelectedItem };
+export type { BedrockUIState, BedrockUIActions, BedrockUIContextValue };

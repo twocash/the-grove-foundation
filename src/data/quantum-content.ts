@@ -473,6 +473,62 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         grove: "Infrastructure Play"
       }
     }
+  },
+
+  // DR. CHIANG / UNIVERSITY LEADERSHIP REALITY
+  'dr-chiang': {
+    hero: {
+      headline: "INSTITUTIONAL INDEPENDENCE.",
+      subtext: [
+        "Research shouldn't rent its infrastructure.",
+        "Build sovereign capability."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "Universities need AI compute capability to remain competitive, but renting from hyperscalers creates dependencies that compromise objectivity.",
+          author: "GROVE THESIS",
+          title: "RESEARCH INDEPENDENCE"
+        },
+        {
+          text: "The land-grant mission was about democratizing knowledge. Today, knowledge access means AI capability.",
+          author: "GROVE THESIS",
+          title: "21ST CENTURY MISSION"
+        },
+        {
+          text: "No single university can match hyperscaler scale. But a consortium might build something better.",
+          author: "GROVE THESIS",
+          title: "COALITION STRATEGY"
+        }
+      ],
+      tension: [
+        "They're building the future of intelligence.",
+        "And they're telling you to get comfortable being a guest in it."
+      ]
+    },
+    terminal: {
+      heading: "The Terminal.",
+      thesis: "Everything documented about Grove—the white paper, technical architecture, economic model, strategic implications for research universities—is indexed here.",
+      prompts: [
+        "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
+        "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
+        "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?"
+      ],
+      footer: "Ask anything you'd like about The Grove Foundation's seminal white paper, research, or vision for building sovereign AI at the edge.",
+      placeholder: "What strategic question interests you?"
+    },
+    navigation: {
+      ctaLabel: "Strategic Brief",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Research",
+        cultivate: "Partnership",
+        grove: "Infrastructure"
+      }
+    }
   }
 };
 

@@ -1,22 +1,16 @@
 // src/explore/JourneyList.tsx
 // Browse and start available journeys
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
+// Sprint: grove-data-layer-v1 (Epic 3)
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useVersionedCollection } from '../../hooks/useVersionedCollection';
+import { useState, useMemo, useEffect } from 'react';
+import { useJourneyListData, type VersionedJourney } from './hooks';
 import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
-import type { Journey } from '../../data/narratives-schema';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
 import { CollectionHeader, useFlowParams, FlowCTA } from '../shared';
 import { useEngagement, useJourneyState } from '@core/engagement';
 import { getCanonicalJourney } from '@core/journey';
 import { StatusBadge } from '../shared/ui';
-
-// Versioned journey type with metadata
-type VersionedJourney = Journey & {
-  versionOrdinal?: number;
-  hasLocalModifications?: boolean;
-};
 
 interface JourneyListProps {
   mode?: 'full' | 'compact';
@@ -123,17 +117,10 @@ function JourneyCard({ journey, isActive, isInspected, onStart, onView }: Journe
 }
 
 export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
-  // Get active journeys from schema and merge with versioned overrides
-  const { schema, loading: schemaLoading } = useNarrativeEngine();
-  const schemaJourneys = useMemo(() => {
-    if (!schema?.journeys) return [];
-    return Object.values(schema.journeys).filter(j => j.status === 'active');
-  }, [schema]);
-  const { items: allJourneys, loading: versionLoading, refresh: refreshJourneys } = useVersionedCollection(
-    schemaJourneys,
-    { objectType: 'journey' }
-  );
-  const loading = schemaLoading || versionLoading;
+  // Sprint: grove-data-layer-v1 - Data layer migration
+  const { journeys: allJourneys, loading, refreshJourneys, getJourney } = useJourneyListData();
+  // Note: schema still needed for getCanonicalJourney in handleStart
+  const { schema } = useNarrativeEngine();
   const workspaceUI = useOptionalWorkspaceUI();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -155,11 +142,6 @@ export function JourneyList({ mode = 'full', onBack }: JourneyListProps = {}) {
     if (!workspaceUI?.onInspectorClosed) return;
     return workspaceUI.onInspectorClosed(refreshJourneys);
   }, [workspaceUI, refreshJourneys]);
-
-  // Helper to get a single journey by ID
-  const getJourney = useCallback((journeyId: string): VersionedJourney | null => {
-    return (allJourneys as VersionedJourney[]).find(j => j.id === journeyId) ?? null;
-  }, [allJourneys]);
 
   // Filter by search (only used in full mode)
   const journeys = useMemo(() => {

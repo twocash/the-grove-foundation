@@ -16,6 +16,9 @@ export {
   ActionsSection,
 } from './BedrockInspector';
 export { BedrockCopilot } from './BedrockCopilot';
+export { ConsoleHeader, StandaloneHeader } from './ConsoleHeader';
+export { StatCard } from './StatCard';
+export { MetricsRow, ResponsiveMetricsRow } from './MetricsRow';
 
 // =============================================================================
 // Quantum Glass Primitives (Story 6.0)

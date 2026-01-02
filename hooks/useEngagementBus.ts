@@ -23,6 +23,7 @@ import {
 } from '../utils/engagementTriggers';
 import { computeSessionStage } from '../utils/stageComputation';
 import { DEFAULT_STAGE_THRESHOLDS } from '../src/core/config';
+import { calculateEntropy } from '../src/core/engine/entropyCalculator';
 
 // Storage keys
 const ENGAGEMENT_STATE_KEY = 'grove-engagement-state';
@@ -234,11 +235,41 @@ class EngagementBusSingleton {
     // Recompute stage after state changes
     this.state.stage = computeSessionStage(this.state, DEFAULT_STAGE_THRESHOLDS);
 
+    // Compute entropy (Sprint: genesis-context-fields-v1)
+    this.state.computedEntropy = this.computeEntropy();
+
+    // Detect active moments based on entropy
+    this.state.activeMoments = this.detectMoments();
+
     this.persistState();
     this.evaluateAndNotify();
 
     // Notify state subscribers
     this.stateSubscribers.forEach(handler => handler(this.state, prevState));
+  }
+
+  // Compute entropy from current state (Sprint: genesis-context-fields-v1)
+  private computeEntropy(): number {
+    return calculateEntropy({
+      hubsVisited: this.state.cardsVisited || [],
+      exchangeCount: this.state.exchangeCount,
+      pivotCount: 0, // TODO: Track pivot count
+      journeyWaypointsHit: this.state.activeJourney?.currentPosition ?? 0,
+      journeyWaypointsTotal: this.state.activeJourney?.threadCardIds.length ?? 0,
+      consecutiveHubRepeats: 0 // TODO: Track consecutive repeats
+    });
+  }
+
+  // Detect active moments based on state (Sprint: genesis-context-fields-v1)
+  private detectMoments(): string[] {
+    const moments: string[] = [];
+
+    // High entropy moment: triggers stabilization prompts
+    if (this.state.computedEntropy > 0.7) {
+      moments.push('high_entropy');
+    }
+
+    return moments;
   }
 
   private evaluateAndNotify(): void {
@@ -509,7 +540,10 @@ export function useEngagementState(): EngagementState {
         prev.journeysCompleted !== newState.journeysCompleted ||
         prev.sproutsCaptured !== newState.sproutsCaptured ||
         prev.minutesActive !== newState.minutesActive ||
-        prev.activeJourney?.lensId !== newState.activeJourney?.lensId;
+        prev.activeJourney?.lensId !== newState.activeJourney?.lensId ||
+        // Context Fields additions (Sprint: genesis-context-fields-v1)
+        prev.computedEntropy !== newState.computedEntropy ||
+        prev.activeMoments?.length !== newState.activeMoments?.length;
 
       if (hasChanged) {
         prevStateRef.current = newState;

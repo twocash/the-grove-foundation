@@ -31,8 +31,8 @@ export function FavoriteToggle({
         inline-flex items-center gap-1 rounded-lg transition-colors
         ${sizeClasses[size]}
         ${isFavorite
-          ? 'text-amber-500 hover:text-amber-600'
-          : 'text-foreground-muted hover:text-amber-500'
+          ? 'text-[var(--neon-amber)] hover:text-[var(--neon-amber)]'
+          : 'text-[var(--glass-text-muted)] hover:text-[var(--neon-amber)]'
         }
       `}
       title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -67,11 +67,11 @@ export function FavoritesFilter({
     <button
       onClick={onToggle}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm
+        flex items-center gap-2 px-3 py-2 rounded-lg text-sm
         border transition-colors
         ${showFavoritesOnly
-          ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-          : 'border-border-light dark:border-border-dark hover:border-amber-500/50'
+          ? 'border-[var(--neon-amber)]/60 bg-[var(--neon-amber)]/10 text-[var(--neon-amber)]'
+          : 'border-[var(--glass-border-bright)] bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] hover:border-[var(--neon-amber)]/50'
         }
       `}
     >
@@ -86,8 +86,8 @@ export function FavoritesFilter({
         <span className={`
           text-xs px-1.5 py-0.5 rounded-full
           ${showFavoritesOnly
-            ? 'bg-amber-500/20'
-            : 'bg-surface-hover'
+            ? 'bg-[var(--neon-amber)]/20'
+            : 'bg-[var(--glass-panel)]'
           }
         `}>
           {favoritesCount}

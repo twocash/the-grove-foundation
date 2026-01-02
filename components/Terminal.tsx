@@ -6,7 +6,7 @@ import {
   resetSession as resetChatSession,
   formatChatError
 } from '../services/chatService';
-import { SECTION_CONFIG } from '../constants';
+import { SECTION_CONFIG, getInitialTerminalMessage, INITIAL_TERMINAL_MESSAGE } from '../constants';
 import { useNarrative } from '../hooks/useNarrative';
 import { useNarrativeEngine } from '../hooks/useNarrativeEngine';
 import { useCustomLens } from '../hooks/useCustomLens';
@@ -380,6 +380,34 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
   }, [terminalState.isOpen, hasShownWelcome, urlLensId, session.activeLens, actions]);
+
+  // Update welcome message when lens is hydrated (Sprint: genesis-context-fields-v1)
+  // This ensures lens-specific prompts appear in the "You might start with" section
+  const hasUpdatedWelcomeForLens = useRef<string | null>(null);
+  useEffect(() => {
+    const currentLens = session.activeLens;
+    if (!currentLens) return;
+
+    // Only update once per lens to avoid loops
+    if (hasUpdatedWelcomeForLens.current === currentLens) return;
+
+    // Check if terminal only has the init message (fresh session)
+    const messages = terminalState.messages;
+    if (messages.length === 1 && messages[0].id === 'init') {
+      // Get lens-specific welcome message
+      const lensMessage = getInitialTerminalMessage(currentLens);
+
+      // Only update if different from current message (lens has custom message)
+      if (lensMessage !== messages[0].text) {
+        console.log('[Terminal] Updating welcome message for lens:', currentLens);
+        hasUpdatedWelcomeForLens.current = currentLens;
+        setTerminalState(prev => ({
+          ...prev,
+          messages: [{ id: 'init', role: 'model', text: lensMessage }]
+        }));
+      }
+    }
+  }, [session.activeLens, terminalState.messages, setTerminalState]);
 
   // Mark as welcomed after lens selection
   const handleLensSelect = (personaId: string | null) => {

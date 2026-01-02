@@ -38,7 +38,7 @@ export function SortDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border border-border-light dark:border-border-dark hover:border-primary/50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-[var(--glass-border-bright)] bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] hover:border-[var(--neon-cyan)]/50 transition-colors"
       >
         <span className="material-symbols-outlined text-base">sort</span>
         <span>{currentOption?.label ?? 'Sort'}</span>
@@ -48,7 +48,7 @@ export function SortDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 w-56 bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg z-50">
+        <div className="absolute top-full right-0 mt-1 w-56 bg-[var(--glass-solid)] border border-[var(--glass-border-bright)] rounded-lg shadow-lg shadow-black/30 z-50">
           <div className="py-1">
             {sortOptions.map(option => {
               const isSelected = option.field === sortField;
@@ -69,8 +69,8 @@ export function SortDropdown({
                     className={`
                       w-full px-3 py-2 text-left text-sm flex items-center justify-between
                       ${isSelected
-                        ? 'bg-primary/10 text-primary'
-                        : 'hover:bg-surface-hover text-foreground-light dark:text-foreground-dark'
+                        ? 'bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]'
+                        : 'hover:bg-[var(--glass-panel)] text-[var(--glass-text-secondary)]'
                       }
                     `}
                   >
@@ -87,16 +87,16 @@ export function SortDropdown({
           </div>
 
           {/* Direction toggle */}
-          <div className="border-t border-border-light dark:border-border-dark px-3 py-2">
-            <div className="flex items-center gap-2 text-xs text-foreground-muted">
+          <div className="border-t border-[var(--glass-border)] px-3 py-2">
+            <div className="flex items-center gap-2 text-xs text-[var(--glass-text-muted)]">
               <span>Direction:</span>
               <button
                 onClick={() => onSortChange(sortField, 'asc')}
                 className={`
                   px-2 py-1 rounded
                   ${sortDirection === 'asc'
-                    ? 'bg-primary/10 text-primary'
-                    : 'hover:bg-surface-hover'
+                    ? 'bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]'
+                    : 'hover:bg-[var(--glass-panel)] text-[var(--glass-text-secondary)]'
                   }
                 `}
               >
@@ -107,8 +107,8 @@ export function SortDropdown({
                 className={`
                   px-2 py-1 rounded
                   ${sortDirection === 'desc'
-                    ? 'bg-primary/10 text-primary'
-                    : 'hover:bg-surface-hover'
+                    ? 'bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]'
+                    : 'hover:bg-[var(--glass-panel)] text-[var(--glass-text-secondary)]'
                   }
                 `}
               >

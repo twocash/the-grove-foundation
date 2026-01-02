@@ -1,6 +1,6 @@
 // src/bedrock/BedrockWorkspace.tsx
-// Main Bedrock workspace shell with routing
-// Sprint: bedrock-foundation-v1
+// Main Bedrock workspace shell with routing and inspector management
+// Sprint: bedrock-foundation-v1, hotfix/console-factory
 
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { BedrockUIProvider, useBedrockUI } from './context/BedrockUIContext';
 import { BedrockCopilotProvider, useBedrockCopilot } from './context/BedrockCopilotContext';
 import { BedrockLayout } from './primitives/BedrockLayout';
 import { BedrockNav } from './primitives/BedrockNav';
-import { BedrockCopilot } from './primitives/BedrockCopilot';
+import { BedrockInspector } from './primitives/BedrockInspector';
 import { BEDROCK_NAV_ITEMS, CONSOLE_METADATA, getCopilotActionsForConsole } from './config';
 
 // =============================================================================
@@ -17,7 +17,20 @@ import { BEDROCK_NAV_ITEMS, CONSOLE_METADATA, getCopilotActionsForConsole } from
 
 function BedrockWorkspaceInner() {
   const location = useLocation();
-  const { inspectorOpen, setActiveConsole } = useBedrockUI();
+
+  // UI context - includes inspector state
+  const {
+    inspectorOpen,
+    inspectorTitle,
+    inspectorSubtitle,
+    inspectorIcon,
+    inspectorContent,
+    copilotContent,
+    closeInspector,
+    setActiveConsole,
+  } = useBedrockUI();
+
+  // Copilot context
   const { setContext, setAvailableActions } = useBedrockCopilot();
 
   // Determine current console from path
@@ -29,7 +42,10 @@ function BedrockWorkspaceInner() {
     setActiveConsole(currentConsoleId);
     setContext({ consoleId: currentConsoleId });
     setAvailableActions(getCopilotActionsForConsole(currentConsoleId));
-  }, [currentConsoleId, setActiveConsole, setContext, setAvailableActions]);
+
+    // Close inspector when navigating to a different console
+    closeInspector();
+  }, [currentConsoleId, setActiveConsole, setContext, setAvailableActions, closeInspector]);
 
   return (
     <BedrockLayout
@@ -51,8 +67,21 @@ function BedrockWorkspaceInner() {
         />
       }
       content={<Outlet />}
-      inspector={null} // Populated by child routes
-      copilot={<BedrockCopilot />}
+      // Inspector from context (registered by consoles)
+      inspector={
+        inspectorOpen && inspectorContent ? (
+          <BedrockInspector
+            title={inspectorTitle}
+            subtitle={inspectorSubtitle}
+            icon={inspectorIcon}
+            onClose={closeInspector}
+          >
+            {inspectorContent}
+          </BedrockInspector>
+        ) : undefined
+      }
+      // Copilot from context (registered by consoles)
+      copilot={copilotContent}
       inspectorOpen={inspectorOpen}
     />
   );
@@ -78,9 +107,6 @@ export function BedrockWorkspace() {
 
 function getConsoleIdFromPath(pathname: string): string {
   const segments = pathname.split('/').filter(Boolean);
-  // /bedrock -> dashboard
-  // /bedrock/garden -> garden
-  // /bedrock/lenses -> lenses
   if (segments.length <= 1) return 'dashboard';
   return segments[1] || 'dashboard';
 }

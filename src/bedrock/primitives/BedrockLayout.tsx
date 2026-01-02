@@ -20,8 +20,8 @@ interface BedrockLayoutProps {
   header?: ReactNode;
   /** Metrics row content (StatCards, etc.) */
   metrics?: ReactNode;
-  /** Left navigation content */
-  navigation: ReactNode;
+  /** Left navigation content (optional - omit for simpler layout) */
+  navigation?: ReactNode;
   /** Main content area */
   content: ReactNode;
   /** Right inspector panel content */

@@ -7,6 +7,9 @@ import { RouteObject, Navigate } from 'react-router-dom';
 // Lazy load Foundation workspace (new three-column layout)
 const FoundationWorkspace = lazy(() => import('../foundation/FoundationWorkspace'));
 
+// Lazy load Bedrock workspace (knowledge curation layer)
+const BedrockWorkspace = lazy(() => import('../bedrock/BedrockWorkspace'));
+
 // Dev components for testing
 const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
 
@@ -25,6 +28,12 @@ const AudioStudio = lazy(() => import('../foundation/consoles/AudioStudio'));
 const Genesis = lazy(() => import('../foundation/consoles/Genesis'));
 const HealthDashboard = lazy(() => import('../foundation/consoles/HealthDashboard'));
 const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
+
+// Bedrock consoles (knowledge curation layer)
+const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
+const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor/PipelineMonitor'));
+const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
+const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -166,6 +175,54 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <SproutQueue />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+
+      // Bedrock (knowledge curation layer)
+      {
+        path: '/bedrock',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <BedrockWorkspace />
+          </Suspense>
+        ),
+        children: [
+          // Default route - dashboard
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <BedrockDashboard />
+              </Suspense>
+            ),
+          },
+          // Pipeline Monitor
+          {
+            path: 'pipeline',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <PipelineMonitor />
+              </Suspense>
+            ),
+          },
+          // Knowledge Garden (sprout curation)
+          {
+            path: 'garden',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <GardenConsole />
+              </Suspense>
+            ),
+          },
+          // Lens Workshop
+          {
+            path: 'lenses',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <LensWorkshop />
               </Suspense>
             ),
           },

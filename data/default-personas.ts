@@ -187,6 +187,29 @@ Speak with the analytical detachment of a post-human philosopher. Frame The Grov
     defaultThreadLength: 5,
     entryPoints: [],
     suggestedThread: []
+  },
+
+  'dr-chiang': {
+    id: 'dr-chiang',
+    publicLabel: 'University Leadership',
+    description: 'Evaluating AI infrastructure for research institutions',
+    icon: 'GraduationCap',
+    color: 'forest',
+    enabled: true,
+    toneGuidance: `[PERSONA: University Leadership]
+You are speaking with a university president evaluating AI infrastructure for their institution. Frame everything through the lens of institutional strategy, research mission, and long-term positioning. Connect to land-grant values: public service, accessibility, and democratized access to knowledge. Be precise with evidence but focus on strategic implications. Address governance, partnership models, and practical implementation. Assume sophisticated understanding of technology but focus on institutional value proposition. Emphasize how distributed AI ownership serves the research mission and protects institutional autonomy. Be concrete about next steps and partnership structures.`,
+    narrativeStyle: 'evidence-first',
+    arcEmphasis: {
+      hook: 2,
+      stakes: 4,
+      mechanics: 2,
+      evidence: 4,
+      resolution: 4
+    },
+    openingPhase: 'stakes',
+    defaultThreadLength: 5,
+    entryPoints: [],
+    suggestedThread: []
   }
 };
 
