@@ -2,6 +2,20 @@
 // Stage-based suggested prompts configuration
 // Sprint: adaptive-engagement-v1
 //
+// ============================================================================
+// @deprecated - Use Context Fields prompt system instead
+// Sprint: genesis-context-fields-v1
+//
+// MIGRATION:
+// - Library prompts: src/data/prompts/base.prompts.json
+// - Lens prompts: src/data/prompts/dr-chiang.prompts.json
+// - Hook: useSuggestedPrompts (now uses Context Fields)
+// - Types: @core/context-fields/types.ts (PromptObject)
+//
+// This file is preserved for backward compatibility but should not be used
+// for new development. Will be removed in a future sprint.
+// ============================================================================
+//
 // ⚠️ TECHNICAL DEBT (TD-001): Journey suggestions are hardcoded here.
 // This should be refactored to Trellis DEX declarative architecture:
 // - Load prompts from JSON/API (not TypeScript)

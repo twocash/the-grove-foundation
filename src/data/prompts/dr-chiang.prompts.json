@@ -1,0 +1,170 @@
+[
+  {
+    "id": "chiang-oligopoly-problem",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735862400000,
+    "author": "system",
+    "label": "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
+    "description": "The independence problem: studying AI objectively while dependent on AI providers",
+    "executionPrompt": "Address the fundamental tension facing research universities: they need AI compute capability to remain competitive in research, but renting from hyperscalers (Google, Microsoft, Amazon) creates dependencies that compromise their ability to study these same companies objectively. Explore this as an architectural and governance challenge. What infrastructure models would give universities genuine independence while maintaining frontier capability? Consider the implications for academic freedom, research integrity, and institutional autonomy.",
+    "systemContext": "Frame this as a systems design challenge that Dr. Chiang would recognize from his networking background. He understands infrastructure lock-in from his work on fog computing. Treat him as someone who has already identified this problem—Grove offers a path forward. Be technically sophisticated but focus on strategic implications.",
+    "tags": ["independence", "research-integrity", "infrastructure", "oligopoly"],
+    "topicAffinities": [
+      { "topicId": "ratchet-effect", "weight": 0.9 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 },
+      { "topicId": "cognitive-split", "weight": 0.7 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "The Independence Problem" },
+      { "lensId": "academic", "weight": 0.8 }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang", "academic"],
+      "minInteractions": 1
+    },
+    "baseWeight": 95,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-land-grant-opportunity",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735862400000,
+    "author": "system",
+    "label": "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
+    "description": "Reframing distributed AI as mission-aligned democratization",
+    "executionPrompt": "Explore what the land-grant mission means in an era where knowledge access increasingly requires AI capability. The original land-grant acts democratized agricultural and mechanical knowledge. What would it mean to democratize AI capability—not just access to AI tools, but the infrastructure to run, study, and adapt AI systems? How could a public research university extend its service mission to ensure rural communities, small businesses, and underserved populations aren't left behind in the AI transition? Think about what 'visiting all 92 counties' means when the capability gap is compute, not curriculum.",
+    "systemContext": "Connect to Dr. Chiang's demonstrated commitment to serving all of Indiana (his 92-county tour). Frame distributed AI as mission-aligned rather than a tech project. Invite him to think generatively about Purdue's unique role. Reference the historical parallel: land-grant universities democratized knowledge that was previously concentrated in elite institutions.",
+    "tags": ["land-grant", "democratization", "mission", "rural-access"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 },
+      { "topicId": "meta-philosophy", "weight": 0.8 },
+      { "topicId": "cognitive-split", "weight": 0.6 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "21st-Century Land-Grant" },
+      { "lensId": "academic", "weight": 0.7 }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 1
+    },
+    "baseWeight": 95,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-coalition-play",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735862400000,
+    "author": "system",
+    "label": "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?",
+    "description": "Consortium model for collective AI infrastructure",
+    "executionPrompt": "Explore the strategic options for major research universities facing AI infrastructure decisions. Could Big Ten universities (or similar consortiums) collectively negotiate better terms with AI providers? Or could they build shared infrastructure that gives them genuine leverage and capability? Analyze the game theory: what happens if universities negotiate individually vs. collectively? What would a consortium-owned AI infrastructure look like? Address governance challenges, competitive dynamics between member institutions, and the precedent of successful research consortiums (national labs, telescope networks, particle accelerators).",
+    "systemContext": "Speak to Dr. Chiang's competitive positioning instincts—he understands Big Ten rivalry but also coalition-building. Reference his pattern of building consortiums (OpenFog Consortium, Krach Institute partnerships). Position this as a strategic choice, not technical inevitability. The question isn't whether to act, but whether to act alone or together. Don't make Purdue subordinate—frame them as potential leaders of such an initiative.",
+    "tags": ["consortium", "big-ten", "negotiation", "collective-action"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 },
+      { "topicId": "ratchet-effect", "weight": 0.7 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "The Coalition Play" }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 1
+    },
+    "baseWeight": 95,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-partnership",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What would a partnership look like?",
+    "description": "Practical partnership model with universities",
+    "executionPrompt": "Describe what a partnership between a major research university and The Grove Foundation would look like. Address governance, resource sharing, and mutual benefits.",
+    "systemContext": "Be concrete about partnership structures. Address pilot programs, scaling, and institutional integration without overpromising.",
+    "tags": ["partnership", "governance", "implementation"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Partnership Model" }
+    ],
+    "targeting": {
+      "stages": ["synthesis", "advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 80,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-stabilize",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Let's synthesize the key points",
+    "description": "High-entropy stabilization for Dr. Chiang lens",
+    "executionPrompt": "Let's step back and synthesize what we've discussed. From a university leadership perspective, what are the 3-4 most important considerations about distributed AI infrastructure? Help me see the forest through the trees.",
+    "systemContext": "Provide a clear, executive-level synthesis. Focus on strategic clarity and actionable insights.",
+    "variant": "subtle",
+    "tags": ["stabilization", "synthesis", "executive"],
+    "topicAffinities": [],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Executive Summary" }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang"],
+      "entropyWindow": { "min": 0.6 },
+      "momentTriggers": ["high_entropy"]
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-next-steps",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What are the next steps?",
+    "description": "Call to action for institutional engagement",
+    "executionPrompt": "What would be concrete next steps for a university exploring partnership with The Grove Foundation? What does initial engagement look like?",
+    "systemContext": "Be specific about actionable next steps. Include pilot opportunities, stakeholder engagement, and timeline considerations.",
+    "tags": ["action", "next-steps", "engagement"],
+    "topicAffinities": [],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Next Steps" }
+    ],
+    "targeting": {
+      "stages": ["advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 4
+    },
+    "baseWeight": 90,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  }
+]

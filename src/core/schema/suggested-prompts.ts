@@ -2,6 +2,18 @@
 // Suggested prompt types for adaptive engagement
 // Sprint: adaptive-engagement-v1
 // Sprint: engagement-consolidation-v1 - SessionStage from engagement.ts
+//
+// ============================================================================
+// @deprecated - Use @core/context-fields types instead
+// Sprint: genesis-context-fields-v1
+//
+// MIGRATION:
+// - SuggestedPrompt → PromptObject (src/core/context-fields/types.ts)
+// - StagePromptConfig → ContextTargeting (declarative JSON)
+// - stagePromptsConfig → base.prompts.json, dr-chiang.prompts.json
+//
+// These types are preserved for backward compatibility.
+// ============================================================================
 
 import type { SessionStage } from './engagement';
 

@@ -1,6 +1,12 @@
 // hooks/useVersionedCollection.ts
 // Generic hook for versioned collections
 // Sprint: versioned-collection-refactor-v1
+//
+// DEPRECATION NOTE (grove-data-layer-v1):
+// For lens/journey data, prefer the new data layer hooks:
+// - useLensPickerData (src/explore/hooks)
+// - useJourneyListData (src/explore/hooks)
+// - useGroveData (src/core/data)
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -40,6 +46,11 @@ interface UseVersionedCollectionResult<T> {
  *
  * Merges versioned overrides from IndexedDB over schema items using
  * declarative merge configuration from MERGE_CONFIGS.
+ *
+ * @deprecated For lens/journey data, use the new data layer hooks instead:
+ * - `useLensPickerData` from `src/explore/hooks`
+ * - `useJourneyListData` from `src/explore/hooks`
+ * - `useGroveData` from `@core/data` for direct CRUD
  *
  * @example
  * ```tsx

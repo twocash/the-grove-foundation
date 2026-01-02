@@ -213,6 +213,36 @@ You might start with:
 
 Or explore freely. The questions lead to each other.`;
 
+/**
+ * Lens-specific welcome messages for the Terminal.
+ * These override INITIAL_TERMINAL_MESSAGE when a specific lens is active.
+ */
+export const LENS_WELCOME_MESSAGES: Record<string, string> = {
+  'dr-chiang': `The Terminal.
+
+Everything documented about Grove—the white paper, technical architecture, economic model, strategic implications for research universities—is indexed here.
+
+The thesis in one sentence: AI capability propagates downward from frontier to local. Grove is infrastructure designed to preserve institutional independence during that propagation.
+
+You might start with:
+→ How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?
+→ What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?
+→ Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?
+
+Ask anything you'd like about The Grove Foundation's seminal white paper, research, or vision for building sovereign AI at the edge.`,
+};
+
+/**
+ * Get the appropriate welcome message for a lens.
+ * Returns lens-specific message if available, otherwise default message.
+ */
+export function getInitialTerminalMessage(lensId?: string | null): string {
+  if (lensId && LENS_WELCOME_MESSAGES[lensId]) {
+    return LENS_WELCOME_MESSAGES[lensId];
+  }
+  return INITIAL_TERMINAL_MESSAGE;
+}
+
 export const ARCHITECTURE_NODES = [
   {
     id: 'local',

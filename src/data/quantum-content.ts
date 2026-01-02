@@ -475,58 +475,58 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
     }
   },
 
-  // DR. CHIANG REALITY (Purdue Partnership)
+  // DR. CHIANG / UNIVERSITY LEADERSHIP REALITY
   'dr-chiang': {
     hero: {
-      headline: "SOVEREIGN INFRASTRUCTURE FOR THE LAND-GRANT MISSION.",
+      headline: "INSTITUTIONAL INDEPENDENCE.",
       subtext: [
-        "Not Big Tech dependency. Not cloud subscription.",
-        "Owned research infrastructure."
+        "Research shouldn't rent its infrastructure.",
+        "Build sovereign capability."
       ]
     },
     problem: {
       quotes: [
         {
-          text: "We need entrepreneurs in free markets to invent competing AI systems and independently maximize choices outside the big tech oligopoly.",
-          author: "MUNG CHIANG",
-          title: "PURDUE PRESIDENT"
+          text: "Universities need AI compute capability to remain competitive, but renting from hyperscalers creates dependencies that compromise objectivity.",
+          author: "GROVE THESIS",
+          title: "RESEARCH INDEPENDENCE"
         },
         {
-          text: "My worst fear about AI is that it shrinks individual freedom.",
-          author: "MUNG CHIANG",
-          title: "PURDUE PRESIDENT"
+          text: "The land-grant mission was about democratizing knowledge. Today, knowledge access means AI capability.",
+          author: "GROVE THESIS",
+          title: "21ST CENTURY MISSION"
         },
         {
-          text: "Minimalism, Optionality, Transparency, Appeal—the MOTA framework for technology that serves rather than subjugates.",
-          author: "MOTA PRINCIPLES",
-          title: "CHIANG FRAMEWORK"
+          text: "No single university can match hyperscaler scale. But a consortium might build something better.",
+          author: "GROVE THESIS",
+          title: "COALITION STRATEGY"
         }
       ],
       tension: [
-        "The land-grant mission was about democratizing knowledge.",
-        "Distributed AI is about democratizing intelligence."
+        "They're building the future of intelligence.",
+        "And they're telling you to get comfortable being a guest in it."
       ]
     },
     terminal: {
-      heading: "Network Optimization Interface.",
-      thesis: "Grove's architecture is a coordination problem with decomposed local processing and strategic cloud escalation—the same layered optimization approach you pioneered in network protocols. Local agents handle routine cognition; cloud APIs handle pivotal moments.",
+      heading: "The Terminal.",
+      thesis: "Everything documented about Grove—the white paper, technical architecture, economic model, strategic implications for research universities—is indexed here.",
       prompts: [
         "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
         "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
         "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?"
       ],
-      footer: "Technical architecture documentation and research briefs available.",
-      placeholder: "What aspect of the distributed architecture interests you?"
+      footer: "Ask anything you'd like about The Grove Foundation's seminal white paper, research, or vision for building sovereign AI at the edge.",
+      placeholder: "What strategic question interests you?"
     },
     navigation: {
-      ctaLabel: "Research Briefing",
-      skipLabel: "Skip to Documentation"
+      ctaLabel: "Strategic Brief",
+      skipLabel: "Skip to Terminal"
     },
     foundation: {
       sectionLabels: {
-        explore: "Architecture",
-        cultivate: "Implementation",
-        grove: "Consortium Model"
+        explore: "Research",
+        cultivate: "Partnership",
+        grove: "Infrastructure"
       }
     }
   }

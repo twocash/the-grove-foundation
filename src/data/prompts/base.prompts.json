@@ -1,0 +1,310 @@
+[
+  {
+    "id": "what-is-grove",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What is The Grove?",
+    "description": "Start here to understand the vision",
+    "executionPrompt": "Explain what The Grove is in a way that captures both the technical architecture and the philosophical vision. Be concise but compelling.",
+    "tags": ["orientation", "overview"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["genesis"]
+    },
+    "baseWeight": 90,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "why-distributed",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Why does distributed AI matter?",
+    "description": "The philosophical basis for distributed AI ownership",
+    "executionPrompt": "Explain why distributed AI infrastructure matters—both the technical advantages and the philosophical implications for AI ownership and access.",
+    "tags": ["philosophy", "architecture"],
+    "topicAffinities": [{ "topicId": "distributed-systems", "weight": 0.9 }],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["genesis", "exploration"]
+    },
+    "baseWeight": 80,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "show-me-how",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Show me how this works",
+    "description": "Interactive demonstration request",
+    "executionPrompt": "Give me a walkthrough of how The Grove system actually works in practice. Show me the key components and how they interact.",
+    "tags": ["demonstration", "interactive"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["genesis"],
+      "excludeLenses": ["academic"]
+    },
+    "baseWeight": 70,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "research-basis",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What's the research basis?",
+    "description": "Academic foundation for distributed AI",
+    "executionPrompt": "Explain the academic and research foundation for distributed AI architectures. What literature, studies, and theoretical frameworks support this approach?",
+    "tags": ["research", "academic"],
+    "topicAffinities": [{ "topicId": "academic-foundation", "weight": 0.9 }],
+    "lensAffinities": [{ "lensId": "academic", "weight": 0.9 }],
+    "targeting": {
+      "stages": ["genesis", "exploration"]
+    },
+    "baseWeight": 75,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "explore-topics",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What topics can I explore?",
+    "description": "Discover available knowledge areas",
+    "executionPrompt": "Give me an overview of the main topic areas I can explore in The Grove. What are the key themes and how do they connect?",
+    "tags": ["discovery", "navigation"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["exploration"]
+    },
+    "baseWeight": 80,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "key-concepts",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What are the key concepts?",
+    "description": "Core concepts to understand",
+    "executionPrompt": "What are the essential concepts I need to understand about The Grove? Explain the foundational ideas that everything else builds upon.",
+    "tags": ["concepts", "orientation"],
+    "topicAffinities": [{ "topicId": "core-concepts", "weight": 0.8 }],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["exploration"]
+    },
+    "baseWeight": 75,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "ratchet-effect",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What is the Ratchet Effect?",
+    "description": "The core mechanism of AI infrastructure lock-in",
+    "executionPrompt": "Explain the Ratchet Effect in AI infrastructure. How does the 21-month doubling cycle create lock-in and what are its implications?",
+    "tags": ["ratchet", "economics"],
+    "topicAffinities": [{ "topicId": "ratchet-effect", "weight": 1.0 }],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["exploration", "synthesis"]
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "infrastructure-bet",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "The $380 billion infrastructure bet",
+    "description": "Understanding hyperscaler economics",
+    "executionPrompt": "Explain the $380 billion hyperscaler infrastructure investment. What does this mean for AI access and why is it significant?",
+    "tags": ["economics", "infrastructure"],
+    "topicAffinities": [{ "topicId": "infrastructure-bet", "weight": 1.0 }],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["exploration", "synthesis"]
+    },
+    "baseWeight": 80,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "capture-insight",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Save an insight",
+    "description": "Capture something valuable",
+    "executionPrompt": "Help me articulate and capture an insight from our conversation. What's the most valuable takeaway I should remember?",
+    "tags": ["contribution", "reflection"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["synthesis", "advocacy"],
+      "minInteractions": 3
+    },
+    "baseWeight": 70,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "surprise-me",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Show me something unexpected",
+    "description": "Serendipitous discovery",
+    "executionPrompt": "Share something surprising or unexpected about The Grove—an insight, connection, or implication I might not have considered.",
+    "tags": ["serendipity", "discovery"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["synthesis"],
+      "minInteractions": 4
+    },
+    "baseWeight": 65,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "implications",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "What are the implications?",
+    "description": "Deeper analysis of consequences",
+    "executionPrompt": "What are the broader implications of distributed AI ownership? How might this reshape the AI landscape over the next decade?",
+    "tags": ["depth", "analysis"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["synthesis"]
+    },
+    "baseWeight": 75,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "review-garden",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Review my captured insights",
+    "description": "Reflect on what you've learned",
+    "executionPrompt": "Help me review and synthesize the insights I've captured. What themes emerge and how do they connect?",
+    "tags": ["reflection", "synthesis"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["advocacy"],
+      "minInteractions": 5
+    },
+    "baseWeight": 70,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "contribute",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "How can I contribute?",
+    "description": "Ways to get involved",
+    "executionPrompt": "What are the ways I can contribute to The Grove? Whether through research, development, community building, or other means—how can I participate?",
+    "tags": ["contribution", "action"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["advocacy"]
+    },
+    "baseWeight": 80,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "stabilize-high-entropy",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Let's focus",
+    "description": "Stabilization prompt for high entropy",
+    "executionPrompt": "I notice our conversation has explored many directions. Let's step back and identify the key thread that's most valuable to pursue. What's the central question we should focus on?",
+    "variant": "subtle",
+    "tags": ["stabilization", "focus"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "entropyWindow": { "min": 0.7 },
+      "momentTriggers": ["high_entropy"]
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "redirect-off-topic",
+    "objectType": "prompt",
+    "created": 1735776000000,
+    "modified": 1735776000000,
+    "author": "system",
+    "label": "Return to Grove topics",
+    "description": "Redirect when off-topic",
+    "executionPrompt": "I notice we've drifted from Grove's focus areas. Would you like me to suggest some relevant topics? I can share more about distributed AI, infrastructure economics, or community governance.",
+    "variant": "subtle",
+    "tags": ["redirect", "navigation"],
+    "topicAffinities": [],
+    "lensAffinities": [],
+    "targeting": {
+      "minInteractions": 2
+    },
+    "baseWeight": 60,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  }
+]

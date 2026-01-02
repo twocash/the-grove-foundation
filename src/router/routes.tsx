@@ -7,14 +7,8 @@ import { RouteObject, Navigate } from 'react-router-dom';
 // Lazy load Foundation workspace (new three-column layout)
 const FoundationWorkspace = lazy(() => import('../foundation/FoundationWorkspace'));
 
-// Lazy load Bedrock workspace (enterprise reference implementation)
+// Lazy load Bedrock workspace (knowledge curation layer)
 const BedrockWorkspace = lazy(() => import('../bedrock/BedrockWorkspace'));
-
-// Lazy load Bedrock consoles
-const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
-const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
-const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
-const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor').then(m => ({ default: m.PipelineMonitor })));
 
 // Dev components for testing
 const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
@@ -34,6 +28,12 @@ const AudioStudio = lazy(() => import('../foundation/consoles/AudioStudio'));
 const Genesis = lazy(() => import('../foundation/consoles/Genesis'));
 const HealthDashboard = lazy(() => import('../foundation/consoles/HealthDashboard'));
 const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
+
+// Bedrock consoles (knowledge curation layer)
+const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
+const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor/PipelineMonitor'));
+const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
+const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -181,7 +181,7 @@ export const routes: RouteObject[] = [
         ],
       },
 
-      // Bedrock (enterprise reference implementation)
+      // Bedrock (knowledge curation layer)
       {
         path: '/bedrock',
         element: (
@@ -190,7 +190,7 @@ export const routes: RouteObject[] = [
           </Suspense>
         ),
         children: [
-          // Default route - Dashboard
+          // Default route - dashboard
           {
             index: true,
             element: (
@@ -199,7 +199,16 @@ export const routes: RouteObject[] = [
               </Suspense>
             ),
           },
-          // Knowledge Garden
+          // Pipeline Monitor
+          {
+            path: 'pipeline',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <PipelineMonitor />
+              </Suspense>
+            ),
+          },
+          // Knowledge Garden (sprout curation)
           {
             path: 'garden',
             element: (
@@ -214,15 +223,6 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <LensWorkshop />
-              </Suspense>
-            ),
-          },
-          // Pipeline Monitor (kinetic-pipeline-v1)
-          {
-            path: 'pipeline',
-            element: (
-              <Suspense fallback={<ConsoleLoadingFallback />}>
-                <PipelineMonitor />
               </Suspense>
             ),
           },

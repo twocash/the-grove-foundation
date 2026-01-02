@@ -1,11 +1,10 @@
 // src/explore/LensPicker.tsx
 // Lens selection view for the workspace
 // Supports two modes: 'full' (workspace grid) and 'compact' (chat nav list)
+// Sprint: grove-data-layer-v1 (Epic 3)
 
 import { useState, useMemo, useEffect } from 'react';
-import { useVersionedCollection } from '../../hooks/useVersionedCollection';
-import { useNarrativeEngine } from '../../hooks/useNarrativeEngine';
-import { useCustomLens } from '../../hooks/useCustomLens';
+import { useLensPickerData } from './hooks';
 import { Persona } from '../../data/narratives-schema';
 import { CustomLens } from '../../types/lens';
 import { useOptionalWorkspaceUI } from '../workspace/WorkspaceUIContext';
@@ -203,14 +202,8 @@ function CustomLensCard({ lens, isActive, isInspected, onSelect, onView, onDelet
 }
 
 export function LensPicker({ mode = 'full', onBack, onAfterSelect, onCreateCustomLens }: LensPickerProps = {}) {
-  // Get schema personas and merge with versioned overrides
-  const { getEnabledPersonas } = useNarrativeEngine();
-  const schemaPersonas = getEnabledPersonas();
-  const { items: personas, refresh: refreshPersonas } = useVersionedCollection(
-    schemaPersonas,
-    { objectType: 'lens' }
-  );
-  const { customLenses, deleteCustomLens } = useCustomLens();
+  // Sprint: grove-data-layer-v1 - Data layer migration
+  const { personas, customLenses, refreshPersonas, deleteCustomLens } = useLensPickerData();
   const workspaceUI = useOptionalWorkspaceUI();
 
   // Flow params for route-based selection

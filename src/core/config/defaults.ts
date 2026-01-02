@@ -85,7 +85,10 @@ export const DEFAULT_ENGAGEMENT_STATE: EngagementState = {
   totalExchangeCount: 0,
   sproutsCaptured: 0,
   allTopicsExplored: [],
-  visitCount: 1
+  visitCount: 1,
+  // Context Fields additions (Sprint: genesis-context-fields-v1)
+  computedEntropy: 0,
+  activeMoments: []
 };
 
 // ============================================================================

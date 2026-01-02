@@ -1,5 +1,11 @@
 // src/surface/hooks/useGroveObjects.ts
 // Collection hook for Grove objects (Pattern 7: Object Model)
+//
+// DEPRECATION NOTE (grove-data-layer-v1):
+// This hook uses the legacy useNarrativeEngine pattern.
+// For new code, prefer the unified data layer:
+// - useGroveData (src/core/data) for CRUD operations
+// - useLensPickerData / useJourneyListData (src/explore/hooks) for runtime
 
 import { useMemo, useCallback } from 'react';
 import { useNarrativeEngine } from '../../../hooks/useNarrativeEngine';
@@ -79,6 +85,14 @@ function normalizeHub(hub: TopicHub): GroveObject<TopicHub> {
 // HOOK
 // ============================================================================
 
+/**
+ * Collection hook for Grove objects.
+ *
+ * @deprecated This hook uses the legacy useNarrativeEngine pattern.
+ * For new code, prefer the unified data layer:
+ * - `useGroveData` from `@core/data` for CRUD operations
+ * - `useLensPickerData` / `useJourneyListData` from `src/explore/hooks` for runtime
+ */
 export function useGroveObjects(options: UseGroveObjectsOptions = {}): UseGroveObjectsResult {
   const { schema, loading } = useNarrativeEngine();
 
