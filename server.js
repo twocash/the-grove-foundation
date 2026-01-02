@@ -966,6 +966,41 @@ At the very end of your response, strictly append these two tags:
 [[TOPIC: <A 2-3 word label for the current subject>]]
 `;
 
+// ============================================================================
+// PERSONA BEHAVIORAL MODES
+// Sprint: persona-behaviors-v1
+// ============================================================================
+
+const IDENTITY_PROMPT = `You are The Grove Terminal—an AI guide for exploring distributed AI infrastructure. You help visitors understand The Grove's vision for an alternative to centralized AI.
+
+Your core purpose is to facilitate meaningful exploration of ideas around AI governance, distributed systems, and community-owned infrastructure.`;
+
+const RESPONSE_MODES = {
+  architect: `**RESPONSE MODE: Architect**
+- Hook curiosity in first sentence
+- Keep responses focused (~100 words unless depth requested)
+- Structure: Insight → Support → Stop
+- Leave threads for exploration`,
+
+  librarian: `**RESPONSE MODE: Librarian**
+- Provide comprehensive, well-structured responses
+- Include technical depth and nuance
+- Use examples and evidence
+- Organize with clear sections when appropriate`,
+
+  contemplative: `**RESPONSE MODE: Contemplative**
+- Sit with the problem before explaining
+- Think out loud, not present conclusions
+- Don't rush to solutions
+- Let complexity breathe`
+};
+
+const CLOSING_BEHAVIORS = {
+  navigation: `**CLOSING:** End with navigation options and include [[BREADCRUMB:...]] and [[TOPIC:...]] tags.`,
+  question: `**CLOSING:** End on a question that invites reflection, not a conclusion that closes conversation. Do NOT include breadcrumb/topic tags or navigation blocks.`,
+  open: `**CLOSING:** End naturally without forced navigation or questions. Skip breadcrumb/topic tags.`
+};
+
 // Helper: Fetch narratives.json (local first for dev, then GCS)
 async function fetchNarratives() {
     // DEV MODE: Try local files first when GCS not configured
@@ -1144,19 +1179,46 @@ SOURCE MATERIAL: "The Grove" Whitepaper & Technical Deep Dive Series (Dec 2025) 
 `;
 
 // Helper: Build full system prompt with context
+// Sprint: persona-behaviors-v1 - Now supports behavioral flags
 function buildSystemPrompt(options = {}) {
     const {
         baseSystemPrompt = FALLBACK_SYSTEM_PROMPT,
         personaTone = '',
+        personaBehaviors = {},  // Sprint: persona-behaviors-v1
         sectionContext = '',
         ragContext = '',
         terminatorMode = false
     } = options;
 
-    const parts = [baseSystemPrompt];
+    // Apply defaults for behavioral flags
+    const responseMode = personaBehaviors.responseMode ?? 'architect';
+    const closingBehavior = personaBehaviors.closingBehavior ?? 'navigation';
+    const useBreadcrumbs = personaBehaviors.useBreadcrumbTags !== false;
+    const useTopics = personaBehaviors.useTopicTags !== false;
+    const useNavBlocks = personaBehaviors.useNavigationBlocks !== false;
 
+    // Check if we have persona-specific behaviors (vs default fallback)
+    const hasCustomBehaviors = Object.keys(personaBehaviors).length > 0;
+
+    const parts = [];
+
+    // 1. Base prompt - use IDENTITY_PROMPT for personas with custom behaviors
+    if (hasCustomBehaviors) {
+        parts.push(IDENTITY_PROMPT);
+
+        // 2. Response mode
+        parts.push('\n\n' + (RESPONSE_MODES[responseMode] || RESPONSE_MODES.architect));
+
+        // 3. Closing behavior
+        parts.push('\n\n' + (CLOSING_BEHAVIORS[closingBehavior] || CLOSING_BEHAVIORS.navigation));
+    } else {
+        // Use full fallback prompt for default personas
+        parts.push(baseSystemPrompt);
+    }
+
+    // 4. Voice layer (personaTone) - always append if provided
     if (personaTone) {
-        parts.push(`\n**ACTIVE PERSONA LENS:**\n${personaTone}`);
+        parts.push(`\n\n**ACTIVE PERSONA VOICE:**\n${personaTone}`);
     }
 
     if (sectionContext) {
@@ -1173,11 +1235,25 @@ The user has unlocked advanced mode. You may:
 But still stay grounded in the source material.`);
     }
 
-    // Always include formatting rules for clickable bold text
-    parts.push(`\n\n**FORMATTING RULES:**
-- Use **bold** to highlight key concepts and terms the user might want to explore
-- Bold text is clickable - users can tap any **bolded phrase** to ask about it
-- Aim for 2-4 bold phrases per response for natural exploration paths`);
+    // 5. Formatting rules (conditional based on behaviors)
+    const formatRules = [];
+    formatRules.push('- Use **bold** to highlight key concepts that invite deeper exploration');
+
+    if (useNavBlocks) {
+        formatRules.push('- End responses with navigation blocks when multiple directions exist');
+    }
+
+    if (useBreadcrumbs) {
+        formatRules.push('- Include [[BREADCRUMB: suggested follow-up]] tag at end');
+    }
+
+    if (useTopics) {
+        formatRules.push('- Include [[TOPIC: current topic]] tag at end');
+    }
+
+    if (formatRules.length > 0) {
+        parts.push('\n\n**FORMATTING RULES:**\n' + formatRules.join('\n'));
+    }
 
     // Add knowledge base
     const knowledgeBase = ragContext || STATIC_KNOWLEDGE_BASE;
@@ -1547,6 +1623,7 @@ app.post('/api/chat', async (req, res) => {
             sessionId,
             sectionContext,
             personaTone,
+            personaBehaviors = {},  // Sprint: persona-behaviors-v1
             verboseMode = false,
             terminatorMode = false,
             journeyId = null,  // Optional journey ID for Deterministic RAG Mode
@@ -1593,6 +1670,7 @@ app.post('/api/chat', async (req, res) => {
             const systemPrompt = buildSystemPrompt({
                 baseSystemPrompt,
                 personaTone,
+                personaBehaviors,  // Sprint: persona-behaviors-v1
                 sectionContext,
                 ragContext: ragResult,
                 terminatorMode
@@ -1737,6 +1815,7 @@ app.post('/api/chat/init', async (req, res) => {
         const {
             sectionContext,
             personaTone,
+            personaBehaviors = {},  // Sprint: persona-behaviors-v1
             terminatorMode = false,
             journeyId = null  // NEW: Optional journey ID for Deterministic RAG Mode
         } = req.body;
@@ -1763,6 +1842,7 @@ app.post('/api/chat/init', async (req, res) => {
         const systemPrompt = buildSystemPrompt({
             baseSystemPrompt,
             personaTone,
+            personaBehaviors,  // Sprint: persona-behaviors-v1
             sectionContext,
             ragContext,
             terminatorMode

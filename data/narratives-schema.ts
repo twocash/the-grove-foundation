@@ -15,6 +15,21 @@ export type NarrativeStyle = 'evidence-first' | 'stakes-heavy' | 'mechanics-deep
 export type OpeningPhase = 'hook' | 'stakes' | 'mechanics';
 export type NoLensBehavior = 'nudge-after-exchanges' | 'never-nudge' | 'force-selection';
 
+// Sprint: persona-behaviors-v1 - Response structure controls
+export type ResponseMode = 'architect' | 'librarian' | 'contemplative';
+export type ClosingBehavior = 'navigation' | 'question' | 'open';
+
+export interface PersonaBehaviors {
+  // Response structure
+  responseMode?: ResponseMode;        // default: 'architect'
+  closingBehavior?: ClosingBehavior;  // default: 'navigation'
+
+  // Structural elements (all default to true)
+  useBreadcrumbTags?: boolean;
+  useTopicTags?: boolean;
+  useNavigationBlocks?: boolean;
+}
+
 export interface ArcEmphasis {
   hook: 1 | 2 | 3 | 4;
   stakes: 1 | 2 | 3 | 4;
@@ -33,6 +48,7 @@ export interface Persona {
 
   // Narrative configuration
   toneGuidance: string;          // Injected into LLM prompt
+  behaviors?: PersonaBehaviors;  // Sprint: persona-behaviors-v1 - structural controls
   narrativeStyle: NarrativeStyle;
   arcEmphasis: ArcEmphasis;
   openingPhase: OpeningPhase;

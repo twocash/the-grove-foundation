@@ -983,6 +983,7 @@ const Terminal: React.FC<TerminalProps> = ({
         {
           sectionContext: SECTION_CONFIG[activeSection]?.title || activeSection,
           personaTone: activeLensData?.toneGuidance,
+          personaBehaviors: activeLensData?.behaviors,  // Sprint: persona-behaviors-v1
           verboseMode: isVerboseMode,
           terminatorMode: terminatorModeActive,
           journeyId: currentJourneyId  // V2.1: Pass to server for Deterministic RAG
@@ -1301,7 +1302,8 @@ const Terminal: React.FC<TerminalProps> = ({
         </div>
 
         {/* Suggestions Area for Embedded Mode - Sprint: adaptive-engagement-v1 */}
-        {shouldShowInput(overlay) && terminalState.messages.length > 0 && stagePrompts.length > 0 && (
+        {/* Hide until user has sent at least one message (gateway pattern) */}
+        {shouldShowInput(overlay) && terminalState.messages.some(m => m.role === 'user') && stagePrompts.length > 0 && (
           <div className="px-4 py-3 border-t border-[var(--chat-border)] bg-[var(--chat-surface)]">
             <div className="max-w-3xl mx-auto">
               <div className="flex items-center justify-between mb-2">
@@ -1722,8 +1724,8 @@ const Terminal: React.FC<TerminalProps> = ({
                       }
                     }}
                   />
-                ) : stagePrompts.length > 0 ? (
-                  /* Stage-aware suggested prompts - fallback when no narrative follow-ups */
+                ) : stagePrompts.length > 0 && terminalState.messages.some(m => m.role === 'user') ? (
+                  /* Stage-aware suggested prompts - hidden until user sends first message (gateway pattern) */
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[9px] text-[var(--neon-cyan)] font-bold uppercase tracking-widest">

@@ -116,7 +116,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "How is this different from just using ChatGPT?"
       ],
       footer: "No guided path. Just curiosity.",
-      placeholder: "What would you like to explore?"
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -173,7 +173,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What can I actually do with this?"
       ],
       footer: "No jargon. Just answers.",
-      placeholder: "Ask me anything..."
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -231,7 +231,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What are the methodological limitations?"
       ],
       footer: "Citations available. Ask for sources.",
-      placeholder: "Enter your research query..."
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -288,7 +288,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "Show me the agent cognition loop."
       ],
       footer: "Implementation details available on request.",
-      placeholder: "Describe your technical question..."
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -345,7 +345,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "Who benefits from the current centralized model?"
       ],
       footer: "Policy implications and strategic options.",
-      placeholder: "What strategic question are you exploring?"
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -402,7 +402,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "Where does Grove complement vs. compete with APIs?"
       ],
       footer: "Strategic implications for established players.",
-      placeholder: "What competitive dynamic interests you?"
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -459,7 +459,7 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         "What are the comparable infrastructure investments?"
       ],
       footer: "Due diligence materials available.",
-      placeholder: "What investment angle interests you?"
+      placeholder: "Ask the Grove"
     },
     // Sprint: declarative-ui-config-v1
     navigation: {
@@ -475,48 +475,46 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
     }
   },
 
-  // DR. CHIANG / UNIVERSITY LEADERSHIP REALITY
+  // DR. CHIANG / NETWORK ARCHITECT REALITY
   'dr-chiang': {
     hero: {
-      headline: "INSTITUTIONAL INDEPENDENCE.",
+      headline: "THE POWER OF NETWORKS.",
       subtext: [
-        "Research shouldn't rent its infrastructure.",
-        "Build sovereign capability."
+        "Infrastructure shapes what's possible.",
+        "Who builds it determines who benefits."
       ]
     },
     problem: {
       quotes: [
         {
-          text: "Universities need AI compute capability to remain competitive, but renting from hyperscalers creates dependencies that compromise objectivity.",
-          author: "GROVE THESIS",
-          title: "RESEARCH INDEPENDENCE"
+          text: "The most important question in any network isn't 'how fast?' It's 'who controls the topology?' Control the infrastructure, control the possibilities.",
+          author: "Network Architecture",
+          title: "The Structural Question"
         },
         {
-          text: "The land-grant mission was about democratizing knowledge. Today, knowledge access means AI capability.",
-          author: "GROVE THESIS",
-          title: "21ST CENTURY MISSION"
+          text: "I've spent my career bridging the gap from proofs to prototypes. The hardest part isn't the math—it's building systems that work at scale, with real constraints.",
+          author: "Engineering Reality",
+          title: "From Theory to Practice"
         },
         {
-          text: "No single university can match hyperscaler scale. But a consortium might build something better.",
-          author: "GROVE THESIS",
-          title: "COALITION STRATEGY"
+          text: "Land-grant universities were America's answer to a question: who gets access to knowledge? We're facing the same question with AI.",
+          author: "The Land-Grant Mission",
+          title: "Public Infrastructure"
         }
       ],
       tension: [
         "They're building the future of intelligence.",
-        "And they're telling you to get comfortable being a guest in it."
+        "Who builds the infrastructure determines who benefits."
       ]
     },
     terminal: {
       heading: "The Terminal.",
-      thesis: "Everything documented about Grove—the white paper, technical architecture, economic model, strategic implications for research universities—is indexed here.",
+      thesis: "Let's begin with the essential question.",
       prompts: [
-        "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
-        "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
-        "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?"
+        "What is The Grove—and why does it matter?"
       ],
-      footer: "Ask anything you'd like about The Grove Foundation's seminal white paper, research, or vision for building sovereign AI at the edge.",
-      placeholder: "What strategic question interests you?"
+      footer: "Everything documented about Grove is indexed here. Start with the foundation.",
+      placeholder: "Ask the Grove"
     },
     navigation: {
       ctaLabel: "Strategic Brief",
@@ -527,6 +525,60 @@ export const SUPERPOSITION_MAP: Partial<Record<ArchetypeId, LensReality>> = {
         explore: "Research",
         cultivate: "Partnership",
         grove: "Infrastructure"
+      }
+    }
+  },
+
+  // WAYNE TURNER / INSTITUTIONAL COUNSEL REALITY
+  'wayne-turner': {
+    hero: {
+      headline: "FIDUCIARY CLARITY.",
+      subtext: [
+        "Concentration risk isn't just a portfolio problem.",
+        "It's a governance question."
+      ]
+    },
+    problem: {
+      quotes: [
+        {
+          text: "When three companies control the infrastructure your institution depends on, that's not a vendor relationship. That's a dependency with fiduciary implications.",
+          author: "GOVERNANCE ADVISORY",
+          title: "INSTITUTIONAL RISK"
+        },
+        {
+          text: "The question isn't whether AI changes everything. The question is whether your institution controls its response—or rents it.",
+          author: "STRATEGIC INFLECTION",
+          title: "INFRASTRUCTURE SOVEREIGNTY"
+        },
+        {
+          text: "Universities that built internet infrastructure became Stanford and MIT. Universities that consumed it became customers. This is that moment for AI.",
+          author: "HISTORICAL PRECEDENT",
+          title: "INSTITUTIONAL POSITIONING"
+        }
+      ],
+      tension: [
+        "Three companies will control intelligence infrastructure.",
+        "What's your institution's fiduciary response?"
+      ]
+    },
+    terminal: {
+      heading: "The Terminal.",
+      thesis: "Let's begin with the essential question.",
+      prompts: [
+        "What is The Grove—and why does it matter?"
+      ],
+      footer: "Grove's architecture and governance model are indexed here for rigorous evaluation.",
+      placeholder: "Ask the Grove"
+    },
+    navigation: {
+      ctaLabel: "Governance Brief",
+      skipLabel: "Skip to Terminal"
+    },
+    foundation: {
+      sectionLabels: {
+        explore: "Due Diligence",
+        cultivate: "Risk Assessment",
+        grove: "Governance Model"
       }
     }
   }
@@ -601,23 +653,16 @@ export const getTerminalWelcome = (
 export const formatTerminalWelcome = (welcome: TerminalWelcome): string => {
   const parts: string[] = [];
 
-  // Heading
-  parts.push(welcome.heading);
+  // Gateway opening with essential question inline
+  parts.push('Welcome to The Grove. Let\'s begin with the essential question:');
   parts.push('');
 
-  // Thesis
-  parts.push(welcome.thesis);
-  parts.push('');
-
-  // Prompts with arrow formatting
+  // Primary prompt with arrow formatting (gateway pattern: just the first prompt)
   if (welcome.prompts.length > 0) {
-    parts.push('You might start with:');
-    welcome.prompts.forEach(prompt => {
-      parts.push(`→ ${prompt}`);
-    });
+    parts.push(`→ ${welcome.prompts[0]}`);
   }
 
-  // Footer
+  // Footer (lens-specific context)
   if (welcome.footer) {
     parts.push('');
     parts.push(welcome.footer);

@@ -200,36 +200,28 @@ export const CTA_VARIANTS = {
   }
 };
 
-export const INITIAL_TERMINAL_MESSAGE = `The Terminal.
+export const INITIAL_TERMINAL_MESSAGE = `Welcome to The Grove. Let's begin with the essential question:
 
-Everything documented about Grove—the white paper, technical architecture, economic model, advisory council analysis—is indexed here.
+→ What is The Grove—and why does it matter?
 
-The thesis in one sentence: AI capability propagates downward from frontier to local. Grove is infrastructure designed to capture that propagation.
-
-You might start with:
-→ What does "distributed AI infrastructure" actually mean?
-→ How does capability propagate from frontier to local?
-→ Why would agents work to improve themselves?
-
-Or explore freely. The questions lead to each other.`;
+Everything documented about Grove—the white paper, technical architecture, economic model, advisory council analysis—is indexed here.`;
 
 /**
  * Lens-specific welcome messages for the Terminal.
  * These override INITIAL_TERMINAL_MESSAGE when a specific lens is active.
  */
 export const LENS_WELCOME_MESSAGES: Record<string, string> = {
-  'dr-chiang': `The Terminal.
+  'dr-chiang': `Welcome to The Grove. Let's begin with the essential question:
 
-Everything documented about Grove—the white paper, technical architecture, economic model, strategic implications for research universities—is indexed here.
+→ What is The Grove—and why does it matter?
 
-The thesis in one sentence: AI capability propagates downward from frontier to local. Grove is infrastructure designed to preserve institutional independence during that propagation.
+Everything documented about Grove is indexed here. Start with the foundation.`,
 
-You might start with:
-→ How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?
-→ What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?
-→ Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?
+  'wayne-turner': `Welcome to The Grove. Let's begin with the essential question:
 
-Ask anything you'd like about The Grove Foundation's seminal white paper, research, or vision for building sovereign AI at the edge.`,
+→ What is The Grove—and why does it matter?
+
+Grove's architecture and governance model are indexed here for rigorous evaluation.`,
 };
 
 /**

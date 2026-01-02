@@ -20,6 +20,7 @@ export interface ChatOptions {
   sessionId?: string;
   sectionContext?: string;
   personaTone?: string;
+  personaBehaviors?: import('../data/narratives-schema').PersonaBehaviors;  // Sprint: persona-behaviors-v1
   verboseMode?: boolean;
   terminatorMode?: boolean;
   journeyId?: string;  // V2.1: Journey ID for Deterministic RAG Mode
@@ -53,6 +54,7 @@ export async function initChatSession(options: Omit<ChatOptions, 'sessionId' | '
       body: JSON.stringify({
         sectionContext: options.sectionContext,
         personaTone: options.personaTone,
+        personaBehaviors: options.personaBehaviors,  // Sprint: persona-behaviors-v1
         terminatorMode: options.terminatorMode ?? false,
         journeyId: options.journeyId ?? null  // V2.1: For Deterministic RAG on init
       })
@@ -87,6 +89,7 @@ export async function sendMessageStream(
     sessionId: options.sessionId ?? currentSessionId,
     sectionContext: options.sectionContext,
     personaTone: options.personaTone,
+    personaBehaviors: options.personaBehaviors,  // Sprint: persona-behaviors-v1
     verboseMode: options.verboseMode ?? false,
     terminatorMode: options.terminatorMode ?? false,
     journeyId: options.journeyId ?? null  // V2.1: Pass to server for Deterministic RAG

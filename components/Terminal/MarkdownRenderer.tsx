@@ -65,7 +65,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onP
       const text = currentTextBuffer.join('\n');
       if (text.trim()) {
         elements.push(
-          <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 leading-relaxed font-serif text-sm">
+          <span key={`text-${elements.length}`} className="whitespace-pre-wrap block mb-3 last:mb-0 leading-relaxed font-mono text-sm text-emerald-500/75">
             {parseInline(text, onPromptClick)}
           </span>
         );
@@ -104,7 +104,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, onP
             ) : (
               <div
                 key={i}
-                className="px-4 py-2.5 text-sm font-serif text-slate-600 dark:text-slate-300"
+                className="px-4 py-2.5 text-sm font-mono text-emerald-500/75"
               >
                 <span className="text-primary mr-2">→</span>
                 {prompt}

@@ -174,7 +174,7 @@ export const ProblemStatement: React.FC<ProblemStatementProps> = ({
             <div className="mb-8 relative">
               <div
                 ref={carouselRef}
-                className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+                className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide justify-center"
               >
                 {quotes.map((quote, index) => (
                   <div
