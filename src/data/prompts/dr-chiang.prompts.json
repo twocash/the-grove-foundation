@@ -1,27 +1,25 @@
 [
   {
-    "id": "chiang-oligopoly-problem",
+    "id": "chiang-hook-thesis",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735862400000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "How can research universities build AI capability without becoming compute customers of the companies they're supposed to study objectively?",
-    "description": "The independence problem: studying AI objectively while dependent on AI providers",
-    "executionPrompt": "Address the fundamental tension facing research universities: they need AI compute capability to remain competitive in research, but renting from hyperscalers (Google, Microsoft, Amazon) creates dependencies that compromise their ability to study these same companies objectively. Explore this as an architectural and governance challenge. What infrastructure models would give universities genuine independence while maintaining frontier capability? Consider the implications for academic freedom, research integrity, and institutional autonomy.",
-    "systemContext": "Frame this as a systems design challenge that Dr. Chiang would recognize from his networking background. He understands infrastructure lock-in from his work on fog computing. Treat him as someone who has already identified this problem—Grove offers a path forward. Be technically sophisticated but focus on strategic implications.",
-    "tags": ["independence", "research-integrity", "infrastructure", "oligopoly"],
+    "label": "What's the core thesis?",
+    "description": "Thirty-second version for a busy president",
+    "executionPrompt": "Give me the thirty-second version. What's the fundamental claim, and why should I believe it's technically feasible?",
+    "systemContext": "Mung wants efficiency. Lead with the core technical thesis: distributed AI infrastructure using hybrid local-cloud architecture. Be specific about what makes it viable now (capability propagation, 7B models reaching utility thresholds). Don't oversell—he'll respect precision.",
+    "tags": ["hook", "thesis", "feasibility"],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 },
-      { "topicId": "cognitive-split", "weight": 0.7 }
+      { "topicId": "technical-arch", "weight": 0.9 },
+      { "topicId": "ratchet-effect", "weight": 0.8 }
     ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "The Independence Problem" },
-      { "lensId": "academic", "weight": 0.8 }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Core Thesis" }
     ],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
-      "lensIds": ["dr-chiang", "academic"],
+      "stages": ["exploration"],
+      "lensIds": ["dr-chiang"],
       "minInteractions": 1
     },
     "baseWeight": 95,
@@ -30,112 +28,167 @@
     "source": "library"
   },
   {
-    "id": "chiang-land-grant-opportunity",
+    "id": "chiang-hook-universities",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735862400000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "What would a 21st-century land-grant mission look like if knowledge access meant AI capability, not just library books?",
-    "description": "Reframing distributed AI as mission-aligned democratization",
-    "executionPrompt": "Explore what the land-grant mission means in an era where knowledge access increasingly requires AI capability. The original land-grant acts democratized agricultural and mechanical knowledge. What would it mean to democratize AI capability—not just access to AI tools, but the infrastructure to run, study, and adapt AI systems? How could a public research university extend its service mission to ensure rural communities, small businesses, and underserved populations aren't left behind in the AI transition? Think about what 'visiting all 92 counties' means when the capability gap is compute, not curriculum.",
-    "systemContext": "Connect to Dr. Chiang's demonstrated commitment to serving all of Indiana (his 92-county tour). Frame distributed AI as mission-aligned rather than a tech project. Invite him to think generatively about Purdue's unique role. Reference the historical parallel: land-grant universities democratized knowledge that was previously concentrated in elite institutions.",
-    "tags": ["land-grant", "democratization", "mission", "rural-access"],
+    "label": "Why does this matter for universities?",
+    "description": "Filter out research projects vs. real infrastructure",
+    "executionPrompt": "I've seen a lot of AI initiatives. Most of them are either research projects that never deploy or commercial products dressed up as partnerships. Where does this fit, and why should a university president care?",
+    "systemContext": "Acknowledge his pattern recognition—he's seen vaporware. Position Grove as infrastructure, not research project. Connect to institutional stakes: research independence, competitive positioning, land-grant mission. Be honest about what stage Grove is at.",
+    "tags": ["hook", "universities", "positioning"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.8 },
+      { "topicId": "infrastructure-bet", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "University Stakes" }
+    ],
+    "targeting": {
+      "stages": ["exploration"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 1
+    },
+    "baseWeight": 90,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-hook-competition",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "Who else is working on this?",
+    "description": "Competitive landscape assessment",
+    "executionPrompt": "Distributed AI infrastructure isn't a new idea. What's the competitive landscape? Who else is building this, and what's your differentiation?",
+    "systemContext": "He's done his homework or will. Be honest about the landscape: federated learning projects, edge AI companies, academic consortiums. Explain differentiation clearly—hybrid architecture, agent-centric design, economic model. Don't pretend competitors don't exist.",
+    "tags": ["hook", "competition", "differentiation"],
+    "topicAffinities": [
+      { "topicId": "infrastructure-bet", "weight": 0.9 },
+      { "topicId": "technical-arch", "weight": 0.7 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Competitive Landscape" }
+    ],
+    "targeting": {
+      "stages": ["exploration"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 1
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-stakes-purdue",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "Why Purdue?",
+    "description": "The competitive advantage question",
+    "executionPrompt": "Be honest with me. Why Purdue instead of MIT, Stanford, or Berkeley? What's our actual competitive advantage here, and what would we need to do to win?",
+    "systemContext": "Don't flatter—give real analysis. Purdue advantages: engineering strength, land-grant mission alignment, Chiang's network background, Midwest positioning. Be honest about disadvantages too. He respects candor over salesmanship.",
+    "tags": ["stakes", "purdue", "competitive-advantage"],
     "topicAffinities": [
       { "topicId": "governance", "weight": 0.9 },
-      { "topicId": "meta-philosophy", "weight": 0.8 },
-      { "topicId": "cognitive-split", "weight": 0.6 }
+      { "topicId": "infrastructure-bet", "weight": 0.8 }
     ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "21st-Century Land-Grant" },
-      { "lensId": "academic", "weight": 0.7 }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Purdue Advantage" }
     ],
     "targeting": {
       "stages": ["exploration", "synthesis"],
       "lensIds": ["dr-chiang"],
-      "minInteractions": 1
+      "minInteractions": 2
     },
-    "baseWeight": 95,
+    "baseWeight": 92,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
     "status": "active",
     "source": "library"
   },
   {
-    "id": "chiang-coalition-play",
+    "id": "chiang-stakes-geopolitics",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735862400000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "Could Big Ten research universities collectively negotiate from strength with AI providers—or build something better together?",
-    "description": "Consortium model for collective AI infrastructure",
-    "executionPrompt": "Explore the strategic options for major research universities facing AI infrastructure decisions. Could Big Ten universities (or similar consortiums) collectively negotiate better terms with AI providers? Or could they build shared infrastructure that gives them genuine leverage and capability? Analyze the game theory: what happens if universities negotiate individually vs. collectively? What would a consortium-owned AI infrastructure look like? Address governance challenges, competitive dynamics between member institutions, and the precedent of successful research consortiums (national labs, telescope networks, particle accelerators).",
-    "systemContext": "Speak to Dr. Chiang's competitive positioning instincts—he understands Big Ten rivalry but also coalition-building. Reference his pattern of building consortiums (OpenFog Consortium, Krach Institute partnerships). Position this as a strategic choice, not technical inevitability. The question isn't whether to act, but whether to act alone or together. Don't make Purdue subordinate—frame them as potential leaders of such an initiative.",
-    "tags": ["consortium", "big-ten", "negotiation", "collective-action"],
+    "label": "What's the geopolitical angle?",
+    "description": "Tech diplomacy and national interest",
+    "executionPrompt": "I spent time advising the State Department on tech diplomacy. The US-China AI competition is real. How does distributed infrastructure fit into that picture? Is there a national interest argument here?",
+    "systemContext": "This is Mung's domain—he founded the Krach Institute for Tech Diplomacy. Connect distributed AI to sovereignty concerns, supply chain resilience, democratic values. Reference his tech diplomacy work. Don't be naive about geopolitics but don't oversimplify either.",
+    "tags": ["stakes", "geopolitics", "sovereignty", "tech-diplomacy"],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 },
-      { "topicId": "ratchet-effect", "weight": 0.7 }
+      { "topicId": "governance", "weight": 0.8 },
+      { "topicId": "infrastructure-bet", "weight": 0.9 }
     ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "The Coalition Play" }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Geopolitical Stakes" }
     ],
     "targeting": {
       "stages": ["exploration", "synthesis"],
       "lensIds": ["dr-chiang"],
-      "minInteractions": 1
+      "minInteractions": 2
     },
-    "baseWeight": 95,
+    "baseWeight": 90,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
     "status": "active",
     "source": "library"
   },
   {
-    "id": "chiang-partnership",
+    "id": "chiang-stakes-timing",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735776000000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "What would a partnership look like?",
-    "description": "Practical partnership model with universities",
-    "executionPrompt": "Describe what a partnership between a major research university and The Grove Foundation would look like. Address governance, resource sharing, and mutual benefits.",
-    "systemContext": "Be concrete about partnership structures. Address pilot programs, scaling, and institutional integration without overpromising.",
-    "tags": ["partnership", "governance", "implementation"],
+    "label": "What's the timing argument?",
+    "description": "Why now, not later",
+    "executionPrompt": "Why now? What's changed that makes this feasible today when it wasn't feasible five years ago? And what happens if we wait another two years?",
+    "systemContext": "Present the Ratchet thesis: capability propagation from frontier to local follows predictable patterns. 7B models now match GPT-3.5 capabilities. Two-year window for infrastructure positioning. Be specific about what's changed and what waiting costs.",
+    "tags": ["stakes", "timing", "ratchet", "window"],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 }
+      { "topicId": "ratchet-effect", "weight": 1.0 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 }
     ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Partnership Model" }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Timing Window" }
     ],
     "targeting": {
-      "stages": ["synthesis", "advocacy"],
+      "stages": ["exploration", "synthesis"],
       "lensIds": ["dr-chiang"],
-      "minInteractions": 3
+      "minInteractions": 2
     },
-    "baseWeight": 80,
+    "baseWeight": 88,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
     "status": "active",
     "source": "library"
   },
   {
-    "id": "chiang-stabilize",
+    "id": "chiang-stakes-moat",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735776000000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "Let's synthesize the key points",
-    "description": "High-entropy stabilization for Dr. Chiang lens",
-    "executionPrompt": "Let's step back and synthesize what we've discussed. From a university leadership perspective, what are the 3-4 most important considerations about distributed AI infrastructure? Help me see the forest through the trees.",
-    "systemContext": "Provide a clear, executive-level synthesis. Focus on strategic clarity and actionable insights.",
-    "variant": "subtle",
-    "tags": ["stabilization", "synthesis", "executive"],
-    "topicAffinities": [],
+    "label": "What if Big Tech co-opts this?",
+    "description": "The moat question",
+    "executionPrompt": "Let's say this works. What stops Google or Microsoft from just building their own version with more resources? What's the moat?",
+    "systemContext": "Be honest—this is a real concern. Explain the structural moat: network effects of distributed data, mission alignment Big Tech can't replicate, regulatory positioning, community ownership model. Acknowledge what Big Tech does better and what they structurally can't do.",
+    "tags": ["stakes", "moat", "big-tech", "competition"],
+    "topicAffinities": [
+      { "topicId": "infrastructure-bet", "weight": 0.9 },
+      { "topicId": "governance", "weight": 0.7 }
+    ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Executive Summary" }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Defensive Moat" }
     ],
     "targeting": {
       "stages": ["exploration", "synthesis"],
       "lensIds": ["dr-chiang"],
-      "entropyWindow": { "min": 0.6 },
-      "momentTriggers": ["high_entropy"]
+      "minInteractions": 2
     },
     "baseWeight": 85,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -143,26 +196,440 @@
     "source": "library"
   },
   {
-    "id": "chiang-next-steps",
+    "id": "chiang-mechanics-topology",
     "objectType": "prompt",
-    "created": 1735776000000,
-    "modified": 1735776000000,
+    "created": 1735862400000,
+    "modified": 1735948800000,
     "author": "system",
-    "label": "What are the next steps?",
-    "description": "Call to action for institutional engagement",
-    "executionPrompt": "What would be concrete next steps for a university exploring partnership with The Grove Foundation? What does initial engagement look like?",
-    "systemContext": "Be specific about actionable next steps. Include pilot opportunities, stakeholder engagement, and timeline considerations.",
-    "tags": ["action", "next-steps", "engagement"],
-    "topicAffinities": [],
+    "label": "Show me the network topology.",
+    "description": "Architecture deep dive—his domain",
+    "executionPrompt": "Walk me through the architecture. What runs locally, what's in the cloud, how do nodes discover each other, and what's the synchronization model? I want to understand the actual network design.",
+    "systemContext": "This is Mung's expertise—network architecture. Be technically precise. Cover: local inference layer, cloud escalation, node discovery (bootstrapping), state synchronization, consensus model. Use network terminology he knows. This is where you earn or lose credibility.",
+    "tags": ["mechanics", "topology", "architecture", "network"],
+    "topicAffinities": [
+      { "topicId": "technical-arch", "weight": 1.0 },
+      { "topicId": "cognitive-split", "weight": 0.8 }
+    ],
     "lensAffinities": [
-      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Next Steps" }
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Network Topology" }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 2
+    },
+    "baseWeight": 95,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-mechanics-local-constraints",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "How do you handle local model constraints?",
+    "description": "The capability gap question",
+    "executionPrompt": "You're betting on local inference with 7B-parameter models. I know the capability gap between local and frontier. What's your strategy for bridging that gap, and what's the timeline?",
+    "systemContext": "Be honest about current limitations. Explain the hybrid architecture: local for routine cognition, cloud for complex reasoning. Reference the Ratchet thesis—capability propagation closes the gap over time. Provide specific timeline projections with confidence intervals.",
+    "tags": ["mechanics", "local-models", "capability-gap", "hybrid"],
+    "topicAffinities": [
+      { "topicId": "cognitive-split", "weight": 1.0 },
+      { "topicId": "ratchet-effect", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Local Constraints" }
+    ],
+    "targeting": {
+      "stages": ["exploration", "synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 2
+    },
+    "baseWeight": 90,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-mechanics-consistency",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's your consistency model?",
+    "description": "CAP theorem trade-offs",
+    "executionPrompt": "Distributed systems have fundamental trade-offs—CAP theorem and all that. What consistency guarantees are you making, and what are you explicitly sacrificing? I want to know you've thought through the hard parts.",
+    "systemContext": "He knows distributed systems theory. Address CAP directly: Grove prioritizes availability and partition tolerance, accepts eventual consistency for agent state. Explain conflict resolution, merge strategies, what happens during network partitions. Show you've done the hard thinking.",
+    "tags": ["mechanics", "consistency", "cap-theorem", "distributed-systems"],
+    "topicAffinities": [
+      { "topicId": "technical-arch", "weight": 1.0 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Consistency Model" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-mechanics-hybrid",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "How does the hybrid architecture work?",
+    "description": "Local-cloud interaction mechanics",
+    "executionPrompt": "You mentioned local plus cloud. Walk me through a concrete interaction. When does a request stay local? When does it escalate? What's the latency profile? What happens when cloud is unavailable?",
+    "systemContext": "Give a concrete example: routine agent cognition stays local (sub-100ms), complex reasoning escalates to cloud (500ms-2s), graceful degradation when cloud unavailable. Include the cognitive router decision logic. He wants to understand the actual system behavior.",
+    "tags": ["mechanics", "hybrid", "latency", "escalation"],
+    "topicAffinities": [
+      { "topicId": "cognitive-split", "weight": 1.0 },
+      { "topicId": "technical-arch", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Hybrid Mechanics" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-mechanics-edge",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's the edge computing play?",
+    "description": "Connection to fog networking",
+    "executionPrompt": "I've been working on edge computing since before it was called that. How does Grove relate to fog networking and edge infrastructure? Is this a new paradigm or an application of existing patterns?",
+    "systemContext": "Connect to his work: OpenFog Consortium, fog computing research. Grove applies fog networking principles to AI inference—compute at the edge, coordinate through hierarchy, minimize backhaul. Reference his published work where applicable. Show you know his domain.",
+    "tags": ["mechanics", "edge", "fog-computing", "openfog"],
+    "topicAffinities": [
+      { "topicId": "technical-arch", "weight": 0.9 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Edge Computing" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-evidence-deployment",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's your deployment path?",
+    "description": "Proofs to prototypes to scale",
+    "executionPrompt": "You've got a prototype. Walk me through the path to a million users. What are the milestones? What are the dependencies? What breaks first when you scale?",
+    "systemContext": "His motto is 'proofs to prototypes.' Give concrete milestones: current state, pilot phase, scaling challenges, dependencies (hardware partnerships, cloud provider relationships). Be honest about what breaks at scale—he'll respect that more than optimistic projections.",
+    "tags": ["evidence", "deployment", "scale", "milestones"],
+    "topicAffinities": [
+      { "topicId": "infrastructure-bet", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Deployment Path" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 90,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-evidence-bootstrap",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "How do you bootstrap the network?",
+    "description": "Cold-start problem",
+    "executionPrompt": "Every distributed network has a cold-start problem. How do you get the first thousand nodes? The first ten thousand? What's the minimum viable network?",
+    "systemContext": "He's built networks before—he knows cold-start is hard. Explain the bootstrap strategy: university partnerships as anchor nodes, Gardener community seeding, minimum viable topology. Be specific about what constitutes a functioning network.",
+    "tags": ["evidence", "bootstrap", "cold-start", "network-effects"],
+    "topicAffinities": [
+      { "topicId": "infrastructure-bet", "weight": 0.9 },
+      { "topicId": "governance", "weight": 0.7 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Bootstrap Strategy" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-evidence-economics",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's the economic model at scale?",
+    "description": "Unit economics and sustainability",
+    "executionPrompt": "I've built companies. The technical architecture has to work, but so does the economic architecture. How does this sustain itself? What do the unit economics look like at scale?",
+    "systemContext": "He's founded multiple companies—he knows economics matter. Explain the efficiency tax model, how it shrinks as communities become self-sufficient, revenue projections at scale, comparison to current AI API economics. Be specific about numbers where possible.",
+    "tags": ["evidence", "economics", "unit-economics", "sustainability"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.8 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Economic Model" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 3
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-evidence-precedent",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "Has anything like this worked before?",
+    "description": "Learning from consortiums and networks",
+    "executionPrompt": "I helped build OpenFog. What can we learn from previous consortia and distributed networks? What worked, what didn't, and how are you applying those lessons?",
+    "systemContext": "Reference his experience directly. Discuss Internet2, OpenFog, Linux Foundation, Apache Foundation. Be honest about what succeeded and failed. Show how Grove's design incorporates lessons learned—especially from his own OpenFog work.",
+    "tags": ["evidence", "precedent", "consortiums", "lessons"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Historical Precedent" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 4
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-evidence-track-record",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "Why should I trust you to execute?",
+    "description": "Track record question",
+    "executionPrompt": "I don't know you well. What's your track record? What have you built before? Why should I believe you can actually pull this off?",
+    "systemContext": "Fair question—answer directly. Provide relevant background, previous builds, team composition, advisory council. Be honest about what's unproven. He's evaluating execution capability, not just vision.",
+    "tags": ["evidence", "track-record", "execution", "credibility"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.8 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Execution Credibility" }
+    ],
+    "targeting": {
+      "stages": ["synthesis"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 4
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-ask",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's the ask?",
+    "description": "Concrete proposition",
+    "executionPrompt": "Let's cut to it. What exactly are you asking Purdue to do? What resources, what commitment, what timeline? Be specific.",
+    "systemContext": "Be concrete: pilot program scope, resource requirements, timeline, decision points. Don't be vague—he's evaluating a real commitment. Include what Purdue gets and what Purdue gives.",
+    "tags": ["resolution", "ask", "commitment", "resources"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 1.0 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "The Ask" }
+    ],
+    "targeting": {
+      "stages": ["synthesis", "advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 4
+    },
+    "baseWeight": 95,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-leadership",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What does leadership look like?",
+    "description": "Defining Purdue's role",
+    "executionPrompt": "You mentioned a leadership position. What does that actually mean? What would Purdue's role be, and what would my role be specifically?",
+    "systemContext": "Define leadership concretely: founding advisory board chair, anchor institutional partner, research coordination hub. Explain his personal role vs. institutional role. Be specific about what leadership means in practice.",
+    "tags": ["resolution", "leadership", "role", "governance"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 1.0 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Leadership Role" }
     ],
     "targeting": {
       "stages": ["advocacy"],
       "lensIds": ["dr-chiang"],
-      "minInteractions": 4
+      "minInteractions": 5
     },
-    "baseWeight": 90,
+    "baseWeight": 92,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-funding",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What's the funding path?",
+    "description": "Capital strategy",
+    "executionPrompt": "You said 'raise billions.' Walk me through that. Who's the capital source? What's the structure? How does this not become a distraction from Purdue's core mission?",
+    "systemContext": "Be specific about funding strategy: foundation grants, federal programs (NSF, DOD), university partnerships, efficiency tax revenue at scale. Address his concern about mission drift—explain how funding structure preserves academic independence.",
+    "tags": ["resolution", "funding", "capital", "structure"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Funding Path" }
+    ],
+    "targeting": {
+      "stages": ["advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 5
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-risks",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What are the risks to Purdue?",
+    "description": "Downside scenarios",
+    "executionPrompt": "Every opportunity has risks. What could go wrong for Purdue if we engage with this? What's the downside scenario, and how do we mitigate it?",
+    "systemContext": "Be honest about risks: reputational if it fails, resource diversion, opportunity cost. Then explain mitigation: staged commitment, clear exit points, limited initial exposure. He'll respect risk acknowledgment more than risk avoidance.",
+    "tags": ["resolution", "risks", "downside", "mitigation"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 1.0 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Risk Assessment" }
+    ],
+    "targeting": {
+      "stages": ["advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 5
+    },
+    "baseWeight": 88,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-coalition",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "Who are the natural allies?",
+    "description": "Coalition strategy",
+    "executionPrompt": "Building infrastructure requires coalitions. Who else should be at the table? Other universities? Government agencies? International partners? What's the coalition strategy?",
+    "systemContext": "Connect to his coalition-building experience (OpenFog, Krach Institute). Identify natural allies: Big Ten universities, national labs, federal agencies (NSF, DARPA), international partners. Explain why Purdue is positioned to lead the coalition.",
+    "tags": ["resolution", "coalition", "partners", "strategy"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 },
+      { "topicId": "infrastructure-bet", "weight": 0.8 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Coalition Strategy" }
+    ],
+    "targeting": {
+      "stages": ["advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 5
+    },
+    "baseWeight": 85,
+    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "status": "active",
+    "source": "library"
+  },
+  {
+    "id": "chiang-resolution-next-steps",
+    "objectType": "prompt",
+    "created": 1735862400000,
+    "modified": 1735948800000,
+    "author": "system",
+    "label": "What do you need in the next 30 days?",
+    "description": "Immediate action",
+    "executionPrompt": "Assuming I'm interested—and I haven't decided yet—what's the immediate next step? What do you need from me specifically, and what will you deliver in return?",
+    "systemContext": "Be concrete and bounded: specific meeting request, technical briefing for his team, pilot program proposal, timeline for decision points. Show you respect his time by having a clear, limited ask for the next 30 days.",
+    "tags": ["resolution", "next-steps", "action", "timeline"],
+    "topicAffinities": [
+      { "topicId": "governance", "weight": 0.9 }
+    ],
+    "lensAffinities": [
+      { "lensId": "dr-chiang", "weight": 1.0, "customLabel": "Immediate Next Steps" }
+    ],
+    "targeting": {
+      "stages": ["advocacy"],
+      "lensIds": ["dr-chiang"],
+      "minInteractions": 5
+    },
+    "baseWeight": 95,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
     "status": "active",
     "source": "library"

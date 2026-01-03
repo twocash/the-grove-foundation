@@ -22,7 +22,8 @@ export type ArchetypeId =
   | 'geopolitical'
   | 'big-ai-exec'
   | 'family-office'
-  | 'dr-chiang';
+  | 'dr-chiang'
+  | 'wayne-turner';
 
 export type NarrativePhase = 'hook' | 'stakes' | 'mechanics' | 'evidence' | 'resolution';
 
