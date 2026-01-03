@@ -17,7 +17,8 @@ export type GroveObjectType =
   | 'sprout'
   | 'card'
   | 'moment'
-  | 'document';
+  | 'document'
+  | 'prompt';
 
 /**
  * Options for listing objects.

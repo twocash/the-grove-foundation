@@ -35,6 +35,12 @@ export const BEDROCK_NAV_ITEMS: NavItem[] = [
     path: '/bedrock/lenses',
   },
   {
+    id: 'prompts',
+    label: 'Prompt Workshop',
+    icon: 'chat',
+    path: '/bedrock/prompts',
+  },
+  {
     id: 'journeys',
     label: 'Journey Architect',
     icon: 'route',
@@ -90,6 +96,13 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
     description: 'Create and manage exploration lenses',
     icon: 'tune',
     path: '/bedrock/lenses',
+  },
+  prompts: {
+    id: 'prompts',
+    title: 'Prompt Workshop',
+    description: 'Create and manage prompts with sequence membership',
+    icon: 'chat',
+    path: '/bedrock/prompts',
   },
   journeys: {
     id: 'journeys',

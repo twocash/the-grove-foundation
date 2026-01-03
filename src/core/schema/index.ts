@@ -239,3 +239,26 @@ export {
   DEFAULT_MOMENT_PRIORITY,
   MOMENT_SURFACES
 } from './moment';
+
+// Prompt types (Sprint: prompt-unification-v1, prompt-schema-rationalization-v1)
+export {
+  type PromptStage,
+  type PromptVariant,
+  type PromptSource,
+  type SequenceType,
+  type TopicAffinity,
+  type LensAffinity,
+  type PromptTargeting,
+  type SuccessCriteria,
+  type PromptSequence,
+  type PromptStats,
+  type WizardChoice,
+  type InputValidation,
+  type ConditionalNext,
+  type WizardStepConfig,
+  type PromptGenerationContext,
+  type PromptPayload,
+  type Prompt,
+  type SequenceDefinition,
+  deriveSequences
+} from './prompt';

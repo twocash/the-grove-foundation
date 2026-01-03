@@ -27,6 +27,7 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   node: 'journey_nodes',
   card: 'cards',
   moment: 'moments',
+  prompt: 'prompts',
 };
 
 /**

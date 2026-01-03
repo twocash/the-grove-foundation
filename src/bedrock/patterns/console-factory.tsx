@@ -2,7 +2,7 @@
 // Factory function for creating Bedrock consoles
 // Sprint: hotfix/console-factory
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { GroveObject } from '../../core/schema/grove-object';
 import type { PatchOperation } from '../types/copilot.types';
 import type { ViewMode } from '../components/ViewModeToggle';
@@ -212,15 +212,28 @@ export function createBedrockConsole<T>(
     // Inspector Registration
     // ==========================================================================
 
+    // Track the last opened selection to prevent infinite loops
+    const lastOpenedIdRef = useRef<string | null>(null);
+
+    // Build inspector config (memoized to prevent unnecessary re-renders)
+    const inspectorConfig = useMemo(() => {
+      if (!selectedObject) return null;
+      return {
+        title: selectedObject.meta.title || `Untitled ${config.title}`,
+        subtitle: selectedObject.meta.description,
+        icon: selectedObject.meta.icon,
+      };
+    }, [selectedObject?.meta.title, selectedObject?.meta.description, selectedObject?.meta.icon, config.title]);
+
+    // Open/close inspector when selection changes
     useEffect(() => {
-      if (selectedObject) {
+      if (selectedId && selectedId !== lastOpenedIdRef.current && inspectorConfig) {
+        lastOpenedIdRef.current = selectedId;
         openInspector({
-          title: selectedObject.meta.title || `Untitled ${config.title}`,
-          subtitle: selectedObject.meta.description,
-          icon: selectedObject.meta.icon,
+          ...inspectorConfig,
           content: (
             <EditorComponent
-              object={selectedObject}
+              object={selectedObject!}
               onEdit={handleEdit}
               onSave={handleSave}
               onDelete={handleDelete}
@@ -238,10 +251,32 @@ export function createBedrockConsole<T>(
             />
           ) : undefined,
         });
-      } else {
+      } else if (!selectedId && lastOpenedIdRef.current) {
+        lastOpenedIdRef.current = null;
         closeInspector();
       }
+    }, [selectedId, inspectorConfig, openInspector, closeInspector]);
+
+    // Update inspector content when object data changes (but selection stays same)
+    useEffect(() => {
+      if (selectedObject && selectedId === lastOpenedIdRef.current) {
+        updateInspector({
+          ...inspectorConfig,
+          content: (
+            <EditorComponent
+              object={selectedObject}
+              onEdit={handleEdit}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+              loading={loading}
+              hasChanges={hasChanges}
+            />
+          ),
+        });
+      }
     }, [
+      selectedId,
       selectedObject,
       handleEdit,
       handleSave,
@@ -249,10 +284,8 @@ export function createBedrockConsole<T>(
       handleDuplicate,
       loading,
       hasChanges,
-      openInspector,
-      closeInspector,
-      copilotTitle,
-      copilotPlaceholder,
+      inspectorConfig,
+      updateInspector,
     ]);
 
     // Close inspector on unmount

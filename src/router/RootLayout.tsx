@@ -1,10 +1,11 @@
 // src/router/RootLayout.tsx
 // Root layout wrapper that provides theme and data context to all routes
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Outlet } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import { ThemeProvider } from '../theme';
-import { GroveDataProviderComponent } from '@core/data';
+import { GroveDataProviderComponent, SupabaseAdapter } from '@core/data';
 
 interface RootLayoutProps {
   children?: React.ReactNode;
@@ -15,13 +16,24 @@ interface RootLayoutProps {
  * ThemeProvider uses useLocation() for surface detection, so it must be
  * inside the router context.
  *
- * GroveDataProvider defaults to LocalStorageAdapter for development.
- * In production, App.tsx configures HybridAdapter with Supabase.
+ * Uses SupabaseAdapter for production data access.
  */
 export const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const provider = useMemo(() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (supabaseUrl && supabaseKey) {
+      const client = createClient(supabaseUrl, supabaseKey);
+      return new SupabaseAdapter({ client });
+    }
+    // Falls back to localStorage if no Supabase config
+    return undefined;
+  }, []);
+
   return (
     <ThemeProvider>
-      <GroveDataProviderComponent>
+      <GroveDataProviderComponent provider={provider}>
         {children ?? <Outlet />}
       </GroveDataProviderComponent>
     </ThemeProvider>

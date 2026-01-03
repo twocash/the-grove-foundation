@@ -34,6 +34,7 @@ const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard
 const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor/PipelineMonitor'));
 const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
 const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
+const PromptWorkshop = lazy(() => import('../bedrock/consoles/PromptWorkshop'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -223,6 +224,15 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <LensWorkshop />
+              </Suspense>
+            ),
+          },
+          // Prompt Workshop
+          {
+            path: 'prompts',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <PromptWorkshop />
               </Suspense>
             ),
           },
