@@ -7,6 +7,7 @@ import type { PromptObject } from '@core/context-fields/types';
 // Import prompt data files
 import basePrompts from './base.prompts.json';
 import drChiangPrompts from './dr-chiang.prompts.json';
+import wayneTurnerPrompts from './wayne-turner.prompts.json';
 
 /**
  * All library prompts combined
@@ -14,6 +15,7 @@ import drChiangPrompts from './dr-chiang.prompts.json';
 export const libraryPrompts: PromptObject[] = [
   ...(basePrompts as PromptObject[]),
   ...(drChiangPrompts as PromptObject[]),
+  ...(wayneTurnerPrompts as PromptObject[]),
 ];
 
 /**
@@ -47,4 +49,4 @@ export function getActivePrompts(): PromptObject[] {
 }
 
 // Re-export for convenience
-export { basePrompts, drChiangPrompts };
+export { basePrompts, drChiangPrompts, wayneTurnerPrompts };

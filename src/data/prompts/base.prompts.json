@@ -12,7 +12,8 @@
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis"]
+      "stages": ["genesis"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 90,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -32,7 +33,8 @@
     "topicAffinities": [{ "topicId": "distributed-systems", "weight": 0.9 }],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis", "exploration"]
+      "stages": ["genesis", "exploration"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 80,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -53,7 +55,7 @@
     "lensAffinities": [],
     "targeting": {
       "stages": ["genesis"],
-      "excludeLenses": ["academic"]
+      "excludeLenses": ["academic", "wayne-turner", "dr-chiang"]
     },
     "baseWeight": 70,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -73,7 +75,8 @@
     "topicAffinities": [{ "topicId": "academic-foundation", "weight": 0.9 }],
     "lensAffinities": [{ "lensId": "academic", "weight": 0.9 }],
     "targeting": {
-      "stages": ["genesis", "exploration"]
+      "stages": ["genesis", "exploration"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 75,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -93,7 +96,8 @@
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"]
+      "stages": ["exploration"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 80,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -113,7 +117,8 @@
     "topicAffinities": [{ "topicId": "core-concepts", "weight": 0.8 }],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"]
+      "stages": ["exploration"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 75,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -133,7 +138,8 @@
     "topicAffinities": [{ "topicId": "ratchet-effect", "weight": 1.0 }],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"]
+      "stages": ["exploration", "synthesis"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 85,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -153,7 +159,8 @@
     "topicAffinities": [{ "topicId": "infrastructure-bet", "weight": 1.0 }],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"]
+      "stages": ["exploration", "synthesis"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 80,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -174,7 +181,8 @@
     "lensAffinities": [],
     "targeting": {
       "stages": ["synthesis", "advocacy"],
-      "minInteractions": 3
+      "minInteractions": 3,
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 70,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -195,7 +203,8 @@
     "lensAffinities": [],
     "targeting": {
       "stages": ["synthesis"],
-      "minInteractions": 4
+      "minInteractions": 4,
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 65,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -215,7 +224,8 @@
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"]
+      "stages": ["synthesis"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 75,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -236,7 +246,8 @@
     "lensAffinities": [],
     "targeting": {
       "stages": ["advocacy"],
-      "minInteractions": 5
+      "minInteractions": 5,
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 70,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -256,7 +267,8 @@
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["advocacy"]
+      "stages": ["advocacy"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 80,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -279,7 +291,8 @@
     "targeting": {
       "stages": ["exploration", "synthesis"],
       "entropyWindow": { "min": 0.7 },
-      "momentTriggers": ["high_entropy"]
+      "momentTriggers": ["high_entropy"],
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 85,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
@@ -300,7 +313,8 @@
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "minInteractions": 2
+      "minInteractions": 2,
+      "excludeLenses": ["wayne-turner", "dr-chiang"]
     },
     "baseWeight": 60,
     "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
