@@ -396,11 +396,8 @@ const Terminal: React.FC<TerminalProps> = ({
     const isCustom = customLenses.some(cl => cl.id === engLens);
     
     // Emit to EngagementBus so useContextState picks it up
-    emit('LENS_SELECTED', {
-      lensId: engLens,
-      isCustom,
-      archetypeId: activeLensData?.archetypeId || undefined
-    });
+    // Note: emit is an object with methods, not a direct function
+    emit.lensSelected(engLens, isCustom, activeLensData?.archetypeId || undefined);
     
     console.log('[Terminal] Synced lens to EngagementBus:', engLens);
   }, [engLens, isLensHydrated, emit, customLenses, activeLensData?.archetypeId]);
