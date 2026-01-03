@@ -381,6 +381,30 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   }, [terminalState.isOpen, hasShownWelcome, engLens, isLensHydrated, actions]);
 
+  // SYNC: Engagement Machine lens → EngagementBus
+  // The Engagement Machine is source of truth for lens (hydrates from URL/localStorage first).
+  // EngagementBus also tracks lens for useContextState (prompts filtering).
+  // This sync ensures they stay aligned.
+  const lastSyncedLens = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isLensHydrated || !engLens) return;
+    if (lastSyncedLens.current === engLens) return;
+    
+    lastSyncedLens.current = engLens;
+    
+    // Determine if this is a custom lens
+    const isCustom = customLenses.some(cl => cl.id === engLens);
+    
+    // Emit to EngagementBus so useContextState picks it up
+    emit('LENS_SELECTED', {
+      lensId: engLens,
+      isCustom,
+      archetypeId: activeLensData?.archetypeId || undefined
+    });
+    
+    console.log('[Terminal] Synced lens to EngagementBus:', engLens);
+  }, [engLens, isLensHydrated, emit, customLenses, activeLensData?.archetypeId]);
+
   // Update welcome message when lens is hydrated (Sprint: genesis-context-fields-v1)
   // This ensures lens-specific prompts appear in the "You might start with" section
   const hasUpdatedWelcomeForLens = useRef<string | null>(null);
