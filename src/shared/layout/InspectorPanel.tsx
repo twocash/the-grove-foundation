@@ -1,7 +1,8 @@
 // src/shared/layout/InspectorPanel.tsx
 // Reusable inspector panel wrapper with header and close button
+// Enhanced: collapsible sections (prompt-editor-standardization-v1)
 
-import { type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 interface InspectorPanelProps {
   /** Panel title */
@@ -87,17 +88,58 @@ interface InspectorSectionProps {
   title?: string;
   children: ReactNode;
   className?: string;
+  /** Enable collapse/expand toggle */
+  collapsible?: boolean;
+  /** Start collapsed (only applies when collapsible=true) */
+  defaultCollapsed?: boolean;
 }
 
-export function InspectorSection({ title, children, className = '' }: InspectorSectionProps) {
+export function InspectorSection({ 
+  title, 
+  children, 
+  className = '',
+  collapsible = false,
+  defaultCollapsed = false
+}: InspectorSectionProps) {
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
+  const handleToggle = () => {
+    if (collapsible) {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (collapsible && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      setIsCollapsed(!isCollapsed);
+    }
+  };
+
   return (
     <div className={`p-5 space-y-4 ${className}`}>
       {title && (
-        <h4 className="glass-section-header">
-          {title}
-        </h4>
+        <div 
+          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer select-none' : ''}`}
+          onClick={handleToggle}
+          role={collapsible ? 'button' : undefined}
+          tabIndex={collapsible ? 0 : undefined}
+          onKeyDown={collapsible ? handleKeyDown : undefined}
+          aria-expanded={collapsible ? !isCollapsed : undefined}
+        >
+          <h4 className="glass-section-header">{title}</h4>
+          {collapsible && (
+            <span 
+              className={`material-symbols-outlined text-[var(--glass-text-muted)] transition-transform duration-200 ${
+                isCollapsed ? '' : 'rotate-180'
+              }`}
+            >
+              expand_more
+            </span>
+          )}
+        </div>
       )}
-      {children}
+      {(!collapsible || !isCollapsed) && children}
     </div>
   );
 }

@@ -1,18 +1,125 @@
+# Execution Prompt: Prompt Editor Standardization
+
+**Sprint:** prompt-editor-standardization-v1  
+**Date:** 2025-01-03  
+**Handoff:** Ready for Claude Code execution
+
+---
+
+## Mission
+
+Standardize `PromptEditor.tsx` to match the reference `LensEditor.tsx` implementation. Convert from tab-based to section-based layout, use shared primitives, and clean up state management.
+
+## Critical Constraints
+
+1. **DO NOT TOUCH** any file outside the explicit list below
+2. **VERIFY BUILD** after each commit: `npm run build`
+3. **PRESERVE** all existing edit functionality
+4. **STRANGLER FIG** - Genesis/Terminal code is completely off-limits
+
+## Files to Modify
+
+### File 1: `src/shared/layout/InspectorPanel.tsx`
+
+**Location:** Lines 85-103 (InspectorSection component)
+
+**Current:**
+```typescript
+interface InspectorSectionProps {
+  title?: string;
+  children: ReactNode;
+  className?: string;
+}
+
+export function InspectorSection({ title, children, className = '' }: InspectorSectionProps) {
+  return (
+    <div className={`p-5 space-y-4 ${className}`}>
+      {title && (
+        <h4 className="glass-section-header">
+          {title}
+        </h4>
+      )}
+      {children}
+    </div>
+  );
+}
+```
+
+**Replace with:**
+```typescript
+interface InspectorSectionProps {
+  title?: string;
+  children: ReactNode;
+  className?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+}
+
+export function InspectorSection({ 
+  title, 
+  children, 
+  className = '',
+  collapsible = false,
+  defaultCollapsed = false
+}: InspectorSectionProps) {
+  const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
+
+  return (
+    <div className={`p-5 space-y-4 ${className}`}>
+      {title && (
+        <div 
+          className={`flex items-center justify-between ${collapsible ? 'cursor-pointer' : ''}`}
+          onClick={collapsible ? () => setIsCollapsed(!isCollapsed) : undefined}
+          role={collapsible ? 'button' : undefined}
+          tabIndex={collapsible ? 0 : undefined}
+          onKeyDown={collapsible ? (e) => e.key === 'Enter' && setIsCollapsed(!isCollapsed) : undefined}
+        >
+          <h4 className="glass-section-header">{title}</h4>
+          {collapsible && (
+            <span 
+              className={`material-symbols-outlined text-[var(--glass-text-muted)] transition-transform duration-200 ${isCollapsed ? '' : 'rotate-180'}`}
+            >
+              expand_more
+            </span>
+          )}
+        </div>
+      )}
+      {(!collapsible || !isCollapsed) && children}
+    </div>
+  );
+}
+```
+
+**Note:** Add `React.useState` since we're using it inline, or add `useState` to imports.
+
+---
+
+### File 2: `src/bedrock/consoles/PromptWorkshop/PromptEditor.tsx`
+
+**Action:** Full rewrite. Use this template:
+
+```typescript
 // src/bedrock/consoles/PromptWorkshop/PromptEditor.tsx
 // Prompt editor with section-based layout matching LensEditor pattern
 // Sprint: prompt-editor-standardization-v1
 
 import React from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
-import type { PromptPayload, PromptVariant, PromptStage } from '@core/schema/prompt';
+import type { PromptPayload, PromptVariant, PromptStage } from '../../../core/schema/prompt';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
-import { PROMPT_VARIANT_CONFIG, PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
 
 // =============================================================================
 // Constants
 // =============================================================================
+
+const VARIANT_OPTIONS: { value: PromptVariant; label: string }[] = [
+  { value: 'default', label: 'Default' },
+  { value: 'glow', label: 'Glow' },
+  { value: 'subtle', label: 'Subtle' },
+  { value: 'urgent', label: 'Urgent' },
+];
 
 const STAGE_OPTIONS: { value: PromptStage; label: string }[] = [
   { value: 'genesis', label: 'Genesis' },
@@ -36,7 +143,7 @@ export function PromptEditor({
 }: ObjectEditorProps<PromptPayload>) {
 
   // Helper to create patch operation for payload fields
-  const patchPayload = (field: string, value: unknown) => {
+  const patchPayload = (field: keyof PromptPayload | string, value: unknown) => {
     const op: PatchOperation = { op: 'replace', path: `/payload/${field}`, value };
     onEdit([op]);
   };
@@ -52,8 +159,6 @@ export function PromptEditor({
     const op: PatchOperation = { op: 'replace', path: `/payload/targeting/${field}`, value };
     onEdit([op]);
   };
-
-  const sourceConfig = PROMPT_SOURCE_CONFIG[prompt.payload.source];
 
   return (
     <div className="flex flex-col h-full">
@@ -93,12 +198,12 @@ export function PromptEditor({
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Variant</label>
               <select
                 value={prompt.payload.variant || 'default'}
-                onChange={(e) => patchPayload('variant', e.target.value as PromptVariant)}
+                onChange={(e) => patchPayload('variant', e.target.value)}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
                 disabled={loading}
               >
-                {Object.entries(PROMPT_VARIANT_CONFIG).map(([value, config]) => (
-                  <option key={value} value={value}>{config.label}</option>
+                {VARIANT_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
             </div>
@@ -146,18 +251,13 @@ export function PromptEditor({
             {/* Source badge */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Source</label>
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-base text-[var(--glass-text-muted)]">
-                  {sourceConfig?.icon || 'source'}
-                </span>
-                <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                  prompt.payload.source === 'library' ? 'bg-blue-500/20 text-blue-300' :
-                  prompt.payload.source === 'generated' ? 'bg-purple-500/20 text-purple-300' :
-                  'bg-green-500/20 text-green-300'
-                }`}>
-                  {sourceConfig?.label || prompt.payload.source}
-                </span>
-              </div>
+              <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
+                prompt.payload.source === 'library' ? 'bg-blue-500/20 text-blue-300' :
+                prompt.payload.source === 'generated' ? 'bg-purple-500/20 text-purple-300' :
+                'bg-green-500/20 text-green-300'
+              }`}>
+                {prompt.payload.source}
+              </span>
             </div>
 
             {/* Base Weight */}
@@ -198,7 +298,7 @@ export function PromptEditor({
           <div className="space-y-4">
             {/* Stages */}
             <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Target Stages</label>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Target Stages</label>
               <div className="flex flex-wrap gap-2">
                 {STAGE_OPTIONS.map(opt => {
                   const isSelected = prompt.payload.targeting.stages?.includes(opt.value);
@@ -210,7 +310,7 @@ export function PromptEditor({
                         const updated = isSelected 
                           ? current.filter(s => s !== opt.value)
                           : [...current, opt.value];
-                        patchTargeting('stages', updated.length ? updated : undefined);
+                        patchTargeting('stages', updated);
                       }}
                       className={`px-3 py-1 text-xs rounded-full transition-colors ${
                         isSelected 
@@ -228,16 +328,13 @@ export function PromptEditor({
 
             {/* Min Interactions */}
             <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                Min Interactions: {prompt.payload.targeting.minInteractions || 0}
-              </label>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Min Interactions</label>
               <input
-                type="range"
+                type="number"
                 min={0}
-                max={20}
                 value={prompt.payload.targeting.minInteractions || 0}
                 onChange={(e) => patchTargeting('minInteractions', parseInt(e.target.value) || undefined)}
-                className="w-full h-2 bg-[var(--glass-border)] rounded-lg appearance-none cursor-pointer accent-[var(--neon-cyan)]"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
                 disabled={loading}
               />
             </div>
@@ -255,22 +352,6 @@ export function PromptEditor({
                 value={prompt.payload.targeting.minConfidence || 0}
                 onChange={(e) => patchTargeting('minConfidence', parseFloat(e.target.value) || undefined)}
                 className="w-full h-2 bg-[var(--glass-border)] rounded-lg appearance-none cursor-pointer accent-[var(--neon-cyan)]"
-                disabled={loading}
-              />
-            </div>
-
-            {/* Lens IDs */}
-            <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Lens IDs</label>
-              <input
-                type="text"
-                value={(prompt.payload.targeting.lensIds || []).join(', ')}
-                onChange={(e) => {
-                  const ids = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
-                  patchTargeting('lensIds', ids.length ? ids : undefined);
-                }}
-                placeholder="lens-id-1, lens-id-2"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
                 disabled={loading}
               />
             </div>
@@ -299,28 +380,19 @@ export function PromptEditor({
         <InspectorSection title="Sequences" collapsible defaultCollapsed={true}>
           {prompt.payload.sequences && prompt.payload.sequences.length > 0 ? (
             <div className="space-y-2">
-              {prompt.payload.sequences.map((seq, idx) => {
-                const seqConfig = SEQUENCE_TYPE_CONFIG[seq.groupType];
-                return (
-                  <div key={idx} className="flex items-center gap-2 p-2 rounded-lg bg-[var(--glass-surface)]">
-                    <span 
-                      className="material-symbols-outlined text-base"
-                      style={{ color: seqConfig?.color || 'var(--glass-text-muted)' }}
-                    >
-                      {seqConfig?.icon || 'route'}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-[var(--glass-border)] text-[var(--glass-text-muted)]">
-                      {seqConfig?.label || seq.groupType}
-                    </span>
-                    <span className="text-sm text-[var(--glass-text-secondary)] flex-1 truncate">
-                      {seq.groupId}
-                    </span>
-                    <span className="text-xs text-[var(--glass-text-muted)]">
-                      #{seq.order}
-                    </span>
-                  </div>
-                );
-              })}
+              {prompt.payload.sequences.map((seq, idx) => (
+                <div key={idx} className="flex items-center gap-2 p-2 rounded-lg bg-[var(--glass-surface)]">
+                  <span className="text-xs px-2 py-0.5 rounded bg-[var(--glass-border)] text-[var(--glass-text-muted)]">
+                    {seq.groupType}
+                  </span>
+                  <span className="text-sm text-[var(--glass-text-secondary)] flex-1">
+                    {seq.groupId}
+                  </span>
+                  <span className="text-xs text-[var(--glass-text-muted)]">
+                    #{seq.order}
+                  </span>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="text-sm text-[var(--glass-text-muted)] italic">No sequence memberships</p>
@@ -334,38 +406,29 @@ export function PromptEditor({
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded-lg bg-[var(--glass-surface)]">
               <div className="text-lg font-semibold text-[var(--glass-text-primary)]">
-                {prompt.payload.stats?.impressions ?? 0}
+                {prompt.payload.stats.impressions}
               </div>
               <div className="text-xs text-[var(--glass-text-muted)]">Impressions</div>
             </div>
             <div className="p-3 rounded-lg bg-[var(--glass-surface)]">
               <div className="text-lg font-semibold text-[var(--glass-text-primary)]">
-                {prompt.payload.stats?.selections ?? 0}
+                {prompt.payload.stats.selections}
               </div>
               <div className="text-xs text-[var(--glass-text-muted)]">Selections</div>
             </div>
             <div className="p-3 rounded-lg bg-[var(--glass-surface)]">
               <div className="text-lg font-semibold text-[var(--glass-text-primary)]">
-                {prompt.payload.stats?.completions ?? 0}
+                {prompt.payload.stats.completions}
               </div>
               <div className="text-xs text-[var(--glass-text-muted)]">Completions</div>
             </div>
             <div className="p-3 rounded-lg bg-[var(--glass-surface)]">
               <div className="text-lg font-semibold text-[var(--glass-text-primary)]">
-                {(prompt.payload.stats?.avgEntropyDelta ?? 0).toFixed(2)}
+                {prompt.payload.stats.avgEntropyDelta.toFixed(2)}
               </div>
               <div className="text-xs text-[var(--glass-text-muted)]">Avg Entropy Δ</div>
             </div>
           </div>
-          {/* Selection Rate */}
-          {(prompt.payload.stats?.impressions ?? 0) > 0 && (
-            <div className="mt-3 p-3 rounded-lg bg-[var(--glass-surface)]">
-              <div className="text-lg font-semibold text-[var(--neon-cyan)]">
-                {(((prompt.payload.stats?.selections ?? 0) / (prompt.payload.stats?.impressions ?? 1)) * 100).toFixed(1)}%
-              </div>
-              <div className="text-xs text-[var(--glass-text-muted)]">Selection Rate</div>
-            </div>
-          )}
         </InspectorSection>
 
         <InspectorDivider />
@@ -433,3 +496,39 @@ export function PromptEditor({
 }
 
 export default PromptEditor;
+```
+
+---
+
+## Verification Commands
+
+After each commit:
+```bash
+npm run build
+```
+
+Final verification:
+```bash
+npm run build && npm run preview
+# Then manually test:
+# 1. Navigate to /bedrock/prompts
+# 2. Select a prompt
+# 3. Verify all sections render
+# 4. Edit title, save
+# 5. Expand Targeting, edit stages
+# 6. Collapse Sequences, expand Performance
+# 7. Duplicate prompt
+# 8. Delete duplicate
+```
+
+---
+
+## Success Criteria
+
+- [ ] Build passes without errors
+- [ ] No console errors during operation
+- [ ] All fields editable and persist correctly
+- [ ] Collapsible sections toggle correctly
+- [ ] Footer actions work (Save/Duplicate/Delete)
+- [ ] Genesis page completely unaffected
+- [ ] Terminal prompt suggestions unaffected
