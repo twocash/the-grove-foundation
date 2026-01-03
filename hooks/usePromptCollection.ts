@@ -10,6 +10,7 @@ import { libraryPrompts } from '../src/data/prompts';
 export interface UsePromptCollectionResult {
   library: PromptObject[];
   generated: PromptObject[];
+  usedIds: Set<string>;
   isLoading: boolean;
   error: Error | null;
   trackSelection: (promptId: string) => void;
@@ -24,6 +25,7 @@ export interface UsePromptCollectionResult {
  */
 export function usePromptCollection(): UsePromptCollectionResult {
   const [generated, setGenerated] = useState<PromptObject[]>([]);
+  const [usedIds, setUsedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const generatorRef = useRef(getPromptGenerator());
@@ -33,10 +35,14 @@ export function usePromptCollection(): UsePromptCollectionResult {
     return libraryPrompts.filter(p => p.status === 'active');
   }, []);
 
-  // Track prompt selection (for analytics)
+  // Track prompt selection (excludes from future suggestions)
   const trackSelection = useCallback((promptId: string) => {
-    // TODO: Integrate with telemetry in future sprint
-    console.log('[PromptCollection] Selection tracked:', promptId);
+    setUsedIds(prev => {
+      const next = new Set(prev);
+      next.add(promptId);
+      console.log('[PromptCollection] Selection tracked, used count:', next.size);
+      return next;
+    });
   }, []);
 
   // Add a generated prompt to the collection
@@ -89,6 +95,7 @@ export function usePromptCollection(): UsePromptCollectionResult {
   return {
     library,
     generated,
+    usedIds,
     isLoading,
     error,
     trackSelection,

@@ -69,7 +69,7 @@ export function useSuggestedPrompts(
   const { maxPrompts = 3, includeGenerated = true, scoringOverrides } = options;
 
   const context = useContextState();
-  const { library, generated, isLoading, error, trackSelection, generateForContext } = usePromptCollection();
+  const { library, generated, usedIds, isLoading, error, trackSelection, generateForContext } = usePromptCollection();
 
   // Track previous interaction count to trigger generation
   const prevInteractionCount = useRef(context.interactionCount);
@@ -89,8 +89,11 @@ export function useSuggestedPrompts(
       allPrompts = [...allPrompts, ...generated];
     }
 
+    // Filter out already-used prompts (immediate refresh on click)
+    const unused = allPrompts.filter(p => !usedIds.has(p.id));
+
     // Hard filters (stage, lens exclusion, minInteractions)
-    const eligible = applyHardFilters(allPrompts, context);
+    const eligible = applyHardFilters(unused, context);
 
     // Soft scoring with optional overrides
     const weights = scoringOverrides ? { ...scoringOverrides } as ScoringWeights : undefined;
@@ -98,7 +101,7 @@ export function useSuggestedPrompts(
 
     // Return top N, converted to legacy format for Terminal.tsx compatibility
     return scored.slice(0, maxPrompts).map(s => toLegacyPrompt(s.prompt));
-  }, [library, generated, context, maxPrompts, includeGenerated, scoringOverrides]);
+  }, [library, generated, usedIds, context, maxPrompts, includeGenerated, scoringOverrides]);
 
   // Debug logging
   if (process.env.NODE_ENV === 'development') {

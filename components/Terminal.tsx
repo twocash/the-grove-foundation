@@ -348,7 +348,7 @@ const Terminal: React.FC<TerminalProps> = ({
   }, [engLens, getPersona, getCustomLens, customLenses]);
 
   // Stage-aware suggested prompts (Sprint: adaptive-engagement-v1)
-  const { prompts: stagePrompts, stage: promptStage, refreshPrompts } = useSuggestedPrompts({
+  const { prompts: stagePrompts, stage: promptStage, refreshPrompts, trackSelection } = useSuggestedPrompts({
     lensId: activeLensData?.id,
     lensName: activeLensData?.publicLabel,
     maxPrompts: 3,
@@ -1325,6 +1325,9 @@ const Terminal: React.FC<TerminalProps> = ({
                   <button
                     key={prompt.id}
                     onClick={() => {
+                      // Track selection to exclude from future suggestions
+                      trackSelection(prompt.id);
+                      
                       if (prompt.journeyId) {
                         // Start journey via XState (schema types with waypoints)
                         // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
@@ -1748,6 +1751,9 @@ const Terminal: React.FC<TerminalProps> = ({
                           <button
                             key={prompt.id}
                             onClick={() => {
+                              // Track selection to exclude from future suggestions
+                              trackSelection(prompt.id);
+                              
                               // Sprint: journey-schema-unification-v1 - Unified lookup with canonical types
                               const journey = getCanonicalJourney(prompt.journeyId!, schema);
                               if (journey) {
@@ -1767,6 +1773,9 @@ const Terminal: React.FC<TerminalProps> = ({
                             key={prompt.id}
                             prompt={prompt.text}
                             onClick={() => {
+                              // Track selection to exclude from future suggestions
+                              trackSelection(prompt.id);
+                              
                               if (prompt.command) {
                                 handleSend(prompt.command);
                               } else {
