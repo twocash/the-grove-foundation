@@ -170,7 +170,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // NEW: Engagement state machine hooks (Epic 6 migration)
   const { actor } = useEngagement();
-  const { lens: engLens, selectLens: engSelectLens } = useLensState({ actor });
+  const { lens: engLens, selectLens: engSelectLens, isHydrated: isLensHydrated } = useLensState({ actor });
   const {
     journey: engJourney,
     isActive: isJourneyActive,
@@ -358,28 +358,28 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Check if we should show welcome interstitial or lens picker on first open
   useEffect(() => {
+    // Wait for engagement machine to hydrate lens from URL/localStorage
+    // This prevents showing lens picker during the hydration race condition
+    if (!isLensHydrated) return;
+
     const hasBeenWelcomed = localStorage.getItem('grove-terminal-welcomed') === 'true';
 
     if (terminalState.isOpen && !hasBeenWelcomed && !hasShownWelcome) {
-      // Epic 5 Fix: If URL lens is present AND already hydrated, skip picker entirely
-      if (urlLensId && session.activeLens === urlLensId) {
-        // Lens already set via useLensHydration, skip to chat
+      // FIX: Use engLens (Engagement Machine) instead of session.activeLens
+      // The engagement machine hydrates from URL params before NarrativeEngine
+      if (engLens) {
+        // Lens already hydrated (from URL or localStorage), skip picker
         localStorage.setItem('grove-terminal-welcomed', 'true');
         localStorage.setItem('grove-session-established', 'true');
-        console.log('[Terminal] URL lens hydrated, skipping picker:', urlLensId);
+        console.log('[Terminal] Lens already hydrated, skipping picker:', engLens);
         return; // Don't show picker or welcome
       }
 
-      // v0.12e: If there's a URL lens but not yet hydrated, show LensPicker (with lens highlighted)
-      // Otherwise, show welcome interstitial for first-time users
+      // No lens set - show welcome interstitial for first-time users
       // Sprint: terminal-overlay-machine-v1 - use setOverlay
-      if (urlLensId) {
-        actions.setOverlay({ type: 'lens-picker' });
-      } else {
-        actions.setOverlay({ type: 'welcome' });
-      }
+      actions.setOverlay({ type: 'welcome' });
     }
-  }, [terminalState.isOpen, hasShownWelcome, urlLensId, session.activeLens, actions]);
+  }, [terminalState.isOpen, hasShownWelcome, engLens, isLensHydrated, actions]);
 
   // Update welcome message when lens is hydrated (Sprint: genesis-context-fields-v1)
   // This ensures lens-specific prompts appear in the "You might start with" section
