@@ -4,11 +4,10 @@ FROM node:20-alpine as builder
 # Cache bust argument to force fresh builds
 ARG CACHEBUST=1
 
-# Argument for Vite build time variable
+# Arguments for Vite build time variables
 ARG GEMINI_API_KEY
-# Vite expects VITE_ prefix usually, but our config uses specific replacements.
-# However, env vars are often picked up by Vite. 
-# We'll pass it as process env to the build command context.
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
 
 WORKDIR /app
 
@@ -17,8 +16,12 @@ RUN npm install
 
 COPY . .
 
-# Run build with the environment variable (pass both names for compatibility)
-RUN GEMINI_API_KEY=$GEMINI_API_KEY VITE_GEMINI_API_KEY=$GEMINI_API_KEY npm run build
+# Run build with environment variables available to Vite
+RUN GEMINI_API_KEY=$GEMINI_API_KEY \
+    VITE_GEMINI_API_KEY=$GEMINI_API_KEY \
+    VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
+    VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
+    npm run build
 
 # Stage 2: Runner
 FROM node:20-alpine
