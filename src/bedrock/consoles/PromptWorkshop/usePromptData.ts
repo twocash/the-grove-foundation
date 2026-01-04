@@ -43,7 +43,6 @@ export function createDefaultPrompt(defaults?: Partial<PromptPayload>): GroveObj
         avgDwellMs: 0,
       },
       source: 'user',
-      variant: 'default',
       ...defaults,
     },
   };

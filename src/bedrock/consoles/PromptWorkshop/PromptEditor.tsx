@@ -4,11 +4,11 @@
 
 import React from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
-import type { PromptPayload, PromptVariant, PromptStage } from '@core/schema/prompt';
+import type { PromptPayload, PromptStage } from '@core/schema/prompt';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
-import { PROMPT_VARIANT_CONFIG, PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
+import { PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
 
 // =============================================================================
 // Constants
@@ -66,11 +66,11 @@ export function PromptEditor({
             {/* Title */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Title</label>
-              <input
-                type="text"
+              <textarea
                 value={prompt.meta.title}
                 onChange={(e) => patchMeta('title', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
+                rows={2}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
                 disabled={loading}
               />
             </div>
@@ -78,29 +78,14 @@ export function PromptEditor({
             {/* Description */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Description</label>
-              <input
-                type="text"
+              <textarea
                 value={prompt.meta.description || ''}
                 onChange={(e) => patchMeta('description', e.target.value)}
+                rows={3}
                 placeholder="Brief description of this prompt"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
                 disabled={loading}
               />
-            </div>
-
-            {/* Variant */}
-            <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Variant</label>
-              <select
-                value={prompt.payload.variant || 'default'}
-                onChange={(e) => patchPayload('variant', e.target.value as PromptVariant)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
-                disabled={loading}
-              >
-                {Object.entries(PROMPT_VARIANT_CONFIG).map(([value, config]) => (
-                  <option key={value} value={value}>{config.label}</option>
-                ))}
-              </select>
             </div>
 
             {/* Status toggle */}

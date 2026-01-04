@@ -30,7 +30,6 @@ export const PromptWorkshop = createBedrockConsole<PromptPayload>({
 export {
   promptWorkshopConfig,
   SEQUENCE_TYPE_CONFIG,
-  PROMPT_VARIANT_CONFIG,
   PROMPT_SOURCE_CONFIG,
 } from './PromptWorkshop.config';
 

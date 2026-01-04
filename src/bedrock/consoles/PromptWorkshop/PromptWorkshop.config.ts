@@ -12,8 +12,7 @@ export const promptWorkshopConfig: ConsoleConfig = {
   metrics: [
     { id: 'total', label: 'Total', icon: 'chat', query: 'count(*)' },
     { id: 'active', label: 'Active', icon: 'visibility', query: 'count(where: status=active)' },
-    { id: 'sequences', label: 'Sequences', icon: 'route', query: 'count(distinct: sequences.groupId)' },
-    { id: 'targeted', label: 'Targeted', icon: 'filter_alt', query: 'count(where: targeting.stages)' },
+    { id: 'inSequences', label: 'In Journeys', icon: 'route', query: 'count(where: sequences.length > 0)' },
   ],
 
   navigation: [],
@@ -28,10 +27,10 @@ export const promptWorkshopConfig: ConsoleConfig = {
         options: ['library', 'generated', 'user'],
       },
       {
-        field: 'payload.variant',
-        label: 'Variant',
+        field: 'payload.targeting.stages',
+        label: 'Stage',
         type: 'select',
-        options: ['default', 'glow', 'subtle', 'urgent'],
+        options: ['genesis', 'exploration', 'synthesis', 'advocacy'],
       },
       {
         field: 'meta.status',
@@ -73,19 +72,11 @@ export const SEQUENCE_TYPE_CONFIG = {
   faq: { label: 'FAQ', icon: 'help', color: '#9C9285' },
 };
 
-// Variant configuration
-export const PROMPT_VARIANT_CONFIG = {
-  default: { label: 'Default', color: '#526F8A' },
-  glow: { label: 'Glow', color: '#00FFCC' },
-  subtle: { label: 'Subtle', color: '#9C9285' },
-  urgent: { label: 'Urgent', color: '#D95D39' },
-};
-
 // Source configuration
-export const PROMPT_SOURCE_CONFIG = {
-  library: { label: 'Library', icon: 'local_library' },
-  generated: { label: 'AI Generated', icon: 'auto_awesome' },
-  user: { label: 'User Created', icon: 'person' },
+export const PROMPT_SOURCE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
+  library: { label: 'Library', icon: 'local_library', color: '#526F8A' },
+  generated: { label: 'AI Generated', icon: 'auto_awesome', color: '#E0A83B' },
+  user: { label: 'User Created', icon: 'person', color: '#7EA16B' },
 };
 
 export default promptWorkshopConfig;

@@ -5,7 +5,7 @@
 import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { PromptPayload } from '@core/schema/prompt';
-import { PROMPT_VARIANT_CONFIG, PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
+import { PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
 
 /**
  * Card component for displaying a prompt in grid/list view
@@ -18,8 +18,7 @@ export function PromptCard({
   onFavoriteToggle,
   className = '',
 }: ObjectCardProps<PromptPayload>) {
-  const variantConfig = PROMPT_VARIANT_CONFIG[prompt.payload.variant || 'default'];
-  const sourceConfig = PROMPT_SOURCE_CONFIG[prompt.payload.source];
+  const sourceConfig = PROMPT_SOURCE_CONFIG[prompt.payload.source] || PROMPT_SOURCE_CONFIG.library;
   const isActive = prompt.meta.status === 'active';
   const sequenceCount = prompt.payload.sequences?.length || 0;
   const firstSequence = prompt.payload.sequences?.[0];
@@ -40,10 +39,10 @@ export function PromptCard({
       `}
       data-testid="prompt-card"
     >
-      {/* Variant color bar at top */}
+      {/* Source color bar at top */}
       <div
         className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
-        style={{ backgroundColor: variantConfig.color }}
+        style={{ backgroundColor: sourceConfig.color }}
       />
 
       {/* Favorite button */}
@@ -70,11 +69,11 @@ export function PromptCard({
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
         <div
           className="w-10 h-10 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${variantConfig.color}20` }}
+          style={{ backgroundColor: `${sourceConfig.color}20` }}
         >
           <span
             className="material-symbols-outlined text-xl"
-            style={{ color: variantConfig.color }}
+            style={{ color: sourceConfig.color }}
           >
             {sourceConfig.icon}
           </span>
@@ -84,7 +83,7 @@ export function PromptCard({
             {prompt.meta.title}
           </h3>
           <p className="text-xs text-[var(--glass-text-muted)]">
-            {sourceConfig.label} • {variantConfig.label}
+            {sourceConfig.label}
           </p>
         </div>
       </div>

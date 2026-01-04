@@ -11,9 +11,6 @@ import type { GroveObject } from './grove-object';
 /** Lifecycle stages for targeting */
 export type PromptStage = 'genesis' | 'exploration' | 'synthesis' | 'advocacy';
 
-/** Prompt visual variants */
-export type PromptVariant = 'default' | 'glow' | 'subtle' | 'urgent';
-
 /** Prompt source tracking */
 export type PromptSource = 'library' | 'generated' | 'user';
 
@@ -165,7 +162,6 @@ export interface PromptGenerationContext {
 export interface PromptPayload {
   executionPrompt: string;
   systemContext?: string;
-  variant?: PromptVariant;
   topicAffinities: TopicAffinity[];
   lensAffinities: LensAffinity[];
   targeting: PromptTargeting;

@@ -243,7 +243,6 @@ export {
 // Prompt types (Sprint: prompt-unification-v1, prompt-schema-rationalization-v1)
 export {
   type PromptStage,
-  type PromptVariant,
   type PromptSource,
   type SequenceType,
   type TopicAffinity,

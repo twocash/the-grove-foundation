@@ -54,7 +54,6 @@ const FIELD_ALIASES: Record<string, string> = {
   context: '/payload/systemContext',
   system: '/payload/systemContext',
   'system context': '/payload/systemContext',
-  variant: '/payload/variant',
   weight: '/payload/baseWeight',
   'base weight': '/payload/baseWeight',
   source: '/payload/source',
@@ -124,7 +123,6 @@ export function parseSetCommand(input: string): PatchOperation[] | null {
 export function suggestPrompt(context: PromptCopilotContext): Partial<PromptPayload> {
   return {
     executionPrompt: 'Explore this topic with the user...',
-    variant: 'default',
     baseWeight: 50,
     topicAffinities: [],
     lensAffinities: [],
