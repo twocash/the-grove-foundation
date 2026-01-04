@@ -66,7 +66,7 @@ function BedrockWorkspaceInner() {
           }
         />
       }
-      content={<Outlet />}
+      content={<Outlet key={location.pathname} />}
       // Inspector from context (registered by consoles)
       inspector={
         inspectorOpen && inspectorContent ? (

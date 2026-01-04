@@ -16,6 +16,9 @@ import { useBedrockUI } from '../context/BedrockUIContext';
 import { useCollectionView } from './useCollectionView';
 import { usePatchHistory } from './usePatchHistory';
 
+// Utils
+import { toMaterialIcon } from '../utils/icon-mapping';
+
 // Primitives
 import { GlassButton } from '../primitives/GlassButton';
 import { MetricsRow } from '../primitives/MetricsRow';
@@ -221,7 +224,7 @@ export function createBedrockConsole<T>(
       return {
         title: selectedObject.meta.title || `Untitled ${config.title}`,
         subtitle: selectedObject.meta.description,
-        icon: selectedObject.meta.icon,
+        icon: toMaterialIcon(selectedObject.meta.icon),
       };
     }, [selectedObject?.meta.title, selectedObject?.meta.description, selectedObject?.meta.icon, config.title]);
 
