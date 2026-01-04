@@ -10,6 +10,7 @@ import type {
   PatchOperation,
 } from '../grove-data-provider';
 import { applyPatches } from '@core/copilot/patch-generator';
+import { getDefaults } from '../defaults';
 
 // Lazy import to avoid bundling server-side code in client
 type SupabaseClient = import('@supabase/supabase-js').SupabaseClient;
@@ -209,11 +210,24 @@ export class SupabaseAdapter implements GroveDataProvider {
     const { data, error } = await query;
 
     if (error) {
+      // PGRST204 = No rows found, 42P01 = table doesn't exist
+      // For missing tables or empty results, fallback to defaults
+      if (error.code === '42P01' || error.code === 'PGRST204' || error.message?.includes('404')) {
+        console.warn(`[SupabaseAdapter] Table ${table} not found or empty, using defaults for ${type}`);
+        return getDefaults<T>(type);
+      }
       console.error(`[SupabaseAdapter] list error for ${type}:`, error);
       throw new Error(`Failed to list ${type}: ${error.message}`);
     }
 
-    return (data || []).map((row) => rowToGroveObject<T>(row as Record<string, unknown>));
+    // If table exists but is empty, also fallback to defaults
+    const results = (data || []).map((row) => rowToGroveObject<T>(row as Record<string, unknown>));
+    if (results.length === 0) {
+      console.log(`[SupabaseAdapter] No ${type} data found, using defaults`);
+      return getDefaults<T>(type);
+    }
+
+    return results;
   }
 
   async get<T>(type: GroveObjectType, id: string): Promise<GroveObject<T> | null> {
