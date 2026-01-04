@@ -1542,9 +1542,11 @@ async function fetchRagContextKinetic(message, options = {}) {
         console.log('[RAG-Kinetic] Using Supabase pipeline for context');
 
         // Use semantic search to find relevant documents
+        // useHybrid enables keyword + utility + temporal scoring
         const { context, sources } = await knowledge.getContextForQuery(message, {
             limit: options.limit || 5,
             threshold: options.threshold || 0.3,  // Lower for conversational queries
+            useHybrid: options.useHybrid || false,  // Sprint: rag-discovery-enhancement-v1
         });
 
         if (!context || context.length === 0) {
@@ -1627,7 +1629,8 @@ app.post('/api/chat', async (req, res) => {
             verboseMode = false,
             terminatorMode = false,
             journeyId = null,  // Optional journey ID for Deterministic RAG Mode
-            useKineticPipeline = true  // Epic 5: Supabase pipeline is now default for all routes
+            useKineticPipeline = true,  // Epic 5: Supabase pipeline is now default for all routes
+            useHybridSearch = false,    // Sprint: rag-discovery-enhancement-v1 (enable via flag for testing)
         } = req.body;
 
         if (!message) {
@@ -1656,7 +1659,7 @@ app.post('/api/chat', async (req, res) => {
                 // Epic 5: Strangler Fig - /explore uses Supabase pipeline
                 console.log('[Chat] Using Kinetic Pipeline (Supabase)');
                 [ragResult, baseSystemPrompt] = await Promise.all([
-                    fetchRagContextKinetic(message, { returnObject: false }),
+                    fetchRagContextKinetic(message, { returnObject: false, useHybrid: useHybridSearch }),
                     fetchActiveSystemPrompt()
                 ]);
             } else {
@@ -2908,7 +2911,8 @@ app.post('/api/knowledge/embed', async (req, res) => {
   }
 });
 
-// Semantic search
+// Semantic search (supports hybrid mode)
+// Sprint: rag-discovery-enhancement-v1
 app.get('/api/knowledge/search', async (req, res) => {
   try {
     const knowledge = await getKnowledgeModule();
@@ -2916,18 +2920,36 @@ app.get('/api/knowledge/search', async (req, res) => {
       return res.status(503).json({ error: 'Knowledge module not available' });
     }
 
-    const { q, limit, threshold } = req.query;
+    const { q, limit = '10', threshold = '0.5', hybrid = 'false' } = req.query;
 
     if (!q) {
       return res.status(400).json({ error: 'Query parameter q is required' });
     }
 
-    const results = await knowledge.searchDocuments(q, {
-      limit: limit ? parseInt(limit, 10) : 10,
-      threshold: threshold ? parseFloat(threshold) : 0.5,
-    });
+    const useHybrid = hybrid === 'true';
 
-    res.json({ results });
+    if (useHybrid) {
+      // Hybrid search: vector + keyword + utility + temporal
+      const results = await knowledge.searchDocumentsHybrid(q, {
+        limit: parseInt(limit, 10),
+        threshold: parseFloat(threshold),
+      });
+      res.json({
+        results,
+        query: {
+          original: q,
+          keywords: knowledge.extractQueryKeywords(q),
+          hybrid: true,
+        },
+      });
+    } else {
+      // Basic vector search (backward compatible)
+      const results = await knowledge.searchDocuments(q, {
+        limit: parseInt(limit, 10),
+        threshold: parseFloat(threshold),
+      });
+      res.json({ results, query: { original: q, hybrid: false } });
+    }
   } catch (error) {
     console.error('[Knowledge] Search error:', error);
     res.status(500).json({ error: error.message });
@@ -3062,6 +3084,65 @@ app.post('/api/knowledge/context', async (req, res) => {
   }
 });
 
+// =============================================================================
+// Enrichment & Entity Endpoints
+// Sprint: rag-discovery-enhancement-v1
+// =============================================================================
+
+// Get enrichment statistics
+app.get('/api/knowledge/enrich/stats', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const stats = await knowledge.getEnrichmentStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('[Knowledge] Enrich stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trigger batch enrichment
+app.post('/api/knowledge/enrich/batch', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { batchSize = 10, operations } = req.body;
+    const results = await knowledge.enrichBatch(batchSize, { operations });
+    res.json(results);
+  } catch (error) {
+    console.error('[Knowledge] Enrich batch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Search documents by named entity
+app.get('/api/knowledge/entities/:name', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { name } = req.params;
+    const { type, limit = '10' } = req.query;
+    const results = await knowledge.findDocumentsByEntity(name, {
+      entityType: type || null,
+      limit: parseInt(limit, 10),
+    });
+    res.json({ results, entity: { name, type: type || null } });
+  } catch (error) {
+    console.error('[Knowledge] Entity search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Health check for knowledge pipeline
 app.get('/api/knowledge/health', async (req, res) => {
   try {
@@ -3089,6 +3170,284 @@ app.get('/api/knowledge/health', async (req, res) => {
     });
   }
 });
+
+// ============================================================================
+// Document Update & Enrichment (pipeline-inspector-v1)
+// ============================================================================
+
+// Canonical tier values per ADR-001
+const CANONICAL_TIERS = ['seed', 'sprout', 'sapling', 'tree', 'grove'];
+
+// Update document
+app.patch('/api/knowledge/documents/:id', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const updates = req.body;
+    const documentId = req.params.id;
+
+    // Validate tier if present
+    if (updates.tier && !CANONICAL_TIERS.includes(updates.tier)) {
+      return res.status(400).json({
+        error: `Invalid tier: ${updates.tier}. Valid tiers: ${CANONICAL_TIERS.join(', ')}`
+      });
+    }
+
+    // Add updated_at timestamp
+    updates.updated_at = new Date().toISOString();
+
+    const document = await knowledge.updateDocument(documentId, updates);
+
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    res.json({ success: true, document });
+  } catch (error) {
+    console.error('[Knowledge] Update document error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Enrich document with AI
+app.post('/api/knowledge/enrich', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { documentId, operations } = req.body;
+
+    if (!documentId) {
+      return res.status(400).json({ error: 'documentId is required' });
+    }
+
+    if (!operations || !operations.length) {
+      return res.status(400).json({ error: 'operations array is required' });
+    }
+
+    // Get document content
+    const document = await knowledge.getDocument(documentId);
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Build enrichment prompt based on operations
+    const results = {};
+    const content = document.content || '';
+    const title = document.title || '';
+
+    for (const op of operations) {
+      try {
+        switch (op) {
+          case 'keywords':
+            results.keywords = await extractKeywords(content, title);
+            break;
+          case 'summary':
+            results.summary = await generateSummary(content, title);
+            break;
+          case 'entities':
+            results.named_entities = await extractEntities(content);
+            break;
+          case 'type':
+            results.document_type = await classifyDocumentType(content);
+            break;
+          case 'questions':
+            results.questions_answered = await suggestQuestions(content, title);
+            break;
+          case 'freshness':
+            results.temporal_class = await checkFreshness(content);
+            break;
+        }
+      } catch (error) {
+        console.error(`[Knowledge] Enrichment error for ${op}:`, error);
+      }
+    }
+
+    res.json({
+      documentId,
+      results,
+      model: 'gemini-2.0-flash',
+    });
+  } catch (error) {
+    console.error('[Knowledge] Enrich error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Re-embed single document
+app.post('/api/knowledge/documents/:id/embed', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    await knowledge.embedDocument(req.params.id);
+
+    res.json({ success: true, message: 'Embedding triggered' });
+  } catch (error) {
+    console.error('[Knowledge] Re-embed error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Find related documents
+app.get('/api/knowledge/documents/:id/related', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const document = await knowledge.getDocument(req.params.id);
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Use semantic search on document's content
+    const related = await knowledge.searchDocuments(document.title, {
+      limit: 6, // Get 6 to filter out self
+      threshold: 0.3,
+    });
+
+    // Filter out self
+    const filtered = related.filter(d => d.id !== req.params.id).slice(0, 5);
+
+    res.json({ documents: filtered });
+  } catch (error) {
+    console.error('[Knowledge] Find related error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// AI Enrichment Helpers
+// ============================================================================
+
+async function callGeminiForEnrichment(prompt) {
+  const result = await genai.models.generateContent({
+    model: 'gemini-2.0-flash',
+    contents: prompt,
+    config: {
+      temperature: 0.3,
+    }
+  });
+  // Strip markdown code blocks that Gemini often wraps around JSON
+  let text = result.text || '';
+  text = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  return text;
+}
+
+async function extractKeywords(content, title) {
+  const prompt = `Extract 5-10 high-signal keywords from this document. Return as a JSON array of strings.
+
+Title: ${title}
+Content: ${content.slice(0, 3000)}
+
+Return ONLY a JSON array, like: ["keyword1", "keyword2", ...]`;
+
+  try {
+    const response = await callGeminiForEnrichment(prompt);
+    console.log('[Enrich] Keywords raw response:', response.slice(0, 200));
+    const parsed = JSON.parse(response);
+    console.log('[Enrich] Keywords parsed:', parsed);
+    return parsed;
+  } catch (err) {
+    console.error('[Enrich] Keywords parse error:', err.message);
+    return [];
+  }
+}
+
+async function generateSummary(content, title) {
+  const prompt = `Generate a 2-3 sentence summary of this document optimized for preview and search.
+
+Title: ${title}
+Content: ${content.slice(0, 3000)}
+
+Return ONLY the summary text, no formatting.`;
+
+  return callGeminiForEnrichment(prompt);
+}
+
+async function extractEntities(content) {
+  const prompt = `Extract named entities from this document. Categorize into: people, organizations, concepts, technologies.
+
+Content: ${content.slice(0, 3000)}
+
+Return as JSON:
+{
+  "people": ["name1", "name2"],
+  "organizations": ["org1", "org2"],
+  "concepts": ["concept1", "concept2"],
+  "technologies": ["tech1", "tech2"]
+}`;
+
+  try {
+    const response = await callGeminiForEnrichment(prompt);
+    console.log('[Enrich] Entities raw response:', response.slice(0, 300));
+    const parsed = JSON.parse(response);
+    console.log('[Enrich] Entities parsed:', parsed);
+    return parsed;
+  } catch (err) {
+    console.error('[Enrich] Entities parse error:', err.message);
+    return { people: [], organizations: [], concepts: [], technologies: [] };
+  }
+}
+
+async function classifyDocumentType(content) {
+  const prompt = `Classify this document into ONE of these types:
+- research: Has citations, methodology, findings sections
+- tutorial: Step-by-step instructions, how-to guide
+- reference: Structured data, specs, API documentation
+- opinion: First-person, argument structure, blog post
+- announcement: Date headers, event focus, news
+- transcript: Speaker labels, timestamps, meeting notes
+
+Content: ${content.slice(0, 2000)}
+
+Return ONLY the single word type.`;
+
+  const response = await callGeminiForEnrichment(prompt);
+  return response.trim().toLowerCase();
+}
+
+async function suggestQuestions(content, title) {
+  const prompt = `What 3-5 questions would someone ask that this document answers?
+
+Title: ${title}
+Content: ${content.slice(0, 3000)}
+
+Return as a JSON array of strings, like: ["Question 1?", "Question 2?"]`;
+
+  try {
+    const response = await callGeminiForEnrichment(prompt);
+    return JSON.parse(response);
+  } catch {
+    return [];
+  }
+}
+
+async function checkFreshness(content) {
+  const prompt = `Analyze this document for temporal markers (dates, versions, "currently", "recently", etc).
+
+Content: ${content.slice(0, 2000)}
+
+Classify as ONE of:
+- evergreen: Timeless fundamentals, no temporal markers
+- current: Recent and actively relevant
+- dated: Contains outdated information
+- historical: Valuable for context but not current practice
+
+Return ONLY the single word classification.`;
+
+  const response = await callGeminiForEnrichment(prompt);
+  return response.trim().toLowerCase();
+}
 
 // SPA Fallback
 app.get('*', (req, res) => {
