@@ -1,7 +1,8 @@
 # Bedrock Sprint Contract
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** BINDING FOR ALL BEDROCK DEVELOPMENT  
+**Amended:** January 4, 2026 (Added core infrastructure provisions)  
 **Effective:** December 30, 2025  
 **Branch:** `bedrock`
 
@@ -203,6 +204,19 @@ Every new object type MUST be:
 3. Given a schema definition
 4. Given default Copilot actions
 
+### Section 4.4: Events vs. Objects
+
+**Events (`GroveEvent`) are NOT GroveObjects.** This is an intentional architectural distinction:
+
+| Concept | Base Type | Purpose | Lifecycle |
+|---------|-----------|---------|-----------|
+| **GroveObject** | `GroveObjectMeta` | Persistent entities | Long-lived, mutable |
+| **GroveEvent** | `MetricAttribution` | Temporal occurrences | Immutable, append-only |
+
+Events record **what happened**; Objects represent **what exists**. Events use `MetricAttribution` as their base type (fieldId + timestamp) to ensure provenance. GroveObjects may be **derived from** events via projections, but events themselves are not subject to Section 4.1 requirements.
+
+**Event infrastructure** resides in `src/core/events/` and follows the event sourcing pattern established in `src/core/schema/telemetry.ts`.
+
 ---
 
 ## Article V: Strangler Fig Awareness
@@ -211,12 +225,19 @@ Every new object type MUST be:
 
 Bedrock code MUST NOT:
 
-- Import from `src/foundation/` (legacy)
+- Import from `src/foundation/` (legacy Foundation console)
 - Share state with legacy components
 - Assume legacy behavior or data structures
 - Use legacy component patterns
 
-**Bedrock is a clean-room implementation.**
+**Exception:** Core infrastructure in `src/core/` is **shared by design**. Both Bedrock and legacy routes may import from:
+- `src/core/events/` — Event sourcing infrastructure
+- `src/core/schema/` — Shared type definitions (telemetry, etc.)
+- `src/core/types/` — Common TypeScript interfaces
+
+This enables strangler fig migration where new infrastructure is built once and consumed by both systems until legacy is fully deprecated.
+
+**Bedrock is a clean-room implementation** — but it builds on shared core infrastructure.
 
 ### Section 5.2: Feature Parity Tracking
 
@@ -300,6 +321,36 @@ Final verification:
 - [ ] All DEX tests pass
 ```
 
+### Section 6.3: Core Infrastructure Sprints
+
+Sprints creating **shared infrastructure** in `src/core/` have modified requirements:
+
+**Required sections:**
+- Constitutional Reference (Article I)
+- DEX Compliance Matrix (Article I Section 1.2)
+- Pattern Check (Foundation Loop Phase 0)
+- No Legacy Coupling verification (Article V Section 5.1)
+- Standard Foundation Loop artifacts
+
+**Omitted sections** (console-specific):
+- Console Implementation Checklist (Section 2.3)
+- Copilot Actions table (Section 3.4)
+- Feature Parity Status (Section 5.2) — unless replacing legacy infrastructure
+
+**Object Model clarification:**
+- Core infrastructure may create **event types** (`GroveEvent`) which are NOT GroveObjects (per Section 4.4)
+- Event types use `MetricAttribution` as base, not `GroveObjectMeta`
+- Projection functions derive GroveObject-compatible state from events
+
+**File locations for core infrastructure:**
+```
+src/core/
+├── events/       # Event sourcing (GroveEvent, projections)
+├── schema/       # Type definitions (telemetry, validation)
+├── types/        # Shared TypeScript interfaces
+└── utils/        # Shared utilities
+```
+
 ---
 
 ## Article VII: Enforcement
@@ -354,10 +405,10 @@ This contract may be amended via:
 
 Before shipping any Bedrock feature:
 
-1. **Does it use BedrockLayout?** (Console pattern)
-2. **Does it have a Copilot?** (AI assistance)
-3. **Does it use GroveObject?** (Data model)
-4. **Does it pass DEX tests?** (Constitutional compliance)
+1. **Does it use BedrockLayout?** (Console pattern — N/A for core infrastructure)
+2. **Does it have a Copilot?** (AI assistance — N/A for core infrastructure)
+3. **Does it use GroveObject?** (Data model — events use MetricAttribution instead)
+4. **Does it pass DEX tests?** (Constitutional compliance — **always required**)
 
 ### The Build Sequence
 
@@ -370,13 +421,22 @@ Sprint 2+: Feature conveyor (one console per sprint)
 ### File Locations
 
 ```
-src/bedrock/
-├── primitives/          # BedrockLayout, Nav, Inspector, Copilot
-├── components/          # Shared components (StatCard, ObjectList, etc.)
-├── consoles/            # Individual console implementations
-├── config/              # Declarative configuration (navigation.ts, etc.)
-├── copilot/             # Copilot context and actions
-└── types/               # TypeScript interfaces
+src/bedrock/                    # Bedrock consoles and components
+├── primitives/                 # BedrockLayout, Nav, Inspector, Copilot
+├── components/                 # Shared components (StatCard, ObjectList, etc.)
+├── consoles/                   # Individual console implementations
+├── config/                     # Declarative configuration (navigation.ts, etc.)
+├── copilot/                    # Copilot context and actions
+└── types/                      # TypeScript interfaces
+
+src/core/                       # Shared infrastructure (both bedrock + legacy)
+├── events/                     # Event sourcing (GroveEvent, projections)
+│   ├── types.ts                # Event type definitions
+│   ├── schema.ts               # Zod validation
+│   ├── projections/            # State derivation from events
+│   └── store.ts                # Event log management
+├── schema/                     # Type definitions (telemetry.ts, etc.)
+└── types/                      # Shared TypeScript interfaces
 ```
 
 ---
@@ -386,7 +446,35 @@ src/bedrock/
 By commencing work on the `bedrock` branch, contributors agree to this contract.
 
 **Effective Date:** December 30, 2025  
-**Version:** 1.0
+**Version:** 1.1
+
+---
+
+## Changelog
+
+### v1.1 (January 4, 2026)
+
+**Amendments for Core Infrastructure:**
+
+1. **Section 4.4 (NEW):** Events vs. Objects
+   - Clarifies that `GroveEvent` types are NOT `GroveObjects`
+   - Events use `MetricAttribution` as base type (provenance-first)
+   - Objects may be derived from events via projections
+
+2. **Section 5.1 (AMENDED):** No Legacy Coupling
+   - Added exception for shared `src/core/` infrastructure
+   - Clarifies strangler fig migration pattern
+
+3. **Section 6.3 (NEW):** Core Infrastructure Sprints
+   - Modified requirements for `src/core/` sprints
+   - Specifies which sections are required vs. omitted
+   - Documents valid file locations for shared infrastructure
+
+4. **Article VIII (AMENDED):** Quick Reference
+   - Updated "Four Questions" to note console-specific vs. universal requirements
+   - Expanded file locations to include `src/core/`
+
+**Rationale:** The `bedrock-event-architecture-v1` sprint exposed a gap: the contract was written for console development but core infrastructure sprints have different requirements. These amendments maintain contract rigor while acknowledging legitimate architectural distinctions between consoles, objects, and events.
 
 ---
 

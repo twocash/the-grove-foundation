@@ -7,6 +7,49 @@
 
 ---
 
+## Domain Contract
+
+**Applicable contract:** Bedrock Sprint Contract
+**Contract version:** 1.0
+**Additional requirements:** Console pattern, Copilot mandate, GroveObject alignment
+
+---
+
+## Patterns Extended
+
+| Requirement | Existing Pattern | Extension Approach |
+|-------------|------------------|-------------------|
+| Inspector Panel | BedrockInspector (Pattern 6) | Wire document-specific config |
+| Copilot commands | BedrockCopilot (Pattern 6) | Add enrichment command handlers |
+| Tag/chip UI | Token Namespaces (Pattern 4) | Create TagArray, GroupedChips with `--card-*` tokens |
+| Quality signals | Engagement Machine (Pattern 2) | None - read-only utility display |
+| Tier selection | Existing tier system | Fix terminology, add grove tier |
+
+## New Patterns Proposed
+
+None required. All needs met by extending existing Bedrock and token patterns.
+
+---
+
+## Canonical Source Audit
+
+| Capability | Canonical Home | Current Approach | Recommendation |
+|------------|----------------|------------------|----------------|
+| Document list | DocumentsView.tsx | ✓ Canonical | Keep |
+| Document card | DocumentCard.tsx | ✓ Canonical | Extend with tier fix |
+| Inspector panel | BedrockInspector | ✓ Canonical | Invoke with config |
+| Copilot UI | BedrockCopilot | ✓ Canonical | Invoke with config |
+| Tag array | None | None | CREATE in primitives |
+| Grouped chips | None | None | CREATE in primitives |
+| Utility bar | None | None | CREATE in primitives |
+
+### No Duplication Certification
+
+I confirm this sprint does not create parallel implementations of existing capabilities.
+All new components (TagArray, GroupedChips, UtilityBar) fill gaps in the primitives library.
+
+---
+
 ## Executive Summary
 
 Extend the Pipeline Monitor console with Inspector Panel and Copilot support, aligned with Grove's Knowledge Commons architecture. Documents follow the same botanical lifecycle as Sprouts (Seed → Sprout → Sapling → Tree → Grove), with quality signals accumulating through use rather than pre-publication gatekeeping.
