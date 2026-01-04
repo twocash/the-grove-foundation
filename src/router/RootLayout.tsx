@@ -23,11 +23,17 @@ export const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
-    if (supabaseUrl && supabaseKey) {
+    // Debug log for troubleshooting (remove in production)
+    console.log('[RootLayout] Supabase URL configured:', !!supabaseUrl);
+    console.log('[RootLayout] Supabase key configured:', !!supabaseKey);
+    
+    if (supabaseUrl && supabaseKey && supabaseUrl !== '' && supabaseKey !== '') {
+      console.log('[RootLayout] Using SupabaseAdapter');
       const client = createClient(supabaseUrl, supabaseKey);
       return new SupabaseAdapter({ client });
     }
     // Falls back to localStorage if no Supabase config
+    console.log('[RootLayout] Falling back to LocalStorageAdapter');
     return undefined;
   }, []);
 
