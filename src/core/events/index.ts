@@ -185,3 +185,28 @@ export {
   dualWrite,
   needsDualWrite,
 } from './compat';
+
+// ─────────────────────────────────────────────────────────────────
+// REACT HOOKS (Sprint 2)
+// ─────────────────────────────────────────────────────────────────
+
+export {
+  // Provider
+  GroveEventProvider,
+  GroveEventContext,
+  type GroveEventContextValue,
+  type GroveEventProviderProps,
+  // Core hooks
+  useGroveEvents,
+  useDispatch,
+  useStartNewSession,
+  useEventHelpers,
+  // Projection hooks
+  useSession,
+  useContextState,
+  useTelemetry,
+  useMomentContext,
+  useStream,
+  // Hook types
+  type TelemetryResult,
+} from './hooks';
