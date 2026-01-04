@@ -23,6 +23,9 @@ export interface KineticHeaderProps {
   currentStreak?: number;
   showStreak?: boolean;
   onStreakClick?: () => void;
+  // Sprint: hybrid-search-toggle-v1
+  useHybridSearch?: boolean;
+  onHybridSearchToggle?: () => void;
 }
 
 const HeaderPill: React.FC<{
@@ -58,6 +61,8 @@ export const KineticHeader: React.FC<KineticHeaderProps> = ({
   currentStreak,
   showStreak = true,
   onStreakClick,
+  useHybridSearch,
+  onHybridSearchToggle,
 }) => {
   const lensColors = lensColor ? getPersonaColors(lensColor) : null;
   const stageInfo = stage ? STAGE_DISPLAY[stage] : null;
@@ -79,6 +84,25 @@ export const KineticHeader: React.FC<KineticHeaderProps> = ({
           </span>
         )}
       </div>
+
+      {/* Hybrid Search Toggle (Sprint: hybrid-search-toggle-v1) */}
+      {onHybridSearchToggle && (
+        <button
+          onClick={onHybridSearchToggle}
+          className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium
+            border transition-all duration-200
+            ${useHybridSearch
+              ? 'bg-[var(--neon-cyan)]/20 border-[var(--neon-cyan)]/50 text-[var(--neon-cyan)]'
+              : 'bg-[var(--glass-elevated)] border-[var(--glass-border)] text-[var(--glass-text-muted)]'
+            }
+            hover:border-[var(--neon-cyan)]/70`}
+          title={useHybridSearch ? 'Hybrid search enabled (vector + keyword + temporal)' : 'Basic vector search'}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${useHybridSearch ? 'bg-[var(--neon-cyan)]' : 'bg-[var(--glass-text-subtle)]'}`} />
+          <span>RAG</span>
+          <span className="text-[9px] opacity-70">{useHybridSearch ? 'ON' : 'OFF'}</span>
+        </button>
+      )}
 
       {/* Center: Context Pills */}
       <div className="flex items-center gap-2 flex-1 min-w-0 justify-end mr-2">

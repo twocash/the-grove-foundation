@@ -19,6 +19,11 @@ import { sendMessageStream } from '../../../../../services/chatService';
 import { useEngagement } from '@core/engagement';
 import { calculateEntropy, type EntropyInputs } from '@core/engine/entropyCalculator';
 
+// Sprint: hybrid-search-toggle-v1
+export interface UseKineticStreamOptions {
+  useHybridSearch?: boolean;
+}
+
 interface UseKineticStreamReturn {
   items: StreamItem[];
   currentItem: StreamItem | null;
@@ -33,7 +38,7 @@ interface UseKineticStreamReturn {
   resubmitWithLens: (lensId: string) => void;
 }
 
-export function useKineticStream(): UseKineticStreamReturn {
+export function useKineticStream(options: UseKineticStreamOptions = {}): UseKineticStreamReturn {
   const [items, setItems] = useState<StreamItem[]>([]);
   const [currentItem, setCurrentItem] = useState<StreamItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +105,8 @@ export function useKineticStream(): UseKineticStreamReturn {
           } as ResponseStreamItem : null);
         },
         {
-          personaTone: effectiveLensId || undefined
+          personaTone: effectiveLensId || undefined,
+          useHybridSearch: options.useHybridSearch  // Sprint: hybrid-search-toggle-v1
         }
       );
 

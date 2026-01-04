@@ -24,6 +24,7 @@ export interface ChatOptions {
   verboseMode?: boolean;
   terminatorMode?: boolean;
   journeyId?: string;  // V2.1: Journey ID for Deterministic RAG Mode
+  useHybridSearch?: boolean;  // Sprint: hybrid-search-toggle-v1
 }
 
 export interface ChatResponse {
@@ -92,7 +93,8 @@ export async function sendMessageStream(
     personaBehaviors: options.personaBehaviors,  // Sprint: persona-behaviors-v1
     verboseMode: options.verboseMode ?? false,
     terminatorMode: options.terminatorMode ?? false,
-    journeyId: options.journeyId ?? null  // V2.1: Pass to server for Deterministic RAG
+    journeyId: options.journeyId ?? null,  // V2.1: Pass to server for Deterministic RAG
+    useHybridSearch: options.useHybridSearch ?? false  // Sprint: hybrid-search-toggle-v1
   };
 
   return new Promise((resolve, reject) => {

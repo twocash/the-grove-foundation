@@ -50,6 +50,15 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   initialLens,
   initialJourney
 }) => {
+  // Hybrid search toggle (Sprint: hybrid-search-toggle-v1)
+  // Must be declared before useKineticStream which depends on it
+  const [useHybridSearch, setUseHybridSearch] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('grove-hybrid-search') === 'true';
+    }
+    return false;
+  });
+
   const {
     items,
     currentItem,
@@ -60,7 +69,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     acceptJourneyOffer,
     dismissJourneyOffer,
     resubmitWithLens
-  } = useKineticStream();
+  } = useKineticStream({ useHybridSearch });
 
   // Engagement hooks
   const { actor } = useEngagement();
@@ -147,6 +156,16 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Overlay state
   const [overlay, setOverlay] = useState<{ type: OverlayType }>({ type: 'none' });
+
+  // Hybrid search toggle handler (Sprint: hybrid-search-toggle-v1)
+  const handleHybridSearchToggle = useCallback(() => {
+    setUseHybridSearch(prev => {
+      const next = !prev;
+      localStorage.setItem('grove-hybrid-search', String(next));
+      console.log('[ExploreShell] Hybrid search:', next ? 'ON' : 'OFF');
+      return next;
+    });
+  }, []);
 
   // Exchange count
   const exchangeCount = useMemo(() =>
@@ -502,6 +521,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         onJourneyClick={() => setOverlay({ type: 'journey-picker' })}
         stage={stage}
         exchangeCount={exchangeCount}
+        useHybridSearch={useHybridSearch}
+        onHybridSearchToggle={handleHybridSearchToggle}
       />
 
       {/* Stream area - attach scrollRef and capture ref */}
