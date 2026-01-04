@@ -39,23 +39,23 @@ export function InspectorPanel({
   return (
     <div className="flex flex-col h-full glass-panel-solid">
       {/* Header */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-[var(--glass-border)] flex-shrink-0 bg-black/20">
-        <div className="flex items-center gap-3">
+      <div className="min-h-14 flex items-start justify-between px-4 py-3 border-b border-[var(--glass-border)] flex-shrink-0 bg-black/20">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
           {icon && (
-            <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center`}>
+            <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
               <span className={`material-symbols-outlined text-lg ${iconColor}`}>{icon}</span>
             </div>
           )}
-          <div>
-            <span className="font-medium text-sm text-[var(--glass-text-primary)]">{title}</span>
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-sm text-[var(--glass-text-primary)] line-clamp-2 leading-tight">{title}</div>
             {subtitle && (
-              <div className="text-xs text-[var(--glass-text-muted)]">{subtitle}</div>
+              <div className="text-xs text-[var(--glass-text-muted)] mt-1 line-clamp-2">{subtitle}</div>
             )}
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)] hover:bg-[var(--glass-elevated)] rounded-lg transition-colors"
+          className="p-1.5 text-[var(--glass-text-subtle)] hover:text-[var(--glass-text-secondary)] hover:bg-[var(--glass-elevated)] rounded-lg transition-colors flex-shrink-0 ml-2"
         >
           <span className="material-symbols-outlined">close</span>
         </button>

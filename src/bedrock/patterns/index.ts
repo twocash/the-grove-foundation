@@ -27,6 +27,14 @@ export {
   type UsePatchHistoryReturn,
 } from './usePatchHistory';
 
+// Copilot command parser
+export {
+  parseCommand,
+  getAvailableFields,
+  type CommandResult,
+  type FieldMapping,
+} from './copilot-commands';
+
 // Console factory types
 export type {
   CollectionDataResult,

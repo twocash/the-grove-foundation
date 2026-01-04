@@ -244,10 +244,12 @@ export function createBedrockConsole<T>(
           ),
           copilot: config.copilot.enabled ? (
             <BedrockCopilot
+              consoleId={config.id}
+              object={selectedObject!}
+              onApplyPatch={handleEdit}
               title={copilotTitle}
               placeholder={copilotPlaceholder}
               defaultCollapsed={true}
-              maxHeight={280}
             />
           ) : undefined,
         });
