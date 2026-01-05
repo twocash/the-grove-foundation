@@ -1,14 +1,16 @@
 // src/explore/hooks/useNavigationPrompts.ts
 // Sprint: kinetic-suggested-prompts-v1
 // Sprint: prompt-progression-v1 - Single prompt progression
+// Sprint: 4d-prompt-refactor-telemetry-v1 - Expose scored prompts for telemetry
 // Wires 4D Context Fields to inline navigation prompts
 
 import { useMemo } from 'react';
 import { useContextState } from '@core/context-fields/useContextState';
-import { selectPrompts } from '@core/context-fields/scoring';
+import { selectPromptsWithScoring } from '@core/context-fields/scoring';
 import { promptsToForks } from '@core/context-fields/adapters';
 import { libraryPrompts, getActivePrompts } from '@data/prompts';
 import type { JourneyFork } from '@core/schema/stream';
+import type { ScoredPrompt, ContextState } from '@core/context-fields/types';
 
 // ─────────────────────────────────────────────────────────────────
 // TYPES
@@ -34,6 +36,10 @@ export interface NavigationPromptsResult {
   isReady: boolean;
   /** Number of prompts that passed hard filters */
   eligibleCount: number;
+  /** Sprint: 4d-prompt-refactor-telemetry-v1 - Scored prompts for telemetry */
+  scoredPrompts: ScoredPrompt[];
+  /** Sprint: 4d-prompt-refactor-telemetry-v1 - Context snapshot for telemetry */
+  context: ContextState;
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -69,29 +75,43 @@ export function useNavigationPrompts(
   const context = useContextState();
 
   // Select and convert prompts
+  // Sprint: 4d-prompt-refactor-telemetry-v1 - Use selectPromptsWithScoring for telemetry
   const result = useMemo(() => {
     // Get prompt pool
     const pool = activeOnly ? getActivePrompts() : libraryPrompts;
 
-    // Select prompts using 4D scoring
-    // Sprint: prompt-progression-v1 - Filters out already-selected prompts
-    const selected = selectPrompts(pool, context, { maxPrompts, minScore });
+    // Select prompts using 4D scoring - returns ScoredPrompt[] for telemetry
+    const scoredPrompts = selectPromptsWithScoring(pool, context, { maxPrompts, minScore });
 
-    // Convert to navigation forks
-    const forks = promptsToForks(selected);
+    // Convert to navigation forks (extract prompts first)
+    const forks = promptsToForks(scoredPrompts.map(sp => sp.prompt));
 
     return {
       forks,
-      eligibleCount: selected.length
+      scoredPrompts,
+      eligibleCount: scoredPrompts.length
     };
   }, [context, maxPrompts, minScore, activeOnly]);
 
   return {
     forks: result.forks,
     isReady: true,
-    eligibleCount: result.eligibleCount
+    eligibleCount: result.eligibleCount,
+    scoredPrompts: result.scoredPrompts,
+    context
   };
 }
+
+// Default context for safe fallback
+const DEFAULT_CONTEXT: ContextState = {
+  stage: 'genesis',
+  activeLensId: null,
+  entropy: 0,
+  interactionCount: 0,
+  topicsExplored: [],
+  activeMoments: [],
+  promptsSelected: [],
+};
 
 /**
  * Safe version that returns empty forks when outside EngagementProvider.
@@ -105,7 +125,9 @@ export function useSafeNavigationPrompts(
     return {
       forks: [],
       isReady: false,
-      eligibleCount: 0
+      eligibleCount: 0,
+      scoredPrompts: [],
+      context: DEFAULT_CONTEXT
     };
   }
 }

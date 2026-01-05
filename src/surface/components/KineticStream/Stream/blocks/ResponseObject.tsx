@@ -2,8 +2,9 @@
 // AI response display with glass, concepts, and forks
 // Sprint: kinetic-experience-v1
 // Sprint: kinetic-suggested-prompts-v1 - Added 4D context-aware navigation fallback
+// Sprint: 4d-prompt-refactor-telemetry-v1 - Prompt telemetry integration
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import type { ResponseStreamItem, RhetoricalSpan, JourneyFork } from '@core/schema/stream';
 import { hasSpans, hasNavigation } from '@core/schema/stream';
 import { GlassContainer } from '../motion/GlassContainer';
@@ -12,6 +13,8 @@ import { NavigationObject } from './NavigationObject';
 import { useSafeNavigationPrompts } from '../../../../../explore/hooks/useNavigationPrompts';
 import { useSafeEventBridge } from '../../../../../core/events/hooks/useEventBridge';
 import { useFeatureFlag } from '../../../../../../hooks/useFeatureFlags';
+import { usePromptTelemetry } from '../../../../../core/telemetry';
+import { getSessionId } from '../../../../../lib/session';
 
 export interface ResponseObjectProps {
   item: ResponseStreamItem;
@@ -33,8 +36,33 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
   // Sprint: feature-flag-cleanup-v1 - Properly wired feature flag
   // Sprint: prompt-progression-v1 - Single prompt progression (removed explicit maxPrompts)
   const isInlineNavEnabled = useFeatureFlag('inline-navigation-prompts');
-  const { forks: libraryForks, isReady } = useSafeNavigationPrompts();
+  const { forks: libraryForks, isReady, scoredPrompts, context } = useSafeNavigationPrompts();
   const { emit } = useSafeEventBridge();
+
+  // Sprint: 4d-prompt-refactor-telemetry-v1 - Prompt telemetry
+  const { recordImpressions, recordSelection } = usePromptTelemetry({
+    sessionId: getSessionId(),
+    enabled: isInlineNavEnabled && isReady,
+  });
+
+  // Track which prompts we've already recorded impressions for
+  const recordedPromptsRef = useRef<Set<string>>(new Set());
+
+  // Record impressions when library prompts are displayed (not for parsed navigation)
+  useEffect(() => {
+    if (!isInlineNavEnabled || !isReady || scoredPrompts.length === 0) return;
+    if (hasNavigation(item)) return; // Don't track parsed navigation, only 4D prompts
+
+    // Filter to only new prompts we haven't recorded yet
+    const newPrompts = scoredPrompts.filter(
+      sp => !recordedPromptsRef.current.has(sp.prompt.id)
+    );
+
+    if (newPrompts.length > 0) {
+      recordImpressions(newPrompts, context);
+      newPrompts.forEach(sp => recordedPromptsRef.current.add(sp.prompt.id));
+    }
+  }, [scoredPrompts, context, isInlineNavEnabled, isReady, item, recordImpressions]);
 
   // Merge: prefer parsed navigation from response, fallback to 4D library prompts
   const navigationForks = hasNavigation(item)
@@ -43,8 +71,14 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
 
   // Handle fork selection with event emission
   // Sprint: prompt-journey-mode-v1 - BUG FIX: Display label in chat, send queryPayload to LLM
+  // Sprint: 4d-prompt-refactor-telemetry-v1 - Record selection telemetry
   const handleForkSelect = useCallback((fork: JourneyFork) => {
     emit.forkSelected(fork.id, fork.type, fork.label, item.id);
+
+    // Record selection telemetry for 4D prompts (not parsed navigation)
+    if (!hasNavigation(item) && isInlineNavEnabled) {
+      recordSelection(fork.id);
+    }
 
     // Display label in chat, send queryPayload (executionPrompt) to LLM
     const displayText = fork.label;
@@ -52,7 +86,7 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
 
     onPromptSubmit?.(displayText, executionPrompt);
     onForkSelect?.(fork);
-  }, [emit, item.id, onPromptSubmit, onForkSelect]);
+  }, [emit, item, isInlineNavEnabled, recordSelection, onPromptSubmit, onForkSelect]);
 
   return (
     <div className="flex flex-col items-start" data-testid="response-object" data-message-id={item.id}>

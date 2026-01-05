@@ -2772,6 +2772,203 @@ app.get('/api/telemetry/journey/:sessionId/:journeyId', async (req, res) => {
 });
 
 // ============================================================================
+// Prompt Telemetry API (4d-prompt-refactor-telemetry-v1)
+// ============================================================================
+
+// Submit single prompt telemetry event
+app.post('/api/telemetry/prompt', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const event = req.body;
+
+    if (!event.promptId || !event.sessionId || !event.eventType) {
+      return res.status(400).json({ error: 'promptId, sessionId, and eventType are required' });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('prompt_telemetry')
+      .insert({
+        event_type: event.eventType,
+        prompt_id: event.promptId,
+        session_id: event.sessionId,
+        context_stage: event.context?.stage ?? null,
+        context_lens_id: event.context?.lensId ?? null,
+        context_entropy: event.context?.entropy ?? null,
+        context_interaction_count: event.context?.interactionCount ?? null,
+        context_active_topics: event.context?.activeTopics ?? [],
+        context_active_moments: event.context?.activeMoments ?? [],
+        scoring_final_score: event.scoring?.finalScore ?? null,
+        scoring_rank: event.scoring?.rank ?? null,
+        scoring_stage_match: event.scoring?.matchDetails?.stageMatch ?? null,
+        scoring_lens_weight: event.scoring?.matchDetails?.lensWeight ?? null,
+        scoring_topic_weight: event.scoring?.matchDetails?.topicWeight ?? null,
+        scoring_moment_boost: event.scoring?.matchDetails?.momentBoost ?? null,
+        outcome_dwell_time_ms: event.outcome?.dwellTimeMs ?? null,
+        outcome_entropy_delta: event.outcome?.entropyDelta ?? null,
+        outcome_follow_up_prompt_id: event.outcome?.followUpPromptId ?? null,
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('[Telemetry] Prompt event insert failed:', JSON.stringify(error, null, 2));
+      console.error('[Telemetry] Event data:', JSON.stringify(req.body, null, 2));
+      return res.status(500).json({ error: 'Insert failed', details: error.message });
+    }
+
+    res.json({ id: data.id, status: 'ok' });
+  } catch (error) {
+    console.error('[Telemetry] Prompt event error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Submit batch of prompt telemetry events
+app.post('/api/telemetry/prompt/batch', async (req, res) => {
+  console.log('[Telemetry] Batch endpoint hit with', req.body?.events?.length || 0, 'events');
+
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const { events } = req.body;
+
+    if (!Array.isArray(events) || events.length === 0) {
+      return res.status(400).json({ error: 'events array is required' });
+    }
+
+    const rows = events.map(event => ({
+      event_type: event.eventType,
+      prompt_id: event.promptId,
+      session_id: event.sessionId,
+      context_stage: event.context?.stage ?? null,
+      context_lens_id: event.context?.lensId ?? null,
+      context_entropy: event.context?.entropy ?? null,
+      context_interaction_count: event.context?.interactionCount ?? null,
+      context_active_topics: event.context?.activeTopics ?? [],
+      context_active_moments: event.context?.activeMoments ?? [],
+      scoring_final_score: event.scoring?.finalScore ?? null,
+      scoring_rank: event.scoring?.rank ?? null,
+      scoring_stage_match: event.scoring?.matchDetails?.stageMatch ?? null,
+      scoring_lens_weight: event.scoring?.matchDetails?.lensWeight ?? null,
+      scoring_topic_weight: event.scoring?.matchDetails?.topicWeight ?? null,
+      scoring_moment_boost: event.scoring?.matchDetails?.momentBoost ?? null,
+      outcome_dwell_time_ms: event.outcome?.dwellTimeMs ?? null,
+      outcome_entropy_delta: event.outcome?.entropyDelta ?? null,
+      outcome_follow_up_prompt_id: event.outcome?.followUpPromptId ?? null,
+    }));
+
+    const { error } = await supabaseAdmin
+      .from('prompt_telemetry')
+      .insert(rows);
+
+    if (error) {
+      console.error('[Telemetry] Prompt batch insert failed:', JSON.stringify(error, null, 2));
+      console.error('[Telemetry] Batch rows:', JSON.stringify(rows.slice(0, 2), null, 2)); // Log first 2 for debugging
+      return res.status(500).json({ error: 'Batch insert failed', details: error.message });
+    }
+
+    res.json({ count: events.length, status: 'ok' });
+  } catch (error) {
+    console.error('[Telemetry] Prompt batch error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get stats for a specific prompt
+app.get('/api/telemetry/prompt/:promptId/stats', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const { promptId } = req.params;
+
+    const { data, error } = await supabaseAdmin
+      .from('prompt_performance')
+      .select('*')
+      .eq('prompt_id', promptId)
+      .single();
+
+    if (error) {
+      // View might not have data yet - return empty stats
+      if (error.code === 'PGRST116') {
+        return res.json({
+          promptId,
+          impressions: 0,
+          selections: 0,
+          completions: 0,
+          selectionRate: 0,
+          avgEntropyDelta: null,
+          avgDwellTimeMs: null,
+          lastSurfaced: null,
+        });
+      }
+      console.warn('[Telemetry] Prompt stats fetch failed:', error);
+      return res.status(500).json({ error: 'Fetch failed' });
+    }
+
+    res.json({
+      promptId: data.prompt_id,
+      impressions: data.impressions,
+      selections: data.selections,
+      completions: data.completions,
+      selectionRate: data.selection_rate,
+      avgEntropyDelta: data.avg_entropy_delta,
+      avgDwellTimeMs: data.avg_dwell_time_ms,
+      lastSurfaced: data.last_surfaced,
+    });
+  } catch (error) {
+    console.error('[Telemetry] Prompt stats error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// List all prompt performance
+app.get('/api/telemetry/prompts/performance', async (req, res) => {
+  if (!supabaseAdmin) {
+    return res.status(503).json({ error: 'Database not configured', mode: 'local' });
+  }
+
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const sort = req.query.sort || 'impressions';
+    const order = req.query.order === 'asc' ? true : false;
+
+    const { data, error, count } = await supabaseAdmin
+      .from('prompt_performance')
+      .select('*', { count: 'exact' })
+      .order(sort, { ascending: order })
+      .limit(limit);
+
+    if (error) {
+      console.warn('[Telemetry] Prompt performance list failed:', error);
+      return res.status(500).json({ error: 'Fetch failed' });
+    }
+
+    const prompts = (data || []).map(row => ({
+      promptId: row.prompt_id,
+      impressions: row.impressions,
+      selections: row.selections,
+      completions: row.completions,
+      selectionRate: row.selection_rate,
+      avgEntropyDelta: row.avg_entropy_delta,
+      avgDwellTimeMs: row.avg_dwell_time_ms,
+      lastSurfaced: row.last_surfaced,
+    }));
+
+    res.json({ prompts, total: count || prompts.length });
+  } catch (error) {
+    console.error('[Telemetry] Prompt performance error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================================================
 // Knowledge Pipeline API (kinetic-pipeline-v1)
 // ============================================================================
 

@@ -221,20 +221,52 @@ export function selectPrompts(
   } = {}
 ): PromptObject[] {
   const { maxPrompts = 3, weights, minScore = 0 } = options;
-  
+
   // Merge custom weights with defaults
   const scoringWeights = {
     ...DEFAULT_SCORING_WEIGHTS,
     ...weights,
   };
-  
+
   // Filter → Score → Rank
   const eligible = applyHardFilters(prompts, context);
   const ranked = rankPrompts(eligible, context, scoringWeights);
-  
+
   // Apply minimum score threshold and limit
   return ranked
     .filter(r => r.score >= minScore)
     .slice(0, maxPrompts)
     .map(r => r.prompt);
+}
+
+/**
+ * Full selection pipeline with scoring details.
+ * Sprint: 4d-prompt-refactor-telemetry-v1
+ * Returns ScoredPrompt[] for telemetry integration.
+ */
+export function selectPromptsWithScoring(
+  prompts: PromptObject[],
+  context: ContextState,
+  options: {
+    maxPrompts?: number;
+    weights?: Partial<ScoringWeights>;
+    minScore?: number;
+  } = {}
+): ScoredPrompt[] {
+  const { maxPrompts = 3, weights, minScore = 0 } = options;
+
+  // Merge custom weights with defaults
+  const scoringWeights = {
+    ...DEFAULT_SCORING_WEIGHTS,
+    ...weights,
+  };
+
+  // Filter → Score → Rank
+  const eligible = applyHardFilters(prompts, context);
+  const ranked = rankPrompts(eligible, context, scoringWeights);
+
+  // Apply minimum score threshold and limit
+  return ranked
+    .filter(r => r.score >= minScore)
+    .slice(0, maxPrompts);
 }
