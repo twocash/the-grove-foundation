@@ -173,6 +173,60 @@ export function createExtractedProvenance(
 }
 
 // ============================================================================
+// PROMPT SURFACES (Multi-context rendering)
+// Sprint: kinetic-highlights-v1
+// ============================================================================
+
+/**
+ * Where a prompt can be rendered
+ * - suggestion: Standard prompt suggestions panel
+ * - highlight: Clickable concepts in kinetic text
+ * - journey: Steps in guided journeys
+ * - followup: Contextual follow-up suggestions
+ */
+export type PromptSurface = 'suggestion' | 'highlight' | 'journey' | 'followup';
+
+/**
+ * Match mode for highlight triggers
+ */
+export type HighlightMatchMode = 'exact' | 'contains';
+
+/**
+ * Text pattern that triggers a prompt in highlight context
+ */
+export interface HighlightTrigger {
+  /** Text that activates this prompt */
+  text: string;
+  /** How to match the text */
+  matchMode: HighlightMatchMode;
+  /** Case sensitivity (default: false) */
+  caseSensitive?: boolean;
+}
+
+/**
+ * Default surfaces when not specified
+ */
+export const DEFAULT_PROMPT_SURFACES: PromptSurface[] = ['suggestion'];
+
+/**
+ * Check if a prompt can render on a given surface
+ */
+export function canRenderOnSurface(
+  prompt: PromptObject, 
+  surface: PromptSurface
+): boolean {
+  const surfaces = prompt.surfaces ?? DEFAULT_PROMPT_SURFACES;
+  return surfaces.includes(surface);
+}
+
+/**
+ * Get all surfaces a prompt can render on
+ */
+export function getPromptSurfaces(prompt: PromptObject): PromptSurface[] {
+  return prompt.surfaces ?? DEFAULT_PROMPT_SURFACES;
+}
+
+// ============================================================================
 // GENERATION CONTEXT (Legacy Provenance)
 // ============================================================================
 
@@ -231,6 +285,14 @@ export interface PromptObject {
 
   /** Embedding for similarity matching (optional) */
   embedding?: number[];
+
+  // === Sprint: kinetic-highlights-v1 ===
+
+  /** Where this prompt can appear (default: ['suggestion']) */
+  surfaces?: PromptSurface[];
+
+  /** For highlight surface: text patterns that trigger this prompt */
+  highlightTriggers?: HighlightTrigger[];
 }
 
 // ============================================================================

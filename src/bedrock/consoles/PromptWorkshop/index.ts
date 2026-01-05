@@ -38,6 +38,10 @@ export { PromptCard } from './PromptCard';
 export { PromptEditor } from './PromptEditor';
 export { usePromptData, createDefaultPrompt } from './usePromptData';
 
+// Sprint: kinetic-highlights-v1 - Surface and highlight editors
+export { SurfaceSelector } from './SurfaceSelector';
+export { HighlightTriggersEditor } from './HighlightTriggersEditor';
+
 // Re-export types
 export type { PromptDataResult } from './usePromptData';
 export type { PromptPayload } from '@core/schema/prompt';

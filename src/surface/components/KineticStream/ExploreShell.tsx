@@ -39,6 +39,7 @@ import type { Sprout, SproutProvenance } from '@core/schema/sprout';
 import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@core/schema/stream';
 import { journeys } from '../../../data/journeys';
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
+import { usePromptForHighlight } from '@explore/hooks/usePromptForHighlight';
 
 export interface ExploreShellProps {
   initialLens?: string;
@@ -66,6 +67,10 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // Sprint: prompt-journey-mode-v1 - Journey mode toggle
   // Default to ON for better exploration experience
   const isJourneyModeEnabled = useFeatureFlag('journey-mode');
+
+  // Sprint: kinetic-highlights-v1 - Look up backing prompts for highlights
+  const { findPrompt } = usePromptForHighlight();
+
   const [journeyMode, setJourneyMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('grove-journey-mode');
@@ -450,6 +455,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     scrollToBottom
   } = useKineticScroll(scrollDeps, isStreaming);
 
+  // Sprint: kinetic-highlights-v1 - Use backing prompt for highlights
   const handleConceptClick = useCallback((span: RhetoricalSpan, sourceId: string) => {
     const pivotContext: PivotContext = {
       sourceResponseId: sourceId,
@@ -457,9 +463,27 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       sourceContext: `User clicked on the concept "${span.text}" to explore it further.`
     };
 
-    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
-    submit(span.text, { pivot: pivotContext, personaBehaviors: effectivePersonaBehaviors });
-  }, [submit, effectivePersonaBehaviors]);
+    // Look up backing prompt for this highlight
+    const backingPrompt = findPrompt(span.text, { lensId: lens || undefined, stage });
+
+    if (backingPrompt) {
+      // Use rich prompt - display surface text but execute with rich prompt
+      submit(span.text, {
+        pivot: pivotContext,
+        executionPrompt: backingPrompt.executionPrompt,
+        systemContext: backingPrompt.systemContext,
+        personaBehaviors: effectivePersonaBehaviors
+      });
+    } else {
+      // Fallback: enhanced surface text
+      const fallbackPrompt = `Tell me more about "${span.text}" in the context of what we've been discussing. What is it, why does it matter, and how does it connect to the bigger picture?`;
+      submit(span.text, {
+        pivot: pivotContext,
+        executionPrompt: fallbackPrompt,
+        personaBehaviors: effectivePersonaBehaviors
+      });
+    }
+  }, [submit, effectivePersonaBehaviors, findPrompt, lens, stage]);
 
   // Sprint: prompt-progression-v1 - Track selected prompts in XState
   // NOTE: This handler only tracks the fork selection. The actual submission

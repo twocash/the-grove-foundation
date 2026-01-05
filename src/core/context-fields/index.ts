@@ -61,3 +61,15 @@ export { captureSessionTelemetry } from './telemetry';
 
 // Generator (Epic 5)
 export { PromptGenerator, getPromptGenerator } from './generator';
+
+// Lookup (Sprint: kinetic-highlights-v1)
+export {
+  findPromptForHighlight,
+  getHighlightPrompts,
+  hasMatchingPrompt,
+  type HighlightLookupContext,
+} from './lookup';
+
+// Surface types (Sprint: kinetic-highlights-v1)
+export type { PromptSurface, HighlightMatchMode, HighlightTrigger } from './types';
+export { DEFAULT_PROMPT_SURFACES, canRenderOnSurface, getPromptSurfaces } from './types';

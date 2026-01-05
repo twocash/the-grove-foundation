@@ -33,3 +33,9 @@ export {
   type SequenceState,
   type SequenceActions,
 } from './useSequence';
+
+// Highlight lookup (Sprint: kinetic-highlights-v1)
+export {
+  usePromptForHighlight,
+  type UsePromptForHighlightResult,
+} from './usePromptForHighlight';

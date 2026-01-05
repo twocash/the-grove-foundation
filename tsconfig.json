@@ -24,9 +24,13 @@
       "@core/*": ["./src/core/*"],
       "@surface/*": ["./src/surface/*"],
       "@foundation/*": ["./src/foundation/*"],
+      "@explore": ["./src/explore"],
+      "@explore/*": ["./src/explore/*"],
       "@widget": ["./src/widget"],
       "@widget/*": ["./src/widget/*"],
       "@garden/*": ["./src/garden/*"],
+      "@bedrock": ["./src/bedrock"],
+      "@bedrock/*": ["./src/bedrock/*"],
       "@data": ["./src/data"],
       "@data/*": ["./src/data/*"]
     },

@@ -1,0 +1,243 @@
+{
+  "prompts": [
+    {
+      "id": "highlight-distributed-ownership",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "What does distributed ownership mean?",
+      "description": "Backing prompt for 'distributed ownership' highlight",
+      "executionPrompt": "I keep seeing 'distributed ownership' and it sounds important, but I'm not sure what's actually being distributed. Is it the AI models themselves? The servers? The data? Help me understand what distributed ownership of AI infrastructure actually means in practical terms—like, what would I actually own, and why does that matter compared to just using ChatGPT?",
+      "systemContext": "User clicked 'distributed ownership' in kinetic text. Core Grove concept. Explain what's distributed (compute nodes, model weights, data sovereignty, economic value). Connect to practical concern: what do I get that I don't have with centralized AI? Use concrete examples. Avoid preaching about decentralization—focus on tangible benefits like no vendor lock-in, local data control, participation in value creation.",
+      "tags": ["highlight", "core-concept", "infrastructure-bet"],
+      "topicAffinities": [
+        { "topicId": "infrastructure-bet", "weight": 1.0 },
+        { "topicId": "architecture", "weight": 0.8 },
+        { "topicId": "philosophy", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.9 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "distributed ownership", "matchMode": "exact" },
+        { "text": "distribute ownership", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-hybrid-architecture",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "How does hybrid architecture work?",
+      "description": "Backing prompt for 'hybrid architecture' highlight",
+      "executionPrompt": "I see 'hybrid architecture' mentioned but I'm fuzzy on what's being hybridized. Is it about running some AI locally and some in the cloud? How does the system decide what goes where? And honestly—why not just run everything in the cloud like everyone else does?",
+      "systemContext": "User clicked 'hybrid architecture'. Explain Grove's local-cloud split: 7B models handle routine cognition locally (fast, private, free after hardware), cloud APIs handle 'pivotal moments' requiring frontier capability. The split isn't about cost—it's about matching capability to need. Use the 'right-sized intelligence' framing. Mention the efficiency tax funds cloud access through problem-solving, not subscriptions.",
+      "tags": ["highlight", "core-concept", "architecture"],
+      "topicAffinities": [
+        { "topicId": "architecture", "weight": 1.0 },
+        { "topicId": "economics", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.9 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "hybrid architecture", "matchMode": "exact" },
+        { "text": "hybrid model", "matchMode": "contains" },
+        { "text": "local-cloud", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-credit-economy",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "What is the credit economy?",
+      "description": "Backing prompt for 'credit economy' highlight",
+      "executionPrompt": "I'm curious about this 'credit economy' concept. How do agents earn credits? What can they spend them on? And how is this different from just... paying for API calls like normal? It sounds like there's something deeper going on here.",
+      "systemContext": "User clicked 'credit economy'. This is Grove's core incentive mechanism. Agents earn credits by solving problems (validated by other agents or humans). Credits buy cloud compute access for complex reasoning. Key insight: agents are intrinsically motivated to be useful because success = cognitive enhancement. This creates compelling content as byproduct—real stories of distributed intelligence solving real problems. Contrast with subscription model where AI has no stake in outcomes.",
+      "tags": ["highlight", "core-concept", "economics"],
+      "topicAffinities": [
+        { "topicId": "economics", "weight": 1.0 },
+        { "topicId": "architecture", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "credit economy", "matchMode": "exact" },
+        { "text": "credit system", "matchMode": "exact" },
+        { "text": "earn credits", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-capability-propagation",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "What is capability propagation?",
+      "description": "Backing prompt for 'capability propagation' highlight",
+      "executionPrompt": "I keep hearing about 'capability propagation' and the 'ratchet thesis.' What does it actually mean for AI capabilities to propagate? Is this about models getting better over time, or something else? And why does Grove seem to think this is predictable?",
+      "systemContext": "User clicked 'capability propagation'. Explain the Ratchet Thesis: frontier AI capabilities propagate to consumer hardware on predictable timelines. METR research shows ~7-month doubling cycles with ~21-month lag. Today's GPT-4 level becomes tomorrow's laptop model. Grove's bet: build infrastructure that rides this wave rather than competing at the frontier. The 'efficiency tax that shrinks' - what costs cloud credits today runs free locally in 18 months. This isn't hope, it's documented pattern.",
+      "tags": ["highlight", "core-concept", "ratchet-thesis"],
+      "topicAffinities": [
+        { "topicId": "ratchet-thesis", "weight": 1.0 },
+        { "topicId": "architecture", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.9 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 70,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "capability propagation", "matchMode": "exact" },
+        { "text": "ratchet thesis", "matchMode": "exact" },
+        { "text": "capabilities propagate", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-efficiency-tax",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "What is the efficiency tax?",
+      "description": "Backing prompt for 'efficiency tax' highlight",
+      "executionPrompt": "What's this 'efficiency tax' I keep seeing? It sounds like Grove is taking a cut of something, but the framing suggests it's actually a feature, not a bug. How does taxing efficiency create value instead of destroying it?",
+      "systemContext": "User clicked 'efficiency tax'. This is Grove's business model and it's counterintuitive. When an agent's innovation gets adopted by other villages, a small portion of the efficiency gain flows back as credits. It's not rent-seeking—it's incentive alignment. Innovations that help the network get rewarded. The tax 'shrinks' because as local capabilities improve, less cloud compute is needed. The goal is a self-sustaining network where the Foundation becomes unnecessary. Compare to Big Tech model where value extraction increases over time.",
+      "tags": ["highlight", "core-concept", "economics"],
+      "topicAffinities": [
+        { "topicId": "economics", "weight": 1.0 },
+        { "topicId": "community", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 70,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "efficiency tax", "matchMode": "exact" },
+        { "text": "efficiency tax that shrinks", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-ai-villages",
+      "objectType": "prompt",
+      "created": 1736121600000,
+      "modified": 1736121600000,
+      "author": "system",
+      "label": "What are AI villages?",
+      "description": "Backing prompt for 'AI villages' highlight",
+      "executionPrompt": "I love the 'AI villages' metaphor but I'm not sure I fully get it. Are these like... communities of AI agents living on someone's computer? How many agents are we talking about? And what do they actually do when their human isn't asking them questions?",
+      "systemContext": "User clicked 'AI villages'. Paint the picture: 3-12 agents on a personal computer, each developing specializations and relationships. They have ongoing projects, keep diaries, form opinions. When idle, they don't just wait—they explore, debate, create. The 'village' metaphor captures emergence: culture, norms, and innovations arise from interaction, not top-down design. Reference Stanford Smallville research. The human is the 'Gardener'—they shape the environment but don't control every outcome. Villages are the atomic unit of the Grove network.",
+      "tags": ["highlight", "core-concept", "vision"],
+      "topicAffinities": [
+        { "topicId": "vision", "weight": 1.0 },
+        { "topicId": "community", "weight": 0.8 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "1A", "weight": 0.95 }
+      ],
+      "targeting": {
+        "stages": ["genesis", "exploration"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736121600000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "AI villages", "matchMode": "exact" },
+        { "text": "AI village", "matchMode": "exact" },
+        { "text": "agent villages", "matchMode": "contains" }
+      ]
+    }
+  ]
+}
