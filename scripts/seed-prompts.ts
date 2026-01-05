@@ -19,6 +19,23 @@ import wayneTurnerPrompts from '../src/data/prompts/wayne-turner.prompts.json';
 // Types
 // =============================================================================
 
+interface PromptProvenance {
+  type: 'authored' | 'extracted' | 'generated' | 'submitted';
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  reviewedAt?: number;
+  reviewedBy?: string;
+  authorId?: string;
+  authorName?: string;
+  sourceDocIds?: string[];
+  sourceDocTitles?: string[];
+  extractedAt?: number;
+  extractionModel?: string;
+  extractionConfidence?: number;
+  gapAnalysisId?: string;
+  generationReason?: string;
+  coverageGap?: { stage?: string; lens?: string; topic?: string };
+}
+
 interface LegacyPrompt {
   id: string;
   objectType: string;
@@ -61,6 +78,7 @@ interface LegacyPrompt {
   }>;
   variant?: string;
   icon?: string;
+  provenance?: PromptProvenance;
 }
 
 interface PromptRow {
@@ -96,6 +114,8 @@ interface PromptRow {
     generatedFrom?: object;
     cooldownMs?: number;
     maxShows?: number;
+    // Sprint: exploration-node-unification-v1
+    provenance?: PromptProvenance;
   };
 }
 
@@ -136,6 +156,8 @@ function transformPrompt(legacy: LegacyPrompt): PromptRow {
         avgDwellMs: legacy.stats?.avgDwellMs || legacy.stats?.avgDwellAfter || 0,
       },
       source: legacy.source || 'library',
+      // Sprint: exploration-node-unification-v1
+      provenance: legacy.provenance,
     },
   };
 }
