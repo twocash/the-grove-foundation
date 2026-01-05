@@ -38,6 +38,7 @@ import { useSproutStorage } from '../../../../hooks/useSproutStorage';
 import type { Sprout, SproutProvenance } from '@core/schema/sprout';
 import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@core/schema/stream';
 import { journeys } from '../../../data/journeys';
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
 
 export interface ExploreShellProps {
   initialLens?: string;
@@ -52,12 +53,36 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 }) => {
   // Hybrid search toggle (Sprint: hybrid-search-toggle-v1)
   // Must be declared before useKineticStream which depends on it
+  // Sprint: prompt-journey-mode-v1 - Default to ON
   const [useHybridSearch, setUseHybridSearch] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('grove-hybrid-search') === 'true';
+      const stored = localStorage.getItem('grove-hybrid-search');
+      // Default to true if not explicitly set to 'false'
+      return stored !== 'false';
     }
-    return false;
+    return true;
   });
+
+  // Sprint: prompt-journey-mode-v1 - Journey mode toggle
+  // Default to ON for better exploration experience
+  const isJourneyModeEnabled = useFeatureFlag('journey-mode');
+  const [journeyMode, setJourneyMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('grove-journey-mode');
+      // Default to true if not explicitly set to 'false'
+      return stored !== 'false';
+    }
+    return true;
+  });
+
+  const handleJourneyModeToggle = useCallback(() => {
+    setJourneyMode(prev => {
+      const next = !prev;
+      localStorage.setItem('grove-journey-mode', String(next));
+      console.log('[ExploreShell] Journey mode:', next ? 'ON' : 'OFF');
+      return next;
+    });
+  }, []);
 
   const {
     items,
@@ -138,6 +163,21 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     const preset = getPersona(lens);
     return preset?.behaviors;
   }, [lens]);
+
+  // Sprint: prompt-journey-mode-v1 - Override behaviors when journey mode active
+  const effectivePersonaBehaviors = useMemo(() => {
+    if (!journeyMode) {
+      return personaBehaviors;
+    }
+    // Journey mode overrides - match Wayne Turner pattern
+    return {
+      ...personaBehaviors,
+      closingBehavior: 'question' as const,
+      useBreadcrumbTags: false,
+      useTopicTags: false,
+      useNavigationBlocks: false
+    };
+  }, [personaBehaviors, journeyMode]);
 
   // Welcome content - use static prompts from welcomeContent for now
   // TODO: Integrate useSuggestedPrompts once engagement systems are unified
@@ -417,10 +457,12 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       sourceContext: `User clicked on the concept "${span.text}" to explore it further.`
     };
 
-    submit(span.text, { pivot: pivotContext, personaBehaviors });
-  }, [submit, personaBehaviors]);
+    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
+    submit(span.text, { pivot: pivotContext, personaBehaviors: effectivePersonaBehaviors });
+  }, [submit, effectivePersonaBehaviors]);
 
   // Sprint: prompt-progression-v1 - Track selected prompts in XState
+  // Sprint: prompt-journey-mode-v1 - Pass separate display/execution prompts
   const handleForkSelect = useCallback((fork: JourneyFork) => {
     // Emit to XState to track prompt selection for progression
     actor.send({
@@ -429,19 +471,27 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       responseId: '' // Not tracked at this level, handled in ResponseObject
     });
 
-    if (fork.queryPayload) {
-      submit(fork.queryPayload, { personaBehaviors });
-    } else {
-      submit(fork.label, { personaBehaviors });
-    }
-  }, [actor, submit, personaBehaviors]);
+    // Display label in chat, send queryPayload (executionPrompt) to LLM
+    const displayText = fork.label;
+    const executionPrompt = fork.queryPayload || fork.label;
 
-  const handleSubmit = useCallback((query: string) => {
+    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
+    submit(displayText, {
+      personaBehaviors: effectivePersonaBehaviors,
+      executionPrompt
+    });
+  }, [actor, submit, effectivePersonaBehaviors]);
+
+  // Sprint: prompt-journey-mode-v1 - Accept separate display text and execution prompt
+  const handleSubmit = useCallback((displayText: string, executionPrompt?: string) => {
     // Force scroll to bottom on new submission (instant)
     scrollToBottom(false);
-    // Sprint: kinetic-suggested-prompts-v1 - pass persona behaviors for response mode control
-    submit(query, { personaBehaviors });
-  }, [submit, scrollToBottom, personaBehaviors]);
+    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
+    submit(displayText, {
+      personaBehaviors: effectivePersonaBehaviors,
+      executionPrompt
+    });
+  }, [submit, scrollToBottom, effectivePersonaBehaviors]);
 
   const handleLensAccept = useCallback((lensId: string) => {
     acceptLensOffer(lensId);
@@ -523,8 +573,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     if (journeyId) {
       console.log('[KineticWelcome] Journey prompt clicked:', journeyId);
     }
-    submit(command || prompt, { personaBehaviors });
-  }, [submit, personaBehaviors]);
+    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
+    submit(command || prompt, { personaBehaviors: effectivePersonaBehaviors });
+  }, [submit, effectivePersonaBehaviors]);
 
   return (
     <div className="kinetic-surface flex flex-col h-screen bg-[var(--glass-void)]">
@@ -539,6 +590,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         exchangeCount={exchangeCount}
         useHybridSearch={useHybridSearch}
         onHybridSearchToggle={handleHybridSearchToggle}
+        journeyMode={isJourneyModeEnabled ? journeyMode : undefined}
+        onJourneyModeToggle={isJourneyModeEnabled ? handleJourneyModeToggle : undefined}
       />
 
       {/* Stream area - attach scrollRef and capture ref */}

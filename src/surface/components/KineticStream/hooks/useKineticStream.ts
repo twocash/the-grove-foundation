@@ -32,6 +32,8 @@ export interface SubmitOptions {
   pivot?: PivotContext;
   lensId?: string;
   personaBehaviors?: PersonaBehaviors;
+  /** Sprint: prompt-journey-mode-v1 - If set, send this to LLM instead of query */
+  executionPrompt?: string;
 }
 
 interface UseKineticStreamReturn {
@@ -61,7 +63,8 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
   itemsRef.current = items;
 
   const submit = useCallback(async (query: string, submitOptions: SubmitOptions = {}) => {
-    const { pivot, lensId, personaBehaviors: submitBehaviors } = submitOptions;
+    // Sprint: prompt-journey-mode-v1 - Destructure executionPrompt for display/execution separation
+    const { pivot, lensId, personaBehaviors: submitBehaviors, executionPrompt } = submitOptions;
     // Use provided lensId or fall back to active lens
     const effectiveLensId = lensId ?? activeLensId;
     // Merge behaviors: submit-time takes precedence over hook-time
@@ -73,11 +76,13 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
     abortRef.current = new AbortController();
 
     // Create query item
+    // Sprint: prompt-journey-mode-v1 - Store executionPrompt if different from display text
     const queryItem: QueryStreamItem = {
       id: `query-${Date.now()}`,
       type: 'query',
       timestamp: Date.now(),
-      content: query,
+      content: query,  // Display text (what user sees)
+      executionPrompt: executionPrompt && executionPrompt !== query ? executionPrompt : undefined,
       role: 'user',
       createdBy: 'user',
       pivot
@@ -109,8 +114,10 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
 
       // Stream response using chatService
       // Sprint: kinetic-suggested-prompts-v1 - pass personaBehaviors for response mode control
+      // Sprint: prompt-journey-mode-v1 - Send executionPrompt to LLM if different from display text
+      const promptToSend = executionPrompt ?? query;
       const chatResponse = await sendMessageStream(
-        query,
+        promptToSend,
         (chunk: string) => {
           fullContent += chunk;
           setCurrentItem(prev => prev ? {

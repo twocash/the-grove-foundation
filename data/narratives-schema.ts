@@ -324,6 +324,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Floating Suggestion Widget',
     description: 'Floating widget for context-aware prompt suggestions',
     enabled: false
+  },
+  {
+    id: 'journey-mode',
+    name: 'Journey Mode Toggle',
+    description: 'Toggle between LLM-driven navigation and 4D library prompt journeys (Sprint: prompt-journey-mode-v1)',
+    enabled: true
   }
 ];
 

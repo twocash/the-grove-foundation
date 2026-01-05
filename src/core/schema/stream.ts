@@ -102,7 +102,8 @@ interface BaseStreamItem {
 
 export interface QueryStreamItem extends BaseStreamItem {
   type: 'query';
-  content: string;
+  content: string;              // Display text (what user sees in chat)
+  executionPrompt?: string;     // Sprint: prompt-journey-mode-v1 - If present, send this to LLM instead of content
   intent?: string;
   pivot?: PivotContext;
   role: 'user';

@@ -17,7 +17,8 @@ export interface ResponseObjectProps {
   item: ResponseStreamItem;
   onConceptClick?: (span: RhetoricalSpan) => void;
   onForkSelect?: (fork: JourneyFork) => void;
-  onPromptSubmit?: (prompt: string) => void;
+  /** Sprint: prompt-journey-mode-v1 - Separate display text from execution prompt */
+  onPromptSubmit?: (displayText: string, executionPrompt?: string) => void;
 }
 
 export const ResponseObject: React.FC<ResponseObjectProps> = ({
@@ -41,13 +42,15 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
     : (isInlineNavEnabled && isReady ? libraryForks : []);
 
   // Handle fork selection with event emission
+  // Sprint: prompt-journey-mode-v1 - BUG FIX: Display label in chat, send queryPayload to LLM
   const handleForkSelect = useCallback((fork: JourneyFork) => {
     emit.forkSelected(fork.id, fork.type, fork.label, item.id);
-    if (fork.queryPayload) {
-      onPromptSubmit?.(fork.queryPayload);
-    } else {
-      onPromptSubmit?.(fork.label);
-    }
+
+    // Display label in chat, send queryPayload (executionPrompt) to LLM
+    const displayText = fork.label;
+    const executionPrompt = fork.queryPayload || fork.label;
+
+    onPromptSubmit?.(displayText, executionPrompt);
     onForkSelect?.(fork);
   }, [emit, item.id, onPromptSubmit, onForkSelect]);
 
