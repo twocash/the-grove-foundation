@@ -180,6 +180,7 @@ export const engagementMachine = setup({
     }),
 
     // Fork select action (Sprint: kinetic-stream-reset-v2)
+    // Sprint: prompt-progression-v1 - Also track selected prompts
     handleForkSelect: assign(({ context, event }) => {
       if (event.type !== 'USER.SELECT_FORK') return {};
 
@@ -193,9 +194,15 @@ export const engagementMachine = setup({
         intent: event.fork.type
       };
 
+      // Track prompt selection for progression (Sprint: prompt-progression-v1)
+      const updatedPromptsSelected = context.promptsSelected.includes(event.fork.id)
+        ? context.promptsSelected
+        : [...context.promptsSelected, event.fork.id];
+
       return {
         currentStreamItem: forkQuery,
-        streamHistory: [...context.streamHistory, forkQuery]
+        streamHistory: [...context.streamHistory, forkQuery],
+        promptsSelected: updatedPromptsSelected
       };
     }),
 

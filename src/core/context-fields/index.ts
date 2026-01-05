@@ -1,6 +1,7 @@
 // src/core/context-fields/index.ts
 // Context Fields module barrel export
 // Sprint: genesis-context-fields-v1
+// Sprint: kinetic-suggested-prompts-v1 - Added useContextState and adapters
 
 // Types
 export type {
@@ -29,6 +30,17 @@ export {
   rankPrompts,
   selectPrompts,
 } from './scoring';
+
+// Context state hook (Sprint: kinetic-suggested-prompts-v1)
+export { useContextState, createDefaultContextState } from './useContextState';
+
+// PromptObject → JourneyFork adapters (Sprint: kinetic-suggested-prompts-v1)
+export {
+  inferForkType,
+  promptToFork,
+  promptsToForks,
+  diversifyForks,
+} from './adapters';
 
 // Telemetry (Epic 5)
 export type {

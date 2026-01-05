@@ -1,301 +1,240 @@
-# Repository Audit: kinetic-suggested-prompts-v1
+# Repository Audit: kinetic-suggested-prompts-v1 (CORRECTED)
 
 **Sprint:** kinetic-suggested-prompts-v1  
-**Auditor:** Claude (Foundation Loop v2)  
-**Date:** 2025-01-04  
-**Status:** ✅ Complete
+**Date:** January 4, 2026  
+**Auditor:** Foundation Loop Phase 0  
+**Supersedes:** Previous audit that ignored 4D Context Fields infrastructure
 
 ---
 
-## Executive Summary
+## Critical Correction
 
-The codebase has a **fully-built 4D Context Fields system** that is not wired to the UI. The prompt library contains ~60 prompts with proper `PromptObject` schema. The `NavigationBlock` component already exists and renders `JourneyFork[]` objects. The core work is **integration**, not creation.
-
-**Key finding:** Two parallel scoring systems exist that must be reconciled. The canonical system is `src/core/context-fields/scoring.ts`.
+The previous SPEC.md was written against outdated documentation and proposed creating new infrastructure that **already exists**. This audit corrects that by using the canonical 4D Context Fields system.
 
 ---
 
-## Phase 0: Pattern Check Results
+## Part 1: Existing Infrastructure (USE THIS)
 
-### Patterns to Extend
+### 4D Context Fields System
 
-| Pattern | Location | Extension Approach |
-|---------|----------|-------------------|
-| **Context Fields** | `src/core/context-fields/` | Wire `selectPrompts()` to response flow |
-| **Engagement Machine** | `src/core/engagement/` | Extract `ContextState` from machine context |
-| **Stream Schema** | `src/core/schema/stream.ts` | Use existing `JourneyFork` type |
-| **NavigationBlock** | `components/Terminal/Stream/blocks/` | Already exists - just feed it data |
-| **Prompt Library** | `src/data/prompts/` | Already has ~60 prompts |
+**Location:** `src/core/context-fields/`
 
-### Patterns NOT to Create
+| File | Purpose | Lines |
+|------|---------|-------|
+| `types.ts` | ContextState, PromptObject, ContextTargeting schemas | 197 |
+| `scoring.ts` | applyHardFilters, calculateRelevance, rankPrompts, selectPrompts | 234 |
+| `generator.ts` | PromptGenerator (rule-based dynamic generation) | ~150 |
+| `index.ts` | Exports | ~20 |
 
-- ❌ No new prompt scoring system (context-fields is canonical)
-- ❌ No new navigation component (NavigationBlock exists)
-- ❌ No new stream item types (ResponseStreamItem.navigation exists)
-- ❌ No new engagement tracking (machine already tracks all 4D fields)
-
----
-
-## System Inventory
-
-### Context Fields System (CANONICAL)
-
-```
-src/core/context-fields/
-├── types.ts          # PromptObject, ContextState, ContextTargeting
-├── scoring.ts        # selectPrompts(), applyHardFilters(), rankPrompts()
-├── generator.ts      # PromptGenerator (rule-based generation)
-├── telemetry.ts      # Analytics tracking
-└── index.ts          # Re-exports
+**ContextState (4D Aggregation):**
+```typescript
+interface ContextState {
+  stage: Stage;              // 'genesis' | 'exploration' | 'synthesis' | 'advocacy'
+  entropy: number;           // 0.0-1.0
+  activeLensId: string | null;
+  activeMoments: string[];
+  interactionCount: number;
+  topicsExplored: string[];
+  sproutsCaptured: number;
+  offTopicCount: number;
+}
 ```
 
-**Status:** Complete, untested in integration. Ready to wire.
+**PromptObject (Full Schema):**
+```typescript
+interface PromptObject {
+  id: string;
+  label: string;              // Button text
+  executionPrompt: string;    // Full query on click
+  targeting: ContextTargeting;
+  topicAffinities: TopicAffinity[];
+  lensAffinities: LensAffinity[];
+  baseWeight?: number;
+  variant?: 'default' | 'glow' | 'subtle' | 'urgent';
+  // ... stats, author, etc.
+}
+```
 
-**Key Types:**
-- `ContextState` — 4D aggregation (stage, entropy, lens, moments)
-- `PromptObject` — First-class DEX object with targeting, affinities, stats
-- `selectPrompts(prompts, context, options)` — Full selection pipeline
+**Selection Pipeline:**
+```typescript
+selectPrompts(prompts, context, { maxPrompts: 3 })
+// Returns: ScoredPrompt[] (ranked by relevance)
+```
 
 ### Prompt Library
 
-```
-src/data/prompts/
-├── base.prompts.json       # 15 universal prompts
-├── dr-chiang.prompts.json  # ~20 lens-specific (Mung Chiang)
-├── wayne-turner.prompts.json # ~25 lens-specific (Wayne Turner)
-├── stage-prompts.ts        # Stage-based prompt generation
-└── index.ts                # Loader with libraryPrompts export
-```
+**Location:** `src/data/prompts/`
 
-**Total:** ~60 prompts with full `PromptObject` schema including:
-- `label` (button text) vs `executionPrompt` (full query)
-- `targeting` with stages, entropy windows, lens filters
+| File | Prompts | Description |
+|------|---------|-------------|
+| `base.prompts.json` | ~15 | Universal prompts for any context |
+| `dr-chiang.prompts.json` | ~20 | Mung Chiang lens-specific |
+| `wayne-turner.prompts.json` | ~25 | Wayne Turner lens-specific |
+| `stage-prompts.ts` | ~10 | Stage-based generation |
+
+**Total:** ~70 prompts with full PromptObject schema including:
+- `targeting` with stages, entropyWindow, lensIds, momentTriggers
 - `topicAffinities` and `lensAffinities` with weights
-- `variant` for visual styling (default/glow/subtle/urgent)
+- `variant` for visual styling
 
-### Engagement Machine
+### Navigation Types
 
-```
-src/core/engagement/
-├── machine.ts        # XState machine with 4D state
-├── types.ts          # EngagementContext, EngagementEvent
-├── context.tsx       # EngagementProvider, useEngagement hook
-├── hooks/
-│   ├── useEntropyState.ts
-│   ├── useLensState.ts
-│   └── useJourneyState.ts
-└── persistence.ts    # localStorage persistence
-```
+**Location:** `src/core/schema/stream.ts`
 
-**EngagementContext tracks:**
-- `lens` — Active lens ID
-- `entropy` — Current entropy value (0-1)
-- `topicExplorations` — Topics explored in session
-- `streamHistory` — Full conversation history
-- `hubsVisited`, `pivotCount` — Entropy inputs
-
-**Missing:** Direct `ContextState` aggregation hook. Need to map EngagementContext → ContextState.
-
-### Stream System
-
-```
-src/core/schema/stream.ts        # StreamItem types
-components/Terminal/Stream/
-├── StreamRenderer.tsx           # Polymorphic renderer
-├── blocks/
-│   ├── NavigationBlock.tsx     # Fork renderer (EXISTS)
-│   ├── ResponseBlock.tsx       # Response with navigation
-│   ├── QueryBlock.tsx          # User query
-│   └── SystemBlock.tsx         # System messages
-└── motion/                     # Animation variants
-```
-
-**ResponseStreamItem already has:**
-```typescript
-interface ResponseStreamItem {
-  navigation?: JourneyFork[];  // ← THIS IS THE INTEGRATION POINT
-  // ... other fields
-}
-```
-
-**NavigationBlock already:**
-- Groups forks by type (deep_dive, pivot, apply, challenge)
-- Renders with icon + label
-- Calls `onSelect(fork)` callback
-- Has motion animations
-
-### Legacy Prompt System (TO DEPRECATE)
-
-```
-src/explore/hooks/usePromptSuggestions.ts  # Uses legacy Prompt type
-src/explore/utils/scorePrompt.ts           # Parallel scoring algorithm
-```
-
-**Issue:** Uses `Prompt` type from `@core/schema/prompt` which differs from `PromptObject`. Must deprecate or reconcile.
-
----
-
-## Integration Gaps
-
-### Gap 1: ContextState Aggregation
-
-**Problem:** No hook to aggregate `EngagementContext` → `ContextState`
-
-**Current state in machine:**
-```typescript
-// EngagementContext has:
-lens: string | null;
-entropy: number;
-topicExplorations: TopicExploration[];
-streamHistory: StreamItem[];
-```
-
-**ContextState needs:**
-```typescript
-interface ContextState {
-  stage: Stage;               // Need to compute from session
-  entropy: number;            // ✅ Available
-  activeLensId: string | null; // ✅ Available
-  activeMoments: string[];    // Need moment evaluator
-  interactionCount: number;   // streamHistory.length
-  topicsExplored: string[];   // Extract from topicExplorations
-  sproutsCaptured: number;    // From sproutCaptures.length
-  offTopicCount: number;      // Need tracking
-}
-```
-
-### Gap 2: PromptObject → JourneyFork Conversion
-
-**Problem:** NavigationBlock expects `JourneyFork[]`, not `PromptObject[]`
-
-**JourneyFork shape:**
 ```typescript
 interface JourneyFork {
   id: string;
+  type: JourneyForkType;  // 'deep_dive' | 'pivot' | 'apply' | 'challenge'
   label: string;
-  type: JourneyForkType; // 'deep_dive' | 'pivot' | 'apply' | 'challenge'
-  targetId?: string;
-  queryPayload?: string;  // ← This should be executionPrompt
-  context?: string;
+  queryPayload?: string;  // This becomes executionPrompt
+  targetWaypoint?: string;
 }
 ```
 
-**Conversion needed:**
+**NavigationBlock** already exists and renders JourneyFork[] with proper styling.
+
+---
+
+## Part 2: What's Missing (CREATE THESE)
+
+### Gap 1: ContextState Aggregation Hook
+
+**Problem:** No hook to aggregate EngagementContext → ContextState
+
+The engagement machine has the data, but no hook converts it to ContextState format.
+
+**Solution:** Create `useContextState.ts`
+
+### Gap 2: Navigation Prompts Hook
+
+**Problem:** No hook connects selectPrompts() to UI components
+
+**Solution:** Create `useNavigationPrompts.ts` that:
+1. Gets ContextState via useContextState
+2. Calls selectPrompts(libraryPrompts, context, options)
+3. Converts PromptObject[] → JourneyFork[]
+4. Returns forks for NavigationBlock
+
+### Gap 3: PromptObject → JourneyFork Adapter
+
+**Problem:** NavigationBlock expects JourneyFork[], not PromptObject[]
+
+**Solution:** Create adapter function:
 ```typescript
 function promptToFork(prompt: PromptObject): JourneyFork {
   return {
     id: prompt.id,
+    type: inferForkType(prompt),
     label: prompt.label,
-    type: inferForkType(prompt), // from tags or variant
-    queryPayload: prompt.executionPrompt,
-    context: prompt.description
+    queryPayload: prompt.executionPrompt
   };
 }
 ```
 
-### Gap 3: Navigation Injection
+### Gap 4: ResponseBlock Integration
 
-**Problem:** Where to call `selectPrompts()` and inject results?
+**Problem:** NavigationBlock not wired to use 4D-aware prompts
 
-**Current flow:**
-1. `FINALIZE_RESPONSE` action parses content
-2. `parseNavigation(content)` extracts forks from markdown
-3. Sets `navigation` on ResponseStreamItem
+**Solution:** Modify ResponseBlock to:
+1. Call useNavigationPrompts()
+2. Render NavigationBlock with returned forks
+3. Handle auto-submit on click
 
-**Options:**
-- **A:** Post-finalization hook that merges library prompts with parsed forks
-- **B:** Replace `parseNavigation()` with 4D selector (loses markdown forks)
-- **C:** Hybrid - parsed forks + library prompts merged
+### Gap 5: Feature Flag
 
-**Recommendation:** Option A — post-processing that adds library prompts if no navigation parsed.
-
-### Gap 4: Fork Type Inference
-
-**Problem:** `PromptObject` has `variant`, but `JourneyFork` expects `type`
-
-**Mapping strategy:**
-- `baseWeight > 85` or `variant === 'glow'` → `deep_dive`
-- `topicAffinities.length > 0` → `pivot`
-- `tags.includes('synthesis')` or `variant === 'subtle'` → `apply`
-- `entropyWindow.min > 0.7` → `challenge` (stabilization)
+**Solution:** Add `INLINE_NAVIGATION_PROMPTS` flag for safe rollout.
 
 ---
 
-## File Inventory
+## Part 3: What Already Works (PRESERVE)
 
-### Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/explore/hooks/useNavigationPrompts.ts` | 4D context → prompt selection |
-| `src/core/context-fields/adapters.ts` | PromptObject → JourneyFork conversion |
-| `src/core/context-fields/useContextState.ts` | Aggregate EngagementContext → ContextState |
-
-### Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/core/engagement/machine.ts` | Add navigation injection in `finalizeResponse` |
-| `components/Terminal/Stream/blocks/NavigationBlock.tsx` | Add variant-based styling |
-| `components/Terminal/TerminalChat.tsx` | Wire fork selection to auto-submit |
-
-### Files to Deprecate
-
-| File | Action |
-|------|--------|
-| `src/explore/hooks/usePromptSuggestions.ts` | Mark deprecated, redirect to new hook |
-| `src/explore/utils/scorePrompt.ts` | Mark deprecated, context-fields is canonical |
+| Component | Status | Notes |
+|-----------|--------|-------|
+| selectPrompts() | ✅ Ready | Full filter→score→rank pipeline |
+| PromptObject schema | ✅ Ready | Complete targeting, affinities |
+| Prompt library | ✅ Ready | 70 prompts with proper schema |
+| NavigationBlock | ✅ Ready | Renders forks with styling |
+| FORK_SELECTED event | ✅ Ready | Event type exists in schema |
+| useEventBridge | ✅ Ready | Can emit events |
 
 ---
 
-## Technical Debt Identified
+## Part 4: What To Deprecate
 
-1. **Dual Scoring Systems**
-   - `src/core/context-fields/scoring.ts` (canonical)
-   - `src/explore/utils/scorePrompt.ts` (legacy)
-   - Action: Deprecate legacy, migrate consumers
-
-2. **Stage Calculation**
-   - No explicit stage tracking in engagement machine
-   - Currently inferred from journey state
-   - Action: Add stage field or calculation hook
-
-3. **Moment Evaluation**
-   - `moment-evaluator.ts` exists but may not populate `activeMoments`
-   - Action: Verify moment flow or add explicit tracking
-
-4. **Floating Suggestion Widget**
-   - Location unknown (not found in audit)
-   - Action: Find and deprecate during implementation
+| Component | Action | Reason |
+|-----------|--------|--------|
+| `usePromptSuggestions.ts` | Deprecate | Uses legacy Prompt type, not PromptObject |
+| `scorePrompt.ts` | Deprecate | Parallel scoring, context-fields is canonical |
+| Floating suggestion widget | Hide | Replaced by inline navigation |
 
 ---
 
-## Risk Assessment
+## Part 5: Integration Strategy
 
-| Risk | Impact | Likelihood | Mitigation |
-|------|--------|------------|------------|
-| Breaking existing navigation | High | Medium | Feature flag for rollout |
-| Performance regression | Medium | Low | Memoize `selectPrompts()` |
-| Type mismatch errors | Medium | Medium | Strict PromptObject→JourneyFork adapter |
-| Stage calculation errors | Low | Medium | Default to 'exploration' if unknown |
+### Data Flow (Corrected)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                  ResponseBlock                                │
+│                       │                                       │
+│                       ▼                                       │
+│            useNavigationPrompts()                             │
+│                       │                                       │
+│           ┌───────────┼───────────┐                          │
+│           ▼           ▼           ▼                          │
+│   useContextState()  libraryPrompts  selectPrompts()         │
+│   (4D aggregation)   (from data/)   (from scoring.ts)        │
+│           │                               │                   │
+│           └───────────┬───────────────────┘                  │
+│                       ▼                                       │
+│              ScoredPrompt[]                                   │
+│                       │                                       │
+│                       ▼                                       │
+│              promptsToForks()                                 │
+│              (adapter function)                               │
+│                       │                                       │
+│                       ▼                                       │
+│              JourneyFork[]                                    │
+│                       │                                       │
+│                       ▼                                       │
+│              NavigationBlock                                  │
+│              (existing component)                             │
+│                       │                                       │
+│                       ▼ (on click)                           │
+│              handleForkSelect()                               │
+│              emit.forkSelected()                              │
+│              submitQuery(executionPrompt)                     │
+└──────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Recommendations
+## Part 6: Test Baseline
 
-1. **Start with useContextState hook** — Enables testing of scoring without UI changes
-2. **Add adapter layer** — Clean PromptObject → JourneyFork conversion
-3. **Wire to finalizeResponse** — Minimal change to machine
-4. **Feature flag navigation** — Allow rollback without code changes
-5. **Keep parsed forks** — Merge with library prompts, don't replace
+```bash
+npm test -- tests/unit/events/
+# 180 tests passing (Sprint 3 complete)
+```
+
+Sprint 4 target: 195+ tests (add context-fields + navigation coverage)
 
 ---
 
-## Next: SPEC.md
+## Summary
 
-With audit complete, proceed to specification with:
-- Live Status block
-- Attention Anchor block
-- Clear acceptance criteria from REQUIREMENTS.md
-- Explicit scope boundaries
+| Category | Status |
+|----------|--------|
+| 4D Context Fields | ✅ EXISTS — USE IT |
+| Prompt selection | ✅ EXISTS — USE IT |
+| Prompt library | ✅ EXISTS — USE IT |
+| NavigationBlock | ✅ EXISTS — USE IT |
+| ContextState hook | ❌ MISSING — CREATE |
+| Navigation hook | ❌ MISSING — CREATE |
+| Type adapter | ❌ MISSING — CREATE |
+| ResponseBlock wiring | ❌ MISSING — MODIFY |
 
+**The infrastructure exists. We're wiring it, not building it.**
+
+---
+
+*Audit corrected. Proceed to SPEC.md with proper architecture.*

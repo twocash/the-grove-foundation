@@ -1,340 +1,519 @@
-# SPEC: kinetic-suggested-prompts-v1
+# Kinetic Suggested Prompts v1 — Specification (CORRECTED)
 
 **Sprint:** kinetic-suggested-prompts-v1  
-**Author:** Claude (Foundation Loop v2)  
-**Created:** 2025-01-04  
-**Status:** 🟡 Planning
+**Depends On:** bedrock-event-integration-v1 (✅ Complete)  
+**Date:** January 4, 2026  
+**Sprint Type:** Feature (Explore Experience)  
+**Est. Duration:** 1 day
 
 ---
 
-## Live Status
+## Constitutional Reference
 
-| Field | Value |
-|-------|-------|
-| **Current Phase** | Phase 2: Specification |
-| **Status** | 🟡 In Progress |
-| **Blocking Issues** | None |
-| **Last Updated** | 2025-01-04T20:30:00Z |
-| **Next Action** | Complete SPEC, then ARCHITECTURE.md |
-| **Attention Anchor** | Wire 4D context to inline navigation |
+- [x] `The_Trellis_Architecture__First_Order_Directives.md` — DEX standards
+- [x] `docs/sprints/kinetic-suggested-prompts-v1/REQUIREMENTS.md` — Canonical vision
+- [x] `src/core/context-fields/` — 4D scoring system (USE THIS)
+- [x] `src/data/prompts/` — Prompt library (USE THIS)
+- [x] `src/core/schema/stream.ts` — JourneyFork type
 
 ---
 
-## Attention Anchor
+## Overview
 
-**Re-read this block before every major decision.**
+Wire the **existing** 4D Context Fields system to inline navigation prompts. This sprint is about **integration**, not building new infrastructure.
 
-- **We are building:** Inline suggested prompts that use 4D context to surface relevant next steps
-- **Success looks like:** 2-4 contextual prompts render at end of responses; clicking auto-submits
-- **We are NOT:** Building LLM-generated prompts, Active Rhetoric, or rewriting Kinetic Stream
-- **Current phase:** Planning
-- **Next action:** Define component hierarchy and data flow
+**What exists:**
+- ContextState with stage, entropy, lens, moments
+- selectPrompts() with hard filters + soft scoring
+- 70 prompts in library with full PromptObject schema
+- NavigationBlock component for rendering forks
 
----
-
-## Goal
-
-Transform the suggested prompts experience from a disconnected floating widget into contextually-aware inline navigation that feels like a natural continuation of exploration. Wire the existing 4D Context Fields system (`selectPrompts()`) to populate `NavigationBlock` at the end of responses.
-
-**Core insight:** The infrastructure exists. This sprint is integration work, not creation.
+**What we create:**
+- useContextState() hook to aggregate 4D state
+- useNavigationPrompts() hook to select + convert
+- PromptObject → JourneyFork adapter
+- ResponseBlock integration
 
 ---
+
+## Goals
+
+- [ ] Create `useContextState` hook aggregating EngagementContext → ContextState
+- [ ] Create `useNavigationPrompts` hook calling selectPrompts() + adapter
+- [ ] Create `promptToFork` adapter converting PromptObject → JourneyFork
+- [ ] Integrate NavigationBlock into ResponseBlock
+- [ ] Auto-submit executionPrompt on fork click
+- [ ] Emit FORK_SELECTED event on click
+- [ ] Feature flag: `INLINE_NAVIGATION_PROMPTS`
+- [ ] Deprecate legacy usePromptSuggestions hook
 
 ## Non-Goals
 
-Explicit scope exclusions (from REQUIREMENTS.md):
-
-1. **LLM-generated fork labels** — Use library prompts only
-2. **Active Rhetoric highlights** — Orange clickable terms (separate sprint)
-3. **Cognitive state streaming** — "thinking..." indicators (separate sprint)
-4. **Full Kinetic Stream rewrite** — Incremental improvement only
-5. **Journey system enhancement** — Deprecating, not improving
-6. **New prompt creation** — 60 prompts already exist
+- Creating new scoring algorithm (use existing selectPrompts)
+- Creating new prompt schema (use existing PromptObject)
+- LLM-generated prompts (v2)
+- <navigation> block parsing (v2)
 
 ---
 
-## Patterns Extended (MANDATORY)
+## DEX Compliance Matrix
 
-| Requirement | Existing Pattern | Extension Approach |
-|-------------|------------------|-------------------|
-| Prompt selection | Context Fields (`selectPrompts`) | Wire to response finalization |
-| State aggregation | Engagement Machine | Create `useContextState` adapter |
-| Navigation rendering | NavigationBlock component | Already exists - feed it data |
-| Fork types | JourneyFork schema | Add PromptObject → JourneyFork adapter |
-| Auto-submit | `handleForkSelect` action | Already wired in machine |
-
----
-
-## Acceptance Criteria
-
-### P0: Must Have (Sprint Gate)
-
-- [ ] **AC-1:** `useContextState` hook aggregates EngagementContext → ContextState
-- [ ] **AC-2:** `promptToFork` adapter converts PromptObject → JourneyFork
-- [ ] **AC-3:** `useNavigationPrompts` hook returns scored prompts as JourneyFork[]
-- [ ] **AC-4:** NavigationBlock renders at end of completed responses
-- [ ] **AC-5:** Clicking fork auto-submits `executionPrompt` (no Enter required)
-- [ ] **AC-6:** Base prompts surface without lens (fallback works)
-- [ ] **AC-7:** Lens-specific prompts surface when lens active
-
-### P1: Should Have
-
-- [ ] **AC-8:** Fork type inferred correctly (deep_dive, pivot, apply, challenge)
-- [ ] **AC-9:** Visual variants render (default, glow, subtle, urgent)
-- [ ] **AC-10:** Entropy stabilization prompts appear when entropy > 0.7
-- [ ] **AC-11:** Topic affinities influence selection
-
-### P2: Nice to Have
-
-- [ ] **AC-12:** Analytics track impressions, selections
-- [ ] **AC-13:** Cooldown prevents repeated prompts
-- [ ] **AC-14:** Floating widget deprecated (hidden via flag)
+| Test | Pass/Fail | Evidence |
+|------|-----------|----------|
+| Declarative Sovereignty | ✅ | Prompts in JSON files. selectPrompts() config-driven. |
+| Capability Agnosticism | ✅ | No LLM calls. Works with any model. |
+| Provenance as Infrastructure | ✅ | FORK_SELECTED event with full context. |
+| Organic Scalability | ✅ | Add prompts to JSON. Add fork types to union. |
 
 ---
 
-## Architecture Overview
-
-### Component Hierarchy
-
-```
-TerminalChat
-├── StreamRenderer
-│   └── ResponseBlock
-│       ├── GlassPanel (content)
-│       └── NavigationBlock (NEW: 4D-aware)
-│           └── ForkButton × N
-└── CommandInput
-```
+## Architecture
 
 ### Data Flow
 
 ```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│EngagementContext │────▶│  useContextState │────▶│   ContextState   │
-│   (XState)       │     │    (adapter)     │     │   (aggregated)   │
-└──────────────────┘     └──────────────────┘     └──────────────────┘
-                                                          │
-                                                          ▼
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  libraryPrompts  │────▶│  selectPrompts   │────▶│  PromptObject[]  │
-│   (60 prompts)   │     │   (scorer)       │     │   (ranked)       │
-└──────────────────┘     └──────────────────┘     └──────────────────┘
-                                                          │
-                                                          ▼
-                         ┌──────────────────┐     ┌──────────────────┐
-                         │  promptToFork    │────▶│  JourneyFork[]   │
-                         │   (adapter)      │     │  (for render)    │
-                         └──────────────────┘     └──────────────────┘
-                                                          │
-                                                          ▼
-                                                  ┌──────────────────┐
-                                                  │ NavigationBlock  │
-                                                  │  (renders pills) │
-                                                  └──────────────────┘
-                                                          │
-                                                          ▼
-                                                  ┌──────────────────┐
-                                                  │ USER.SELECT_FORK │
-                                                  │ (auto-submit)    │
-                                                  └──────────────────┘
+EngagementContext (XState)
+         │
+         ▼
+  useContextState()           libraryPrompts
+  (4D aggregation)            (from data/)
+         │                         │
+         └──────────┬──────────────┘
+                    ▼
+           selectPrompts()
+           (from scoring.ts)
+                    │
+                    ▼
+            ScoredPrompt[]
+                    │
+                    ▼
+           promptsToForks()
+           (adapter)
+                    │
+                    ▼
+            JourneyFork[]
+                    │
+                    ▼
+           NavigationBlock
+           (existing component)
+                    │
+                    ▼ (click)
+           handleForkSelect()
+           • emit.forkSelected()
+           • submitQuery(executionPrompt)
 ```
 
-### Key Files
+### Fork Type Inference
 
-| File | Role |
-|------|------|
-| `src/core/context-fields/useContextState.ts` | Aggregate 4D state |
-| `src/core/context-fields/adapters.ts` | PromptObject → JourneyFork |
-| `src/explore/hooks/useNavigationPrompts.ts` | Selection hook |
-| `components/Terminal/Stream/blocks/ResponseBlock.tsx` | Render integration |
+Map PromptObject characteristics → JourneyForkType:
+
+| Condition | Fork Type |
+|-----------|-----------|
+| `entropyWindow.min > 0.6` | `challenge` (stabilization) |
+| `topicAffinities.length > 0` | `pivot` (connection) |
+| `tags.includes('synthesis')` | `apply` (practical) |
+| Default | `deep_dive` (exploration) |
 
 ---
 
-## ContextState Aggregation
+## Epics
 
-Map from `EngagementContext` to `ContextState`:
+### Epic 1: Context State Hook (2 hrs)
+
+**Goal:** Aggregate EngagementContext → ContextState
+
+#### Story 1.1: Create useContextState.ts
+
+**File:** `src/core/context-fields/useContextState.ts`
 
 ```typescript
-function aggregateContextState(engagement: EngagementContext): ContextState {
-  return {
-    stage: computeStage(engagement),              // From session state
-    entropy: engagement.entropy,                  // Direct
-    activeLensId: engagement.lens,                // Direct
-    activeMoments: evaluateMoments(engagement),   // From moment evaluator
-    interactionCount: engagement.streamHistory.length,
-    topicsExplored: engagement.topicExplorations.map(t => t.topicId),
-    sproutsCaptured: engagement.sproutCaptures.length,
-    offTopicCount: 0  // TODO: track separately
-  };
+import { useMemo } from 'react';
+import { useEngagement } from '@core/engagement';
+import type { ContextState, Stage } from './types';
+import { mapSessionStageToStage } from './types';
+
+export function useContextState(): ContextState {
+  const { state } = useEngagement();
+  
+  return useMemo(() => ({
+    stage: computeStage(state),
+    entropy: state.context.entropy ?? 0,
+    activeLensId: state.context.lens ?? null,
+    activeMoments: evaluateMoments(state),
+    interactionCount: state.context.streamHistory?.length ?? 0,
+    topicsExplored: extractTopics(state),
+    sproutsCaptured: state.context.sproutCaptures?.length ?? 0,
+    offTopicCount: 0
+  }), [state]);
 }
-```
 
-**Stage computation:**
-```typescript
-function computeStage(engagement: EngagementContext): Stage {
-  const count = engagement.streamHistory.length;
+function computeStage(state): Stage {
+  const count = state.context.streamHistory?.length ?? 0;
   if (count === 0) return 'genesis';
-  if (count < 5) return 'exploration';
-  if (engagement.sproutCaptures.length > 0) return 'advocacy';
+  if (count < 3) return 'exploration';
+  if (state.context.sproutCaptures?.length > 0) return 'advocacy';
   return 'synthesis';
 }
+
+function evaluateMoments(state): string[] {
+  const moments: string[] = [];
+  if ((state.context.entropy ?? 0) > 0.7) moments.push('high_entropy');
+  if ((state.context.streamHistory?.length ?? 0) === 0) moments.push('first_visit');
+  return moments;
+}
+
+function extractTopics(state): string[] {
+  return state.context.topicExplorations?.map(t => t.topicId) ?? [];
+}
 ```
 
----
+**Acceptance Criteria:**
+- [ ] Returns valid ContextState from engagement machine
+- [ ] Stage computed from interaction count
+- [ ] Entropy passed through
+- [ ] Lens ID passed through
+- [ ] Moments evaluated (high_entropy, first_visit)
 
-## PromptObject → JourneyFork Adapter
+### Epic 2: Navigation Prompts Hook (2 hrs)
+
+**Goal:** Wire selectPrompts() to NavigationBlock
+
+#### Story 2.1: Create promptToFork adapter
+
+**File:** `src/core/context-fields/adapters.ts`
 
 ```typescript
-function promptToFork(prompt: PromptObject): JourneyFork {
+import type { PromptObject, JourneyFork, JourneyForkType } from './types';
+
+export function inferForkType(prompt: PromptObject): JourneyForkType {
+  const { targeting, topicAffinities, tags, variant } = prompt;
+  
+  // High entropy = challenge (stabilization)
+  if (targeting.entropyWindow?.min && targeting.entropyWindow.min > 0.6) {
+    return 'challenge';
+  }
+  
+  // Urgent variant = challenge
+  if (variant === 'urgent') return 'challenge';
+  
+  // Topic connections = pivot
+  if (topicAffinities.length > 0) return 'pivot';
+  
+  // Synthesis/apply tags
+  const applyTags = ['synthesis', 'reflection', 'action', 'contribution'];
+  if (tags.some(t => applyTags.includes(t))) return 'apply';
+  
+  // Default
+  return 'deep_dive';
+}
+
+export function promptToFork(prompt: PromptObject): JourneyFork {
   return {
     id: prompt.id,
-    label: prompt.label,
     type: inferForkType(prompt),
-    queryPayload: prompt.executionPrompt,
-    context: prompt.description
+    label: prompt.label,
+    queryPayload: prompt.executionPrompt
   };
 }
 
-function inferForkType(prompt: PromptObject): JourneyForkType {
-  // Entropy-reactive prompts are challenges
-  if (prompt.targeting.entropyWindow?.min > 0.6) return 'challenge';
-  
-  // Topic-connected prompts are pivots
-  if (prompt.topicAffinities.length > 0) return 'pivot';
-  
-  // Synthesis/reflection prompts are apply
-  if (prompt.tags.some(t => ['synthesis', 'reflection', 'contribution'].includes(t))) {
-    return 'apply';
-  }
-  
-  // Default: deep dive
-  return 'deep_dive';
+export function promptsToForks(prompts: PromptObject[]): JourneyFork[] {
+  return prompts.map(promptToFork);
 }
 ```
 
----
+#### Story 2.2: Create useNavigationPrompts hook
 
-## Integration Point
-
-**Where to inject:** After response finalization, before render.
-
-**Option selected:** Post-finalization hook in `useNavigationPrompts`
+**File:** `src/explore/hooks/useNavigationPrompts.ts`
 
 ```typescript
-// In ResponseBlock or parent component
-const { prompts } = useNavigationPrompts();
-const forks = item.navigation ?? prompts;  // Merge strategy
+import { useMemo } from 'react';
+import { useContextState } from '@core/context-fields/useContextState';
+import { selectPrompts } from '@core/context-fields/scoring';
+import { promptsToForks } from '@core/context-fields/adapters';
+import { libraryPrompts } from '@data/prompts';
+import type { JourneyFork } from '@core/schema/stream';
+
+export interface UseNavigationPromptsOptions {
+  maxPrompts?: number;
+  minScore?: number;
+}
+
+export interface NavigationPromptsResult {
+  forks: JourneyFork[];
+  isReady: boolean;
+}
+
+export function useNavigationPrompts(
+  options: UseNavigationPromptsOptions = {}
+): NavigationPromptsResult {
+  const { maxPrompts = 3, minScore = 1.0 } = options;
+  const context = useContextState();
+  
+  const forks = useMemo(() => {
+    const scored = selectPrompts(libraryPrompts, context, { 
+      maxPrompts, 
+      minScore 
+    });
+    return promptsToForks(scored.map(s => s.prompt));
+  }, [context, maxPrompts, minScore]);
+  
+  return {
+    forks,
+    isReady: true
+  };
+}
 ```
 
-**Alternative (machine-level):** Modify `finalizeResponse` action to call selector. Rejected because:
-- Adds async complexity to machine
-- Couples machine to React hooks
-- Harder to test in isolation
+**Acceptance Criteria:**
+- [ ] Calls selectPrompts with ContextState
+- [ ] Converts to JourneyFork[]
+- [ ] Returns up to maxPrompts forks
+- [ ] Memoized for performance
 
----
+### Epic 3: ResponseBlock Integration (1.5 hrs)
 
-## Testing Strategy
+**Goal:** Render NavigationBlock after response completes
 
-### Unit Tests
+#### Story 3.1: Add feature flag
 
-**File:** `tests/unit/context-fields-integration.test.ts`
-
-```typescript
-describe('useContextState', () => {
-  it('aggregates engagement context to ContextState', () => { ... });
-  it('computes stage from interaction count', () => { ... });
-  it('extracts topics from explorations', () => { ... });
-});
-
-describe('promptToFork', () => {
-  it('converts PromptObject to JourneyFork', () => { ... });
-  it('infers deep_dive for default prompts', () => { ... });
-  it('infers challenge for high-entropy prompts', () => { ... });
-});
-```
-
-### Integration Tests
-
-**File:** `tests/integration/navigation-prompts.test.tsx`
+**File:** `src/config/features.ts`
 
 ```typescript
-describe('useNavigationPrompts', () => {
-  it('returns prompts matching current context', () => { ... });
-  it('filters by active lens', () => { ... });
-  it('respects entropy windows', () => { ... });
-});
-```
-
-### E2E Tests
-
-**File:** `tests/e2e/suggested-prompts.spec.ts`
-
-```typescript
-test('inline prompts appear after response', async ({ page }) => {
-  await page.goto('/explore');
-  await sendMessage(page, 'What is the Grove?');
-  await expect(page.getByTestId('navigation-block')).toBeVisible();
-  await expect(page.getByTestId('fork-button')).toHaveCount({ min: 2, max: 4 });
-});
-
-test('clicking prompt auto-submits', async ({ page }) => {
-  const fork = page.getByTestId('fork-button').first();
-  await fork.click();
-  // Should immediately start generating response
-  await expect(page.getByTestId('response-block').last()).toContainText(/loading|thinking/i);
-});
-```
-
----
-
-## Migration Notes
-
-### Feature Flag
-
-```typescript
-// config/features.ts
 export const FEATURES = {
-  INLINE_NAVIGATION_PROMPTS: true,  // Enable new system
-  FLOATING_SUGGESTION_WIDGET: false // Disable legacy
+  // ...
+  INLINE_NAVIGATION_PROMPTS: true,
+  FLOATING_SUGGESTION_WIDGET: false  // Deprecate
 };
 ```
 
-### Rollback Plan
+#### Story 3.2: Modify ResponseBlock
 
-1. Set `INLINE_NAVIGATION_PROMPTS: false`
-2. Set `FLOATING_SUGGESTION_WIDGET: true`
-3. No code changes required
+**File:** `src/components/explore/stream/ResponseBlock.tsx`
+
+```diff
++ import { FEATURES } from '@config/features';
++ import { useNavigationPrompts } from '@explore/hooks/useNavigationPrompts';
++ import { useEventBridge } from '@core/events/hooks';
+
+  export const ResponseBlock: React.FC<ResponseBlockProps> = ({
+    item,
+    onForkSelect,
++   onPromptSubmit
+  }) => {
++   const { forks } = FEATURES.INLINE_NAVIGATION_PROMPTS 
++     ? useNavigationPrompts({ maxPrompts: 3 })
++     : { forks: [] };
++   
++   const { emit } = useEventBridge();
++   
++   const handleForkSelect = (fork: JourneyFork) => {
++     // Emit event for tracking
++     emit.forkSelected(fork.id, fork.type, fork.label, item.id);
++     // Auto-submit the executionPrompt
++     onPromptSubmit?.(fork.queryPayload ?? fork.label);
++   };
++   
++   // Merge: prefer parsed navigation, fallback to 4D prompts
++   const navigationForks = item.navigation?.length 
++     ? item.navigation 
++     : forks;
+
+    return (
+      <motion.div ...>
+        {/* Response content */}
+        
+-       {hasNavigation(item) && !item.isGenerating && (
++       {!item.isGenerating && navigationForks.length > 0 && (
+          <NavigationBlock
+-           forks={item.navigation!}
++           forks={navigationForks}
+-           onSelect={onForkSelect}
++           onSelect={handleForkSelect}
+          />
+        )}
+      </motion.div>
+    );
+  };
+```
+
+**Acceptance Criteria:**
+- [ ] NavigationBlock renders after response
+- [ ] Uses 4D-selected forks when no parsed navigation
+- [ ] Click emits FORK_SELECTED event
+- [ ] Click calls onPromptSubmit with executionPrompt
+
+### Epic 4: Event Bridge Extension (0.5 hrs)
+
+**Goal:** Add forkSelected to EventBridgeEmit
+
+#### Story 4.1: Add forkSelected method
+
+**File:** `src/core/events/hooks/useEventBridge.ts`
+
+Add to EventBridgeEmit interface:
+
+```typescript
+forkSelected: (
+  forkId: string, 
+  forkType: string, 
+  label: string, 
+  responseId: string
+) => void;
+```
+
+Implementation:
+```typescript
+forkSelected: (forkId, forkType, label, responseId) => {
+  if (isNewSystemEnabled && newDispatch) {
+    newDispatch({
+      type: 'FORK_SELECTED',
+      forkId,
+      forkType,
+      label,
+      responseId,
+      ...baseAttribution
+    });
+  }
+  // Legacy dual-write if needed
+}
+```
+
+### Epic 5: Deprecation (0.5 hrs)
+
+**Goal:** Mark legacy hooks as deprecated
+
+#### Story 5.1: Deprecate usePromptSuggestions
+
+**File:** `src/explore/hooks/usePromptSuggestions.ts`
+
+```typescript
+/**
+ * @deprecated Use `useNavigationPrompts` from `@explore/hooks` instead.
+ * This hook uses the legacy Prompt type. The new hook uses the
+ * canonical Context Fields system with 4D targeting.
+ * 
+ * Sprint: kinetic-suggested-prompts-v1
+ */
+export function usePromptSuggestions(...) {
+  console.warn('[DEPRECATED] usePromptSuggestions - use useNavigationPrompts');
+  // ... existing implementation
+}
+```
+
+### Epic 6: Tests (1.5 hrs)
+
+**Goal:** Coverage for new hooks
+
+#### Story 6.1: Test useContextState
+
+```typescript
+describe('useContextState', () => {
+  it('returns genesis stage when no interactions', () => {...});
+  it('returns exploration stage with 1-2 interactions', () => {...});
+  it('returns synthesis stage with 5+ interactions', () => {...});
+  it('includes high_entropy moment when entropy > 0.7', () => {...});
+  it('passes through lens ID from engagement', () => {...});
+});
+```
+
+#### Story 6.2: Test useNavigationPrompts
+
+```typescript
+describe('useNavigationPrompts', () => {
+  it('returns 3 forks by default', () => {...});
+  it('respects maxPrompts option', () => {...});
+  it('converts PromptObject to JourneyFork', () => {...});
+  it('infers fork type from entropy window', () => {...});
+  it('infers fork type from topic affinities', () => {...});
+});
+```
+
+#### Story 6.3: Test integration
+
+```typescript
+describe('ResponseBlock with NavigationBlock', () => {
+  it('renders forks after response completes', () => {...});
+  it('calls onPromptSubmit with executionPrompt on click', () => {...});
+  it('emits FORK_SELECTED event on click', () => {...});
+});
+```
+
+**Acceptance Criteria:**
+- [ ] 15+ new tests
+- [ ] All existing 180 tests pass
+- [ ] 195+ total tests
 
 ---
 
-## Open Questions
+## File Summary
 
-1. **Prompt count:** Fixed at 3, or adaptive (2-4)?
-   - **Decision:** Start with 3, make configurable later
+### Create
 
-2. **Merge strategy:** Library prompts + parsed forks, or library only?
-   - **Decision:** Library prompts only for MVP; parsed forks are separate content system
+| File | Purpose | Lines |
+|------|---------|-------|
+| `src/core/context-fields/useContextState.ts` | 4D aggregation hook | ~50 |
+| `src/core/context-fields/adapters.ts` | PromptObject → JourneyFork | ~40 |
+| `src/explore/hooks/useNavigationPrompts.ts` | Selection + conversion | ~40 |
+| `tests/unit/context-fields/` | Tests | ~150 |
 
-3. **Mobile layout:** Vertical stack or horizontal scroll?
-   - **Decision:** Defer to existing NavigationBlock flex-wrap behavior
+### Modify
+
+| File | Changes |
+|------|---------|
+| `src/core/context-fields/index.ts` | Export useContextState, adapters |
+| `src/explore/hooks/index.ts` | Export useNavigationPrompts |
+| `src/components/explore/stream/ResponseBlock.tsx` | Wire NavigationBlock |
+| `src/core/events/hooks/useEventBridge.ts` | Add forkSelected |
+| `src/config/features.ts` | Add feature flags |
+
+### Deprecate
+
+| File | Action |
+|------|--------|
+| `src/explore/hooks/usePromptSuggestions.ts` | @deprecated annotation |
+| `src/explore/utils/scorePrompt.ts` | @deprecated annotation |
 
 ---
 
-## Success Metrics
+## Build Gates
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Prompt click-through | ~5% | 25%+ |
-| Average session turns | ~3 | 5+ |
-| Time to first click | N/A | <30s |
+### After Epic 1
+```bash
+npx tsc --noEmit
+```
+
+### After Epic 2
+```bash
+npm test -- tests/unit/context-fields/
+```
+
+### After Epic 3
+```bash
+npm run build
+npm run dev # manual verification
+```
+
+### Sprint Complete
+```bash
+npm run build
+npm test
+npx tsc --noEmit
+# 195+ tests passing
+```
 
 ---
 
-## Next: ARCHITECTURE.md
+## Success Criteria
 
-Proceed to detailed architecture with:
-- File structure
-- Type definitions
-- Integration sequence
-- Error handling
+- [ ] useContextState aggregates 4D state correctly
+- [ ] useNavigationPrompts calls existing selectPrompts
+- [ ] NavigationBlock renders 4D-selected forks
+- [ ] Click auto-submits executionPrompt
+- [ ] Click emits FORK_SELECTED event
+- [ ] Feature flag controls rollout
+- [ ] Legacy hooks deprecated
+- [ ] 195+ tests passing
 
+---
+
+*Generated by Foundation Loop — Using EXISTING 4D Context Fields infrastructure*

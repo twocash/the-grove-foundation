@@ -1,13 +1,17 @@
 // src/surface/components/KineticStream/Stream/blocks/ResponseObject.tsx
 // AI response display with glass, concepts, and forks
 // Sprint: kinetic-experience-v1
+// Sprint: kinetic-suggested-prompts-v1 - Added 4D context-aware navigation fallback
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { ResponseStreamItem, RhetoricalSpan, JourneyFork } from '@core/schema/stream';
 import { hasSpans, hasNavigation } from '@core/schema/stream';
 import { GlassContainer } from '../motion/GlassContainer';
 import { RhetoricRenderer } from '../../ActiveRhetoric/RhetoricRenderer';
 import { NavigationObject } from './NavigationObject';
+import { useSafeNavigationPrompts } from '../../../../../explore/hooks/useNavigationPrompts';
+import { useSafeEventBridge } from '../../../../../core/events/hooks/useEventBridge';
+import { useFeatureFlag } from '../../../../../../hooks/useFeatureFlags';
 
 export interface ResponseObjectProps {
   item: ResponseStreamItem;
@@ -23,6 +27,29 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
   onPromptSubmit
 }) => {
   const isError = item.content.startsWith('Error:');
+
+  // Sprint: kinetic-suggested-prompts-v1 - 4D Context-aware navigation fallback
+  // Sprint: feature-flag-cleanup-v1 - Properly wired feature flag
+  // Sprint: prompt-progression-v1 - Single prompt progression (removed explicit maxPrompts)
+  const isInlineNavEnabled = useFeatureFlag('inline-navigation-prompts');
+  const { forks: libraryForks, isReady } = useSafeNavigationPrompts();
+  const { emit } = useSafeEventBridge();
+
+  // Merge: prefer parsed navigation from response, fallback to 4D library prompts
+  const navigationForks = hasNavigation(item)
+    ? item.navigation!
+    : (isInlineNavEnabled && isReady ? libraryForks : []);
+
+  // Handle fork selection with event emission
+  const handleForkSelect = useCallback((fork: JourneyFork) => {
+    emit.forkSelected(fork.id, fork.type, fork.label, item.id);
+    if (fork.queryPayload) {
+      onPromptSubmit?.(fork.queryPayload);
+    } else {
+      onPromptSubmit?.(fork.label);
+    }
+    onForkSelect?.(fork);
+  }, [emit, item.id, onPromptSubmit, onForkSelect]);
 
   return (
     <div className="flex flex-col items-start" data-testid="response-object" data-message-id={item.id}>
@@ -58,9 +85,9 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
         )}
       </GlassContainer>
 
-      {hasNavigation(item) && !item.isGenerating && (
+      {navigationForks.length > 0 && !item.isGenerating && (
         <div className="mt-4 w-full max-w-[90%]">
-          <NavigationObject forks={item.navigation!} onSelect={onForkSelect} />
+          <NavigationObject forks={navigationForks} onSelect={handleForkSelect} />
         </div>
       )}
     </div>

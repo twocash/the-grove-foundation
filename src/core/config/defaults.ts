@@ -163,6 +163,12 @@ export const DEFAULT_PERSONA_PROMPT_CONFIG: Omit<PersonaPromptConfig, 'toneGuida
 // FEATURE FLAGS
 // ============================================================================
 
+// ⚠️ DEPRECATED: This is NOT the canonical source for feature flags.
+// The canonical source is: data/narratives-schema.ts
+// useFeatureFlags() reads from narratives-schema.ts, not this file.
+// Add new flags to data/narratives-schema.ts instead.
+// Sprint: feature-flag-cleanup-v1 (2026-01-05)
+
 export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
   {
     id: 'custom-lens-in-picker',
@@ -193,6 +199,24 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Auto-Generate Journeys',
     description: 'Generate first journey for custom persona users based on first question',
     enabled: true
+  },
+  {
+    id: 'grove-event-system',
+    name: 'Grove Event System (Bedrock)',
+    description: 'Use new GroveEventLog for explore routes instead of XState engagement machine',
+    enabled: false  // Disabled by default for gradual rollout
+  },
+  {
+    id: 'inline-navigation-prompts',
+    name: 'Inline Navigation Prompts',
+    description: '4D Context-aware navigation forks shown after responses',
+    enabled: true  // Enabled by default (Sprint: kinetic-suggested-prompts-v1)
+  },
+  {
+    id: 'floating-suggestion-widget',
+    name: 'Floating Suggestion Widget',
+    description: 'Floating widget for context-aware prompt suggestions',
+    enabled: false  // Reserved for future sprint
   }
 ];
 

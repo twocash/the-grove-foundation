@@ -1197,6 +1197,10 @@ function buildSystemPrompt(options = {}) {
     const useTopics = personaBehaviors.useTopicTags !== false;
     const useNavBlocks = personaBehaviors.useNavigationBlocks !== false;
 
+    // Sprint: kinetic-suggested-prompts-v1 - Debug logging
+    console.log('[buildSystemPrompt] personaBehaviors received:', JSON.stringify(personaBehaviors));
+    console.log('[buildSystemPrompt] Resolved flags:', { responseMode, closingBehavior, useBreadcrumbs, useTopics, useNavBlocks });
+
     // Check if we have persona-specific behaviors (vs default fallback)
     const hasCustomBehaviors = Object.keys(personaBehaviors).length > 0;
 

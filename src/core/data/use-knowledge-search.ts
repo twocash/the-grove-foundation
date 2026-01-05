@@ -15,6 +15,8 @@ export interface SearchOptions {
   tiers?: string[];
   /** Enable query expansion (default: false) */
   expand?: boolean;
+  /** Enable hybrid search: vector + keyword + utility + temporal (default: false) */
+  hybrid?: boolean;
 }
 
 /**
@@ -100,6 +102,7 @@ export function useKnowledgeSearch(): UseKnowledgeSearchResult {
         if (options?.threshold) params.set('threshold', String(options.threshold));
         if (options?.expand) params.set('expand', 'true');
         if (options?.tiers) params.set('tiers', options.tiers.join(','));
+        if (options?.hybrid) params.set('hybrid', 'true');
 
         const response = await fetch(`/api/knowledge/search?${params}`);
 

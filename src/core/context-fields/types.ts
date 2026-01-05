@@ -43,6 +43,8 @@ export interface ContextState {
   topicsExplored: string[];
   sproutsCaptured: number;
   offTopicCount: number;
+  // Prompt progression tracking (Sprint: prompt-progression-v1)
+  promptsSelected: string[];
 }
 
 // ============================================================================

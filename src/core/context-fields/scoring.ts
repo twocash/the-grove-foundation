@@ -16,7 +16,8 @@ import { DEFAULT_SCORING_WEIGHTS } from './types';
 
 /**
  * Apply hard filters that disqualify prompts entirely.
- * Hard filters: stage mismatch, lens excluded, minInteractions not met
+ * Hard filters: stage mismatch, lens excluded, minInteractions not met, already selected
+ * Sprint: prompt-progression-v1 - Added already-selected filter
  */
 export function applyHardFilters(
   prompts: PromptObject[],
@@ -24,6 +25,12 @@ export function applyHardFilters(
 ): PromptObject[] {
   return prompts.filter(prompt => {
     const { targeting } = prompt;
+
+    // Already selected filter (Sprint: prompt-progression-v1)
+    // Remove prompts the user has already clicked
+    if (context.promptsSelected?.includes(prompt.id)) {
+      return false;
+    }
 
     // Stage filter
     if (targeting.stages && targeting.stages.length > 0) {

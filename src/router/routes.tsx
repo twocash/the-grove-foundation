@@ -4,6 +4,9 @@
 import React, { lazy, Suspense } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 
+// Event System Provider (Sprint: bedrock-event-integration-v1)
+import { ExploreEventProvider } from '@core/events/hooks';
+
 // Lazy load Foundation workspace (new three-column layout)
 const FoundationWorkspace = lazy(() => import('../foundation/FoundationWorkspace'));
 
@@ -31,7 +34,7 @@ const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
 
 // Bedrock consoles (knowledge curation layer)
 const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
-const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor/PipelineMonitor'));
+const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor'));
 const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
 const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
 const PromptWorkshop = lazy(() => import('../bedrock/consoles/PromptWorkshop'));
@@ -91,12 +94,15 @@ export const routes: RouteObject[] = [
       },
 
       // Kinetic Stream exploration surface
+      // Wrapped with ExploreEventProvider for feature-flagged event system
       {
         path: '/explore',
         element: (
-          <Suspense fallback={<WorkspaceLoadingFallback />}>
-            <ExplorePage />
-          </Suspense>
+          <ExploreEventProvider>
+            <Suspense fallback={<WorkspaceLoadingFallback />}>
+              <ExplorePage />
+            </Suspense>
+          </ExploreEventProvider>
         ),
       },
 

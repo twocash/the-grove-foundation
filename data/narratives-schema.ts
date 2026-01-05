@@ -306,6 +306,24 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Controls Below Input',
     description: 'Move lens/journey controls below input',
     enabled: true
+  },
+  {
+    id: 'grove-event-system',
+    name: 'Grove Event System (Bedrock)',
+    description: 'Use new GroveEventLog for explore routes instead of XState engagement machine',
+    enabled: false  // Disabled by default for gradual rollout
+  },
+  {
+    id: 'inline-navigation-prompts',
+    name: 'Inline Navigation Prompts',
+    description: '4D Context-aware navigation forks shown after responses (Sprint: kinetic-suggested-prompts-v1)',
+    enabled: true
+  },
+  {
+    id: 'floating-suggestion-widget',
+    name: 'Floating Suggestion Widget',
+    description: 'Floating widget for context-aware prompt suggestions',
+    enabled: false
   }
 ];
 

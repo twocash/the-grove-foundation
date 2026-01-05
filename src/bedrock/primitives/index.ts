@@ -37,3 +37,11 @@ export {
 } from './GlassStatusBadge';
 export { GlassButton, GlassIconButton } from './GlassButton';
 export { GlassTable } from './GlassTable';
+
+// =============================================================================
+// Document Enrichment Primitives (pipeline-inspector-v1)
+// =============================================================================
+
+export { TagArray } from './TagArray';
+export { GroupedChips } from './GroupedChips';
+export { UtilityBar } from './UtilityBar';

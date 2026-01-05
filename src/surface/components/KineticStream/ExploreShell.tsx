@@ -132,6 +132,13 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     return null;
   }, [lens, getCustomLens]);
 
+  // Sprint: kinetic-suggested-prompts-v1 - Extract persona behaviors for chat service
+  const personaBehaviors = useMemo(() => {
+    if (!lens) return undefined;
+    const preset = getPersona(lens);
+    return preset?.behaviors;
+  }, [lens]);
+
   // Welcome content - use static prompts from welcomeContent for now
   // TODO: Integrate useSuggestedPrompts once engagement systems are unified
   const welcomeContent = useMemo(() =>
@@ -410,22 +417,31 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       sourceContext: `User clicked on the concept "${span.text}" to explore it further.`
     };
 
-    submit(span.text, pivotContext);
-  }, [submit]);
+    submit(span.text, { pivot: pivotContext, personaBehaviors });
+  }, [submit, personaBehaviors]);
 
+  // Sprint: prompt-progression-v1 - Track selected prompts in XState
   const handleForkSelect = useCallback((fork: JourneyFork) => {
+    // Emit to XState to track prompt selection for progression
+    actor.send({
+      type: 'USER.SELECT_FORK',
+      fork,
+      responseId: '' // Not tracked at this level, handled in ResponseObject
+    });
+
     if (fork.queryPayload) {
-      submit(fork.queryPayload);
+      submit(fork.queryPayload, { personaBehaviors });
     } else {
-      submit(fork.label);
+      submit(fork.label, { personaBehaviors });
     }
-  }, [submit]);
+  }, [actor, submit, personaBehaviors]);
 
   const handleSubmit = useCallback((query: string) => {
     // Force scroll to bottom on new submission (instant)
     scrollToBottom(false);
-    submit(query);
-  }, [submit, scrollToBottom]);
+    // Sprint: kinetic-suggested-prompts-v1 - pass persona behaviors for response mode control
+    submit(query, { personaBehaviors });
+  }, [submit, scrollToBottom, personaBehaviors]);
 
   const handleLensAccept = useCallback((lensId: string) => {
     acceptLensOffer(lensId);
@@ -497,18 +513,18 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       // Submit the first waypoint's prompt to begin the journey
       if (selectedJourney.waypoints && selectedJourney.waypoints.length > 0) {
         const firstWaypoint = selectedJourney.waypoints[0];
-        submit(firstWaypoint.prompt);
+        submit(firstWaypoint.prompt, { personaBehaviors });
       }
     }
     setOverlay({ type: 'none' });
-  }, [engStartJourney, actor, submit]);
+  }, [engStartJourney, actor, submit, personaBehaviors]);
 
   const handlePromptClick = useCallback((prompt: string, command?: string, journeyId?: string) => {
     if (journeyId) {
       console.log('[KineticWelcome] Journey prompt clicked:', journeyId);
     }
-    submit(command || prompt);
-  }, [submit]);
+    submit(command || prompt, { personaBehaviors });
+  }, [submit, personaBehaviors]);
 
   return (
     <div className="kinetic-surface flex flex-col h-screen bg-[var(--glass-void)]">

@@ -33,6 +33,6 @@
       { "id": "accept", "label": "Show me a journey", "type": "navigate", "target": "journey-picker", "variant": "primary" },
       { "id": "dismiss", "label": "I'll keep exploring", "type": "dismiss", "variant": "ghost" }
     ],
-    "enabled": true
+    "enabled": false
   }
 }

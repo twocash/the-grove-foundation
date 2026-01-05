@@ -52,6 +52,9 @@ export interface EngagementContext {
 
   // Detection (Sprint: xstate-telemetry-v1)
   hasCustomLens: boolean;
+
+  // Prompt progression tracking (Sprint: prompt-progression-v1)
+  promptsSelected: string[];
 }
 
 export const initialContext: EngagementContext = {
@@ -81,6 +84,8 @@ export const initialContext: EngagementContext = {
   sproutCaptures: [],
   // Detection (Sprint: xstate-telemetry-v1)
   hasCustomLens: false,
+  // Prompt progression tracking (Sprint: prompt-progression-v1)
+  promptsSelected: [],
 };
 
 export type EngagementEvent =

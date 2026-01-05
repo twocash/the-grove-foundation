@@ -16,6 +16,7 @@
     "trigger": {
       "exchangeCount": { "min": 2 },
       "stage": ["ARRIVAL", "ORIENTED", "EXPLORING", "ENGAGED"],
+      "lens": null,
       "hasCustomLens": false,
       "flags": { "customLensOffered": false, "customLensCreated": false }
     },

@@ -11,6 +11,7 @@ import type {
   JourneyOfferStreamItem,
   PivotContext
 } from '@core/schema/stream';
+import type { PersonaBehaviors } from '../../../../../data/narratives-schema';
 import { parseNavigation } from '@core/transformers/NavigationParser';
 import { parse as parseRhetoric } from '@core/transformers/RhetoricalParser';
 import { parseLensOffer } from '@core/transformers/LensOfferParser';
@@ -19,16 +20,25 @@ import { sendMessageStream } from '../../../../../services/chatService';
 import { useEngagement } from '@core/engagement';
 import { calculateEntropy, type EntropyInputs } from '@core/engine/entropyCalculator';
 
-// Sprint: hybrid-search-toggle-v1
+// Sprint: hybrid-search-toggle-v1, kinetic-suggested-prompts-v1
 export interface UseKineticStreamOptions {
   useHybridSearch?: boolean;
+  /** Persona behaviors for response mode and closing behavior */
+  personaBehaviors?: PersonaBehaviors;
+}
+
+/** Options passed to submit at call time */
+export interface SubmitOptions {
+  pivot?: PivotContext;
+  lensId?: string;
+  personaBehaviors?: PersonaBehaviors;
 }
 
 interface UseKineticStreamReturn {
   items: StreamItem[];
   currentItem: StreamItem | null;
   isLoading: boolean;
-  submit: (query: string, pivot?: PivotContext) => Promise<void>;
+  submit: (query: string, options?: SubmitOptions) => Promise<void>;
   clear: () => void;
   acceptLensOffer: (lensId: string) => void;
   dismissLensOffer: (offerId: string) => void;
@@ -50,9 +60,12 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
   // Keep ref in sync with state
   itemsRef.current = items;
 
-  const submit = useCallback(async (query: string, pivot?: PivotContext, lensId?: string) => {
+  const submit = useCallback(async (query: string, submitOptions: SubmitOptions = {}) => {
+    const { pivot, lensId, personaBehaviors: submitBehaviors } = submitOptions;
     // Use provided lensId or fall back to active lens
     const effectiveLensId = lensId ?? activeLensId;
+    // Merge behaviors: submit-time takes precedence over hook-time
+    const effectiveBehaviors = submitBehaviors ?? options.personaBehaviors;
     // Abort any in-flight request
     if (abortRef.current) {
       abortRef.current.abort();
@@ -95,6 +108,7 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
       let fullContent = '';
 
       // Stream response using chatService
+      // Sprint: kinetic-suggested-prompts-v1 - pass personaBehaviors for response mode control
       const chatResponse = await sendMessageStream(
         query,
         (chunk: string) => {
@@ -106,6 +120,7 @@ export function useKineticStream(options: UseKineticStreamOptions = {}): UseKine
         },
         {
           personaTone: effectiveLensId || undefined,
+          personaBehaviors: effectiveBehaviors,
           useHybridSearch: options.useHybridSearch  // Sprint: hybrid-search-toggle-v1
         }
       );

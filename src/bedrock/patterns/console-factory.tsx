@@ -134,14 +134,22 @@ export function createBedrockConsole<T>(
         if (metric.query === 'count(*)') {
           value = objects.length;
         } else if (metric.query.startsWith('count(where:')) {
-          // Extract field and expected value
-          const match = metric.query.match(/count\(where:\s*(\!?)(\w+)\)/);
+          // Extract field and expected value: count(where: field=value) or count(where: !field)
+          const match = metric.query.match(/count\(where:\s*(\!?)(\w+)(?:=(\w+))?\)/);
           if (match) {
             const negate = match[1] === '!';
             const field = match[2];
+            const expectedValue = match[3]; // e.g., 'pending', 'complete'
             value = objects.filter((o) => {
               const fieldValue = (o.payload as Record<string, unknown>)[field];
-              return negate ? !fieldValue : Boolean(fieldValue);
+              if (expectedValue) {
+                // Check equality against expected value
+                const matches = fieldValue === expectedValue;
+                return negate ? !matches : matches;
+              } else {
+                // Check existence/truthiness
+                return negate ? !fieldValue : Boolean(fieldValue);
+              }
             }).length;
           }
         } else if (metric.query.startsWith('max(')) {
@@ -218,6 +226,9 @@ export function createBedrockConsole<T>(
     // Track the last opened selection to prevent infinite loops
     const lastOpenedIdRef = useRef<string | null>(null);
 
+    // Track object version to prevent unnecessary updates
+    const lastObjectVersionRef = useRef<string | null>(null);
+
     // Build inspector config (memoized to prevent unnecessary re-renders)
     const inspectorConfig = useMemo(() => {
       if (!selectedObject) return null;
@@ -232,6 +243,8 @@ export function createBedrockConsole<T>(
     useEffect(() => {
       if (selectedId && selectedId !== lastOpenedIdRef.current && inspectorConfig) {
         lastOpenedIdRef.current = selectedId;
+        // Reset version tracking for new selection
+        lastObjectVersionRef.current = `${selectedObject?.meta.modified}-${loading}-${hasChanges}`;
         openInspector({
           ...inspectorConfig,
           content: (
@@ -258,35 +271,55 @@ export function createBedrockConsole<T>(
         });
       } else if (!selectedId && lastOpenedIdRef.current) {
         lastOpenedIdRef.current = null;
+        lastObjectVersionRef.current = null;
         closeInspector();
       }
-    }, [selectedId, inspectorConfig, openInspector, closeInspector]);
+    }, [selectedId, selectedObject, inspectorConfig, loading, hasChanges, openInspector, closeInspector]);
+
+    // Use refs for handlers to avoid dependency array issues
+    const handleEditRef = useRef(handleEdit);
+    const handleSaveRef = useRef(handleSave);
+    const handleDeleteRef = useRef(handleDelete);
+    const handleDuplicateRef = useRef(handleDuplicate);
+    
+    // Keep refs up to date
+    useEffect(() => {
+      handleEditRef.current = handleEdit;
+      handleSaveRef.current = handleSave;
+      handleDeleteRef.current = handleDelete;
+      handleDuplicateRef.current = handleDuplicate;
+    });
 
     // Update inspector content when object data changes (but selection stays same)
+    // Uses version tracking to prevent infinite loops from reference changes
     useEffect(() => {
       if (selectedObject && selectedId === lastOpenedIdRef.current) {
-        updateInspector({
-          ...inspectorConfig,
-          content: (
-            <EditorComponent
-              object={selectedObject}
-              onEdit={handleEdit}
-              onSave={handleSave}
-              onDelete={handleDelete}
-              onDuplicate={handleDuplicate}
-              loading={loading}
-              hasChanges={hasChanges}
-            />
-          ),
-        });
+        // Create a version key from object modified timestamp and UI state
+        const currentVersion = `${selectedObject.meta.modified}-${loading}-${hasChanges}`;
+
+        // Only update if version actually changed
+        if (currentVersion !== lastObjectVersionRef.current) {
+          lastObjectVersionRef.current = currentVersion;
+          updateInspector({
+            ...inspectorConfig,
+            content: (
+              <EditorComponent
+                object={selectedObject}
+                onEdit={(ops) => handleEditRef.current(ops)}
+                onSave={() => handleSaveRef.current()}
+                onDelete={() => handleDeleteRef.current()}
+                onDuplicate={() => handleDuplicateRef.current()}
+                loading={loading}
+                hasChanges={hasChanges}
+              />
+            ),
+          });
+        }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
       selectedId,
       selectedObject,
-      handleEdit,
-      handleSave,
-      handleDelete,
-      handleDuplicate,
       loading,
       hasChanges,
       inspectorConfig,
@@ -460,7 +493,42 @@ export function createBedrockConsole<T>(
           ) : (
             <ObjectList
               objects={results}
-              columns={[]} // Consoles can override via config if needed
+              columns={[
+                {
+                  key: 'title',
+                  label: 'Name',
+                  field: 'meta.title',
+                  sortable: true,
+                  width: '50%',
+                },
+                {
+                  key: 'tier',
+                  label: 'Tier',
+                  render: (obj) => {
+                    const tier = (obj.payload as Record<string, unknown>)?.tier as string;
+                    return tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : '—';
+                  },
+                  sortable: true,
+                },
+                {
+                  key: 'embedding_status',
+                  label: 'Embedded',
+                  render: (obj) => {
+                    const status = (obj.payload as Record<string, unknown>)?.embedding_status as string;
+                    if (status === 'complete') return '✓ Yes';
+                    if (status === 'error') return '✗ Error';
+                    if (status === 'pending') return '○ Pending';
+                    return '—';
+                  },
+                  sortable: true,
+                },
+                {
+                  key: 'createdAt',
+                  label: 'Added',
+                  field: 'meta.createdAt',
+                  sortable: true,
+                },
+              ]}
               selectedId={selectedId}
               favorites={favorites}
               onSelect={handleSelect}

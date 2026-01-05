@@ -1,8 +1,9 @@
 // components/Terminal/Stream/blocks/ResponseBlock.tsx
 // AI response message block with glass effect, streaming text, and motion
 // Sprint: kinetic-stream-rendering-v1, kinetic-stream-polish-v1, kinetic-stream-reset-v2
+// Sprint: kinetic-suggested-prompts-v1 - Added 4D context-aware navigation
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { ResponseStreamItem, RhetoricalSpan, JourneyFork } from '../../../../src/core/schema/stream';
 import { hasSpans, hasPaths, hasNavigation } from '../../../../src/core/schema/stream';
@@ -14,6 +15,9 @@ import LoadingIndicator from '../../LoadingIndicator';
 import SuggestionChip from '../../SuggestionChip';
 import { NavigationBlock } from './NavigationBlock';
 import { responseVariants, staggerContainer, staggerItem } from '../motion/variants';
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
+import { useSafeNavigationPrompts } from '../../../../src/explore/hooks/useNavigationPrompts';
+import { useSafeEventBridge } from '../../../../src/core/events/hooks/useEventBridge';
 
 export interface ResponseBlockProps {
   item: ResponseStreamItem;
@@ -32,6 +36,32 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
 }) => {
   const isError = item.content.startsWith('SYSTEM ERROR') ||
                   item.content.startsWith('Error:');
+
+  // Sprint: kinetic-suggested-prompts-v1 - 4D Context-aware navigation
+  const isInlineNavEnabled = useFeatureFlag('inline-navigation-prompts');
+  const { forks: libraryForks, isReady } = useSafeNavigationPrompts({ maxPrompts: 3 });
+  const { emit } = useSafeEventBridge();
+
+  // Merge: prefer parsed navigation from response, fallback to 4D library prompts
+  const navigationForks = hasNavigation(item)
+    ? item.navigation!
+    : (isInlineNavEnabled && isReady ? libraryForks : []);
+
+  // Handle fork selection with event emission
+  const handleForkSelect = useCallback((fork: JourneyFork) => {
+    // Emit analytics event
+    emit.forkSelected(fork.id, fork.type, fork.label, item.id);
+
+    // Execute the fork's query
+    if (fork.queryPayload) {
+      onPromptSubmit?.(fork.queryPayload);
+    } else {
+      onPromptSubmit?.(fork.label);
+    }
+
+    // Also call original handler if provided
+    onForkSelect?.(fork);
+  }, [emit, item.id, onPromptSubmit, onForkSelect]);
 
   return (
     <motion.div
@@ -102,10 +132,10 @@ export const ResponseBlock: React.FC<ResponseBlockProps> = ({
         </motion.div>
       )}
 
-      {hasNavigation(item) && !item.isGenerating && (
+      {navigationForks.length > 0 && !item.isGenerating && (
         <NavigationBlock
-          forks={item.navigation!}
-          onSelect={onForkSelect}
+          forks={navigationForks}
+          onSelect={handleForkSelect}
         />
       )}
     </motion.div>

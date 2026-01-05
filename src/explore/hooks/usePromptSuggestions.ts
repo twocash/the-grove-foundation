@@ -1,8 +1,12 @@
 // src/explore/hooks/usePromptSuggestions.ts
 // Hook for getting contextual prompt suggestions
 // Sprint: prompt-unification-v1
+//
+// @deprecated Use `useNavigationPrompts` from `@explore/hooks` instead.
+// This hook is preserved for backward compatibility only.
+// Sprint: kinetic-suggested-prompts-v1
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useGroveData } from '@core/data';
 import type { Prompt, PromptPayload } from '@core/schema/prompt';
 import { scorePrompt, type ExplorationContext } from '../utils/scorePrompt';
@@ -22,6 +26,10 @@ export interface UsePromptSuggestionsOptions extends ExplorationContext {
 /**
  * Hook for getting contextual prompt suggestions
  *
+ * @deprecated Use `useNavigationPrompts` from `@explore/hooks` instead.
+ * This hook is preserved for backward compatibility only.
+ * Sprint: kinetic-suggested-prompts-v1
+ *
  * Uses the unified Prompt scoring algorithm to surface the most
  * relevant prompts for the current exploration context.
  *
@@ -39,6 +47,12 @@ export interface UsePromptSuggestionsOptions extends ExplorationContext {
  * ```
  */
 export function usePromptSuggestions(options: UsePromptSuggestionsOptions): Prompt[] {
+  // Emit deprecation warning once per component
+  useEffect(() => {
+    console.warn(
+      '[DEPRECATED] usePromptSuggestions - use useNavigationPrompts from @explore/hooks instead'
+    );
+  }, []);
   const { data: prompts, loading } = useGroveData<PromptPayload>('prompt');
 
   const {
