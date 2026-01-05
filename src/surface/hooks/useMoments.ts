@@ -13,7 +13,7 @@ import { loadMoments } from '../../data/moments';
 import { useMomentActions } from './useMomentActions';
 
 // =============================================================================
-// Cached Moments (module level)
+// Cached Moments (module level) - Invalidated on HMR
 // =============================================================================
 
 let cachedMoments: Moment[] | null = null;
@@ -23,6 +23,14 @@ function getMoments(): Moment[] {
     cachedMoments = loadMoments();
   }
   return cachedMoments;
+}
+
+// Invalidate cache on HMR (Vite dev mode)
+if (import.meta.hot) {
+  import.meta.hot.accept('../../data/moments', () => {
+    cachedMoments = null;
+    console.log('[Moments] Cache invalidated via HMR');
+  });
 }
 
 // =============================================================================
@@ -105,6 +113,7 @@ export function useMoments(options: UseMomentsOptions): UseMomentsReturn {
     console.log('[Moments] Evaluating for surface:', surface, 'context:', {
       exchangeCount: evaluationContext.exchangeCount,
       stage: evaluationContext.stage,
+      entropy: evaluationContext.entropy,
       flags: evaluationContext.flags
     });
     const eligible = getEligibleMoments(allMoments, evaluationContext, surface);

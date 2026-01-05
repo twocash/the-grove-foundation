@@ -21,7 +21,7 @@ export interface KineticRendererProps {
   bottomRef?: React.RefObject<HTMLDivElement>;
   onConceptClick?: (span: RhetoricalSpan, sourceId: string) => void;
   onForkSelect?: (fork: JourneyFork) => void;
-  onPromptSubmit?: (prompt: string) => void;
+  onPromptSubmit?: (displayText: string, executionPrompt?: string) => void;
   onLensAccept?: (lensId: string) => void;
   onLensDismiss?: (offerId: string) => void;
   onJourneyAccept?: (journeyId: string) => void;
@@ -86,7 +86,7 @@ interface KineticBlockProps {
   item: StreamItem;
   onConceptClick?: (span: RhetoricalSpan, sourceId: string) => void;
   onForkSelect?: (fork: JourneyFork) => void;
-  onPromptSubmit?: (prompt: string) => void;
+  onPromptSubmit?: (displayText: string, executionPrompt?: string) => void;
   onLensAccept?: (lensId: string) => void;
   onLensDismiss?: (offerId: string) => void;
   onJourneyAccept?: (journeyId: string) => void;

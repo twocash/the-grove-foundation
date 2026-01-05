@@ -14,8 +14,9 @@
   },
   "payload": {
     "trigger": {
-      "exchangeCount": { "min": 2 },
-      "stage": ["ARRIVAL", "ORIENTED", "EXPLORING", "ENGAGED"],
+      "exchangeCount": { "min": 4 },
+      "entropy": { "min": 0.6 },
+      "stage": ["EXPLORING", "ENGAGED"],
       "lens": null,
       "hasCustomLens": false,
       "flags": { "customLensOffered": false, "customLensCreated": false }
@@ -34,6 +35,6 @@
       { "id": "choose-existing", "label": "Choose Existing", "type": "navigate", "target": "lens-picker", "variant": "secondary", "setFlags": { "customLensOffered": true } },
       { "id": "dismiss", "label": "Not now", "type": "dismiss", "variant": "ghost", "setFlags": { "customLensOffered": true } }
     ],
-    "enabled": true
+    "enabled": false
   }
 }

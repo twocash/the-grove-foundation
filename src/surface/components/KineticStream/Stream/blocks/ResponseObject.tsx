@@ -71,7 +71,7 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
         {item.isGenerating && !item.content ? (
           <LoadingIndicator />
         ) : (
-          <div className="max-w-none font-sans text-[13px]">
+          <div className="max-w-none font-mono text-[13px]">
             {hasSpans(item) ? (
               <RhetoricRenderer
                 content={item.content}
@@ -80,7 +80,7 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
               />
             ) : (
               <div
-                className="text-[var(--glass-text-body)] leading-relaxed"
+                className="text-[#94a3b8] leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatMarkdown(item.content) }}
               />
             )}
@@ -109,10 +109,87 @@ const LoadingIndicator: React.FC = () => (
 );
 
 function formatMarkdown(content: string): string {
-  return content
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[var(--grove-clay)]">$1</strong>')
-    .replace(/\n\n/g, '</p><p class="mt-3">')
-    .replace(/\n/g, '<br />');
+  // Pre-process: normalize various LLM list formats
+  let normalized = content;
+
+  // Pattern 1: "...sentence. 2.\n**Title**" → "...sentence.\n2. **Title**"
+  // Split number from end of previous sentence to its own logical line
+  normalized = normalized.replace(/\.\s*(\d+)\.\s*\n/g, '.\n$1. ');
+
+  // Pattern 2: "1.\n**Title**" → "1. **Title**" (number alone on line)
+  normalized = normalized.replace(/^(\d+)\.\s*\n+(?=\S)/gm, '$1. ');
+
+  // Pattern 3: "...sentence. 2. **Title**" (all on same line, no newline after number)
+  // Split into separate lines for list detection
+  normalized = normalized.replace(/\.\s*(\d+)\.\s+(?=\*\*)/g, '.\n$1. ');
+
+  // Process lists BEFORE newline normalization
+  const lines = normalized.split('\n');
+  const processedLines: string[] = [];
+  let inBulletList = false;
+  let inNumberedList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const bulletMatch = line.match(/^[*-]\s+(.+)$/);
+    const numberedMatch = line.match(/^(\d+)\.\s*(.+)$/);
+
+    if (bulletMatch) {
+      if (inNumberedList) {
+        processedLines.push('</ol>');
+        inNumberedList = false;
+      }
+      if (!inBulletList) {
+        processedLines.push('<ul class="list-disc pl-5 my-3 space-y-2">');
+        inBulletList = true;
+      }
+      processedLines.push(`<li>${bulletMatch[1]}</li>`);
+    } else if (numberedMatch) {
+      if (inBulletList) {
+        processedLines.push('</ul>');
+        inBulletList = false;
+      }
+      if (!inNumberedList) {
+        processedLines.push('<ol class="list-decimal pl-5 my-3 space-y-2">');
+        inNumberedList = true;
+      }
+      processedLines.push(`<li>${numberedMatch[2]}</li>`);
+    } else {
+      // Close any open lists when hitting a non-list line
+      if (inBulletList) {
+        processedLines.push('</ul>');
+        inBulletList = false;
+      }
+      if (inNumberedList) {
+        processedLines.push('</ol>');
+        inNumberedList = false;
+      }
+      if (line) {
+        processedLines.push(line);
+      } else if (processedLines.length > 0) {
+        // Empty line = paragraph break
+        processedLines.push('</p><p class="mt-3">');
+      }
+    }
+  }
+
+  // Close any trailing open lists
+  if (inBulletList) processedLines.push('</ul>');
+  if (inNumberedList) processedLines.push('</ol>');
+
+  let result = processedLines.join(' ');
+
+  // Inline formatting (order matters!)
+  // 1. Bold: **text** → <strong> (must be before italics)
+  result = result.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#d97706]">$1</strong>');
+
+  // 2. Italics: *text* → <em> (single asterisks, not inside tags)
+  result = result.replace(/(?<![<\w])\*([^*<>]+)\*(?![>\w])/g, '<em class="italic text-[#cbd5e1]">$1</em>');
+
+  // 3. Clean up multiple spaces
+  result = result.replace(/\s+/g, ' ').trim();
+
+  return result;
 }
 
 export default ResponseObject;

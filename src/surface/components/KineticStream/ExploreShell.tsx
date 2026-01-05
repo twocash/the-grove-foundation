@@ -462,7 +462,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   }, [submit, effectivePersonaBehaviors]);
 
   // Sprint: prompt-progression-v1 - Track selected prompts in XState
-  // Sprint: prompt-journey-mode-v1 - Pass separate display/execution prompts
+  // NOTE: This handler only tracks the fork selection. The actual submission
+  // is handled by ResponseObject via onPromptSubmit to avoid double-submission.
   const handleForkSelect = useCallback((fork: JourneyFork) => {
     // Emit to XState to track prompt selection for progression
     actor.send({
@@ -470,17 +471,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       fork,
       responseId: '' // Not tracked at this level, handled in ResponseObject
     });
-
-    // Display label in chat, send queryPayload (executionPrompt) to LLM
-    const displayText = fork.label;
-    const executionPrompt = fork.queryPayload || fork.label;
-
-    // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
-    submit(displayText, {
-      personaBehaviors: effectivePersonaBehaviors,
-      executionPrompt
-    });
-  }, [actor, submit, effectivePersonaBehaviors]);
+  }, [actor]);
 
   // Sprint: prompt-journey-mode-v1 - Accept separate display text and execution prompt
   const handleSubmit = useCallback((displayText: string, executionPrompt?: string) => {
@@ -590,8 +581,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         exchangeCount={exchangeCount}
         useHybridSearch={useHybridSearch}
         onHybridSearchToggle={handleHybridSearchToggle}
-        journeyMode={isJourneyModeEnabled ? journeyMode : undefined}
-        onJourneyModeToggle={isJourneyModeEnabled ? handleJourneyModeToggle : undefined}
+        journeyMode={journeyMode}
+        onJourneyModeToggle={handleJourneyModeToggle}
       />
 
       {/* Stream area - attach scrollRef and capture ref */}

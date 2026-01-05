@@ -50,12 +50,12 @@ export const KineticWelcome: React.FC<KineticWelcomeProps> = ({
       </div>
 
       {/* Heading */}
-      <h2 className="text-xl font-semibold text-[var(--glass-text-primary)] mb-3">
+      <h2 className="text-xl font-semibold text-[#94a3b8] mb-3">
         {content.heading}
       </h2>
 
       {/* Thesis */}
-      <p className="text-[var(--glass-text-body)] mb-6 leading-relaxed">
+      <p className="text-[#94a3b8] mb-6 leading-relaxed">
         {content.thesis}
       </p>
 

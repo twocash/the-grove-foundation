@@ -64,7 +64,7 @@ export const RhetoricRenderer: React.FC<RhetoricRendererProps> = ({
   }, [content, spans]);
 
   return (
-    <div className="text-[var(--glass-text-body)] leading-relaxed font-sans">
+    <div className="text-[#94a3b8] leading-relaxed font-mono">
       {segments.map((segment, index) => {
         if (segment.type === 'span' && segment.span) {
           return (
@@ -90,9 +90,32 @@ export const RhetoricRenderer: React.FC<RhetoricRendererProps> = ({
 };
 
 function formatText(text: string): string {
-  return text
-    .replace(/\n\n/g, '</p><p class="mt-3">')
-    .replace(/\n/g, '<br />');
+  let result = text;
+
+  // IMPORTANT: This renders inside a <span>, so only use INLINE elements
+  // No block elements (<p>, <div>, <ul>, <ol>) allowed!
+
+  // Handle list numbers: "...sentence. 2." → line break before number
+  // Using <br> for line breaks since we're in inline context
+  result = result.replace(/\.\s*(\d+)\.\s*/g, '.<br/><br/><strong class="text-[#d97706]">$1.</strong> ');
+
+  // Handle standalone numbers at start: "1." → styled number
+  result = result.replace(/^(\d+)\.\s*/gm, '<strong class="text-[#d97706]">$1.</strong> ');
+
+  // Handle bullet points: "* item" → bullet character with line break
+  result = result.replace(/^[*-]\s+/gm, '<br/>• ');
+
+  // Bold: **text** → <strong>
+  result = result.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#d97706]">$1</strong>');
+
+  // Italics: *text* → <em>
+  result = result.replace(/(?<![<\w*])\*([^*<>]+)\*(?![>\w])/g, '<em class="italic text-[#cbd5e1]">$1</em>');
+
+  // Paragraph breaks → double line break
+  result = result.replace(/\n\n/g, '<br/><br/>');
+  result = result.replace(/\n/g, ' ');
+
+  return result;
 }
 
 export default RhetoricRenderer;

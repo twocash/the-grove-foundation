@@ -19,7 +19,7 @@ export const QueryObject: React.FC<QueryObjectProps> = ({ item }) => {
             <span>Exploring concept</span>
           </div>
         )}
-        <p className="text-[var(--glass-text-primary)]">{item.content}</p>
+        <p className="text-[#94a3b8]">{item.content}</p>
       </div>
     </div>
   );
