@@ -16,11 +16,18 @@ export type {
   PromptObject,
   ScoringWeights,
   ScoredPrompt,
+  // Sprint: exploration-node-unification-v1
+  ProvenanceType,
+  ReviewStatus,
+  PromptProvenance,
 } from './types';
 
 export {
   mapSessionStageToStage,
   DEFAULT_SCORING_WEIGHTS,
+  // Sprint: exploration-node-unification-v1
+  AUTHORED_PROVENANCE,
+  createExtractedProvenance,
 } from './types';
 
 // Scoring functions

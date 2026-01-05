@@ -3,6 +3,7 @@
 // Sprint: prompt-unification-v1, prompt-schema-rationalization-v1
 
 import type { GroveObject } from './grove-object';
+import type { PromptProvenance } from '../context-fields/types';
 
 // =============================================================================
 // Type Aliases
@@ -173,6 +174,8 @@ export interface PromptPayload {
   cooldownMs?: number;
   maxShows?: number;
   wizardConfig?: WizardStepConfig;
+  /** Sprint: exploration-node-unification-v1 */
+  provenance?: PromptProvenance;
 }
 
 /** Full Prompt object */

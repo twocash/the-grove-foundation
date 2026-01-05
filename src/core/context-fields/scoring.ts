@@ -270,3 +270,64 @@ export function selectPromptsWithScoring(
     .filter(r => r.score >= minScore)
     .slice(0, maxPrompts);
 }
+
+// ============================================================================
+// PROVENANCE-AWARE SCORING
+// Sprint: exploration-node-unification-v1
+// ============================================================================
+
+/**
+ * Apply provenance-based score modifiers
+ * Sprint: exploration-node-unification-v1
+ */
+export function applyProvenanceModifier(
+  baseScore: number,
+  prompt: PromptObject,
+  context: { retrievedDocIds?: string[] } = {}
+): number {
+  let score = baseScore;
+  const provenance = prompt.provenance;
+
+  // Legacy prompt without provenance
+  if (!provenance) {
+    return score + 10;
+  }
+
+  switch (provenance.type) {
+    case 'authored':
+      score += 10; // Trust boost
+      break;
+
+    case 'extracted':
+      // Boost if source doc was retrieved
+      if (context.retrievedDocIds && provenance.sourceDocIds) {
+        const isRelevant = provenance.sourceDocIds.some(id =>
+          context.retrievedDocIds!.includes(id)
+        );
+        if (isRelevant) {
+          score += 25;
+        }
+      }
+      // Reduce if not reviewed
+      if (provenance.reviewStatus === 'pending') {
+        score *= 0.8;
+      } else if (provenance.reviewStatus === 'rejected') {
+        score *= 0.3;
+      }
+      break;
+
+    case 'generated':
+      if (provenance.reviewStatus !== 'approved') {
+        score *= 0.5;
+      }
+      break;
+
+    case 'submitted':
+      if (provenance.reviewStatus === 'pending') {
+        score *= 0.7;
+      }
+      break;
+  }
+
+  return score;
+}

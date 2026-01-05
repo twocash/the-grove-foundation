@@ -6,6 +6,7 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { PromptPayload } from '@core/schema/prompt';
 import { PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
+import { ProvenanceBadge } from './ProvenanceBadge';
 
 /**
  * Card component for displaying a prompt in grid/list view
@@ -82,9 +83,10 @@ export function PromptCard({
           <h3 className="font-medium text-[var(--glass-text-primary)] truncate">
             {prompt.meta.title}
           </h3>
-          <p className="text-xs text-[var(--glass-text-muted)]">
-            {sourceConfig.label}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-[var(--glass-text-muted)]">
+            <span>{sourceConfig.label}</span>
+            <ProvenanceBadge provenance={prompt.payload.provenance} size="sm" />
+          </div>
         </div>
       </div>
 

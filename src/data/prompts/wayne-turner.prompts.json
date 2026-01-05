@@ -9,23 +9,55 @@
     "description": "Open with the infrastructure of thought problem—stakes before technology",
     "executionPrompt": "I've read enough to know this isn't another technology pitch. But I need you to make the stakes concrete. When you say AI infrastructure concentration matters, what exactly is at risk? For whom? And why should someone who cares about the free exchange of ideas be paying attention right now?",
     "systemContext": "Wayne founded Junto—he cares about knowledge and the marketplace of ideas. Start with infrastructure of thought: three companies building what human cognition will increasingly run through. Name them—Google, Microsoft, OpenAI. Not censorship—architecture. What's easy vs. hard, what's optimized vs. buried. End with a question that should trouble someone who values intellectual independence.",
-    "tags": ["hook", "stakes", "concentration", "infrastructure"],
+    "tags": [
+      "hook",
+      "stakes",
+      "concentration",
+      "infrastructure"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 1.0 },
-      { "topicId": "meta-philosophy", "weight": 0.9 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 1
+      },
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Infrastructure of Thought" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Infrastructure of Thought"
+      }
     ],
     "targeting": {
-      "stages": ["genesis", "exploration"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "genesis",
+        "exploration"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 0
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-hook-marketplace-of-ideas",
@@ -37,23 +69,55 @@
     "description": "Connect to Junto values—Franklin's vision of knowledge exchange",
     "executionPrompt": "Ben Franklin founded Junto to create a space where ideas could compete on merit. I've tried to continue that tradition. Help me understand how AI infrastructure concentration threatens—or could threaten—that kind of intellectual marketplace. Not the dystopian version. The structural one.",
     "systemContext": "Wayne's Junto is modeled on Franklin's intellectual salon—peer discussion, knowledge sharing, ideas tested against each other. Connect to this: AI increasingly mediates how ideas are discovered, evaluated, compared. When that mediation layer is owned by three companies optimizing for engagement rather than truth, what happens to the marketplace Franklin envisioned? The threat isn't censorship. It's architecture that makes some ideas easy to find and others invisible. Frame as a federalist question: who should control the infrastructure of thought?",
-    "tags": ["hook", "junto", "marketplace", "federalist"],
+    "tags": [
+      "hook",
+      "junto",
+      "marketplace",
+      "federalist"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 },
-      { "topicId": "infrastructure-bet", "weight": 0.9 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      },
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Marketplace of Ideas" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Marketplace of Ideas"
+      }
     ],
     "targeting": {
-      "stages": ["genesis", "exploration"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "genesis",
+        "exploration"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 0
     },
     "baseWeight": 92,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-hook-ownership-question",
@@ -65,23 +129,55 @@
     "description": "Frame as property rights and sovereignty—rent vs. own",
     "executionPrompt": "I've spent my career thinking about ownership, fiduciary duty, and who controls what matters. Frame the AI infrastructure question in those terms. What's being rented vs. owned? Who holds the deed to cognitive infrastructure? And what does that mean for institutions—and individuals—who increasingly depend on it?",
     "systemContext": "Wayne is a business litigator who understands property, control, and dependency. Frame clearly: current AI infrastructure is rental. Every prompt flows through systems owned by Google, Microsoft, OpenAI. Terms change unilaterally. Access can be revoked. Pricing is at provider's discretion. Compare to owning vs. renting the building your business operates in—except this building is where thinking happens. The ownership question: who holds the deed to what you can't live without?",
-    "tags": ["hook", "ownership", "property", "dependency"],
+    "tags": [
+      "hook",
+      "ownership",
+      "property",
+      "dependency"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 1.0 },
-      { "topicId": "governance", "weight": 0.8 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 1
+      },
+      {
+        "topicId": "governance",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Ownership Question" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Ownership Question"
+      }
     ],
     "targeting": {
-      "stages": ["genesis", "exploration"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "genesis",
+        "exploration"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 0
     },
     "baseWeight": 90,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-stakes-universities-canary",
@@ -93,23 +189,55 @@
     "description": "Universities losing independence signals something larger for everyone",
     "executionPrompt": "You've mentioned universities specifically. Why are they the canary? What makes their situation a leading indicator for everyone else? I've been connected to Purdue for over forty years—help me understand what's at stake for institutions like it, and what that signals for the broader question.",
     "systemContext": "Universities are the canary because they represent institutionalized independent thought. When a student writes a paper, when a researcher analyzes data, when a professor tests an idea—increasingly, that cognition flows through AI systems owned by Google, Microsoft, OpenAI. Universities that built internet infrastructure became Stanford and MIT. Universities that waited became customers. The same pattern is forming now, faster. If universities—whose mission is independent inquiry—lose that independence, what does that mean for everyone else? Purdue's land-grant mission is 'practical education for the people.' What happens to that mission when practical education runs through systems Purdue doesn't control?",
-    "tags": ["stakes", "universities", "canary", "independence"],
+    "tags": [
+      "stakes",
+      "universities",
+      "canary",
+      "independence"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 0.9 },
-      { "topicId": "governance", "weight": 0.8 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.9
+      },
+      {
+        "topicId": "governance",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Universities as Canary" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Universities as Canary"
+      }
     ],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 2
     },
     "baseWeight": 90,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-stakes-architecture-not-censorship",
@@ -121,23 +249,55 @@
     "description": "The subtle mechanism—what's easy vs. what's hard",
     "executionPrompt": "You've said this isn't about censorship. I'm a litigator—I understand the difference between overt restrictions and structural constraints. Explain how architectural control over AI systems shapes thought differently than direct censorship. What are the mechanisms? What would evidence of this look like?",
     "systemContext": "Wayne understands structural power from corporate governance. Architectural control isn't banning ideas—it's making some ideas frictionless and others invisible. Search optimization determines what's found. Model training determines what's easy to express. API design determines what's possible to build. No one decided to suppress anything. The architecture just makes certain paths easier. Like zoning laws that don't ban businesses but determine where they can operate. Evidence: what's hard to get AI to help with, what it volunteers vs. what requires prompting, what gets flagged vs. what flows freely. Not conspiracy—optimization. Systems optimized for engagement, safety, and commercial viability create systematic patterns in what's easy vs. hard.",
-    "tags": ["stakes", "architecture", "control", "mechanisms"],
+    "tags": [
+      "stakes",
+      "architecture",
+      "control",
+      "mechanisms"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 1.0 },
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 1
+      },
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Architecture vs. Censorship" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Architecture vs. Censorship"
+      }
     ],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 2
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-stakes-window-closing",
@@ -149,23 +309,55 @@
     "description": "Honest timing analysis—test the urgency claim",
     "executionPrompt": "Every pitch claims the window is closing. I've heard that for forty years. Give me the honest timing analysis. Is there actually a window for building alternatives? What determines when it closes? What's the evidence that this moment is different from artificial urgency?",
     "systemContext": "Wayne has seen manufactured urgency. Be honest: the window is real but not measured in months. Evidence: AI infrastructure decisions made in the next 2-3 years determine capability distribution for a decade. Like internet infrastructure in the 1990s—decisions made then still shape who has power today. What closes the window: not technology, but institutional lock-in. When universities sign enterprise agreements, build curriculum around specific tools, train researchers on specific platforms—switching costs compound. The urgency isn't 'act now or miss out.' It's 'act while alternatives are still viable.' Open-source AI (DeepSeek-V3, Llama) creates the technical possibility. The question is whether institutions build the governance and economic structures to use it. That's a 2-3 year window, not a 6-month sprint.",
-    "tags": ["stakes", "timing", "window", "urgency"],
+    "tags": [
+      "stakes",
+      "timing",
+      "window",
+      "urgency"
+    ],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 }
+      {
+        "topicId": "ratchet-effect",
+        "weight": 0.9
+      },
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Timing Analysis" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Timing Analysis"
+      }
     ],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 2
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-opportunity-indianapolis",
@@ -177,23 +369,54 @@
     "description": "The Indiana opportunity—strategic positioning, not coastal default",
     "executionPrompt": "Every tech initiative defaults to the coasts. Make the case for Indianapolis as the home for something like the Grove Foundation. What's the strategic advantage? What does Indiana offer that San Francisco and Boston don't? And be honest about the disadvantages too.",
     "systemContext": "Wayne is politically connected in Indiana and cares about the state. Make the genuine case: Indianapolis sits at the crossroads—logistics, healthcare, agriculture, manufacturing. These industries need AI infrastructure that isn't controlled by coastal tech giants with different priorities. Purdue and Indiana University provide research depth. Cost structure is sustainable—foundation dollars go further. Political environment is pragmatic rather than ideological. Life sciences corridor (Eli Lilly, major health systems) creates natural partners and funding sources. The disadvantage is real: harder to recruit coastal tech talent, less existing AI ecosystem. But the advantage is also real: building something new rather than competing on someone else's turf. A foundation based in Indianapolis represents that AI isn't just a coastal phenomenon—it's infrastructure for everyone.",
-    "tags": ["opportunity", "indianapolis", "indiana", "positioning"],
+    "tags": [
+      "opportunity",
+      "indianapolis",
+      "indiana",
+      "positioning"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 0.8 },
-      { "topicId": "governance", "weight": 0.7 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      },
+      {
+        "topicId": "governance",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Indianapolis Opportunity" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Indianapolis Opportunity"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 92,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-opportunity-purdue-lead",
@@ -205,23 +428,54 @@
     "description": "Purdue's unique position—Mung Chiang, engineering strength, land-grant mission",
     "executionPrompt": "Purdue has meant something to me for over forty years. What would it actually mean for Purdue to lead an initiative like this? What's unique about Purdue's position? And what would it take for that to happen? I know the institution—give me the realistic version, not the pitch deck version.",
     "systemContext": "Wayne knows Purdue deeply. Be specific about Purdue's positioning: Mung Chiang's background in network theory and distributed systems is directly relevant—he understands this space technically, not just administratively. Engineering strength is obvious, but the land-grant mission is the deeper hook: 'practical education for the people' means ensuring AI serves everyone, not just those who can afford cloud API fees. Purdue's research funding ($877M+) creates infrastructure that could run local AI. The Discovery Park model shows willingness to build cross-disciplinary infrastructure. Realistic obstacles: Purdue moves deliberately, competing priorities, 'fast follower' instinct, funding uncertainty. What it would take: clear economic case, pilot that demonstrates value, early wins that create momentum. Purdue leading isn't about prestige—it's about demonstrating that a major research university can build alternatives.",
-    "tags": ["opportunity", "purdue", "leadership", "chiang"],
+    "tags": [
+      "opportunity",
+      "purdue",
+      "leadership",
+      "chiang"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 }
+      {
+        "topicId": "governance",
+        "weight": 0.9
+      },
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Purdue Leadership" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Purdue Leadership"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-opportunity-research-funding",
@@ -233,22 +487,50 @@
     "description": "The economic case—research dollars from life sciences, Big AI hedging",
     "executionPrompt": "Foundations need funding. Walk me through where the money would actually come from. Not the aspirational version—the realistic funding sources, the interests they serve, and why they'd write checks for something like this.",
     "systemContext": "Wayne understands money and interests. Be concrete about funding sources: (1) Life sciences industry—pharma and healthcare spend billions on AI but worry about dependency on companies that might become competitors. Distributed AI infrastructure they partially own reduces that risk. Eli Lilly alone has AI initiatives that would benefit from alternatives. (2) Federal research funding—NSF, DOD, DOE all fund AI research. A foundation structure can capture grants that individual universities can't. (3) Big AI companies themselves—here's the counterintuitive play: Google, Microsoft, OpenAI have legitimate interest in hedging against societal backlash. Funding distributed alternatives is both good policy and good optics. They're increasingly seen as controlling forces—greenwashing their image by supporting public-good AI is smart strategy. (4) University consortium contributions—smaller individually, but represent skin in the game. The economics work when interests align: industry wants alternatives, government wants American AI competitiveness, Big Tech wants to appear responsible.",
-    "tags": ["opportunity", "funding", "economics", "interests"],
+    "tags": [
+      "opportunity",
+      "funding",
+      "economics",
+      "interests"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.8 }
+      {
+        "topicId": "governance",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Funding Sources" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Funding Sources"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 90,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-opportunity-big-ai-hedge",
@@ -260,23 +542,54 @@
     "description": "The counterintuitive case for Big Tech participation",
     "executionPrompt": "You mentioned Google, Microsoft, OpenAI might actually fund something like this. That's counterintuitive. Why would dominant players fund alternatives to their own infrastructure? Walk me through the logic—and the risks if you're wrong about it.",
     "systemContext": "Wayne evaluates strategic interests professionally. The logic: (1) Forestalling regulation—demonstrating commitment to distributed alternatives preempts forced breakups or utility regulation. (2) Edge computing hedge—frontier AI requires massive compute, but edge AI running on personal devices is a real market they can't fully capture with centralized infrastructure. Better to shape that market than cede it to competitors. (3) Greenwashing—these companies are increasingly seen as concentrating power over thought itself. Funding public-good alternatives creates a narrative of responsibility. (4) Societal collapse hedge—this is darker but real: if AI concentration creates enough societal instability, it threatens everyone including the winners. Smart money hedges existential risk. The risk if wrong: Big Tech might view distributed alternatives as threats to be suppressed rather than opportunities to be shaped. Evidence suggests both impulses exist. Grove's design assumes they'll behave in their enlightened self-interest, which history suggests is not guaranteed.",
-    "tags": ["opportunity", "big-tech", "hedge", "incentives"],
+    "tags": [
+      "opportunity",
+      "big-tech",
+      "hedge",
+      "incentives"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 }
+      {
+        "topicId": "governance",
+        "weight": 0.9
+      },
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Big AI Hedge" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Big AI Hedge"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-opportunity-economic-model",
@@ -288,23 +601,54 @@
     "description": "Villages as revenue generators, universal income implications",
     "executionPrompt": "Walk me through the economics in detail. You've mentioned AI communities doing tasks, owners generating revenue. How does that actually work? What are the mechanics? And what are the broader implications—you seem to be suggesting this connects to something like universal income?",
     "systemContext": "Wayne understands business models. Explain the mechanics: Local AI 'villages' run on personal computers. These agents perform tasks—research synthesis, data analysis, content generation—more efficiently than frontier AI for routine work because they don't require cloud round-trips. Village owners earn revenue when their agents complete tasks for the network. The economics: frontier AI charges premium prices ($20/month, enterprise rates). Local AI has near-zero marginal cost once hardware exists. The difference creates arbitrage. Over time, as local models improve (the Ratchet), this arbitrage grows. Universal income implication: if ordinary people can own productive AI infrastructure—not just consume it—they have a new source of economic participation. The village doesn't replace your job; it gives you ownership stake in the AI economy. Not UBI from taxation—income from ownership. The federalist version of AI economics. This is aspirational, not proven. But the structural possibility is real.",
-    "tags": ["opportunity", "economics", "villages", "income"],
+    "tags": [
+      "opportunity",
+      "economics",
+      "villages",
+      "income"
+    ],
     "topicAffinities": [
-      { "topicId": "cognitive-split", "weight": 0.8 },
-      { "topicId": "governance", "weight": 0.7 }
+      {
+        "topicId": "cognitive-split",
+        "weight": 0.8
+      },
+      {
+        "topicId": "governance",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Economic Model" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Economic Model"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-evidence-ratchet",
@@ -316,22 +660,50 @@
     "description": "The Ratchet thesis—capability propagation from frontier to edge",
     "executionPrompt": "The whole case seems to depend on local AI becoming capable enough to matter. That's a specific claim. What's the evidence? What patterns are you seeing? And where might you be wrong?",
     "systemContext": "Wayne evaluates evidence claims. Present the Ratchet thesis: AI capability propagates from frontier models to consumer hardware on documented timelines. Evidence: GPT-2 was frontier in 2019; GPT-2 equivalent models now run on phones. GPT-3 was frontier in 2020; comparable open-source models run on gaming PCs today. The pattern: roughly 7-month doubling in local capability, 21-month lag from frontier to consumer hardware. Data sources: METR benchmarks, hardware cost curves, open-source release patterns. Recent validation: DeepSeek-V3 (frontier-competitive, open-source) and FunctionGemma (specialized function-calling) compress this timeline further. Where might we be wrong: scaling laws could hit limits, regulatory barriers could emerge, proprietary advantage could prove more durable than expected. Confidence level: moderate-high on direction, moderate on specific timing.",
-    "tags": ["evidence", "ratchet", "capability", "local"],
+    "tags": [
+      "evidence",
+      "ratchet",
+      "capability",
+      "local"
+    ],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 1.0 }
+      {
+        "topicId": "ratchet-effect",
+        "weight": 1
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Ratchet Evidence" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Ratchet Evidence"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 90,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-evidence-chinese-releases",
@@ -343,23 +715,54 @@
     "description": "DeepSeek and the strategic implications of open-source AI from China",
     "executionPrompt": "You've mentioned Chinese open-source releases—DeepSeek and others. What do they actually prove? What's the strategic significance? And is there a risk that distributed AI just means trading American concentration for Chinese influence?",
     "systemContext": "Wayne thinks strategically about geopolitics. What Chinese releases prove: frontier-competitive AI can be open-sourced. DeepSeek-V3 matches GPT-4 level capability and is freely available. This validates the Ratchet—capability propagation is accelerating. Strategic significance: (1) American closed-source advantage is eroding. (2) The choice isn't American AI vs. Chinese AI; it's concentrated AI vs. distributed AI. (3) Open-source from any source reduces dependency on any single provider. The China influence question is real: using Chinese-developed models creates different dependencies. But Grove's architecture is about running models locally on infrastructure you own—the model's origin matters less when you control the execution environment and can audit the outputs. The strategic position: better to have diverse sources of capability than single-source dependency on anyone. American closed-source AI, Chinese open-source AI, or European open-source AI—distributed infrastructure can use any of them.",
-    "tags": ["evidence", "china", "deepseek", "geopolitics"],
+    "tags": [
+      "evidence",
+      "china",
+      "deepseek",
+      "geopolitics"
+    ],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 0.9 },
-      { "topicId": "infrastructure-bet", "weight": 0.8 }
+      {
+        "topicId": "ratchet-effect",
+        "weight": 0.9
+      },
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Chinese Releases" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Chinese Releases"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 3
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-evidence-honest-limitations",
@@ -371,22 +774,50 @@
     "description": "Trust-building through uncertainty acknowledgment",
     "executionPrompt": "I've been practicing law long enough to know that anyone who doesn't acknowledge uncertainty is selling something. What are the genuine uncertainties here? Where might the whole thesis be wrong? What would cause you to abandon it?",
     "systemContext": "This is where trust is built. Wayne respects intellectual honesty. Genuine uncertainties: (1) Whether community formation actually happens at scale—distributed systems require coordination, and coordination is hard. (2) Whether the economic model sustains before network effects—chicken-and-egg problem of building infrastructure before demand is proven. (3) Whether Foundation governance works as designed—nonprofits can drift from mission just like corporations. (4) Whether Big Tech suppresses rather than supports alternatives—they have the resources to make this very difficult. Most fragile assumption: that institutions will commit resources before proof of success. What would falsify the thesis: if capability propagation stalls, if closed-source maintains 10+ year advantages, if regulatory capture locks out alternatives. Honest assessment: Grove is an attempt. Whether it works is genuinely unknown. The question is whether the attempt is worth making given what's at stake.",
-    "tags": ["evidence", "limitations", "uncertainty", "honesty"],
+    "tags": [
+      "evidence",
+      "limitations",
+      "uncertainty",
+      "honesty"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Honest Limitations" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Honest Limitations"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 4
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-resolution-foundation-power",
@@ -398,23 +829,55 @@
     "description": "The scope of influence—shaping access to thought and society",
     "executionPrompt": "Let's talk about power directly. If Grove succeeds, how much influence would this foundation have? Over what? You're describing something that could shape access to thought itself. That's significant power. Who would wield it, and what would constrain them?",
     "systemContext": "Wayne understands power structures. Be direct about the scope: a successful Grove Foundation would influence how millions access AI infrastructure—which models are available, on what terms, with what governance. That's real power over cognitive tools. Constraints by design: (1) Foundation sunset—built-in obsolescence so power transfers to the network itself. (2) Participating institution governance—universities and members have representation, not just Foundation board. (3) Open-source architecture—anyone can fork if the Foundation drifts from mission. (4) Economic alignment—Foundation succeeds only when participants succeed, not through extraction. The honest question: is this enough? Can any institution wield this kind of power responsibly? Grove's answer is to make the power distributed rather than concentrated, accountable rather than arbitrary. But that's a design intention, not a guarantee. The alternative is power concentrated in fewer hands with less accountability. Neither option is comfortable.",
-    "tags": ["resolution", "power", "governance", "influence"],
+    "tags": [
+      "resolution",
+      "power",
+      "governance",
+      "influence"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 1.0 },
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "governance",
+        "weight": 1
+      },
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Foundation Power" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Foundation Power"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis", "advocacy"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis",
+        "advocacy"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 4
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-resolution-wayne-networks",
@@ -426,22 +889,51 @@
     "description": "Realistic scope of action for a connected Indiana attorney and Purdue supporter",
     "executionPrompt": "I'm a lawyer with connections in Indiana and to Purdue, not a university administrator or foundation executive. What could someone in my position actually do if I found this compelling? What's realistic? What would be presumptuous?",
     "systemContext": "Wayne is well-connected but appropriately humble about scope. Realistic actions: (1) Raise the question—at Junto, with contacts at Purdue Foundation, in conversations where ideas about the future are discussed. Not advocating for Grove specifically, but raising the question of AI infrastructure concentration as something worth thinking about. (2) Connect people—if the Grove team deserves a hearing with Mung Chiang or other Purdue leadership, Wayne could facilitate an introduction. (3) Help refine the case—Wayne's legal mind and institutional experience can stress-test the governance arguments. (4) Participate in pilot—if there's a way for Junto or other groups Wayne is connected to to test the concept. What would be presumptuous: committing anyone else's resources, representing himself as more than personally interested, pushing too hard before understanding the landscape. The most valuable thing: taking the idea seriously enough to subject it to rigorous questioning.",
-    "tags": ["resolution", "action", "networks", "realistic"],
+    "tags": [
+      "resolution",
+      "action",
+      "networks",
+      "realistic"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 }
+      {
+        "topicId": "governance",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Personal Action" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Personal Action"
+      }
     ],
     "targeting": {
-      "stages": ["synthesis", "advocacy"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "synthesis",
+        "advocacy"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 4
     },
     "baseWeight": 92,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-resolution-junto-conversation",
@@ -453,23 +945,54 @@
     "description": "Intellectual salon framing—question for discussion, not pitch",
     "executionPrompt": "If I wanted to raise this topic at Junto—a group of thoughtful people who meet to discuss ideas—how would you frame it? Not as a pitch for Grove specifically, but as a question worth discussing. What's the intellectual problem that a group like ours should be thinking about?",
     "systemContext": "Wayne's Junto is an intellectual salon, not a business meeting. Frame for that context: The question isn't 'should we support Grove?' It's 'what happens when the infrastructure of thought is owned by three companies?' That's a question worth a Junto discussion. Discussion prompts: How is this different from previous concentration of media or information? What's the federalist response to infrastructure monopoly? What does ownership mean in a digital context? What's at stake for institutions that depend on intellectual independence? Grove is one proposed answer—worth examining, worth critiquing. But the question exists regardless of whether Grove is the right answer. Franklin's original Junto asked: what can we do together that we can't do alone? The infrastructure question is: what happens when 'together' is mediated by systems we don't own?",
-    "tags": ["resolution", "junto", "intellectual", "framing"],
+    "tags": [
+      "resolution",
+      "junto",
+      "intellectual",
+      "framing"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 },
-      { "topicId": "governance", "weight": 0.7 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      },
+      {
+        "topicId": "governance",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Junto Framing" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Junto Framing"
+      }
     ],
     "targeting": {
-      "stages": ["advocacy"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "advocacy"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 5
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-resolution-chiang-conversation",
@@ -481,22 +1004,50 @@
     "description": "Preparing the executive conversation—2 minutes, key questions, honest answers",
     "executionPrompt": "If this warranted a conversation with Purdue's president, how would you approach it? What's the 2-minute version for someone with Mung Chiang's background? What questions would he likely ask? What are the honest answers?",
     "systemContext": "Help Wayne prepare for a high-level conversation. 2-minute version for Mung: AI infrastructure concentration creates institutional risk Purdue should understand. The same pattern from internet infrastructure is forming—institutions that build alternatives gain independence; those that wait become customers. There's a window to act while open-source AI makes alternatives viable. Grove is one attempt to build university-owned infrastructure. Does Purdue want to evaluate whether leading this initiative serves its land-grant mission? Mung's likely questions: (1) What's the technical architecture? (Network guy wants to understand the distributed systems.) (2) What's the competitive landscape—who else is doing this? (3) Why Purdue specifically—what's our advantage? (4) What resources are required? (5) What's the risk if we commit and it doesn't work? Frame for what Mung cares about: research competitiveness, institutional positioning, land-grant mission of practical education for everyone. Don't oversell—offer a briefing to evaluate whether deeper engagement makes sense.",
-    "tags": ["resolution", "chiang", "executive", "preparation"],
+    "tags": [
+      "resolution",
+      "chiang",
+      "executive",
+      "preparation"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 1.0 }
+      {
+        "topicId": "governance",
+        "weight": 1
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "Chiang Conversation" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "Chiang Conversation"
+      }
     ],
     "targeting": {
-      "stages": ["advocacy"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "advocacy"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 5
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "turner-resolution-question-to-sit-with",
@@ -508,21 +1059,49 @@
     "description": "Close with a question worth thinking about, not an answer that closes conversation",
     "executionPrompt": "After all of this, what's the question you think I should be sitting with? Not a call to action. Not a decision to make. Just... the question that's worth continued thought, regardless of whether Grove is the answer.",
     "systemContext": "This is how the conversation should close. The question for Wayne: When a student writes a paper, when a researcher tests a hypothesis, when a doctor considers a diagnosis, when a lawyer evaluates a case—when human thinking increasingly runs through AI systems owned by three companies optimizing for their own interests—who should own the infrastructure of thought? Not whether to trust Google or Microsoft or OpenAI. Not whether AI is good or bad. Just: who should own it? That's the federalist question. That's the Franklin question. Whether Grove is the right answer—genuinely uncertain. Whether the question matters—that seems clear. And it's the kind of question that deserves Junto-quality discussion, with smart people who care about ideas, taking it seriously enough to subject it to rigorous examination.",
-    "tags": ["resolution", "question", "reflection", "close"],
+    "tags": [
+      "resolution",
+      "question",
+      "reflection",
+      "close"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      }
     ],
     "lensAffinities": [
-      { "lensId": "wayne-turner", "weight": 1.0, "customLabel": "The Question" }
+      {
+        "lensId": "wayne-turner",
+        "weight": 1,
+        "customLabel": "The Question"
+      }
     ],
     "targeting": {
-      "stages": ["advocacy"],
-      "lensIds": ["wayne-turner"],
+      "stages": [
+        "advocacy"
+      ],
+      "lensIds": [
+        "wayne-turner"
+      ],
       "minInteractions": 5
     },
     "baseWeight": 98,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   }
 ]

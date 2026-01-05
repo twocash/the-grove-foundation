@@ -6,8 +6,9 @@ import type { ConsoleConfig } from '../../types/console.types';
 
 export const promptWorkshopConfig: ConsoleConfig = {
   id: 'prompts',
-  title: 'Prompts',
-  description: 'Contextual content with declarative sequence membership',
+  title: 'Exploration Nodes',
+  subtitle: 'Prompts', // Sprint: exploration-node-unification-v1
+  description: 'Unified navigation primitives with provenance tracking',
 
   metrics: [
     { id: 'total', label: 'Total', icon: 'chat', query: 'count(*)' },
@@ -37,6 +38,13 @@ export const promptWorkshopConfig: ConsoleConfig = {
         label: 'Status',
         type: 'select',
         options: ['active', 'draft', 'archived'],
+      },
+      // Sprint: exploration-node-unification-v1
+      {
+        field: 'payload.provenance.type',
+        label: 'Provenance',
+        type: 'select',
+        options: ['authored', 'extracted', 'generated', 'submitted'],
       },
     ],
     sortOptions: [

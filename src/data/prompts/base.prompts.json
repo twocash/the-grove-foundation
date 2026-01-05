@@ -8,20 +8,44 @@
     "label": "What is The Grove?",
     "description": "Start here to understand the vision",
     "executionPrompt": "Explain what The Grove is in a way that captures both the technical architecture and the philosophical vision. Be concise but compelling—this is someone's first encounter with the idea.",
-    "tags": ["orientation", "overview", "genesis"],
+    "tags": [
+      "orientation",
+      "overview",
+      "genesis"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 0.9 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis"],
+      "stages": [
+        "genesis"
+      ],
       "minInteractions": 0,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "why-does-this-matter",
@@ -33,21 +57,48 @@
     "description": "Stakes framing for new visitors",
     "executionPrompt": "Help me understand why distributed AI infrastructure matters. Not the technical details—the stakes. What's actually at risk if things continue on their current path? Frame this in terms of real consequences for real people.",
     "systemContext": "This is an early-journey visitor who needs to understand stakes before technology. Lead with the infrastructure of thought problem: three companies building what human cognition will increasingly run through. Make it concrete and personal, not abstract.",
-    "tags": ["stakes", "genesis", "framing"],
+    "tags": [
+      "stakes",
+      "genesis",
+      "framing"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 0.9 },
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.9
+      },
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis"],
+      "stages": [
+        "genesis"
+      ],
       "minInteractions": 0,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 92,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "who-is-this-for",
@@ -59,20 +110,44 @@
     "description": "Audience and relevance question",
     "executionPrompt": "Who is The Grove actually for? Researchers? Developers? Regular people? Help me understand if this is relevant to me and people like me.",
     "systemContext": "Answer honestly about the different audiences: universities protecting research independence, developers wanting alternatives to Big Tech APIs, individuals wanting ownership stake in AI infrastructure. Be specific about what each group gets.",
-    "tags": ["audience", "genesis", "relevance"],
+    "tags": [
+      "audience",
+      "genesis",
+      "relevance"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.7 }
+      {
+        "topicId": "governance",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis"],
+      "stages": [
+        "genesis"
+      ],
       "minInteractions": 0,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "why-distributed",
@@ -84,21 +159,49 @@
     "description": "The philosophical basis for distributed AI ownership",
     "executionPrompt": "Explain why distributed AI infrastructure matters—both the technical advantages and the philosophical implications for AI ownership and access. Why not just use existing cloud AI services?",
     "systemContext": "Frame the choice clearly: centralized means renting cognitive infrastructure from three companies who can change terms at will. Distributed means owning the infrastructure your thinking runs through. Connect to historical precedents—mainframes to PCs, servers to cloud.",
-    "tags": ["philosophy", "architecture", "exploration"],
+    "tags": [
+      "philosophy",
+      "architecture",
+      "exploration"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 0.9 },
-      { "topicId": "technical-arch", "weight": 0.7 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.9
+      },
+      {
+        "topicId": "technical-arch",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["genesis", "exploration"],
+      "stages": [
+        "genesis",
+        "exploration"
+      ],
       "minInteractions": 1,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "how-does-it-work",
@@ -110,21 +213,48 @@
     "description": "System overview for curious explorers",
     "executionPrompt": "Walk me through how The Grove's architecture actually works. What runs locally? What's in the cloud? How do the pieces fit together? I want to understand the system, not just the vision.",
     "systemContext": "Explain the hybrid local-cloud architecture: routine cognition runs locally on 7B models, complex reasoning escalates to cloud APIs. Cover the cognitive router, the efficiency tax, the village structure. Be technical enough to satisfy curiosity but not overwhelming.",
-    "tags": ["architecture", "technical", "exploration"],
+    "tags": [
+      "architecture",
+      "technical",
+      "exploration"
+    ],
     "topicAffinities": [
-      { "topicId": "technical-arch", "weight": 1.0 },
-      { "topicId": "cognitive-split", "weight": 0.9 }
+      {
+        "topicId": "technical-arch",
+        "weight": 1
+      },
+      {
+        "topicId": "cognitive-split",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"],
+      "stages": [
+        "exploration"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "what-makes-this-different",
@@ -136,20 +266,44 @@
     "description": "Differentiation and competitive positioning",
     "executionPrompt": "There are lots of AI projects. What makes The Grove different? What's the unique angle that isn't being addressed elsewhere?",
     "systemContext": "Be honest about the landscape: federated learning projects, edge AI companies, academic consortiums. Explain Grove's differentiation: not just distributed inference but distributed ownership, not just technical architecture but governance architecture, not just cost savings but sovereignty.",
-    "tags": ["differentiation", "exploration", "competitive"],
+    "tags": [
+      "differentiation",
+      "exploration",
+      "competitive"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 0.8 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"],
+      "stages": [
+        "exploration"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "ratchet-effect",
@@ -161,20 +315,45 @@
     "description": "The core mechanism of capability propagation",
     "executionPrompt": "Explain the Ratchet Effect in AI capability. I've heard this mentioned—what does it actually mean? What patterns are you tracking, and what are the implications?",
     "systemContext": "Present the Ratchet thesis: AI capability propagates from frontier models to consumer hardware on documented timelines. Evidence: GPT-2 to phones, GPT-3 to gaming PCs. Roughly 7-month doubling in local capability, 21-month lag from frontier. Connect to why this matters for distributed infrastructure—the gap closes over time.",
-    "tags": ["ratchet", "capability", "exploration"],
+    "tags": [
+      "ratchet",
+      "capability",
+      "exploration"
+    ],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 1.0 }
+      {
+        "topicId": "ratchet-effect",
+        "weight": 1
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "infrastructure-bet",
@@ -186,20 +365,45 @@
     "description": "Understanding hyperscaler economics and stakes",
     "executionPrompt": "Help me understand the infrastructure concentration problem. You've mentioned Big Tech controlling AI infrastructure—what does that actually look like? What are the numbers?",
     "systemContext": "Be specific: $380 billion+ in hyperscaler AI infrastructure investment. Three companies—Google, Microsoft, OpenAI—building what human cognition will increasingly run through. Not censorship—architecture. What's easy vs. hard, what's optimized vs. buried. The infrastructure of thought is being built, and someone owns it.",
-    "tags": ["economics", "infrastructure", "exploration"],
+    "tags": [
+      "economics",
+      "infrastructure",
+      "exploration"
+    ],
     "topicAffinities": [
-      { "topicId": "infrastructure-bet", "weight": 1.0 }
+      {
+        "topicId": "infrastructure-bet",
+        "weight": 1
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "evidence-supporting",
@@ -211,21 +415,49 @@
     "description": "Evidence and validation request",
     "executionPrompt": "What's the evidence that distributed AI infrastructure is viable? Are there precedents? Research? Working examples? I want to understand what's proven vs. what's projected.",
     "systemContext": "Present the evidence honestly: (1) Open-source AI reaching capability parity—DeepSeek-V3, Llama, Mistral. (2) Hardware cost curves following predictable declines. (3) Historical precedents—internet decentralization, PC revolution. (4) Academic research on distributed systems. Be clear about what's demonstrated vs. what's theoretical.",
-    "tags": ["evidence", "validation", "synthesis"],
+    "tags": [
+      "evidence",
+      "validation",
+      "synthesis"
+    ],
     "topicAffinities": [
-      { "topicId": "ratchet-effect", "weight": 0.8 },
-      { "topicId": "technical-arch", "weight": 0.7 }
+      {
+        "topicId": "ratchet-effect",
+        "weight": 0.8
+      },
+      {
+        "topicId": "technical-arch",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
       "minInteractions": 3,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "honest-limitations",
@@ -237,20 +469,44 @@
     "description": "Trust-building through uncertainty acknowledgment",
     "executionPrompt": "I've heard the vision. Now tell me what you're uncertain about. What are the genuine limitations? What could go wrong? Where might the whole thesis be mistaken?",
     "systemContext": "This is where trust is built. Be genuinely honest: (1) Whether community formation happens at scale. (2) Whether economic model sustains before network effects. (3) Whether Foundation governance works as designed. (4) Whether Big Tech suppresses rather than supports alternatives. (5) Whether capability propagation continues at current rates. The honest assessment: Grove is an attempt. Whether it works is genuinely unknown. The question is whether the attempt is worth making.",
-    "tags": ["limitations", "honesty", "synthesis"],
+    "tags": [
+      "limitations",
+      "honesty",
+      "synthesis"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"],
+      "stages": [
+        "synthesis"
+      ],
       "minInteractions": 3,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "economics-model",
@@ -262,20 +518,44 @@
     "description": "Business model and sustainability",
     "executionPrompt": "Walk me through the economics. How does this sustain itself? What's the business model? I want to understand how this doesn't just become another underfunded open-source project.",
     "systemContext": "Explain the efficiency tax model: Foundation takes a percentage of cloud compute costs as communities become self-sufficient. This tax shrinks over time as local capability grows—designed obsolescence. Revenue projections at scale, comparison to current AI API economics. Be specific about numbers where possible. The goal is sustainability, not extraction.",
-    "tags": ["economics", "sustainability", "synthesis"],
+    "tags": [
+      "economics",
+      "sustainability",
+      "synthesis"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.9 }
+      {
+        "topicId": "governance",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"],
+      "stages": [
+        "synthesis"
+      ],
       "minInteractions": 3,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "success-five-years",
@@ -287,20 +567,44 @@
     "description": "Vision synthesis and future state",
     "executionPrompt": "Paint me a picture. If The Grove succeeds, what does the world look like in five years? What's different? What exists that doesn't exist today?",
     "systemContext": "Be specific and concrete: Thousands of AI villages running on personal computers worldwide. Universities with research independence from Big Tech APIs. Individuals earning from their contributed compute. A Knowledge Commons where innovations are shared across the network. The Foundation becoming obsolete because the network governs itself. Not utopia—a structural alternative that exists.",
-    "tags": ["vision", "synthesis", "future"],
+    "tags": [
+      "vision",
+      "synthesis",
+      "future"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"],
+      "stages": [
+        "synthesis"
+      ],
       "minInteractions": 4,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 82,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "explore-topics",
@@ -311,18 +615,39 @@
     "label": "What other topics can I explore?",
     "description": "Discover available knowledge areas",
     "executionPrompt": "What are the main topic areas I can explore here? Give me a map of the territory—what are the key themes and how do they connect?",
-    "tags": ["discovery", "navigation", "exploration"],
+    "tags": [
+      "discovery",
+      "navigation",
+      "exploration"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"],
+      "stages": [
+        "exploration"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 75,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "key-concepts",
@@ -334,20 +659,44 @@
     "description": "Core concepts to understand",
     "executionPrompt": "What are the essential concepts I need to understand about The Grove? Give me the foundational ideas that everything else builds upon.",
     "systemContext": "Cover the core concepts: (1) Hybrid local-cloud architecture—routine local, complex cloud. (2) The Ratchet—capability propagation from frontier to edge. (3) Efficiency tax—sustainability mechanism that shrinks. (4) Villages—community units of AI agents. (5) Knowledge Commons—shared innovation network. Keep it digestible.",
-    "tags": ["concepts", "orientation", "exploration"],
+    "tags": [
+      "concepts",
+      "orientation",
+      "exploration"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration"],
+      "stages": [
+        "exploration"
+      ],
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 78,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "what-can-i-do",
@@ -359,18 +708,40 @@
     "description": "Personal application and relevance",
     "executionPrompt": "Now that I understand The Grove better, what could I actually do with this information? How might this be relevant to my own situation?",
     "systemContext": "Help them think through applications: (1) If they're technical—contribute to open-source development, run a village. (2) If they're at a university—advocate for distributed infrastructure. (3) If they're an individual—understand what's at stake, become a Gardener. (4) If they're in business—consider the implications for AI strategy. Personalize based on the conversation so far.",
-    "tags": ["application", "action", "advocacy"],
+    "tags": [
+      "application",
+      "action",
+      "advocacy"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis", "advocacy"],
+      "stages": [
+        "synthesis",
+        "advocacy"
+      ],
       "minInteractions": 4,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 88,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "explain-to-others",
@@ -382,20 +753,44 @@
     "description": "Synthesis test through explanation",
     "executionPrompt": "If I wanted to explain The Grove to a friend or colleague, how would I do it? Help me find the simplest way to convey the core idea.",
     "systemContext": "Help them synthesize: The 30-second version might be 'A project to make AI infrastructure something people own instead of rent.' The 2-minute version adds the technical approach and why it matters now. The 10-minute version includes the evidence and honest limitations. Give them versions at different depths.",
-    "tags": ["synthesis", "explanation", "advocacy"],
+    "tags": [
+      "synthesis",
+      "explanation",
+      "advocacy"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 0.8 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.8
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["advocacy"],
+      "stages": [
+        "advocacy"
+      ],
       "minInteractions": 5,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 90,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "one-thing-remember",
@@ -407,20 +802,44 @@
     "description": "Closing reflection and key takeaway",
     "executionPrompt": "After everything we've discussed, what's the single most important thing I should take away from this conversation?",
     "systemContext": "Close with the essential question, not an answer that closes conversation: Who should own the infrastructure of thought? Not whether AI is good or bad. Not whether to trust specific companies. Just: who should own it? That's the federalist question. Whether Grove is the right answer—genuinely uncertain. Whether the question matters—that seems clear.",
-    "tags": ["reflection", "closing", "advocacy"],
+    "tags": [
+      "reflection",
+      "closing",
+      "advocacy"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 1.0 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 1
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["advocacy"],
+      "stages": [
+        "advocacy"
+      ],
       "minInteractions": 5,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 95,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "contribute",
@@ -432,20 +851,44 @@
     "description": "Ways to participate and contribute",
     "executionPrompt": "If I wanted to get involved with The Grove, what are the options? Whether through research, development, community building, or other means—how can I participate?",
     "systemContext": "Be specific about paths: (1) Gardener—host a village on your hardware. (2) Developer—contribute to open-source infrastructure. (3) Researcher—help validate the technical thesis. (4) Advocate—raise the question in your networks. (5) Pilot participant—help test early implementations. Don't oversell—be honest about what's ready and what's still being built.",
-    "tags": ["contribution", "action", "advocacy"],
+    "tags": [
+      "contribution",
+      "action",
+      "advocacy"
+    ],
     "topicAffinities": [
-      { "topicId": "governance", "weight": 0.7 }
+      {
+        "topicId": "governance",
+        "weight": 0.7
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["advocacy"],
+      "stages": [
+        "advocacy"
+      ],
       "minInteractions": 4,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "capture-insight",
@@ -456,18 +899,40 @@
     "label": "Save an insight from this conversation",
     "description": "Capture something valuable",
     "executionPrompt": "Help me articulate and capture an insight from our conversation. What's the most valuable takeaway I should remember?",
-    "tags": ["contribution", "reflection", "synthesis"],
+    "tags": [
+      "contribution",
+      "reflection",
+      "synthesis"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis", "advocacy"],
+      "stages": [
+        "synthesis",
+        "advocacy"
+      ],
       "minInteractions": 3,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 70,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "surprise-me",
@@ -479,18 +944,39 @@
     "description": "Serendipitous discovery",
     "executionPrompt": "Share something surprising or unexpected about The Grove—an insight, connection, or implication I might not have considered.",
     "systemContext": "Find a genuinely unexpected angle: the 'horse moment' metaphor (unlike horses during automobile transition, humans can choose to become stakeholders), the efficiency-enlightenment loop (agents motivated to solve problems because success earns cognitive enhancement), or the counterintuitive Big Tech hedge (they might fund alternatives). Pick something that reframes.",
-    "tags": ["serendipity", "discovery", "synthesis"],
+    "tags": [
+      "serendipity",
+      "discovery",
+      "synthesis"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"],
+      "stages": [
+        "synthesis"
+      ],
       "minInteractions": 4,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 72,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "implications",
@@ -502,20 +988,44 @@
     "description": "Deeper analysis of consequences",
     "executionPrompt": "What are the broader implications of distributed AI ownership? How might this reshape the AI landscape over the next decade?",
     "systemContext": "Think through second-order effects: (1) Universities regaining research independence. (2) New economic participation models—ownership, not just wages. (3) Geographic decentralization of AI capability. (4) Governance innovation required for distributed networks. (5) Potential for AI diversity vs. monoculture. Be thoughtful, not hyperbolic.",
-    "tags": ["depth", "analysis", "synthesis"],
+    "tags": [
+      "depth",
+      "analysis",
+      "synthesis"
+    ],
     "topicAffinities": [
-      { "topicId": "meta-philosophy", "weight": 0.9 }
+      {
+        "topicId": "meta-philosophy",
+        "weight": 0.9
+      }
     ],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["synthesis"],
+      "stages": [
+        "synthesis"
+      ],
       "minInteractions": 3,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 78,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "stabilize-high-entropy",
@@ -527,19 +1037,45 @@
     "description": "Stabilization prompt for high entropy",
     "executionPrompt": "We've covered a lot of ground. Let's step back and identify the thread that's most valuable to pursue. What's the central question that would be most useful for me to understand better?",
     "variant": "subtle",
-    "tags": ["stabilization", "focus", "navigation"],
+    "tags": [
+      "stabilization",
+      "focus",
+      "navigation"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
-      "stages": ["exploration", "synthesis"],
-      "entropyWindow": { "min": 0.7 },
-      "momentTriggers": ["high_entropy"],
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "stages": [
+        "exploration",
+        "synthesis"
+      ],
+      "entropyWindow": {
+        "min": 0.7
+      },
+      "momentTriggers": [
+        "high_entropy"
+      ],
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 85,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   },
   {
     "id": "redirect-off-topic",
@@ -551,16 +1087,34 @@
     "description": "Gentle redirect when off-topic",
     "executionPrompt": "I notice we've drifted from Grove's focus areas. Would you like me to suggest some relevant topics? I can share more about distributed AI, infrastructure economics, or community governance.",
     "variant": "subtle",
-    "tags": ["redirect", "navigation"],
+    "tags": [
+      "redirect",
+      "navigation"
+    ],
     "topicAffinities": [],
     "lensAffinities": [],
     "targeting": {
       "minInteractions": 2,
-      "excludeLenses": ["wayne-turner", "dr-chiang"]
+      "excludeLenses": [
+        "wayne-turner",
+        "dr-chiang"
+      ]
     },
     "baseWeight": 60,
-    "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+    "stats": {
+      "impressions": 0,
+      "selections": 0,
+      "completions": 0,
+      "avgEntropyDelta": 0,
+      "avgDwellAfter": 0
+    },
     "status": "active",
-    "source": "library"
+    "source": "library",
+    "provenance": {
+      "type": "authored",
+      "reviewStatus": "approved",
+      "authorId": "system",
+      "authorName": "Grove Team"
+    }
   }
 ]

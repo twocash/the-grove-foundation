@@ -2969,6 +2969,120 @@ app.get('/api/telemetry/prompts/performance', async (req, res) => {
 });
 
 // ============================================================================
+// Prompt Extraction API
+// Sprint: exploration-node-unification-v1
+// ============================================================================
+
+app.post('/api/prompts/extract', async (req, res) => {
+  try {
+    const { documentId, title, content, tier, namedEntities } = req.body;
+
+    if (!documentId || !content) {
+      return res.status(400).json({ error: 'documentId and content required' });
+    }
+
+    console.log(`[Extract] Processing: ${title || documentId}`);
+
+    const prompt = `You are extracting exploration prompts from a Grove knowledge document.
+
+DOCUMENT:
+Title: ${title || 'Untitled'}
+Content: ${content.slice(0, 4000)}
+Tier: ${tier || 'sapling'}
+Named Entities: ${JSON.stringify(namedEntities || {})}
+
+EXTRACTION RULES:
+
+1. MOLECULAR INDEPENDENCE: Each prompt must stand completely alone.
+   - Never assume the reader has seen other prompts
+   - No "following up on..." or "building on..."
+   - Each prompt is a valid entry point to this topic
+
+2. DUAL FORM: Each prompt needs:
+   - LABEL: Simple question for UI (10-15 words max)
+   - EXECUTION_PROMPT: First-person curious question with context
+   - SYSTEM_CONTEXT: Rich instruction for LLM (persona, framing)
+
+3. STAGE TARGETING based on tier:
+   - seed → genesis (curiosity)
+   - sprout → genesis/exploration (mechanics)
+   - sapling → exploration/synthesis (implications)
+   - tree → synthesis/advocacy (action)
+
+4. Return JSON array with 5-8 prompts:
+[
+  {
+    "label": "Simple question here?",
+    "executionPrompt": "First-person curious question...",
+    "systemContext": "LLM instruction about framing...",
+    "stages": ["genesis", "exploration"],
+    "lenses": ["base"],
+    "topics": ["infrastructure-bet"],
+    "confidence": 0.9
+  }
+]`;
+
+    const result = await genai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+      config: { responseMimeType: 'application/json', temperature: 0.4 },
+    });
+
+    let rawPrompts = [];
+    try {
+      const text = result.text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      rawPrompts = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('[Extract] Parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse extraction' });
+    }
+
+    const now = Date.now();
+    const prompts = rawPrompts.map((raw, index) => ({
+      id: `extracted-${documentId.slice(0, 8)}-${index}-${now}`,
+      objectType: 'prompt',
+      created: now,
+      modified: now,
+      author: 'extracted',
+      label: raw.label,
+      description: `Extracted from: ${title}`,
+      executionPrompt: raw.executionPrompt,
+      systemContext: raw.systemContext,
+      tags: ['extracted', tier || 'sapling', ...(raw.topics || []).slice(0, 3)],
+      topicAffinities: (raw.topics || []).map((t, i) => ({ topicId: t, weight: 1.0 - i * 0.1 })),
+      lensAffinities: (raw.lenses || []).map((l, i) => ({ lensId: l, weight: 1.0 - i * 0.15 })),
+      targeting: { stages: raw.stages?.length ? raw.stages : ['exploration'] },
+      baseWeight: Math.round((raw.confidence || 0.7) * 80),
+      stats: { impressions: 0, selections: 0, completions: 0, avgEntropyDelta: 0, avgDwellAfter: 0 },
+      status: 'active',
+      source: 'generated',
+      provenance: {
+        type: 'extracted',
+        reviewStatus: 'pending',
+        sourceDocIds: [documentId],
+        sourceDocTitles: [title],
+        extractedAt: now,
+        extractionModel: 'gemini-2.0-flash',
+        extractionConfidence: raw.confidence || 0.7,
+      },
+    }));
+
+    console.log(`[Extract] Extracted ${prompts.length} prompts from ${title}`);
+
+    res.json({
+      documentId,
+      documentTitle: title,
+      prompts,
+      raw: rawPrompts,
+      metadata: { extractedAt: now, model: 'gemini-2.0-flash', documentTier: tier, promptCount: prompts.length },
+    });
+  } catch (error) {
+    console.error('[Extract] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
 // Knowledge Pipeline API (kinetic-pipeline-v1)
 // ============================================================================
 

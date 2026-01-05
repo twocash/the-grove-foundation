@@ -105,7 +105,75 @@ export interface PromptStats {
 }
 
 // ============================================================================
-// GENERATION CONTEXT (Provenance)
+// PROVENANCE (Exploration Node Source Tracking)
+// Sprint: exploration-node-unification-v1
+// ============================================================================
+
+/**
+ * Provenance type - where the prompt originated
+ */
+export type ProvenanceType = 'authored' | 'extracted' | 'generated' | 'submitted';
+
+/**
+ * Review status for non-authored prompts
+ */
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * Provenance tracking for exploration nodes
+ */
+export interface PromptProvenance {
+  type: ProvenanceType;
+  reviewStatus: ReviewStatus;
+  reviewedAt?: number;
+  reviewedBy?: string;
+  // Authored
+  authorId?: string;
+  authorName?: string;
+  // Extracted
+  sourceDocIds?: string[];
+  sourceDocTitles?: string[];
+  extractedAt?: number;
+  extractionModel?: string;
+  extractionConfidence?: number;
+  // Generated
+  gapAnalysisId?: string;
+  generationReason?: string;
+  coverageGap?: { stage?: string; lens?: string; topic?: string };
+}
+
+/**
+ * Default provenance for authored prompts
+ */
+export const AUTHORED_PROVENANCE: PromptProvenance = {
+  type: 'authored',
+  reviewStatus: 'approved',
+  authorId: 'system',
+  authorName: 'Grove Team',
+};
+
+/**
+ * Create provenance for extracted prompt
+ */
+export function createExtractedProvenance(
+  sourceDocIds: string[],
+  sourceDocTitles: string[],
+  confidence: number,
+  model: string = 'gemini-2.0-flash'
+): PromptProvenance {
+  return {
+    type: 'extracted',
+    reviewStatus: 'pending',
+    sourceDocIds,
+    sourceDocTitles,
+    extractedAt: Date.now(),
+    extractionModel: model,
+    extractionConfidence: confidence,
+  };
+}
+
+// ============================================================================
+// GENERATION CONTEXT (Legacy Provenance)
 // ============================================================================
 
 /**
@@ -155,6 +223,14 @@ export interface PromptObject {
   
   cooldown?: number;
   maxShows?: number;
+
+  // === Sprint: exploration-node-unification-v1 ===
+
+  /** Provenance tracking - where this prompt came from */
+  provenance?: PromptProvenance;
+
+  /** Embedding for similarity matching (optional) */
+  embedding?: number[];
 }
 
 // ============================================================================
