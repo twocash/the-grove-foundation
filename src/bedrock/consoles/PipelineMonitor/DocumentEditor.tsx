@@ -1,6 +1,11 @@
 // src/bedrock/consoles/PipelineMonitor/DocumentEditor.tsx
 // Document editor component for inspector panel
 // Sprint: hotfix-pipeline-factory
+//
+// TODO: If text inputs in this editor lose characters during rapid typing,
+// replace native <input>/<textarea> with BufferedInput/BufferedTextarea.
+// @see src/bedrock/primitives/BufferedInput.tsx
+// @see docs/hotfixes/HOTFIX-002-inspector-input-race.md
 
 import React from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';

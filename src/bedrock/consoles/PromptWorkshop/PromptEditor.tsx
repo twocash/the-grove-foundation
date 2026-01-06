@@ -1,14 +1,23 @@
 // src/bedrock/consoles/PromptWorkshop/PromptEditor.tsx
 // Prompt editor with section-based layout matching LensEditor pattern
 // Sprint: prompt-editor-standardization-v1
+//
+// IMPORTANT: This editor uses BufferedInput/BufferedTextarea for all text fields.
+// This prevents the inspector input race condition where rapid typing loses characters.
+// @see src/bedrock/patterns/console-factory.tsx (architecture note at top)
+// @see src/bedrock/primitives/BufferedInput.tsx
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
-import type { PromptPayload, PromptStage } from '@core/schema/prompt';
+import type { PromptPayload, PromptStage, QAIssue } from '@core/schema/prompt';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
+import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
 import { PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.config';
+import { SourceContextSection } from './components/SourceContextSection';
+import { QAResultsSection } from './components/QAResultsSection';
+import { generateCopilotStarterPrompt } from '@core/copilot/PromptQAActions';
 
 // =============================================================================
 // Constants
@@ -33,6 +42,7 @@ export function PromptEditor({
   onDuplicate,
   loading,
   hasChanges,
+  onSetCopilotInput,
 }: ObjectEditorProps<PromptPayload>) {
 
   // Read-only mode for library prompts (Sprint: prompt-library-readonly-v1)
@@ -57,6 +67,88 @@ export function PromptEditor({
     onEdit([op]);
   };
 
+  // QA Check handler (Sprint: prompt-refinement-v1)
+  const [isQAChecking, setIsQAChecking] = React.useState(false);
+  const [isDuplicating, setIsDuplicating] = React.useState(false);
+
+  // Duplicate library prompt to user's prompts (Sprint: prompt-refinement-v1)
+  const handleDuplicateLibraryPrompt = useCallback(async () => {
+    setIsDuplicating(true);
+    try {
+      // Call the provided onDuplicate which creates a user-owned copy
+      // This uses usePromptData.duplicate which handles library prompts
+      onDuplicate();
+      // Note: The new prompt will appear in the list after data refresh
+    } catch (error) {
+      console.error('Duplicate failed:', error);
+    } finally {
+      // Small delay to show loading state before it disappears
+      setTimeout(() => setIsDuplicating(false), 500);
+    }
+  }, [onDuplicate]);
+
+  const handleRunQACheck = useCallback(async () => {
+    setIsQAChecking(true);
+    console.log('[PromptEditor] Running QA check for prompt:', prompt.meta.id);
+    try {
+      const response = await fetch(`/api/prompts/${prompt.meta.id}/qa-check`, {
+        method: 'POST',
+      });
+      console.log('[PromptEditor] QA check response status:', response.status);
+      if (response.ok) {
+        const result = await response.json();
+        console.log('[PromptEditor] QA check result:', {
+          score: result.score,
+          issuesCount: result.issues?.length,
+          issues: result.issues?.map((i: { type: string; autoFixAvailable: boolean }) => ({ type: i.type, autoFixAvailable: i.autoFixAvailable })),
+        });
+        // Update the prompt with QA results
+        // IMPORTANT: Include /meta/updatedAt to trigger version change detection in console factory
+        const now = new Date().toISOString();
+        const ops: PatchOperation[] = [
+          { op: 'replace', path: '/payload/qaScore', value: result.score },
+          { op: 'replace', path: '/payload/qaIssues', value: result.issues },
+          { op: 'replace', path: '/payload/qaLastChecked', value: now },
+          { op: 'replace', path: '/meta/updatedAt', value: now },
+        ];
+        console.log('[PromptEditor] Applying QA patches:', ops);
+        await onEdit(ops);
+        console.log('[PromptEditor] onEdit completed');
+      } else {
+        console.error('[PromptEditor] QA check failed with status:', response.status);
+      }
+    } catch (error) {
+      console.error('[PromptEditor] QA check error:', error);
+    } finally {
+      setIsQAChecking(false);
+    }
+  }, [prompt.meta.id, onEdit]);
+
+  const [fixMessage, setFixMessage] = useState<string | null>(null);
+
+  // Handle "Refine" button click - populates Copilot input with starter prompt
+  // Philosophy: Forces thought and reason - user reviews and completes the prompt
+  // @see HOTFIX_COPILOT_FIX_FLOW.md
+  const handleApplyFix = useCallback((issue: QAIssue) => {
+    console.log('[PromptEditor] Refine requested for issue:', issue);
+
+    const currentPrompt = prompt.payload.executionPrompt || prompt.meta.title || '';
+    const starterPrompt = generateCopilotStarterPrompt(issue, currentPrompt);
+
+    if (onSetCopilotInput) {
+      // Populate Copilot input with starter prompt
+      console.log('[PromptEditor] Setting Copilot input:', starterPrompt);
+      onSetCopilotInput(starterPrompt);
+      setFixMessage('💡 Complete the prompt in Copilot below to refine');
+      setTimeout(() => setFixMessage(null), 4000);
+    } else {
+      // Fallback: show the suggestion if Copilot is not available
+      console.log('[PromptEditor] Copilot not available, showing suggestion');
+      setFixMessage(`💡 Suggestion: ${issue.suggestedFix || starterPrompt}`);
+      setTimeout(() => setFixMessage(null), 5000);
+    }
+  }, [prompt.payload.executionPrompt, prompt.meta.title, onSetCopilotInput]);
+
   const sourceConfig = PROMPT_SOURCE_CONFIG[prompt.payload.source];
 
   return (
@@ -80,16 +172,25 @@ export function PromptEditor({
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
 
+        {/* === SOURCE CONTEXT (Sprint: prompt-refinement-v1) === */}
+        <SourceContextSection
+          promptId={prompt.meta.id}
+          documentId={prompt.payload.provenance?.sourceDocIds?.[0]}
+        />
+
+        <InspectorDivider />
+
         {/* === IDENTITY === */}
         <InspectorSection title="Identity">
           <div className="space-y-4">
             {/* Title */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Title</label>
-              <textarea
+              <BufferedTextarea
                 value={prompt.meta.title}
-                onChange={(e) => patchMeta('title', e.target.value)}
+                onChange={(v) => patchMeta('title', v)}
                 rows={2}
+                debounceMs={400}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
                 disabled={isReadOnly}
               />
@@ -98,10 +199,11 @@ export function PromptEditor({
             {/* Description */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Description</label>
-              <textarea
+              <BufferedTextarea
                 value={prompt.meta.description || ''}
-                onChange={(e) => patchMeta('description', e.target.value)}
+                onChange={(v) => patchMeta('description', v)}
                 rows={3}
+                debounceMs={400}
                 placeholder="Brief description of this prompt"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
                 disabled={isReadOnly}
@@ -130,10 +232,11 @@ export function PromptEditor({
 
         {/* === EXECUTION === */}
         <InspectorSection title="Execution Prompt">
-          <textarea
+          <BufferedTextarea
             value={prompt.payload.executionPrompt}
-            onChange={(e) => patchPayload('executionPrompt', e.target.value)}
+            onChange={(v) => patchPayload('executionPrompt', v)}
             rows={8}
+            debounceMs={400}
             placeholder="The prompt text that will be shown to users..."
             className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none font-mono"
             disabled={loading}
@@ -184,10 +287,10 @@ export function PromptEditor({
             {/* Tags */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Tags</label>
-              <input
-                type="text"
+              <BufferedInput
                 value={(prompt.meta.tags || []).join(', ')}
-                onChange={(e) => patchMeta('tags', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
+                onChange={(v) => patchMeta('tags', v.split(',').map(t => t.trim()).filter(Boolean))}
+                debounceMs={400}
                 placeholder="tag1, tag2, tag3"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
                 disabled={isReadOnly}
@@ -267,13 +370,13 @@ export function PromptEditor({
             {/* Lens IDs */}
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Lens IDs</label>
-              <input
-                type="text"
+              <BufferedInput
                 value={(prompt.payload.targeting.lensIds || []).join(', ')}
-                onChange={(e) => {
-                  const ids = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+                onChange={(v) => {
+                  const ids = v.split(',').map(t => t.trim()).filter(Boolean);
                   patchTargeting('lensIds', ids.length ? ids : undefined);
                 }}
+                debounceMs={400}
                 placeholder="lens-id-1, lens-id-2"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
                 disabled={isReadOnly}
@@ -297,6 +400,28 @@ export function PromptEditor({
             </div>
           </div>
         </InspectorSection>
+
+        <InspectorDivider />
+
+        {/* === QA ASSESSMENT (Sprint: prompt-refinement-v1) === */}
+        {/* QA checks only available for user-owned prompts (not library prompts) */}
+        <QAResultsSection
+          score={prompt.payload.qaScore}
+          issues={prompt.payload.qaIssues}
+          lastChecked={prompt.payload.qaLastChecked}
+          onApplyFix={isLibraryPrompt ? undefined : handleApplyFix}
+          onRunQACheck={isLibraryPrompt ? undefined : handleRunQACheck}
+          isChecking={isQAChecking}
+          onDuplicate={isLibraryPrompt ? handleDuplicateLibraryPrompt : undefined}
+          isDuplicating={isDuplicating}
+        />
+
+        {/* Fix message toast */}
+        {fixMessage && (
+          <div className="mx-4 my-2 p-3 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-sm text-cyan-300 animate-pulse">
+            {fixMessage}
+          </div>
+        )}
 
         <InspectorDivider />
 

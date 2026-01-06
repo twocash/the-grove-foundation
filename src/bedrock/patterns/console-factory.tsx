@@ -1,6 +1,31 @@
 // src/bedrock/patterns/console-factory.tsx
 // Factory function for creating Bedrock consoles
 // Sprint: hotfix/console-factory
+//
+// =============================================================================
+// ARCHITECTURE NOTE: Input Race Condition in Inspector Editors
+// =============================================================================
+//
+// The console factory uses version tracking (line ~329) to re-render the inspector
+// when object data changes. This creates a race condition with controlled inputs:
+//
+//   1. User types in input field
+//   2. onChange fires, calling onEdit([patch])
+//   3. Parent updates state, changing `updatedAt`
+//   4. Version tracking detects change, triggers updateInspector()
+//   5. Editor re-renders with potentially stale prop values
+//   6. Characters are lost or duplicated
+//
+// SOLUTION: Use BufferedInput/BufferedTextarea from '@bedrock/primitives'
+//
+// These components buffer input state locally and sync to parent:
+//   - On blur (user leaves field)
+//   - After debounce timeout (user pauses typing)
+//   - Never while user is actively typing
+//
+// @see src/bedrock/primitives/BufferedInput.tsx
+// @see docs/hotfixes/HOTFIX-002-inspector-input-race.md
+// =============================================================================
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { GroveObject } from '../../core/schema/grove-object';
@@ -8,6 +33,7 @@ import type { PatchOperation } from '../types/copilot.types';
 import type { ViewMode } from '../components/ViewModeToggle';
 import type {
   BedrockConsoleOptions,
+  BedrockConsoleProps,
   MetricData,
 } from './console-factory.types';
 
@@ -56,7 +82,7 @@ import { NoResultsState, NoItemsState } from '../components/EmptyState';
  */
 export function createBedrockConsole<T>(
   options: BedrockConsoleOptions<T>
-): React.ComponentType {
+): React.ComponentType<BedrockConsoleProps> {
   const {
     config,
     useData,
@@ -65,10 +91,12 @@ export function createBedrockConsole<T>(
     EmptyStateComponent,
     copilotTitle = `${config.title} Copilot`,
     copilotPlaceholder = 'Edit with AI...',
+    actionHandler,
   } = options;
 
   // The actual console component
-  function BedrockConsole() {
+  // Sprint: extraction-pipeline-integration-v1 - Added props support for external filters and selection
+  function BedrockConsole({ externalFilters, headerContent, externalSelectedId }: BedrockConsoleProps) {
     const { openInspector, closeInspector, updateInspector } = useBedrockUI();
 
     // Data layer
@@ -83,10 +111,12 @@ export function createBedrockConsole<T>(
     } = useData();
 
     // Collection view state
+    // Sprint: extraction-pipeline-integration-v1 - Pass external filters from props
     const collectionState = useCollectionView(objects, {
       searchFields: config.collectionView.searchFields,
       defaultSort: config.collectionView.defaultSort,
       favoritesStorageKey: config.collectionView.favoritesKey,
+      externalFilters,
     });
 
     const {
@@ -115,6 +145,19 @@ export function createBedrockConsole<T>(
       config.collectionView.defaultViewMode
     );
     const [hasChanges, setHasChanges] = useState(false);
+
+    // Copilot input state (for external population, e.g., from Fix/Refine buttons)
+    const [copilotInput, setCopilotInput] = useState<string | undefined>(undefined);
+    const clearCopilotInput = useCallback(() => setCopilotInput(undefined), []);
+
+    // Sprint: extraction-pipeline-integration-v1 - Sync external selection with internal state
+    // When externalSelectedId changes, update internal selection to open inspector
+    useEffect(() => {
+      if (externalSelectedId !== undefined && externalSelectedId !== selectedId) {
+        setSelectedId(externalSelectedId);
+        setHasChanges(false);
+      }
+    }, [externalSelectedId]);
 
     // Patch history for undo/redo
     const patchHistory = usePatchHistory({ objectId: selectedId || undefined });
@@ -189,10 +232,10 @@ export function createBedrockConsole<T>(
     }, []);
 
     const handleEdit = useCallback(
-      (operations: PatchOperation[]) => {
+      async (operations: PatchOperation[]) => {
         if (!selectedObject) return;
         patchHistory.applyPatch(operations, selectedObject, 'user');
-        update(selectedObject.meta.id, operations);
+        await update(selectedObject.meta.id, operations);
         setHasChanges(true);
       },
       [selectedObject, patchHistory, update]
@@ -245,7 +288,7 @@ export function createBedrockConsole<T>(
       if (selectedId && selectedId !== lastOpenedIdRef.current && inspectorConfig) {
         lastOpenedIdRef.current = selectedId;
         // Reset version tracking for new selection
-        lastObjectVersionRef.current = `${selectedObject?.meta.modified}-${loading}-${hasChanges}`;
+        lastObjectVersionRef.current = `${selectedObject?.meta.updatedAt}-${loading}-${hasChanges}`;
         openInspector({
           ...inspectorConfig,
           content: (
@@ -257,6 +300,7 @@ export function createBedrockConsole<T>(
               onDuplicate={handleDuplicate}
               loading={loading}
               hasChanges={hasChanges}
+              onSetCopilotInput={setCopilotInput}
             />
           ),
           copilot: config.copilot.enabled ? (
@@ -267,6 +311,15 @@ export function createBedrockConsole<T>(
               title={copilotTitle}
               placeholder={copilotPlaceholder}
               defaultCollapsed={true}
+              externalInput={copilotInput}
+              onExternalInputConsumed={clearCopilotInput}
+              onAction={actionHandler ? async (actionId, userInput) => {
+                return actionHandler(actionId, userInput, {
+                  consoleId: config.id,
+                  selectedObject: selectedObject!,
+                  objects,
+                });
+              } : undefined}
             />
           ) : undefined,
         });
@@ -282,13 +335,15 @@ export function createBedrockConsole<T>(
     const handleSaveRef = useRef(handleSave);
     const handleDeleteRef = useRef(handleDelete);
     const handleDuplicateRef = useRef(handleDuplicate);
-    
+    const setCopilotInputRef = useRef(setCopilotInput);
+
     // Keep refs up to date
     useEffect(() => {
       handleEditRef.current = handleEdit;
       handleSaveRef.current = handleSave;
       handleDeleteRef.current = handleDelete;
       handleDuplicateRef.current = handleDuplicate;
+      setCopilotInputRef.current = setCopilotInput;
     });
 
     // Update inspector content when object data changes (but selection stays same)
@@ -296,11 +351,13 @@ export function createBedrockConsole<T>(
     useEffect(() => {
       if (selectedObject && selectedId === lastOpenedIdRef.current) {
         // Create a version key from object modified timestamp and UI state
-        const currentVersion = `${selectedObject.meta.modified}-${loading}-${hasChanges}`;
+        const currentVersion = `${selectedObject.meta.updatedAt}-${loading}-${hasChanges}`;
 
-        // Only update if version actually changed
-        if (currentVersion !== lastObjectVersionRef.current) {
-          lastObjectVersionRef.current = currentVersion;
+        // Only update if version actually changed OR copilot input changed
+        const copilotKey = copilotInput || '';
+        const versionWithCopilot = `${currentVersion}-${copilotKey}`;
+        if (versionWithCopilot !== lastObjectVersionRef.current) {
+          lastObjectVersionRef.current = versionWithCopilot;
           updateInspector({
             ...inspectorConfig,
             content: (
@@ -312,8 +369,28 @@ export function createBedrockConsole<T>(
                 onDuplicate={() => handleDuplicateRef.current()}
                 loading={loading}
                 hasChanges={hasChanges}
+                onSetCopilotInput={(input) => setCopilotInputRef.current(input)}
               />
             ),
+            copilot: config.copilot.enabled ? (
+              <BedrockCopilot
+                consoleId={config.id}
+                object={selectedObject}
+                onApplyPatch={(ops) => handleEditRef.current(ops)}
+                title={copilotTitle}
+                placeholder={copilotPlaceholder}
+                defaultCollapsed={true}
+                externalInput={copilotInput}
+                onExternalInputConsumed={clearCopilotInput}
+                onAction={actionHandler ? async (actionId, userInput) => {
+                  return actionHandler(actionId, userInput, {
+                    consoleId: config.id,
+                    selectedObject,
+                    objects,
+                  });
+                } : undefined}
+              />
+            ) : undefined,
           });
         }
       }
@@ -325,6 +402,8 @@ export function createBedrockConsole<T>(
       hasChanges,
       inspectorConfig,
       updateInspector,
+      copilotInput,
+      clearCopilotInput,
     ]);
 
     // Close inspector on unmount
@@ -353,8 +432,11 @@ export function createBedrockConsole<T>(
     return (
       <div className="flex flex-col h-full">
         {/* Header with primary action */}
+        {/* Sprint: extraction-pipeline-integration-v1 - Added headerContent slot for review queue button */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)]">
-          <div />
+          <div className="flex items-center gap-3">
+            {headerContent}
+          </div>
           {config.primaryAction && (
             <GlassButton
               onClick={handleCreate}

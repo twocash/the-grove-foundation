@@ -45,3 +45,9 @@ export { GlassTable } from './GlassTable';
 export { TagArray } from './TagArray';
 export { GroupedChips } from './GroupedChips';
 export { UtilityBar } from './UtilityBar';
+
+// =============================================================================
+// Form Primitives (inspector-input-fix-v1)
+// =============================================================================
+
+export { BufferedInput, BufferedTextarea } from './BufferedInput';
