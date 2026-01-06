@@ -139,9 +139,18 @@ export function useCollectionView<T extends GroveObject>(
       filtered = filtered.filter(obj => {
         const objValue = getNestedValue(obj, key);
 
-        // Handle multi-select filters
+        // Handle multi-select filters (filter value is array)
         if (Array.isArray(value)) {
+          // If object value is also an array, check for intersection
+          if (Array.isArray(objValue)) {
+            return value.some(v => objValue.includes(v));
+          }
           return value.includes(String(objValue));
+        }
+
+        // Handle array object values (filter value is single string)
+        if (Array.isArray(objValue)) {
+          return objValue.includes(value);
         }
 
         return String(objValue) === value;
