@@ -142,6 +142,11 @@ export interface PromptProvenance {
   gapAnalysisId?: string;
   generationReason?: string;
   coverageGap?: { stage?: string; lens?: string; topic?: string };
+  // Duplicated (Sprint: prompt-library-readonly-v1)
+  /** ID of the prompt this was duplicated from */
+  duplicatedFrom?: string;
+  /** ISO timestamp when this prompt was duplicated */
+  duplicatedAt?: string;
 }
 
 /**

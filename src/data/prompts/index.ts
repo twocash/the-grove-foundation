@@ -8,7 +8,10 @@ import type { PromptObject } from '@core/context-fields/types';
 import basePrompts from './base.prompts.json';
 import drChiangPrompts from './dr-chiang.prompts.json';
 import wayneTurnerPrompts from './wayne-turner.prompts.json';
-import highlightPrompts from './highlights.prompts.json'; // Sprint: kinetic-highlights-v1
+import highlightPromptsRaw from './highlights.prompts.json'; // Sprint: kinetic-highlights-v1
+
+// Extract prompts array from highlight wrapper (has { prompts: [...] } structure)
+const highlightPrompts = (highlightPromptsRaw as { prompts: PromptObject[] }).prompts || [];
 
 /**
  * All library prompts combined
@@ -17,7 +20,7 @@ export const libraryPrompts: PromptObject[] = [
   ...(basePrompts as PromptObject[]),
   ...(drChiangPrompts as PromptObject[]),
   ...(wayneTurnerPrompts as PromptObject[]),
-  ...(highlightPrompts.prompts as PromptObject[]), // Sprint: kinetic-highlights-v1
+  ...highlightPrompts, // Sprint: kinetic-highlights-v1
 ];
 
 /**
@@ -51,4 +54,4 @@ export function getActivePrompts(): PromptObject[] {
 }
 
 // Re-export for convenience
-export { basePrompts, drChiangPrompts, wayneTurnerPrompts, highlightPrompts };
+export { basePrompts, drChiangPrompts, wayneTurnerPrompts, highlightPrompts, highlightPromptsRaw };

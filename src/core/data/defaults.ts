@@ -7,12 +7,13 @@ import type { GroveObject } from '@core/schema/grove-object';
 import type { GroveObjectType } from './grove-data-provider';
 import type { Persona } from '@/data/narratives-schema';
 import type { PromptPayload } from '@core/schema/prompt';
-import type { PromptProvenance } from '@core/context-fields/types';
+import type { PromptProvenance, PromptSurface, HighlightTrigger } from '@core/context-fields/types';
 
 // Import prompt data files
 import basePrompts from '@data/prompts/base.prompts.json';
 import drChiangPrompts from '@data/prompts/dr-chiang.prompts.json';
 import wayneTurnerPrompts from '@data/prompts/wayne-turner.prompts.json';
+import highlightPrompts from '@data/prompts/highlights.prompts.json'; // Sprint: kinetic-highlights-v1
 
 const EMPTY_DEFAULTS: GroveObject<unknown>[] = [];
 
@@ -64,6 +65,9 @@ interface LegacyPrompt {
   variant?: string;
   icon?: string;
   provenance?: PromptProvenance;
+  // Sprint: kinetic-highlights-v1 - Highlight-specific fields
+  surfaces?: PromptSurface[];
+  highlightTriggers?: HighlightTrigger[];
 }
 
 // =============================================================================
@@ -129,6 +133,9 @@ function promptToGroveObject(legacy: LegacyPrompt): GroveObject<PromptPayload> {
       source: (legacy.source as 'library' | 'generated' | 'user') || 'library',
       // Map provenance from root level to payload.provenance
       provenance: legacy.provenance,
+      // Sprint: kinetic-highlights-v1 - Map highlight-specific fields
+      surfaces: legacy.surfaces,
+      highlightTriggers: legacy.highlightTriggers,
     },
   };
 }
@@ -147,10 +154,12 @@ export function getDefaults<T>(type: GroveObjectType): GroveObject<T>[] {
     case 'prompt': {
       // Transform legacy prompts to GroveObject format
       // Sprint: exploration-node-unification-v1
+      // Sprint: kinetic-highlights-v1 - Added highlightPrompts
       const allPrompts = [
         ...(basePrompts as LegacyPrompt[]),
         ...(drChiangPrompts as LegacyPrompt[]),
         ...(wayneTurnerPrompts as LegacyPrompt[]),
+        ...((highlightPrompts as { prompts: LegacyPrompt[] }).prompts),
       ];
       return allPrompts.map(promptToGroveObject) as GroveObject<T>[];
     }

@@ -1,6 +1,6 @@
 // src/bedrock/consoles/PromptWorkshop/usePromptData.ts
 // Data hook for Prompt Workshop - wraps useGroveData for console factory compatibility
-// Sprint: prompt-unification-v1
+// Sprint: prompt-unification-v1, prompt-library-readonly-v1
 
 import { useCallback, useMemo } from 'react';
 import { useGroveData } from '@core/data';
@@ -9,6 +9,56 @@ import type { PromptPayload, SequenceDefinition } from '@core/schema/prompt';
 import { deriveSequences } from '@core/schema/prompt';
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
 import { generateUUID } from '@core/versioning/utils';
+import { libraryPrompts } from '@data/prompts';
+import type { PromptObject } from '@core/context-fields/types';
+
+// =============================================================================
+// Library Prompt Converter
+// Sprint: prompt-library-readonly-v1
+// =============================================================================
+
+/**
+ * Convert PromptObject (JSON library format) to GroveObject<PromptPayload>
+ */
+function convertLibraryPrompt(prompt: PromptObject): GroveObject<PromptPayload> {
+  return {
+    meta: {
+      id: prompt.id,
+      type: 'prompt',
+      title: prompt.label,
+      description: prompt.description || '',
+      icon: prompt.icon || 'chat',
+      status: prompt.status === 'active' ? 'active' : 'draft',
+      createdAt: new Date(prompt.created).toISOString(),
+      updatedAt: new Date(prompt.modified).toISOString(),
+      tags: prompt.tags || [],
+    },
+    payload: {
+      executionPrompt: prompt.executionPrompt,
+      systemContext: prompt.systemContext,
+      topicAffinities: prompt.topicAffinities || [],
+      lensAffinities: prompt.lensAffinities || [],
+      targeting: prompt.targeting || {},
+      baseWeight: prompt.baseWeight ?? 50,
+      stats: {
+        impressions: prompt.stats?.impressions ?? 0,
+        selections: prompt.stats?.selections ?? 0,
+        completions: prompt.stats?.completions ?? 0,
+        avgEntropyDelta: prompt.stats?.avgEntropyDelta ?? 0,
+        avgDwellMs: prompt.stats?.avgDwellAfter ?? 0,
+      },
+      source: 'library', // Always library for these
+      provenance: prompt.provenance,
+      surfaces: prompt.surfaces,
+      highlightTriggers: prompt.highlightTriggers,
+    },
+  };
+}
+
+/**
+ * Memoized conversion of library prompts
+ */
+const convertedLibraryPrompts: GroveObject<PromptPayload>[] = libraryPrompts.map(convertLibraryPrompt);
 
 // =============================================================================
 // Default Prompt Factory
@@ -77,15 +127,23 @@ export interface PromptDataResult extends CollectionDataResult<PromptPayload> {
 export function usePromptData(): PromptDataResult {
   const groveData = useGroveData<PromptPayload>('prompt');
 
-  // Derive sequences from prompts
-  const sequences = useMemo(() => {
-    return deriveSequences(groveData.objects);
+  // Strangler fig pattern: Library prompts from JSON, user prompts from data layer
+  // Legacy library prompts in Supabase (source: 'library') are ignored
+  // Only user-created prompts (source: 'user') come from the data layer
+  const allObjects = useMemo(() => {
+    const userPrompts = groveData.objects.filter((p) => p.payload.source === 'user');
+    return [...convertedLibraryPrompts, ...userPrompts];
   }, [groveData.objects]);
+
+  // Derive sequences from ALL prompts (library + user)
+  const sequences = useMemo(() => {
+    return deriveSequences(allObjects);
+  }, [allObjects]);
 
   // Get prompts for a specific sequence, ordered
   const getPromptsForSequence = useCallback(
     (groupId: string): GroveObject<PromptPayload>[] => {
-      return groveData.objects
+      return allObjects
         .filter((p) => p.payload.sequences?.some((s) => s.groupId === groupId))
         .sort((a, b) => {
           const aOrder = a.payload.sequences?.find((s) => s.groupId === groupId)?.order ?? 0;
@@ -93,13 +151,13 @@ export function usePromptData(): PromptDataResult {
           return aOrder - bOrder;
         });
     },
-    [groveData.objects]
+    [allObjects]
   );
 
   // Get prompts not in any sequence
   const getUnsequencedPrompts = useCallback((): GroveObject<PromptPayload>[] => {
-    return groveData.objects.filter((p) => !p.payload.sequences?.length);
-  }, [groveData.objects]);
+    return allObjects.filter((p) => !p.payload.sequences?.length);
+  }, [allObjects]);
 
   // Adapt create: console factory expects Partial<PromptPayload>
   const create = useCallback(
@@ -115,9 +173,11 @@ export function usePromptData(): PromptDataResult {
     groveData.refetch();
   }, [groveData]);
 
-  // Duplicate prompt
+  // Duplicate prompt - ALWAYS creates a user-owned copy (Sprint: prompt-library-readonly-v1)
   const duplicate = useCallback(
     async (object: GroveObject<PromptPayload>) => {
+      const now = new Date().toISOString();
+
       const duplicated: GroveObject<PromptPayload> = {
         meta: {
           id: generateUUID(),
@@ -125,9 +185,9 @@ export function usePromptData(): PromptDataResult {
           title: `${object.meta.title} (Copy)`,
           description: object.meta.description,
           icon: object.meta.icon,
-          status: 'draft',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          status: 'draft', // Duplicates start as draft
+          createdAt: now,
+          updatedAt: now,
           tags: [...(object.meta.tags || [])],
         },
         payload: {
@@ -136,12 +196,23 @@ export function usePromptData(): PromptDataResult {
           lensAffinities: [...object.payload.lensAffinities],
           targeting: { ...object.payload.targeting },
           sequences: object.payload.sequences?.map((s) => ({ ...s })),
+          // Reset stats for the copy
           stats: {
             impressions: 0,
             selections: 0,
             completions: 0,
             avgEntropyDelta: 0,
             avgDwellMs: 0,
+          },
+          // CRITICAL: Always set source to 'user' for duplicates
+          source: 'user',
+          // Track provenance: where did this come from?
+          provenance: {
+            ...object.payload.provenance,
+            type: 'authored', // User is authoring their own version
+            reviewStatus: 'pending',
+            duplicatedFrom: object.meta.id,
+            duplicatedAt: now,
           },
         },
       };
@@ -157,7 +228,7 @@ export function usePromptData(): PromptDataResult {
   }, [groveData]);
 
   return {
-    objects: groveData.objects,
+    objects: allObjects, // Library + user prompts merged
     loading: groveData.loading,
     error: groveData.error,
     refetch,

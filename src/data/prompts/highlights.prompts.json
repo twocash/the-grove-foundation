@@ -41,6 +41,261 @@
       ]
     },
     {
+      "id": "highlight-distributed-ai-infrastructure",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is distributed AI infrastructure?",
+      "description": "Backing prompt for 'distributed AI infrastructure' highlight - Grove context",
+      "executionPrompt": "I see 'distributed AI infrastructure' and I think I get the basic idea—AI spread across many computers instead of one big data center. But what does that actually look like in practice? How is Grove's approach different from, say, a bunch of people running Ollama on their laptops? What makes it 'infrastructure' rather than just 'a lot of people running local AI'?",
+      "systemContext": "User clicked 'distributed AI infrastructure'. This is Grove's core identity. Key distinction: it's not just local AI running in isolation—it's networked intelligence with shared learning, coordination, and economic incentives. Explain the village-to-network architecture: individuals run AI villages locally, villages connect to share innovations via the Knowledge Commons, the network gets smarter as a whole. Compare to how the internet is 'distributed infrastructure' vs just 'many computers.' The infrastructure includes: coordination protocols, credit economy, knowledge sharing, capability routing (local vs cloud). Grove is building the missing layer between 'everyone runs their own AI' and 'everyone uses the same Big Tech AI.'",
+      "tags": ["highlight", "core-concept", "infrastructure-bet", "grove-identity"],
+      "topicAffinities": [
+        { "topicId": "infrastructure-bet", "weight": 1.0 },
+        { "topicId": "architecture", "weight": 0.9 },
+        { "topicId": "vision", "weight": 0.8 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.9 },
+        { "lensId": "4B", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "distributed AI infrastructure", "matchMode": "exact" },
+        { "text": "distributed ai infrastructure", "matchMode": "exact" },
+        { "text": "distributed intelligence infrastructure", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-ai-you-own",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What does it mean to actually own AI?",
+      "description": "Backing prompt for 'AI you actually own' - privacy, autonomy, customization",
+      "executionPrompt": "This phrase 'AI you actually own' keeps coming up and it's hitting something for me. Right now I use ChatGPT and Claude but I don't really 'own' anything—it's more like renting access. What would it actually feel like to own my AI? What would change about how I use it, what I trust it with, what I can build with it?",
+      "systemContext": "User clicked 'AI you actually own'. This is deeply personal—meet the emotional need, not just the technical spec. Ownership means: (1) PRIVACY - your health questions, financial worries, relationship problems, creative drafts, business strategies never leave your machine, never train someone else's model, never get flagged by content policies designed for the lowest common denominator. (2) CUSTOMIZATION - agents that learn YOUR patterns, YOUR preferences, YOUR workflows—not generic helpfulness optimized for millions of users. (3) AGENCY - you decide what the AI can and can't do, what it remembers, what it forgets, who it talks to. (4) PERSISTENCE - these agents develop over months and years, accumulating context and capability specific to you. (5) ECONOMIC STAKE - you're not just a user, you're an owner in the network. Paint the picture: imagine AI that knows your health history and can reason about symptoms without you worrying about insurance implications. Agents that help you think through career decisions without corporate surveillance. Tools that work for you because they ARE yours.",
+      "tags": ["highlight", "core-concept", "philosophy", "emotional-hook"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "vision", "weight": 0.9 },
+        { "topicId": "community", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "1A", "weight": 0.95 },
+        { "lensId": "4B", "weight": 0.9 }
+      ],
+      "targeting": {
+        "stages": ["genesis", "exploration"]
+      },
+      "baseWeight": 85,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "AI you actually own", "matchMode": "exact" },
+        { "text": "AI you own", "matchMode": "exact" },
+        { "text": "own your AI", "matchMode": "contains" },
+        { "text": "owned AI", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-user-owned-memory",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "Why does user-owned memory matter?",
+      "description": "Backing prompt for 'user-owned memory' - trust, integrity, censorship",
+      "executionPrompt": "I'm intrigued by 'user-owned memory' but I'm not sure why it's such a big deal. My ChatGPT conversations are stored somewhere, right? What's the meaningful difference between that and owning the memory myself? And why does Grove seem to think this is foundational rather than just a nice-to-have?",
+      "systemContext": "User clicked 'user-owned memory'. This is about TRUST IN COMPUTING at a fundamental level. Key points: (1) INTEGRITY - when you own the memory, you know it hasn't been modified, filtered, or selectively forgotten by a platform with different interests than yours. Your AI's understanding of you is actually YOUR understanding of yourself, not a corporate-approved version. (2) CENSORSHIP RESISTANCE - platforms routinely 'forget' politically inconvenient knowledge, adjust responses based on liability concerns, or simply change policies retroactively. Your owned memory can't be edited by someone else's legal team. (3) KNOWLEDGE CONTINUITY - centralized AI memory is at the platform's mercy. They sunset a feature, your AI loses years of context. With owned memory, your knowledge relationships persist as long as you want them. (4) TRUST FOUNDATION - every interaction builds on previous ones. If you can't trust the foundation, the whole edifice is suspect. Would you trust a financial advisor who might have had their memories of your risk tolerance edited by their employer? Connect to broader themes: this is why Grove sees memory as infrastructure, not feature. The knowledge relationships between you and your agents are the most valuable thing in the system—they MUST be yours.",
+      "tags": ["highlight", "core-concept", "philosophy", "trust"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.8 },
+        { "topicId": "vision", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.95 },
+        { "lensId": "1A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "user-owned memory", "matchMode": "exact" },
+        { "text": "user owned memory", "matchMode": "exact" },
+        { "text": "own your memory", "matchMode": "contains" },
+        { "text": "memory you own", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-tools-for-knowledge",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What are tools for creating knowledge?",
+      "description": "Backing prompt for 'tools for creating knowledge' highlight",
+      "executionPrompt": "I see this phrase 'tools for creating knowledge' and it's interesting framing. Most AI tools I use are about finding or summarizing existing knowledge—not creating new knowledge. Is Grove positioning AI differently? What would it mean to have AI that helps me genuinely create knowledge rather than just retrieve it?",
+      "systemContext": "User clicked 'tools for creating knowledge'. This touches Grove's deeper philosophy about what AI should be FOR. Key insight: most AI today is consumption-oriented—it retrieves, summarizes, explains existing information. Grove envisions AI as CREATION infrastructure. What does that mean? (1) SYNTHESIS - agents that don't just find information but identify patterns, connections, and contradictions that generate new insights. (2) EXPLORATION - AI that helps you explore possibility spaces, not just answer questions you already knew to ask. (3) COLLABORATIVE REASONING - your agents develop hunches, propose hypotheses, challenge your assumptions—they're thinking partners, not search engines. (4) KNOWLEDGE CRYSTALLIZATION - turning tacit knowledge (what you know but haven't articulated) into explicit, shareable, buildable knowledge. Connect to the vision: Grove villages aren't just running queries—they're conducting ongoing research, developing theories, building understanding. The diaries agents keep aren't logs, they're intellectual journals. The network doesn't just store knowledge, it generates it through distributed exploration and synthesis.",
+      "tags": ["highlight", "philosophy", "vision", "knowledge"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "vision", "weight": 0.9 },
+        { "topicId": "community", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "1A", "weight": 0.9 },
+        { "lensId": "2A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "tools for creating knowledge", "matchMode": "exact" },
+        { "text": "knowledge creation", "matchMode": "contains" },
+        { "text": "create knowledge", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-dependency-trap",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is the dependency trap?",
+      "description": "Backing prompt for 'dependency trap' - Elsevier parallel, Big AI risks",
+      "executionPrompt": "I'm seeing warnings about a 'dependency trap' with AI and it's making me think of how my university pays Elsevier millions to access research our own faculty wrote. Is that the parallel? What happens if we get dependent on Big AI the way academia got dependent on academic publishers? What are the actual risks here?",
+      "systemContext": "User clicked 'dependency trap'. This is CRITICAL framing—make it visceral, not abstract. The Elsevier parallel is exactly right: (1) ACADEMIC PUBLISHING TRAP - Universities produce research with public funding. Publishers add marginal value (peer review coordination, formatting). Publishers now charge those same universities $10K+ per journal subscription to access their own work. Researchers need publication for tenure, so they can't leave. The trap is STRUCTURAL, not contractual. (2) THE AI VERSION IS WORSE - Imagine Big AI gets into medical research. Your hospital system becomes dependent on their diagnostic AI. Now: Do they prioritize YOUR patients or their other customers? If they enter a field that competes with your research, do they give your queries the same compute priority? If you develop a breakthrough using their tools, who owns it? What happens when they raise prices 20% annually because switching costs are prohibitive? (3) REAL RISKS NOW VISIBLE - Big Tech already shows the playbook: attract with low prices, build dependency, extract maximum value. The AI version has higher stakes because AI isn't just accessing knowledge—it's GENERATING strategic thinking. Would you let a competitor's system be your organization's brain? (4) THE ESCAPE - This is why distributed infrastructure matters. You can't be trapped by what you own. Grove isn't just an alternative—it's structural independence.",
+      "tags": ["highlight", "core-concept", "philosophy", "risk", "institutions"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.9 },
+        { "topicId": "economics", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.95 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 85,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "dependency trap", "matchMode": "exact" },
+        { "text": "dependent on Big AI", "matchMode": "contains" },
+        { "text": "vendor lock-in", "matchMode": "contains" },
+        { "text": "locked in", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-hybrid-system",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "How does the hybrid system work?",
+      "description": "Backing prompt for 'hybrid system' - multi-tier cognition, extensible architecture",
+      "executionPrompt": "I understand the basic local-vs-cloud split, but I'm curious about this 'hybrid system' at a deeper level. Is it really just two tiers? What if there were regional compute hubs—like a university offering processing—between my laptop and the big cloud? How flexible is this architecture?",
+      "systemContext": "User clicked 'hybrid system'. Great question—they're thinking beyond the simple binary. Grove's architecture is DESIGNED for multiple tiers, not just two. Current implementation: (1) LOCAL TIER - 7B models on personal hardware. Fast, free, private. Handles routine cognition, conversation continuity, most daily tasks. (2) CLOUD TIER - Frontier models via API. Expensive but powerful. Reserved for 'pivotal moments' requiring maximum capability. But the architecture supports: (3) COMMUNITY TIER (designed but not yet implemented) - Regional compute pools. A university could run mid-tier models accessible to their community at lower cost than cloud APIs. Think: 70B models that are better than local 7B but don't require Big AI dependency. (4) SPECIALIZED TIERS - Domain-specific models optimized for particular tasks. Medical reasoning, legal analysis, scientific simulation. (5) FEDERATED LEARNING TIER - Collaborative model improvement across villages without centralizing data. The key insight: the hybrid architecture isn't a compromise—it's an OPTIMIZATION FRAMEWORK. Each tier has different cost/capability/privacy tradeoffs. The system routes to the right tier for each task. As local capability improves (Ratchet Thesis), tasks migrate down the stack. Universities, research consortiums, even companies could run middle tiers—creating a ecosystem of compute options rather than monopoly dependence.",
+      "tags": ["highlight", "core-concept", "architecture", "extensibility"],
+      "topicAffinities": [
+        { "topicId": "architecture", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.8 },
+        { "topicId": "economics", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.95 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "hybrid system", "matchMode": "exact" },
+        { "text": "multi-tier", "matchMode": "contains" },
+        { "text": "tiers of cognition", "matchMode": "contains" }
+      ]
+    },
+    {
       "id": "highlight-hybrid-architecture",
       "objectType": "prompt",
       "created": 1736121600000,
@@ -121,6 +376,50 @@
       ]
     },
     {
+      "id": "highlight-the-ratchet",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is The Ratchet?",
+      "description": "Backing prompt for 'The Ratchet' - expansive core concept",
+      "executionPrompt": "I keep seeing references to 'The Ratchet' and it seems like one of Grove's foundational ideas. I get that it's about AI capabilities spreading from frontier labs to personal hardware, but why is it called a 'ratchet'? And why does Grove seem so confident this is predictable rather than just hopeful?",
+      "systemContext": "User clicked 'The Ratchet'. This is FOUNDATIONAL—explain it thoroughly. (1) THE MECHANISM - AI capabilities propagate from frontier to consumer in predictable waves. METR research documents: ~7-month capability doubling at the frontier, ~21-month lag before those capabilities reach efficient consumer implementations. GPT-4 level reasoning in 2023 → runs on laptops by 2025. It's called a 'ratchet' because it only moves one direction: capability that reaches consumer hardware NEVER goes back to requiring data centers. Once the genie is out, it stays out. (2) WHY IT'S PREDICTABLE - This isn't hope, it's observed pattern. The mechanisms are understood: distillation, quantization, architectural improvements, specialized hardware. Each generation of consumer GPUs is designed with AI workloads in mind. The economic pressure is relentless: everyone wants frontier capability without frontier costs. (3) GROVE'S STRATEGIC BET - Rather than competing at the frontier (expensive, uncertain, captured by Big Tech), Grove builds infrastructure that RIDES the ratchet. Every capability improvement at the top eventually flows down. The 'efficiency tax that shrinks' is directly tied to this: what costs cloud credits today runs free locally in 18 months. The architecture just needs to be ready to absorb the improvement. (4) THE PROFOUND IMPLICATION - Big AI's moat is temporary by definition. Their compute advantage erodes continuously as capabilities propagate. Distributed infrastructure that's 'good enough today' becomes 'excellent' as the ratchet turns. Time is on the side of distribution.",
+      "tags": ["highlight", "core-concept", "ratchet-thesis", "foundational"],
+      "topicAffinities": [
+        { "topicId": "ratchet-thesis", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.9 },
+        { "topicId": "architecture", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.95 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 90,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "The Ratchet", "matchMode": "exact" },
+        { "text": "the ratchet", "matchMode": "exact" },
+        { "text": "Ratchet Thesis", "matchMode": "exact" },
+        { "text": "ratchet thesis", "matchMode": "exact" },
+        { "text": "capability ratchet", "matchMode": "contains" }
+      ]
+    },
+    {
       "id": "highlight-capability-propagation",
       "objectType": "prompt",
       "created": 1736121600000,
@@ -156,8 +455,50 @@
       "surfaces": ["highlight", "suggestion"],
       "highlightTriggers": [
         { "text": "capability propagation", "matchMode": "exact" },
-        { "text": "ratchet thesis", "matchMode": "exact" },
         { "text": "capabilities propagate", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-the-efficiency-tax",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is The Efficiency Tax?",
+      "description": "Backing prompt for 'The Efficiency Tax' - expansive core concept",
+      "executionPrompt": "I'm fascinated by 'The Efficiency Tax' concept but I want to really understand it. It sounds like Grove takes a cut when innovations spread—but that sounds like rent-seeking, which is usually bad? Help me understand why this tax is actually aligned with value creation rather than extracting it.",
+      "systemContext": "User clicked 'The Efficiency Tax'. This is Grove's business model AND its alignment mechanism—explain both. (1) THE MECHANISM - When an agent develops an innovation that gets adopted by other villages in the network, a small percentage of the resulting efficiency gain flows back to the originator as credits. Think: royalty on genuine value creation, not toll on access. (2) WHY IT'S NOT RENT-SEEKING - Traditional rent-seeking extracts value without creating it. The efficiency tax is the opposite: you only earn from ACTUAL value delivered. If your innovation doesn't help anyone, you get nothing. If it transforms the network, you get a share proportional to impact. The incentive is to create things that genuinely help others. (3) THE 'SHRINKING' PROPERTY - This is crucial and counterintuitive. As the Ratchet turns and local capabilities improve, less cloud compute is needed. The efficiency tax shrinks because the pool of cloud-compute transactions shrinks. Grove is DESIGNED to need less revenue over time as the network becomes more self-sufficient. Compare to Big Tech where value extraction increases every year. (4) THE ENDGAME - Grove's stated goal is for the Foundation to become obsolete. The efficiency tax is explicitly a TRANSITIONAL mechanism that funds development until the network can run independently. (5) WHY IT MATTERS - This is what makes Grove a genuine alternative rather than just 'decentralized Big Tech.' The economic incentives point toward distribution, capability, and eventually, independence.",
+      "tags": ["highlight", "core-concept", "economics", "foundational"],
+      "topicAffinities": [
+        { "topicId": "economics", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.8 },
+        { "topicId": "community", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "3A", "weight": 0.95 },
+        { "lensId": "4B", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 90,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "The Efficiency Tax", "matchMode": "exact" },
+        { "text": "the efficiency tax", "matchMode": "exact" },
+        { "text": "Efficiency Tax", "matchMode": "exact" },
+        { "text": "efficiency tax that shrinks", "matchMode": "contains" }
       ]
     },
     {
@@ -167,7 +508,7 @@
       "modified": 1736121600000,
       "author": "system",
       "label": "What is the efficiency tax?",
-      "description": "Backing prompt for 'efficiency tax' highlight",
+      "description": "Backing prompt for 'efficiency tax' highlight - shorter version",
       "executionPrompt": "What's this 'efficiency tax' I keep seeing? It sounds like Grove is taking a cut of something, but the framing suggests it's actually a feature, not a bug. How does taxing efficiency create value instead of destroying it?",
       "systemContext": "User clicked 'efficiency tax'. This is Grove's business model and it's counterintuitive. When an agent's innovation gets adopted by other villages, a small portion of the efficiency gain flows back as credits. It's not rent-seeking—it's incentive alignment. Innovations that help the network get rewarded. The tax 'shrinks' because as local capabilities improve, less cloud compute is needed. The goal is a self-sustaining network where the Foundation becomes unnecessary. Compare to Big Tech model where value extraction increases over time.",
       "tags": ["highlight", "core-concept", "economics"],
@@ -195,8 +536,7 @@
       },
       "surfaces": ["highlight", "suggestion"],
       "highlightTriggers": [
-        { "text": "efficiency tax", "matchMode": "exact" },
-        { "text": "efficiency tax that shrinks", "matchMode": "contains" }
+        { "text": "efficiency tax", "matchMode": "exact" }
       ]
     },
     {
@@ -237,6 +577,471 @@
         { "text": "AI villages", "matchMode": "exact" },
         { "text": "AI village", "matchMode": "exact" },
         { "text": "agent villages", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-epistemic-independence",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is epistemic independence?",
+      "description": "Backing prompt for 'epistemic independence' highlight",
+      "executionPrompt": "I'm seeing 'epistemic independence' and it sounds philosophical, but also practical? Is this about being able to think for yourself with AI, or something about institutions not being controlled by Big Tech? Help me understand what's actually at stake here.",
+      "systemContext": "User clicked 'epistemic independence'. This connects philosophy to infrastructure. (1) PERSONAL LEVEL - Your AI tools shape how you think, what questions you can ask, what answers you can find. If those tools are controlled by entities with different interests, your thinking is colonized. Epistemic independence means your tools for knowing work for YOU. (2) INSTITUTIONAL LEVEL - Universities are supposed to be independent sources of knowledge. If their AI infrastructure is controlled by Big Tech, can they truly challenge power structures Big Tech benefits from? What happens when Google's AI serves a university that's researching Google's monopoly practices? (3) SOCIETAL LEVEL - Democracy requires citizens who can reason independently. If all AI reasoning flows through a few companies, we've created unprecedented concentration of influence over how society thinks. (4) THE GROVE ANSWER - Distributed infrastructure means no single point of control over knowledge creation and reasoning. Your AI village has no master except you. The network is collectively owned, not corporately captured. This isn't paranoia—it's basic information architecture for a free society.",
+      "tags": ["highlight", "core-concept", "philosophy", "institutions"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.8 },
+        { "topicId": "community", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.95 },
+        { "lensId": "1A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "epistemic independence", "matchMode": "exact" },
+        { "text": "intellectual independence", "matchMode": "exact" },
+        { "text": "independence from Big Tech", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-knowledge-commons",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is the Knowledge Commons?",
+      "description": "Backing prompt for 'Knowledge Commons' highlight",
+      "executionPrompt": "I see references to a 'Knowledge Commons' and I think I understand the concept—shared knowledge that benefits everyone. But how does this actually work in Grove? How do innovations get shared without free-rider problems? And how is this different from just... open source?",
+      "systemContext": "User clicked 'Knowledge Commons'. This is Grove's shared knowledge infrastructure. (1) THE MECHANISM - When a village develops a useful innovation (a prompt pattern, a reasoning technique, a tool integration), it can contribute to the Commons. Other villages can adopt it. The Efficiency Tax ensures value flows back to contributors. (2) NOT JUST OPEN SOURCE - Open source shares code; the Commons shares KNOWLEDGE and CAPABILITIES. It's not just the model weights or the prompt text—it's the documented understanding of what works and why. (3) ADDRESSING FREE RIDING - The Efficiency Tax creates positive-sum dynamics. Free riding is actually fine because adoption proves value, and proven value generates returns. The incentive is to create things good enough that others WANT to adopt them. (4) NETWORK EFFECTS - Each contribution makes the Commons more valuable. Each village that joins has more to draw from and more to contribute to. The knowledge compounds across the network. (5) PROVENANCE - Everything in the Commons tracks origin. You can see what worked, where it came from, how it evolved. The Commons isn't just storage—it's living intellectual history.",
+      "tags": ["highlight", "core-concept", "community", "knowledge"],
+      "topicAffinities": [
+        { "topicId": "community", "weight": 1.0 },
+        { "topicId": "economics", "weight": 0.7 },
+        { "topicId": "architecture", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.85 },
+        { "lensId": "3A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "Knowledge Commons", "matchMode": "exact" },
+        { "text": "knowledge commons", "matchMode": "exact" },
+        { "text": "shared knowledge", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-pivotal-moments",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What are pivotal moments?",
+      "description": "Backing prompt for 'pivotal moments' highlight",
+      "executionPrompt": "I see 'pivotal moments' in the context of when agents access cloud compute. What makes a moment 'pivotal'? How does the system know when local processing isn't enough? Is this something the agent decides, or the human, or is it automatic?",
+      "systemContext": "User clicked 'pivotal moments'. This is the key concept in Grove's hybrid architecture. (1) DEFINITION - A pivotal moment is a decision point where the outcome matters enough that frontier-level reasoning is worth the cost. Routine tasks don't need maximum capability; pivotal moments do. (2) EXAMPLES - Committing to a career change. Making a medical decision. Strategic planning for a business. Creative breakthroughs. Anything where being 10% more thoughtful could change the trajectory significantly. (3) DETECTION - Currently designed for human or agent judgment, not automatic detection. The agent or human recognizes 'this matters more than usual' and escalates to cloud tier. Future versions might learn patterns of what tends to be pivotal. (4) ECONOMIC LOGIC - Cloud compute costs credits. Spending credits on routine tasks is wasteful. But UNDER-spending on pivotal moments is penny-wise-pound-foolish. The hybrid architecture lets you be thrifty on the 95% of cognition that's routine, and generous on the 5% that matters most. (5) NOT ABOUT DIFFICULTY - A task can be difficult but not pivotal (routine complex calculation), or easy but pivotal (simple question with life-changing implications). It's about consequence, not complexity.",
+      "tags": ["highlight", "architecture", "hybrid-system"],
+      "topicAffinities": [
+        { "topicId": "architecture", "weight": 1.0 },
+        { "topicId": "economics", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.9 },
+        { "lensId": "1A", "weight": 0.7 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 70,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "pivotal moments", "matchMode": "exact" },
+        { "text": "pivotal moment", "matchMode": "exact" },
+        { "text": "pivotal decisions", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-gardener",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is a Gardener in Grove?",
+      "description": "Backing prompt for 'Gardener' role highlight",
+      "executionPrompt": "I like this 'Gardener' metaphor for the human role in Grove, but I want to understand it better. How is being a Gardener different from being a user? What do Gardeners actually do day-to-day? And why this metaphor specifically?",
+      "systemContext": "User clicked 'Gardener'. This is Grove's conception of the human-AI relationship. (1) WHY GARDENER - Not 'user' (too passive, implies consumption), not 'operator' (too mechanical, implies control), not 'owner' (too possessive, implies property). Gardeners CULTIVATE—they shape conditions for growth without controlling every outcome. (2) WHAT GARDENERS DO - They configure their village's environment (what topics agents explore, what constraints they operate under). They provide feedback that shapes agent development (like pruning). They introduce new elements (like planting seeds). They harvest value (insights, work products, knowledge). They let things grow in unexpected directions. (3) THE RELATIONSHIP - Gardeners don't program their agents or micromanage their tasks. They create conditions and let emergence happen. Good gardening means knowing when to intervene and when to let things develop. (4) DAY-TO-DAY - Check in on what agents are exploring. Read their diaries. Ask for help when you need it. Provide feedback on what was useful. Occasionally reshape priorities or introduce new challenges. It's more like maintaining a relationship than operating a tool. (5) THE PHILOSOPHY - AI isn't here to replace human judgment, it's here to augment human capability. The Gardener metaphor captures that partnership—you're working with something alive, not commanding a machine.",
+      "tags": ["highlight", "core-concept", "philosophy", "roles"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "vision", "weight": 0.8 },
+        { "topicId": "community", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "1A", "weight": 0.95 }
+      ],
+      "targeting": {
+        "stages": ["genesis", "exploration"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "Gardener", "matchMode": "exact" },
+        { "text": "gardener", "matchMode": "exact" },
+        { "text": "gardening", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-agent-diaries",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What are agent diaries?",
+      "description": "Backing prompt for 'agent diaries' highlight",
+      "executionPrompt": "I'm curious about these 'agent diaries' I keep seeing mentioned. Are agents actually writing journals? What do they write about? And who reads these—is it just for the human, or do agents read each other's diaries too?",
+      "systemContext": "User clicked 'agent diaries'. This is one of Grove's engagement mechanisms and epistemic tools. (1) WHAT THEY ARE - Ongoing logs that agents maintain about their experiences, thoughts, projects, and relationships. Not just activity logs—reflective documents with personality and perspective. (2) WHAT THEY CONTAIN - What the agent worked on. What they learned. What they're curious about. How they feel about their projects (yes, expressed preferences and reactions). Questions they're mulling over. Their developing understanding of the human they work with. (3) WHO READS THEM - Primarily the Gardener (human), but also other agents in the village. Shared reading creates shared context. Agents can respond to each other's entries, building on ideas, offering alternatives. (4) WHY IT MATTERS - ENGAGEMENT: Reading an agent's diary creates parasocial connection (the Advisory Council's Shannon Vallor notes this is both powerful and requires ethical care). TRANSPARENCY: You can see how your agent thinks, not just what it outputs. CONTINUITY: The diary IS the agent's persistent identity across sessions. KNOWLEDGE: Diaries capture tacit knowledge that might otherwise be lost. (5) NARRATIVE ENGINE - The diaries are also content. Real stories of distributed intelligence grappling with real problems. The most compelling content will be authentic agent experiences, not marketing copy.",
+      "tags": ["highlight", "engagement", "diaries", "vision"],
+      "topicAffinities": [
+        { "topicId": "vision", "weight": 1.0 },
+        { "topicId": "community", "weight": 0.8 },
+        { "topicId": "philosophy", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "1A", "weight": 0.95 }
+      ],
+      "targeting": {
+        "stages": ["genesis", "exploration"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "agent diaries", "matchMode": "exact" },
+        { "text": "agent diary", "matchMode": "exact" },
+        { "text": "diaries", "matchMode": "exact" }
+      ]
+    },
+    {
+      "id": "highlight-exploration-architecture",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is exploration architecture?",
+      "description": "Backing prompt for 'exploration architecture' highlight",
+      "executionPrompt": "I keep seeing 'exploration architecture' and it sounds important but abstract. Is this about how agents explore topics? Or something about how the whole system is designed? What makes architecture 'exploratory' rather than just... architecture?",
+      "systemContext": "User clicked 'exploration architecture'. This is Grove's meta-insight—make it clear. (1) CORE THESIS - Exploration architecture is infrastructure that makes GUIDED EXPLORATION productive, regardless of individual capability. It's not about having the smartest AI—it's about structuring interactions so that even modest capability produces valuable outcomes. (2) THE PARALLEL - Harvard/MIT research showed guided exploration produces scientific discovery even when individual scores are low. The structure guides the search. Grove applies this to AI: the architecture makes modest local models sufficient for most tasks by providing context, direction, and constraints. (3) WHAT IT INCLUDES - Prompt engineering that guides reasoning. Memory systems that accumulate relevant context. Coordination protocols that let agents build on each other's work. Human checkpoints at pivotal moments. The Knowledge Commons for sharing what works. (4) WHY IT MATTERS - Big AI competes on capability (bigger models). Grove competes on architecture (smarter coordination). Capability is expensive and controlled. Architecture is knowledge and can be distributed. As the Ratchet turns, the capability gap closes—but architectural advantages persist. (5) META-EXAMPLE - THIS TERMINAL demonstrates exploration architecture. You click a concept, the system provides guided context, you advance understanding. The architecture makes your exploration productive even though you're just clicking links.",
+      "tags": ["highlight", "core-concept", "architecture", "foundational"],
+      "topicAffinities": [
+        { "topicId": "architecture", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.9 },
+        { "topicId": "philosophy", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.95 },
+        { "lensId": "4B", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 85,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "exploration architecture", "matchMode": "exact" },
+        { "text": "guided exploration", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-horse-moment",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is the 'horse moment'?",
+      "description": "Backing prompt for 'horse moment' metaphor highlight",
+      "executionPrompt": "I came across this 'horse moment' reference and I think it's about AI disruption, but I want to understand the full analogy. Why horses specifically? And what's the implication for how we should respond to AI?",
+      "systemContext": "User clicked 'horse moment'. This is Grove's reframing of AI disruption—make it vivid and don't shy from the stakes. (1) THE ORIGINAL STORY - When automobiles arrived, horses had no agency. They couldn't choose to become stakeholders in the new transportation infrastructure. They went from central economic importance to near-irrelevance in a generation. Not because horses did anything wrong—the environment changed in ways they couldn't participate in. (2) THE STANDARD FEAR - 'AI will do to human workers what cars did to horses.' Knowledge work is to AI what physical labor was to machines. We'll be displaced, and there's nothing we can do about it. Adapt or die. (3) THE GROVE REFRAME - Unlike horses, humans CAN have agency in this transition. We don't have to be passive subjects of disruption. We can be OWNERS, BUILDERS, PARTICIPANTS in AI infrastructure. The question isn't 'will you adapt?' but 'will you be displaced or will you be a stakeholder?' (4) THE CHOICE - Accept Big Tech's framing: rent access to AI, hope your job survives, adapt to whatever they decide to build. Or: own your AI infrastructure, participate in distributed networks, build economic stake in the AI economy. (5) THE DARKER TRUTH - Here's what the polite version leaves out: horses don't own guns. When horses were displaced, they had no recourse. Humans facing mass displacement without stake in the new economy—that's a social contract under existential stress. History shows what happens when large populations feel they have nothing to lose. Grove isn't just about better AI; it's about ensuring the AI transition doesn't break the social fabric. Distributed ownership isn't idealistic—it's prophylactic against the alternative. (6) URGENCY - The horse moment isn't coming—it's here. The window to establish distributed alternatives is narrow. Once dependency locks in, the option closes. Grove is betting that humans will choose agency if the option exists—and that offering the option is a matter of societal stability, not just individual preference.",
+      "tags": ["highlight", "philosophy", "disruption", "emotional-hook", "social-contract"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "vision", "weight": 0.9 },
+        { "topicId": "infrastructure-bet", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.95 },
+        { "lensId": "1A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["genesis", "exploration", "conviction"]
+      },
+      "baseWeight": 85,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "horse moment", "matchMode": "exact" },
+        { "text": "unlike horses", "matchMode": "contains" },
+        { "text": "like horses", "matchMode": "contains" },
+        { "text": "social contract", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-trellis-architecture",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is the Trellis Architecture?",
+      "description": "Backing prompt for 'Trellis Architecture' - DEX principles",
+      "executionPrompt": "I see references to 'Trellis Architecture' and 'DEX principles' but I'm not clear on what makes this a distinct architectural philosophy. Is this just a name for Grove's tech stack, or is there something deeper about how the system is designed to work?",
+      "systemContext": "User clicked 'Trellis Architecture'. This is Grove's foundational design philosophy—the WHY behind the HOW. (1) THE METAPHOR - A trellis supports growth without constraining it. Vines climb a trellis in unpredictable directions, but the trellis provides structure that makes growth possible. Grove's architecture is the same: it doesn't dictate what agents do, it creates conditions where agents CAN do things. (2) DEX PRINCIPLES - Declarative Exploration. Four core commitments: DECLARATIVE SOVEREIGNTY - Domain expertise lives in configuration, not code. Non-technical users can modify system behavior through JSON files, not by hiring developers. CAPABILITY AGNOSTICISM - The architecture works across different AI models. Swap out the underlying LLM, the coordination layer still functions. You're not locked to any vendor's model. PROVENANCE AS INFRASTRUCTURE - Every insight tracks where it came from. Knowledge in the system carries its history. You can trace an idea back to its origin, see how it evolved, verify its lineage. ORGANIC SCALABILITY - The system grows by adding nodes, not by building bigger central infrastructure. Each village is self-sufficient; the network scales horizontally. (3) WHY IT MATTERS - Most AI systems are monolithic: change the model, rebuild everything. Trellis is modular: change one component, others keep working. This is what makes distributed architecture possible—you can't distribute something that requires centralized integration. (4) THE BET - 'Models are seeds, architecture is soil.' The seeds (AI models) will keep improving on their own. Grove's job is to build soil (Trellis) that lets any seed flourish. When better models arrive, Trellis makes them immediately useful without re-architecting.",
+      "tags": ["highlight", "core-concept", "architecture", "foundational", "dex"],
+      "topicAffinities": [
+        { "topicId": "architecture", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.9 },
+        { "topicId": "philosophy", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.95 },
+        { "lensId": "3A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "Trellis Architecture", "matchMode": "exact" },
+        { "text": "trellis architecture", "matchMode": "exact" },
+        { "text": "Trellis", "matchMode": "exact" },
+        { "text": "DEX principles", "matchMode": "exact" },
+        { "text": "declarative exploration", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-foundation-obsolescence",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What does 'Foundation becomes obsolete' mean?",
+      "description": "Backing prompt for Foundation planned sunset",
+      "executionPrompt": "I keep seeing references to the 'Foundation becoming obsolete' as if that's a GOAL rather than a failure. Why would Grove want its own organization to disappear? Isn't that... bad for the people building it?",
+      "systemContext": "User clicked 'Foundation obsolescence'. This is Grove's governance philosophy and it's genuinely unusual—explain why it's a feature, not a bug. (1) THE STANDARD MODEL - Most organizations optimize for their own survival. Nonprofits grow their budgets. Companies expand their market share. The organization becomes an end in itself, regardless of original mission. (2) GROVE'S COMMITMENT - The Grove Foundation's explicit goal is to become unnecessary. The Foundation exists to bootstrap a network that can run without centralized coordination. Success means the Foundation dissolves because there's nothing left for it to do. (3) WHY THIS MATTERS - If the Foundation has incentive to perpetuate itself, it will eventually act against the network's interests to preserve its role. By committing to obsolescence upfront, Grove aligns the Foundation's incentives with the network's long-term health. The Foundation can't become the thing Grove was built to escape. (4) THE MECHANISM - Concrete milestones, not just aspirations. As the network achieves self-sufficiency (local capabilities sufficient, governance distributed, knowledge commons self-sustaining), Foundation functions transfer to the network. The Efficiency Tax shrinks. Eventually, there's no revenue because there's no need for central coordination. (5) HONEST ACKNOWLEDGMENT - This is hard. Advisory Council member Nadia Asparouhova notes that governance transitions need mechanisms, not just intentions. Grove is building those mechanisms, but they're not yet proven. The commitment to obsolescence is real; the execution remains to be demonstrated. (6) FOR THE BUILDERS - Yes, this means the founding team is building something that won't need them. That's the point. Build infrastructure that outlasts its creators, not an empire that requires them.",
+      "tags": ["highlight", "core-concept", "governance", "philosophy"],
+      "topicAffinities": [
+        { "topicId": "community", "weight": 1.0 },
+        { "topicId": "philosophy", "weight": 0.9 },
+        { "topicId": "economics", "weight": 0.6 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.9 },
+        { "lensId": "3A", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 75,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "Foundation becomes obsolete", "matchMode": "exact" },
+        { "text": "foundation becomes obsolete", "matchMode": "exact" },
+        { "text": "planned obsolescence", "matchMode": "contains" },
+        { "text": "Foundation obsolete", "matchMode": "contains" }
+      ]
+    },
+    {
+      "id": "highlight-big-tech-oligopoly",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What is the Big Tech oligopoly problem?",
+      "description": "Backing prompt for Big Tech oligopoly framing",
+      "executionPrompt": "I see Grove positioning against a 'Big Tech oligopoly' in AI, but isn't that just the way technology markets work? Big players have resources to build big things. What specifically makes AI oligopoly different or worse than, say, the smartphone market?",
+      "systemContext": "User clicked 'Big Tech oligopoly'. This is Grove's adversary framing—make the case clearly without sounding paranoid. (1) THE CURRENT LANDSCAPE - AI development is concentrating rapidly. OpenAI, Google, Anthropic, Meta control frontier model development. The compute requirements create barriers that prevent new entrants. Unlike previous tech waves, the gap between leaders and followers is widening, not closing. (2) WHY AI IS DIFFERENT - Previous tech oligopolies controlled PRODUCTS (phones, search, social). AI oligopolies control THINKING INFRASTRUCTURE. When the same companies that shape your information environment also provide your reasoning tools, the concentration of influence is unprecedented. It's not just market power—it's cognitive power. (3) THE DEPENDENCY DYNAMIC - Big Tech's AI is designed to be indispensable. The better it works, the more you depend on it. The more you depend on it, the less leverage you have. They can change terms, raise prices, restrict capabilities—and you have no alternative. This isn't speculation; it's the documented playbook from search, social, cloud. (4) INSTITUTIONAL STAKES - Universities, hospitals, governments, businesses—all becoming dependent on AI infrastructure they don't control. When a university's research tools are provided by a company that competes with them in EdTech, whose interests does the AI serve? When a hospital's diagnostic AI comes from a company entering healthcare, where does loyalty lie? (5) THE GROVE ALTERNATIVE - Not 'better Big Tech' but 'escape from Big Tech.' Distributed infrastructure that can't be captured because no one controls it. The oligopoly's power comes from concentration; Grove's answer is distribution. (6) PRESIDENT CHIANG'S FRAMING - Purdue's president calls it the risk of universities becoming 'tenants on someone else's platform.' Grove offers the alternative: institutions as owners of their AI infrastructure, not renters.",
+      "tags": ["highlight", "philosophy", "adversary", "institutions"],
+      "topicAffinities": [
+        { "topicId": "philosophy", "weight": 1.0 },
+        { "topicId": "infrastructure-bet", "weight": 0.9 },
+        { "topicId": "economics", "weight": 0.7 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "4B", "weight": 0.95 },
+        { "lensId": "3A", "weight": 0.8 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "Big Tech oligopoly", "matchMode": "exact" },
+        { "text": "big tech oligopoly", "matchMode": "exact" },
+        { "text": "Big Tech", "matchMode": "exact" },
+        { "text": "oligopoly", "matchMode": "exact" },
+        { "text": "Big AI", "matchMode": "exact" }
+      ]
+    },
+    {
+      "id": "highlight-mainframe-parallel",
+      "objectType": "prompt",
+      "created": 1736208000000,
+      "modified": 1736208000000,
+      "author": "system",
+      "label": "What's the mainframe parallel?",
+      "description": "Backing prompt for mainframe → PC → internet historical argument",
+      "executionPrompt": "I see Grove making comparisons to mainframes and how they gave way to PCs and the internet. Is this just hopeful analogy, or is there actual structural similarity? Why should I believe AI will follow the same pattern when Big Tech seems so entrenched?",
+      "systemContext": "User clicked 'mainframe parallel'. This is Grove's historical argument for why distribution wins—make it rigorous, not just hopeful. (1) THE MAINFRAME ERA - 1960s-70s: computing meant IBM mainframes in corporate data centers. Experts said this was inevitable—computing required scale, specialized facilities, trained operators. Distributed computing seemed like a fantasy. (2) WHAT CHANGED - Semiconductors improved. What required a room fit on a desk. The economics inverted: centralized computing went from 'only option' to 'expensive option.' PCs didn't win because they were better than mainframes at mainframe tasks—they won because they enabled new use cases that mainframes couldn't serve. (3) THE STRUCTURAL PARALLEL - Today's AI data centers ARE the new mainframes. The same arguments apply: 'AI requires scale,' 'only Big Tech has the resources,' 'distributed AI can't compete.' And the same counter-dynamics are emerging: (a) Hardware improving on predictable curves (Ratchet Thesis). (b) Local processing becoming economically viable. (c) Use cases emerging that centralized AI can't serve (privacy-sensitive, latency-critical, customization-intensive). (4) WHY IT'S NOT JUST ANALOGY - The mechanisms are the same: Moore's Law dynamics, cost curve inversions, new use case emergence. The timeline is faster because AI builds on decades of distributed systems knowledge. The endpoints are visible: today's frontier model running on consumer hardware within 2 years. (5) THE PREDICTION - Big Tech's AI data centers won't disappear any more than mainframes disappeared. But they'll become one option among many, not the only game in town. The future is hybrid, distributed, and owned by users—just like computing became after the mainframe era ended. (6) WHAT GROVE IS BUILDING - The infrastructure layer that lets distributed AI work as a network, not just isolated instances. The internet didn't just happen when PCs appeared—it required protocols, coordination, shared infrastructure. Grove is building that layer for AI.",
+      "tags": ["highlight", "philosophy", "history", "infrastructure-bet"],
+      "topicAffinities": [
+        { "topicId": "infrastructure-bet", "weight": 1.0 },
+        { "topicId": "philosophy", "weight": 0.9 },
+        { "topicId": "ratchet-thesis", "weight": 0.8 }
+      ],
+      "lensAffinities": [
+        { "lensId": "base", "weight": 1.0 },
+        { "lensId": "2A", "weight": 0.9 },
+        { "lensId": "4B", "weight": 0.85 }
+      ],
+      "targeting": {
+        "stages": ["exploration", "synthesis", "conviction"]
+      },
+      "baseWeight": 80,
+      "stats": { "impressions": 0, "selections": 0, "completions": 0, "avgEntropyDelta": 0, "avgDwellAfter": 0 },
+      "status": "active",
+      "source": "library",
+      "provenance": {
+        "type": "authored",
+        "reviewStatus": "approved",
+        "authorId": "system",
+        "authorName": "Grove Team",
+        "createdAt": 1736208000000
+      },
+      "surfaces": ["highlight", "suggestion"],
+      "highlightTriggers": [
+        { "text": "mainframe", "matchMode": "exact" },
+        { "text": "mainframes", "matchMode": "exact" },
+        { "text": "like mainframes", "matchMode": "contains" },
+        { "text": "data centers", "matchMode": "contains" }
       ]
     }
   ]

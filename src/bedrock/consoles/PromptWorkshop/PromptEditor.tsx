@@ -35,6 +35,10 @@ export function PromptEditor({
   hasChanges,
 }: ObjectEditorProps<PromptPayload>) {
 
+  // Read-only mode for library prompts (Sprint: prompt-library-readonly-v1)
+  const isLibraryPrompt = prompt.payload.source === 'library';
+  const isReadOnly = isLibraryPrompt || loading;
+
   // Helper to create patch operation for payload fields
   const patchPayload = (field: string, value: unknown) => {
     const op: PatchOperation = { op: 'replace', path: `/payload/${field}`, value };
@@ -57,6 +61,22 @@ export function PromptEditor({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Read-only banner for library prompts (Sprint: prompt-library-readonly-v1) */}
+      {isLibraryPrompt && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border-b border-blue-500/20">
+          <span className="material-symbols-outlined text-blue-400 text-base">lock</span>
+          <span className="text-sm text-blue-300">
+            Library Prompt — shipped with Grove
+          </span>
+          <span
+            className="material-symbols-outlined text-blue-400/60 text-base cursor-help"
+            title="Library prompts are version-controlled configuration. Duplicate to create your own customized version."
+          >
+            info
+          </span>
+        </div>
+      )}
+
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
 
@@ -71,7 +91,7 @@ export function PromptEditor({
                 onChange={(e) => patchMeta('title', e.target.value)}
                 rows={2}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -84,7 +104,7 @@ export function PromptEditor({
                 rows={3}
                 placeholder="Brief description of this prompt"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -96,7 +116,7 @@ export function PromptEditor({
                 className={`relative w-11 h-6 rounded-full transition-colors ${
                   prompt.meta.status === 'active' ? 'bg-[var(--neon-green)]' : 'bg-[var(--glass-border)]'
                 }`}
-                disabled={loading}
+                disabled={isReadOnly}
               >
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
                   prompt.meta.status === 'active' ? 'left-6' : 'left-1'
@@ -157,7 +177,7 @@ export function PromptEditor({
                 value={prompt.payload.baseWeight}
                 onChange={(e) => patchPayload('baseWeight', parseInt(e.target.value))}
                 className="w-full h-2 bg-[var(--glass-border)] rounded-lg appearance-none cursor-pointer accent-[var(--neon-cyan)]"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -170,7 +190,7 @@ export function PromptEditor({
                 onChange={(e) => patchMeta('tags', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
                 placeholder="tag1, tag2, tag3"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
           </div>
@@ -202,7 +222,7 @@ export function PromptEditor({
                           ? 'bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] border border-[var(--neon-cyan)]/50'
                           : 'bg-[var(--glass-surface)] text-[var(--glass-text-muted)] border border-[var(--glass-border)]'
                       }`}
-                      disabled={loading}
+                      disabled={isReadOnly}
                     >
                       {opt.label}
                     </button>
@@ -223,7 +243,7 @@ export function PromptEditor({
                 value={prompt.payload.targeting.minInteractions || 0}
                 onChange={(e) => patchTargeting('minInteractions', parseInt(e.target.value) || undefined)}
                 className="w-full h-2 bg-[var(--glass-border)] rounded-lg appearance-none cursor-pointer accent-[var(--neon-cyan)]"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -240,7 +260,7 @@ export function PromptEditor({
                 value={prompt.payload.targeting.minConfidence || 0}
                 onChange={(e) => patchTargeting('minConfidence', parseFloat(e.target.value) || undefined)}
                 className="w-full h-2 bg-[var(--glass-border)] rounded-lg appearance-none cursor-pointer accent-[var(--neon-cyan)]"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -256,7 +276,7 @@ export function PromptEditor({
                 }}
                 placeholder="lens-id-1, lens-id-2"
                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
-                disabled={loading}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -268,7 +288,7 @@ export function PromptEditor({
                 className={`relative w-11 h-6 rounded-full transition-colors ${
                   prompt.payload.targeting.requireMoment ? 'bg-[var(--neon-cyan)]' : 'bg-[var(--glass-border)]'
                 }`}
-                disabled={loading}
+                disabled={isReadOnly}
               >
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
                   prompt.payload.targeting.requireMoment ? 'left-6' : 'left-1'
@@ -380,38 +400,53 @@ export function PromptEditor({
         </InspectorSection>
       </div>
 
-      {/* Fixed footer with actions */}
+      {/* Fixed footer with actions (Sprint: prompt-library-readonly-v1) */}
       <div className="flex-shrink-0 p-4 border-t border-[var(--glass-border)] bg-[var(--glass-panel)]">
-        <div className="flex items-center gap-2">
-          <GlassButton
-            onClick={onSave}
-            variant="primary"
-            size="sm"
-            disabled={loading || !hasChanges}
-            className="flex-1"
-          >
-            {hasChanges ? 'Save Changes' : 'Saved'}
-          </GlassButton>
+        {isLibraryPrompt ? (
+          // Library prompt: only duplicate action
           <GlassButton
             onClick={onDuplicate}
-            variant="ghost"
+            variant="primary"
             size="sm"
             disabled={loading}
-            title="Duplicate"
+            className="w-full"
           >
-            <span className="material-symbols-outlined text-lg">content_copy</span>
+            <span className="material-symbols-outlined text-lg mr-2">content_copy</span>
+            Duplicate to Customize
           </GlassButton>
-          <GlassButton
-            onClick={onDelete}
-            variant="ghost"
-            size="sm"
-            disabled={loading}
-            className="text-red-400 hover:text-red-300"
-            title="Delete"
-          >
-            <span className="material-symbols-outlined text-lg">delete</span>
-          </GlassButton>
-        </div>
+        ) : (
+          // User prompt: full edit actions
+          <div className="flex items-center gap-2">
+            <GlassButton
+              onClick={onSave}
+              variant="primary"
+              size="sm"
+              disabled={loading || !hasChanges}
+              className="flex-1"
+            >
+              {hasChanges ? 'Save Changes' : 'Saved'}
+            </GlassButton>
+            <GlassButton
+              onClick={onDuplicate}
+              variant="ghost"
+              size="sm"
+              disabled={loading}
+              title="Duplicate"
+            >
+              <span className="material-symbols-outlined text-lg">content_copy</span>
+            </GlassButton>
+            <GlassButton
+              onClick={onDelete}
+              variant="ghost"
+              size="sm"
+              disabled={loading}
+              className="text-red-400 hover:text-red-300"
+              title="Delete"
+            >
+              <span className="material-symbols-outlined text-lg">delete</span>
+            </GlassButton>
+          </div>
+        )}
       </div>
     </div>
   );

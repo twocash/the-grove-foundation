@@ -209,9 +209,10 @@ export function createBedrockConsole<T>(
       closeInspector();
     }, [selectedObject, remove, closeInspector]);
 
-    const handleDuplicate = useCallback(() => {
+    const handleDuplicate = useCallback(async () => {
       if (!selectedObject) return;
-      duplicate(selectedObject);
+      const newObject = await duplicate(selectedObject);
+      setSelectedId(newObject.meta.id);
     }, [selectedObject, duplicate]);
 
     const handleCreate = useCallback(async () => {
