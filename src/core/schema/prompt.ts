@@ -3,7 +3,7 @@
 // Sprint: prompt-unification-v1, prompt-schema-rationalization-v1
 
 import type { GroveObject } from './grove-object';
-import type { PromptProvenance } from '../context-fields/types';
+import type { PromptProvenance, PromptSurface, HighlightTrigger } from '../context-fields/types';
 
 // =============================================================================
 // Type Aliases
@@ -176,6 +176,10 @@ export interface PromptPayload {
   wizardConfig?: WizardStepConfig;
   /** Sprint: exploration-node-unification-v1 */
   provenance?: PromptProvenance;
+  /** Sprint: kinetic-highlights-v1 - Where this prompt can appear */
+  surfaces?: PromptSurface[];
+  /** Sprint: kinetic-highlights-v1 - Text patterns that trigger this prompt */
+  highlightTriggers?: HighlightTrigger[];
 }
 
 /** Full Prompt object */

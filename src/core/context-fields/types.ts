@@ -136,6 +136,8 @@ export interface PromptProvenance {
   extractedAt?: number;
   extractionModel?: string;
   extractionConfidence?: number;
+  /** Method used for extraction @added highlight-extraction-v1 */
+  extractionMethod?: 'general' | 'highlight-concept-detection';
   // Generated
   gapAnalysisId?: string;
   generationReason?: string;

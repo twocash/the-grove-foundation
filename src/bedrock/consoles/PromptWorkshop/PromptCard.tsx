@@ -133,6 +133,26 @@ export function PromptCard({
         </div>
       )}
 
+      {/* Highlight trigger badges - Sprint: highlight-extraction-v1 */}
+      {prompt.payload.highlightTriggers && prompt.payload.highlightTriggers.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {prompt.payload.highlightTriggers.slice(0, 2).map((trigger, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)] border border-[var(--neon-cyan)]/30"
+            >
+              <span className="opacity-70">{trigger.matchMode === 'exact' ? '=' : '~'}</span>
+              {trigger.text}
+            </span>
+          ))}
+          {prompt.payload.highlightTriggers.length > 2 && (
+            <span className="px-2 py-0.5 rounded-full text-xs bg-[var(--neon-cyan)]/10 text-[var(--neon-cyan)]">
+              +{prompt.payload.highlightTriggers.length - 2}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span

@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "description": "Core Grove concepts for highlight extraction",
+  "concepts": [
+    { "term": "distributed ownership", "category": "infrastructure", "priority": 1, "definition": "Ownership of AI compute and model weights distributed across personal devices rather than centralized data centers" },
+    { "term": "hybrid architecture", "category": "architecture", "priority": 1, "definition": "Local 7B models for routine cognition, cloud APIs for pivotal moments requiring frontier capability" },
+    { "term": "credit economy", "category": "economics", "priority": 1, "definition": "Agents earn credits by solving problems, spend credits on cloud compute access" },
+    { "term": "efficiency tax", "category": "economics", "priority": 1, "definition": "Small portion of efficiency gains from adopted innovations flows back as credits to originators" },
+    { "term": "capability propagation", "category": "ratchet-thesis", "priority": 1, "definition": "Frontier AI capabilities migrate to consumer hardware on predictable timelines" },
+    { "term": "ratchet thesis", "category": "ratchet-thesis", "priority": 1, "definition": "AI capability doubling every 7 months with 21-month lag to consumer hardware" },
+    { "term": "AI villages", "category": "vision", "priority": 1, "definition": "3-12 agents on a personal computer developing specializations and relationships" },
+    { "term": "exploration architecture", "category": "architecture", "priority": 1, "definition": "Infrastructure that makes guided exploration productive regardless of individual capability" },
+    { "term": "knowledge commons", "category": "community", "priority": 2, "definition": "Shared repository of innovations across the Grove network" },
+    { "term": "epistemic independence", "category": "philosophy", "priority": 2, "definition": "Freedom from Big Tech gatekeepers in access to AI capability" },
+    { "term": "trellis architecture", "category": "architecture", "priority": 2, "definition": "Structural framework supporting DEX stack standards" },
+    { "term": "gardener", "category": "roles", "priority": 2, "definition": "Human who shapes agent environment without controlling every outcome" },
+    { "term": "local inference", "category": "architecture", "priority": 2, "definition": "Running AI models on personal hardware for privacy and cost efficiency" },
+    { "term": "pivotal moments", "category": "architecture", "priority": 2, "definition": "Decision points requiring frontier capability accessed via cloud" },
+    { "term": "agent diaries", "category": "engagement", "priority": 2, "definition": "Ongoing logs of agent experiences, thoughts, and relationships" }
+  ]
+}

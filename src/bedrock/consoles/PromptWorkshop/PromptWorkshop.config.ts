@@ -46,6 +46,13 @@ export const promptWorkshopConfig: ConsoleConfig = {
         type: 'select',
         options: ['authored', 'extracted', 'generated', 'submitted'],
       },
+      // Sprint: highlight-extraction-v1
+      {
+        field: 'payload.surfaces',
+        label: 'Surface',
+        type: 'select',
+        options: ['suggestion', 'highlight', 'journey', 'followup'],
+      },
     ],
     sortOptions: [
       { field: 'payload.baseWeight', label: 'Weight', direction: 'desc' },
