@@ -2969,6 +2969,77 @@ app.get('/api/telemetry/prompts/performance', async (req, res) => {
 });
 
 // ============================================================================
+// Prompt CRUD API
+// Sprint: prompt-refinement-v1
+// ============================================================================
+
+/**
+ * Create a new prompt
+ * Used by "Duplicate to My Prompts" for library prompts
+ */
+app.post('/api/prompts', async (req, res) => {
+  try {
+    const { payload, meta } = req.body;
+
+    if (!payload) {
+      return res.status(400).json({ error: 'payload is required' });
+    }
+
+    const now = new Date().toISOString();
+    const newId = crypto.randomUUID();
+
+    // Build the prompt row matching GroveObject schema
+    const promptRow = {
+      id: newId,
+      type: 'prompt',
+      title: meta?.title || 'Untitled Prompt',
+      description: meta?.description || '',
+      icon: meta?.icon || 'chat',
+      status: meta?.status || 'draft',
+      tags: meta?.tags || [],
+      created_at: now,
+      updated_at: now,
+      payload: {
+        ...payload,
+        source: 'user', // Always user-owned when created via API
+      },
+    };
+
+    const { data, error } = await supabaseAdmin
+      .from('prompts')
+      .insert(promptRow)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Prompts] Create error:', error);
+      return res.status(500).json({ error: 'Failed to create prompt', details: error.message });
+    }
+
+    console.log(`[Prompts] Created prompt: ${newId} - "${promptRow.title}"`);
+
+    // Return in GroveObject format
+    res.status(201).json({
+      meta: {
+        id: data.id,
+        type: data.type,
+        title: data.title,
+        description: data.description,
+        icon: data.icon,
+        status: data.status,
+        tags: data.tags,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+      payload: data.payload,
+    });
+  } catch (error) {
+    console.error('[Prompts] Create error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ============================================================================
 // Prompt Extraction API
 // Sprint: exploration-node-unification-v1
 // ============================================================================
@@ -3078,6 +3149,1118 @@ EXTRACTION RULES:
     });
   } catch (error) {
     console.error('[Extract] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// Claude Prompt Extraction API
+// Sprint: prompt-extraction-pipeline-v1
+// ============================================================================
+
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
+console.log('ANTHROPIC_API_KEY configured:', ANTHROPIC_API_KEY ? `${ANTHROPIC_API_KEY.substring(0, 15)}...` : 'NOT SET');
+
+const CLAUDE_MODEL_IDS = {
+  'claude-3-opus': 'claude-sonnet-4-20250514',
+  'claude-3-sonnet': 'claude-sonnet-4-20250514',
+  'claude-3-haiku': 'claude-3-5-haiku-20241022',
+};
+
+/**
+ * Build the extraction prompt for Claude
+ */
+function buildClaudeExtractionPrompt(documentContent, existingTriggers = []) {
+  return `# Prompt Extraction Task
+
+You are analyzing Grove documentation to identify concepts that should become kinetic highlights — clickable phrases that launch guided exploration.
+
+## Source Document
+
+${documentContent}
+
+## Existing Triggers (Skip These)
+
+${existingTriggers.length > 0 ? existingTriggers.join(', ') : 'None yet'}
+
+## Your Task
+
+Identify 3-5 concepts in this document that meet ALL of these criteria:
+
+### 1. Confusion Point
+A newcomer encountering this phrase would think: "Wait, what does that actually mean?" or "Why does that matter?"
+
+### 2. Multi-Dimensional Salience
+The concept connects to multiple aspects of Grove's world model:
+- Technical (architecture, implementation)
+- Economic (value, incentives)
+- Philosophical (why this approach)
+- Practical (what you get)
+
+A concept touching only ONE dimension is not salient enough.
+
+### 3. Interesting Response Potential
+Explaining this concept well would make someone lean forward. There's something surprising, counterintuitive, or stakes-laden about it.
+
+### 4. Not Already Covered
+Don't extract concepts that match existing triggers listed above.
+
+## Output Format
+
+Respond with a JSON array. Each object must have these exact fields:
+
+\`\`\`json
+[
+  {
+    "concept": "the exact phrase as it appears",
+    "whyConfusing": "what makes this unclear to a newcomer",
+    "dimensions": ["technical", "economic"],
+    "interestingBecause": "what makes the explanation compelling",
+    "userQuestion": "I keep seeing 'X' mentioned, but I'm not sure what it actually means. [continue in curious, slightly confused first-person voice]",
+    "systemGuidance": "User clicked 'X' highlight. [specific guidance for LLM: what to emphasize, what to avoid, how to connect to user's concern]",
+    "sourcePassage": "the sentence or paragraph where this concept appears",
+    "confidence": 0.85
+  }
+]
+\`\`\`
+
+## Quality Bar
+
+Reject concepts that are:
+- Jargon without substance (impressive-sounding but shallow)
+- Too narrow (only interesting to specialists)
+- Too broad (requires a dissertation to explain)
+- Already well-understood (not actually confusing)
+
+Better to extract 2 excellent concepts than 5 mediocre ones. Return an empty array if nothing meets the bar.`;
+}
+
+/**
+ * Polish extracted concepts with AI enrichment
+ * Sprint: extraction-enrichment-v1
+ *
+ * Takes raw extracted concepts and enriches them with:
+ * - Compelling title (not just raw concept phrase)
+ * - Expanded executionPrompt with background context
+ * - userIntent (what the user really wants to learn)
+ * - conceptAngle (how to frame the response)
+ * - suggestedFollowups (2-3 exploration questions)
+ * - Targeted stages (genesis, exploration, synthesis, advocacy)
+ * - Lens affinities with weights
+ *
+ * This prevents QA issues at extraction time rather than fixing them downstream.
+ */
+async function polishExtractedConcepts(concepts, sourceDocument) {
+  if (!concepts || concepts.length === 0) {
+    return concepts;
+  }
+
+  if (!ANTHROPIC_API_KEY) {
+    console.warn('[Polish] No API key, skipping polish step');
+    return concepts;
+  }
+
+  const docContent = sourceDocument.content?.slice(0, 6000) || '';
+  const docTitle = sourceDocument.title || 'Untitled';
+
+  // Build the polish prompt - now includes title generation and targeting
+  const polishPrompt = `# Prompt Enrichment Task
+
+You are enriching extracted exploration prompts for The Grove - a platform for exploring ideas about distributed AI infrastructure.
+
+## Source Document: "${docTitle}"
+
+${docContent}
+
+---
+
+## Extracted Concepts to Polish
+
+${JSON.stringify(concepts.map(c => ({
+  concept: c.concept,
+  userQuestion: c.userQuestion,
+  systemGuidance: c.systemGuidance,
+  sourcePassage: c.sourcePassage,
+  interestingBecause: c.interestingBecause,
+  dimensions: c.dimensions,
+})), null, 2)}
+
+---
+
+## STAGE DEFINITIONS (for targeting)
+
+- **genesis**: Initial exploration - accessible language, stakes-focused, short responses. For newcomers.
+- **exploration**: Deep dive - technical language, mechanics-focused. For users wanting to understand how things work.
+- **synthesis**: Integration - academic language, evidence-focused. For researchers connecting ideas.
+- **advocacy**: Action-oriented - executive language, resolution-focused. For decision-makers.
+
+## AVAILABLE LENSES (user personas)
+
+- general: General curious audience (genesis only)
+- concerned-citizen: Engaged citizens worried about AI (genesis, exploration)
+- executive: Business decision-makers (genesis, exploration, advocacy)
+- technical: Engineers and developers (genesis, exploration, synthesis)
+- academic: Researchers and scholars (all stages)
+- geopolitical: Policy and governance focus (genesis, exploration, synthesis)
+- family-office: Investors and wealth managers (genesis, exploration, advocacy)
+
+---
+
+## Your Task
+
+For each concept, produce a COMPLETE, ready-to-use prompt. Address ALL of these:
+
+### 1. Compelling Title
+The raw concept phrase (e.g., "The Ratchet") is NOT a good title. Generate a title that:
+- Invites exploration (makes someone want to click)
+- Hints at value/insight ("What happens when..." not just "The X")
+- Works standalone (doesn't require reading surrounding context)
+
+### 2. Enriched Execution Prompt
+Expand with context so newcomers can engage. 2-4 sentences.
+
+### 3. User Intent & Concept Angle
+What they really want to know, and how to frame the response.
+
+### 4. Targeting: Stages
+Which stages is this appropriate for? Consider the concept's depth and complexity.
+
+### 5. Targeting: Lens Affinities
+Which personas would find this valuable? Assign weights (0.5-1.0).
+
+### 6. Follow-ups
+2-3 natural follow-up questions.
+
+## Output Format
+
+Return a JSON array. Each object must have ALL fields:
+
+\`\`\`json
+[
+  {
+    "concept": "the original concept phrase",
+    "title": "Compelling, clickable title that invites exploration",
+    "executionPrompt": "Enriched prompt with context baked in. 2-4 sentences.",
+    "userIntent": "What the user really wants to understand",
+    "conceptAngle": "How to frame the response - the insight angle",
+    "suggestedFollowups": ["Follow-up 1", "Follow-up 2"],
+    "stages": ["genesis", "exploration"],
+    "lensAffinities": [
+      { "lensId": "technical", "weight": 0.9 },
+      { "lensId": "executive", "weight": 0.7 }
+    ],
+    "polishReasoning": "What you improved and why"
+  }
+]
+\`\`\`
+
+## Quality Bar
+
+- Title: Would someone click this? Does it promise insight?
+- ExecutionPrompt: Does it provide enough context for a newcomer?
+- Stages: Does this match the concept's depth?
+- Lenses: Who actually cares about this?
+
+Return the array in the same order as input.`;
+
+  try {
+    const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-5-haiku-20241022';
+
+    console.log(`[Polish] Enriching ${concepts.length} concepts from "${docTitle}"`);
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: polishPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Polish] API error: ${response.status}`, errorText);
+      // Graceful degradation: return original concepts
+      return concepts;
+    }
+
+    const data = await response.json();
+    const responseText = data.content[0]?.text || '[]';
+
+    // Parse JSON from response
+    const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || [null, responseText];
+    let polishedConcepts = [];
+
+    try {
+      polishedConcepts = JSON.parse(jsonMatch[1] || '[]');
+    } catch (parseErr) {
+      console.error('[Polish] Parse error:', parseErr.message);
+      return concepts;
+    }
+
+    // Merge polished data back into original concepts
+    const enrichedConcepts = concepts.map((original, index) => {
+      const polished = polishedConcepts[index];
+      if (!polished) {
+        return original;
+      }
+
+      return {
+        ...original,
+        // Title (compelling, not raw concept)
+        label: polished.title || original.label || original.concept,
+        // Enriched fields
+        executionPrompt: polished.executionPrompt || original.userQuestion,
+        userIntent: polished.userIntent,
+        conceptAngle: polished.conceptAngle,
+        suggestedFollowups: polished.suggestedFollowups || [],
+        // AI-powered targeting (replaces rule-based inference)
+        targetStages: polished.stages || ['genesis'],
+        polishedLensAffinities: polished.lensAffinities || [],
+        // Provenance
+        polishReasoning: polished.polishReasoning,
+        polishedAt: new Date().toISOString(),
+      };
+    });
+
+    console.log(`[Polish] Successfully enriched ${enrichedConcepts.length} concepts`);
+    return enrichedConcepts;
+
+  } catch (error) {
+    console.error('[Polish] Error:', error.message);
+    // Graceful degradation: return original concepts
+    return concepts;
+  }
+}
+
+app.post('/api/prompts/extract-claude', async (req, res) => {
+  try {
+    const { documentId, title, content, model = 'claude-3-sonnet', confidenceThreshold = 0.6, existingTriggers = [] } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'content is required' });
+    }
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        error: 'Anthropic API key not configured',
+        details: 'Set ANTHROPIC_API_KEY or VITE_ANTHROPIC_API_KEY environment variable'
+      });
+    }
+
+    const docId = documentId || `doc-${Date.now()}`;
+    const docTitle = title || 'Untitled Document';
+    const batchId = `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    console.log(`[Claude Extract] Processing: ${docTitle} (model: ${model})`);
+
+    const prompt = buildClaudeExtractionPrompt(content, existingTriggers);
+    const modelId = CLAUDE_MODEL_IDS[model] || CLAUDE_MODEL_IDS['claude-3-sonnet'];
+
+    // Call Anthropic API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[Claude Extract] API error: ${response.status}`, errorText);
+      return res.status(response.status).json({
+        error: `Anthropic API error: ${response.status}`,
+        details: errorText
+      });
+    }
+
+    const data = await response.json();
+    const responseText = data.content[0]?.text || '[]';
+
+    // Parse JSON from response (handle markdown code blocks)
+    const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || [null, responseText];
+    let concepts = [];
+
+    try {
+      concepts = JSON.parse(jsonMatch[1] || '[]');
+    } catch (parseErr) {
+      console.error('[Claude Extract] Parse error:', parseErr.message, responseText.slice(0, 200));
+      return res.status(500).json({ error: 'Failed to parse extraction response' });
+    }
+
+    // Filter by confidence threshold
+    const filteredConcepts = concepts.filter(c => (c.confidence || 0) >= confidenceThreshold);
+
+    console.log(`[Claude Extract] Extracted ${filteredConcepts.length}/${concepts.length} concepts from ${docTitle}`);
+
+    res.json({
+      documentId: docId,
+      documentTitle: docTitle,
+      concepts: filteredConcepts,
+      extractedAt: new Date().toISOString(),
+      model,
+      batchId,
+      metadata: {
+        totalExtracted: concepts.length,
+        afterThreshold: filteredConcepts.length,
+        confidenceThreshold,
+      }
+    });
+  } catch (error) {
+    console.error('[Claude Extract] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Sprint: extraction-pipeline-integration-v1 - Bulk extraction endpoint
+app.post('/api/prompts/extract-bulk', async (req, res) => {
+  try {
+    const { filter, tier, documentIds } = req.body;
+
+    if (!filter) {
+      return res.status(400).json({ error: 'filter is required' });
+    }
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        error: 'Anthropic API key not configured',
+        details: 'Set ANTHROPIC_API_KEY or VITE_ANTHROPIC_API_KEY environment variable'
+      });
+    }
+
+    // Get knowledge module for document access
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    console.log(`[Bulk Extract] Starting extraction with filter: ${filter}, tier: ${tier}`);
+
+    // Get documents based on filter
+    let documents = [];
+    const allDocs = await knowledge.listDocuments({ limit: 1000 });
+
+    switch (filter) {
+      case 'selected':
+        if (!documentIds || documentIds.length === 0) {
+          return res.status(400).json({ error: 'documentIds required for selected filter' });
+        }
+        documents = allDocs.filter(d => documentIds.includes(d.id));
+        break;
+      case 'tier':
+        if (!tier) {
+          return res.status(400).json({ error: 'tier required for tier filter' });
+        }
+        documents = allDocs.filter(d => d.tier === tier);
+        break;
+      case 'unextracted':
+        documents = allDocs.filter(d => !d.promptsExtracted);
+        break;
+      case 'all':
+        documents = allDocs;
+        break;
+      default:
+        return res.status(400).json({ error: `Invalid filter: ${filter}` });
+    }
+
+    console.log(`[Bulk Extract] Processing ${documents.length} documents`);
+
+    // Process documents
+    const results = { extracted: 0, errors: 0, processed: 0, details: [] };
+    const batchId = `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    for (const doc of documents) {
+      try {
+        // Skip documents without content
+        if (!doc.content) {
+          console.log(`[Bulk Extract] Skipping ${doc.id}: no content`);
+          results.details.push({ id: doc.id, status: 'skipped', reason: 'no content' });
+          continue;
+        }
+
+        // Build extraction prompt
+        const prompt = buildClaudeExtractionPrompt(doc.content, []);
+        const modelId = CLAUDE_MODEL_IDS['claude-3-sonnet'];
+
+        // Call Anthropic API
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: modelId,
+            max_tokens: 4096,
+            messages: [{ role: 'user', content: prompt }],
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[Bulk Extract] API error for ${doc.id}:`, response.status, errorText);
+          results.errors++;
+          results.details.push({ id: doc.id, status: 'error', reason: `API error: ${response.status}` });
+          continue;
+        }
+
+        const data = await response.json();
+        const responseText = data.content[0]?.text || '[]';
+
+        // Parse JSON from response
+        const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || [null, responseText];
+        let concepts = [];
+
+        try {
+          concepts = JSON.parse(jsonMatch[1] || '[]');
+        } catch (parseErr) {
+          console.error(`[Bulk Extract] Parse error for ${doc.id}:`, parseErr.message);
+          results.errors++;
+          results.details.push({ id: doc.id, status: 'error', reason: 'parse error' });
+          continue;
+        }
+
+        // Filter by confidence threshold
+        const filteredConcepts = concepts.filter(c => (c.confidence || 0) >= 0.6);
+
+        console.log(`[Bulk Extract] ${doc.id}: extracted ${filteredConcepts.length} concepts`);
+
+        // Sprint: extraction-enrichment-v1 - Polish concepts before saving
+        const polishedConcepts = await polishExtractedConcepts(filteredConcepts, doc);
+        console.log(`[Bulk Extract] ${doc.id}: polished ${polishedConcepts.length} concepts`);
+
+        // Save extracted prompts to Supabase (Sprint: extraction-pipeline-integration-v1)
+        const { getSupabaseAdmin } = await import('./lib/supabase.js');
+        const supabase = getSupabaseAdmin();
+
+        // Sprint: prompt-wiring-v1 - Use targeting inference for stage selection
+        const { inferTargetingFromSalience } = await import('./lib/targeting-inference.js');
+
+        if (supabase && polishedConcepts.length > 0) {
+          const now = new Date().toISOString();
+
+          // Build payload with provenance for GroveObject pattern
+          const promptRows = polishedConcepts.map(concept => {
+            // Sprint: extraction-enrichment-v1 - Use AI-polished targeting, fallback to rule-based
+            const salienceDimensions = concept.salienceDimensions || [];
+            const interestingBecause = concept.interestingBecause || '';
+            const targetingInference = inferTargetingFromSalience(salienceDimensions, interestingBecause);
+
+            // Prefer AI-polished stages, fallback to rule-based inference
+            const stages = concept.targetStages?.length
+              ? concept.targetStages
+              : targetingInference.suggestedStages;
+
+            // Prefer AI-polished lens affinities, fallback to rule-based inference
+            const lensAffinities = concept.polishedLensAffinities?.length
+              ? concept.polishedLensAffinities
+              : targetingInference.lensAffinities.map(l => ({
+                  lensId: l.lensId,
+                  weight: l.weight,
+                }));
+
+            // Build targeting with lens IDs for filtering
+            const lensIds = lensAffinities.map(l => l.lensId);
+
+            const payload = {
+              executionPrompt: concept.executionPrompt || concept.userQuestion || '',
+              systemContext: concept.systemContext || concept.systemGuidance || '',
+              topicAffinities: concept.topicCategory ? [{ topicId: concept.topicCategory, weight: 1.0 }] : [],
+              lensAffinities: lensAffinities.length > 0 ? lensAffinities : [{ lensId: 'base', weight: 1.0 }],
+              targeting: {
+                stages,
+                lensIds,
+                stageReasoning: concept.polishReasoning || targetingInference.reasoning,
+              },
+              baseWeight: 50,
+              source: 'generated',
+              provenance: {
+                type: 'extracted',
+                reviewStatus: 'pending',
+                sourceDocIds: [doc.id],
+                sourceDocTitles: [doc.title],
+                extractedAt: Date.now(),
+                extractionModel: 'claude-3-sonnet',
+                extractionConfidence: concept.confidence,
+                extractionBatch: batchId,
+                stageReasoning: concept.stageReasoning,
+                // Sprint: extraction-enrichment-v1 - Polish provenance
+                polishedAt: concept.polishedAt,
+                polishReasoning: concept.polishReasoning,
+              },
+              salienceDimensions: concept.salienceDimensions || [],
+              interestingBecause: concept.interestingBecause,
+              surfaces: ['highlight', 'suggestion'],
+              highlightTriggers: [{ text: concept.concept, matchMode: 'contains', caseSensitive: false }],
+              stats: { impressions: 0, selections: 0, completions: 0, avgEntropyDelta: 0, avgDwellMs: 0 },
+              // Sprint: extraction-enrichment-v1 - Enriched fields
+              userIntent: concept.userIntent,
+              conceptAngle: concept.conceptAngle,
+              suggestedFollowups: concept.suggestedFollowups || [],
+            };
+
+            return {
+              id: crypto.randomUUID(),
+              type: 'prompt',
+              title: concept.label || concept.concept,
+              description: concept.interestingBecause || `Extracted from: ${doc.title}`,
+              icon: 'auto_awesome',
+              status: 'draft',
+              tags: [
+                'extracted',
+                'pending-review',
+                ...(concept.polishedAt ? ['ai-polished'] : []),
+                ...(concept.topicCategory ? [`topic:${concept.topicCategory}`] : []),
+              ],
+              created_at: now,
+              updated_at: now,
+              payload,
+            };
+          });
+
+          // Insert into public.prompts (matches SupabaseAdapter TABLE_MAP)
+          const { error: insertError } = await supabase
+            .from('prompts')
+            .insert(promptRows);
+
+          if (insertError) {
+            console.error(`[Bulk Extract] Failed to save prompts for ${doc.id}:`, insertError);
+          } else {
+            console.log(`[Bulk Extract] Saved ${promptRows.length} prompts for ${doc.id}`);
+          }
+        }
+
+        results.extracted += polishedConcepts.length;
+        results.processed++;
+        results.details.push({
+          id: doc.id,
+          title: doc.title,
+          status: 'success',
+          conceptCount: polishedConcepts.length,
+          concepts: polishedConcepts.map(c => ({
+            concept: c.concept,
+            confidence: c.confidence,
+            topicCategory: c.topicCategory,
+            polished: !!c.polishedAt, // Sprint: extraction-enrichment-v1
+          })),
+        });
+
+        // Mark document as extracted (if knowledge module supports it)
+        if (knowledge.updateDocument) {
+          await knowledge.updateDocument(doc.id, {
+            promptsExtracted: true,
+            promptExtractionAt: new Date().toISOString(),
+            promptExtractionCount: filteredConcepts.length,
+          });
+        }
+
+        // Rate limiting - wait 1 second between requests
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+      } catch (docError) {
+        console.error(`[Bulk Extract] Error processing ${doc.id}:`, docError);
+        results.errors++;
+        results.details.push({ id: doc.id, status: 'error', reason: docError.message });
+      }
+    }
+
+    console.log(`[Bulk Extract] Complete: ${results.processed} processed, ${results.extracted} concepts, ${results.errors} errors`);
+
+    res.json({
+      batchId,
+      filter,
+      tier,
+      ...results,
+    });
+  } catch (error) {
+    console.error('[Bulk Extract] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// Prompt QA & Context API
+// Sprint: prompt-refinement-v1
+// ============================================================================
+
+/**
+ * Run QA check on a single prompt
+ * Validates prompt against its source document and returns score + issues
+ */
+app.post('/api/prompts/:id/qa-check', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        error: 'Anthropic API key not configured',
+        details: 'Set ANTHROPIC_API_KEY environment variable'
+      });
+    }
+
+    // Fetch the prompt from Supabase
+    const { data: prompt, error: promptError } = await supabaseAdmin
+      .from('prompts')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (promptError || !prompt) {
+      return res.status(404).json({ error: 'Prompt not found' });
+    }
+
+    // Get source document context if available
+    const sourceDocId = prompt.payload?.provenance?.sourceDocIds?.[0];
+    let sourceContext = null;
+
+    if (sourceDocId) {
+      const knowledge = await getKnowledgeModule();
+      if (knowledge) {
+        try {
+          sourceContext = await knowledge.getDocument(sourceDocId);
+        } catch (e) {
+          console.warn(`[QA] Could not fetch source document ${sourceDocId}:`, e.message);
+        }
+      }
+    }
+
+    // Build QA prompt for Claude
+    const qaPrompt = `You are a QA validator for a knowledge management system. Analyze this prompt and identify any issues.
+
+PROMPT TO VALIDATE:
+Title: ${prompt.title}
+Execution Text: ${prompt.payload?.executionPrompt || 'N/A'}
+User Intent: ${prompt.payload?.userIntent || 'Not specified'}
+Concept Angle: ${prompt.payload?.conceptAngle || 'Not specified'}
+Target Stages: ${JSON.stringify(prompt.payload?.targeting?.stages || [])}
+
+${sourceContext ? `
+SOURCE DOCUMENT:
+Title: ${sourceContext.title || 'Unknown'}
+Content Extract: ${(sourceContext.content || '').slice(0, 2000)}
+` : 'SOURCE DOCUMENT: Not available'}
+
+VALIDATION CRITERIA:
+1. missing_context: Prompt assumes context the reader doesn't have
+2. ambiguous_intent: Unclear what the prompt is asking the user to explore
+3. too_broad: Scope is too wide for meaningful exploration
+4. too_narrow: Scope is too limited for interesting exploration
+5. source_mismatch: Prompt doesn't align well with source document content
+
+Return a JSON object with:
+{
+  "score": 0-100 (overall quality score),
+  "issues": [
+    {
+      "type": "missing_context" | "ambiguous_intent" | "too_broad" | "too_narrow" | "source_mismatch",
+      "severity": "error" | "warning" | "info",
+      "description": "Clear description of the issue",
+      "suggestedFix": "How to fix this issue",
+      "autoFixAvailable": true/false
+    }
+  ]
+}
+
+Return ONLY valid JSON, no markdown or explanation.`;
+
+    const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-haiku-20240307';
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: qaPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[QA] API error:', response.status, errorText);
+      return res.status(502).json({
+        error: 'QA service unavailable',
+        status: response.status,
+        details: errorText.slice(0, 500)
+      });
+    }
+
+    const data = await response.json();
+    const responseText = data.content[0]?.text || '{}';
+
+    // Parse JSON response
+    let result;
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      result = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+    } catch (parseError) {
+      console.error('[QA] Failed to parse response:', responseText);
+      result = { score: 70, issues: [] };
+    }
+
+    // Enforce autoFixAvailable for fixable issues (Fix 1: HOTFIX_BUNDLE_001)
+    const FIXABLE_TYPES = ['missing_context', 'ambiguous_intent', 'too_broad'];
+    if (result.issues) {
+      result.issues = result.issues.map(issue => ({
+        ...issue,
+        autoFixAvailable: FIXABLE_TYPES.includes(issue.type)
+      }));
+    }
+
+    console.log(`[QA] Checked prompt ${id}: score=${result.score}, issues=${result.issues?.length || 0}`);
+    console.log(`[QA] Issues with autoFixAvailable:`, result.issues?.map(i => ({ type: i.type, autoFixAvailable: i.autoFixAvailable })));
+
+    res.json({
+      promptId: id,
+      score: result.score || 0,
+      issues: result.issues || [],
+      checkedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[QA] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * AI-powered title suggestions for prompts
+ * Sprint: prompt-wiring-v1
+ *
+ * Takes prompt context (title, description, execution prompt) and generates
+ * compelling, contextually-aware title variants using Claude.
+ */
+app.post('/api/prompts/:id/suggest-titles', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        error: 'Anthropic API key not configured',
+        details: 'Set ANTHROPIC_API_KEY environment variable'
+      });
+    }
+
+    // Accept prompt data from request body (preferred for library prompts)
+    // or fetch from Supabase for generated/user prompts
+    let prompt = req.body.prompt;
+
+    if (!prompt) {
+      // Fallback: Fetch from Supabase
+      const { data: dbPrompt, error: promptError } = await supabaseAdmin
+        .from('prompts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (promptError || !dbPrompt) {
+        return res.status(404).json({
+          error: 'Prompt not found',
+          hint: 'For library prompts, pass prompt data in request body: { prompt: { title, description, payload } }'
+        });
+      }
+      prompt = dbPrompt;
+    }
+
+    // Get Grove overview context from tier 1 files
+    let groveContext = '';
+    try {
+      const knowledge = await getKnowledgeModule();
+      if (knowledge) {
+        // Try to get a brief Grove overview
+        const overviewDoc = await knowledge.getDocument('grove-overview');
+        if (overviewDoc?.content) {
+          groveContext = overviewDoc.content.slice(0, 1500);
+        }
+      }
+    } catch (e) {
+      console.warn('[SuggestTitles] Could not load Grove context:', e.message);
+    }
+
+    // Build AI prompt for Claude
+    const titlePrompt = `You are helping create compelling, user-friendly titles for exploration prompts in The Grove - a platform for exploring ideas about distributed AI infrastructure.
+
+${groveContext ? `GROVE CONTEXT:
+${groveContext}
+---` : ''}
+
+CURRENT PROMPT DATA:
+Title: ${prompt.title || 'Untitled'}
+Description: ${prompt.description || 'No description'}
+Execution Prompt: ${prompt.payload?.executionPrompt || 'No execution prompt'}
+Topic Category: ${prompt.payload?.topicAffinities?.[0]?.topicId || 'General'}
+
+YOUR TASK:
+Generate 3 compelling title variants for this prompt. Each should:
+1. Be clear and inviting to curious users
+2. Hint at the value/insight the exploration will provide
+3. Be appropriately scoped (not too broad, not too narrow)
+4. Work well as a clickable prompt in a research interface
+
+Return ONLY a JSON array with 3 objects:
+[
+  { "title": "Your first title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation of why this works" },
+  { "title": "Your second title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation" },
+  { "title": "Your third title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation" }
+]
+
+Be creative but grounded in the actual content. Do NOT just rephrase the existing title mechanically.`;
+
+    const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-haiku-20240307';
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: titlePrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[SuggestTitles] API error:', response.status, errorText);
+      return res.status(502).json({
+        error: 'Title suggestion service unavailable',
+        status: response.status,
+      });
+    }
+
+    const data = await response.json();
+    const responseText = data.content[0]?.text || '[]';
+
+    // Parse the JSON response
+    let variants = [];
+    try {
+      const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        variants = JSON.parse(jsonMatch[0]);
+      }
+    } catch (parseErr) {
+      console.error('[SuggestTitles] Parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse title suggestions' });
+    }
+
+    console.log(`[SuggestTitles] Generated ${variants.length} variants for prompt ${id}`);
+
+    res.json({
+      promptId: id,
+      currentTitle: prompt.title,
+      variants,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[SuggestTitles] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * AI-powered targeting suggestions for prompts
+ * Sprint: prompt-wiring-v1
+ *
+ * Analyzes prompt content and suggests appropriate stages and lens affinities
+ * using Claude for contextual understanding.
+ */
+app.post('/api/prompts/:id/suggest-targeting', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({
+        error: 'Anthropic API key not configured',
+        details: 'Set ANTHROPIC_API_KEY environment variable'
+      });
+    }
+
+    // Accept prompt data from request body (preferred for library prompts)
+    // or fetch from Supabase for generated/user prompts
+    let prompt = req.body.prompt;
+
+    if (!prompt) {
+      // Fallback: Fetch from Supabase
+      const { data: dbPrompt, error: promptError } = await supabaseAdmin
+        .from('prompts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (promptError || !dbPrompt) {
+        return res.status(404).json({
+          error: 'Prompt not found',
+          hint: 'For library prompts, pass prompt data in request body: { prompt: { title, description, payload } }'
+        });
+      }
+      prompt = dbPrompt;
+    }
+
+    // Get Grove overview context
+    let groveContext = '';
+    try {
+      const knowledge = await getKnowledgeModule();
+      if (knowledge) {
+        const overviewDoc = await knowledge.getDocument('grove-overview');
+        if (overviewDoc?.content) {
+          groveContext = overviewDoc.content.slice(0, 1500);
+        }
+      }
+    } catch (e) {
+      console.warn('[SuggestTargeting] Could not load Grove context:', e.message);
+    }
+
+    // Build AI prompt for targeting analysis
+    const targetingPrompt = `You are helping configure targeting for exploration prompts in The Grove - a platform for exploring ideas about distributed AI infrastructure.
+
+${groveContext ? `GROVE CONTEXT:
+${groveContext}
+---` : ''}
+
+STAGE DEFINITIONS:
+- genesis: Initial exploration - accessible language, stakes-focused, short responses. For newcomers and surface-level understanding.
+- exploration: Deep dive - technical language, mechanics-focused, medium responses. For users wanting to understand how things work.
+- synthesis: Integration - academic language, evidence-focused, comprehensive responses. For researchers connecting ideas.
+- advocacy: Action-oriented - executive language, resolution-focused, strategic responses. For decision-makers.
+
+AVAILABLE LENSES (user personas):
+- general: General curious audience (genesis only)
+- concerned-citizen: Engaged citizens worried about AI (genesis, exploration)
+- executive: Business decision-makers (genesis, exploration, advocacy)
+- technical: Engineers and developers (genesis, exploration, synthesis)
+- academic: Researchers and scholars (all stages)
+- geopolitical: Policy and governance focus (genesis, exploration, synthesis)
+- family-office: Investors and wealth managers (genesis, exploration, advocacy)
+
+CURRENT PROMPT DATA:
+Title: ${prompt.title || 'Untitled'}
+Description: ${prompt.description || 'No description'}
+Execution Prompt: ${prompt.payload?.executionPrompt || 'No execution prompt'}
+Salience Dimensions: ${prompt.payload?.salienceDimensions?.join(', ') || 'None specified'}
+Interesting Because: ${prompt.payload?.interestingBecause || 'Not specified'}
+
+YOUR TASK:
+Analyze this prompt and suggest:
+1. Which stages it should be available at (consider depth/complexity of the topic)
+2. Which lenses have natural affinity (consider who would find this valuable)
+
+Return ONLY a JSON object:
+{
+  "suggestedStages": ["genesis", "exploration", ...],
+  "stageReasoning": "Why these stages make sense",
+  "lensAffinities": [
+    { "lensId": "lens-name", "weight": 0.8, "reasoning": "Why this lens fits" },
+    ...
+  ],
+  "overallReasoning": "Summary of targeting strategy"
+}
+
+Be thoughtful - not every prompt needs all stages or all lenses. Match the content's depth and audience.`;
+
+    const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-haiku-20240307';
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: modelId,
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: targetingPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[SuggestTargeting] API error:', response.status, errorText);
+      return res.status(502).json({
+        error: 'Targeting suggestion service unavailable',
+        status: response.status,
+      });
+    }
+
+    const data = await response.json();
+    const responseText = data.content[0]?.text || '{}';
+
+    // Parse the JSON response
+    let targeting = {};
+    try {
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        targeting = JSON.parse(jsonMatch[0]);
+      }
+    } catch (parseErr) {
+      console.error('[SuggestTargeting] Parse error:', parseErr.message);
+      return res.status(500).json({ error: 'Failed to parse targeting suggestions' });
+    }
+
+    console.log(`[SuggestTargeting] Generated targeting for prompt ${id}: ${targeting.suggestedStages?.length || 0} stages, ${targeting.lensAffinities?.length || 0} lenses`);
+
+    res.json({
+      promptId: id,
+      currentTitle: prompt.title,
+      ...targeting,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[SuggestTargeting] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get source document context for a prompt
+ * Returns extracted passage, confidence, and document metadata
+ */
+app.get('/api/documents/:id/context', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    // Fetch document from knowledge module
+    const doc = await knowledge.getDocument(id);
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Build context response
+    const context = {
+      title: doc.title || 'Untitled Document',
+      extractedPassage: doc.content?.slice(0, 500) || null,
+      confidence: doc.extractionConfidence || 0.7,
+      extractedAt: doc.createdAt || doc.created_at || new Date().toISOString(),
+      documentUrl: `/foundation/pipeline?doc=${id}`,
+    };
+
+    res.json(context);
+  } catch (error) {
+    console.error('[Context] Error:', error);
     res.status(500).json({ error: error.message });
   }
 });

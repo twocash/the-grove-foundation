@@ -5,6 +5,8 @@
 import type { GroveObject } from '@core/schema/grove-object';
 import type { PromptPayload, PromptTargeting } from '@core/schema/prompt';
 import type { PatchOperation } from '../../types/copilot.types';
+import { generateVariants, toConceptName } from '@core/utils/TitleTransforms';
+import { inferTargetingFromSalience } from './utils/TargetingInference';
 
 // =============================================================================
 // Types
@@ -243,14 +245,172 @@ export async function handleCopilotAction(
       if (!context.selectedPrompt) {
         return { success: false, message: 'No prompt selected' };
       }
-      const targeting = suggestTargeting(context.selectedPrompt);
-      return {
-        success: true,
-        message: 'Generated targeting suggestion',
-        operations: [
-          { op: 'replace', path: '/payload/targeting', value: targeting },
-        ],
-      };
+
+      // Call AI-powered targeting suggestion API
+      // Send prompt data in body to support both library and Supabase prompts
+      try {
+        const response = await fetch(`/api/prompts/${context.selectedPrompt.meta.id}/suggest-targeting`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: {
+              title: context.selectedPrompt.meta.title,
+              description: context.selectedPrompt.meta.description,
+              payload: context.selectedPrompt.payload,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          // Log error for debugging
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.error(`[suggest-targeting] API error ${response.status}:`, errorText);
+
+          // Fallback to rule-based inference if API fails - still apply operations
+          const salienceDimensions = context.selectedPrompt.payload.salienceDimensions || [];
+          const interestingBecause = context.selectedPrompt.payload.interestingBecause || '';
+          const fallbackSuggestion = inferTargetingFromSalience(salienceDimensions, interestingBecause);
+          const stageList = fallbackSuggestion.suggestedStages.join(' → ');
+          const lensIds = fallbackSuggestion.lensAffinities.map(l => l.lensId);
+
+          return {
+            success: true,
+            message: `(API error ${response.status} - applied rule-based targeting)\n\n` +
+              `**Stages:** ${stageList}\n` +
+              `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
+              `**Reasoning:** ${fallbackSuggestion.reasoning}`,
+            operations: [
+              { op: 'replace', path: '/payload/targeting/stages', value: fallbackSuggestion.suggestedStages },
+              { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
+              { op: 'replace', path: '/payload/lensAffinities', value: fallbackSuggestion.lensAffinities.map(l => ({
+                lensId: l.lensId,
+                weight: l.weight,
+              })) },
+            ],
+          };
+        }
+
+        const data = await response.json();
+        const suggestedStages = data.suggestedStages || ['genesis'];
+        const lensAffinities = (data.lensAffinities || []) as { lensId: string; weight: number; reasoning?: string }[];
+        const stageList = suggestedStages.join(' → ');
+        const lensIds = lensAffinities.map(l => l.lensId);
+
+        // Build operations to apply all targeting suggestions
+        const operations: PatchOperation[] = [
+          // Set stages in targeting
+          { op: 'replace', path: '/payload/targeting/stages', value: suggestedStages },
+          // Set lens IDs in targeting (for filtering)
+          { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
+          // Set full lens affinities with weights
+          { op: 'replace', path: '/payload/lensAffinities', value: lensAffinities.map(l => ({
+            lensId: l.lensId,
+            weight: l.weight,
+          })) },
+        ];
+
+        return {
+          success: true,
+          message: `**AI Targeting Applied ✓**\n\n` +
+            `**Stages:** ${stageList}\n` +
+            `_${data.stageReasoning || ''}_\n\n` +
+            `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
+            `**Affinities:**\n` +
+            lensAffinities.slice(0, 4).map(l =>
+              `- **${l.lensId}** (${(l.weight * 100).toFixed(0)}%): ${l.reasoning || ''}`
+            ).join('\n') +
+            `\n\n_${data.overallReasoning || ''}_`,
+          operations,
+        };
+      } catch (err) {
+        // Fallback on network error - still apply operations
+        const salienceDimensions = context.selectedPrompt.payload.salienceDimensions || [];
+        const interestingBecause = context.selectedPrompt.payload.interestingBecause || '';
+        const fallbackSuggestion = inferTargetingFromSalience(salienceDimensions, interestingBecause);
+        const stageList = fallbackSuggestion.suggestedStages.join(' → ');
+        const lensIds = fallbackSuggestion.lensAffinities.map(l => l.lensId);
+
+        return {
+          success: true,
+          message: `(Network error - using rule-based inference)\n\n` +
+            `**Stages:** ${stageList}\n` +
+            `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
+            `**Reasoning:** ${fallbackSuggestion.reasoning}`,
+          operations: [
+            { op: 'replace', path: '/payload/targeting/stages', value: fallbackSuggestion.suggestedStages },
+            { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
+            { op: 'replace', path: '/payload/lensAffinities', value: fallbackSuggestion.lensAffinities.map(l => ({
+              lensId: l.lensId,
+              weight: l.weight,
+            })) },
+          ],
+        };
+      }
+
+    case 'make-compelling':
+      if (!context.selectedPrompt) {
+        return { success: false, message: 'No prompt selected' };
+      }
+
+      // Call AI-powered title suggestion API
+      // Send prompt data in body to support both library and Supabase prompts
+      try {
+        const response = await fetch(`/api/prompts/${context.selectedPrompt.meta.id}/suggest-titles`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: {
+              title: context.selectedPrompt.meta.title,
+              description: context.selectedPrompt.meta.description,
+              payload: context.selectedPrompt.payload,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          // Fallback to mechanical transforms if API fails
+          const currentTitle = context.selectedPrompt.meta?.title || 'Untitled';
+          const conceptName = toConceptName(currentTitle);
+          const fallbackVariants = generateVariants(conceptName, 3);
+          return {
+            success: true,
+            message: `(API unavailable - using basic transforms)\n\n` +
+              fallbackVariants.map((v, i) =>
+                `${i + 1}. ${v.title}\n   _Format: ${v.format}_`
+              ).join('\n\n') +
+              `\n\nCopy the full title, e.g.:\nset title to ${fallbackVariants[0]?.title || 'Your Title'}`,
+          };
+        }
+
+        const data = await response.json();
+        const aiVariants = data.variants || [];
+
+        if (aiVariants.length === 0) {
+          return { success: false, message: 'No title suggestions generated. Try again.' };
+        }
+
+        return {
+          success: true,
+          message: `Here are 3 AI-generated title suggestions:\n\n` +
+            aiVariants.map((v: { title: string; format: string; reasoning?: string }, i: number) =>
+              `${i + 1}. ${v.title}\n   _${v.format}_ — ${v.reasoning || ''}`
+            ).join('\n\n') +
+            `\n\nCopy the full title, e.g.:\nset title to ${aiVariants[0]?.title || 'Your Title'}`,
+        };
+      } catch (err) {
+        // Fallback on network error
+        const currentTitle = context.selectedPrompt.meta?.title || 'Untitled';
+        const conceptName = toConceptName(currentTitle);
+        const fallbackVariants = generateVariants(conceptName, 3);
+        return {
+          success: true,
+          message: `(Network error - using basic transforms)\n\n` +
+            fallbackVariants.map((v, i) =>
+              `${i + 1}. ${v.title}\n   _Format: ${v.format}_`
+            ).join('\n\n') +
+            `\n\nCopy the full title, e.g.:\nset title to ${fallbackVariants[0]?.title || 'Your Title'}`,
+        };
+      }
 
     case 'activate':
       if (!context.selectedPrompt) {
