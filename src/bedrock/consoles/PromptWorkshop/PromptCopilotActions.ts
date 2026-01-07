@@ -1,10 +1,11 @@
 // src/bedrock/consoles/PromptWorkshop/PromptCopilotActions.ts
 // Prompt-specific Copilot action handlers
 // Sprint: prompt-schema-rationalization-v1 (Epic 3)
+// Sprint: copilot-suggestions-hotfix-v1 - unified enrichment API + clickable suggestions
 
 import type { GroveObject } from '@core/schema/grove-object';
 import type { PromptPayload, PromptTargeting } from '@core/schema/prompt';
-import type { PatchOperation } from '../../types/copilot.types';
+import type { PatchOperation, SuggestedAction } from '../../types/copilot.types';
 import { generateVariants, toConceptName } from '@core/utils/TitleTransforms';
 import { inferTargetingFromSalience } from './utils/TargetingInference';
 
@@ -22,6 +23,7 @@ export interface CopilotActionResult {
   success: boolean;
   message: string;
   operations?: PatchOperation[];
+  suggestions?: SuggestedAction[];
   suggestedPrompt?: Partial<PromptPayload>;
 }
 
@@ -29,6 +31,49 @@ export interface ValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
+}
+
+// =============================================================================
+// Enrichment API Helper
+// Mirrors document enrichment pattern from PipelineMonitor
+// =============================================================================
+
+interface EnrichmentResult {
+  titles?: Array<{ title: string; format: string; reasoning?: string }>;
+  targeting?: {
+    suggestedStages: string[];
+    stageReasoning?: string;
+    lensAffinities: Array<{ lensId: string; weight: number; reasoning?: string }>;
+    overallReasoning?: string;
+    error?: string;
+  };
+  error?: string;
+}
+
+async function callPromptEnrichmentAPI(
+  prompt: GroveObject<PromptPayload>,
+  operations: string[]
+): Promise<EnrichmentResult> {
+  const response = await fetch('/api/prompts/enrich', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: {
+        title: prompt.meta.title,
+        description: prompt.meta.description,
+        payload: prompt.payload,
+      },
+      operations,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    throw new Error(`Enrichment API error ${response.status}: ${errorText}`);
+  }
+
+  const { results } = await response.json();
+  return results;
 }
 
 // =============================================================================
@@ -246,63 +291,22 @@ export async function handleCopilotAction(
         return { success: false, message: 'No prompt selected' };
       }
 
-      // Call AI-powered targeting suggestion API
-      // Send prompt data in body to support both library and Supabase prompts
+      // Call unified enrichment API with targeting operation
       try {
-        const response = await fetch(`/api/prompts/${context.selectedPrompt.meta.id}/suggest-targeting`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: {
-              title: context.selectedPrompt.meta.title,
-              description: context.selectedPrompt.meta.description,
-              payload: context.selectedPrompt.payload,
-            },
-          }),
-        });
+        const results = await callPromptEnrichmentAPI(context.selectedPrompt, ['targeting']);
 
-        if (!response.ok) {
-          // Log error for debugging
-          const errorText = await response.text().catch(() => 'Unknown error');
-          console.error(`[suggest-targeting] API error ${response.status}:`, errorText);
-
-          // Fallback to rule-based inference if API fails - still apply operations
-          const salienceDimensions = context.selectedPrompt.payload.salienceDimensions || [];
-          const interestingBecause = context.selectedPrompt.payload.interestingBecause || '';
-          const fallbackSuggestion = inferTargetingFromSalience(salienceDimensions, interestingBecause);
-          const stageList = fallbackSuggestion.suggestedStages.join(' → ');
-          const lensIds = fallbackSuggestion.lensAffinities.map(l => l.lensId);
-
-          return {
-            success: true,
-            message: `(API error ${response.status} - applied rule-based targeting)\n\n` +
-              `**Stages:** ${stageList}\n` +
-              `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
-              `**Reasoning:** ${fallbackSuggestion.reasoning}`,
-            operations: [
-              { op: 'replace', path: '/payload/targeting/stages', value: fallbackSuggestion.suggestedStages },
-              { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
-              { op: 'replace', path: '/payload/lensAffinities', value: fallbackSuggestion.lensAffinities.map(l => ({
-                lensId: l.lensId,
-                weight: l.weight,
-              })) },
-            ],
-          };
+        if (!results.targeting || results.targeting.error) {
+          throw new Error(results.targeting?.error || 'No targeting data returned');
         }
 
-        const data = await response.json();
-        const suggestedStages = data.suggestedStages || ['genesis'];
-        const lensAffinities = (data.lensAffinities || []) as { lensId: string; weight: number; reasoning?: string }[];
+        const { suggestedStages, stageReasoning, lensAffinities, overallReasoning } = results.targeting;
         const stageList = suggestedStages.join(' → ');
         const lensIds = lensAffinities.map(l => l.lensId);
 
-        // Build operations to apply all targeting suggestions
+        // Build operations to apply targeting suggestions
         const operations: PatchOperation[] = [
-          // Set stages in targeting
           { op: 'replace', path: '/payload/targeting/stages', value: suggestedStages },
-          // Set lens IDs in targeting (for filtering)
           { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
-          // Set full lens affinities with weights
           { op: 'replace', path: '/payload/lensAffinities', value: lensAffinities.map(l => ({
             lensId: l.lensId,
             weight: l.weight,
@@ -311,19 +315,19 @@ export async function handleCopilotAction(
 
         return {
           success: true,
-          message: `**AI Targeting Applied ✓**\n\n` +
+          message: `**✓ AI Targeting Applied**\n\n` +
             `**Stages:** ${stageList}\n` +
-            `_${data.stageReasoning || ''}_\n\n` +
-            `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
-            `**Affinities:**\n` +
-            lensAffinities.slice(0, 4).map(l =>
+            `_${stageReasoning || ''}_\n\n` +
+            `**Lens Affinities:** ${lensIds.join(', ')}\n\n` +
+            lensAffinities.slice(0, 3).map(l =>
               `- **${l.lensId}** (${(l.weight * 100).toFixed(0)}%): ${l.reasoning || ''}`
             ).join('\n') +
-            `\n\n_${data.overallReasoning || ''}_`,
+            (overallReasoning ? `\n\n_${overallReasoning}_` : ''),
           operations,
+          // No suggestions - operations are auto-applied
         };
       } catch (err) {
-        // Fallback on network error - still apply operations
+        // Fallback to rule-based inference
         const salienceDimensions = context.selectedPrompt.payload.salienceDimensions || [];
         const interestingBecause = context.selectedPrompt.payload.interestingBecause || '';
         const fallbackSuggestion = inferTargetingFromSalience(salienceDimensions, interestingBecause);
@@ -332,9 +336,8 @@ export async function handleCopilotAction(
 
         return {
           success: true,
-          message: `(Network error - using rule-based inference)\n\n` +
+          message: `**✓ Targeting Applied** (rule-based)\n\n` +
             `**Stages:** ${stageList}\n` +
-            `**Lens IDs:** ${lensIds.join(', ')}\n\n` +
             `**Reasoning:** ${fallbackSuggestion.reasoning}`,
           operations: [
             { op: 'replace', path: '/payload/targeting/stages', value: fallbackSuggestion.suggestedStages },
@@ -344,6 +347,7 @@ export async function handleCopilotAction(
               weight: l.weight,
             })) },
           ],
+          // No suggestions - operations are auto-applied
         };
       }
 
@@ -352,63 +356,39 @@ export async function handleCopilotAction(
         return { success: false, message: 'No prompt selected' };
       }
 
-      // Call AI-powered title suggestion API
-      // Send prompt data in body to support both library and Supabase prompts
+      // Call unified enrichment API with titles operation
       try {
-        const response = await fetch(`/api/prompts/${context.selectedPrompt.meta.id}/suggest-titles`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: {
-              title: context.selectedPrompt.meta.title,
-              description: context.selectedPrompt.meta.description,
-              payload: context.selectedPrompt.payload,
-            },
-          }),
-        });
+        const results = await callPromptEnrichmentAPI(context.selectedPrompt, ['titles']);
 
-        if (!response.ok) {
-          // Fallback to mechanical transforms if API fails
-          const currentTitle = context.selectedPrompt.meta?.title || 'Untitled';
-          const conceptName = toConceptName(currentTitle);
-          const fallbackVariants = generateVariants(conceptName, 3);
-          return {
-            success: true,
-            message: `(API unavailable - using basic transforms)\n\n` +
-              fallbackVariants.map((v, i) =>
-                `${i + 1}. ${v.title}\n   _Format: ${v.format}_`
-              ).join('\n\n') +
-              `\n\nCopy the full title, e.g.:\nset title to ${fallbackVariants[0]?.title || 'Your Title'}`,
-          };
+        if (!results.titles || results.titles.length === 0) {
+          throw new Error('No title suggestions returned');
         }
 
-        const data = await response.json();
-        const aiVariants = data.variants || [];
-
-        if (aiVariants.length === 0) {
-          return { success: false, message: 'No title suggestions generated. Try again.' };
-        }
+        const aiVariants = results.titles;
 
         return {
           success: true,
-          message: `Here are 3 AI-generated title suggestions:\n\n` +
-            aiVariants.map((v: { title: string; format: string; reasoning?: string }, i: number) =>
-              `${i + 1}. ${v.title}\n   _${v.format}_ — ${v.reasoning || ''}`
-            ).join('\n\n') +
-            `\n\nCopy the full title, e.g.:\nset title to ${aiVariants[0]?.title || 'Your Title'}`,
+          message: `**AI Title Suggestions:**`,
+          suggestions: aiVariants.map(v => ({
+            label: v.title.length > 40 ? v.title.slice(0, 37) + '...' : v.title,
+            template: `set title to ${v.title}`,
+            icon: 'auto_awesome',
+          })),
         };
       } catch (err) {
-        // Fallback on network error
+        // Fallback to mechanical transforms
         const currentTitle = context.selectedPrompt.meta?.title || 'Untitled';
         const conceptName = toConceptName(currentTitle);
         const fallbackVariants = generateVariants(conceptName, 3);
+
         return {
           success: true,
-          message: `(Network error - using basic transforms)\n\n` +
-            fallbackVariants.map((v, i) =>
-              `${i + 1}. ${v.title}\n   _Format: ${v.format}_`
-            ).join('\n\n') +
-            `\n\nCopy the full title, e.g.:\nset title to ${fallbackVariants[0]?.title || 'Your Title'}`,
+          message: `**Title Suggestions** (basic transforms):`,
+          suggestions: fallbackVariants.map(v => ({
+            label: v.title.length > 40 ? v.title.slice(0, 37) + '...' : v.title,
+            template: `set title to ${v.title}`,
+            icon: 'auto_awesome',
+          })),
         };
       }
 
@@ -431,6 +411,61 @@ export async function handleCopilotAction(
         message: 'Prompt deactivated',
         operations: [{ op: 'replace', path: '/meta/status', value: 'draft' }],
       };
+
+    // Sprint: prompt-copilot-actions-v1 - Combined enrichment action
+    case 'enrich':
+      if (!context.selectedPrompt) {
+        return { success: false, message: 'No prompt selected' };
+      }
+
+      try {
+        // Call unified enrichment API with both operations
+        const results = await callPromptEnrichmentAPI(context.selectedPrompt, ['targeting', 'titles']);
+        const operations: PatchOperation[] = [];
+        const messages: string[] = [];
+
+        // Process targeting results
+        if (results.targeting && !results.targeting.error) {
+          const { suggestedStages, lensAffinities } = results.targeting;
+          const lensIds = lensAffinities.map(l => l.lensId);
+
+          operations.push(
+            { op: 'replace', path: '/payload/targeting/stages', value: suggestedStages },
+            { op: 'replace', path: '/payload/targeting/lensIds', value: lensIds },
+            { op: 'replace', path: '/payload/lensAffinities', value: lensAffinities.map(l => ({
+              lensId: l.lensId,
+              weight: l.weight,
+            })) },
+          );
+
+          messages.push(`**Stages:** ${suggestedStages.join(' → ')}`);
+          messages.push(`**Lenses:** ${lensIds.join(', ')}`);
+        }
+
+        // Process title suggestions (as clickable buttons)
+        const suggestions: SuggestedAction[] = [];
+        if (results.titles && results.titles.length > 0) {
+          results.titles.forEach(v => {
+            suggestions.push({
+              label: v.title.length > 40 ? v.title.slice(0, 37) + '...' : v.title,
+              template: `set title to ${v.title}`,
+              icon: 'auto_awesome',
+            });
+          });
+        }
+
+        return {
+          success: true,
+          message: `**✓ Metadata Enriched**\n\n${messages.join('\n')}\n\n${suggestions.length > 0 ? 'Click a title suggestion below:' : ''}`,
+          operations: operations.length > 0 ? operations : undefined,
+          suggestions: suggestions.length > 0 ? suggestions : undefined,
+        };
+      } catch (err) {
+        return {
+          success: false,
+          message: `Enrichment failed: ${(err as Error).message}`,
+        };
+      }
 
     default:
       // Try parsing as natural language command

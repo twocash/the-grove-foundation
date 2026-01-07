@@ -11,12 +11,26 @@ import type {
 } from './collection-view.types';
 
 // =============================================================================
+// Extended Config with External Filters
+// =============================================================================
+
+export interface CollectionViewOptions extends CollectionViewConfig {
+  /**
+   * External filters that override internal state.
+   * When set, these filters are applied in addition to user-selected filters.
+   * Useful for parent components that need to constrain the view.
+   * Sprint: extraction-pipeline-integration-v1
+   */
+  externalFilters?: Record<string, string | string[]>;
+}
+
+// =============================================================================
 // Hook Implementation
 // =============================================================================
 
 export function useCollectionView<T extends GroveObject>(
   objects: T[],
-  config: CollectionViewConfig
+  config: CollectionViewOptions
 ): CollectionViewState<T> {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,8 +148,12 @@ export function useCollectionView<T extends GroveObject>(
       );
     }
 
+    // Merge external filters with internal filters (external takes precedence)
+    // Sprint: extraction-pipeline-integration-v1
+    const mergedFilters = { ...filters, ...(config.externalFilters || {}) };
+
     // Field filters
-    for (const [key, value] of Object.entries(filters)) {
+    for (const [key, value] of Object.entries(mergedFilters)) {
       filtered = filtered.filter(obj => {
         const objValue = getNestedValue(obj, key);
 
@@ -193,7 +211,7 @@ export function useCollectionView<T extends GroveObject>(
     });
 
     return { results: filtered, filteredCount: countBeforeFavorites };
-  }, [objects, searchQuery, filters, showFavoritesOnly, favorites, sortField, sortDirection, config.searchFields]);
+  }, [objects, searchQuery, filters, config.externalFilters, showFavoritesOnly, favorites, sortField, sortDirection, config.searchFields]);
 
   // Select all visible items
   const selectAll = useCallback(() => {

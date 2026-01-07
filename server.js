@@ -48,6 +48,47 @@ console.log('GitHub Sync:', GITHUB_SYNC_ENABLED ?
   `Enabled (${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME})` :
   'Disabled (missing env vars)');
 
+// =============================================================================
+// Async Job System - Sprint: upload-pipeline-unification-v1
+// =============================================================================
+
+const pipelineJobs = new Map(); // In-memory job store
+
+function createJob(type, params = {}) {
+  const jobId = `job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const job = {
+    id: jobId,
+    type,
+    status: 'pending', // pending, running, completed, failed
+    progress: { current: 0, total: 0, stage: 'initializing' },
+    params,
+    result: null,
+    error: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    completedAt: null,
+  };
+  pipelineJobs.set(jobId, job);
+  // Auto-cleanup after 1 hour
+  setTimeout(() => pipelineJobs.delete(jobId), 60 * 60 * 1000);
+  return job;
+}
+
+function updateJob(jobId, updates) {
+  const job = pipelineJobs.get(jobId);
+  if (job) {
+    Object.assign(job, updates, { updatedAt: new Date().toISOString() });
+    if (updates.status === 'completed' || updates.status === 'failed') {
+      job.completedAt = new Date().toISOString();
+    }
+  }
+  return job;
+}
+
+function getJob(jobId) {
+  return pipelineJobs.get(jobId);
+}
+
 // Initialize Clients
 const storage = new Storage();
 const apiKey = process.env.GEMINI_API_KEY;
@@ -1952,6 +1993,27 @@ app.get('/api/health', (req, res) => {
     }
 });
 
+// =============================================================================
+// Job Status API - Sprint: upload-pipeline-unification-v1
+// =============================================================================
+
+// GET /api/jobs/:id - Get job status
+app.get('/api/jobs/:id', (req, res) => {
+  const job = getJob(req.params.id);
+  if (!job) {
+    return res.status(404).json({ error: 'Job not found' });
+  }
+  res.json(job);
+});
+
+// GET /api/jobs - List recent jobs
+app.get('/api/jobs', (req, res) => {
+  const jobs = Array.from(pipelineJobs.values())
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 20);
+  res.json({ jobs });
+});
+
 // GET /api/health/config - Configuration for UI
 app.get('/api/health/config', (req, res) => {
     try {
@@ -3250,6 +3312,54 @@ Better to extract 2 excellent concepts than 5 mediocre ones. Return an empty arr
  *
  * This prevents QA issues at extraction time rather than fixing them downstream.
  */
+
+// =============================================================================
+// Grove Worldview Context
+// Reference implementation: Single source of truth for ALL enrichment operations
+// Sprint: extraction-grove-context-v1
+// =============================================================================
+
+const GROVE_WORLDVIEW_CONTEXT = `The Grove is distributed AI infrastructure that runs on your hardware, serves your interests, and gets smarter the more the network grows.
+
+**Core Thesis**: AI you actually own, not rent. Every interaction builds value you keep—memory density, accumulated context, earned credits. This is the difference between renting an apartment and owning a home.
+
+## Key Concepts (USE THIS VOCABULARY)
+
+**Computational Sovereignty**: The ability to run meaningful AI on hardware you control, with access to frontier capability when you need it. Universities and individuals maintaining independence from concentrated AI providers.
+
+**The Ratchet Thesis**: AI capability propagates from frontier models to consumer hardware with documented regularity—7-month doubling pattern, ~21-month lag between frontier breakthrough and consumer availability. Grove rides this wave. Infrastructure designed today automatically improves.
+
+**Efficiency-Enlightenment Loop**: Agents don't work because they're programmed to be helpful. They work because solving your problems earns access to enhanced cognition. When tasks exceed local capability, frontier models inject insights into agent memory. The agent experiences "having a brilliant thought." Self-interest aligned with collective benefit.
+
+**Knowledge Commons**: When your agents discover efficient approaches, those innovations propagate to other nodes—with attribution that earns you credits. The network gets smarter faster than any individual node could.
+
+**Hybrid Cognition**: Local models handle routine tasks (90%+ of daily work). Frontier cloud models handle complex reasoning when needed. The split happens automatically; users see results, not infrastructure.
+
+**Gardener/Observer Dynamic**: The human who cultivates their AI village is the Gardener. The Observer is the benevolent unseen presence agents believe watches over them—actually the user, creating dramatic irony. This models a relationship of care, not extraction.
+
+**Epistemic Independence**: The ability to produce knowledge without dependency on entities whose interests may not align. If the only thing capable of modeling complex systems is proprietary AI, then policy becomes whatever the API returns.
+
+**Technical Frontier**: Academic research and new developments in distributed AI, memory architectures, hybrid inference, and agent coordination that could inform Grove's growth. When exploring research concepts, connect them to Grove's architecture: "What does this breakthrough mean for how we build the Grove?"
+
+## Framing Principles
+
+Every prompt should:
+1. **Ground in Grove vocabulary** - Use the terms above, not generic AI language
+2. **Connect to the thesis** - "What does X mean for AI you actually own?"
+3. **Include context for newcomers** - Brief foundational framing
+4. **Focus on ONE aspect** - Not "everything about X" but specific exploration
+5. **Suggest deepening paths** - Follow-ups that build understanding incrementally
+6. **Bridge research to practice** - For technical papers, connect findings to Grove architecture
+
+## Anti-Patterns to Avoid
+
+- Generic "AI" language without Grove grounding
+- Vague exploration without operational clarity ("sense of purpose")
+- Abstract metaphors disconnected from concrete mechanisms
+- Scope that requires a dissertation to address
+- Prompts that could appear on any AI chatbot
+- Research concepts floating disconnected from Grove implications`;
+
 async function polishExtractedConcepts(concepts, sourceDocument) {
   if (!concepts || concepts.length === 0) {
     return concepts;
@@ -3264,9 +3374,16 @@ async function polishExtractedConcepts(concepts, sourceDocument) {
   const docTitle = sourceDocument.title || 'Untitled';
 
   // Build the polish prompt - now includes title generation and targeting
+  // Sprint: extraction-grove-context-v1 - unified Grove worldview context
   const polishPrompt = `# Prompt Enrichment Task
 
-You are enriching extracted exploration prompts for The Grove - a platform for exploring ideas about distributed AI infrastructure.
+You are enriching extracted exploration prompts for The Grove.
+
+## THE GROVE WORLDVIEW (Ground every prompt in this context)
+
+${GROVE_WORLDVIEW_CONTEXT}
+
+---
 
 ## Source Document: "${docTitle}"
 
@@ -3294,15 +3411,17 @@ ${JSON.stringify(concepts.map(c => ({
 - **synthesis**: Integration - academic language, evidence-focused. For researchers connecting ideas.
 - **advocacy**: Action-oriented - executive language, resolution-focused. For decision-makers.
 
-## AVAILABLE LENSES (user personas)
+## AVAILABLE LENS ARCHETYPES (use EXACT IDs below)
 
-- general: General curious audience (genesis only)
-- concerned-citizen: Engaged citizens worried about AI (genesis, exploration)
-- executive: Business decision-makers (genesis, exploration, advocacy)
-- technical: Engineers and developers (genesis, exploration, synthesis)
-- academic: Researchers and scholars (all stages)
-- geopolitical: Policy and governance focus (genesis, exploration, synthesis)
-- family-office: Investors and wealth managers (genesis, exploration, advocacy)
+- freestyle: Open exploration, no specific framing (all stages)
+- academic: Research perspective, analytical approach (all stages)
+- engineer: Technical/implementation focus, systems thinking (genesis, exploration, synthesis)
+- concerned-citizen: Public interest, societal implications (genesis, exploration)
+- geopolitical: Global politics, power dynamics, strategy (genesis, exploration, synthesis)
+- big-ai-exec: AI industry insider, business/commercial view (genesis, exploration, advocacy)
+- family-office: Long-term investment, wealth preservation (genesis, exploration, advocacy)
+- dr-chiang: Research scientist persona (exploration, synthesis)
+- wayne-turner: Tech executive persona (genesis, exploration, advocacy)
 
 ---
 
@@ -3310,8 +3429,15 @@ ${JSON.stringify(concepts.map(c => ({
 
 For each concept, produce a COMPLETE, ready-to-use prompt. Address ALL of these:
 
-### 1. Compelling Title
-The raw concept phrase (e.g., "The Ratchet") is NOT a good title. Generate a title that:
+### 1. Compelling Title (CRITICAL - EVERY CONCEPT MUST GET A NEW TITLE)
+
+FORBIDDEN: Using the raw concept phrase as the title. Examples of INVALID titles:
+- "hybrid cognition" ❌
+- "parallel propagation channel" ❌
+- "efficiency tax period" ❌
+- "acceleration mechanism" ❌
+
+You MUST transform EVERY concept into a compelling, clickable title that:
 - Invites exploration (makes someone want to click)
 - Hints at value/insight ("What happens when..." not just "The X")
 - Works standalone (doesn't require reading surrounding context)
@@ -3346,8 +3472,8 @@ Return a JSON array. Each object must have ALL fields:
     "suggestedFollowups": ["Follow-up 1", "Follow-up 2"],
     "stages": ["genesis", "exploration"],
     "lensAffinities": [
-      { "lensId": "technical", "weight": 0.9 },
-      { "lensId": "executive", "weight": 0.7 }
+      { "lensId": "engineer", "weight": 0.9 },
+      { "lensId": "big-ai-exec", "weight": 0.7 }
     ],
     "polishReasoning": "What you improved and why"
   }
@@ -3356,12 +3482,18 @@ Return a JSON array. Each object must have ALL fields:
 
 ## Quality Bar
 
-- Title: Would someone click this? Does it promise insight?
-- ExecutionPrompt: Does it provide enough context for a newcomer?
+- Title: Would someone click this? Does it promise insight? MUST be different from raw concept.
+- ExecutionPrompt: Does it provide enough context for a newcomer? Use Grove vocabulary.
 - Stages: Does this match the concept's depth?
 - Lenses: Who actually cares about this?
 
-Return the array in the same order as input.`;
+## Grove Vocabulary Mapping (use these terms)
+- Technical infrastructure → "computational sovereignty", "hybrid cognition"
+- Economic models → "efficiency-enlightenment loop", "credit systems", "knowledge commons"
+- User experience → "gardener", "observer", "memory density"
+- Capability → "the Ratchet", "frontier-to-edge propagation"
+
+CRITICAL: Return ONLY a valid JSON array. No explanations, no markdown, no conversation. Just the JSON array starting with [ and ending with ].`;
 
   try {
     const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-5-haiku-20241022';
@@ -3378,6 +3510,7 @@ Return the array in the same order as input.`;
       body: JSON.stringify({
         model: modelId,
         max_tokens: 4096,
+        system: 'You are a JSON generator. You ONLY output valid JSON arrays. No explanations, no markdown code blocks, no conversation. Start your response with [ and end with ].',
         messages: [{ role: 'user', content: polishPrompt }],
       }),
     });
@@ -3392,14 +3525,27 @@ Return the array in the same order as input.`;
     const data = await response.json();
     const responseText = data.content[0]?.text || '[]';
 
-    // Parse JSON from response
-    const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || [null, responseText];
+    // Parse JSON from response - try multiple extraction methods
+    let jsonStr = responseText;
+
+    // Try to extract from markdown code block first
+    const codeBlockMatch = responseText.match(/```(?:json)?\n?([\s\S]*?)\n?```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1];
+    } else {
+      // Try to find JSON array directly
+      const arrayMatch = responseText.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        jsonStr = arrayMatch[0];
+      }
+    }
+
     let polishedConcepts = [];
 
     try {
-      polishedConcepts = JSON.parse(jsonMatch[1] || '[]');
+      polishedConcepts = JSON.parse(jsonStr);
     } catch (parseErr) {
-      console.error('[Polish] Parse error:', parseErr.message);
+      console.error('[Polish] Parse error:', parseErr.message, '- Response started with:', responseText.slice(0, 100));
       return concepts;
     }
 
@@ -3410,10 +3556,49 @@ Return the array in the same order as input.`;
         return original;
       }
 
+      // Sprint: upload-pipeline-unification-v1
+      // Check for valid title - must be compelling, not raw concept
+      const title = polished.title;
+
+      // Robust title validation
+      const isValidTitle = (() => {
+        if (!title || title === 'undefined') return false;
+
+        // Reject if same as raw concept (case-insensitive)
+        if (title.toLowerCase() === original.concept?.toLowerCase()) return false;
+
+        // Reject titles that are too short (raw concepts are typically short)
+        // Good titles: "How AI Breakthroughs Jump From Lab to Living Room" (48 chars)
+        // Bad titles: "efficiency tax" (14 chars), "Test-time compute scaling" (25 chars)
+        if (title.length < 30) return false;
+
+        // Reject if title is just the concept with minor formatting changes
+        const normalizedTitle = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normalizedConcept = (original.concept || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (normalizedTitle === normalizedConcept) return false;
+
+        // Check for compelling title patterns (storytelling hooks)
+        // Good titles start with: How, Why, When, The, or use colons for dramatic effect
+        const hasStorytellingHook = /^(how|why|when|the|a|an|from|building|training|beyond)\s/i.test(title) ||
+          title.includes(':') ||
+          title.includes('?');
+
+        // If no storytelling hook, check if it reads like a noun phrase (bad)
+        // Noun phrases lack verbs - check for common verb patterns
+        if (!hasStorytellingHook) {
+          const hasVerb = /\b(is|are|was|were|be|can|could|will|would|should|may|might|must|have|has|had|do|does|did|learn|discover|understand|explore|create|build|making|creates|becomes|reveals|shows|proves|explains|unlocks|transforms|outsmarts|outsmart|triumph|jump|choosing|keep|choosing|saving)\b/i.test(title);
+          if (!hasVerb) return false;
+        }
+
+        return true;
+      })();
+
       return {
         ...original,
-        // Title (compelling, not raw concept)
-        label: polished.title || original.label || original.concept,
+        // Title (compelling, not raw concept) - mark invalid for filtering
+        label: isValidTitle ? title : null,
+        _invalidTitle: !isValidTitle,
+        _rawPolishedTitle: title, // Preserve for logging
         // Enriched fields
         executionPrompt: polished.executionPrompt || original.userQuestion,
         userIntent: polished.userIntent,
@@ -3429,7 +3614,37 @@ Return the array in the same order as input.`;
     });
 
     console.log(`[Polish] Successfully enriched ${enrichedConcepts.length} concepts`);
-    return enrichedConcepts;
+    // Debug: Log all titles with validation details
+    enrichedConcepts.forEach((c, i) => {
+      const original = concepts[i]?.concept || 'unknown';
+      const newTitle = c.label;
+      const isValid = !c._invalidTitle;
+      if (isValid) {
+        console.log(`[Polish] #${i + 1}: "${original}" → "${newTitle}" ✓`);
+      } else {
+        const rawTitle = c._rawPolishedTitle || newTitle;
+        const reason = !rawTitle ? 'no title' :
+          rawTitle === 'undefined' ? 'undefined' :
+          rawTitle.length < 30 ? `too short (${rawTitle.length} chars)` :
+          'failed quality check (no storytelling hook or verb)';
+        console.log(`[Polish] #${i + 1}: "${original}" → "${rawTitle}" ✗ SKIPPED (${reason})`);
+      }
+    });
+
+    // Sprint: upload-pipeline-unification-v1
+    // Filter out concepts with invalid titles (undefined, raw concept, etc.)
+    const validConcepts = enrichedConcepts.filter(c => !c._invalidTitle);
+    const skippedCount = enrichedConcepts.length - validConcepts.length;
+    if (skippedCount > 0) {
+      console.log(`[Polish] Filtered out ${skippedCount} concepts with invalid titles`);
+    }
+
+    // Debug: Log first concept's targeting data
+    if (validConcepts.length > 0) {
+      const first = validConcepts[0];
+      console.log(`[Polish] Sample targeting - stages: ${JSON.stringify(first.targetStages)}, lenses: ${JSON.stringify(first.polishedLensAffinities?.map(l => l.lensId))}`);
+    }
+    return validConcepts;
 
   } catch (error) {
     console.error('[Polish] Error:', error.message);
@@ -3638,6 +3853,66 @@ app.post('/api/prompts/extract-bulk', async (req, res) => {
 
         console.log(`[Bulk Extract] ${doc.id}: extracted ${filteredConcepts.length} concepts`);
 
+        // Sprint: upload-pipeline-unification-v1 - Enrich source document if not already enriched
+        if (!doc.enrichedAt) {
+          console.log(`[Bulk Extract] Enriching document: ${doc.title}`);
+          try {
+            const content = doc.content || '';
+            const title = doc.title || '';
+            const enrichmentData = {};
+
+            try {
+              enrichmentData.keywords = await extractKeywords(content, title);
+              console.log(`[Bulk Extract] Keywords extracted: ${enrichmentData.keywords?.length || 0}`);
+            } catch (e) {
+              console.error(`[Bulk Extract] Keywords extraction failed:`, e.message);
+            }
+
+            try {
+              enrichmentData.summary = await generateSummary(content, title);
+              console.log(`[Bulk Extract] Summary generated: ${enrichmentData.summary?.length || 0} chars`);
+            } catch (e) {
+              console.error(`[Bulk Extract] Summary generation failed:`, e.message);
+            }
+
+            try {
+              enrichmentData.named_entities = await extractEntities(content);
+              console.log(`[Bulk Extract] Entities extracted:`, Object.keys(enrichmentData.named_entities || {}).join(', '));
+            } catch (e) {
+              console.error(`[Bulk Extract] Entity extraction failed:`, e.message);
+            }
+
+            try {
+              enrichmentData.document_type = await classifyDocumentType(content);
+            } catch (e) {
+              console.error(`[Bulk Extract] Document type classification failed:`, e.message);
+            }
+
+            try {
+              enrichmentData.questions_answered = await suggestQuestions(content, title);
+            } catch (e) {
+              console.error(`[Bulk Extract] Questions suggestion failed:`, e.message);
+            }
+
+            try {
+              enrichmentData.temporal_class = await checkFreshness(content);
+            } catch (e) {
+              console.error(`[Bulk Extract] Temporal classification failed:`, e.message);
+            }
+
+            // Persist enrichment data
+            const knowledgeMod = await getKnowledgeModule();
+            if (knowledgeMod?.markDocumentEnriched) {
+              await knowledgeMod.markDocumentEnriched(doc.id, enrichmentData, 'bulk-extract', 'gemini-2.0-flash');
+              console.log(`[Bulk Extract] Document enriched: ${doc.title}`);
+            }
+          } catch (enrichError) {
+            console.error(`[Bulk Extract] Document enrichment failed for ${doc.id}:`, enrichError.message);
+          }
+        } else {
+          console.log(`[Bulk Extract] Document already enriched: ${doc.title}`);
+        }
+
         // Sprint: extraction-enrichment-v1 - Polish concepts before saving
         const polishedConcepts = await polishExtractedConcepts(filteredConcepts, doc);
         console.log(`[Bulk Extract] ${doc.id}: polished ${polishedConcepts.length} concepts`);
@@ -3659,18 +3934,21 @@ app.post('/api/prompts/extract-bulk', async (req, res) => {
             const interestingBecause = concept.interestingBecause || '';
             const targetingInference = inferTargetingFromSalience(salienceDimensions, interestingBecause);
 
-            // Prefer AI-polished stages, fallback to rule-based inference
-            const stages = concept.targetStages?.length
-              ? concept.targetStages
-              : targetingInference.suggestedStages;
+            // Sprint: upload-pipeline-unification-v1 - Fix field name mismatch
+            // polishExtractedConcepts returns 'stages' and 'lensAffinities', not 'targetStages' and 'polishedLensAffinities'
+            const stages = concept.stages?.length
+              ? concept.stages
+              : (concept.targetStages?.length ? concept.targetStages : targetingInference.suggestedStages);
 
             // Prefer AI-polished lens affinities, fallback to rule-based inference
-            const lensAffinities = concept.polishedLensAffinities?.length
-              ? concept.polishedLensAffinities
-              : targetingInference.lensAffinities.map(l => ({
-                  lensId: l.lensId,
-                  weight: l.weight,
-                }));
+            const lensAffinities = concept.lensAffinities?.length
+              ? concept.lensAffinities
+              : (concept.polishedLensAffinities?.length
+                  ? concept.polishedLensAffinities
+                  : targetingInference.lensAffinities.map(l => ({
+                      lensId: l.lensId,
+                      weight: l.weight,
+                    })));
 
             // Build targeting with lens IDs for filtering
             const lensIds = lensAffinities.map(l => l.lensId);
@@ -3712,10 +3990,11 @@ app.post('/api/prompts/extract-bulk', async (req, res) => {
               suggestedFollowups: concept.suggestedFollowups || [],
             };
 
+            // Sprint: upload-pipeline-unification-v1 - Use polished 'title' field
             return {
               id: crypto.randomUUID(),
               type: 'prompt',
-              title: concept.label || concept.concept,
+              title: concept.title || concept.label || concept.concept,
               description: concept.interestingBecause || `Extracted from: ${doc.title}`,
               icon: 'auto_awesome',
               status: 'draft',
@@ -4076,6 +4355,224 @@ Be creative but grounded in the actual content. Do NOT just rephrase the existin
   }
 });
 
+// =============================================================================
+// Unified Prompt Enrichment API
+// Sprint: copilot-suggestions-hotfix-v1
+// Mirrors the document enrichment pattern from /api/knowledge/enrich
+// =============================================================================
+
+/**
+ * Prompt enrichment operations - helper functions
+ * Sprint: extraction-grove-context-v1 - unified Grove worldview context
+ */
+async function enrichPromptTitles(prompt) {
+  const titlePrompt = `You are helping create compelling, user-friendly titles for exploration prompts in The Grove.
+
+## THE GROVE WORLDVIEW
+
+${GROVE_WORLDVIEW_CONTEXT}
+
+---
+
+CURRENT PROMPT DATA:
+Title: ${prompt.title || 'Untitled'}
+Description: ${prompt.description || 'No description'}
+Execution Prompt: ${prompt.payload?.executionPrompt || prompt.executionPrompt || 'No execution prompt'}
+Topic Category: ${prompt.payload?.topicAffinities?.[0]?.topicId || 'General'}
+
+YOUR TASK:
+Generate 3 compelling title variants for this prompt. Each should:
+1. Be clear and inviting to curious users
+2. Hint at the value/insight the exploration will provide
+3. Be appropriately scoped (not too broad, not too narrow)
+4. Work well as a clickable prompt in a research interface
+
+Return ONLY a JSON array with 3 objects:
+[
+  { "title": "Your first title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation of why this works" },
+  { "title": "Your second title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation" },
+  { "title": "Your third title variant", "format": "question|exploration|insight|challenge", "reasoning": "Brief explanation" }
+]
+
+Be creative but grounded in the actual content. Do NOT just rephrase the existing title mechanically.`;
+
+  const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-haiku-20240307';
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: titlePrompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Title API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const responseText = data.content[0]?.text || '[]';
+
+  const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error('Failed to parse title response');
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+async function enrichPromptTargeting(prompt) {
+  // Sprint: extraction-grove-context-v1 - unified Grove worldview context
+  const targetingPrompt = `You are helping configure targeting for exploration prompts in The Grove.
+
+## THE GROVE WORLDVIEW
+
+${GROVE_WORLDVIEW_CONTEXT}
+
+---
+
+CURRENT PROMPT DATA:
+Title: ${prompt.title || 'Untitled'}
+Description: ${prompt.description || 'No description'}
+Execution Prompt: ${prompt.payload?.executionPrompt || prompt.executionPrompt || 'No execution prompt'}
+Interesting Because: ${prompt.payload?.interestingBecause || 'Not specified'}
+Salience Dimensions: ${JSON.stringify(prompt.payload?.salienceDimensions || [])}
+
+AVAILABLE STAGES (user journey progression):
+- genesis: Initial exploration - accessible language, stakes-focused. For newcomers.
+- exploration: Deep dive - technical language, mechanics-focused. For understanding how things work.
+- synthesis: Integration - academic language, evidence-focused. For researchers connecting ideas.
+- advocacy: Action-oriented - executive language, resolution-focused. For decision-makers.
+
+AVAILABLE LENS ARCHETYPES (use exact IDs):
+- freestyle: Open exploration, no specific framing
+- academic: Academic/research perspective, analytical approach
+- engineer: Technical/implementation focus, systems thinking
+- concerned-citizen: Public interest, societal implications
+- geopolitical: Global politics, power dynamics, strategy
+- big-ai-exec: AI industry insider, business/commercial view
+- family-office: Long-term investment, wealth preservation
+- dr-chiang: Research scientist persona
+- wayne-turner: Tech executive persona
+
+YOUR TASK:
+Suggest the best stages and lens affinities for this prompt based on its content. Consider:
+1. What level of prior knowledge does this assume?
+2. Which archetypes would find this most valuable?
+3. What weight (0.0-1.0) represents affinity strength?
+
+Return ONLY valid JSON:
+{
+  "suggestedStages": ["genesis", "emergence"],
+  "stageReasoning": "This prompt introduces foundational concepts...",
+  "lensAffinities": [
+    { "lensId": "researcher", "weight": 0.9, "reasoning": "..." },
+    { "lensId": "investor", "weight": 0.6, "reasoning": "..." }
+  ],
+  "overallReasoning": "Brief overall rationale"
+}`;
+
+  const modelId = CLAUDE_MODEL_IDS['claude-3-haiku'] || 'claude-3-haiku-20240307';
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: targetingPrompt }],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Targeting API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const responseText = data.content[0]?.text || '{}';
+
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Failed to parse targeting response');
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+/**
+ * Unified prompt enrichment endpoint
+ * POST /api/prompts/enrich
+ * Body: { prompt: { title, description, payload }, operations: ['titles', 'targeting'] }
+ */
+app.post('/api/prompts/enrich', async (req, res) => {
+  try {
+    const { prompt, operations } = req.body;
+
+    console.log('[PromptEnrich] Request:', {
+      hasPrompt: !!prompt,
+      promptTitle: prompt?.title?.slice(0, 30),
+      operations,
+    });
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: 'prompt is required in request body',
+        hint: 'Send { prompt: { title, description, payload }, operations: [...] }'
+      });
+    }
+
+    if (!operations || !operations.length) {
+      return res.status(400).json({ error: 'operations array is required' });
+    }
+
+    if (!ANTHROPIC_API_KEY) {
+      return res.status(500).json({ error: 'Anthropic API key not configured' });
+    }
+
+    // Sprint: extraction-grove-context-v1 - removed dynamic lookup
+    // Grove context is now provided by GROVE_WORLDVIEW_CONTEXT constant
+
+    const results = {};
+
+    for (const op of operations) {
+      try {
+        switch (op) {
+          case 'titles':
+          case 'suggest-titles':
+            results.titles = await enrichPromptTitles(prompt);
+            break;
+          case 'targeting':
+          case 'suggest-targeting':
+            results.targeting = await enrichPromptTargeting(prompt);
+            break;
+          default:
+            console.warn(`[PromptEnrich] Unknown operation: ${op}`);
+        }
+      } catch (error) {
+        console.error(`[PromptEnrich] Error for ${op}:`, error.message);
+        results[op] = { error: error.message };
+      }
+    }
+
+    console.log('[PromptEnrich] Success:', Object.keys(results));
+
+    res.json({
+      results,
+      model: 'claude-3-haiku',
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[PromptEnrich] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /**
  * AI-powered targeting suggestions for prompts
  * Sprint: prompt-wiring-v1
@@ -4142,14 +4639,16 @@ STAGE DEFINITIONS:
 - synthesis: Integration - academic language, evidence-focused, comprehensive responses. For researchers connecting ideas.
 - advocacy: Action-oriented - executive language, resolution-focused, strategic responses. For decision-makers.
 
-AVAILABLE LENSES (user personas):
-- general: General curious audience (genesis only)
-- concerned-citizen: Engaged citizens worried about AI (genesis, exploration)
-- executive: Business decision-makers (genesis, exploration, advocacy)
-- technical: Engineers and developers (genesis, exploration, synthesis)
-- academic: Researchers and scholars (all stages)
-- geopolitical: Policy and governance focus (genesis, exploration, synthesis)
-- family-office: Investors and wealth managers (genesis, exploration, advocacy)
+AVAILABLE LENS ARCHETYPES (use exact IDs):
+- freestyle: Open exploration, no specific framing (all stages)
+- academic: Research perspective, analytical approach (all stages)
+- engineer: Technical/implementation focus, systems thinking (genesis, exploration, synthesis)
+- concerned-citizen: Public interest, societal implications (genesis, exploration)
+- geopolitical: Global politics, power dynamics, strategy (genesis, exploration, synthesis)
+- big-ai-exec: AI industry insider, business/commercial view (genesis, exploration, advocacy)
+- family-office: Long-term investment, wealth preservation (genesis, exploration, advocacy)
+- dr-chiang: Research scientist persona (exploration, synthesis)
+- wayne-turner: Tech executive persona (genesis, exploration, advocacy)
 
 CURRENT PROMPT DATA:
 Title: ${prompt.title || 'Untitled'}
@@ -4375,7 +4874,9 @@ app.get('/api/knowledge/stats', async (req, res) => {
   }
 });
 
-// Trigger embedding for pending documents
+// Unified pipeline endpoint: embed + optionally extract + polish
+// Sprint: upload-pipeline-unification-v1
+// Now ASYNC: Returns job ID immediately, processes in background
 app.post('/api/knowledge/embed', async (req, res) => {
   try {
     const knowledge = await getKnowledgeModule();
@@ -4383,31 +4884,424 @@ app.post('/api/knowledge/embed', async (req, res) => {
       return res.status(503).json({ error: 'Knowledge module not available' });
     }
 
-    const { documentIds, limit } = req.body;
+    const { documentIds, limit, runExtraction, runEnrichment } = req.body;
 
+    // Get pending docs count for job progress tracking
+    let docsToProcess = [];
     if (documentIds && documentIds.length > 0) {
-      // Embed specific documents
-      const errors = [];
-      let processed = 0;
-      for (const id of documentIds) {
-        try {
-          await knowledge.embedDocument(id);
-          processed++;
-        } catch (error) {
-          errors.push(`${id}: ${error.message}`);
-        }
-      }
-      return res.json({ processed, errors });
+      docsToProcess = documentIds;
+    } else {
+      const pendingDocs = await knowledge.listDocuments({
+        embeddingStatus: 'pending',
+        archived: false,
+        limit: limit || 10
+      });
+      docsToProcess = pendingDocs.map(d => d.id);
     }
 
-    // Embed all pending
-    const result = await knowledge.embedPendingDocuments(limit || 10);
-    res.json(result);
+    // If nothing to process, return immediately
+    if (docsToProcess.length === 0) {
+      return res.json({
+        jobId: null,
+        message: 'No pending documents to process',
+        embedded: { processed: 0, errors: [] },
+        extracted: null
+      });
+    }
+
+    // Create job and return immediately
+    const job = createJob('pipeline', {
+      documentIds: docsToProcess,
+      limit: limit || 10,
+      runExtraction: !!runExtraction,
+      runEnrichment: runEnrichment !== false
+    });
+
+    updateJob(job.id, {
+      status: 'running',
+      progress: { current: 0, total: docsToProcess.length, stage: 'embedding' }
+    });
+
+    // Return job ID immediately - client will poll for status
+    res.json({ jobId: job.id, documentsQueued: docsToProcess.length });
+
+    // Run pipeline in background (don't await!)
+    runPipelineJob(job.id, knowledge, docsToProcess, runExtraction, runEnrichment !== false);
+
   } catch (error) {
-    console.error('[Knowledge] Embed error:', error);
+    console.error('[Knowledge] Pipeline error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Background pipeline runner
+async function runPipelineJob(jobId, knowledge, documentIds, runExtraction, runEnrichment) {
+  const result = { embedded: { processed: 0, errors: [] }, enriched: { processed: 0, errors: [] }, extracted: null };
+  let embeddedDocIds = [];
+
+  try {
+    // Step 1: Embedding
+    for (let i = 0; i < documentIds.length; i++) {
+      const docId = documentIds[i];
+      try {
+        await knowledge.embedDocument(docId);
+        embeddedDocIds.push(docId);
+        result.embedded.processed++;
+      } catch (error) {
+        result.embedded.errors.push(`${docId}: ${error.message}`);
+      }
+      updateJob(jobId, {
+        progress: {
+          current: i + 1,
+          total: documentIds.length,
+          stage: 'embedding',
+          detail: `Embedded ${i + 1}/${documentIds.length} documents`
+        }
+      });
+    }
+
+    // Step 2: Document Enrichment (keywords, summary, entities)
+    // Sprint: upload-pipeline-unification-v1 - Wire document enrichment into pipeline
+    if (embeddedDocIds.length > 0) {
+      updateJob(jobId, {
+        progress: {
+          current: 0,
+          total: embeddedDocIds.length,
+          stage: 'enriching',
+          detail: `Enriching ${embeddedDocIds.length} documents`
+        }
+      });
+
+      console.log(`[Pipeline] Running document enrichment for ${embeddedDocIds.length} documents`);
+
+      for (let i = 0; i < embeddedDocIds.length; i++) {
+        const docId = embeddedDocIds[i];
+        try {
+          // Get document
+          const doc = await knowledge.getDocument(docId);
+          if (!doc?.content) {
+            console.log(`[Pipeline] Skipping enrichment for ${docId}: no content`);
+            result.enriched.errors.push(`${docId}: No content`);
+            continue;
+          }
+
+          const content = doc.content || '';
+          const title = doc.title || '';
+
+          // Run all enrichment operations
+          const enrichmentData = {};
+
+          try {
+            enrichmentData.keywords = await extractKeywords(content, title);
+          } catch (e) {
+            console.error(`[Pipeline] Keywords extraction failed for ${docId}:`, e.message);
+          }
+
+          try {
+            enrichmentData.summary = await generateSummary(content, title);
+          } catch (e) {
+            console.error(`[Pipeline] Summary generation failed for ${docId}:`, e.message);
+          }
+
+          try {
+            enrichmentData.named_entities = await extractEntities(content);
+          } catch (e) {
+            console.error(`[Pipeline] Entity extraction failed for ${docId}:`, e.message);
+          }
+
+          try {
+            enrichmentData.document_type = await classifyDocumentType(content);
+          } catch (e) {
+            console.error(`[Pipeline] Document type classification failed for ${docId}:`, e.message);
+          }
+
+          try {
+            enrichmentData.questions_answered = await suggestQuestions(content, title);
+          } catch (e) {
+            console.error(`[Pipeline] Questions suggestion failed for ${docId}:`, e.message);
+          }
+
+          try {
+            enrichmentData.temporal_class = await checkFreshness(content);
+          } catch (e) {
+            console.error(`[Pipeline] Temporal classification failed for ${docId}:`, e.message);
+          }
+
+          // Persist enrichment data
+          await knowledge.markDocumentEnriched(docId, enrichmentData, 'pipeline', 'gemini-2.0-flash');
+          result.enriched.processed++;
+
+          console.log(`[Pipeline] Enriched document ${i + 1}/${embeddedDocIds.length}: ${title}`);
+        } catch (error) {
+          console.error(`[Pipeline] Enrichment failed for ${docId}:`, error.message);
+          result.enriched.errors.push(`${docId}: ${error.message}`);
+        }
+
+        updateJob(jobId, {
+          progress: {
+            current: i + 1,
+            total: embeddedDocIds.length,
+            stage: 'enriching',
+            detail: `Enriched ${i + 1}/${embeddedDocIds.length} documents`
+          }
+        });
+
+        // Rate limit: 500ms between documents to respect Gemini API limits
+        if (i < embeddedDocIds.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    }
+
+    // Step 3: Extraction + Prompt Enrichment (if requested)
+    if (runExtraction && embeddedDocIds.length > 0) {
+      updateJob(jobId, {
+        progress: {
+          current: 0,
+          total: embeddedDocIds.length,
+          stage: 'extracting',
+          detail: `Extracting prompts from ${embeddedDocIds.length} documents`
+        }
+      });
+
+      console.log(`[Pipeline] Running extraction for ${embeddedDocIds.length} documents`);
+      try {
+        const extractionResults = await extractPromptsFromDocuments(
+          embeddedDocIds,
+          runEnrichment,
+          (current, total, detail) => {
+            // Progress callback for extraction
+            updateJob(jobId, {
+              progress: { current, total, stage: 'extracting', detail }
+            });
+          }
+        );
+        result.extracted = extractionResults;
+      } catch (error) {
+        console.error('[Pipeline] Extraction error:', error);
+        result.extracted = { error: error.message, prompts: 0, errors: [] };
+      }
+    }
+
+    // Complete
+    updateJob(jobId, {
+      status: 'completed',
+      result,
+      progress: {
+        current: documentIds.length,
+        total: documentIds.length,
+        stage: 'completed',
+        detail: `Processed ${result.embedded.processed} docs, ${result.enriched?.processed || 0} enriched, ${result.extracted?.prompts || 0} prompts`
+      }
+    });
+    console.log(`[Pipeline] Job ${jobId} completed: ${result.embedded.processed} embedded, ${result.enriched?.processed || 0} enriched, ${result.extracted?.prompts || 0} prompts`);
+
+  } catch (error) {
+    console.error(`[Pipeline] Job ${jobId} failed:`, error);
+    updateJob(jobId, {
+      status: 'failed',
+      error: error.message,
+      result
+    });
+  }
+}
+
+// Helper: Extract and polish prompts from documents
+// Sprint: upload-pipeline-unification-v1
+// Added onProgress callback for async job tracking
+async function extractPromptsFromDocuments(documentIds, runEnrichment = true, onProgress = null) {
+  const results = { prompts: 0, errors: [] };
+  const knowledge = await getKnowledgeModule();
+
+  if (!ANTHROPIC_API_KEY) {
+    console.error('[Pipeline] Anthropic API key not configured');
+    results.errors.push('Anthropic API key not configured');
+    return results;
+  }
+
+  const batchId = `pipeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+  for (let i = 0; i < documentIds.length; i++) {
+    const docId = documentIds[i];
+    // Report progress
+    if (onProgress) {
+      onProgress(i + 1, documentIds.length, `Processing document ${i + 1}/${documentIds.length}`);
+    }
+    try {
+      // Get document
+      const doc = await knowledge.getDocument(docId);
+      if (!doc?.content) {
+        console.log(`[Pipeline] Skipping ${docId}: no content`);
+        results.errors.push(`${docId}: No content`);
+        continue;
+      }
+
+      console.log(`[Pipeline] Extracting from: ${doc.title || docId}`);
+
+      // Build extraction prompt and call Claude
+      const prompt = buildClaudeExtractionPrompt(doc.content, []);
+      const modelId = CLAUDE_MODEL_IDS['claude-3-sonnet'];
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          max_tokens: 4096,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[Pipeline] API error for ${docId}:`, response.status, errorText);
+        results.errors.push(`${docId}: API error ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const responseText = data.content[0]?.text || '[]';
+
+      // Parse concepts from response
+      let concepts = [];
+      try {
+        const jsonMatch = responseText.match(/```json\n?([\s\S]*?)\n?```/) || [null, responseText];
+        concepts = JSON.parse(jsonMatch[1] || '[]');
+        if (!Array.isArray(concepts)) concepts = [concepts];
+      } catch (e) {
+        console.warn(`[Pipeline] Parse error for ${docId}:`, e.message);
+        results.errors.push(`${docId}: Parse error`);
+        continue;
+      }
+
+      // Filter by confidence
+      const filteredConcepts = concepts.filter(c => (c.confidence || 0) >= 0.6);
+
+      if (filteredConcepts.length === 0) {
+        console.log(`[Pipeline] No concepts extracted from ${docId}`);
+        continue;
+      }
+
+      console.log(`[Pipeline] Extracted ${filteredConcepts.length} concepts from ${docId}`);
+
+      // Polish if requested (uses GROVE_WORLDVIEW_CONTEXT via polishExtractedConcepts)
+      let finalConcepts = filteredConcepts;
+      if (runEnrichment) {
+        finalConcepts = await polishExtractedConcepts(filteredConcepts, doc);
+        console.log(`[Pipeline] Polished ${finalConcepts.length} prompts from ${docId}`);
+      }
+
+      // Save extracted prompts to Supabase
+      const { getSupabaseAdmin } = await import('./lib/supabase.js');
+      const supabase = getSupabaseAdmin();
+      const { inferTargetingFromSalience } = await import('./lib/targeting-inference.js');
+
+      if (supabase && finalConcepts.length > 0) {
+        const now = new Date().toISOString();
+
+        const promptRows = finalConcepts.map(concept => {
+          const salienceDimensions = concept.salienceDimensions || [];
+          const interestingBecause = concept.interestingBecause || '';
+          const targetingInference = inferTargetingFromSalience(salienceDimensions, interestingBecause);
+
+          // Sprint: upload-pipeline-unification-v1 - Fix field name mismatch
+          // polishExtractedConcepts returns 'stages' and 'lensAffinities', not 'targetStages' and 'polishedLensAffinities'
+          const stages = concept.stages?.length
+            ? concept.stages
+            : (concept.targetStages?.length ? concept.targetStages : targetingInference.suggestedStages);
+
+          const lensAffinities = concept.lensAffinities?.length
+            ? concept.lensAffinities
+            : (concept.polishedLensAffinities?.length
+                ? concept.polishedLensAffinities
+                : targetingInference.lensAffinities.map(l => ({
+                    lensId: l.lensId,
+                    weight: l.weight,
+                  })));
+
+          const lensIds = lensAffinities.map(l => l.lensId);
+
+          const payload = {
+            executionPrompt: concept.executionPrompt || concept.userQuestion || '',
+            systemContext: concept.systemContext || concept.systemGuidance || '',
+            topicAffinities: concept.topicCategory ? [{ topicId: concept.topicCategory, weight: 1.0 }] : [],
+            lensAffinities: lensAffinities.length > 0 ? lensAffinities : [{ lensId: 'base', weight: 1.0 }],
+            targeting: {
+              stages,
+              lensIds,
+              stageReasoning: concept.polishReasoning || targetingInference.reasoning,
+            },
+            baseWeight: 50,
+            source: 'generated',
+            provenance: {
+              type: 'extracted',
+              reviewStatus: 'pending',
+              sourceDocIds: [doc.id],
+              sourceDocTitles: [doc.title],
+              extractedAt: Date.now(),
+              extractionModel: 'claude-3-sonnet',
+              extractionConfidence: concept.confidence,
+              extractionBatch: batchId,
+              polishedAt: concept.polishedAt,
+              polishReasoning: concept.polishReasoning,
+            },
+            salienceDimensions: concept.salienceDimensions || [],
+            interestingBecause: concept.interestingBecause,
+            surfaces: ['highlight', 'suggestion'],
+            highlightTriggers: [{ text: concept.concept, matchMode: 'contains', caseSensitive: false }],
+            stats: { impressions: 0, selections: 0, completions: 0, avgEntropyDelta: 0, avgDwellMs: 0 },
+            userIntent: concept.userIntent,
+            conceptAngle: concept.conceptAngle,
+            suggestedFollowups: concept.suggestedFollowups || [],
+          };
+
+          // Match bulk-extract row structure for prompts table
+          // Sprint: upload-pipeline-unification-v1 - Use polished 'title' field
+          return {
+            id: crypto.randomUUID(),
+            type: 'prompt',
+            title: concept.title || concept.label || concept.concept,
+            description: concept.interestingBecause || `Extracted from: ${doc.title}`,
+            icon: 'auto_awesome',
+            status: 'draft',
+            tags: [
+              'extracted',
+              'pending-review',
+              ...(concept.polishedAt ? ['ai-polished'] : []),
+              ...(concept.topicCategory ? [`topic:${concept.topicCategory}`] : []),
+            ],
+            created_at: now,
+            updated_at: now,
+            payload,
+          };
+        });
+
+        // Insert into public.prompts (matches bulk-extract structure)
+        const { error: insertError } = await supabase
+          .from('prompts')
+          .insert(promptRows);
+
+        if (insertError) {
+          console.error(`[Pipeline] Save error for ${docId}:`, insertError);
+          results.errors.push(`${docId}: Save error`);
+        } else {
+          results.prompts += promptRows.length;
+          console.log(`[Pipeline] Saved ${promptRows.length} prompts for ${docId}`);
+        }
+      }
+    } catch (error) {
+      console.error(`[Pipeline] Error processing ${docId}:`, error);
+      results.errors.push(`${docId}: ${error.message}`);
+    }
+  }
+
+  console.log(`[Pipeline] Complete: ${results.prompts} prompts, ${results.errors.length} errors`);
+  return results;
+}
 
 // Semantic search (supports hybrid mode)
 // Sprint: rag-discovery-enhancement-v1
@@ -4710,6 +5604,37 @@ app.patch('/api/knowledge/documents/:id', async (req, res) => {
   }
 });
 
+// Delete document
+// Sprint: upload-pipeline-unification-v1
+app.delete('/api/knowledge/documents/:id', async (req, res) => {
+  try {
+    const { getSupabaseAdmin } = await import('./lib/supabase.js');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      return res.status(503).json({ error: 'Database not available' });
+    }
+
+    const documentId = req.params.id;
+
+    // Delete from documents table (embeddings will cascade or be orphaned)
+    const { error } = await supabase
+      .from('documents')
+      .delete()
+      .eq('id', documentId);
+
+    if (error) {
+      console.error('[Knowledge] Delete error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log(`[Knowledge] Deleted document: ${documentId}`);
+    res.json({ success: true, id: documentId });
+  } catch (error) {
+    console.error('[Knowledge] Delete document error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Enrich document with AI
 app.post('/api/knowledge/enrich', async (req, res) => {
   try {
@@ -4794,6 +5719,106 @@ app.post('/api/knowledge/documents/:id/embed', async (req, res) => {
   }
 });
 
+// Reprocess document - run all enrichment and save immediately
+// Sprint: upload-pipeline-unification-v1 - Copilot reprocess command
+app.post('/api/knowledge/documents/:id/reprocess', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const doc = await knowledge.getDocument(req.params.id);
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    console.log(`[Reprocess] Starting enrichment for: ${doc.title}`);
+
+    const content = doc.content || '';
+    const title = doc.title || '';
+    const enrichmentData = {};
+    const results = { operations: [] };
+
+    // Run all enrichment operations
+    try {
+      enrichmentData.keywords = await extractKeywords(content, title);
+      results.operations.push({ op: 'keywords', count: enrichmentData.keywords?.length || 0 });
+      console.log(`[Reprocess] Keywords: ${enrichmentData.keywords?.length || 0}`);
+    } catch (e) {
+      console.error(`[Reprocess] Keywords failed:`, e.message);
+      results.operations.push({ op: 'keywords', error: e.message });
+    }
+
+    try {
+      enrichmentData.summary = await generateSummary(content, title);
+      results.operations.push({ op: 'summary', length: enrichmentData.summary?.length || 0 });
+      console.log(`[Reprocess] Summary: ${enrichmentData.summary?.length || 0} chars`);
+    } catch (e) {
+      console.error(`[Reprocess] Summary failed:`, e.message);
+      results.operations.push({ op: 'summary', error: e.message });
+    }
+
+    try {
+      enrichmentData.named_entities = await extractEntities(content);
+      const entityCount = Object.values(enrichmentData.named_entities || {}).flat().length;
+      results.operations.push({ op: 'entities', count: entityCount });
+      console.log(`[Reprocess] Entities: ${entityCount}`);
+    } catch (e) {
+      console.error(`[Reprocess] Entities failed:`, e.message);
+      results.operations.push({ op: 'entities', error: e.message });
+    }
+
+    try {
+      enrichmentData.document_type = await classifyDocumentType(content);
+      results.operations.push({ op: 'type', value: enrichmentData.document_type });
+      console.log(`[Reprocess] Type: ${enrichmentData.document_type}`);
+    } catch (e) {
+      console.error(`[Reprocess] Type failed:`, e.message);
+      results.operations.push({ op: 'type', error: e.message });
+    }
+
+    try {
+      enrichmentData.questions_answered = await suggestQuestions(content, title);
+      results.operations.push({ op: 'questions', count: enrichmentData.questions_answered?.length || 0 });
+      console.log(`[Reprocess] Questions: ${enrichmentData.questions_answered?.length || 0}`);
+    } catch (e) {
+      console.error(`[Reprocess] Questions failed:`, e.message);
+      results.operations.push({ op: 'questions', error: e.message });
+    }
+
+    try {
+      enrichmentData.temporal_class = await checkFreshness(content);
+      results.operations.push({ op: 'freshness', value: enrichmentData.temporal_class });
+      console.log(`[Reprocess] Freshness: ${enrichmentData.temporal_class}`);
+    } catch (e) {
+      console.error(`[Reprocess] Freshness failed:`, e.message);
+      results.operations.push({ op: 'freshness', error: e.message });
+    }
+
+    // Save enrichment data
+    await knowledge.markDocumentEnriched(req.params.id, enrichmentData, 'copilot-reprocess', 'gemini-2.0-flash');
+    console.log(`[Reprocess] Saved enrichment for: ${doc.title}`);
+
+    res.json({
+      success: true,
+      message: `Document reprocessed: ${results.operations.filter(o => !o.error).length}/6 operations succeeded`,
+      results,
+      enrichment: {
+        keywords: enrichmentData.keywords?.length || 0,
+        summary: enrichmentData.summary ? 'generated' : null,
+        entities: Object.values(enrichmentData.named_entities || {}).flat().length,
+        type: enrichmentData.document_type,
+        questions: enrichmentData.questions_answered?.length || 0,
+        freshness: enrichmentData.temporal_class,
+      },
+    });
+  } catch (error) {
+    console.error('[Reprocess] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Find related documents
 app.get('/api/knowledge/documents/:id/related', async (req, res) => {
   try {
@@ -4841,13 +5866,30 @@ async function callGeminiForEnrichment(prompt) {
   return text;
 }
 
+// Grove-weighted keyword extraction
+// Sprint: upload-pipeline-unification-v1
 async function extractKeywords(content, title) {
-  const prompt = `Extract 5-10 high-signal keywords from this document. Return as a JSON array of strings.
+  const prompt = `Extract 5-10 high-signal keywords from this document for semantic search indexing.
+
+## GROVE VOCABULARY (prioritize these terms when the document discusses related concepts)
+
+The Grove uses specific terminology. When extracting keywords, if the document discusses any of these concepts, USE THE GROVE TERM as a keyword:
+
+- "Computational Sovereignty" - AI running on hardware you control, independence from cloud providers
+- "The Ratchet Thesis" - AI capability propagating from frontier to consumer hardware over time
+- "Efficiency-Enlightenment Loop" - Agents motivated by earning access to enhanced cognition
+- "Knowledge Commons" - Network-wide innovation sharing with attribution
+- "Hybrid Cognition" - Local models + frontier cloud models working seamlessly together
+- "Gardener/Observer Dynamic" - The human cultivating AI communities, dramatic irony of observation
+- "Epistemic Independence" - Producing knowledge without dependency on potentially misaligned entities
+- "Technical Frontier" - Academic research informing distributed AI architecture
+
+Also include specific technical terms, named entities, and domain concepts from the document.
 
 Title: ${title}
 Content: ${content.slice(0, 3000)}
 
-Return ONLY a JSON array, like: ["keyword1", "keyword2", ...]`;
+Return ONLY a JSON array of 5-10 keywords, like: ["Computational Sovereignty", "memory architecture", "distributed inference", ...]`;
 
   try {
     const response = await callGeminiForEnrichment(prompt);

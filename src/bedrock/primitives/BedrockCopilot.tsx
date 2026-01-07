@@ -1,10 +1,12 @@
 // src/bedrock/primitives/BedrockCopilot.tsx
 // Copilot panel at bottom of inspector for AI-assisted editing
 // Sprint: prompt-editor-standardization-v1
+// Sprint: copilot-suggestions-hotfix-v1 - added clickable suggestion buttons
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type { GroveObject } from '../../core/schema/grove-object';
-import type { PatchOperation } from '../types/copilot.types';
+import type { PatchOperation, SuggestedAction } from '../types/copilot.types';
+import type { QuickAction } from '../types/console.types';
 import { parseCommand, getAvailableFields } from '../patterns/copilot-commands';
 
 // =============================================================================
@@ -15,7 +17,25 @@ interface CopilotMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
+  suggestions?: SuggestedAction[];
 }
+
+/** Result from action handler or command parser */
+interface ActionResult {
+  success: boolean;
+  message: string;
+  operations?: PatchOperation[];
+  suggestions?: SuggestedAction[];
+}
+
+/** Type alias for parseCommand result (now includes suggestions) */
+type CommandParseResult = ActionResult;
+
+/** Default quick actions when none provided */
+const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
+  { id: 'activate', label: 'Activate', command: 'activate', icon: 'toggle_on' },
+  { id: 'help', label: 'Help', command: 'help', icon: 'help' },
+];
 
 interface BedrockCopilotProps {
   /** Console ID for field mapping */
@@ -30,6 +50,14 @@ interface BedrockCopilotProps {
   placeholder?: string;
   /** Whether the panel is collapsed by default */
   defaultCollapsed?: boolean;
+  /** External input to populate (e.g., from Fix button). Clears after being consumed. */
+  externalInput?: string;
+  /** Callback when external input has been consumed */
+  onExternalInputConsumed?: () => void;
+  /** Optional async action handler for slash commands (e.g., /make-compelling) */
+  onAction?: (actionId: string, userInput: string) => Promise<ActionResult | null>;
+  /** Quick action buttons (defaults to Activate + Help) */
+  quickActions?: QuickAction[];
 }
 
 // =============================================================================
@@ -43,6 +71,10 @@ export function BedrockCopilot({
   title = 'Copilot',
   placeholder = 'Try "set title to New Title" or "help"',
   defaultCollapsed = true,
+  externalInput,
+  onExternalInputConsumed,
+  onAction,
+  quickActions = DEFAULT_QUICK_ACTIONS,
 }: BedrockCopilotProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [input, setInput] = useState('');
@@ -50,6 +82,24 @@ export function BedrockCopilot({
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Handle external input (e.g., from Fix/Refine button)
+  useEffect(() => {
+    if (externalInput) {
+      setInput(externalInput);
+      setIsCollapsed(false); // Expand the panel
+      // Focus input after a short delay to allow panel to render
+      setTimeout(() => {
+        inputRef.current?.focus();
+        // Move cursor to end of input
+        if (inputRef.current) {
+          inputRef.current.selectionStart = inputRef.current.value.length;
+          inputRef.current.selectionEnd = inputRef.current.value.length;
+        }
+      }, 100);
+      onExternalInputConsumed?.();
+    }
+  }, [externalInput, onExternalInputConsumed]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -81,17 +131,35 @@ export function BedrockCopilot({
     };
     setMessages(prev => [...prev, userMsg]);
 
-    // Parse command
-    const result = parseCommand(userMessage, consoleId, object);
+    let result: ActionResult;
+
+    // Check for slash command (e.g., /make-compelling, /suggest-targeting)
+    const slashMatch = userMessage.match(/^\/(\S+)(?:\s+(.*))?$/);
+    if (slashMatch && onAction) {
+      const [, actionId, args] = slashMatch;
+      const actionResult = await onAction(actionId, args || '');
+      if (actionResult) {
+        result = actionResult;
+      } else {
+        // Fallback to parseCommand if action handler returns null
+        // Sprint: upload-pipeline-unification-v1 - parseCommand is now async
+        result = await parseCommand(userMessage, consoleId, object);
+      }
+    } else {
+      // Parse as regular command
+      // Sprint: upload-pipeline-unification-v1 - parseCommand is now async
+      result = await parseCommand(userMessage, consoleId, object);
+    }
 
     // Small delay for UX
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    // Add assistant response
+    // Add assistant response with suggestions
     const assistantMsg: CopilotMessage = {
       id: crypto.randomUUID(),
       role: 'assistant',
       content: result.message,
+      suggestions: result.suggestions,
     };
     setMessages(prev => [...prev, assistantMsg]);
 
@@ -101,36 +169,51 @@ export function BedrockCopilot({
     }
 
     setIsProcessing(false);
-  }, [input, isProcessing, consoleId, object, onApplyPatch]);
+  }, [input, isProcessing, consoleId, object, onApplyPatch, onAction]);
 
-  // Quick action buttons
-  const quickActions = [
-    { label: 'Activate', command: 'activate', icon: 'toggle_on' },
-    { label: 'Help', command: 'help', icon: 'help' },
-  ];
-
-  const executeQuickAction = useCallback((command: string) => {
+  // Execute quick action - handles both slash commands and regular commands
+  // Sprint: prompt-copilot-actions-v1
+  const executeQuickAction = useCallback(async (command: string) => {
     setInput(command);
-    // Trigger submit
-    const result = parseCommand(command, consoleId, object);
-    
+    setIsProcessing(true);
+
     const userMsg: CopilotMessage = {
       id: crypto.randomUUID(),
       role: 'user',
       content: command,
     };
+    setMessages(prev => [...prev, userMsg]);
+
+    let result: ActionResult;
+
+    // Check for slash command
+    const slashMatch = command.match(/^\/(\S+)(?:\s+(.*))?$/);
+    if (slashMatch && onAction) {
+      const [, actionId, args] = slashMatch;
+      const actionResult = await onAction(actionId, args || '');
+      if (actionResult) {
+        result = actionResult;
+      } else {
+        result = await parseCommand(command, consoleId, object);
+      }
+    } else {
+      result = await parseCommand(command, consoleId, object);
+    }
+
     const assistantMsg: CopilotMessage = {
       id: crypto.randomUUID(),
       role: 'assistant',
       content: result.message,
+      suggestions: result.suggestions,
     };
-    setMessages(prev => [...prev, userMsg, assistantMsg]);
+    setMessages(prev => [...prev, assistantMsg]);
 
     if (result.success && result.operations && onApplyPatch) {
       onApplyPatch(result.operations);
     }
     setInput('');
-  }, [consoleId, object, onApplyPatch]);
+    setIsProcessing(false);
+  }, [consoleId, object, onApplyPatch, onAction]);
 
   return (
     <div className="border-t border-[var(--glass-border-bright)] bg-[var(--glass-panel)]">
@@ -187,9 +270,35 @@ export function BedrockCopilot({
                       {message.content}
                     </span>
                   ) : (
-                    <span className="inline-block px-3 py-2 rounded-lg bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] max-w-[80%] text-left whitespace-pre-wrap">
-                      {message.content}
-                    </span>
+                    <div className="inline-block max-w-[80%] text-left">
+                      <span className="block px-3 py-2 rounded-lg bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] whitespace-pre-wrap">
+                        {message.content}
+                      </span>
+                      {/* Clickable Suggestions - Sprint: copilot-suggestions-hotfix-v1 */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-[var(--glass-border)]">
+                          {message.suggestions.map((s, i) => (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                setInput(s.template);
+                                inputRef.current?.focus();
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px]
+                                         bg-[var(--neon-green)]/10 text-[var(--neon-green)]
+                                         border border-[var(--neon-green)]/20
+                                         hover:bg-[var(--neon-green)]/20 hover:border-[var(--neon-green)]/40
+                                         transition-colors cursor-pointer"
+                            >
+                              {s.icon && (
+                                <span className="material-symbols-outlined text-xs">{s.icon}</span>
+                              )}
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}

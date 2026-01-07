@@ -320,6 +320,7 @@ export function createBedrockConsole<T>(
                   objects,
                 });
               } : undefined}
+              quickActions={config.copilot.quickActions}
             />
           ) : undefined,
         });
@@ -389,6 +390,7 @@ export function createBedrockConsole<T>(
                     objects,
                   });
                 } : undefined}
+                quickActions={config.copilot.quickActions}
               />
             ) : undefined,
           });

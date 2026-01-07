@@ -102,6 +102,11 @@ export interface Document {
   enriched_at?: string;
   enriched_by?: EnrichmentSource;
   enrichment_model?: string;
+
+  // Prompt extraction tracking (Sprint: extraction-pipeline-integration-v1)
+  promptsExtracted?: boolean;
+  promptExtractionAt?: string;
+  promptExtractionCount?: number;
 }
 
 // =============================================================================

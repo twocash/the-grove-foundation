@@ -52,6 +52,7 @@ export default defineConfig(({ mode }) => {
         '@garden': path.resolve(__dirname, './src/garden'),
         '@data': path.resolve(__dirname, './src/data'),
         '@bedrock': path.resolve(__dirname, './src/bedrock'),
+        '@services': path.resolve(__dirname, './src/services'),
       }
     }
   };

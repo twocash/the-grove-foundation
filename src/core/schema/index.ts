@@ -240,7 +240,7 @@ export {
   MOMENT_SURFACES
 } from './moment';
 
-// Prompt types (Sprint: prompt-unification-v1, prompt-schema-rationalization-v1)
+// Prompt types (Sprint: prompt-unification-v1, prompt-schema-rationalization-v1, prompt-refinement-v1)
 export {
   type PromptStage,
   type PromptSource,
@@ -259,5 +259,9 @@ export {
   type PromptPayload,
   type Prompt,
   type SequenceDefinition,
+  // QA types (Sprint: prompt-refinement-v1)
+  type QAIssueType,
+  type QAIssueSeverity,
+  type QAIssue,
   deriveSequences
 } from './prompt';

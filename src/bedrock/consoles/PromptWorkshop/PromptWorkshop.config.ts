@@ -14,6 +14,8 @@ export const promptWorkshopConfig: ConsoleConfig = {
     { id: 'total', label: 'Total', icon: 'chat', query: 'count(*)' },
     { id: 'active', label: 'Active', icon: 'visibility', query: 'count(where: status=active)' },
     { id: 'inSequences', label: 'In Journeys', icon: 'route', query: 'count(where: sequences.length > 0)' },
+    // Sprint: prompt-extraction-pipeline-v1 - Review queue indicator
+    { id: 'pendingReview', label: 'Pending Review', icon: 'pending_actions', query: 'count(where: source=generated)' },
   ],
 
   navigation: [],
@@ -67,12 +69,25 @@ export const promptWorkshopConfig: ConsoleConfig = {
   },
 
   primaryAction: { label: 'New Prompt', icon: 'add', action: 'create' },
-  copilot: { 
+  copilot: {
     enabled: true,
     actions: [
       { id: 'set-title', trigger: 'set title to *', description: 'Update the prompt title' },
       { id: 'set-description', trigger: 'set description to *', description: 'Update the prompt description' },
       { id: 'set-weight', trigger: 'set weight to *', description: 'Update the base weight' },
+      // Sprint: prompt-wiring-v1
+      { id: 'make-compelling', trigger: '/make-compelling', description: 'Generate compelling title variants', aliases: ['make compelling', 'compelling title', 'better title'] },
+      { id: 'suggest-targeting', trigger: '/suggest-targeting', description: 'Suggest target stages based on content', aliases: ['suggest targeting', 'suggest stages', 'what stages'] },
+      // Sprint: prompt-copilot-actions-v1
+      { id: 'enrich', trigger: '/enrich', description: 'Enrich metadata (targeting + title suggestions)', aliases: ['enrich', 'enrich metadata'] },
+    ],
+    // Sprint: prompt-copilot-actions-v1 - Quick action buttons
+    quickActions: [
+      { id: 'suggest-targeting', label: 'Update Targeting', command: '/suggest-targeting', icon: 'target' },
+      { id: 'make-compelling', label: 'Suggest Headlines', command: '/make-compelling', icon: 'auto_awesome' },
+      { id: 'enrich', label: 'Enrich Metadata', command: '/enrich', icon: 'psychology' },
+      { id: 'activate', label: 'Activate', command: 'activate', icon: 'toggle_on' },
+      { id: 'help', label: 'Help', command: 'help', icon: 'help' },
     ],
   },
 };

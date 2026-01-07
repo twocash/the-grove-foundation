@@ -79,12 +79,30 @@ export interface CopilotAction {
   trigger: string;              // e.g., 'set * to *'
   description: string;
   modelPreference?: 'local' | 'hybrid' | 'cloud';
+  aliases?: string[];           // Alternative trigger phrases
+}
+
+/**
+ * Quick action button configuration for Copilot UI
+ * Sprint: prompt-copilot-actions-v1
+ */
+export interface QuickAction {
+  /** Unique action identifier (matches action handler) */
+  id: string;
+  /** Button label */
+  label: string;
+  /** Material Symbols icon name */
+  icon: string;
+  /** Command or action ID to execute */
+  command: string;
 }
 
 export interface CopilotConfig {
   enabled: boolean;
   model?: string;
   actions: CopilotAction[];
+  /** Quick action buttons shown in Copilot UI */
+  quickActions?: QuickAction[];
 }
 
 // =============================================================================
@@ -99,14 +117,35 @@ export interface PrimaryActionConfig {
 }
 
 // =============================================================================
+// Secondary Action Configuration
+// Sprint: prompt-extraction-pipeline-v1
+// =============================================================================
+
+export interface SecondaryActionConfig {
+  id: string;
+  label: string;
+  icon: string;
+  /** Action type - 'modal' opens a modal, 'custom' calls customAction */
+  action: 'modal' | 'custom';
+  /** Modal ID to open (for 'modal' action type) */
+  modalId?: string;
+  /** Custom handler (for 'custom' action type) */
+  customAction?: () => void;
+}
+
+// =============================================================================
 // Console Configuration
 // =============================================================================
 
 export interface ConsoleConfig {
   id: string;
   title: string;
+  /** Sprint: exploration-node-unification-v1 - Optional subtitle for display */
+  subtitle?: string;
   description: string;
   primaryAction?: PrimaryActionConfig;
+  /** Sprint: prompt-extraction-pipeline-v1 - Secondary action buttons */
+  secondaryActions?: SecondaryActionConfig[];
   metrics: MetricConfig[];
   navigation: NavItemConfig[];
   collectionView: CollectionViewConfig;

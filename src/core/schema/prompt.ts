@@ -151,6 +151,30 @@ export interface PromptGenerationContext {
 }
 
 // =============================================================================
+// QA Types (Sprint: prompt-refinement-v1)
+// =============================================================================
+
+/** Issue types identified by QA check */
+export type QAIssueType =
+  | 'missing_context'
+  | 'ambiguous_intent'
+  | 'too_broad'
+  | 'too_narrow'
+  | 'source_mismatch';
+
+/** Issue severity levels */
+export type QAIssueSeverity = 'error' | 'warning' | 'info';
+
+/** QA issue identified during quality assessment */
+export interface QAIssue {
+  type: QAIssueType;
+  description: string;
+  suggestedFix: string;
+  autoFixAvailable: boolean;
+  severity: QAIssueSeverity;
+}
+
+// =============================================================================
 // Payload
 // =============================================================================
 
@@ -180,6 +204,26 @@ export interface PromptPayload {
   surfaces?: PromptSurface[];
   /** Sprint: kinetic-highlights-v1 - Text patterns that trigger this prompt */
   highlightTriggers?: HighlightTrigger[];
+  /** Sprint: prompt-extraction-pipeline-v1 - Dimensions the concept touches */
+  salienceDimensions?: ('technical' | 'economic' | 'philosophical' | 'practical')[];
+  /** Sprint: prompt-extraction-pipeline-v1 - Why this concept is interesting */
+  interestingBecause?: string;
+
+  // === Sprint: prompt-refinement-v1 - Structured Execution ===
+  /** What the user implicitly wants to learn */
+  userIntent?: string;
+  /** How to frame the response (derived from interestingBecause) */
+  conceptAngle?: string;
+  /** Optional follow-up exploration questions */
+  suggestedFollowups?: string[];
+
+  // === Sprint: prompt-refinement-v1 - QA Metadata ===
+  /** Last QA check score (0-100) */
+  qaScore?: number;
+  /** ISO timestamp of last QA check */
+  qaLastChecked?: string;
+  /** Issues identified by QA check */
+  qaIssues?: QAIssue[];
 }
 
 /** Full Prompt object */

@@ -13,6 +13,8 @@ export interface CommandResult {
   success: boolean;
   message: string;
   operations?: PatchOperation[];
+  /** Clickable suggestions for follow-up actions */
+  suggestions?: Array<{ label: string; template: string; icon?: string }>;
 }
 
 export interface FieldMapping {
@@ -35,15 +37,19 @@ const COMMON_META_FIELDS: FieldMapping[] = [
 ];
 
 // Console-specific field mappings
+const PROMPT_FIELDS: FieldMapping[] = [
+  { aliases: ['execution', 'prompt', 'execution prompt'], path: '/payload/executionPrompt', type: 'string' },
+  { aliases: ['weight', 'base weight'], path: '/payload/baseWeight', type: 'number' },
+  { aliases: ['source'], path: '/payload/source', type: 'string' },
+  { aliases: ['context', 'system', 'system context'], path: '/payload/systemContext', type: 'string' },
+  { aliases: ['min interactions'], path: '/payload/targeting/minInteractions', type: 'number' },
+  { aliases: ['min confidence'], path: '/payload/targeting/minConfidence', type: 'number' },
+];
+
 const CONSOLE_FIELDS: Record<string, FieldMapping[]> = {
-  'prompt-workshop': [
-    { aliases: ['execution', 'prompt', 'execution prompt'], path: '/payload/executionPrompt', type: 'string' },
-    { aliases: ['weight', 'base weight'], path: '/payload/baseWeight', type: 'number' },
-    { aliases: ['source'], path: '/payload/source', type: 'string' },
-    { aliases: ['context', 'system', 'system context'], path: '/payload/systemContext', type: 'string' },
-    { aliases: ['min interactions'], path: '/payload/targeting/minInteractions', type: 'number' },
-    { aliases: ['min confidence'], path: '/payload/targeting/minConfidence', type: 'number' },
-  ],
+  // Support both 'prompts' (config id) and 'prompt-workshop' (legacy)
+  'prompts': PROMPT_FIELDS,
+  'prompt-workshop': PROMPT_FIELDS,
   'lens-workshop': [
     { aliases: ['color'], path: '/payload/color', type: 'string' },
     { aliases: ['tone', 'tone guidance'], path: '/payload/toneGuidance', type: 'string' },
@@ -196,23 +202,139 @@ function parseClearCommand(input: string, consoleId: string): CommandResult {
   };
 }
 
+/**
+ * Parse "reprocess" command for document enrichment
+ * Sprint: upload-pipeline-unification-v1
+ */
+async function parseReprocessCommand(input: string, object?: GroveObject): Promise<CommandResult> {
+  const lower = input.toLowerCase().trim();
+  if (lower !== 'reprocess' && lower !== 're-process') {
+    return { success: false, message: '' };
+  }
+
+  // GroveObject has ID at meta.id, not at top level
+  const objectId = object?.meta?.id || (object as unknown as { id?: string })?.id;
+  if (!objectId) {
+    return { success: false, message: 'No document selected. Select a document first.' };
+  }
+
+  try {
+    const response = await fetch(`/api/knowledge/documents/${objectId}/reprocess`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        message: `Reprocess failed: ${errorData.error || response.statusText}`,
+      };
+    }
+
+    const result = await response.json();
+    const e = result.enrichment || {};
+
+    return {
+      success: true,
+      message: `✓ Document reprocessed and saved!\n\nKeywords: ${e.keywords || 0}\nSummary: ${e.summary || 'none'}\nEntities: ${e.entities || 0}\nType: ${e.type || 'unknown'}\nQuestions: ${e.questions || 0}\nFreshness: ${e.freshness || 'unknown'}\n\nRefresh to see updated data.`,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Reprocess error: ${(error as Error).message}`,
+    };
+  }
+}
+
+/**
+ * Parse "prepend <field> with <value>" commands
+ * Prepends value to the existing field content
+ * Sprint: prompt-wiring-v1
+ */
+export function parsePrependCommand(input: string, consoleId: string, object?: GroveObject): CommandResult {
+  const match = input.match(/^prepend\s+(.+?)\s+with[:\s]+(.+)$/i);
+  if (!match) return { success: false, message: '' };
+
+  const [, fieldName, rawValue] = match;
+  const field = findFieldMapping(fieldName, consoleId);
+
+  if (!field) {
+    const availableFields = [
+      ...COMMON_META_FIELDS,
+      ...(CONSOLE_FIELDS[consoleId] || []),
+    ].flatMap(f => f.aliases);
+    return {
+      success: false,
+      message: `Unknown field: "${fieldName}". Available fields: ${availableFields.slice(0, 10).join(', ')}...`,
+    };
+  }
+
+  if (field.type !== 'string') {
+    return {
+      success: false,
+      message: `Cannot prepend to ${field.type} field. Only string fields support prepend.`,
+    };
+  }
+
+  const prependValue = rawValue.trim();
+
+  // Get existing value from object
+  const existingValue = object ? getNestedValue(object, field.path) : '';
+  const newValue = existingValue
+    ? `${prependValue} ${existingValue}`.trim()
+    : prependValue;
+
+  return {
+    success: true,
+    message: `Prepended "${prependValue}" to ${field.aliases[0]}`,
+    operations: [{ op: 'replace', path: field.path, value: newValue }],
+  };
+}
+
+/**
+ * Get nested value from object using JSON pointer path
+ */
+function getNestedValue(obj: GroveObject, path: string): string {
+  const parts = path.split('/').filter(Boolean);
+  let current: unknown = obj;
+
+  for (const part of parts) {
+    if (current && typeof current === 'object' && part in current) {
+      current = (current as Record<string, unknown>)[part];
+    } else {
+      return '';
+    }
+  }
+
+  return typeof current === 'string' ? current : '';
+}
+
 // =============================================================================
 // Main Parser
 // =============================================================================
 
 /**
  * Parse a natural language command and return patch operations
+ * Sprint: upload-pipeline-unification-v1 - Made async to support reprocess command
  */
-export function parseCommand(
+export async function parseCommand(
   input: string,
   consoleId: string,
-  _object?: GroveObject
-): CommandResult {
+  object?: GroveObject
+): Promise<CommandResult> {
   const trimmed = input.trim();
+
+  // Check for reprocess command first (async)
+  // Sprint: upload-pipeline-unification-v1
+  const reprocessResult = await parseReprocessCommand(trimmed, object);
+  if (reprocessResult.success || reprocessResult.message) {
+    return reprocessResult;
+  }
 
   // Try each parser in order
   const parsers = [
     () => parseSetCommand(trimmed, consoleId),
+    () => parsePrependCommand(trimmed, consoleId, object),
     () => parseActivateCommand(trimmed),
     () => parseClearCommand(trimmed, consoleId),
   ];
@@ -233,13 +355,13 @@ export function parseCommand(
     const fieldList = fields.map(f => `• ${f.aliases[0]}: ${f.description || f.type}`).join('\n');
     return {
       success: true,
-      message: `Available commands:\n• set <field> to <value>\n• activate / deactivate\n• clear <field>\n\nAvailable fields:\n${fieldList}`,
+      message: `Available commands:\n• reprocess - Run all enrichment and save (Pipeline Monitor)\n• set <field> to <value>\n• prepend <field> with <value>\n• activate / deactivate\n• clear <field>\n\nAvailable fields:\n${fieldList}`,
     };
   }
 
   return {
     success: false,
-    message: `I didn't understand that. Try "set title to New Title" or type "help" for available commands.`,
+    message: `I didn't understand that. Try "reprocess", "set title to New Title", or type "help" for available commands.`,
   };
 }
 

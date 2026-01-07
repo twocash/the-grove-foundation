@@ -117,7 +117,7 @@ export type ProvenanceType = 'authored' | 'extracted' | 'generated' | 'submitted
 /**
  * Review status for non-authored prompts
  */
-export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+export type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'edited';
 
 /**
  * Provenance tracking for exploration nodes
@@ -138,6 +138,10 @@ export interface PromptProvenance {
   extractionConfidence?: number;
   /** Method used for extraction @added highlight-extraction-v1 */
   extractionMethod?: 'general' | 'highlight-concept-detection';
+  /** Batch ID for grouping extractions @added prompt-extraction-pipeline-v1 */
+  extractionBatch?: string;
+  /** Notes from reviewer (e.g., rejection reason) @added prompt-extraction-pipeline-v1 */
+  reviewNotes?: string;
   // Generated
   gapAnalysisId?: string;
   generationReason?: string;

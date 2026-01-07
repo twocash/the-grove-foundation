@@ -13,3 +13,10 @@ export {
   simulateDelay
 } from './simulator';
 export { getSuggestionsForType, getWelcomeMessage } from './suggestions';
+export {
+  QA_SUGGESTIONS,
+  ISSUE_FIX_SUGGESTIONS,
+  getSuggestionsForIssues,
+  getQAWelcomeMessage,
+  generateAutoFixPatch,
+} from './PromptQAActions';

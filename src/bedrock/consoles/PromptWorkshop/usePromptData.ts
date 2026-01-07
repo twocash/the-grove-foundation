@@ -5,6 +5,7 @@
 import { useCallback, useMemo } from 'react';
 import { useGroveData } from '@core/data';
 import type { GroveObject } from '@core/schema/grove-object';
+import type { PatchOperation } from '@core/data/grove-data-provider';
 import type { PromptPayload, SequenceDefinition } from '@core/schema/prompt';
 import { deriveSequences } from '@core/schema/prompt';
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
@@ -107,6 +108,11 @@ export interface PromptDataResult extends CollectionDataResult<PromptPayload> {
   getPromptsForSequence: (groupId: string) => GroveObject<PromptPayload>[];
   getUnsequencedPrompts: () => GroveObject<PromptPayload>[];
   reset: () => void;
+  // Review queue (Sprint: prompt-extraction-pipeline-v1)
+  reviewQueue: GroveObject<PromptPayload>[];
+  createExtracted: (object: GroveObject<PromptPayload>) => Promise<GroveObject<PromptPayload>>;
+  approveExtracted: (object: GroveObject<PromptPayload>) => Promise<void>;
+  rejectExtracted: (object: GroveObject<PromptPayload>, notes?: string) => Promise<void>;
 }
 
 // =============================================================================
@@ -127,12 +133,24 @@ export interface PromptDataResult extends CollectionDataResult<PromptPayload> {
 export function usePromptData(): PromptDataResult {
   const groveData = useGroveData<PromptPayload>('prompt');
 
-  // Strangler fig pattern: Library prompts from JSON, user prompts from data layer
+  // Strangler fig pattern: Library prompts from JSON, user/generated prompts from data layer
   // Legacy library prompts in Supabase (source: 'library') are ignored
-  // Only user-created prompts (source: 'user') come from the data layer
+  // User-created (source: 'user') and extracted (source: 'generated') come from data layer
   const allObjects = useMemo(() => {
-    const userPrompts = groveData.objects.filter((p) => p.payload.source === 'user');
-    return [...convertedLibraryPrompts, ...userPrompts];
+    const dataLayerPrompts = groveData.objects.filter(
+      (p) => p.payload.source === 'user' || p.payload.source === 'generated'
+    );
+    return [...convertedLibraryPrompts, ...dataLayerPrompts];
+  }, [groveData.objects]);
+
+  // Review queue: extracted prompts pending review (Sprint: prompt-extraction-pipeline-v1)
+  const reviewQueue = useMemo(() => {
+    return groveData.objects.filter(
+      (p) =>
+        p.payload.source === 'generated' &&
+        p.payload.provenance?.type === 'extracted' &&
+        p.meta.tags?.includes('pending-review')
+    );
   }, [groveData.objects]);
 
   // Derive sequences from ALL prompts (library + user)
@@ -164,6 +182,27 @@ export function usePromptData(): PromptDataResult {
     async (defaults?: Partial<PromptPayload>) => {
       const newPrompt = createDefaultPrompt(defaults);
       return groveData.create(newPrompt);
+    },
+    [groveData]
+  );
+
+  // Create from full GroveObject (Sprint: prompt-extraction-pipeline-v1)
+  const createExtracted = useCallback(
+    async (object: GroveObject<PromptPayload>) => {
+      console.log('[usePromptData.createExtracted] Saving prompt:', {
+        id: object.meta.id,
+        title: object.meta.title,
+        description: object.meta.description,
+        type: object.meta.type,
+        source: object.payload.source,
+      });
+      const created = await groveData.create(object);
+      console.log('[usePromptData.createExtracted] Created:', {
+        id: created.meta.id,
+        title: created.meta.title,
+        description: created.meta.description,
+      });
+      return created;
     },
     [groveData]
   );
@@ -227,12 +266,58 @@ export function usePromptData(): PromptDataResult {
     groveData.refetch();
   }, [groveData]);
 
+  // Approve extracted prompt (Sprint: prompt-extraction-pipeline-v1)
+  const approveExtracted = useCallback(
+    async (object: GroveObject<PromptPayload>) => {
+      const now = new Date().toISOString();
+      const patches: PatchOperation[] = [
+        { op: 'replace', path: '/meta/status', value: 'active' },
+        { op: 'replace', path: '/meta/updatedAt', value: now },
+        {
+          op: 'replace',
+          path: '/meta/tags',
+          value: (object.meta.tags || []).filter((t) => t !== 'pending-review'),
+        },
+        { op: 'replace', path: '/payload/source', value: 'user' },
+        { op: 'replace', path: '/payload/provenance/reviewStatus', value: 'approved' },
+        { op: 'add', path: '/payload/provenance/reviewedAt', value: Date.now() },
+      ];
+      return groveData.update(object.meta.id, patches);
+    },
+    [groveData]
+  );
+
+  // Reject extracted prompt (Sprint: prompt-extraction-pipeline-v1)
+  const rejectExtracted = useCallback(
+    async (object: GroveObject<PromptPayload>, notes?: string) => {
+      const now = new Date().toISOString();
+      const patches: PatchOperation[] = [
+        { op: 'replace', path: '/meta/status', value: 'archived' },
+        { op: 'replace', path: '/meta/updatedAt', value: now },
+        {
+          op: 'replace',
+          path: '/meta/tags',
+          value: [
+            ...(object.meta.tags || []).filter((t) => t !== 'pending-review'),
+            'rejected',
+          ],
+        },
+        { op: 'replace', path: '/payload/provenance/reviewStatus', value: 'rejected' },
+        { op: 'add', path: '/payload/provenance/reviewedAt', value: Date.now() },
+        ...(notes ? [{ op: 'add' as const, path: '/payload/provenance/reviewNotes', value: notes }] : []),
+      ];
+      return groveData.update(object.meta.id, patches);
+    },
+    [groveData]
+  );
+
   return {
     objects: allObjects, // Library + user prompts merged
     loading: groveData.loading,
     error: groveData.error,
     refetch,
     create,
+    createExtracted, // Sprint: prompt-extraction-pipeline-v1
     update: groveData.update,
     remove: groveData.remove,
     duplicate,
@@ -240,6 +325,10 @@ export function usePromptData(): PromptDataResult {
     getPromptsForSequence,
     getUnsequencedPrompts,
     reset,
+    // Review queue (Sprint: prompt-extraction-pipeline-v1)
+    reviewQueue,
+    approveExtracted,
+    rejectExtracted,
   };
 }
 

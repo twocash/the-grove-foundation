@@ -102,3 +102,15 @@ export interface PatchHistoryEntry {
   source: 'user' | 'copilot';
   objectId: string;
 }
+
+// =============================================================================
+// Suggested Actions
+// Sprint: copilot-suggestions-hotfix-v1
+// =============================================================================
+
+/** Clickable suggestion button for Copilot responses */
+export interface SuggestedAction {
+  label: string;
+  template: string;
+  icon?: string;
+}

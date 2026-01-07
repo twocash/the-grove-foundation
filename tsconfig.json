@@ -32,7 +32,9 @@
       "@bedrock": ["./src/bedrock"],
       "@bedrock/*": ["./src/bedrock/*"],
       "@data": ["./src/data"],
-      "@data/*": ["./src/data/*"]
+      "@data/*": ["./src/data/*"],
+      "@services": ["./src/services"],
+      "@services/*": ["./src/services/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true

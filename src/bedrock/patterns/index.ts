@@ -6,7 +6,7 @@
 export { createBedrockConsole } from './console-factory';
 
 // Collection view hook
-export { useCollectionView, getNestedValue } from './useCollectionView';
+export { useCollectionView, getNestedValue, type CollectionViewOptions } from './useCollectionView';
 
 // Grove API client
 export {
@@ -41,6 +41,7 @@ export type {
   ObjectCardProps,
   ObjectEditorProps,
   BedrockConsoleOptions,
+  BedrockConsoleProps,
   InspectorConfig,
   MetricData,
 } from './console-factory.types';

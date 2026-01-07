@@ -89,6 +89,8 @@ export const PIPELINE_API = {
   synthesize: '/api/knowledge/synthesize',
   journeys: '/api/knowledge/journeys',
   context: '/api/knowledge/context',
+  // Sprint: extraction-pipeline-integration-v1
+  extractPrompts: '/api/prompts/extract-bulk',
 } as const;
 
 // =============================================================================

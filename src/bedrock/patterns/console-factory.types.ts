@@ -77,7 +77,49 @@ export interface ObjectEditorProps<T> {
   loading: boolean;
   /** Whether there are unsaved changes */
   hasChanges: boolean;
+  /** Handler to populate Copilot input (for Fix/Refine flows) */
+  onSetCopilotInput?: (input: string) => void;
 }
+
+// =============================================================================
+// Action Handler Interface
+// =============================================================================
+
+/**
+ * Result from copilot action handler
+ * Sprint: copilot-suggestions-hotfix-v1 - added suggestions for clickable actions
+ */
+export interface CopilotActionResult {
+  success: boolean;
+  message: string;
+  operations?: PatchOperation[];
+  suggestions?: SuggestedAction[];
+}
+
+/** Clickable suggestion button for Copilot responses */
+export interface SuggestedAction {
+  label: string;
+  template: string;
+  icon?: string;
+}
+
+/**
+ * Context passed to copilot action handler
+ */
+export interface CopilotActionContext<T> {
+  consoleId: string;
+  selectedObject: GroveObject<T> | null;
+  objects: GroveObject<T>[];
+}
+
+/**
+ * Async action handler for slash commands (e.g., /make-compelling)
+ */
+export type CopilotActionHandler<T> = (
+  actionId: string,
+  userInput: string,
+  context: CopilotActionContext<T>
+) => Promise<CopilotActionResult | null>;
 
 // =============================================================================
 // Factory Options Interface
@@ -107,6 +149,41 @@ export interface BedrockConsoleOptions<T> {
 
   /** Optional: Custom copilot placeholder */
   copilotPlaceholder?: string;
+
+  /** Optional: Async action handler for slash commands */
+  actionHandler?: CopilotActionHandler<T>;
+}
+
+// =============================================================================
+// Console Component Props Interface
+// Sprint: extraction-pipeline-integration-v1
+// =============================================================================
+
+/**
+ * Props accepted by factory-generated console components
+ * These allow parent components to control console behavior.
+ */
+export interface BedrockConsoleProps {
+  /**
+   * External filters that override/extend internal filter state.
+   * Applied in addition to user-selected filters.
+   * Useful for review queues, scoped views, etc.
+   */
+  externalFilters?: Record<string, string | string[]>;
+
+  /**
+   * Custom header content to render alongside the primary action button.
+   * Rendered to the left of the primary action.
+   */
+  headerContent?: ReactNode;
+
+  /**
+   * External selection control - when set, opens the inspector for this ID.
+   * Useful for review queues or other external navigation that needs to
+   * trigger inspector for a specific item.
+   * Sprint: extraction-pipeline-integration-v1
+   */
+  externalSelectedId?: string | null;
 }
 
 // =============================================================================

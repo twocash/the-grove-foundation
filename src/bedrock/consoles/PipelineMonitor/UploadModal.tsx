@@ -24,7 +24,11 @@ export function UploadModal({ open, onClose, onUploadComplete }: UploadModalProp
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Sprint: upload-pipeline-unification-v1 - Processing settings
+  const [extractPrompts, setExtractPrompts] = useState(true);
+  const [autoEnrich, setAutoEnrich] = useState(true);
 
   if (!open) return null;
 
@@ -140,6 +144,46 @@ export function UploadModal({ open, onClose, onUploadComplete }: UploadModalProp
                 Browse Files
               </GlassButton>
             </>
+          )}
+        </div>
+
+        {/* Processing Pipeline Settings - Sprint: upload-pipeline-unification-v1 */}
+        <div className="mt-4 p-3 rounded-lg bg-white/5 border border-white/10">
+          <div className="text-sm font-medium text-white/70 mb-2">
+            Processing Pipeline
+          </div>
+
+          <label className="flex items-center gap-2 text-sm text-white/60 mb-2 cursor-not-allowed">
+            <input
+              type="checkbox"
+              checked={true}
+              disabled
+              className="rounded bg-white/10 border-white/20 cursor-not-allowed accent-emerald-500"
+            />
+            <span>Embed for search</span>
+            <span className="text-white/40 text-xs">(required)</span>
+          </label>
+
+          <label className="flex items-center gap-2 text-sm text-white/60 mb-2 cursor-pointer hover:text-white/80">
+            <input
+              type="checkbox"
+              checked={extractPrompts}
+              onChange={(e) => setExtractPrompts(e.target.checked)}
+              className="rounded bg-white/10 border-white/20 cursor-pointer accent-emerald-500"
+            />
+            <span>Extract exploration prompts</span>
+          </label>
+
+          {extractPrompts && (
+            <label className="flex items-center gap-2 text-sm text-white/60 ml-6 cursor-pointer hover:text-white/80">
+              <input
+                type="checkbox"
+                checked={autoEnrich}
+                onChange={(e) => setAutoEnrich(e.target.checked)}
+                className="rounded bg-white/10 border-white/20 cursor-pointer accent-emerald-500"
+              />
+              <span>Auto-enrich with Grove context</span>
+            </label>
           )}
         </div>
       </div>
