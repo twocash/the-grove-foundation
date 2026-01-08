@@ -21,7 +21,7 @@ export const promptWorkshopConfig: ConsoleConfig = {
   navigation: [],
 
   collectionView: {
-    searchFields: ['meta.title', 'meta.description', 'payload.executionPrompt'],
+    searchFields: ['meta.title', 'meta.description', 'payload.executionPrompt', 'meta.tags'],
     filterOptions: [
       {
         field: 'payload.source',
@@ -48,12 +48,13 @@ export const promptWorkshopConfig: ConsoleConfig = {
         type: 'select',
         options: ['authored', 'extracted', 'generated', 'submitted'],
       },
-      // Sprint: highlight-extraction-v1
+      // Sprint: genesis-sequence-v1 - Dynamic tag-based filtering
       {
-        field: 'payload.surfaces',
-        label: 'Surface',
+        field: 'meta.tags',
+        label: 'Tags',
         type: 'select',
-        options: ['suggestion', 'highlight', 'journey', 'followup'],
+        dynamic: true,
+        dynamicThreshold: 5, // Only show tags with 5+ uses
       },
     ],
     sortOptions: [

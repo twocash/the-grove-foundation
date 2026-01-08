@@ -48,7 +48,9 @@ export interface FilterOption {
   field: string;
   label: string;
   type: FilterType;
-  options?: string[];           // For 'select' type
+  options?: string[];           // For 'select' type (static options)
+  dynamic?: boolean;            // If true, options computed from data
+  dynamicThreshold?: number;    // Minimum count to include in dynamic options (default: 5)
   trueLabel?: string;           // For 'boolean' type
   falseLabel?: string;          // For 'boolean' type
   min?: number;                 // For 'number-range' type

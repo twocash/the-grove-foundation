@@ -39,7 +39,7 @@ import type {
 
 // Hooks
 import { useBedrockUI } from '../context/BedrockUIContext';
-import { useCollectionView } from './useCollectionView';
+import { useCollectionView, getNestedValue } from './useCollectionView';
 import { usePatchHistory } from './usePatchHistory';
 
 // Utils
@@ -417,12 +417,45 @@ export function createBedrockConsole<T>(
     // Filter bar config
     // ==========================================================================
 
-    const filterOptions = config.collectionView.filterOptions.map((opt) => ({
-      key: opt.field,
-      label: opt.label,
-      multiple: false,
-      values: opt.options?.map((v) => ({ value: v, label: v })) || [],
-    }));
+    // Sprint: genesis-sequence-v1 - Support dynamic filter options
+    const filterOptions = config.collectionView.filterOptions.map((opt) => {
+      let values: { value: string; label: string }[] = [];
+
+      if (opt.dynamic) {
+        // Compute options from data dynamically
+        const threshold = opt.dynamicThreshold ?? 5;
+        const counts: Record<string, number> = {};
+
+        for (const obj of objects) {
+          // Use safe nested field access
+          const fieldValue = getNestedValue(obj, opt.field);
+
+          if (Array.isArray(fieldValue)) {
+            for (const item of fieldValue) {
+              if (typeof item === 'string') {
+                counts[item] = (counts[item] || 0) + 1;
+              }
+            }
+          } else if (typeof fieldValue === 'string' && fieldValue) {
+            counts[fieldValue] = (counts[fieldValue] || 0) + 1;
+          }
+        }
+
+        values = Object.entries(counts)
+          .filter(([, count]) => count >= threshold)
+          .sort((a, b) => b[1] - a[1])
+          .map(([v, count]) => ({ value: v, label: `${v} (${count})` }));
+      } else {
+        values = opt.options?.map((v) => ({ value: v, label: v })) || [];
+      }
+
+      return {
+        key: opt.field,
+        label: opt.label,
+        multiple: false,
+        values,
+      };
+    });
 
     const isFiltering =
       searchQuery.length > 0 || activeFilterCount > 0 || showFavoritesOnly;
