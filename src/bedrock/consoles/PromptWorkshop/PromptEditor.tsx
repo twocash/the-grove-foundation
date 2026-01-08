@@ -18,6 +18,7 @@ import { PROMPT_SOURCE_CONFIG, SEQUENCE_TYPE_CONFIG } from './PromptWorkshop.con
 import { SourceContextSection } from './components/SourceContextSection';
 import { QAResultsSection } from './components/QAResultsSection';
 import { generateCopilotStarterPrompt } from '@core/copilot/PromptQAActions';
+import { setLibraryPromptOverride } from './utils/libraryPromptOverrides';
 
 // =============================================================================
 // Constants
@@ -46,8 +47,11 @@ export function PromptEditor({
 }: ObjectEditorProps<PromptPayload>) {
 
   // Read-only mode for library prompts (Sprint: prompt-library-readonly-v1)
+  // Note: Status toggle is enabled for library prompts (Sprint: prompt-library-deactivation-v1)
   const isLibraryPrompt = prompt.payload.source === 'library';
   const isReadOnly = isLibraryPrompt || loading;
+  // Library prompts can only toggle status (not edit other fields)
+  const isStatusReadOnly = loading;
 
   // Helper to create patch operation for payload fields
   const patchPayload = (field: string, value: unknown) => {
@@ -210,15 +214,34 @@ export function PromptEditor({
               />
             </div>
 
-            {/* Status toggle */}
+            {/* Status toggle (Sprint: prompt-library-deactivation-v1 - enabled for library prompts) */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-[var(--glass-text-secondary)]">Active</span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[var(--glass-text-secondary)]">Active</span>
+                {isLibraryPrompt && (
+                  <span
+                    className="material-symbols-outlined text-xs text-blue-400 cursor-help"
+                    title="Library prompt status is stored locally. Toggle to exclude from suggestions."
+                  >
+                    info
+                  </span>
+                )}
+              </div>
               <button
-                onClick={() => patchMeta('status', prompt.meta.status === 'active' ? 'draft' : 'active')}
+                onClick={() => {
+                  const newStatus = prompt.meta.status === 'active' ? 'draft' : 'active';
+                  if (isLibraryPrompt) {
+                    // Library prompts: use localStorage override
+                    setLibraryPromptOverride(prompt.meta.id, newStatus);
+                  } else {
+                    // Regular prompts: use normal patch
+                    patchMeta('status', newStatus);
+                  }
+                }}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
                   prompt.meta.status === 'active' ? 'bg-[var(--neon-green)]' : 'bg-[var(--glass-border)]'
                 }`}
-                disabled={isReadOnly}
+                disabled={isStatusReadOnly}
               >
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
                   prompt.meta.status === 'active' ? 'left-6' : 'left-1'

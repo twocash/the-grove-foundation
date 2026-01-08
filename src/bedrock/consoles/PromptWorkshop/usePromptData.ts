@@ -1,8 +1,8 @@
 // src/bedrock/consoles/PromptWorkshop/usePromptData.ts
 // Data hook for Prompt Workshop - wraps useGroveData for console factory compatibility
-// Sprint: prompt-unification-v1, prompt-library-readonly-v1
+// Sprint: prompt-unification-v1, prompt-library-readonly-v1, prompt-library-deactivation-v1
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useGroveData } from '@core/data';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { PatchOperation } from '@core/data/grove-data-provider';
@@ -12,6 +12,11 @@ import type { CollectionDataResult } from '../../patterns/console-factory.types'
 import { generateUUID } from '@core/versioning/utils';
 import { libraryPrompts } from '@data/prompts';
 import type { PromptObject } from '@core/context-fields/types';
+import {
+  getLibraryPromptOverrides,
+  setLibraryPromptOverride,
+  LIBRARY_OVERRIDE_EVENT,
+} from './utils/libraryPromptOverrides';
 
 // =============================================================================
 // Library Prompt Converter
@@ -113,6 +118,8 @@ export interface PromptDataResult extends CollectionDataResult<PromptPayload> {
   createExtracted: (object: GroveObject<PromptPayload>) => Promise<GroveObject<PromptPayload>>;
   approveExtracted: (object: GroveObject<PromptPayload>) => Promise<void>;
   rejectExtracted: (object: GroveObject<PromptPayload>, notes?: string) => Promise<void>;
+  // Library prompt status override (Sprint: prompt-library-deactivation-v1)
+  updateLibraryPromptStatus: (promptId: string, status: 'active' | 'draft') => void;
 }
 
 // =============================================================================
@@ -133,6 +140,21 @@ export interface PromptDataResult extends CollectionDataResult<PromptPayload> {
 export function usePromptData(): PromptDataResult {
   const groveData = useGroveData<PromptPayload>('prompt');
 
+  // Track library prompt override changes to trigger re-renders
+  // Sprint: prompt-library-deactivation-v1
+  const [overrideVersion, setOverrideVersion] = useState(0);
+
+  // Listen for library prompt override events (from PromptEditor)
+  useEffect(() => {
+    const handleOverrideChange = () => {
+      setOverrideVersion((v) => v + 1);
+    };
+    window.addEventListener(LIBRARY_OVERRIDE_EVENT, handleOverrideChange);
+    return () => {
+      window.removeEventListener(LIBRARY_OVERRIDE_EVENT, handleOverrideChange);
+    };
+  }, []);
+
   // Strangler fig pattern: Library prompts from JSON, user/generated prompts from data layer
   // Legacy library prompts in Supabase (source: 'library') are ignored
   // User-created (source: 'user') and extracted (source: 'generated') come from data layer
@@ -140,8 +162,26 @@ export function usePromptData(): PromptDataResult {
     const dataLayerPrompts = groveData.objects.filter(
       (p) => p.payload.source === 'user' || p.payload.source === 'generated'
     );
-    return [...convertedLibraryPrompts, ...dataLayerPrompts];
-  }, [groveData.objects]);
+
+    // Apply library prompt status overrides (Sprint: prompt-library-deactivation-v1)
+    const overrides = getLibraryPromptOverrides();
+    const libraryWithOverrides = convertedLibraryPrompts.map((prompt) => {
+      const override = overrides[prompt.meta.id];
+      if (override) {
+        return {
+          ...prompt,
+          meta: {
+            ...prompt.meta,
+            status: override.status,
+          },
+        };
+      }
+      return prompt;
+    });
+
+    return [...libraryWithOverrides, ...dataLayerPrompts];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groveData.objects, overrideVersion]);
 
   // Review queue: extracted prompts pending review (Sprint: prompt-extraction-pipeline-v1)
   const reviewQueue = useMemo(() => {
@@ -266,6 +306,17 @@ export function usePromptData(): PromptDataResult {
     groveData.refetch();
   }, [groveData]);
 
+  // Update library prompt status (Sprint: prompt-library-deactivation-v1)
+  // This stores an override in localStorage since library prompts are read-only JSON
+  const updateLibraryPromptStatus = useCallback(
+    (promptId: string, status: 'active' | 'draft') => {
+      setLibraryPromptOverride(promptId, status);
+      // Trigger re-render to pick up the new override
+      setOverrideVersion((v) => v + 1);
+    },
+    []
+  );
+
   // Approve extracted prompt (Sprint: prompt-extraction-pipeline-v1)
   const approveExtracted = useCallback(
     async (object: GroveObject<PromptPayload>) => {
@@ -329,6 +380,8 @@ export function usePromptData(): PromptDataResult {
     reviewQueue,
     approveExtracted,
     rejectExtracted,
+    // Library prompt status override (Sprint: prompt-library-deactivation-v1)
+    updateLibraryPromptStatus,
   };
 }
 

@@ -3,3 +3,4 @@
 // Sprint: prompt-refinement-v1
 
 export * from './TargetingInference';
+export * from './libraryPromptOverrides';
