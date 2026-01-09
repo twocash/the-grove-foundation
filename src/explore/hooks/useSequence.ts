@@ -64,7 +64,7 @@ export function useSequence(groupId: string): {
   state: SequenceState;
   actions: SequenceActions;
 } {
-  const { data: allPrompts, loading } = useGroveData<PromptPayload>('prompt');
+  const { objects: allPrompts, loading } = useGroveData<PromptPayload>('prompt');
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Get prompts for this sequence, sorted by order

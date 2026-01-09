@@ -11,6 +11,7 @@ import { useKineticStream } from './hooks/useKineticStream';
 import { useKineticScroll } from './hooks/useKineticScroll';
 import { useEngagement, useLensState, useJourneyState } from '../../../core/engagement';
 import { getTerminalWelcome, DEFAULT_TERMINAL_WELCOME } from '../../../data/quantum-content';
+import { useGenesisPrompts } from '@surface/hooks/useGenesisPrompts';
 import { getPersona } from '../../../../data/default-personas';
 import { LensPicker } from '../../../explore/LensPicker';
 import { CustomLensWizard } from '../../../../components/Terminal/CustomLensWizard';
@@ -192,10 +193,17 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   );
 
   // Convert static prompts to the expected format
-  const staticPrompts = useMemo(() =>
-    welcomeContent.prompts.map((text, i) => ({ id: `static-${i}`, text })),
-    [welcomeContent.prompts]
-  );
+  // Sprint: system-prompt-integration-v1 - Use Supabase genesis-welcome prompts
+  const { prompts: genesisPrompts, isLoading: promptsLoading } = useGenesisPrompts(lens);
+  
+  const staticPrompts = useMemo(() => {
+    // Use Supabase prompts if available, otherwise fall back to static
+    // Limit to 3 prompts for welcome screen
+    if (genesisPrompts.length > 0) {
+      return genesisPrompts.slice(0, 3);
+    }
+    return welcomeContent.prompts.map((text, i) => ({ id: `static-${i}`, text })).slice(0, 3);
+  }, [genesisPrompts, welcomeContent.prompts]);
 
   // Stage is derived from exchange count for now
   const stage = useMemo(() => {

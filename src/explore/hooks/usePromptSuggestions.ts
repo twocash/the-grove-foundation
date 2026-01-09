@@ -53,7 +53,7 @@ export function usePromptSuggestions(options: UsePromptSuggestionsOptions): Prom
       '[DEPRECATED] usePromptSuggestions - use useNavigationPrompts from @explore/hooks instead'
     );
   }, []);
-  const { data: prompts, loading } = useGroveData<PromptPayload>('prompt');
+  const { objects: prompts, loading } = useGroveData<PromptPayload>('prompt');
 
   const {
     limit = 6,
