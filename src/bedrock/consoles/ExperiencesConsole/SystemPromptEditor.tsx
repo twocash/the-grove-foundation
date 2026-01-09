@@ -9,7 +9,7 @@
 // @see src/bedrock/patterns/console-factory.tsx (architecture note at top)
 // @see src/bedrock/primitives/BufferedInput.tsx
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
 import type { SystemPromptPayload, ResponseMode, ClosingBehavior } from '@core/schema/system-prompt';
 import { RESPONSE_MODES, CLOSING_BEHAVIORS, PROMPT_SECTIONS } from '@core/schema/system-prompt';
@@ -55,11 +55,24 @@ export function SystemPromptEditor({
   const isArchived = prompt.meta.status === 'archived';
   const isDraft = prompt.meta.status === 'draft';
 
-  // Get activate function and refetch from data hook
-  const { activate, activePrompt, refetch } = useExperienceData();
+  // Get activate function and update from data hook
+  const { activate, activePrompt, update } = useExperienceData();
   const [activating, setActivating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [discarding, setDiscarding] = useState(false);
+
+  // Snapshot of original state for discard functionality
+  const originalSnapshotRef = useRef<{ meta: typeof prompt.meta; payload: typeof prompt.payload } | null>(null);
+
+  // Capture snapshot when prompt changes (new selection) and no pending changes
+  useEffect(() => {
+    if (!hasChanges) {
+      originalSnapshotRef.current = {
+        meta: { ...prompt.meta },
+        payload: { ...prompt.payload },
+      };
+    }
+  }, [prompt.meta.id, hasChanges]);
 
   // Handle activation
   const handleActivate = useCallback(async () => {
@@ -90,18 +103,43 @@ export function SystemPromptEditor({
     }
   }, [onSave, isActive]);
 
-  // Handle discard - refetch from server to reset changes
+  // Handle discard - restore original snapshot
   const handleDiscard = useCallback(async () => {
+    if (!originalSnapshotRef.current) {
+      console.warn('[SystemPromptEditor] No snapshot to restore');
+      return;
+    }
+
     setDiscarding(true);
     try {
-      await refetch();
-      // Parent will update hasChanges to false when data refreshes
+      const snapshot = originalSnapshotRef.current;
+
+      // Build patch operations to restore original state
+      const operations: PatchOperation[] = [];
+
+      // Restore meta fields
+      for (const [key, value] of Object.entries(snapshot.meta)) {
+        if (key !== 'id' && key !== 'type') { // Don't patch immutable fields
+          operations.push({ op: 'replace', path: `/meta/${key}`, value });
+        }
+      }
+
+      // Restore payload fields
+      for (const [key, value] of Object.entries(snapshot.payload)) {
+        operations.push({ op: 'replace', path: `/payload/${key}`, value });
+      }
+
+      // Apply restore operations
+      await update(prompt.meta.id, operations);
+
+      // Call onSave to clear hasChanges flag
+      onSave();
     } catch (error) {
       console.error('[SystemPromptEditor] Discard failed:', error);
     } finally {
       setDiscarding(false);
     }
-  }, [refetch]);
+  }, [update, prompt.meta.id, onSave]);
 
   // Helper to create patch operation for payload fields
   const patchPayload = useCallback((field: string, value: unknown) => {
@@ -119,66 +157,38 @@ export function SystemPromptEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Active Status Indicator */}
+      {/* Active Status Indicator (visual only - actions in footer) */}
       {isActive && (
         <div className={`
-          flex items-center justify-between gap-2 px-4 py-3 border-b transition-colors
+          flex items-center gap-3 px-4 py-3 border-b transition-colors
           ${hasChanges
             ? 'bg-amber-500/10 border-amber-500/30'
             : 'bg-green-500/10 border-green-500/20'
           }
         `}>
-          <div className="flex items-center gap-3">
-            {/* Status dot with pulse animation when saved */}
-            <span className="relative flex h-3 w-3">
-              {!hasChanges && (
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              )}
-              <span className={`
-                relative inline-flex rounded-full h-3 w-3
-                ${hasChanges ? 'bg-amber-500' : 'bg-green-500'}
-              `} />
+          {/* Status dot with pulse animation when saved */}
+          <span className="relative flex h-3 w-3">
+            {!hasChanges && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            )}
+            <span className={`
+              relative inline-flex rounded-full h-3 w-3
+              ${hasChanges ? 'bg-amber-500' : 'bg-green-500'}
+            `} />
+          </span>
+
+          {/* Status text */}
+          <div>
+            <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-green-300'}`}>
+              {hasChanges ? 'Active System Prompt (editing...)' : 'Active System Prompt'}
             </span>
-
-            {/* Status text */}
-            <div>
-              <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-green-300'}`}>
-                {hasChanges ? 'Active System Prompt (editing...)' : 'Active System Prompt'}
-              </span>
-              <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-green-400/70'}`}>
-                {hasChanges
-                  ? 'Save to update /explore, or discard changes'
-                  : 'Currently powering /explore'
-                }
-              </p>
-            </div>
+            <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-green-400/70'}`}>
+              {hasChanges
+                ? 'Changes pending — save or discard below'
+                : 'Currently powering /explore'
+              }
+            </p>
           </div>
-
-          {/* Save/Discard buttons when editing */}
-          {hasChanges && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleDiscard}
-                disabled={discarding || saving || loading}
-                className="px-3 py-1.5 text-xs rounded-lg border border-amber-500/30 text-amber-300
-                           hover:bg-amber-500/10 transition-colors disabled:opacity-50"
-              >
-                {discarding ? 'Discarding...' : 'Discard'}
-              </button>
-              <button
-                onClick={handleSaveWithCache}
-                disabled={saving || discarding || loading}
-                className="px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white
-                           hover:bg-green-500 transition-colors disabled:opacity-50
-                           flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-sm">
-                  {saving ? 'hourglass_empty' : 'cloud_upload'}
-                </span>
-                {saving ? 'Saving...' : 'Save & Push Live'}
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -481,7 +491,51 @@ export function SystemPromptEditor({
       {/* Fixed footer with actions */}
       <div className="flex-shrink-0 p-4 border-t border-[var(--glass-border)] bg-[var(--glass-panel)]">
         <div className="flex flex-col gap-3">
-          {/* Activate button - only show for drafts */}
+
+          {/* === ACTIVE PROMPT: Status button or Save/Discard === */}
+          {isActive && (
+            hasChanges ? (
+              // Editing mode: Save & Activate + Discard
+              <div className="flex items-center gap-2">
+                <GlassButton
+                  onClick={handleDiscard}
+                  variant="ghost"
+                  size="sm"
+                  disabled={loading || discarding || saving}
+                  className="border border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                >
+                  <span className="material-symbols-outlined text-lg mr-1">undo</span>
+                  {discarding ? 'Discarding...' : 'Discard'}
+                </GlassButton>
+                <GlassButton
+                  onClick={handleSaveWithCache}
+                  variant="primary"
+                  size="sm"
+                  disabled={loading || saving || discarding}
+                  className="flex-1 bg-green-600 hover:bg-green-500"
+                >
+                  <span className="material-symbols-outlined text-lg mr-1">
+                    {saving ? 'hourglass_empty' : 'cloud_upload'}
+                  </span>
+                  {saving ? 'Saving...' : 'Save & Activate'}
+                </GlassButton>
+              </div>
+            ) : (
+              // Saved mode: Show "Active System Prompt" status button
+              <div
+                className="w-full px-4 py-2.5 rounded-lg bg-green-600/90 text-white text-center
+                           flex items-center justify-center gap-2 cursor-default"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                </span>
+                <span className="font-medium">Active System Prompt</span>
+              </div>
+            )
+          )}
+
+          {/* === DRAFT: Activate button === */}
           {isDraft && (
             <GlassButton
               onClick={handleActivate}
@@ -498,37 +552,82 @@ export function SystemPromptEditor({
             </GlassButton>
           )}
 
-          {/* Standard actions row */}
-          <div className="flex items-center gap-2">
-            <GlassButton
-              onClick={handleSaveWithCache}
-              variant="primary"
-              size="sm"
-              disabled={loading || saving || !hasChanges}
-              className="flex-1"
-            >
-              {saving ? 'Saving...' : hasChanges ? (isActive ? 'Save & Push Live' : 'Save Changes') : 'Saved'}
-            </GlassButton>
-            <GlassButton
-              onClick={onDuplicate}
-              variant="ghost"
-              size="sm"
-              disabled={loading}
-              title="Create Version"
-            >
-              <span className="material-symbols-outlined text-lg">content_copy</span>
-            </GlassButton>
-            <GlassButton
-              onClick={onDelete}
-              variant="ghost"
-              size="sm"
-              disabled={loading || isActive}
-              className="text-red-400 hover:text-red-300"
-              title={isActive ? 'Cannot delete active prompt' : 'Delete'}
-            >
-              <span className="material-symbols-outlined text-lg">delete</span>
-            </GlassButton>
-          </div>
+          {/* === DRAFT: Save changes row === */}
+          {isDraft && (
+            <div className="flex items-center gap-2">
+              <GlassButton
+                onClick={handleSaveWithCache}
+                variant="primary"
+                size="sm"
+                disabled={loading || saving || !hasChanges}
+                className="flex-1"
+              >
+                {saving ? 'Saving...' : hasChanges ? 'Save Changes' : 'Saved'}
+              </GlassButton>
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                title="Duplicate"
+              >
+                <span className="material-symbols-outlined text-lg">content_copy</span>
+              </GlassButton>
+              <GlassButton
+                onClick={onDelete}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="text-red-400 hover:text-red-300"
+                title="Delete"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </GlassButton>
+            </div>
+          )}
+
+          {/* === ACTIVE: Secondary actions row === */}
+          {isActive && (
+            <div className="flex items-center justify-center gap-2">
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                title="Create a copy as draft"
+              >
+                <span className="material-symbols-outlined text-lg mr-1">content_copy</span>
+                Duplicate
+              </GlassButton>
+            </div>
+          )}
+
+          {/* === ARCHIVED: Restore/Delete === */}
+          {isArchived && (
+            <div className="flex items-center gap-2">
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="flex-1"
+                title="Create a new draft from this archived prompt"
+              >
+                <span className="material-symbols-outlined text-lg mr-1">content_copy</span>
+                Restore as Draft
+              </GlassButton>
+              <GlassButton
+                onClick={onDelete}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="text-red-400 hover:text-red-300"
+                title="Delete permanently"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </GlassButton>
+            </div>
+          )}
         </div>
       </div>
     </div>
