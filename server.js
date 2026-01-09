@@ -882,6 +882,46 @@ app.post('/api/admin/narrative', async (req, res) => {
     }
 });
 
+// ============================================================================
+// CACHE INVALIDATION API
+// Sprint: system-prompt-integration-v1
+// ============================================================================
+
+app.post('/api/cache/invalidate', async (req, res) => {
+  try {
+    const { type } = req.body;
+
+    if (type === 'system-prompt' || !type) {
+      invalidateSystemPromptCache();
+    }
+
+    res.json({
+      success: true,
+      message: 'Cache invalidated',
+      invalidated: type || 'all'
+    });
+  } catch (error) {
+    console.error('[Cache] Invalidation error:', error);
+    res.status(500).json({ error: 'Cache invalidation failed' });
+  }
+});
+
+// DEBUG: Inspect current system prompt (dev only)
+app.get('/api/debug/system-prompt', async (req, res) => {
+  try {
+    const prompt = await fetchActiveSystemPrompt();
+    res.json({
+      source: systemPromptCache.source,
+      fetchedAt: systemPromptCache.fetchedAt ? new Date(systemPromptCache.fetchedAt).toISOString() : null,
+      contentLength: prompt?.length || 0,
+      contentPreview: prompt?.substring(0, 500) + '...',
+      fullContent: prompt
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST Generate Narrative from PDF or Text/Markdown
 app.post('/api/admin/generate-narrative', upload.single('file'), async (req, res) => {
     try {
@@ -1148,40 +1188,125 @@ async function loadKnowledgeConfig() {
     }
 }
 
-// Helper: Fetch active system prompt from GCS narratives.json
+// ============================================================================
+// SYSTEM PROMPT: Supabase → GCS → Fallback
+// Sprint: system-prompt-integration-v1
+// ============================================================================
+
+// In-memory cache for system prompt
+let systemPromptCache = {
+  content: null,
+  source: null,
+  fetchedAt: null
+};
+const SYSTEM_PROMPT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Assemble system prompt content from payload sections.
+ * Mirrors src/core/schema/system-prompt.ts assemblePromptContent()
+ */
+function assemblePromptContent(payload) {
+  const sections = [];
+
+  if (payload.identity) {
+    sections.push(`## Identity\n${payload.identity}`);
+  }
+  if (payload.voiceGuidelines) {
+    sections.push(`## Voice Guidelines\n${payload.voiceGuidelines}`);
+  }
+  if (payload.structureRules) {
+    sections.push(`## Structure Rules\n${payload.structureRules}`);
+  }
+  if (payload.knowledgeInstructions) {
+    sections.push(`## Knowledge Instructions\n${payload.knowledgeInstructions}`);
+  }
+  if (payload.boundaries) {
+    sections.push(`## Boundaries\n${payload.boundaries}`);
+  }
+
+  return sections.join('\n\n');
+}
+
+/**
+ * Invalidate system prompt cache.
+ * Called when ExperiencesConsole activates a new prompt.
+ */
+function invalidateSystemPromptCache() {
+  systemPromptCache = { content: null, source: null, fetchedAt: null };
+  console.log('[SystemPrompt] Cache invalidated');
+}
+
+// Helper: Fetch active system prompt with tiered fallback
+// Priority: Supabase → GCS → Static fallback
 async function fetchActiveSystemPrompt() {
-    try {
-        const file = storage.bucket(BUCKET_NAME).file('narratives.json');
-        const [exists] = await file.exists();
+  const now = Date.now();
 
-        if (!exists) {
-            console.log('No narratives.json found, using fallback system prompt');
-            return FALLBACK_SYSTEM_PROMPT;
-        }
+  // Check cache first
+  if (systemPromptCache.content &&
+      (now - systemPromptCache.fetchedAt) < SYSTEM_PROMPT_CACHE_TTL_MS) {
+    console.log(`[SystemPrompt] Using cached prompt (source: ${systemPromptCache.source})`);
+    return systemPromptCache.content;
+  }
 
-        const [content] = await file.download();
-        const narratives = JSON.parse(content.toString());
+  // Tier 1: Try Supabase
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('system_prompts')
+      .select('*')
+      .eq('status', 'active')
+      .single();
 
-        // Check for modern schema with system prompt versions (semantic check)
-        if (isModernSchema(narratives) && narratives.globalSettings?.systemPromptVersions) {
-            const versions = narratives.globalSettings.systemPromptVersions;
-            const activeId = narratives.globalSettings.activeSystemPromptId;
-
-            // Find active version
-            const activeVersion = versions.find(v => v.id === activeId) || versions.find(v => v.isActive);
-
-            if (activeVersion?.content) {
-                console.log(`Using system prompt version: ${activeVersion.id} - "${activeVersion.label}"`);
-                return activeVersion.content;
-            }
-        }
-
-        console.log('No active system prompt version found, using fallback');
-        return FALLBACK_SYSTEM_PROMPT;
-    } catch (error) {
-        console.error('Error fetching system prompt from GCS:', error.message);
-        return FALLBACK_SYSTEM_PROMPT;
+    if (!error && data?.payload) {
+      const content = assemblePromptContent(data.payload);
+      systemPromptCache = { content, source: 'supabase', fetchedAt: now };
+      console.log(`[SystemPrompt] Loaded from Supabase: "${data.title}"`);
+      return content;
     }
+
+    if (error && error.code !== 'PGRST116') {
+      console.warn('[SystemPrompt] Supabase error:', error.message);
+    }
+  } catch (err) {
+    console.warn('[SystemPrompt] Supabase fetch failed:', err.message);
+  }
+
+  // Tier 2: Try GCS narratives.json (legacy)
+  try {
+    const file = storage.bucket(BUCKET_NAME).file('narratives.json');
+    const [exists] = await file.exists();
+
+    if (exists) {
+      const [content] = await file.download();
+      const narratives = JSON.parse(content.toString());
+
+      if (isModernSchema(narratives) && narratives.globalSettings?.systemPromptVersions) {
+        const versions = narratives.globalSettings.systemPromptVersions;
+        const activeId = narratives.globalSettings.activeSystemPromptId;
+        const activeVersion = versions.find(v => v.id === activeId) || versions.find(v => v.isActive);
+
+        if (activeVersion?.content) {
+          systemPromptCache = {
+            content: activeVersion.content,
+            source: 'gcs-legacy',
+            fetchedAt: now
+          };
+          console.log(`[SystemPrompt] Loaded from GCS legacy: "${activeVersion.label}"`);
+          return activeVersion.content;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[SystemPrompt] GCS fetch failed:', err.message);
+  }
+
+  // Tier 3: Fallback
+  console.log('[SystemPrompt] Using fallback prompt');
+  systemPromptCache = {
+    content: FALLBACK_SYSTEM_PROMPT,
+    source: 'fallback',
+    fetchedAt: now
+  };
+  return FALLBACK_SYSTEM_PROMPT;
 }
 
 // Static knowledge base (fallback if GCS fetch fails)

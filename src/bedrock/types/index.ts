@@ -59,3 +59,18 @@ export {
   isLens,
   isLensPayload,
 } from './lens';
+
+// Experience types (DEX: Organic Scalability)
+export {
+  type ExperienceTypeDefinition,
+  type ExperienceObjectType,
+  type ExperiencePayloadMap,
+  EXPERIENCE_TYPE_REGISTRY,
+  getExperienceTypeDefinition,
+  isExperienceObjectType,
+  getAllExperienceTypes,
+  // Legacy compatibility
+  type ExperienceTypeConfig,
+  getExperienceTypeConfig,
+  hasWizardSupport,
+} from './experience.types';

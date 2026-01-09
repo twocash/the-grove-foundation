@@ -48,10 +48,14 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
   const variants = reducedMotion ? reducedMotionVariants : blockVariants;
   const allItems = currentItem ? [...items, currentItem] : items;
 
+  // Sprint: inline-prompts-wiring-v1 - Find last response index for navigation display
+  const lastResponseIndex = allItems.reduce((lastIdx, item, idx) => 
+    item.type === 'response' ? idx : lastIdx, -1);
+
   return (
     <div className="space-y-6" data-testid="kinetic-renderer">
       <AnimatePresence mode="popLayout">
-        {allItems.map((item) => (
+        {allItems.map((item, index) => (
           <motion.div
             key={item.id}
             variants={variants}
@@ -62,6 +66,7 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
           >
             <KineticBlock
               item={item}
+              isLastResponse={item.type === 'response' && index === lastResponseIndex}
               onConceptClick={onConceptClick}
               onForkSelect={onForkSelect}
               onPromptSubmit={onPromptSubmit}
@@ -84,6 +89,7 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
 
 interface KineticBlockProps {
   item: StreamItem;
+  isLastResponse?: boolean;
   onConceptClick?: (span: RhetoricalSpan, sourceId: string) => void;
   onForkSelect?: (fork: JourneyFork) => void;
   onPromptSubmit?: (displayText: string, executionPrompt?: string) => void;
@@ -97,6 +103,7 @@ interface KineticBlockProps {
 
 const KineticBlock: React.FC<KineticBlockProps> = ({
   item,
+  isLastResponse,
   onConceptClick,
   onForkSelect,
   onPromptSubmit,
@@ -114,6 +121,7 @@ const KineticBlock: React.FC<KineticBlockProps> = ({
       return (
         <ResponseObject
           item={item}
+          isLast={isLastResponse}
           onConceptClick={onConceptClick ? (span) => onConceptClick(span, item.id) : undefined}
           onForkSelect={onForkSelect}
           onPromptSubmit={onPromptSubmit}

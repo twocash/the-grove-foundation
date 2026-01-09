@@ -41,6 +41,12 @@ export const BEDROCK_NAV_ITEMS: NavItem[] = [
     path: '/bedrock/prompts',
   },
   {
+    id: 'experiences',
+    label: 'Experiences',
+    icon: 'smart_toy',
+    path: '/bedrock/experiences',
+  },
+  {
     id: 'journeys',
     label: 'Journey Architect',
     icon: 'route',
@@ -103,6 +109,13 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
     description: 'Create and manage prompts with sequence membership',
     icon: 'chat',
     path: '/bedrock/prompts',
+  },
+  experiences: {
+    id: 'experiences',
+    title: 'Experiences',
+    description: 'Manage AI system prompts for /explore',
+    icon: 'smart_toy',
+    path: '/bedrock/experiences',
   },
   journeys: {
     id: 'journeys',

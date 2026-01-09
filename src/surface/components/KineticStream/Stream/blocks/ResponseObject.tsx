@@ -22,13 +22,16 @@ export interface ResponseObjectProps {
   onForkSelect?: (fork: JourneyFork) => void;
   /** Sprint: prompt-journey-mode-v1 - Separate display text from execution prompt */
   onPromptSubmit?: (displayText: string, executionPrompt?: string) => void;
+  /** Sprint: inline-prompts-wiring-v1 - Only show navigation on most recent response */
+  isLast?: boolean;
 }
 
 export const ResponseObject: React.FC<ResponseObjectProps> = ({
   item,
   onConceptClick,
   onForkSelect,
-  onPromptSubmit
+  onPromptSubmit,
+  isLast = false
 }) => {
   const isError = item.content.startsWith('Error:');
 
@@ -122,7 +125,8 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
         )}
       </GlassContainer>
 
-      {navigationForks.length > 0 && !item.isGenerating && (
+      {/* Sprint: inline-prompts-wiring-v1 - Only show navigation on most recent response */}
+      {navigationForks.length > 0 && !item.isGenerating && isLast && (
         <div className="mt-4 w-full max-w-[90%]">
           <NavigationObject forks={navigationForks} onSelect={handleForkSelect} />
         </div>
