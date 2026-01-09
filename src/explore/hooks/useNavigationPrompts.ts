@@ -2,15 +2,49 @@
 // Sprint: kinetic-suggested-prompts-v1
 // Sprint: prompt-progression-v1 - Single prompt progression
 // Sprint: 4d-prompt-refactor-telemetry-v1 - Expose scored prompts for telemetry
+// Sprint: supabase-prompt-wiring-v1 - Switched from static JSON to Grove data layer
 // Wires 4D Context Fields to inline navigation prompts
 
 import { useMemo } from 'react';
+import { useGroveData } from '@core/data';
 import { useContextState } from '@core/context-fields/useContextState';
 import { selectPromptsWithScoring } from '@core/context-fields/scoring';
 import { promptsToForks } from '@core/context-fields/adapters';
-import { libraryPrompts, getActivePrompts } from '@data/prompts';
+import type { Prompt, PromptPayload } from '@core/schema/prompt';
 import type { JourneyFork } from '@core/schema/stream';
-import type { ScoredPrompt, ContextState } from '@core/context-fields/types';
+import type { PromptObject, ScoredPrompt, ContextState } from '@core/context-fields/types';
+
+// ─────────────────────────────────────────────────────────────────
+// FORMAT CONVERTER
+// Sprint: supabase-prompt-wiring-v1
+// Converts GroveObject<PromptPayload> to flat PromptObject for scoring
+// ─────────────────────────────────────────────────────────────────
+
+function grovePromptToPromptObject(gp: Prompt): PromptObject {
+  return {
+    id: gp.meta.id,
+    objectType: 'prompt',
+    created: new Date(gp.meta.createdAt).getTime(),
+    modified: new Date(gp.meta.updatedAt).getTime(),
+    author: gp.payload.source === 'library' ? 'system' : gp.payload.source,
+    label: gp.meta.title,
+    description: gp.meta.description,
+    executionPrompt: gp.payload.executionPrompt,
+    systemContext: gp.payload.systemContext,
+    icon: gp.meta.icon,
+    tags: gp.meta.tags || [],
+    topicAffinities: gp.payload.topicAffinities,
+    lensAffinities: gp.payload.lensAffinities,
+    targeting: gp.payload.targeting,
+    baseWeight: gp.payload.baseWeight,
+    stats: gp.payload.stats,
+    status: gp.meta.status as 'draft' | 'active' | 'deprecated',
+    source: gp.payload.source,
+    provenance: gp.payload.provenance,
+    surfaces: gp.payload.surfaces,
+    highlightTriggers: gp.payload.highlightTriggers,
+  };
+}
 
 // ─────────────────────────────────────────────────────────────────
 // TYPES
@@ -71,14 +105,39 @@ export function useNavigationPrompts(
   // Sprint: prompt-progression-v1 - Default to 1 prompt at a time
   const { maxPrompts = 1, minScore = 1.0, activeOnly = true } = options;
 
+  // Sprint: supabase-prompt-wiring-v1 - Use Grove data layer instead of static JSON
+  // BUG FIX: useGroveData returns 'objects', not 'data'
+  const { objects: allPrompts, loading } = useGroveData<PromptPayload>('prompt');
+
   // Get aggregated 4D context from engagement state
   const context = useContextState();
 
   // Select and convert prompts
   // Sprint: 4d-prompt-refactor-telemetry-v1 - Use selectPromptsWithScoring for telemetry
+  // Sprint: supabase-prompt-wiring-v1 - Convert Grove format to flat PromptObject for scoring
   const result = useMemo(() => {
-    // Get prompt pool
-    const pool = activeOnly ? getActivePrompts() : libraryPrompts;
+    if (loading || !allPrompts.length) {
+      return { forks: [], scoredPrompts: [], eligibleCount: 0 };
+    }
+
+    // Get prompt pool - filter to active if requested
+    const grovePool = activeOnly
+      ? allPrompts.filter(p => p.meta.status === 'active')
+      : allPrompts;
+
+    // HOTFIX: If user is in genesis stage, use only genesis-welcome tagged prompts
+    let filteredPool = grovePool;
+    if (context.stage === 'genesis') {
+      const genesisTagged = grovePool.filter(p =>
+        p.meta.tags?.includes('genesis-welcome')
+      );
+      if (genesisTagged.length > 0) {
+        filteredPool = genesisTagged;
+      }
+    }
+
+    // Convert to flat PromptObject format for scoring functions
+    const pool = filteredPool.map(grovePromptToPromptObject);
 
     // Select prompts using 4D scoring - returns ScoredPrompt[] for telemetry
     const scoredPrompts = selectPromptsWithScoring(pool, context, { maxPrompts, minScore });
@@ -91,11 +150,11 @@ export function useNavigationPrompts(
       scoredPrompts,
       eligibleCount: scoredPrompts.length
     };
-  }, [context, maxPrompts, minScore, activeOnly]);
+  }, [allPrompts, loading, context, maxPrompts, minScore, activeOnly]);
 
   return {
     forks: result.forks,
-    isReady: true,
+    isReady: !loading && allPrompts.length > 0,
     eligibleCount: result.eligibleCount,
     scoredPrompts: result.scoredPrompts,
     context
