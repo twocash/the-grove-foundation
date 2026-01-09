@@ -4,8 +4,8 @@
 // Sprint: kinetic-suggested-prompts-v1 - Added 4D context-aware navigation fallback
 // Sprint: 4d-prompt-refactor-telemetry-v1 - Prompt telemetry integration
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import type { ResponseStreamItem, RhetoricalSpan, JourneyFork } from '@core/schema/stream';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { ResponseStreamItem, RhetoricalSpan, JourneyFork, JourneyForkType } from '@core/schema/stream';
 import { hasSpans, hasNavigation } from '@core/schema/stream';
 import { GlassContainer } from '../motion/GlassContainer';
 import { RhetoricRenderer } from '../../ActiveRhetoric/RhetoricRenderer';
@@ -72,6 +72,31 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
     ? item.navigation!
     : (isInlineNavEnabled && isReady ? libraryForks : []);
 
+  // Sprint: dedupe-prompts-v1 - Deduplicate forks by label text
+  // Prefers deep_dive > pivot > apply > challenge when duplicates exist
+  // TODO: DEX-proper fix would add 'source' field to JourneyFork for provenance tracking
+  const TYPE_PRIORITY: Record<JourneyForkType, number> = {
+    deep_dive: 4,
+    pivot: 3,
+    apply: 2,
+    challenge: 1
+  };
+
+  const deduplicatedForks = useMemo(() => {
+    const seen = new Map<string, JourneyFork>();
+
+    for (const fork of navigationForks) {
+      const key = fork.label.toLowerCase().trim();
+      const existing = seen.get(key);
+
+      if (!existing || TYPE_PRIORITY[fork.type] > TYPE_PRIORITY[existing.type]) {
+        seen.set(key, fork);
+      }
+    }
+
+    return Array.from(seen.values());
+  }, [navigationForks]);
+
   // Handle fork selection with event emission
   // Sprint: prompt-journey-mode-v1 - BUG FIX: Display label in chat, send queryPayload to LLM
   // Sprint: 4d-prompt-refactor-telemetry-v1 - Record selection telemetry
@@ -126,9 +151,10 @@ export const ResponseObject: React.FC<ResponseObjectProps> = ({
       </GlassContainer>
 
       {/* Sprint: inline-prompts-wiring-v1 - Only show navigation on most recent response */}
-      {navigationForks.length > 0 && !item.isGenerating && isLast && (
+      {/* Sprint: dedupe-prompts-v1 - Use deduplicated forks to prevent duplicate labels */}
+      {deduplicatedForks.length > 0 && !item.isGenerating && isLast && (
         <div className="mt-4 w-full max-w-[90%]">
-          <NavigationObject forks={navigationForks} onSelect={handleForkSelect} />
+          <NavigationObject forks={deduplicatedForks} onSelect={handleForkSelect} />
         </div>
       )}
     </div>
