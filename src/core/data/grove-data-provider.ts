@@ -18,7 +18,8 @@ export type GroveObjectType =
   | 'card'
   | 'moment'
   | 'document'
-  | 'prompt';
+  | 'prompt'
+  | 'system-prompt';
 
 /**
  * Options for listing objects.

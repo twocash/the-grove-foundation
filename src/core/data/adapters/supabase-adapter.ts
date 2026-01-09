@@ -29,6 +29,7 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   card: 'cards',
   moment: 'moments',
   prompt: 'prompts',
+  'system-prompt': 'system_prompts',
 };
 
 /**

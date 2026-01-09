@@ -40,6 +40,7 @@ const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
 const PromptWorkshop = lazy(() =>
   import('../bedrock/consoles/PromptWorkshop').then((m) => ({ default: m.PromptWorkshopWithExtraction }))
 );
+const ExperiencesConsole = lazy(() => import('../bedrock/consoles/ExperiencesConsole'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -241,6 +242,15 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <PromptWorkshop />
+              </Suspense>
+            ),
+          },
+          // Experiences Console (system prompts for /explore)
+          {
+            path: 'experiences',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <ExperiencesConsole />
               </Suspense>
             ),
           },
