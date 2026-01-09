@@ -10,6 +10,7 @@ import { useGroveData } from '@core/data';
 import { useContextState } from '@core/context-fields/useContextState';
 import { selectPromptsWithScoring } from '@core/context-fields/scoring';
 import { promptsToForks } from '@core/context-fields/adapters';
+import { getEffectiveStatus } from '@bedrock/consoles/PromptWorkshop/utils/libraryPromptOverrides';
 import type { Prompt, PromptPayload } from '@core/schema/prompt';
 import type { JourneyFork } from '@core/schema/stream';
 import type { PromptObject, ScoredPrompt, ContextState } from '@core/context-fields/types';
@@ -116,34 +117,58 @@ export function useNavigationPrompts(
   // Sprint: 4d-prompt-refactor-telemetry-v1 - Use selectPromptsWithScoring for telemetry
   // Sprint: supabase-prompt-wiring-v1 - Convert Grove format to flat PromptObject for scoring
   const result = useMemo(() => {
+    // DIAGNOSTIC LOGGING - remove after fix verified
+    console.log('[NavPrompts] loading:', loading, 'allPrompts:', allPrompts?.length);
+    console.log('[NavPrompts] context.stage:', context.stage);
+    
     if (loading || !allPrompts.length) {
       return { forks: [], scoredPrompts: [], eligibleCount: 0 };
     }
 
     // Get prompt pool - filter to active if requested
+    // HOTFIX: Respect library prompt status overrides from localStorage
     const grovePool = activeOnly
-      ? allPrompts.filter(p => p.meta.status === 'active')
+      ? allPrompts.filter(p => {
+          // Library prompts use localStorage overrides
+          if (p.payload.source === 'library') {
+            return getEffectiveStatus(p.meta.id, p.meta.status as 'active' | 'draft') === 'active';
+          }
+          return p.meta.status === 'active';
+        })
       : allPrompts;
 
-    // HOTFIX: If user is in genesis stage, use only genesis-welcome tagged prompts
+    console.log('[NavPrompts] grovePool (active):', grovePool.length);
+
+    // HOTFIX: Use interaction count to determine genesis phase
+    // First 5 interactions = genesis stage, show only genesis-welcome prompts
     let filteredPool = grovePool;
-    if (context.stage === 'genesis') {
+    const isGenesisPhase = context.interactionCount <= 5;
+    console.log('[NavPrompts] interactionCount:', context.interactionCount, 'isGenesisPhase:', isGenesisPhase);
+    
+    if (isGenesisPhase) {
       const genesisTagged = grovePool.filter(p =>
         p.meta.tags?.includes('genesis-welcome')
       );
+      console.log('[NavPrompts] GENESIS PHASE - found', genesisTagged.length, 'genesis-welcome prompts');
       if (genesisTagged.length > 0) {
         filteredPool = genesisTagged;
+        console.log('[NavPrompts] Using genesis-welcome pool');
+      } else {
+        console.log('[NavPrompts] WARNING: No genesis-welcome prompts, using full pool');
       }
     }
 
     // Convert to flat PromptObject format for scoring functions
     const pool = filteredPool.map(grovePromptToPromptObject);
+    console.log('[NavPrompts] final pool size:', pool.length);
 
     // Select prompts using 4D scoring - returns ScoredPrompt[] for telemetry
     const scoredPrompts = selectPromptsWithScoring(pool, context, { maxPrompts, minScore });
+    console.log('[NavPrompts] scoredPrompts:', scoredPrompts.length, scoredPrompts.map(sp => sp.prompt.label));
 
     // Convert to navigation forks (extract prompts first)
     const forks = promptsToForks(scoredPrompts.map(sp => sp.prompt));
+    console.log('[NavPrompts] forks:', forks.length);
 
     return {
       forks,
