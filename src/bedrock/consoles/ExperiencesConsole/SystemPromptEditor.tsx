@@ -2,6 +2,7 @@
 // Editor component for system prompts
 // Sprint: experiences-console-v1
 // Hotfix: experiences-console-v1.1 - added Activate button
+// Hotfix: experiences-console-v1.2 - enhanced Active Status indicator with save/discard
 //
 // IMPORTANT: This editor uses BufferedInput/BufferedTextarea for all text fields.
 // This prevents the inspector input race condition where rapid typing loses characters.
@@ -19,6 +20,25 @@ import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput'
 import { RESPONSE_MODE_CONFIG, CLOSING_BEHAVIOR_CONFIG } from './ExperiencesConsole.config';
 import { useExperienceData } from './useExperienceData';
 
+// =============================================================================
+// Cache Invalidation Helper
+// =============================================================================
+
+async function invalidateSystemPromptCache(): Promise<boolean> {
+  try {
+    await fetch('/api/cache/invalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'system-prompt' }),
+    });
+    console.log('[SystemPromptEditor] Cache invalidated');
+    return true;
+  } catch (error) {
+    console.warn('[SystemPromptEditor] Failed to invalidate cache:', error);
+    return false;
+  }
+}
+
 /**
  * Editor component for SystemPrompt objects
  */
@@ -35,23 +55,53 @@ export function SystemPromptEditor({
   const isArchived = prompt.meta.status === 'archived';
   const isDraft = prompt.meta.status === 'draft';
 
-  // Get activate function from data hook
-  const { activate, activePrompt } = useExperienceData();
+  // Get activate function and refetch from data hook
+  const { activate, activePrompt, refetch } = useExperienceData();
   const [activating, setActivating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [discarding, setDiscarding] = useState(false);
 
   // Handle activation
   const handleActivate = useCallback(async () => {
     setActivating(true);
     try {
       await activate(prompt.meta.id);
-      // Force a page reload to ensure server picks up the new active prompt
-      // This is a temporary solution until we have proper cache invalidation
     } catch (error) {
       console.error('[SystemPromptEditor] Activation failed:', error);
     } finally {
       setActivating(false);
     }
   }, [activate, prompt.meta.id]);
+
+  // Handle save with cache invalidation for active prompts
+  const handleSaveWithCache = useCallback(async () => {
+    setSaving(true);
+    try {
+      // Call the parent save handler
+      onSave();
+      // If this is the active prompt, invalidate cache so /explore gets the update
+      if (isActive) {
+        await invalidateSystemPromptCache();
+      }
+    } catch (error) {
+      console.error('[SystemPromptEditor] Save failed:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [onSave, isActive]);
+
+  // Handle discard - refetch from server to reset changes
+  const handleDiscard = useCallback(async () => {
+    setDiscarding(true);
+    try {
+      await refetch();
+      // Parent will update hasChanges to false when data refreshes
+    } catch (error) {
+      console.error('[SystemPromptEditor] Discard failed:', error);
+    } finally {
+      setDiscarding(false);
+    }
+  }, [refetch]);
 
   // Helper to create patch operation for payload fields
   const patchPayload = useCallback((field: string, value: unknown) => {
@@ -69,16 +119,66 @@ export function SystemPromptEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Active banner */}
+      {/* Active Status Indicator */}
       {isActive && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border-b border-green-500/20">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-          </span>
-          <span className="text-sm text-green-300">
-            Currently Active — powering /explore
-          </span>
+        <div className={`
+          flex items-center justify-between gap-2 px-4 py-3 border-b transition-colors
+          ${hasChanges
+            ? 'bg-amber-500/10 border-amber-500/30'
+            : 'bg-green-500/10 border-green-500/20'
+          }
+        `}>
+          <div className="flex items-center gap-3">
+            {/* Status dot with pulse animation when saved */}
+            <span className="relative flex h-3 w-3">
+              {!hasChanges && (
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              )}
+              <span className={`
+                relative inline-flex rounded-full h-3 w-3
+                ${hasChanges ? 'bg-amber-500' : 'bg-green-500'}
+              `} />
+            </span>
+
+            {/* Status text */}
+            <div>
+              <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-green-300'}`}>
+                {hasChanges ? 'Active System Prompt (editing...)' : 'Active System Prompt'}
+              </span>
+              <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-green-400/70'}`}>
+                {hasChanges
+                  ? 'Save to update /explore, or discard changes'
+                  : 'Currently powering /explore'
+                }
+              </p>
+            </div>
+          </div>
+
+          {/* Save/Discard buttons when editing */}
+          {hasChanges && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDiscard}
+                disabled={discarding || saving || loading}
+                className="px-3 py-1.5 text-xs rounded-lg border border-amber-500/30 text-amber-300
+                           hover:bg-amber-500/10 transition-colors disabled:opacity-50"
+              >
+                {discarding ? 'Discarding...' : 'Discard'}
+              </button>
+              <button
+                onClick={handleSaveWithCache}
+                disabled={saving || discarding || loading}
+                className="px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white
+                           hover:bg-green-500 transition-colors disabled:opacity-50
+                           flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  {saving ? 'hourglass_empty' : 'cloud_upload'}
+                </span>
+                {saving ? 'Saving...' : 'Save & Push Live'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -401,13 +501,13 @@ export function SystemPromptEditor({
           {/* Standard actions row */}
           <div className="flex items-center gap-2">
             <GlassButton
-              onClick={onSave}
+              onClick={handleSaveWithCache}
               variant="primary"
               size="sm"
-              disabled={loading || !hasChanges}
+              disabled={loading || saving || !hasChanges}
               className="flex-1"
             >
-              {hasChanges ? 'Save Changes' : 'Saved'}
+              {saving ? 'Saving...' : hasChanges ? (isActive ? 'Save & Push Live' : 'Save Changes') : 'Saved'}
             </GlassButton>
             <GlassButton
               onClick={onDuplicate}
