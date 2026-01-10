@@ -66,6 +66,8 @@ export interface CollectionViewConfig {
   sortOptions: SortOption[];
   defaultSort: SortOption;
   filterOptions: FilterOption[];
+  /** Default filter values applied on initial load */
+  defaultFilters?: Record<string, string | string[]>;
   viewModes: ('grid' | 'list')[];
   defaultViewMode: 'grid' | 'list';
   favoritesKey: string;

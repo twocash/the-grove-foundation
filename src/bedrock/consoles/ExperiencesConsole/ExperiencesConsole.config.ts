@@ -29,21 +29,15 @@ export const experiencesConsoleConfig: ConsoleConfig = {
     filterOptions: [
       {
         field: 'meta.status',
-        label: 'Status',
+        label: 'State',
         type: 'select',
         options: ['active', 'draft', 'archived'],
       },
       {
-        field: 'payload.responseMode',
-        label: 'Response Mode',
+        field: 'meta.type',
+        label: 'Type',
         type: 'select',
-        options: ['architect', 'librarian', 'contemplative'],
-      },
-      {
-        field: 'payload.environment',
-        label: 'Environment',
-        type: 'select',
-        options: ['production', 'staging', 'development'],
+        options: ['system-prompt'], // New types coming: lens, journey, etc.
       },
     ],
     sortOptions: [
@@ -52,6 +46,8 @@ export const experiencesConsoleConfig: ConsoleConfig = {
       { field: 'payload.version', label: 'Version', direction: 'desc' },
     ],
     defaultSort: { field: 'meta.updatedAt', label: 'Recently Updated', direction: 'desc' },
+    // Default to showing only active prompts to keep the view focused
+    defaultFilters: { 'meta.status': 'active' },
     defaultViewMode: 'grid',
     viewModes: ['grid', 'list'],
     favoritesKey: 'grove-experience-favorites',

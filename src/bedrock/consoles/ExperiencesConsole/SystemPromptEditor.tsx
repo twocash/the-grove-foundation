@@ -50,16 +50,36 @@ export function SystemPromptEditor({
   onDuplicate,
   loading,
   hasChanges,
+  onSelectObject,
 }: ObjectEditorProps<SystemPromptPayload>) {
-  const isActive = prompt.meta.status === 'active';
-  const isArchived = prompt.meta.status === 'archived';
-  const isDraft = prompt.meta.status === 'draft';
-
   // Get activate function and update from data hook
-  const { activate, activePrompt, update } = useExperienceData();
+  const { activate, activePrompt, update, saveAndActivate } = useExperienceData();
   const [activating, setActivating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [discarding, setDiscarding] = useState(false);
+
+  // Optimistic UI: track if we just activated (before props update)
+  const [justActivated, setJustActivated] = useState(false);
+
+  // Reset justActivated when prompt changes or status updates
+  useEffect(() => {
+    setJustActivated(false);
+  }, [prompt.meta.id]);
+
+  useEffect(() => {
+    if (prompt.meta.status === 'active') {
+      setJustActivated(false);
+    }
+  }, [prompt.meta.status]);
+
+  // Status checks - include optimistic justActivated for immediate UI feedback
+  const isActive = prompt.meta.status === 'active' || justActivated;
+  const isArchived = prompt.meta.status === 'archived' && !justActivated;
+  const isDraft = prompt.meta.status === 'draft' && !justActivated;
+
+  // Track which payload fields have been modified for version creation
+  // Sprint: system-prompt-versioning-v1
+  const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
 
   // Snapshot of original state for discard functionality
   const originalSnapshotRef = useRef<{ meta: typeof prompt.meta; payload: typeof prompt.payload } | null>(null);
@@ -71,6 +91,8 @@ export function SystemPromptEditor({
         meta: { ...prompt.meta },
         payload: { ...prompt.payload },
       };
+      // Reset modification tracking for new selection
+      setModifiedFields(new Set());
     }
   }, [prompt.meta.id, hasChanges]);
 
@@ -79,6 +101,9 @@ export function SystemPromptEditor({
     setActivating(true);
     try {
       await activate(prompt.meta.id);
+      // Optimistic UI: show as active immediately
+      setJustActivated(true);
+      console.log('[SystemPromptEditor] Activation successful');
     } catch (error) {
       console.error('[SystemPromptEditor] Activation failed:', error);
     } finally {
@@ -87,21 +112,48 @@ export function SystemPromptEditor({
   }, [activate, prompt.meta.id]);
 
   // Handle save with cache invalidation for active prompts
+  // Sprint: system-prompt-versioning-v1 - Uses saveAndActivate for active prompts to create versions
   const handleSaveWithCache = useCallback(async () => {
     setSaving(true);
     try {
-      // Call the parent save handler
-      onSave();
-      // If this is the active prompt, invalidate cache so /explore gets the update
-      if (isActive) {
-        await invalidateSystemPromptCache();
+      if (isActive && modifiedFields.size > 0) {
+        // Active prompt with changes: create new version
+        const pendingChanges: Partial<SystemPromptPayload> = {};
+
+        // Extract current values for modified fields
+        modifiedFields.forEach(fieldName => {
+          const key = fieldName as keyof SystemPromptPayload;
+          if (key in prompt.payload) {
+            (pendingChanges as Record<string, unknown>)[key] = prompt.payload[key];
+          }
+        });
+
+        console.log('[SystemPromptEditor] Creating version with changes:',
+          Object.keys(pendingChanges));
+
+        const newPrompt = await saveAndActivate(prompt, pendingChanges);
+        setModifiedFields(new Set()); // Reset tracking
+        onSave(); // Clear hasChanges flag
+
+        // Switch inspector to the newly created prompt
+        if (onSelectObject && newPrompt) {
+          console.log('[SystemPromptEditor] Switching to new version:', newPrompt.meta.id);
+          onSelectObject(newPrompt.meta.id);
+        }
+      } else {
+        // Draft/archived or no changes: use regular save
+        onSave();
+        // If this is the active prompt, invalidate cache so /explore gets the update
+        if (isActive) {
+          await invalidateSystemPromptCache();
+        }
       }
     } catch (error) {
       console.error('[SystemPromptEditor] Save failed:', error);
     } finally {
       setSaving(false);
     }
-  }, [onSave, isActive]);
+  }, [onSave, isActive, modifiedFields, prompt, saveAndActivate, onSelectObject]);
 
   // Handle discard - restore original snapshot
   const handleDiscard = useCallback(async () => {
@@ -132,6 +184,9 @@ export function SystemPromptEditor({
       // Apply restore operations
       await update(prompt.meta.id, operations);
 
+      // Reset modification tracking
+      setModifiedFields(new Set());
+
       // Call onSave to clear hasChanges flag
       onSave();
     } catch (error) {
@@ -143,6 +198,8 @@ export function SystemPromptEditor({
 
   // Helper to create patch operation for payload fields
   const patchPayload = useCallback((field: string, value: unknown) => {
+    // Track modified field for version creation
+    setModifiedFields(prev => new Set(prev).add(field));
     const op: PatchOperation = { op: 'replace', path: `/payload/${field}`, value };
     onEdit([op]);
   }, [onEdit]);
