@@ -52,16 +52,19 @@ export function useContextState(): ContextState {
 /**
  * Compute the user's stage based on interaction metrics.
  *
- * - genesis: New user, no interactions yet
- * - exploration: Early engagement (1-4 interactions)
- * - synthesis: Deeper exploration (5+ interactions, no captures)
+ * - genesis: New user, first 5 interactions (onboarding period)
+ * - exploration: Early engagement (6-14 interactions)
+ * - synthesis: Deeper exploration (15+ interactions, no captures)
  * - advocacy: Contributing back (has captured sprouts)
+ *
+ * Sprint: navigation-dex-cleanup-v1 - Extended genesis to 0-5 interactions
+ * to match the onboarding prompt targeting window.
  */
 function computeStage(interactionCount: number, sproutCount: number): Stage {
-  if (interactionCount === 0) return 'genesis';
   if (sproutCount > 0) return 'advocacy';
-  if (interactionCount >= 5) return 'synthesis';
-  return 'exploration';
+  if (interactionCount <= 5) return 'genesis';
+  if (interactionCount <= 15) return 'exploration';
+  return 'synthesis';
 }
 
 /**
