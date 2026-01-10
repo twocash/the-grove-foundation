@@ -1194,12 +1194,16 @@ async function loadKnowledgeConfig() {
 // ============================================================================
 
 // In-memory cache for system prompt
+// NOTE: Disabled (TTL=0) due to multi-instance cache invalidation issue.
+// Each Cloud Run instance has its own cache, so /api/cache/invalidate only
+// clears one instance while others serve stale prompts.
+// TODO: Implement shared Redis cache - see sprints/shared-cache-v1/
 let systemPromptCache = {
   content: null,
   source: null,
   fetchedAt: null
 };
-const SYSTEM_PROMPT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SYSTEM_PROMPT_CACHE_TTL_MS = 0; // DISABLED - was 5 * 60 * 1000 (5 minutes)
 
 /**
  * Assemble system prompt content from payload sections.
