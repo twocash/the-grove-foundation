@@ -907,15 +907,21 @@ app.post('/api/cache/invalidate', async (req, res) => {
 });
 
 // DEBUG: Inspect current system prompt (dev only)
+// Sprint: system-prompt-assembly-fix-v1 - Updated for config object
 app.get('/api/debug/system-prompt', async (req, res) => {
   try {
-    const prompt = await fetchActiveSystemPrompt();
+    const config = await fetchActiveSystemPrompt();
     res.json({
-      source: systemPromptCache.source,
-      fetchedAt: systemPromptCache.fetchedAt ? new Date(systemPromptCache.fetchedAt).toISOString() : null,
-      contentLength: prompt?.length || 0,
-      contentPreview: prompt?.substring(0, 500) + '...',
-      fullContent: prompt
+      source: config.source,
+      fetchedAt: config.fetchedAt ? new Date(config.fetchedAt).toISOString() : null,
+      responseMode: config.responseMode,
+      closingBehavior: config.closingBehavior,
+      useBreadcrumbTags: config.useBreadcrumbTags,
+      useTopicTags: config.useTopicTags,
+      useNavigationBlocks: config.useNavigationBlocks,
+      contentLength: config.content?.length || 0,
+      contentPreview: config.content?.substring(0, 500) + '...',
+      fullContent: config.content
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
