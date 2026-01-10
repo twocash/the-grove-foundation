@@ -1208,7 +1208,7 @@ let systemPromptCache = {
   source: null,
   fetchedAt: null
 };
-const SYSTEM_PROMPT_CACHE_TTL_MS = 0; // DISABLED - was 5 * 60 * 1000 (5 minutes)
+const SYSTEM_PROMPT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // Default behavioral settings (used when Supabase/GCS don't provide them)
 const DEFAULT_SYSTEM_PROMPT_BEHAVIORS = {
