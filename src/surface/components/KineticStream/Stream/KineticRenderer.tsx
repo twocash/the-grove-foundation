@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import type { StreamItem, RhetoricalSpan, JourneyFork } from '@core/schema/stream';
+import type { StreamItem, ResponseStreamItem, RhetoricalSpan, JourneyFork } from '@core/schema/stream';
 import { QueryObject } from './blocks/QueryObject';
 import { ResponseObject } from './blocks/ResponseObject';
 import { NavigationObject } from './blocks/NavigationObject';
@@ -49,8 +49,15 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
   const allItems = currentItem ? [...items, currentItem] : items;
 
   // Sprint: inline-prompts-wiring-v1 - Find last response index for navigation display
-  const lastResponseIndex = allItems.reduce((lastIdx, item, idx) => 
+  const lastResponseIndex = allItems.reduce((lastIdx, item, idx) =>
     item.type === 'response' ? idx : lastIdx, -1);
+
+  // Sprint: streaming-layout-fix-v2
+  // Detect if any item is currently streaming to prevent layout thrashing
+  const isAnyStreaming = allItems.some(
+    (item): item is ResponseStreamItem =>
+      item.type === 'response' && item.isGenerating === true
+  );
 
   return (
     <div className="space-y-6" data-testid="kinetic-renderer">
@@ -62,7 +69,7 @@ export const KineticRenderer: React.FC<KineticRendererProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            layout
+            layout={!isAnyStreaming}
           >
             <KineticBlock
               item={item}

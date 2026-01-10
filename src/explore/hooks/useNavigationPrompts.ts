@@ -139,43 +139,8 @@ export function useNavigationPrompts(
 
     console.log('[NavPrompts] grovePool (active):', grovePool.length);
 
-    // HOTFIX: Use interaction count to determine genesis phase
-    // First 5 interactions = genesis stage, show only genesis-welcome prompts
-    // SKIP 4D scoring for genesis - direct passthrough
-    // TODO: Refactor 4D scoring to handle genesis context properly (DEX/Trellis issue)
-    const isGenesisPhase = context.interactionCount <= 5;
-    console.log('[NavPrompts] interactionCount:', context.interactionCount, 'isGenesisPhase:', isGenesisPhase);
-    
-    if (isGenesisPhase) {
-      const genesisTagged = grovePool.filter(p =>
-        p.meta.tags?.includes('genesis-welcome')
-      );
-      console.log('[NavPrompts] GENESIS PHASE - found', genesisTagged.length, 'genesis-welcome prompts');
-      
-      if (genesisTagged.length > 0) {
-        // BYPASS 4D scoring entirely - just convert and return
-        const genesisPool = genesisTagged.map(grovePromptToPromptObject);
-        const genesisForks = promptsToForks(genesisPool.slice(0, maxPrompts));
-        const genesisScoredPrompts: ScoredPrompt[] = genesisPool.slice(0, maxPrompts).map(p => ({
-          prompt: p,
-          score: 100, // Fixed score for genesis prompts
-          matchDetails: {
-            stageMatch: true,
-            entropyFit: true,
-            lensWeight: 0,
-            topicWeight: 0,
-            momentBoosts: 0
-          }
-        }));
-        console.log('[NavPrompts] GENESIS BYPASS - returning', genesisForks.length, 'forks directly');
-        return {
-          forks: genesisForks,
-          scoredPrompts: genesisScoredPrompts,
-          eligibleCount: genesisForks.length
-        };
-      }
-      console.log('[NavPrompts] WARNING: No genesis-welcome prompts, falling through to 4D scoring');
-    }
+    // Sprint: navigation-dex-cleanup-v1 - Removed genesis bypass
+    // Genesis prompts now handled by 4D scoring via targeting.stages: ['genesis']
 
     // Standard path: Convert to flat PromptObject format for scoring functions
     const pool = grovePool.map(grovePromptToPromptObject);

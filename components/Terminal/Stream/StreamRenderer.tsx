@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import type { StreamItem, RhetoricalSpan, JourneyPath, JourneyFork } from '../../../src/core/schema/stream';
+import type { StreamItem, ResponseStreamItem, RhetoricalSpan, JourneyPath, JourneyFork } from '../../../src/core/schema/stream';
 import { QueryBlock } from './blocks/QueryBlock';
 import { ResponseBlock } from './blocks/ResponseBlock';
 import { NavigationBlock } from './blocks/NavigationBlock';
@@ -42,6 +42,13 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
   const variants = reducedMotion ? reducedMotionVariants : blockVariants;
   const allItems = currentItem ? [...items, currentItem] : items;
 
+  // Sprint: streaming-layout-fix-v2
+  // Detect if any item is currently streaming to prevent layout thrashing
+  const isAnyStreaming = allItems.some(
+    (item): item is ResponseStreamItem =>
+      item.type === 'response' && item.isGenerating === true
+  );
+
   return (
     <div className="space-y-6" data-testid="stream-renderer">
       <AnimatePresence mode="popLayout">
@@ -52,7 +59,7 @@ export const StreamRenderer: React.FC<StreamRendererProps> = ({
             initial="hidden"
             animate="visible"
             exit="exit"
-            layout
+            layout={!isAnyStreaming}
           >
             <StreamBlock
               item={item}
