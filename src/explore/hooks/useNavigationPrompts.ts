@@ -151,12 +151,20 @@ export function useNavigationPrompts(
         p.meta.tags?.includes('genesis-welcome')
       );
       console.log('[NavPrompts] GENESIS PHASE - found', genesisTagged.length, 'genesis-welcome prompts');
-      
+
       if (genesisTagged.length > 0) {
         // BYPASS 4D scoring entirely - just convert and return
         const genesisPool = genesisTagged.map(grovePromptToPromptObject);
-        const genesisForks = promptsToForks(genesisPool.slice(0, maxPrompts));
-        const genesisScoredPrompts: ScoredPrompt[] = genesisPool.slice(0, maxPrompts).map(p => ({
+
+        // Sprint: dedupe-prompts-v1 - Filter out already-selected prompts
+        const selectedIds = new Set(context.promptsSelected || []);
+        const unseenPool = genesisPool.filter(p => !selectedIds.has(p.id));
+        console.log('[NavPrompts] GENESIS - filtered to', unseenPool.length, 'unseen prompts (selected:', selectedIds.size, ')');
+
+        // Use unseen prompts if available, otherwise fall back to full pool (allows repeat)
+        const availablePool = unseenPool.length > 0 ? unseenPool : genesisPool;
+        const genesisForks = promptsToForks(availablePool.slice(0, maxPrompts));
+        const genesisScoredPrompts: ScoredPrompt[] = availablePool.slice(0, maxPrompts).map(p => ({
           prompt: p,
           score: 100, // Fixed score for genesis prompts
           matchDetails: {
