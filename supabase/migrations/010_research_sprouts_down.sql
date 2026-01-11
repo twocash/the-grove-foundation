@@ -6,36 +6,22 @@
 -- Only use in development or when data loss is acceptable.
 
 -- =============================================================================
--- Drop Functions
+-- Drop Tables (order matters due to foreign keys)
+-- Dropping tables first removes triggers and policies automatically
+-- =============================================================================
+
+DROP TABLE IF EXISTS public.research_sprout_evidence CASCADE;
+DROP TABLE IF EXISTS public.research_sprout_gate_decisions CASCADE;
+DROP TABLE IF EXISTS public.research_sprout_status_history CASCADE;
+DROP TABLE IF EXISTS public.research_sprouts CASCADE;
+
+-- =============================================================================
+-- Drop Functions (after tables are gone, no more dependencies)
 -- =============================================================================
 
 DROP FUNCTION IF EXISTS get_pending_sprouts(TEXT, INTEGER);
 DROP FUNCTION IF EXISTS get_sprout_status_counts(TEXT);
 DROP FUNCTION IF EXISTS update_research_sprout_updated_at();
-
--- =============================================================================
--- Drop Triggers
--- =============================================================================
-
-DROP TRIGGER IF EXISTS trigger_research_sprout_updated_at ON public.research_sprouts;
-
--- =============================================================================
--- Drop Policies
--- =============================================================================
-
-DROP POLICY IF EXISTS "Allow all for authenticated users" ON public.research_sprout_evidence;
-DROP POLICY IF EXISTS "Allow all for authenticated users" ON public.research_sprout_gate_decisions;
-DROP POLICY IF EXISTS "Allow all for authenticated users" ON public.research_sprout_status_history;
-DROP POLICY IF EXISTS "Allow all for authenticated users" ON public.research_sprouts;
-
--- =============================================================================
--- Drop Tables (order matters due to foreign keys)
--- =============================================================================
-
-DROP TABLE IF EXISTS public.research_sprout_evidence;
-DROP TABLE IF EXISTS public.research_sprout_gate_decisions;
-DROP TABLE IF EXISTS public.research_sprout_status_history;
-DROP TABLE IF EXISTS public.research_sprouts;
 
 -- =============================================================================
 -- Verification
