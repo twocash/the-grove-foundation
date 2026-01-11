@@ -149,16 +149,16 @@ export const FILTER_PRESETS = {
  */
 export const SPROUT_RESEARCH_FLAGS = {
   /** Master flag for the entire sprout research system */
-  ENABLED: 'SPROUT_RESEARCH_ENABLED',
+  ENABLED: 'sprout-research',
 
   /** Flag for Garden Inspector panel */
-  GARDEN_INSPECTOR: 'GARDEN_INSPECTOR_ENABLED',
+  GARDEN_INSPECTOR: 'garden-inspector',
 
   /** Flag for agent auto-execution */
-  AGENT_AUTO_EXECUTE: 'RESEARCH_AGENT_AUTO_EXECUTE',
+  AGENT_AUTO_EXECUTE: 'research-agent-auto-execute',
 
   /** Flag for legacy sprout capture (should be disabled in /explore) */
-  LEGACY_DISABLED: 'LEGACY_SPROUT_DISABLED',
+  LEGACY_DISABLED: 'legacy-sprout-disabled',
 } as const;
 
 // =============================================================================

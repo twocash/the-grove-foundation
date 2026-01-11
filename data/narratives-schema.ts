@@ -336,6 +336,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Sprout Research System',
     description: 'Enable sprout: command for research initiation with Prompt Architect (Sprint: sprout-research-v1)',
     enabled: false
+  },
+  {
+    id: 'garden-inspector',
+    name: 'Garden Inspector Panel',
+    description: 'Enable Garden Inspector panel for viewing and managing research sprouts (Sprint: sprout-research-v1, Phase 4e)',
+    enabled: false
   }
 ];
 

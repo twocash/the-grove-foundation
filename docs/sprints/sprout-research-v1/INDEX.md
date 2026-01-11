@@ -35,25 +35,25 @@
 - [x] 2f: Migration rollback test
 - [x] **GATE:** Storage round-trip test passes; DOWN migration verified
 
-### Phase 3: Prompt Architect Agent
+### Phase 3: Prompt Architect Agent ✅ COMPLETE
 
-- [ ] 3a: Command detection for sprout: (no UI change)
-- [ ] 3b: Config loader implementation (no UI change)
-- [ ] 3c: Inference pipeline (no UI change)
-- [ ] 3d: Confirmation flow logic (no UI change)
-- [ ] 3e: Feature flag: SPROUT_RESEARCH_ENABLED
-- [ ] 3f: Wire flag=true path (UI change, flagged)
-- [ ] 3g: Visual verification: flag=true vs flag=false
-- [ ] **GATE:** Screenshot both paths, behavior correct
+- [x] 3a: Command detection for sprout: (no UI change)
+- [x] 3b: Config loader implementation (no UI change)
+- [x] 3c: Inference pipeline (no UI change)
+- [x] 3d: Confirmation flow logic (no UI change)
+- [x] 3e: Feature flag: SPROUT_RESEARCH_ENABLED
+- [x] 3f: Wire flag=true path (UI change, flagged)
+- [x] 3g: Visual verification: flag=true vs flag=false
+- [x] **GATE:** Screenshot both paths, behavior correct
 
-### Phase 4: Garden Inspector Panel
+### Phase 4: Garden Inspector Panel (In Progress)
 
-- [ ] 4a: GardenInspector component (isolated)
-- [ ] 4b: Status grouping logic (no integration)
-- [ ] 4c: Pulsing badge animation (isolated CSS)
-- [ ] 4d: Toast notification system (isolated)
-- [ ] 4e: Feature flag: GARDEN_INSPECTOR_ENABLED
-- [ ] 4f: Wire into Explore layout (flagged)
+- [x] 4a: GardenInspector component (isolated)
+- [x] 4b: Status grouping logic (no integration)
+- [x] 4c: Pulsing badge animation (isolated CSS)
+- [x] 4d: Toast notification system (isolated)
+- [x] 4e: Feature flag: GARDEN_INSPECTOR_ENABLED
+- [x] 4f: Wire into Explore layout (flagged)
 - [ ] 4g: Visual verification: inspector states
 - [ ] **GATE:** Screenshot collapsed, expanded, pulsing states
 

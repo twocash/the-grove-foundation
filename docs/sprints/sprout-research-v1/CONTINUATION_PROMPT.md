@@ -2,69 +2,79 @@
 
 ## Session State
 
-**Last completed:** Phase 3g - Visual verification (flag=false legacy preserved, flag=true intercepts)
-**Next action:** Phase 4a - GardenInspector component skeleton
+**Last completed:** Phase 4f - Wire GardenInspector into Explore layout
+**Next action:** Phase 4g - Visual verification of inspector states
 **Git branch:** `feature/sprout-research-v1`
 **Blocking issues:** None
 
-## Phase 3 Commits
+## Phase 4 Progress (Current)
 
-| Commit | Description |
-|--------|-------------|
-| `b26a55c` | Phase 3a-3d: Prompt Architect pipeline (parser, config loader, pipeline, hook) |
-| `80eda8a` | Phase 3e: Feature flag `sprout-research` in narratives-schema.ts |
-| `6ceba42` | Phase 3f: ExploreShell.tsx interception wiring |
+| Sub-phase | Status | Description |
+|-----------|--------|-------------|
+| 4a | ✅ Complete | GardenInspector component skeleton |
+| 4b | ✅ Complete | Status grouping logic |
+| 4c | ✅ Complete | Pulsing badge animation CSS |
+| 4d | ✅ Complete | Toast notification system |
+| 4e | ✅ Complete | Feature flag `garden-inspector` |
+| 4f | ✅ Complete | Wire GardenInspector into Explore layout |
+| 4g | 🔄 Pending | Visual verification of inspector states |
 
-## Files Created in Phase 3
+## Files Created in Phase 4
 
-- `src/explore/services/sprout-command-parser.ts` - Detect `sprout:`/`research:`/`investigate:` prefixes
-- `src/explore/services/prompt-architect-config-loader.ts` - Load grove config with 5-min cache
-- `src/explore/services/prompt-architect-pipeline.ts` - Orchestrate parse→config→inference→gates
-- `src/explore/hooks/usePromptArchitect.ts` - React hook for confirmation flow state
+- `src/explore/GardenInspector.tsx` - Garden Inspector component with confirmation view
+- `src/explore/context/ToastContext.tsx` - Toast notification system
 
-## Files Modified in Phase 3
+## Files Modified in Phase 4
 
-- `data/narratives-schema.ts` - Added `sprout-research` feature flag (enabled: false)
-- `src/surface/components/KineticStream/ExploreShell.tsx` - Added interception in handleSubmit()
+- `tailwind.config.ts` - Added pulsing animations (pulse-pending, pulse-attention, pulse-active)
+- `data/narratives-schema.ts` - Added `garden-inspector` feature flag
+- `src/core/schema/research-sprout-registry.ts` - Updated flag key constants
+- `src/surface/pages/ExplorePage.tsx` - Added ToastProvider
+- `src/surface/components/KineticStream/ExploreShell.tsx` - Wired up GardenInspector overlay
 
 ## Verification Status
 
 - [x] Phase 0: Route verification and pattern audit
 - [x] Phase 1: PromptArchitectConfig schema
 - [x] Phase 2: ResearchSprout object model and storage
-- [x] Phase 3a: Command detection (`sprout:`, `research:`, `investigate:`)
-- [x] Phase 3b: Config loader with caching
-- [x] Phase 3c: Inference pipeline orchestration
-- [x] Phase 3d: usePromptArchitect React hook
-- [x] Phase 3e: Feature flag `sprout-research`
-- [x] Phase 3f: ExploreShell.tsx wiring
-- [x] Phase 3g: Visual verification (flag=false and flag=true tested)
-- [ ] Phase 4a: GardenInspector component skeleton
-- [ ] Phase 4b-4f: Remaining Phase 4 tasks
+- [x] Phase 3: Prompt Architect Agent pipeline
+- [x] Phase 4a: GardenInspector component skeleton
+- [x] Phase 4b: Status grouping logic
+- [x] Phase 4c: Pulsing badge animation CSS
+- [x] Phase 4d: Toast notification system
+- [x] Phase 4e: Feature flag `garden-inspector`
+- [x] Phase 4f: Wire GardenInspector into Explore layout
+- [ ] Phase 4g: Visual verification (screenshot both flag states)
+- [ ] Phase 5: Research Agent (pending)
+- [ ] Phase 6: Deprecation & Isolation (pending)
 
 ## To Resume
 
 1. Read `docs/sprints/sprout-research-v1/INDEX.md` for phase checklist
 2. Run `npm run build` to verify baseline
-3. Continue with Phase 4a - GardenInspector component skeleton
+3. Run `npm run dev` and test:
+   - Enable both `sprout-research` and `garden-inspector` flags
+   - Type `sprout: What causes the ratchet effect?`
+   - Verify GardenInspector dialog opens with inferred manifest
+4. Take screenshots for gate verification
 
 ## Key Context
 
 **Integration Point:**
 - File: `src/surface/components/KineticStream/ExploreShell.tsx`
-- Function: `handleSubmit()` - intercepts when `isSproutResearchEnabled && shouldTriggerPromptArchitect(displayText)`
-- Next: Replace `return;` with GardenInspector dialog open
+- Function: `handleSubmit()` - runs Prompt Architect pipeline and opens GardenInspector
+- Overlay type: `garden-inspector`
 
-**Phase 4 Focus:**
-- GardenInspector: Confirmation dialog showing inferred manifest
-- User can edit title, branches, strategy before creating sprout
-- Uses `usePromptArchitect` hook for state management
+**Feature Flags (both required):**
+- `sprout-research` - Enables command interception
+- `garden-inspector` - Enables the confirmation dialog
 
 **Frozen Zones:**
 - `components/Terminal/`: 77 files - DO NOT TOUCH
 - `src/foundation/`: 23 files - DO NOT TOUCH
 
-**Feature Flag:**
-- ID: `sprout-research`
-- Default: `false` (disabled)
-- Enable via Bedrock console or localStorage override
+**Phase 5 Preview:**
+- Research Agent queue consumer
+- Execute branches and collect evidence
+- Spawn child manifests
+- Results population
