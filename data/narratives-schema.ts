@@ -335,19 +335,19 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     id: 'sprout-research',
     name: 'Sprout Research System',
     description: 'Enable sprout: command for research initiation with Prompt Architect (Sprint: sprout-research-v1)',
-    enabled: false
+    enabled: true
   },
   {
     id: 'garden-inspector',
     name: 'Garden Inspector Panel',
     description: 'Enable Garden Inspector panel for viewing and managing research sprouts (Sprint: sprout-research-v1, Phase 4e)',
-    enabled: false
+    enabled: true
   },
   {
     id: 'research-agent-auto-execute',
     name: 'Research Agent Auto-Execute',
     description: 'Automatically execute research when sprouts are created (Sprint: sprout-research-v1, Phase 5e)',
-    enabled: false
+    enabled: true
   },
   {
     id: 'legacy-sprout-disabled',
