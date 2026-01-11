@@ -129,6 +129,12 @@ interface ResearchSproutActions {
     updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview'>>
   ) => Promise<ResearchSprout>;
 
+  /** Add a child sprout ID to parent's childSproutIds array (Sprint: sprout-research-v1, Phase 5d) */
+  addChildSproutId: (
+    parentId: string,
+    childId: string
+  ) => Promise<void>;
+
   /** Select a sprout for detail view */
   selectSprout: (id: string | null) => void;
 
@@ -359,6 +365,31 @@ export function ResearchSproutProvider({
     return updated;
   }, [sprouts]);
 
+  // Add child sprout ID to parent (Sprint: sprout-research-v1, Phase 5d)
+  const addChildSproutId = useCallback(async (
+    parentId: string,
+    childId: string
+  ): Promise<void> => {
+    const parent = sprouts.find(s => s.id === parentId);
+    if (!parent) {
+      throw new Error(`Parent sprout not found: ${parentId}`);
+    }
+
+    // Avoid duplicates
+    if (parent.childSproutIds.includes(childId)) {
+      return;
+    }
+
+    const updated: ResearchSprout = {
+      ...parent,
+      childSproutIds: [...parent.childSproutIds, childId],
+      updatedAt: new Date().toISOString(),
+    };
+
+    // TODO Phase 2d: Update in Supabase
+    setSprouts(prev => prev.map(s => s.id === parentId ? updated : s));
+  }, [sprouts]);
+
   // Select sprout
   const selectSprout = useCallback((id: string | null) => {
     setSelectedSproutId(id);
@@ -420,6 +451,7 @@ export function ResearchSproutProvider({
     transitionStatus,
     update,
     updateResults,
+    addChildSproutId,
     selectSprout,
     refresh,
     getChildren,
@@ -437,6 +469,7 @@ export function ResearchSproutProvider({
     transitionStatus,
     update,
     updateResults,
+    addChildSproutId,
     selectSprout,
     refresh,
     getChildren,
