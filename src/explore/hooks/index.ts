@@ -48,3 +48,13 @@ export {
   type UseResearchQueueConsumerOptions,
   type UseResearchQueueConsumerResult,
 } from './useResearchQueueConsumer';
+
+// Research Agent (Sprint: sprout-research-v1, Phase 5b)
+export {
+  useResearchAgent,
+  useIsResearchExecuting,
+  useResearchProgress,
+  type UseResearchAgentOptions,
+  type ResearchExecutionState,
+  type UseResearchAgentResult,
+} from './useResearchAgent';
