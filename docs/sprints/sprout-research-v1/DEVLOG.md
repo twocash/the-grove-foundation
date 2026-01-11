@@ -252,58 +252,22 @@ Ready for Phase 2: Object Model & Storage
 
 ---
 
-### Phase 2f: Migration Rollback Test ⏳ PENDING USER ACTION
+### Phase 2f: Migration Rollback Test ✅ COMPLETE
 
-**Migration Test Procedure:**
+**Test Results:**
 
-1. **Run UP migration:**
-   ```bash
-   # In Supabase SQL Editor or via CLI
-   psql -f supabase/migrations/010_research_sprouts.sql
-   ```
+1. **UP migration:** ✅ 4 tables created
+2. **Storage round-trip:** ✅ Insert/select working
+3. **DOWN migration:** ✅ Tables dropped (after fixing dependency order)
 
-2. **Verify tables exist:**
-   ```sql
-   SELECT table_name FROM information_schema.tables
-   WHERE table_schema = 'public'
-   AND table_name LIKE 'research_sprout%';
-   -- Expected: 4 tables
-   ```
-
-3. **Storage round-trip test:**
-   ```sql
-   -- Insert test sprout
-   INSERT INTO research_sprouts (
-     grove_id, spark, title, session_id, grove_config_snapshot
-   ) VALUES (
-     'test-grove',
-     'Test research spark',
-     'Test Research',
-     'test-session',
-     '{"configVersionId": "test", "hypothesisGoals": [], "corpusBoundaries": [], "confirmationMode": "always"}'::jsonb
-   ) RETURNING id;
-
-   -- Verify retrieval
-   SELECT id, spark, status FROM research_sprouts WHERE grove_id = 'test-grove';
-   -- Expected: 1 row with status='pending'
-   ```
-
-4. **Run DOWN migration:**
-   ```bash
-   psql -f supabase/migrations/010_research_sprouts_down.sql
-   ```
-
-5. **Verify tables dropped:**
-   ```sql
-   SELECT table_name FROM information_schema.tables
-   WHERE table_schema = 'public'
-   AND table_name LIKE 'research_sprout%';
-   -- Expected: 0 rows
-   ```
+**Bug found and fixed:** DOWN migration had incorrect dependency ordering.
+Triggers depend on both table AND function, so dropping function first failed.
+Fixed by dropping tables with CASCADE first, then functions.
+Commit: `e7dfc93`
 
 ---
 
-## Phase 2 Gate Status
+## Phase 2 Gate Status ✅ COMPLETE
 
 - [x] Build passing
 - [x] ResearchSprout interface with provenance
@@ -311,9 +275,9 @@ Ready for Phase 2: Object Model & Storage
 - [x] Context provider complete
 - [x] Supabase migrations created
 - [x] Context integrated into ExplorePage
-- [ ] **PENDING:** Migration UP test on Supabase
-- [ ] **PENDING:** Storage round-trip test
-- [ ] **PENDING:** Migration DOWN (rollback) test
+- [x] Migration UP test on Supabase
+- [x] Storage round-trip test
+- [x] Migration DOWN (rollback) test
 
 ---
 

@@ -25,15 +25,15 @@
 - [x] 1d: Quality gate logic (no UI)
 - [x] **GATE:** npm run build succeeds
 
-### Phase 2: Object Model & Storage ⏳ GATE PENDING
+### Phase 2: Object Model & Storage ✅ COMPLETE
 
 - [x] 2a: ResearchSprout interface (with provenance snapshot)
 - [x] 2b: research-sprouts.json registry (type registry)
 - [x] 2c: ResearchSproutContext (React context)
 - [x] 2d: Supabase table migrations (UP + DOWN)
 - [x] 2e: Context provider integration (ExplorePage)
-- [ ] 2f: Migration rollback test ⏳ **AWAITING USER**
-- [ ] **GATE:** Storage round-trip test passes; DOWN migration verified
+- [x] 2f: Migration rollback test
+- [x] **GATE:** Storage round-trip test passes; DOWN migration verified
 
 ### Phase 3: Prompt Architect Agent
 
