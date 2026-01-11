@@ -348,6 +348,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Research Agent Auto-Execute',
     description: 'Automatically execute research when sprouts are created (Sprint: sprout-research-v1, Phase 5e)',
     enabled: false
+  },
+  {
+    id: 'legacy-sprout-disabled',
+    name: 'Legacy Sprout Command Disabled',
+    description: 'When enabled, legacy /sprout Terminal command is disabled in /explore context. New sprout: prefix uses Prompt Architect flow instead. (Sprint: sprout-research-v1, Phase 6a)',
+    enabled: false
   }
 ];
 

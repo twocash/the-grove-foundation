@@ -57,26 +57,26 @@
 - [x] 4g: Visual verification: inspector states
 - [x] **GATE:** Visual verification passed - dialog opens, branches can be added
 
-### Phase 5: Research Agent
+### Phase 5: Research Agent ✅ COMPLETE
 
-- [ ] 5a: Queue consumer for pending status (no UI)
-- [ ] 5b: Research execution logic (no UI)
-- [ ] 5c: Results population (no UI)
-- [ ] 5d: Child manifest spawning (no UI)
-- [ ] 5e: System-level QA agent flag (no UI)
-- [ ] 5f: Integration test: sprout -> agent -> results
-- [ ] 5g: Visual verification: end-to-end flow
-- [ ] **GATE:** Complete sprout lifecycle works
+- [x] 5a: Queue consumer for pending status (no UI)
+- [x] 5b: Research execution logic (no UI)
+- [x] 5c: Results population (no UI)
+- [x] 5d: Child manifest spawning (no UI)
+- [x] 5e: System-level QA agent flag (no UI)
+- [x] 5f: Integration test: sprout -> agent -> results
+- [x] 5g: Visual verification: MVP simplified dialog
+- [x] **GATE:** Complete sprout lifecycle works (MVP: title + prompt only)
 
-### Phase 6: Deprecation & Isolation
+### Phase 6: Deprecation & Isolation ✅ COMPLETE
 
-- [ ] 6a: Feature flag: LEGACY_SPROUT_DISABLED
-- [ ] 6b: Verify sprout-command-parser.ts intercepts 'sprout:' in /explore
-- [ ] 6c: Verify legacy Terminal command files unreachable from /explore
-- [ ] 6d: Confirm PlantSelectionTooltip not rendered in /explore
-- [ ] 6e: Document legacy files as "dead code in Explore context"
-- [ ] 6f: Update help documentation
-- [ ] **GATE:** Legacy commands isolated; FROZEN ZONE UNTOUCHED
+- [x] 6a: Feature flag: LEGACY_SPROUT_DISABLED
+- [x] 6b: Verify sprout-command-parser.ts intercepts 'sprout:' in /explore
+- [x] 6c: Verify legacy Terminal command files unreachable from /explore
+- [x] 6d: Confirm PlantSelectionTooltip not rendered in /explore (spec concept, not implemented)
+- [x] 6e: Document legacy files as "dead code in Explore context"
+- [x] 6f: Update help documentation
+- [x] **GATE:** Legacy commands isolated; FROZEN ZONE UNTOUCHED
 
 ---
 

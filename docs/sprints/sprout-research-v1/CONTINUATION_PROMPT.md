@@ -2,8 +2,8 @@
 
 ## Session State
 
-**Last completed:** Phase 5g - Visual verification complete
-**Next action:** Phase 6a - Deprecation & Isolation
+**Last completed:** Phase 6 - Deprecation & Isolation complete
+**Next action:** Sprint complete - ready for PR
 **Git branch:** `feature/sprout-research-v1`
 **Blocking issues:** None
 
@@ -78,7 +78,18 @@ import('/src/explore/services/research-integration-test.ts').then(m => m.runFrom
 - [x] Phase 3: Prompt Architect Agent pipeline
 - [x] Phase 4: Garden Inspector Panel
 - [x] Phase 5: Research Agent (5a-5g complete)
-- [ ] Phase 6: Deprecation & Isolation
+- [x] Phase 6: Deprecation & Isolation (6a-6f complete)
+
+## Phase 6 Summary (Complete)
+
+| Sub-phase | Status | Description |
+|-----------|--------|-------------|
+| 6a | ✅ Complete | Added legacy-sprout-disabled feature flag |
+| 6b | ✅ Complete | Verified sprout-command-parser intercepts in /explore |
+| 6c | ✅ Complete | Verified Terminal commands unreachable from /explore |
+| 6d | ✅ Complete | Confirmed PlantSelectionTooltip not in /explore |
+| 6e | ✅ Complete | Created ISOLATION_AUDIT.md documenting legacy code |
+| 6f | ✅ Complete | Updated INDEX.md and help documentation |
 
 ## Screenshots
 
