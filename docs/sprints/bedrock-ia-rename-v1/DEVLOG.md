@@ -151,6 +151,33 @@ Added grouping comments to `navigation.ts`. Section dividers noted as future enh
 
 **Final build:** ✅ Passed
 
+### 2026-01-11 01:30 — Visual Verification Complete
+
+**Screenshots captured:**
+
+1. `/bedrock` - Dashboard showing updated navigation:
+   - Nursery, Garden, Lens Workshop, Prompt Workshop, Experience
+   - Journey Architect and Knowledge Vault shown as disabled
+
+2. `/bedrock/nursery` - New Nursery console:
+   - Title: "Nursery"
+   - Subtitle: "Cultivate and moderate knowledge contributions"
+   - Coming Soon placeholder with moderation workflow preview
+
+3. `/bedrock/garden` - Garden console (formerly Pipeline):
+   - Title: "Garden"
+   - Subtitle: "Mature knowledge corpus management"
+   - 68 documents displayed correctly
+
+4. `/bedrock/experience` - Experience console (singular):
+   - Title: "Experience" (not "Experiences")
+   - Subtitle: "Manage AI system prompts for /explore"
+   - 9 system prompts displayed correctly
+
+5. `/explore` - Strangler Fig compliance verified:
+   - Route unaffected by rename sprint
+   - All functionality intact
+
 **Files modified (summary):**
 - `src/bedrock/consoles/GardenConsole/*` (14 files - renamed from PipelineMonitor)
 - `src/bedrock/consoles/NurseryConsole.tsx` (renamed from GardenConsole.tsx)
