@@ -154,7 +154,7 @@ export const SPROUT_RESEARCH_FLAGS = {
   /** Flag for Garden Inspector panel */
   GARDEN_INSPECTOR: 'garden-inspector',
 
-  /** Flag for agent auto-execution */
+  /** Flag for agent auto-execution (Sprint: sprout-research-v1, Phase 5e) */
   AGENT_AUTO_EXECUTE: 'research-agent-auto-execute',
 
   /** Flag for legacy sprout capture (should be disabled in /explore) */

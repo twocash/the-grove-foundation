@@ -342,6 +342,12 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Garden Inspector Panel',
     description: 'Enable Garden Inspector panel for viewing and managing research sprouts (Sprint: sprout-research-v1, Phase 4e)',
     enabled: false
+  },
+  {
+    id: 'research-agent-auto-execute',
+    name: 'Research Agent Auto-Execute',
+    description: 'Automatically execute research when sprouts are created (Sprint: sprout-research-v1, Phase 5e)',
+    enabled: false
   }
 ];
 
