@@ -20,10 +20,10 @@
 ### Phase 1: Configuration Schema
 
 - [x] 1a: Interface definitions (PromptArchitectConfig, mirror System Prompt singleton pattern)
-- [ ] 1b: JSON schema files (mirror System Prompt versioning)
-- [ ] 1c: Inference rule engine (no UI)
-- [ ] 1d: Quality gate logic (no UI)
-- [ ] **GATE:** Unit tests pass, npm run build succeeds
+- [x] 1b: JSON schema files (mirror System Prompt versioning)
+- [x] 1c: Inference rule engine (no UI)
+- [x] 1d: Quality gate logic (no UI)
+- [x] **GATE:** npm run build succeeds
 
 ### Phase 2: Object Model & Storage
 
