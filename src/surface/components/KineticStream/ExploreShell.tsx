@@ -41,6 +41,7 @@ import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@cor
 import { journeys } from '../../../data/journeys';
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
 import { usePromptForHighlight } from '@explore/hooks/usePromptForHighlight';
+import { shouldTriggerPromptArchitect } from '@explore/services/prompt-architect-pipeline';
 
 export interface ExploreShellProps {
   initialLens?: string;
@@ -68,6 +69,10 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // Sprint: prompt-journey-mode-v1 - Journey mode toggle
   // Default to ON for better exploration experience
   const isJourneyModeEnabled = useFeatureFlag('journey-mode');
+
+  // Sprint: sprout-research-v1 - Sprout research system
+  // When enabled, intercepts sprout: commands for Prompt Architect flow
+  const isSproutResearchEnabled = useFeatureFlag('sprout-research');
 
   // Sprint: kinetic-highlights-v1 - Look up backing prompts for highlights
   const { findPrompt } = usePromptForHighlight();
@@ -507,6 +512,14 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Sprint: prompt-journey-mode-v1 - Accept separate display text and execution prompt
   const handleSubmit = useCallback((displayText: string, executionPrompt?: string) => {
+    // Sprint: sprout-research-v1 - Intercept sprout: commands when flag is enabled
+    if (isSproutResearchEnabled && shouldTriggerPromptArchitect(displayText)) {
+      // TODO Phase 4: Open Prompt Architect confirmation dialog
+      // For now, intercept the command without sending to chat
+      // The full flow will be implemented in Phase 4 (Garden Inspector)
+      return;
+    }
+
     // Force scroll to bottom on new submission (instant)
     scrollToBottom(false);
     // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
@@ -514,7 +527,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       personaBehaviors: effectivePersonaBehaviors,
       executionPrompt
     });
-  }, [submit, scrollToBottom, effectivePersonaBehaviors]);
+  }, [submit, scrollToBottom, effectivePersonaBehaviors, isSproutResearchEnabled]);
 
   const handleLensAccept = useCallback((lensId: string) => {
     acceptLensOffer(lensId);
