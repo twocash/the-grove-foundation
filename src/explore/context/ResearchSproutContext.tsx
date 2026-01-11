@@ -123,6 +123,12 @@ interface ResearchSproutActions {
     updates: Partial<Pick<ResearchSprout, 'tags' | 'notes' | 'rating' | 'reviewed'>>
   ) => Promise<ResearchSprout>;
 
+  /** Update sprout with research results (branches, evidence, synthesis, execution) */
+  updateResults: (
+    id: string,
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview'>>
+  ) => Promise<ResearchSprout>;
+
   /** Select a sprout for detail view */
   selectSprout: (id: string | null) => void;
 
@@ -331,6 +337,28 @@ export function ResearchSproutProvider({
     return updated;
   }, [sprouts]);
 
+  // Update sprout with research results (Sprint: sprout-research-v1, Phase 5c)
+  const updateResults = useCallback(async (
+    id: string,
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview'>>
+  ): Promise<ResearchSprout> => {
+    const sprout = sprouts.find(s => s.id === id);
+    if (!sprout) {
+      throw new Error(`Sprout not found: ${id}`);
+    }
+
+    const updated: ResearchSprout = {
+      ...sprout,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // TODO Phase 2d: Update in Supabase
+    setSprouts(prev => prev.map(s => s.id === id ? updated : s));
+
+    return updated;
+  }, [sprouts]);
+
   // Select sprout
   const selectSprout = useCallback((id: string | null) => {
     setSelectedSproutId(id);
@@ -391,6 +419,7 @@ export function ResearchSproutProvider({
     query,
     transitionStatus,
     update,
+    updateResults,
     selectSprout,
     refresh,
     getChildren,
@@ -407,6 +436,7 @@ export function ResearchSproutProvider({
     query,
     transitionStatus,
     update,
+    updateResults,
     selectSprout,
     refresh,
     getChildren,
