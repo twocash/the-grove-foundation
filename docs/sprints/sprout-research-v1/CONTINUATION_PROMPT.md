@@ -2,12 +2,12 @@
 
 ## Session State
 
-**Last completed:** Phase 5f - Integration test
-**Next action:** Phase 5g - Visual verification (end-to-end flow)
+**Last completed:** Phase 5g - Visual verification complete
+**Next action:** Phase 6a - Deprecation & Isolation
 **Git branch:** `feature/sprout-research-v1`
 **Blocking issues:** None
 
-## Phase 5 Summary (In Progress)
+## Phase 5 Summary (Complete)
 
 | Sub-phase | Status | Description |
 |-----------|--------|-------------|
@@ -17,7 +17,14 @@
 | 5d | ✅ Complete | Child manifest spawning |
 | 5e | ✅ Complete | Research Agent auto-execute flag |
 | 5f | ✅ Complete | Integration test (5-step lifecycle) |
-| 5g | 🔄 Next | Visual verification: end-to-end flow |
+| 5g | ✅ Complete | Visual verification: MVP confirmation dialog |
+
+## MVP Simplification (Phase 5g)
+
+GardenInspector confirmation dialog simplified to MVP scope:
+- **KEPT:** Title field, Instructions/Prompt field, Create/Cancel buttons
+- **COMMENTED OUT:** Research Branches, Strategy, Tags sections
+- See `src/explore/GardenInspector.tsx` for TODO markers
 
 ## Files Created in Phase 5
 
@@ -70,14 +77,21 @@ import('/src/explore/services/research-integration-test.ts').then(m => m.runFrom
 - [x] Phase 2: ResearchSprout object model and storage
 - [x] Phase 3: Prompt Architect Agent pipeline
 - [x] Phase 4: Garden Inspector Panel
-- [ ] Phase 5: Research Agent (5a-5f complete, 5g pending)
+- [x] Phase 5: Research Agent (5a-5g complete)
 - [ ] Phase 6: Deprecation & Isolation
+
+## Screenshots
+
+Visual verification screenshots saved to `docs/sprints/sprout-research-v1/screenshots/`:
+- `4g-garden-inspector-flow.gif` - Original Garden Inspector flow
+- `5g-mvp-confirmation-dialog-flow.gif` - MVP simplified dialog
+- `review.html` - Browser-viewable review page
 
 ## To Resume
 
 1. Read `docs/sprints/sprout-research-v1/INDEX.md` for phase checklist
 2. Run `npm run build` to verify baseline
-3. Continue Phase 5g: Visual verification
+3. Continue Phase 6a: Feature flag LEGACY_SPROUT_DISABLED
 
 ## Key Context
 
