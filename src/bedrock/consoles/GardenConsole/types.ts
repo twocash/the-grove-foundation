@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/types.ts
+// src/bedrock/consoles/GardenConsole/types.ts
 // Document types with enrichment fields aligned with Knowledge Commons
 // Sprint: pipeline-inspector-v1 (Epic 1)
 // Authority: ADR-001-knowledge-commons-unification.md

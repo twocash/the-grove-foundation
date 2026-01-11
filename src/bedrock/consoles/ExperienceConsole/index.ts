@@ -1,20 +1,20 @@
-// src/bedrock/consoles/ExperiencesConsole/index.ts
-// ExperiencesConsole - System Prompt Management
-// Sprint: experiences-console-recovery-v1
+// src/bedrock/consoles/ExperienceConsole/index.ts
+// ExperienceConsole - System Prompt Management
+// Sprint: bedrock-ia-rename-v1 (formerly ExperienceConsole)
 //
 // Manages system prompts that control AI behavior on /explore.
 // Adapted from orphaned commit e61877c with health check features removed.
 // Health check integration deferred to future sprint.
 
 import { createBedrockConsole } from '../../patterns/console-factory';
-import { experiencesConsoleConfig } from './ExperiencesConsole.config';
+import { experienceConsoleConfig } from './ExperienceConsole.config';
 import { SystemPromptCard } from './SystemPromptCard';
 import { SystemPromptEditor } from './SystemPromptEditor';
 import { useExperienceData } from './useExperienceData';
 import type { SystemPromptPayload } from '@core/schema/system-prompt';
 
 /**
- * Experiences Console
+ * Experience Console
  *
  * Manages system prompts that control AI behavior on /explore.
  * Uses the Bedrock Console Factory pattern for consistent UX.
@@ -29,8 +29,8 @@ import type { SystemPromptPayload } from '@core/schema/system-prompt';
  * - Health check integration (read-only view)
  * - Combined experience object browser
  */
-export const ExperiencesConsole = createBedrockConsole<SystemPromptPayload>({
-  config: experiencesConsoleConfig,
+export const ExperienceConsole = createBedrockConsole<SystemPromptPayload>({
+  config: experienceConsoleConfig,
   useData: useExperienceData,
   CardComponent: SystemPromptCard,
   EditorComponent: SystemPromptEditor,
@@ -39,7 +39,7 @@ export const ExperiencesConsole = createBedrockConsole<SystemPromptPayload>({
 });
 
 // Re-export configuration for external use
-export { experiencesConsoleConfig } from './ExperiencesConsole.config';
+export { experienceConsoleConfig } from './ExperienceConsole.config';
 
 // Re-export card and editor components
 export { SystemPromptCard } from './SystemPromptCard';
@@ -52,4 +52,4 @@ export type { ExperienceDataResult } from './useExperienceData';
 // Re-export types for consumers
 export type { SystemPromptPayload } from '@core/schema/system-prompt';
 
-export default ExperiencesConsole;
+export default ExperienceConsole;

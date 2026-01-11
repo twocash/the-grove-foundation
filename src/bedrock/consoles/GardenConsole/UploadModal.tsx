@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/UploadModal.tsx
+// src/bedrock/consoles/GardenConsole/UploadModal.tsx
 // Glass modal overlay for file uploads
 // Sprint: bedrock-alignment-v1 (Story 2.1)
 

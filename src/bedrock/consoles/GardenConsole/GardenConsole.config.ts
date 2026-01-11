@@ -1,13 +1,13 @@
-// src/bedrock/consoles/PipelineMonitor/PipelineMonitor.config.ts
-// Console configuration for Pipeline Monitor
-// Sprint: hotfix-pipeline-factory
+// src/bedrock/consoles/GardenConsole/GardenConsole.config.ts
+// Console configuration for Garden Console
+// Sprint: bedrock-ia-rename-v1 (formerly PipelineMonitor)
 
 import type { ConsoleConfig } from '../../types/console.types';
 
-export const pipelineMonitorConfig: ConsoleConfig = {
-  id: 'pipeline-monitor',
+export const gardenConsoleConfig: ConsoleConfig = {
+  id: 'garden-console',
   title: 'Documents',
-  description: 'Knowledge pipeline management',
+  description: 'Knowledge garden management',
 
   metrics: [
     { id: 'total', label: 'Total', icon: 'description', query: 'count(*)' },
@@ -48,10 +48,10 @@ export const pipelineMonitorConfig: ConsoleConfig = {
     defaultSort: { field: 'meta.createdAt', label: 'Date Added', direction: 'desc' },
     defaultViewMode: 'list',
     viewModes: ['list', 'grid'],
-    favoritesKey: 'pipeline-doc-favorites',
+    favoritesKey: 'garden-doc-favorites',
   },
 
-  // primaryAction removed - handled by PipelineMonitorWithUpload wrapper
+  // primaryAction removed - handled by GardenConsoleWithUpload wrapper
   copilot: {
     enabled: true,
     actions: [
@@ -63,4 +63,4 @@ export const pipelineMonitorConfig: ConsoleConfig = {
   },
 };
 
-export default pipelineMonitorConfig;
+export default gardenConsoleConfig;

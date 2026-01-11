@@ -35,7 +35,7 @@ export interface ValidationResult {
 
 // =============================================================================
 // Enrichment API Helper
-// Mirrors document enrichment pattern from PipelineMonitor
+// Mirrors document enrichment pattern from GardenConsole
 // =============================================================================
 
 interface EnrichmentResult {

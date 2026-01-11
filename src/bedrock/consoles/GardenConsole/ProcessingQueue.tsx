@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/ProcessingQueue.tsx
+// src/bedrock/consoles/GardenConsole/ProcessingQueue.tsx
 // Embedding processing queue panel
 // Sprint: kinetic-pipeline-v1 (Story 6.3)
 

@@ -1,4 +1,4 @@
-// src/bedrock/consoles/ExperiencesConsole/useExperienceData.ts
+// src/bedrock/consoles/ExperienceConsole/useExperienceData.ts
 // Data hook for Experiences Console - wraps useGroveData for console factory compatibility
 // Sprint: experiences-console-v1
 

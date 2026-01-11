@@ -1,6 +1,7 @@
 // src/bedrock/types/experience.types.ts
-// Experience Object Type Registry - Defines all object types manageable via ExperiencesConsole
+// Experience Object Type Registry - Defines all object types manageable via ExperienceConsole
 // Hotfix: experiences-console-v1.1
+// Sprint: bedrock-ia-rename-v1 (ExperiencesConsole → ExperienceConsole)
 //
 // DEX Principle: Organic Scalability
 // New experience object types are added to this registry without code changes to console-factory.
@@ -14,7 +15,7 @@ import { DEFAULT_SYSTEM_PROMPT_PAYLOAD } from '@core/schema/system-prompt';
 
 /**
  * Definition for an experience object type
- * Each type registered here can be managed via ExperiencesConsole
+ * Each type registered here can be managed via ExperienceConsole
  */
 export interface ExperienceTypeDefinition<T = unknown> {
   /** Unique type identifier (matches GroveObjectType) */
@@ -33,7 +34,7 @@ export interface ExperienceTypeDefinition<T = unknown> {
   editorComponent: string;
   /** Whether multiple can be active simultaneously */
   allowMultipleActive: boolean;
-  /** Route path for this type's management (e.g., '/bedrock/experiences') */
+  /** Route path for this type's management (e.g., '/bedrock/experience') */
   routePath: string;
   /** Accent color for badges/cards (optional) */
   color?: string;
@@ -46,7 +47,7 @@ export interface ExperienceTypeDefinition<T = unknown> {
 /**
  * Experience Object Type Registry
  *
- * Add new experience types here to make them manageable via ExperiencesConsole.
+ * Add new experience types here to make them manageable via ExperienceConsole.
  * The console will automatically support CRUD, activation, and versioning.
  *
  * @example Adding a new type:
@@ -74,7 +75,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     wizardId: 'system-prompt-creator',
     editorComponent: 'SystemPromptEditor',
     allowMultipleActive: false, // Single-active model
-    routePath: '/bedrock/experiences',
+    routePath: '/bedrock/experience',
     color: '#2F5C3B', // grove-forest
   } satisfies ExperienceTypeDefinition<SystemPromptPayload>,
 

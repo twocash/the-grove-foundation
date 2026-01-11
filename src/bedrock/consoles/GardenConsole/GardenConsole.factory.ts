@@ -1,23 +1,23 @@
-// src/bedrock/consoles/PipelineMonitor/PipelineMonitor.factory.ts
-// Factory-generated Pipeline Monitor console (base component)
-// Sprint: hotfix-pipeline-factory-v2
+// src/bedrock/consoles/GardenConsole/GardenConsole.factory.ts
+// Factory-generated Garden Console (base component)
+// Sprint: bedrock-ia-rename-v1 (formerly PipelineMonitor)
 
 import { createBedrockConsole } from '../../patterns/console-factory';
-import { pipelineMonitorConfig } from './PipelineMonitor.config';
+import { gardenConsoleConfig } from './GardenConsole.config';
 import { useDocumentData } from './useDocumentData';
 import { DocumentCard } from './DocumentCard';
 import { DocumentEditor } from './DocumentEditor';
 import type { DocumentPayload } from './types';
 
 /**
- * Base Pipeline Monitor Console (factory-generated)
- * 
+ * Base Garden Console (factory-generated)
+ *
  * This is the core console without action buttons.
- * Use PipelineMonitorWithUpload for the complete experience with
+ * Use GardenConsoleWithUpload for the complete experience with
  * Add Files and Process Queue buttons.
  */
-export const PipelineMonitorBase = createBedrockConsole<DocumentPayload>({
-  config: pipelineMonitorConfig,
+export const GardenConsoleBase = createBedrockConsole<DocumentPayload>({
+  config: gardenConsoleConfig,
   useData: useDocumentData,
   CardComponent: DocumentCard,
   EditorComponent: DocumentEditor,
@@ -25,4 +25,4 @@ export const PipelineMonitorBase = createBedrockConsole<DocumentPayload>({
   copilotPlaceholder: 'Try: "extract keywords", "summarize", "enrich"',
 });
 
-export default PipelineMonitorBase;
+export default GardenConsoleBase;

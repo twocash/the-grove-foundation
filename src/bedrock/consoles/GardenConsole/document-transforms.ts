@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/document-transforms.ts
+// src/bedrock/consoles/GardenConsole/document-transforms.ts
 // Transform functions between Document API and GroveObject shape
 // Sprint: hotfix-pipeline-factory-v2
 // Note: API returns camelCase fields (embeddingStatus), types use snake_case

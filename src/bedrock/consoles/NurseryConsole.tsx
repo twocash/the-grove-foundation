@@ -1,15 +1,15 @@
-// src/bedrock/consoles/GardenConsole.tsx
-// Knowledge Garden Console - Sprout moderation and curation
-// Sprint: bedrock-alignment-v1 (Story 3.1)
+// src/bedrock/consoles/NurseryConsole.tsx
+// Nursery Console - Sprout moderation and curation
+// Sprint: bedrock-ia-rename-v1 (formerly GardenConsole)
 
 import React from 'react';
 import { BedrockLayout, GlassPanel } from '../primitives';
 
-export function GardenConsole() {
+export function NurseryConsole() {
   return (
     <BedrockLayout
-      consoleId="garden"
-      title="Knowledge Garden"
+      consoleId="nursery"
+      title="Nursery"
       description="Sprout moderation and curation"
       navigation={<div />}
       content={
@@ -27,7 +27,7 @@ export function GardenConsole() {
               Coming Soon
             </h3>
             <p className="text-sm text-[var(--glass-text-muted)] max-w-md mb-8">
-              The Knowledge Garden console will provide a full moderation workflow for
+              The Nursery console will provide a full moderation workflow for
               reviewing user-submitted sprouts, with AI-assisted categorization and
               duplicate detection.
             </p>
@@ -61,4 +61,4 @@ export function GardenConsole() {
   );
 }
 
-export default GardenConsole;
+export default NurseryConsole;

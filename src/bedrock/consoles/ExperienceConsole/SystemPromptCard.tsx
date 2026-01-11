@@ -1,4 +1,4 @@
-// src/bedrock/consoles/ExperiencesConsole/SystemPromptCard.tsx
+// src/bedrock/consoles/ExperienceConsole/SystemPromptCard.tsx
 // Card component for System Prompt in grid/list view
 // Sprint: experiences-console-recovery-v1
 

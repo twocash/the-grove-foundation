@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/DocumentCard.tsx
+// src/bedrock/consoles/GardenConsole/DocumentCard.tsx
 // Card component for displaying documents in grid view (vertical layout)
 // Sprint: hotfix-pipeline-factory-v2
 

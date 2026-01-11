@@ -34,13 +34,13 @@ const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
 
 // Bedrock consoles (knowledge curation layer)
 const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
-const PipelineMonitor = lazy(() => import('../bedrock/consoles/PipelineMonitor'));
 const GardenConsole = lazy(() => import('../bedrock/consoles/GardenConsole'));
+const NurseryConsole = lazy(() => import('../bedrock/consoles/NurseryConsole'));
 const LensWorkshop = lazy(() => import('../bedrock/consoles/LensWorkshop'));
 const PromptWorkshop = lazy(() =>
   import('../bedrock/consoles/PromptWorkshop').then((m) => ({ default: m.PromptWorkshopWithExtraction }))
 );
-const ExperiencesConsole = lazy(() => import('../bedrock/consoles/ExperiencesConsole'));
+const ExperienceConsole = lazy(() => import('../bedrock/consoles/ExperienceConsole'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -209,21 +209,21 @@ export const routes: RouteObject[] = [
               </Suspense>
             ),
           },
-          // Pipeline Monitor
-          {
-            path: 'pipeline',
-            element: (
-              <Suspense fallback={<ConsoleLoadingFallback />}>
-                <PipelineMonitor />
-              </Suspense>
-            ),
-          },
-          // Knowledge Garden (sprout curation)
+          // Garden Console (mature knowledge - formerly Pipeline Monitor)
           {
             path: 'garden',
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <GardenConsole />
+              </Suspense>
+            ),
+          },
+          // Nursery Console (sprout curation - formerly Garden)
+          {
+            path: 'nursery',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <NurseryConsole />
               </Suspense>
             ),
           },
@@ -245,12 +245,12 @@ export const routes: RouteObject[] = [
               </Suspense>
             ),
           },
-          // Experiences Console (system prompts for /explore)
+          // Experience Console (system prompts for /explore)
           {
-            path: 'experiences',
+            path: 'experience',
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
-                <ExperiencesConsole />
+                <ExperienceConsole />
               </Suspense>
             ),
           },

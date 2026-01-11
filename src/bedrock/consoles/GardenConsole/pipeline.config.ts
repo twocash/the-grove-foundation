@@ -1,5 +1,5 @@
-// src/bedrock/consoles/PipelineMonitor/pipeline.config.ts
-// Configuration for Pipeline Monitor console
+// src/bedrock/consoles/GardenConsole/pipeline.config.ts
+// Configuration for Garden Console console
 // Sprint: kinetic-pipeline-v1 (Epic 6)
 
 import type { NavItem } from '../../primitives';
@@ -13,26 +13,26 @@ export const PIPELINE_NAV_ITEMS: NavItem[] = [
     id: 'documents',
     label: 'Documents',
     icon: 'description',
-    path: '/bedrock/pipeline',
+    path: '/bedrock/garden',
   },
   {
     id: 'processing',
     label: 'Processing',
     icon: 'autorenew',
-    path: '/bedrock/pipeline/processing',
+    path: '/bedrock/garden/processing',
     badge: 0, // Dynamic: pending documents
   },
   {
     id: 'hubs',
     label: 'Hubs',
     icon: 'hub',
-    path: '/bedrock/pipeline/hubs',
+    path: '/bedrock/garden/hubs',
   },
   {
     id: 'journeys',
     label: 'Journeys',
     icon: 'route',
-    path: '/bedrock/pipeline/journeys',
+    path: '/bedrock/garden/journeys',
   },
 ];
 

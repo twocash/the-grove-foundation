@@ -1,4 +1,4 @@
-// src/bedrock/consoles/ExperiencesConsole/SystemPromptEditor.tsx
+// src/bedrock/consoles/ExperienceConsole/SystemPromptEditor.tsx
 // Editor component for system prompts
 // Sprint: experiences-console-v1
 // Hotfix: experiences-console-v1.1 - added Activate button
@@ -17,7 +17,7 @@ import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
 import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
-import { RESPONSE_MODE_CONFIG, CLOSING_BEHAVIOR_CONFIG } from './ExperiencesConsole.config';
+import { RESPONSE_MODE_CONFIG, CLOSING_BEHAVIOR_CONFIG } from './ExperienceConsole.config';
 import { useExperienceData } from './useExperienceData';
 
 // =============================================================================

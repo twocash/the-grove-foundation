@@ -1,10 +1,10 @@
-// src/bedrock/consoles/PipelineMonitor/PipelineMonitorWithUpload.tsx
+// src/bedrock/consoles/GardenConsole/GardenConsoleWithUpload.tsx
 // Wrapper that adds upload modal and process button to factory-generated console
-// Sprint: hotfix-pipeline-factory-v2, extraction-pipeline-integration-v1, upload-pipeline-unification-v1
+// Sprint: bedrock-ia-rename-v1 (formerly PipelineMonitorWithUpload)
 // Pattern: Matches original PipelineMonitor.tsx header behavior
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { PipelineMonitorBase } from './PipelineMonitor.factory';
+import { GardenConsoleBase } from './GardenConsole.factory';
 import { UploadModal } from './UploadModal';
 import { BulkExtractionDropdown } from './BulkExtractionDropdown';
 import { GlassButton } from '../../primitives';
@@ -28,18 +28,18 @@ interface PipelineJob {
 }
 
 /**
- * Pipeline Monitor with Upload Modal and Process Queue
+ * Garden Console with Upload Modal and Process Queue
  *
  * Wraps the factory-generated console to restore the original header:
  * 1. "Add Files" button → opens upload modal
  * 2. "Process Queue" button → triggers embedding pipeline (ASYNC)
- * 3. "Bulk Extract" dropdown → trigger prompt extraction (Sprint: extraction-pipeline-integration-v1)
+ * 3. "Bulk Extract" dropdown → trigger prompt extraction
  */
-export function PipelineMonitorWithUpload() {
+export function GardenConsoleWithUpload() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [extractionResult, setExtractionResult] = useState<{ extracted: number; errors: number } | null>(null);
 
-  // Async job state - Sprint: upload-pipeline-unification-v1
+  // Async job state
   const [activeJob, setActiveJob] = useState<PipelineJob | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -59,7 +59,7 @@ export function PipelineMonitorWithUpload() {
     try {
       const response = await fetch(`/api/jobs/${jobId}`);
       if (!response.ok) {
-        console.error('[Pipeline] Failed to fetch job status');
+        console.error('[Garden] Failed to fetch job status');
         return;
       }
       const job: PipelineJob = await response.json();
@@ -84,12 +84,12 @@ export function PipelineMonitorWithUpload() {
         setTimeout(() => setActiveJob(null), 3000);
       }
     } catch (error) {
-      console.error('[Pipeline] Poll error:', error);
+      console.error('[Garden] Poll error:', error);
     }
   }, []);
 
-  // Start pipeline job - Sprint: upload-pipeline-unification-v1
-  // Now ASYNC: Returns immediately, polls for progress
+  // Start pipeline job
+  // ASYNC: Returns immediately, polls for progress
   const triggerEmbedding = useCallback(async () => {
     try {
       const response = await fetch(PIPELINE_API.embed, {
@@ -103,7 +103,7 @@ export function PipelineMonitorWithUpload() {
       });
 
       const result = await response.json();
-      console.log('[Pipeline] Job started:', result);
+      console.log('[Garden] Job started:', result);
 
       if (result.jobId) {
         // Start polling for job status
@@ -122,10 +122,10 @@ export function PipelineMonitorWithUpload() {
         pollJobStatus(result.jobId);
       } else if (result.message) {
         // No documents to process
-        console.log('[Pipeline]', result.message);
+        console.log('[Garden]', result.message);
       }
     } catch (error) {
-      console.error('[Pipeline] Start error:', error);
+      console.error('[Garden] Start error:', error);
     }
   }, [pollJobStatus]);
 
@@ -152,7 +152,7 @@ export function PipelineMonitorWithUpload() {
           }, 1000);
         }
       } catch (error) {
-        console.error('[Pipeline] Failed to check existing jobs:', error);
+        console.error('[Garden] Failed to check existing jobs:', error);
       }
     };
     checkExistingJobs();
@@ -189,7 +189,7 @@ export function PipelineMonitorWithUpload() {
         <BulkExtractionDropdown onComplete={handleExtractionComplete} />
       </div>
 
-      {/* Job progress indicator - Sprint: upload-pipeline-unification-v1 */}
+      {/* Job progress indicator */}
       {activeJob && activeJob.status === 'running' && (
         <div className="mx-6 mt-4 px-4 py-3 rounded-lg border bg-cyan-500/10 border-cyan-500/30">
           <div className="flex items-center justify-between mb-2">
@@ -245,7 +245,7 @@ export function PipelineMonitorWithUpload() {
 
       {/* Factory-generated console */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        <PipelineMonitorBase />
+        <GardenConsoleBase />
       </div>
 
       {/* Upload Modal */}
@@ -258,4 +258,4 @@ export function PipelineMonitorWithUpload() {
   );
 }
 
-export default PipelineMonitorWithUpload;
+export default GardenConsoleWithUpload;

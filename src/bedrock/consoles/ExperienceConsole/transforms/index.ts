@@ -1,5 +1,5 @@
-// src/bedrock/consoles/ExperiencesConsole/transforms/index.ts
-// Transform exports for ExperiencesConsole
+// src/bedrock/consoles/ExperienceConsole/transforms/index.ts
+// Transform exports for ExperienceConsole
 
 export {
   createSystemPromptFromWizard,

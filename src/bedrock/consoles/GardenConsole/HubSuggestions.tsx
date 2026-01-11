@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/HubSuggestions.tsx
+// src/bedrock/consoles/GardenConsole/HubSuggestions.tsx
 // Hub suggestions panel from clustering
 // Sprint: kinetic-pipeline-v1 (Story 6.4)
 

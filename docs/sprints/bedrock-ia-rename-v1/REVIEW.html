@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprint Review: bedrock-ia-rename-v1</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { border-bottom: 2px solid #4a9eff; padding-bottom: 0.5rem; }
+    h2 { color: #4a9eff; margin-top: 2rem; }
+    .summary { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; }
+    .summary-item { padding: 1rem; }
+    .summary-label { font-size: 0.875rem; color: #94a3b8; }
+    .summary-value { font-size: 1.5rem; font-weight: bold; margin-top: 0.25rem; }
+    .phase { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .phase-header { display: flex; justify-content: space-between; align-items: center; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; }
+    .status.complete { background: #22c55e33; color: #22c55e; }
+    .status.in-progress { background: #eab30833; color: #eab308; }
+    .status.pending { background: #64748b33; color: #94a3b8; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .media-item { background: #1a1a2e; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
+    .media-item img { width: 100%; display: block; }
+    .media-caption { padding: 0.75rem; font-size: 0.875rem; color: #94a3b8; border-top: 1px solid #333; }
+    .timestamp { color: #64748b; font-size: 0.75rem; }
+    .rename-map { margin: 1rem 0; }
+    .rename-map table { width: 100%; border-collapse: collapse; }
+    .rename-map th, .rename-map td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
+    .rename-map th { color: #4a9eff; font-weight: 500; }
+    .old { color: #f87171; text-decoration: line-through; }
+    .new { color: #22c55e; }
+    .arrow { color: #64748b; padding: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: Bedrock IA Rename</h1>
+  <p class="timestamp">Last updated: <span id="timestamp">Not started</span></p>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-label">Phases Complete</div>
+        <div class="summary-value" id="phases-complete">0 / 6</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Screenshots</div>
+        <div class="summary-value" id="screenshot-count">0</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">Status</div>
+        <div class="summary-value" id="overall-status">Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Rename Map</h2>
+  <div class="rename-map">
+    <table>
+      <tr>
+        <th>Old Route</th>
+        <th></th>
+        <th>New Route</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td class="old">/bedrock/pipeline</td>
+        <td class="arrow">→</td>
+        <td class="new">/bedrock/garden</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td class="old">/bedrock/garden</td>
+        <td class="arrow">→</td>
+        <td class="new">/bedrock/nursery</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td class="old">/bedrock/experiences</td>
+        <td class="arrow">→</td>
+        <td class="new">/bedrock/experience</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- PHASE 0: Sprint Infrastructure -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 0: Sprint Infrastructure</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Create sprint folder, DEVLOG, feature branch</p>
+    <div class="media-grid">
+      <!-- No visual verification for Phase 0 -->
+    </div>
+  </div>
+
+  <!-- PHASE 1: Audit Current State -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 1: Audit Current State</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Document current files, routes, and nav config</p>
+    <div class="media-grid">
+      <!-- Add audit screenshots here -->
+    </div>
+  </div>
+
+  <!-- PHASE 2: Pipeline → Garden -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 2: Pipeline → Garden</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Rename PipelineMonitor.tsx to GardenConsole.tsx, update routes</p>
+    <div class="media-grid">
+      <!--
+      <div class="media-item">
+        <img src="screenshots/2f-garden-route.png" alt="Garden route working">
+        <div class="media-caption">2f: /bedrock/garden route loads successfully</div>
+      </div>
+      -->
+    </div>
+  </div>
+
+  <!-- PHASE 3: Garden → Nursery -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 3: Garden → Nursery</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Rename old GardenConsole.tsx to NurseryConsole.tsx, update routes</p>
+    <div class="media-grid">
+      <!--
+      <div class="media-item">
+        <img src="screenshots/3f-nursery-route.png" alt="Nursery route working">
+        <div class="media-caption">3f: /bedrock/nursery route loads successfully</div>
+      </div>
+      -->
+    </div>
+  </div>
+
+  <!-- PHASE 4: Experiences → Experience -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 4: Experiences → Experience</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Rename ExperiencesConsole/ to ExperienceConsole/, singular route</p>
+    <div class="media-grid">
+      <!--
+      <div class="media-item">
+        <img src="screenshots/4g-experience-route.png" alt="Experience route working">
+        <div class="media-caption">4g: /bedrock/experience route loads successfully</div>
+      </div>
+      -->
+    </div>
+  </div>
+
+  <!-- PHASE 5: Navigation Order -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 5: Navigation Order & Groupings</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Reorder nav to match IA spec: Dashboard, Nursery, Garden, Lenses, Prompts, Experience</p>
+    <div class="media-grid">
+      <!--
+      <div class="media-item">
+        <img src="screenshots/5d-nav-order.png" alt="New navigation order">
+        <div class="media-caption">5d: Navigation showing new order and groupings</div>
+      </div>
+      -->
+    </div>
+  </div>
+
+  <!-- PHASE 6: Cleanup -->
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 6: Cleanup & Final Verification</h2>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Search for remaining old terminology, final screenshots of all routes</p>
+    <div class="media-grid">
+      <!--
+      <div class="media-item">
+        <img src="screenshots/6d-final-dashboard.png" alt="Dashboard">
+        <div class="media-caption">6d: /bedrock dashboard</div>
+      </div>
+      <div class="media-item">
+        <img src="screenshots/6d-final-nursery.png" alt="Nursery">
+        <div class="media-caption">6d: /bedrock/nursery</div>
+      </div>
+      <div class="media-item">
+        <img src="screenshots/6d-final-garden.png" alt="Garden">
+        <div class="media-caption">6d: /bedrock/garden</div>
+      </div>
+      <div class="media-item">
+        <img src="screenshots/6d-final-experience.png" alt="Experience">
+        <div class="media-caption">6d: /bedrock/experience</div>
+      </div>
+      -->
+    </div>
+  </div>
+
+</body>
+</html>

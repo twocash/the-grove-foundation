@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/BulkExtractionDropdown.tsx
+// src/bedrock/consoles/GardenConsole/BulkExtractionDropdown.tsx
 // Dropdown for bulk prompt extraction operations
 // Sprint: extraction-pipeline-integration-v1
 
