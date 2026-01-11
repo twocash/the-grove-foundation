@@ -2,51 +2,66 @@
 
 ## Session State
 
-**Last completed:** Phase 4 - Garden Inspector Panel (COMPLETE)
-**Next action:** Phase 5a - Queue consumer for pending status
+**Last completed:** Phase 5f - Integration test
+**Next action:** Phase 5g - Visual verification (end-to-end flow)
 **Git branch:** `feature/sprout-research-v1`
 **Blocking issues:** None
 
-## Phase 4 Summary (COMPLETE)
+## Phase 5 Summary (In Progress)
 
 | Sub-phase | Status | Description |
 |-----------|--------|-------------|
-| 4a | ✅ Complete | GardenInspector component skeleton |
-| 4b | ✅ Complete | Status grouping logic |
-| 4c | ✅ Complete | Pulsing badge animation CSS |
-| 4d | ✅ Complete | Toast notification system |
-| 4e | ✅ Complete | Feature flag `garden-inspector` |
-| 4f | ✅ Complete | Wire GardenInspector into Explore layout |
-| 4g | ✅ Complete | Visual verification of inspector states |
+| 5a | ✅ Complete | Queue consumer for pending status |
+| 5b | ✅ Complete | Research execution logic (simulated) |
+| 5c | ✅ Complete | Results population with synthesis |
+| 5d | ✅ Complete | Child manifest spawning |
+| 5e | ✅ Complete | Research Agent auto-execute flag |
+| 5f | ✅ Complete | Integration test (5-step lifecycle) |
+| 5g | 🔄 Next | Visual verification: end-to-end flow |
 
-## Visual Verification Results (Phase 4g)
+## Files Created in Phase 5
 
-**Verified behaviors:**
-1. `sprout:` command triggers Prompt Architect pipeline
-2. GardenInspector confirmation dialog opens with:
-   - Research Spark display
-   - Title field (editable)
-   - Research Branches section with "+ Add branch" button
-   - Research Strategy configuration (depth, mode, max spawns)
-   - Tags and Notes fields
-   - Cancel and "Start Research" buttons
-3. Adding branches updates the count and shows removable branch cards
-4. Cancel closes dialog and returns to explore view
+| File | Phase | Description |
+|------|-------|-------------|
+| `src/explore/services/research-queue-consumer.ts` | 5a | Pull-based consumer with polling |
+| `src/explore/hooks/useResearchQueueConsumer.ts` | 5a | React hook binding |
+| `src/explore/services/research-agent.ts` | 5b | Agent with progress callbacks |
+| `src/explore/hooks/useResearchAgent.ts` | 5b | React execution hook |
+| `src/explore/services/research-results-processor.ts` | 5c | Synthesis and completion |
+| `src/explore/services/research-child-spawner.ts` | 5d | Child sprout spawning |
+| `src/explore/services/research-integration-test.ts` | 5f | Full lifecycle test |
 
-**Testing method:** Temporarily bypassed feature flags in ExploreShell.tsx to verify UI rendering. Feature flags remain disabled by default (toggle via admin interface).
+## Files Modified in Phase 5
 
-## Files Created in Phase 4
+| File | Phase | Description |
+|------|-------|-------------|
+| `src/explore/context/ResearchSproutContext.tsx` | 5c, 5d | Added updateResults(), addChildSproutId() |
+| `src/explore/hooks/index.ts` | 5a, 5b | Export new hooks |
+| `data/narratives-schema.ts` | 5e | Added research-agent-auto-execute flag |
+| `src/core/schema/research-sprout-registry.ts` | 5e | Updated flag constant docs |
 
-- `src/explore/GardenInspector.tsx` - Garden Inspector component with confirmation view
-- `src/explore/context/ToastContext.tsx` - Toast notification system
+## Integration Test Results (Phase 5f)
 
-## Files Modified in Phase 4
+The integration test (`research-integration-test.ts`) verifies:
 
-- `tailwind.config.ts` - Added pulsing animations (pulse-pending, pulse-attention, pulse-active)
-- `data/narratives-schema.ts` - Added `garden-inspector` feature flag
-- `src/core/schema/research-sprout-registry.ts` - Updated flag key constants
-- `src/surface/pages/ExplorePage.tsx` - Added ToastProvider
-- `src/surface/components/KineticStream/ExploreShell.tsx` - Wired up GardenInspector overlay
+1. **Create Sprout** - Creates sprout with branches from spark
+2. **Queue Consumer** - Claims pending sprout, transitions to active
+3. **Research Agent** - Executes branches, collects evidence
+4. **Results Processor** - Generates synthesis, completes sprout
+5. **Final State** - Verifies completed status, evidence, synthesis
+
+Run manually in browser console:
+```javascript
+import('/src/explore/services/research-integration-test.ts').then(m => m.runFromConsole())
+```
+
+## Feature Flags
+
+| Flag ID | Default | Description |
+|---------|---------|-------------|
+| `sprout-research` | false | Master flag for sprout: command |
+| `garden-inspector` | false | Garden Inspector panel |
+| `research-agent-auto-execute` | false | Auto-execute on sprout creation |
 
 ## Verification Status
 
@@ -54,21 +69,17 @@
 - [x] Phase 1: PromptArchitectConfig schema
 - [x] Phase 2: ResearchSprout object model and storage
 - [x] Phase 3: Prompt Architect Agent pipeline
-- [x] Phase 4: Garden Inspector Panel (COMPLETE)
-- [ ] Phase 5: Research Agent (NEXT)
+- [x] Phase 4: Garden Inspector Panel
+- [ ] Phase 5: Research Agent (5a-5f complete, 5g pending)
 - [ ] Phase 6: Deprecation & Isolation
 
 ## To Resume
 
 1. Read `docs/sprints/sprout-research-v1/INDEX.md` for phase checklist
 2. Run `npm run build` to verify baseline
-3. Begin Phase 5a: Queue consumer for pending status
+3. Continue Phase 5g: Visual verification
 
 ## Key Context
-
-**Feature Flags (both default to false):**
-- `sprout-research` - Enables command interception
-- `garden-inspector` - Enables the confirmation dialog
 
 **Integration Point:**
 - File: `src/surface/components/KineticStream/ExploreShell.tsx`
@@ -79,11 +90,20 @@
 - `components/Terminal/`: 77 files - DO NOT TOUCH
 - `src/foundation/`: 23 files - DO NOT TOUCH
 
-**Phase 5 Preview:**
-- 5a: Queue consumer for pending status (no UI)
-- 5b: Research execution logic (no UI)
-- 5c: Results population (no UI)
-- 5d: Child manifest spawning (no UI)
-- 5e: System-level QA agent flag (no UI)
-- 5f: Integration test: sprout -> agent -> results
-- 5g: Visual verification: end-to-end flow
+**Phase 6 Preview:**
+- 6a: Feature flag: LEGACY_SPROUT_DISABLED
+- 6b: Verify sprout-command-parser.ts intercepts 'sprout:' in /explore
+- 6c: Verify legacy Terminal command files unreachable from /explore
+- 6d: Confirm PlantSelectionTooltip not rendered in /explore
+- 6e: Document legacy files as "dead code in Explore context"
+- 6f: Update help documentation
+
+## Screenshot Routes
+
+IMPORTANT: Only capture screenshots at these routes:
+- `/explore` - Main explore page
+- `/bedrock/*` - Bedrock admin routes
+
+NEVER navigate to or capture at:
+- `/foundation/*` - Frozen zone
+- `/terminal/*` - Frozen zone
