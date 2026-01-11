@@ -199,22 +199,19 @@ function ConfirmationView({
   summary,
   isProcessing,
   onManifestUpdate,
-  onAddBranch,
-  onRemoveBranch,
+  onAddBranch: _onAddBranch,
+  onRemoveBranch: _onRemoveBranch,
 }: ConfirmationViewProps) {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  // MVP: Simplified to title + prompt only
+  // TODO: Restore branches, strategy, tags when prompt patterns validated
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onManifestUpdate({ title: e.target.value });
   }, [onManifestUpdate]);
 
-  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handlePromptChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Store prompt in notes field for MVP
     onManifestUpdate({ notes: e.target.value });
-  }, [onManifestUpdate]);
-
-  const handleTagsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
-    onManifestUpdate({ tags });
   }, [onManifestUpdate]);
 
   return (
@@ -255,41 +252,49 @@ function ConfirmationView({
         <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
           Title
         </label>
-        {isEditingTitle ? (
-          <input
-            type="text"
-            value={manifest.title}
-            onChange={handleTitleChange}
-            onBlur={() => setIsEditingTitle(false)}
-            autoFocus
-            disabled={isProcessing}
-            className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
-                       border border-slate-300 dark:border-slate-600 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-purple-500/50
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        ) : (
-          <button
-            onClick={() => setIsEditingTitle(true)}
-            disabled={isProcessing}
-            className="w-full px-3 py-2 text-sm text-left bg-white dark:bg-slate-900
-                       border border-slate-300 dark:border-slate-600 rounded-lg
-                       hover:border-purple-400 transition-colors
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {manifest.title || 'Click to add title...'}
-          </button>
-        )}
+        <input
+          type="text"
+          value={manifest.title}
+          onChange={handleTitleChange}
+          placeholder="Give your research a descriptive title..."
+          disabled={isProcessing}
+          className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
+                     border border-slate-300 dark:border-slate-600 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-purple-500/50
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        />
       </div>
 
-      {/* Branches */}
+      {/* Prompt / Instructions (MVP: maps to notes field, will become system prompt) */}
+      <div>
+        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+          Instructions / Prompt
+        </label>
+        <textarea
+          value={manifest.notes}
+          onChange={handlePromptChange}
+          placeholder="Provide specific instructions for how the AI should approach this research..."
+          rows={5}
+          disabled={isProcessing}
+          className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
+                     border border-slate-300 dark:border-slate-600 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-purple-500/50
+                     resize-none font-mono
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        />
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+          This will guide the research agent's behavior and focus areas.
+        </p>
+      </div>
+
+      {/* MVP: Branches section commented out
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-xs font-medium text-slate-600 dark:text-slate-400">
             Research Branches ({manifest.branches.length})
           </label>
           <button
-            onClick={() => onAddBranch({
+            onClick={() => _onAddBranch({
               id: `branch-${Date.now()}`,
               label: 'New Branch',
               queries: [],
@@ -310,7 +315,7 @@ function ConfirmationView({
               branch={branch}
               index={index}
               isProcessing={isProcessing}
-              onRemove={() => onRemoveBranch(branch.id)}
+              onRemove={() => _onRemoveBranch(branch.id)}
             />
           ))}
           {manifest.branches.length === 0 && (
@@ -320,11 +325,13 @@ function ConfirmationView({
           )}
         </div>
       </div>
+      */}
 
-      {/* Strategy Summary */}
+      {/* MVP: Strategy summary commented out
       <StrategySummary strategy={manifest.strategy} />
+      */}
 
-      {/* Tags */}
+      {/* MVP: Tags commented out
       <div>
         <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
           Tags (comma-separated)
@@ -341,25 +348,7 @@ function ConfirmationView({
                      disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
-
-      {/* Notes */}
-      <div>
-        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
-          Notes (optional)
-        </label>
-        <textarea
-          value={manifest.notes}
-          onChange={handleNotesChange}
-          placeholder="Add any additional context for the research agent..."
-          rows={3}
-          disabled={isProcessing}
-          className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
-                     border border-slate-300 dark:border-slate-600 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-purple-500/50
-                     resize-none
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-      </div>
+      */}
     </div>
   );
 }
