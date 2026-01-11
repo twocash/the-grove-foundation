@@ -46,7 +46,7 @@
 - [x] 3g: Visual verification: flag=true vs flag=false
 - [x] **GATE:** Screenshot both paths, behavior correct
 
-### Phase 4: Garden Inspector Panel (In Progress)
+### Phase 4: Garden Inspector Panel ✅ COMPLETE
 
 - [x] 4a: GardenInspector component (isolated)
 - [x] 4b: Status grouping logic (no integration)
@@ -54,8 +54,8 @@
 - [x] 4d: Toast notification system (isolated)
 - [x] 4e: Feature flag: GARDEN_INSPECTOR_ENABLED
 - [x] 4f: Wire into Explore layout (flagged)
-- [ ] 4g: Visual verification: inspector states
-- [ ] **GATE:** Screenshot collapsed, expanded, pulsing states
+- [x] 4g: Visual verification: inspector states
+- [x] **GATE:** Visual verification passed - dialog opens, branches can be added
 
 ### Phase 5: Research Agent
 

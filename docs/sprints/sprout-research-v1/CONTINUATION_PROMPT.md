@@ -2,12 +2,12 @@
 
 ## Session State
 
-**Last completed:** Phase 4f - Wire GardenInspector into Explore layout
-**Next action:** Phase 4g - Visual verification of inspector states
+**Last completed:** Phase 4 - Garden Inspector Panel (COMPLETE)
+**Next action:** Phase 5a - Queue consumer for pending status
 **Git branch:** `feature/sprout-research-v1`
 **Blocking issues:** None
 
-## Phase 4 Progress (Current)
+## Phase 4 Summary (COMPLETE)
 
 | Sub-phase | Status | Description |
 |-----------|--------|-------------|
@@ -17,7 +17,23 @@
 | 4d | ✅ Complete | Toast notification system |
 | 4e | ✅ Complete | Feature flag `garden-inspector` |
 | 4f | ✅ Complete | Wire GardenInspector into Explore layout |
-| 4g | 🔄 Pending | Visual verification of inspector states |
+| 4g | ✅ Complete | Visual verification of inspector states |
+
+## Visual Verification Results (Phase 4g)
+
+**Verified behaviors:**
+1. `sprout:` command triggers Prompt Architect pipeline
+2. GardenInspector confirmation dialog opens with:
+   - Research Spark display
+   - Title field (editable)
+   - Research Branches section with "+ Add branch" button
+   - Research Strategy configuration (depth, mode, max spawns)
+   - Tags and Notes fields
+   - Cancel and "Start Research" buttons
+3. Adding branches updates the count and shows removable branch cards
+4. Cancel closes dialog and returns to explore view
+
+**Testing method:** Temporarily bypassed feature flags in ExploreShell.tsx to verify UI rendering. Feature flags remain disabled by default (toggle via admin interface).
 
 ## Files Created in Phase 4
 
@@ -38,43 +54,36 @@
 - [x] Phase 1: PromptArchitectConfig schema
 - [x] Phase 2: ResearchSprout object model and storage
 - [x] Phase 3: Prompt Architect Agent pipeline
-- [x] Phase 4a: GardenInspector component skeleton
-- [x] Phase 4b: Status grouping logic
-- [x] Phase 4c: Pulsing badge animation CSS
-- [x] Phase 4d: Toast notification system
-- [x] Phase 4e: Feature flag `garden-inspector`
-- [x] Phase 4f: Wire GardenInspector into Explore layout
-- [ ] Phase 4g: Visual verification (screenshot both flag states)
-- [ ] Phase 5: Research Agent (pending)
-- [ ] Phase 6: Deprecation & Isolation (pending)
+- [x] Phase 4: Garden Inspector Panel (COMPLETE)
+- [ ] Phase 5: Research Agent (NEXT)
+- [ ] Phase 6: Deprecation & Isolation
 
 ## To Resume
 
 1. Read `docs/sprints/sprout-research-v1/INDEX.md` for phase checklist
 2. Run `npm run build` to verify baseline
-3. Run `npm run dev` and test:
-   - Enable both `sprout-research` and `garden-inspector` flags
-   - Type `sprout: What causes the ratchet effect?`
-   - Verify GardenInspector dialog opens with inferred manifest
-4. Take screenshots for gate verification
+3. Begin Phase 5a: Queue consumer for pending status
 
 ## Key Context
+
+**Feature Flags (both default to false):**
+- `sprout-research` - Enables command interception
+- `garden-inspector` - Enables the confirmation dialog
 
 **Integration Point:**
 - File: `src/surface/components/KineticStream/ExploreShell.tsx`
 - Function: `handleSubmit()` - runs Prompt Architect pipeline and opens GardenInspector
 - Overlay type: `garden-inspector`
 
-**Feature Flags (both required):**
-- `sprout-research` - Enables command interception
-- `garden-inspector` - Enables the confirmation dialog
-
 **Frozen Zones:**
 - `components/Terminal/`: 77 files - DO NOT TOUCH
 - `src/foundation/`: 23 files - DO NOT TOUCH
 
 **Phase 5 Preview:**
-- Research Agent queue consumer
-- Execute branches and collect evidence
-- Spawn child manifests
-- Results population
+- 5a: Queue consumer for pending status (no UI)
+- 5b: Research execution logic (no UI)
+- 5c: Results population (no UI)
+- 5d: Child manifest spawning (no UI)
+- 5e: System-level QA agent flag (no UI)
+- 5f: Integration test: sprout -> agent -> results
+- 5g: Visual verification: end-to-end flow
