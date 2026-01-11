@@ -55,7 +55,42 @@
 - [x] Build passing
 - [x] Phase 0.25 documented in REPO_AUDIT.md
 - [x] Phase 0.5 documented in REPO_AUDIT.md
-- [ ] **AWAITING:** Human review before Phase 1
+- [x] Human review approved
+
+---
+
+### Phase 1a: PromptArchitectConfig Interface ✅ COMPLETE
+
+**Files created:**
+
+1. `src/core/schema/research-strategy.ts`
+   - `ResearchStrategy` interface
+   - `ResearchBranch` interface
+   - `BranchTemplate` for auto-population
+   - `Evidence` type for collected data
+
+2. `src/core/schema/quality-gate.ts`
+   - `QualityGateConfig` interface
+   - `GateDecision` for audit trail
+   - Default configs (permissive and strict)
+
+3. `src/core/schema/prompt-architect-config.ts`
+   - `PromptArchitectConfigPayload` interface (SINGLETON pattern)
+   - `InferenceRule` and `InferenceTrigger` types
+   - `ConfirmationMode` type
+   - Type guards and validators
+
+4. `src/core/schema/grove-object.ts`
+   - Added `'prompt-architect-config'` to GroveObjectType
+   - Added `'research-sprout'` to GroveObjectType
+   - Added `'system-prompt'` for completeness
+
+**Key pattern documentation:**
+- Explicit comments in prompt-architect-config.ts explaining SINGLETON vs INSTANCE
+- `groveId` documented as the anchor for singleton constraint
+- Database constraint pattern documented: `UNIQUE WHERE status='active' ON grove_id`
+
+**Build status:** ✅ Passes
 
 ---
 
