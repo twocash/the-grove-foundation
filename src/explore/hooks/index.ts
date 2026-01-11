@@ -39,3 +39,12 @@ export {
   usePromptForHighlight,
   type UsePromptForHighlightResult,
 } from './usePromptForHighlight';
+
+// Research Queue Consumer (Sprint: sprout-research-v1, Phase 5a)
+export {
+  useResearchQueueConsumer,
+  useIsQueueProcessing,
+  useQueueConsumerStats,
+  type UseResearchQueueConsumerOptions,
+  type UseResearchQueueConsumerResult,
+} from './useResearchQueueConsumer';
