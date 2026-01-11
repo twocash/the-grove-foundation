@@ -17,7 +17,7 @@
 - [x] 0.25: Route verification - trace /explore render path
 - [x] 0.5: Audit System Prompt pattern (singleton reference)
 
-### Phase 1: Configuration Schema
+### Phase 1: Configuration Schema ✅ COMPLETE
 
 - [x] 1a: Interface definitions (PromptArchitectConfig, mirror System Prompt singleton pattern)
 - [x] 1b: JSON schema files (mirror System Prompt versioning)
@@ -25,14 +25,14 @@
 - [x] 1d: Quality gate logic (no UI)
 - [x] **GATE:** npm run build succeeds
 
-### Phase 2: Object Model & Storage
+### Phase 2: Object Model & Storage ⏳ GATE PENDING
 
-- [ ] 2a: ResearchSprout interface (no UI)
-- [ ] 2b: research-sprouts.json registry (no UI)
-- [ ] 2c: ResearchSproutContext (no UI)
-- [ ] 2d: Supabase table migrations (no UI)
-- [ ] 2e: Context provider integration
-- [ ] 2f: Migration rollback test
+- [x] 2a: ResearchSprout interface (with provenance snapshot)
+- [x] 2b: research-sprouts.json registry (type registry)
+- [x] 2c: ResearchSproutContext (React context)
+- [x] 2d: Supabase table migrations (UP + DOWN)
+- [x] 2e: Context provider integration (ExplorePage)
+- [ ] 2f: Migration rollback test ⏳ **AWAITING USER**
 - [ ] **GATE:** Storage round-trip test passes; DOWN migration verified
 
 ### Phase 3: Prompt Architect Agent

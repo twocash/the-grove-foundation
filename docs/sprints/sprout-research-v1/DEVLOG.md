@@ -153,6 +153,170 @@ Ready for Phase 2: Object Model & Storage
 
 ---
 
+## Phase 2: Object Model & Storage
+
+### Phase 2a: ResearchSprout Interface ✅ COMPLETE
+
+**File:** `src/core/schema/research-sprout.ts`
+
+**Features:**
+- INSTANCE pattern (many active per grove)
+- Full status lifecycle: `pending → active → completed/paused/blocked → archived`
+- Parent-child spawning via `parentSproutId` and `spawnDepth`
+- `GroveConfigSnapshot` for provenance (DEX Pillar III)
+- `architectSessionId` for intake dialogue linking
+- `createResearchSprout()` factory function
+- `canTransitionTo()` state machine validator
+
+**Key types:**
+- `ResearchSprout` - Main interface (518 lines)
+- `GroveConfigSnapshot` - Provenance capture
+- `StatusTransition` - Audit trail entry
+- `GateDecisionRecord` - Gate outcome record
+
+---
+
+### Phase 2b: Type Registry ✅ COMPLETE
+
+**File:** `src/core/schema/research-sprout-registry.ts`
+
+**Features:**
+- Status labels, icons, colors for UI
+- `ACTIVE_STATUSES` and `TERMINAL_STATUSES` groupings
+- Supabase table name constants
+- Filter presets for Garden Inspector
+- Feature flag keys
+- System limits (max pending, max active, etc.)
+- `RESEARCH_SPROUT_TYPE_CONFIG` registry entry
+
+---
+
+### Phase 2c: ResearchSproutContext ✅ COMPLETE
+
+**File:** `src/explore/context/ResearchSproutContext.tsx`
+
+**Features:**
+- `ResearchSproutProvider` - Context provider component
+- `useResearchSprouts()` - Main hook
+- `useResearchSprout(id)` - Single sprout lookup
+- `useSelectedResearchSprout()` - Current selection
+
+**Operations:**
+- `create()` - Create new sprout with provenance
+- `query()` - Filter/paginate sprouts
+- `transitionStatus()` - State machine transitions
+- `update()` - Update tags, notes, rating
+- `getChildren()` - Get child sprouts
+- `getStatusCounts()` - Status grouping
+
+**Note:** In-memory implementation for MVP. Supabase integration via TODO comments for Phase 2d.
+
+---
+
+### Phase 2d: Supabase Migrations ✅ COMPLETE
+
+**Files:**
+- `supabase/migrations/010_research_sprouts.sql` - UP migration
+- `supabase/migrations/010_research_sprouts_down.sql` - DOWN migration
+
+**Tables created:**
+1. `research_sprouts` - Main table with JSONB columns for flexibility
+2. `research_sprout_status_history` - Status transition audit trail
+3. `research_sprout_gate_decisions` - Quality gate outcomes
+4. `research_sprout_evidence` - Collected evidence
+
+**Features:**
+- Indexes for grove_id, status, parent, creator, updated_at
+- GIN index for tags array
+- RLS enabled with open policies (tighten when auth is implemented)
+- `update_research_sprout_updated_at` trigger
+- `get_sprout_status_counts()` helper function
+- `get_pending_sprouts()` for agent queue
+
+---
+
+### Phase 2e: Context Provider Integration ✅ COMPLETE
+
+**File modified:** `src/surface/pages/ExplorePage.tsx`
+
+**Change:** Added `ResearchSproutProvider` to the component tree:
+```tsx
+<EngagementProvider>
+  <ResearchSproutProvider>
+    <ExploreShell />
+  </ResearchSproutProvider>
+</EngagementProvider>
+```
+
+**Build impact:** ExplorePage chunk increased from 209KB to 213KB (+4KB)
+
+---
+
+### Phase 2f: Migration Rollback Test ⏳ PENDING USER ACTION
+
+**Migration Test Procedure:**
+
+1. **Run UP migration:**
+   ```bash
+   # In Supabase SQL Editor or via CLI
+   psql -f supabase/migrations/010_research_sprouts.sql
+   ```
+
+2. **Verify tables exist:**
+   ```sql
+   SELECT table_name FROM information_schema.tables
+   WHERE table_schema = 'public'
+   AND table_name LIKE 'research_sprout%';
+   -- Expected: 4 tables
+   ```
+
+3. **Storage round-trip test:**
+   ```sql
+   -- Insert test sprout
+   INSERT INTO research_sprouts (
+     grove_id, spark, title, session_id, grove_config_snapshot
+   ) VALUES (
+     'test-grove',
+     'Test research spark',
+     'Test Research',
+     'test-session',
+     '{"configVersionId": "test", "hypothesisGoals": [], "corpusBoundaries": [], "confirmationMode": "always"}'::jsonb
+   ) RETURNING id;
+
+   -- Verify retrieval
+   SELECT id, spark, status FROM research_sprouts WHERE grove_id = 'test-grove';
+   -- Expected: 1 row with status='pending'
+   ```
+
+4. **Run DOWN migration:**
+   ```bash
+   psql -f supabase/migrations/010_research_sprouts_down.sql
+   ```
+
+5. **Verify tables dropped:**
+   ```sql
+   SELECT table_name FROM information_schema.tables
+   WHERE table_schema = 'public'
+   AND table_name LIKE 'research_sprout%';
+   -- Expected: 0 rows
+   ```
+
+---
+
+## Phase 2 Gate Status
+
+- [x] Build passing
+- [x] ResearchSprout interface with provenance
+- [x] Type registry complete
+- [x] Context provider complete
+- [x] Supabase migrations created
+- [x] Context integrated into ExplorePage
+- [ ] **PENDING:** Migration UP test on Supabase
+- [ ] **PENDING:** Storage round-trip test
+- [ ] **PENDING:** Migration DOWN (rollback) test
+
+---
+
 ## Log Format
 
 Each entry should include:
