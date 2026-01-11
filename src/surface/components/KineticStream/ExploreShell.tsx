@@ -41,13 +41,18 @@ import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@cor
 import { journeys } from '../../../data/journeys';
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
 import { usePromptForHighlight } from '@explore/hooks/usePromptForHighlight';
+import { shouldTriggerPromptArchitect } from '@explore/services/prompt-architect-pipeline';
+import { usePromptArchitect } from '@explore/hooks/usePromptArchitect';
+import { useResearchSprouts } from '@explore/context/ResearchSproutContext';
+import { useToast } from '@explore/context/ToastContext';
+import { GardenInspector } from '@explore/GardenInspector';
 
 export interface ExploreShellProps {
   initialLens?: string;
   initialJourney?: string;
 }
 
-type OverlayType = 'none' | 'lens-picker' | 'journey-picker' | 'custom-lens-wizard';
+type OverlayType = 'none' | 'lens-picker' | 'journey-picker' | 'custom-lens-wizard' | 'garden-inspector';
 
 export const ExploreShell: React.FC<ExploreShellProps> = ({
   initialLens,
@@ -69,8 +74,46 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // Default to ON for better exploration experience
   const isJourneyModeEnabled = useFeatureFlag('journey-mode');
 
+  // Sprint: sprout-research-v1 - Sprout research system
+  // When enabled, intercepts sprout: commands for Prompt Architect flow
+  const isSproutResearchEnabled = useFeatureFlag('sprout-research');
+
+  // Sprint: sprout-research-v1, Phase 4e - Garden Inspector panel
+  const isGardenInspectorEnabled = useFeatureFlag('garden-inspector');
+
   // Sprint: kinetic-highlights-v1 - Look up backing prompts for highlights
   const { findPrompt } = usePromptForHighlight();
+
+  // Sprint: sprout-research-v1, Phase 4f - Prompt Architect and sprout creation hooks
+  const toast = useToast();
+  const { create: createSprout, groveId } = useResearchSprouts();
+
+  // Prompt Architect hook for the confirmation flow
+  const promptArchitect = usePromptArchitect({
+    groveId: groveId || 'default-grove',
+    sessionId: typeof window !== 'undefined' ? localStorage.getItem('grove-session-id') || 'anonymous' : 'anonymous',
+    onSproutReady: async (input) => {
+      try {
+        const newSprout = await createSprout(input);
+        toast.success('Research sprout created', {
+          description: `"${newSprout.title}" is now pending execution`,
+          action: {
+            label: 'View Garden',
+            onClick: () => setOverlay({ type: 'garden-inspector' }),
+          },
+        });
+      } catch (error) {
+        toast.error('Failed to create sprout', {
+          description: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error('Research initiation failed', {
+        description: error,
+      });
+    },
+  });
 
   const [journeyMode, setJourneyMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -506,7 +549,22 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   }, [actor]);
 
   // Sprint: prompt-journey-mode-v1 - Accept separate display text and execution prompt
-  const handleSubmit = useCallback((displayText: string, executionPrompt?: string) => {
+  const handleSubmit = useCallback(async (displayText: string, executionPrompt?: string) => {
+    // Sprint: sprout-research-v1, Phase 4f - Intercept sprout: commands when flag is enabled
+    if (isSproutResearchEnabled && shouldTriggerPromptArchitect(displayText)) {
+      // Run through Prompt Architect pipeline
+      const result = await promptArchitect.processInput(displayText);
+
+      // If pipeline returns 'show-confirmation', the hook state will change to 'confirming'
+      // and the GardenInspector overlay will be shown automatically via the overlay state check below
+      if (result.action === 'show-confirmation') {
+        // Open Garden Inspector overlay when in confirmation mode
+        setOverlay({ type: 'garden-inspector' });
+      }
+      // Other actions (create-sprout, show-error, passthrough) are handled by the hook callbacks
+      return;
+    }
+
     // Force scroll to bottom on new submission (instant)
     scrollToBottom(false);
     // Sprint: prompt-journey-mode-v1 - Use effectivePersonaBehaviors for journey mode support
@@ -514,7 +572,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       personaBehaviors: effectivePersonaBehaviors,
       executionPrompt
     });
-  }, [submit, scrollToBottom, effectivePersonaBehaviors]);
+  }, [submit, scrollToBottom, effectivePersonaBehaviors, isSproutResearchEnabled, promptArchitect]);
 
   const handleLensAccept = useCallback((lensId: string) => {
     acceptLensOffer(lensId);
@@ -710,6 +768,32 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
             <CustomLensWizard
               onComplete={handleWizardComplete}
               onCancel={handleWizardCancel}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Garden Inspector Overlay - Sprint: sprout-research-v1, Phase 4f */}
+      {overlay.type === 'garden-inspector' && isGardenInspectorEnabled && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden">
+            <GardenInspector
+              architectState={promptArchitect.state}
+              manifest={promptArchitect.manifest}
+              summary={promptArchitect.summary}
+              error={promptArchitect.error}
+              onManifestUpdate={promptArchitect.updateManifest}
+              onAddBranch={promptArchitect.addBranch}
+              onRemoveBranch={promptArchitect.removeBranch}
+              onConfirm={() => {
+                promptArchitect.confirm();
+                setOverlay({ type: 'none' });
+              }}
+              onCancel={() => {
+                promptArchitect.cancel();
+                setOverlay({ type: 'none' });
+              }}
+              onClearError={promptArchitect.clearError}
             />
           </div>
         </div>

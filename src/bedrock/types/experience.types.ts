@@ -7,6 +7,8 @@
 
 import type { SystemPromptPayload } from '@core/schema/system-prompt';
 import { DEFAULT_SYSTEM_PROMPT_PAYLOAD } from '@core/schema/system-prompt';
+import type { PromptArchitectConfigPayload } from '@core/schema/prompt-architect-config';
+import { DEFAULT_PROMPT_ARCHITECT_CONFIG_PAYLOAD } from '@core/schema/prompt-architect-config';
 
 // =============================================================================
 // Registry Types
@@ -78,6 +80,21 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     color: '#2F5C3B', // grove-forest
   } satisfies ExperienceTypeDefinition<SystemPromptPayload>,
 
+  // Sprint: sprout-research-v1 - Prompt Architect configuration
+  // SINGLETON pattern: One active config per grove
+  'prompt-architect-config': {
+    type: 'prompt-architect-config',
+    label: 'Research Config',
+    icon: 'science',
+    description: 'Grove-level research DNA: hypothesis goals, inference rules, quality gates',
+    defaultPayload: DEFAULT_PROMPT_ARCHITECT_CONFIG_PAYLOAD,
+    wizardId: undefined, // Admin-only, no wizard
+    editorComponent: 'PromptArchitectConfigEditor', // Phase 4+
+    allowMultipleActive: false, // SINGLETON: One active per grove
+    routePath: '/bedrock/research-config',
+    color: '#7E57C2', // Purple for research
+  } satisfies ExperienceTypeDefinition<PromptArchitectConfigPayload>,
+
   // Future types (commented templates for reference):
   //
   // 'feature-flag': {
@@ -118,6 +135,7 @@ export type ExperienceObjectType = keyof typeof EXPERIENCE_TYPE_REGISTRY;
  */
 export interface ExperiencePayloadMap {
   'system-prompt': SystemPromptPayload;
+  'prompt-architect-config': PromptArchitectConfigPayload;
   // Future: 'feature-flag': FeatureFlagPayload;
 }
 

@@ -330,6 +330,30 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlag[] = [
     name: 'Journey Mode Toggle',
     description: 'Toggle between LLM-driven navigation and 4D library prompt journeys (Sprint: prompt-journey-mode-v1)',
     enabled: true
+  },
+  {
+    id: 'sprout-research',
+    name: 'Sprout Research System',
+    description: 'Enable sprout: command for research initiation with Prompt Architect (Sprint: sprout-research-v1)',
+    enabled: false
+  },
+  {
+    id: 'garden-inspector',
+    name: 'Garden Inspector Panel',
+    description: 'Enable Garden Inspector panel for viewing and managing research sprouts (Sprint: sprout-research-v1, Phase 4e)',
+    enabled: false
+  },
+  {
+    id: 'research-agent-auto-execute',
+    name: 'Research Agent Auto-Execute',
+    description: 'Automatically execute research when sprouts are created (Sprint: sprout-research-v1, Phase 5e)',
+    enabled: false
+  },
+  {
+    id: 'legacy-sprout-disabled',
+    name: 'Legacy Sprout Command Disabled',
+    description: 'When enabled, legacy /sprout Terminal command is disabled in /explore context. New sprout: prefix uses Prompt Architect flow instead. (Sprint: sprout-research-v1, Phase 6a)',
+    enabled: false
   }
 ];
 
