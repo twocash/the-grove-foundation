@@ -109,11 +109,46 @@ const config: Config = {
       animation: {
         'pulse-slow': 'pulse 2s ease-in-out infinite',
         'glow-breathe': 'glow-breathe 3s ease-in-out infinite',
+        // Garden Inspector badge animations (Phase 4c)
+        'pulse-pending': 'pulse-pending 2s ease-in-out infinite',
+        'pulse-attention': 'pulse-attention 1.5s ease-in-out infinite',
+        'pulse-active': 'pulse-active 2s ease-in-out infinite',
       },
       keyframes: {
         'glow-breathe': {
           '0%, 100%': { boxShadow: '0 0 5px rgba(0, 212, 255, 0.2)' },
           '50%': { boxShadow: '0 0 15px rgba(0, 212, 255, 0.4)' },
+        },
+        // Garden Inspector badge keyframes (Phase 4c)
+        'pulse-pending': {
+          '0%, 100%': {
+            boxShadow: '0 0 0 0 rgba(251, 191, 36, 0.4)',
+            transform: 'scale(1)',
+          },
+          '50%': {
+            boxShadow: '0 0 0 4px rgba(251, 191, 36, 0)',
+            transform: 'scale(1.05)',
+          },
+        },
+        'pulse-attention': {
+          '0%, 100%': {
+            boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.5)',
+            transform: 'scale(1)',
+          },
+          '50%': {
+            boxShadow: '0 0 0 6px rgba(239, 68, 68, 0)',
+            transform: 'scale(1.1)',
+          },
+        },
+        'pulse-active': {
+          '0%, 100%': {
+            boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)',
+            transform: 'scale(1)',
+          },
+          '50%': {
+            boxShadow: '0 0 0 4px rgba(59, 130, 246, 0)',
+            transform: 'scale(1.03)',
+          },
         },
       },
 

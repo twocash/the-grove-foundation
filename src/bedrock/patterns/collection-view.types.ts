@@ -80,6 +80,9 @@ export interface CollectionViewConfig {
     direction: SortDirection;
   };
 
+  /** Default filter values applied on initial load */
+  defaultFilters?: Record<string, string | string[]>;
+
   /** localStorage key for favorites persistence */
   favoritesStorageKey: string;
 

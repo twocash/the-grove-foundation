@@ -79,6 +79,8 @@ export interface ObjectEditorProps<T> {
   hasChanges: boolean;
   /** Handler to populate Copilot input (for Fix/Refine flows) */
   onSetCopilotInput?: (input: string) => void;
+  /** Handler to change selected object (e.g., after version creation) */
+  onSelectObject?: (id: string) => void;
 }
 
 // =============================================================================

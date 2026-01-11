@@ -1,0 +1,113 @@
+# Sprout Research System v1
+
+**Codename:** `sprout-research-v1`
+**Status:** In Progress
+**Branch:** `feature/sprout-research-v1`
+**Baseline Checkpoint:** `checkpoint-pre-sprout-research-20260110` (commit `ae1e4fd`)
+**Started:** January 10, 2026
+
+---
+
+## Phase Checklist
+
+### Phase 0: Setup & Audit ✅ COMPLETE
+
+- [x] 0.0: Create checkpoint tag and sprint branch
+- [x] 0.1: Create sprint documentation structure
+- [x] 0.25: Route verification - trace /explore render path
+- [x] 0.5: Audit System Prompt pattern (singleton reference)
+
+### Phase 1: Configuration Schema ✅ COMPLETE
+
+- [x] 1a: Interface definitions (PromptArchitectConfig, mirror System Prompt singleton pattern)
+- [x] 1b: JSON schema files (mirror System Prompt versioning)
+- [x] 1c: Inference rule engine (no UI)
+- [x] 1d: Quality gate logic (no UI)
+- [x] **GATE:** npm run build succeeds
+
+### Phase 2: Object Model & Storage ✅ COMPLETE
+
+- [x] 2a: ResearchSprout interface (with provenance snapshot)
+- [x] 2b: research-sprouts.json registry (type registry)
+- [x] 2c: ResearchSproutContext (React context)
+- [x] 2d: Supabase table migrations (UP + DOWN)
+- [x] 2e: Context provider integration (ExplorePage)
+- [x] 2f: Migration rollback test
+- [x] **GATE:** Storage round-trip test passes; DOWN migration verified
+
+### Phase 3: Prompt Architect Agent ✅ COMPLETE
+
+- [x] 3a: Command detection for sprout: (no UI change)
+- [x] 3b: Config loader implementation (no UI change)
+- [x] 3c: Inference pipeline (no UI change)
+- [x] 3d: Confirmation flow logic (no UI change)
+- [x] 3e: Feature flag: SPROUT_RESEARCH_ENABLED
+- [x] 3f: Wire flag=true path (UI change, flagged)
+- [x] 3g: Visual verification: flag=true vs flag=false
+- [x] **GATE:** Screenshot both paths, behavior correct
+
+### Phase 4: Garden Inspector Panel ✅ COMPLETE
+
+- [x] 4a: GardenInspector component (isolated)
+- [x] 4b: Status grouping logic (no integration)
+- [x] 4c: Pulsing badge animation (isolated CSS)
+- [x] 4d: Toast notification system (isolated)
+- [x] 4e: Feature flag: GARDEN_INSPECTOR_ENABLED
+- [x] 4f: Wire into Explore layout (flagged)
+- [x] 4g: Visual verification: inspector states
+- [x] **GATE:** Visual verification passed - dialog opens, branches can be added
+
+### Phase 5: Research Agent ✅ COMPLETE
+
+- [x] 5a: Queue consumer for pending status (no UI)
+- [x] 5b: Research execution logic (no UI)
+- [x] 5c: Results population (no UI)
+- [x] 5d: Child manifest spawning (no UI)
+- [x] 5e: System-level QA agent flag (no UI)
+- [x] 5f: Integration test: sprout -> agent -> results
+- [x] 5g: Visual verification: MVP simplified dialog
+- [x] **GATE:** Complete sprout lifecycle works (MVP: title + prompt only)
+
+### Phase 6: Deprecation & Isolation ✅ COMPLETE
+
+- [x] 6a: Feature flag: LEGACY_SPROUT_DISABLED
+- [x] 6b: Verify sprout-command-parser.ts intercepts 'sprout:' in /explore
+- [x] 6c: Verify legacy Terminal command files unreachable from /explore
+- [x] 6d: Confirm PlantSelectionTooltip not rendered in /explore (spec concept, not implemented)
+- [x] 6e: Document legacy files as "dead code in Explore context"
+- [x] 6f: Update help documentation
+- [x] **GATE:** Legacy commands isolated; FROZEN ZONE UNTOUCHED
+
+---
+
+## Hard Constraints
+
+1. **Strangler Fig Compliance:** NO modifications to /terminal, /foundation, /journeys, /hubs routes or src/surface/components/Terminal/*
+2. **Visual Verification Gates:** Screenshot evidence required before commits
+3. **Feature Flags Before Wiring:** No new code in render path without flag
+4. **Schema-First Development:** Interfaces before UI
+5. **Test-Behavior Parity:** Tests verify user-visible behavior
+
+---
+
+## Key Documents
+
+| Document | Purpose |
+|----------|---------|
+| [REPO_AUDIT.md](./REPO_AUDIT.md) | Route verification, pattern documentation |
+| [DEVLOG.md](./DEVLOG.md) | Session-by-session progress log |
+| [CONTINUATION_PROMPT.md](./CONTINUATION_PROMPT.md) | Context handoff for session changes |
+| [DECISIONS.md](./DECISIONS.md) | Architectural decisions made |
+
+---
+
+## Emergency Recovery
+
+```bash
+# Return to checkpoint
+git checkout checkpoint-pre-sprout-research-20260110
+
+# Or reset branch
+git checkout feature/sprout-research-v1
+git reset --hard checkpoint-pre-sprout-research-20260110
+```

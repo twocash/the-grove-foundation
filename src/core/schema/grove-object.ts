@@ -11,6 +11,9 @@ export type GroveObjectType =
   | 'journey'
   | 'hub'
   | 'sprout'
+  | 'research-sprout'        // Sprint: sprout-research-v1
+  | 'prompt-architect-config' // Sprint: sprout-research-v1
+  | 'system-prompt'
   | 'node'
   | 'card'
   | string;

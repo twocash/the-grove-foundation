@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 6 - Isolation Audit Review</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #a855f7;
+      --success: #22c55e;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .gate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.5);
+      color: var(--success);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .phase-badge {
+      background: var(--accent);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .evidence-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .evidence-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .evidence-title {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-icon {
+      color: var(--success);
+    }
+
+    .evidence-content {
+      padding: 1.5rem;
+    }
+
+    .code-block {
+      background: #0a0f1a;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+
+    .code-block .comment {
+      color: #6b7280;
+    }
+
+    .code-block .result {
+      color: var(--success);
+    }
+
+    .code-block .file {
+      color: #60a5fa;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .summary-item {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .summary-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .summary-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .checklist {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(34, 197, 94, 0.05);
+      border-radius: 0.25rem;
+    }
+
+    .checklist li::before {
+      content: "\\2713";
+      color: var(--success);
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-align: center;
+    }
+
+    .file-tree {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: #0a0f1a;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .file-tree .folder {
+      color: #60a5fa;
+    }
+
+    .file-tree .file {
+      color: #e2e8f0;
+    }
+
+    .file-tree .dead {
+      color: #ef4444;
+      text-decoration: line-through;
+    }
+
+    .file-tree .new {
+      color: var(--success);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Phase 6: Deprecation & Isolation</h1>
+      <p class="subtitle">Sprint: sprout-research-v1 | Strangler Fig Compliance Audit</p>
+      <div class="gate-badge">
+        <span>&#10003;</span>
+        GATE PASSED: Legacy commands isolated; FROZEN ZONE UNTOUCHED
+      </div>
+    </header>
+
+    <!-- Summary Stats -->
+    <section class="section">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-number">0</div>
+          <div class="summary-label">Terminal Imports in /explore</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number">0</div>
+          <div class="summary-label">Frozen Zone Modifications</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number">4</div>
+          <div class="summary-label">Feature Flags Added</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-number">8</div>
+          <div class="summary-label">New Services Created</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6a: Feature Flag -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">6a</span>
+        <h2 class="section-title">Feature Flag: LEGACY_SPROUT_DISABLED</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            data/narratives-schema.ts
+          </span>
+        </div>
+        <div class="evidence-content">
+          <div class="code-block">
+<span class="comment">// Feature flags for sprout-research-v1</span>
+{
+  id: '<span class="file">sprout-research</span>',
+  name: 'Sprout Research System',
+  enabled: false
+},
+{
+  id: '<span class="file">garden-inspector</span>',
+  name: 'Garden Inspector Panel',
+  enabled: false
+},
+{
+  id: '<span class="file">research-agent-auto-execute</span>',
+  name: 'Research Agent Auto-Execute',
+  enabled: false
+},
+{
+  id: '<span class="file">legacy-sprout-disabled</span>',  <span class="comment">// NEW in Phase 6a</span>
+  name: 'Legacy Sprout Command Disabled',
+  enabled: false
+}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6b: Command Interception -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">6b</span>
+        <h2 class="section-title">Sprout Command Interception Chain</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            Import Chain Verification
+          </span>
+        </div>
+        <div class="evidence-content">
+          <div class="code-block">
+<span class="comment"># New flow - all in @explore module</span>
+
+<span class="file">ExploreShell.tsx:554</span>
+  if (isSproutResearchEnabled && shouldTriggerPromptArchitect(displayText))
+    |
+    v
+<span class="file">@explore/services/prompt-architect-pipeline.ts:316</span>
+  export function shouldTriggerPromptArchitect(input: string)
+    const command = parseSproutCommand(input);
+    |
+    v
+<span class="file">@explore/services/sprout-command-parser.ts:64</span>
+  export function parseSproutCommand(input: string)
+    <span class="result">// Intercepts: sprout:, research:, investigate:</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6c: Terminal Isolation -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">6c</span>
+        <h2 class="section-title">Terminal Command Files Unreachable</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            Grep Evidence: No Terminal Imports
+          </span>
+        </div>
+        <div class="evidence-content">
+          <div class="code-block">
+<span class="comment"># Check src/explore/ for Terminal imports</span>
+$ grep -r "from.*Terminal/" src/explore/
+<span class="result">No matches found</span>
+
+<span class="comment"># Check KineticStream for Terminal command imports</span>
+$ grep -r "Terminal/CommandInput" src/surface/components/KineticStream/
+<span class="result">No matches found</span>
+
+<span class="comment"># Only shared import is CustomLensWizard (not sprout-related)</span>
+$ grep -r "from.*Terminal/" src/surface/components/KineticStream/ExploreShell.tsx
+<span class="file">import { CustomLensWizard } from '../../../../components/Terminal/CustomLensWizard';</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            Legacy Command Files (Dead Code in /explore)
+          </span>
+        </div>
+        <div class="evidence-content">
+          <div class="file-tree">
+components/Terminal/CommandInput/commands/
+  <span class="dead">sprout.ts</span>      <span class="comment">- UNREACHABLE from /explore</span>
+  <span class="dead">garden.ts</span>      <span class="comment">- UNREACHABLE from /explore</span>
+  <span class="dead">index.ts</span>       <span class="comment">- UNREACHABLE from /explore</span>
+  help.ts
+  journeys.ts
+  lens.ts
+  stats.ts
+  welcome.ts
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6d: PlantSelectionTooltip -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">6d</span>
+        <h2 class="section-title">PlantSelectionTooltip Not in /explore</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            Component Search Results
+          </span>
+        </div>
+        <div class="evidence-content">
+          <div class="code-block">
+<span class="comment"># Search for PlantSelectionTooltip in source</span>
+$ grep -r "PlantSelection" src/
+<span class="result">No files found</span>
+
+<span class="comment"># Only exists in documentation (spec concept)</span>
+$ grep -r "PlantSelection" docs/
+<span class="file">docs/sprints/foundation-ux-unification-v1/SPRINTS.md</span>
+<span class="file">docs/sprints/foundation-ux-unification-v1/SPEC.md</span>
+
+<span class="comment"># New capture flow is fully isolated</span>
+$ grep -r "from.*Terminal/" src/surface/components/KineticStream/Capture/
+<span class="result">No matches found</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Frozen Zones -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">FROZEN</span>
+        <h2 class="section-title">Frozen Zone Integrity</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            Zero Modifications
+          </span>
+        </div>
+        <div class="evidence-content">
+          <ul class="checklist">
+            <li><strong>components/Terminal/</strong> - 77 files untouched</li>
+            <li><strong>src/foundation/</strong> - 23 files untouched</li>
+            <li>No modifications to /terminal route</li>
+            <li>No modifications to /foundation route</li>
+            <li>No modifications to /journeys route</li>
+            <li>No modifications to /hubs route</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Phase 6 Checklist -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">COMPLETE</span>
+        <h2 class="section-title">Phase 6 Checklist</h2>
+      </div>
+      <ul class="checklist">
+        <li><strong>6a:</strong> Feature flag LEGACY_SPROUT_DISABLED added to narratives-schema.ts</li>
+        <li><strong>6b:</strong> sprout-command-parser.ts intercepts 'sprout:' in /explore route</li>
+        <li><strong>6c:</strong> Legacy Terminal command files unreachable from /explore route</li>
+        <li><strong>6d:</strong> PlantSelectionTooltip not rendered in /explore (spec concept only)</li>
+        <li><strong>6e:</strong> Legacy files documented in ISOLATION_AUDIT.md</li>
+        <li><strong>6f:</strong> INDEX.md and CONTINUATION_PROMPT.md updated</li>
+      </ul>
+    </section>
+
+    <!-- Visual Verification -->
+    <section class="section">
+      <div class="section-header">
+        <span class="phase-badge">VISUAL</span>
+        <h2 class="section-title">Visual Verification: Sprout Interception</h2>
+      </div>
+      <div class="evidence-card">
+        <div class="evidence-header">
+          <span class="evidence-title">
+            <span class="status-icon">&#10003;</span>
+            6-isolation-verification-sprout-intercept.gif
+          </span>
+          <span style="color: var(--muted); font-size: 0.875rem;">~418 KB</span>
+        </div>
+        <div class="evidence-content" style="background: #0a0f1a;">
+          <img src="6-isolation-verification-sprout-intercept.gif" alt="Sprout Interception Flow" style="width: 100%; border-radius: 0.5rem; border: 1px solid var(--border);">
+        </div>
+      </div>
+      <p style="color: var(--muted); font-size: 0.875rem; margin-top: 1rem;">
+        This GIF shows the <code>sprout:</code> command being intercepted by the new
+        <code>@explore/services/sprout-command-parser.ts</code> and triggering the
+        MVP GardenInspector confirmation dialog (Title + Instructions only).
+      </p>
+    </section>
+
+    <footer>
+      <p>Generated: January 11, 2026</p>
+      <p>See also: <a href="../ISOLATION_AUDIT.md" style="color: var(--accent);">ISOLATION_AUDIT.md</a></p>
+    </footer>
+  </div>
+</body>
+</html>

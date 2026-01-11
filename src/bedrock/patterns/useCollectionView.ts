@@ -35,8 +35,10 @@ export function useCollectionView<T extends GroveObject>(
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter state
-  const [filters, setFilters] = useState<Record<string, string | string[]>>({});
+  // Filter state - initialize with defaults if provided
+  const [filters, setFilters] = useState<Record<string, string | string[]>>(
+    () => config.defaultFilters || {}
+  );
 
   // Sort state
   const [sortField, setSortField] = useState(config.defaultSort.field);

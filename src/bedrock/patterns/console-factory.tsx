@@ -301,6 +301,7 @@ export function createBedrockConsole<T>(
               loading={loading}
               hasChanges={hasChanges}
               onSetCopilotInput={setCopilotInput}
+              onSelectObject={setSelectedId}
             />
           ),
           copilot: config.copilot.enabled ? (
@@ -371,6 +372,7 @@ export function createBedrockConsole<T>(
                 loading={loading}
                 hasChanges={hasChanges}
                 onSetCopilotInput={(input) => setCopilotInputRef.current(input)}
+                onSelectObject={setSelectedId}
               />
             ),
             copilot: config.copilot.enabled ? (

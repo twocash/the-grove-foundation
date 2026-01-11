@@ -907,15 +907,21 @@ app.post('/api/cache/invalidate', async (req, res) => {
 });
 
 // DEBUG: Inspect current system prompt (dev only)
+// Sprint: system-prompt-assembly-fix-v1 - Updated for config object
 app.get('/api/debug/system-prompt', async (req, res) => {
   try {
-    const prompt = await fetchActiveSystemPrompt();
+    const config = await fetchActiveSystemPrompt();
     res.json({
-      source: systemPromptCache.source,
-      fetchedAt: systemPromptCache.fetchedAt ? new Date(systemPromptCache.fetchedAt).toISOString() : null,
-      contentLength: prompt?.length || 0,
-      contentPreview: prompt?.substring(0, 500) + '...',
-      fullContent: prompt
+      source: config.source,
+      fetchedAt: config.fetchedAt ? new Date(config.fetchedAt).toISOString() : null,
+      responseMode: config.responseMode,
+      closingBehavior: config.closingBehavior,
+      useBreadcrumbTags: config.useBreadcrumbTags,
+      useTopicTags: config.useTopicTags,
+      useNavigationBlocks: config.useNavigationBlocks,
+      contentLength: config.content?.length || 0,
+      contentPreview: config.content?.substring(0, 500) + '...',
+      fullContent: config.content
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -1194,12 +1200,30 @@ async function loadKnowledgeConfig() {
 // ============================================================================
 
 // In-memory cache for system prompt
+// NOTE: Disabled (TTL=0) due to multi-instance cache invalidation issue.
+// Each Cloud Run instance has its own cache, so /api/cache/invalidate only
+// clears one instance while others serve stale prompts.
+// TODO: Implement shared Redis cache - see sprints/shared-cache-v1/
 let systemPromptCache = {
   content: null,
+  responseMode: null,
+  closingBehavior: null,
+  useBreadcrumbTags: null,
+  useTopicTags: null,
+  useNavigationBlocks: null,
   source: null,
   fetchedAt: null
 };
-const SYSTEM_PROMPT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SYSTEM_PROMPT_CACHE_TTL_MS = 0; // DISABLED - was 5 * 60 * 1000 (5 minutes)
+
+// Default behavioral settings (used when Supabase/GCS don't provide them)
+const DEFAULT_SYSTEM_PROMPT_BEHAVIORS = {
+  responseMode: 'architect',
+  closingBehavior: 'navigation',
+  useBreadcrumbTags: true,
+  useTopicTags: true,
+  useNavigationBlocks: true
+};
 
 /**
  * Assemble system prompt content from payload sections.
@@ -1245,7 +1269,7 @@ async function fetchActiveSystemPrompt() {
   if (systemPromptCache.content &&
       (now - systemPromptCache.fetchedAt) < SYSTEM_PROMPT_CACHE_TTL_MS) {
     console.log(`[SystemPrompt] Using cached prompt (source: ${systemPromptCache.source})`);
-    return systemPromptCache.content;
+    return systemPromptCache;
   }
 
   // Tier 1: Try Supabase
@@ -1258,9 +1282,19 @@ async function fetchActiveSystemPrompt() {
 
     if (!error && data?.payload) {
       const content = assemblePromptContent(data.payload);
-      systemPromptCache = { content, source: 'supabase', fetchedAt: now };
-      console.log(`[SystemPrompt] Loaded from Supabase: "${data.title}"`);
-      return content;
+      const config = {
+        content,
+        responseMode: data.payload.responseMode || DEFAULT_SYSTEM_PROMPT_BEHAVIORS.responseMode,
+        closingBehavior: data.payload.closingBehavior || DEFAULT_SYSTEM_PROMPT_BEHAVIORS.closingBehavior,
+        useBreadcrumbTags: data.payload.useBreadcrumbTags ?? DEFAULT_SYSTEM_PROMPT_BEHAVIORS.useBreadcrumbTags,
+        useTopicTags: data.payload.useTopicTags ?? DEFAULT_SYSTEM_PROMPT_BEHAVIORS.useTopicTags,
+        useNavigationBlocks: data.payload.useNavigationBlocks ?? DEFAULT_SYSTEM_PROMPT_BEHAVIORS.useNavigationBlocks,
+        source: 'supabase',
+        fetchedAt: now
+      };
+      systemPromptCache = config;
+      console.log(`[SystemPrompt] Loaded from Supabase: "${data.title}" (closingBehavior: ${config.closingBehavior})`);
+      return config;
     }
 
     if (error && error.code !== 'PGRST116') {
@@ -1285,13 +1319,15 @@ async function fetchActiveSystemPrompt() {
         const activeVersion = versions.find(v => v.id === activeId) || versions.find(v => v.isActive);
 
         if (activeVersion?.content) {
-          systemPromptCache = {
+          const config = {
             content: activeVersion.content,
+            ...DEFAULT_SYSTEM_PROMPT_BEHAVIORS,
             source: 'gcs-legacy',
             fetchedAt: now
           };
+          systemPromptCache = config;
           console.log(`[SystemPrompt] Loaded from GCS legacy: "${activeVersion.label}"`);
-          return activeVersion.content;
+          return config;
         }
       }
     }
@@ -1301,12 +1337,14 @@ async function fetchActiveSystemPrompt() {
 
   // Tier 3: Fallback
   console.log('[SystemPrompt] Using fallback prompt');
-  systemPromptCache = {
+  const config = {
     content: FALLBACK_SYSTEM_PROMPT,
+    ...DEFAULT_SYSTEM_PROMPT_BEHAVIORS,
     source: 'fallback',
     fetchedAt: now
   };
-  return FALLBACK_SYSTEM_PROMPT;
+  systemPromptCache = config;
+  return config;
 }
 
 // Static knowledge base (fallback if GCS fetch fails)
@@ -1346,9 +1384,10 @@ SOURCE MATERIAL: "The Grove" Whitepaper & Technical Deep Dive Series (Dec 2025) 
 
 // Helper: Build full system prompt with context
 // Sprint: persona-behaviors-v1 - Now supports behavioral flags
+// Sprint: system-prompt-assembly-fix-v1 - Use systemConfig from fetchActiveSystemPrompt
 function buildSystemPrompt(options = {}) {
     const {
-        baseSystemPrompt = FALLBACK_SYSTEM_PROMPT,
+        systemConfig = null,  // Sprint: system-prompt-assembly-fix-v1
         personaTone = '',
         personaBehaviors = {},  // Sprint: persona-behaviors-v1
         sectionContext = '',
@@ -1356,35 +1395,32 @@ function buildSystemPrompt(options = {}) {
         terminatorMode = false
     } = options;
 
-    // Apply defaults for behavioral flags
-    const responseMode = personaBehaviors.responseMode ?? 'architect';
-    const closingBehavior = personaBehaviors.closingBehavior ?? 'navigation';
-    const useBreadcrumbs = personaBehaviors.useBreadcrumbTags !== false;
-    const useTopics = personaBehaviors.useTopicTags !== false;
-    const useNavBlocks = personaBehaviors.useNavigationBlocks !== false;
+    // Resolve behaviors: systemConfig as defaults, personaBehaviors as overrides
+    // Sprint: system-prompt-assembly-fix-v1
+    const configDefaults = systemConfig || DEFAULT_SYSTEM_PROMPT_BEHAVIORS;
+    const responseMode = personaBehaviors.responseMode ?? configDefaults.responseMode;
+    const closingBehavior = personaBehaviors.closingBehavior ?? configDefaults.closingBehavior;
+    const useBreadcrumbs = personaBehaviors.useBreadcrumbTags ?? configDefaults.useBreadcrumbTags;
+    const useTopics = personaBehaviors.useTopicTags ?? configDefaults.useTopicTags;
+    const useNavBlocks = personaBehaviors.useNavigationBlocks ?? configDefaults.useNavigationBlocks;
 
     // Sprint: kinetic-suggested-prompts-v1 - Debug logging
     console.log('[buildSystemPrompt] personaBehaviors received:', JSON.stringify(personaBehaviors));
+    console.log('[buildSystemPrompt] configDefaults:', JSON.stringify({ responseMode: configDefaults.responseMode, closingBehavior: configDefaults.closingBehavior }));
     console.log('[buildSystemPrompt] Resolved flags:', { responseMode, closingBehavior, useBreadcrumbs, useTopics, useNavBlocks });
-
-    // Check if we have persona-specific behaviors (vs default fallback)
-    const hasCustomBehaviors = Object.keys(personaBehaviors).length > 0;
 
     const parts = [];
 
-    // 1. Base prompt - use IDENTITY_PROMPT for personas with custom behaviors
-    if (hasCustomBehaviors) {
-        parts.push(IDENTITY_PROMPT);
+    // 1. Base content from system config or fallback
+    // Sprint: system-prompt-assembly-fix-v1
+    const baseContent = systemConfig?.content || FALLBACK_SYSTEM_PROMPT;
+    parts.push(baseContent);
 
-        // 2. Response mode
-        parts.push('\n\n' + (RESPONSE_MODES[responseMode] || RESPONSE_MODES.architect));
+    // 2. Response mode - ALWAYS apply
+    parts.push('\n\n' + (RESPONSE_MODES[responseMode] || RESPONSE_MODES.architect));
 
-        // 3. Closing behavior
-        parts.push('\n\n' + (CLOSING_BEHAVIORS[closingBehavior] || CLOSING_BEHAVIORS.navigation));
-    } else {
-        // Use full fallback prompt for default personas
-        parts.push(baseSystemPrompt);
-    }
+    // 3. Closing behavior - ALWAYS apply
+    parts.push('\n\n' + (CLOSING_BEHAVIORS[closingBehavior] || CLOSING_BEHAVIORS.navigation));
 
     // 4. Voice layer (personaTone) - always append if provided
     if (personaTone) {
@@ -1823,25 +1859,25 @@ app.post('/api/chat', async (req, res) => {
         if (!session) {
             // Fetch RAG context - use Kinetic Pipeline (Supabase) or GCS based on flag
             let ragResult;
-            let baseSystemPrompt;
+            let systemConfig;  // Sprint: system-prompt-assembly-fix-v1
 
             if (useKineticPipeline) {
                 // Epic 5: Strangler Fig - /explore uses Supabase pipeline
                 console.log('[Chat] Using Kinetic Pipeline (Supabase)');
-                [ragResult, baseSystemPrompt] = await Promise.all([
+                [ragResult, systemConfig] = await Promise.all([
                     fetchRagContextKinetic(message, { returnObject: false, useHybrid: useHybridSearch }),
                     fetchActiveSystemPrompt()
                 ]);
             } else {
                 // Default: GCS pipeline (for /genesis and other routes)
                 const narratives = await fetchNarratives();
-                [ragResult, baseSystemPrompt] = await Promise.all([
+                [ragResult, systemConfig] = await Promise.all([
                     fetchRagContext(message, narratives, journeyId),
                     fetchActiveSystemPrompt()
                 ]);
             }
             const systemPrompt = buildSystemPrompt({
-                baseSystemPrompt,
+                systemConfig,  // Sprint: system-prompt-assembly-fix-v1
                 personaTone,
                 personaBehaviors,  // Sprint: persona-behaviors-v1
                 sectionContext,
@@ -2008,12 +2044,13 @@ app.post('/api/chat/init', async (req, res) => {
 
         // Fetch RAG context and active system prompt
         // Init doesn't have a message yet, so we rely on journeyId for Deterministic Mode
-        const [ragContext, baseSystemPrompt] = await Promise.all([
+        // Sprint: system-prompt-assembly-fix-v1 - systemConfig includes behavioral settings
+        const [ragContext, systemConfig] = await Promise.all([
             fetchRagContext('', narratives, journeyId),
             fetchActiveSystemPrompt()
         ]);
         const systemPrompt = buildSystemPrompt({
-            baseSystemPrompt,
+            systemConfig,  // Sprint: system-prompt-assembly-fix-v1
             personaTone,
             personaBehaviors,  // Sprint: persona-behaviors-v1
             sectionContext,
