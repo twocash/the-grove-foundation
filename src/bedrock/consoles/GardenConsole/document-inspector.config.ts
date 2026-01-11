@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/document-inspector.config.ts
+// src/bedrock/consoles/GardenConsole/document-inspector.config.ts
 // Inspector configuration for document editing
 // Sprint: pipeline-inspector-v1 (Epic 4)
 

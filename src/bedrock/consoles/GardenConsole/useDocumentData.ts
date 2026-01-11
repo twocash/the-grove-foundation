@@ -1,5 +1,5 @@
-// src/bedrock/consoles/PipelineMonitor/useDocumentData.ts
-// Data hook for Pipeline Monitor - wraps API for console factory compatibility
+// src/bedrock/consoles/GardenConsole/useDocumentData.ts
+// Data hook for Garden Console - wraps API for console factory compatibility
 // Sprint: hotfix-pipeline-factory
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,7 +10,7 @@ import type { DocumentPayload, Document } from './types';
 import { documentToGroveObject, createDefaultDocument } from './document-transforms';
 
 /**
- * Data hook for Pipeline Monitor
+ * Data hook for Garden Console
  *
  * Wraps /api/knowledge/documents endpoints to provide CollectionDataResult
  * interface expected by the console factory pattern.

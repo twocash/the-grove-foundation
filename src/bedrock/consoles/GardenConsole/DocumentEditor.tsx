@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/DocumentEditor.tsx
+// src/bedrock/consoles/GardenConsole/DocumentEditor.tsx
 // Document editor component for inspector panel
 // Sprint: hotfix-pipeline-factory
 //

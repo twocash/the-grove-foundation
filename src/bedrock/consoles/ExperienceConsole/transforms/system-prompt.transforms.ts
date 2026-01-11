@@ -1,4 +1,4 @@
-// src/bedrock/consoles/ExperiencesConsole/transforms/system-prompt.transforms.ts
+// src/bedrock/consoles/ExperienceConsole/transforms/system-prompt.transforms.ts
 // Transform functions for SystemPrompt wizard
 // Hotfix: experiences-console-v1.1
 //

@@ -1,6 +1,6 @@
-// src/bedrock/consoles/ExperiencesConsole/ExperiencesConsole.config.ts
-// Console configuration for Experiences Console
-// Sprint: experiences-console-v1
+// src/bedrock/consoles/ExperienceConsole/ExperienceConsole.config.ts
+// Console configuration for Experience Console
+// Sprint: bedrock-ia-rename-v1 (formerly ExperienceConsole)
 // Hotfix: experiences-console-v1.1 (registry integration)
 
 import type { ConsoleConfig } from '../../types/console.types';
@@ -9,9 +9,9 @@ import { getExperienceTypeDefinition } from '../../types/experience.types';
 // Get definition from registry (DEX: Organic Scalability)
 const systemPromptDef = getExperienceTypeDefinition('system-prompt');
 
-export const experiencesConsoleConfig: ConsoleConfig = {
-  id: 'experiences',
-  title: 'Experiences',
+export const experienceConsoleConfig: ConsoleConfig = {
+  id: 'experience',
+  title: 'Experience',
   subtitle: systemPromptDef.label,
   description: systemPromptDef.description,
 
@@ -85,4 +85,4 @@ export const CLOSING_BEHAVIOR_CONFIG: Record<string, { label: string; icon: stri
   open: { label: 'Open', icon: 'all_inclusive' },
 };
 
-export default experiencesConsoleConfig;
+export default experienceConsoleConfig;

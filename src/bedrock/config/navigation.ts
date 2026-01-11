@@ -1,6 +1,14 @@
 // src/bedrock/config/navigation.ts
 // Navigation configuration for Bedrock workspace
-// Sprint: bedrock-foundation-v1
+// Sprint: bedrock-ia-rename-v1 (IA alignment)
+//
+// Navigation order follows Grove IA specification:
+// - Dashboard (overview)
+// - Knowledge Lifecycle: Nursery → Garden
+// - Cultivation Tools: Lenses, Prompts
+// - Delivery Configuration: Experience
+//
+// Note: Section dividers are a future enhancement (NavItem type doesn't support them)
 
 import type { NavItem } from '../primitives/BedrockNav';
 
@@ -9,25 +17,30 @@ import type { NavItem } from '../primitives/BedrockNav';
 // =============================================================================
 
 export const BEDROCK_NAV_ITEMS: NavItem[] = [
+  // --- Dashboard ---
   {
     id: 'dashboard',
     label: 'Dashboard',
     icon: 'dashboard',
     path: '/bedrock',
   },
+
+  // --- Knowledge Lifecycle ---
   {
-    id: 'pipeline',
-    label: 'Pipeline Monitor',
-    icon: 'data_object',
-    path: '/bedrock/pipeline',
+    id: 'nursery',
+    label: 'Nursery',
+    icon: 'eco',
+    path: '/bedrock/nursery',
+    badge: 0, // Will be populated dynamically
   },
   {
     id: 'garden',
-    label: 'Knowledge Garden',
-    icon: 'eco',
+    label: 'Garden',
+    icon: 'park',
     path: '/bedrock/garden',
-    badge: 0, // Will be populated dynamically
   },
+
+  // --- Cultivation Tools ---
   {
     id: 'lenses',
     label: 'Lens Workshop',
@@ -40,12 +53,16 @@ export const BEDROCK_NAV_ITEMS: NavItem[] = [
     icon: 'chat',
     path: '/bedrock/prompts',
   },
+
+  // --- Delivery Configuration ---
   {
-    id: 'experiences',
-    label: 'Experiences',
+    id: 'experience',
+    label: 'Experience',
     icon: 'smart_toy',
-    path: '/bedrock/experiences',
+    path: '/bedrock/experience',
   },
+
+  // --- Future ---
   {
     id: 'journeys',
     label: 'Journey Architect',
@@ -82,18 +99,18 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
     icon: 'dashboard',
     path: '/bedrock',
   },
-  pipeline: {
-    id: 'pipeline',
-    title: 'Pipeline Monitor',
-    description: 'Monitor and manage the knowledge pipeline',
-    icon: 'data_object',
-    path: '/bedrock/pipeline',
+  nursery: {
+    id: 'nursery',
+    title: 'Nursery',
+    description: 'Cultivate and moderate knowledge contributions',
+    icon: 'eco',
+    path: '/bedrock/nursery',
   },
   garden: {
     id: 'garden',
-    title: 'Knowledge Garden',
-    description: 'Cultivate and moderate knowledge contributions',
-    icon: 'eco',
+    title: 'Garden',
+    description: 'Mature knowledge corpus management',
+    icon: 'park',
     path: '/bedrock/garden',
   },
   lenses: {
@@ -110,12 +127,12 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
     icon: 'chat',
     path: '/bedrock/prompts',
   },
-  experiences: {
-    id: 'experiences',
-    title: 'Experiences',
+  experience: {
+    id: 'experience',
+    title: 'Experience',
     description: 'Manage AI system prompts for /explore',
     icon: 'smart_toy',
-    path: '/bedrock/experiences',
+    path: '/bedrock/experience',
   },
   journeys: {
     id: 'journeys',

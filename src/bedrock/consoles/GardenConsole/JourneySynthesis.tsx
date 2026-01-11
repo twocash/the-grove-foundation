@@ -1,4 +1,4 @@
-// src/bedrock/consoles/PipelineMonitor/JourneySynthesis.tsx
+// src/bedrock/consoles/GardenConsole/JourneySynthesis.tsx
 // Journey synthesis panel showing generated paths
 // Sprint: kinetic-pipeline-v1 (Story 6.5)
 
