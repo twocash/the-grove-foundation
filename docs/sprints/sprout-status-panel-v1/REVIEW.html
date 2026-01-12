@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprint Review: sprout-status-panel-v1</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { border-bottom: 2px solid #4a9eff; padding-bottom: 0.5rem; }
+    h2 { color: #4a9eff; margin-top: 2rem; }
+    .summary { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .summary-item { text-align: center; }
+    .summary-value { font-size: 2rem; font-weight: bold; color: #4a9eff; }
+    .summary-label { font-size: 0.875rem; color: #94a3b8; }
+    .phase { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .phase-header { display: flex; justify-content: space-between; align-items: center; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; }
+    .status.complete { background: #22c55e33; color: #22c55e; }
+    .status.in-progress { background: #eab30833; color: #eab308; }
+    .status.pending { background: #64748b33; color: #94a3b8; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .media-item { background: #1a1a2e; border-radius: 4px; overflow: hidden; }
+    .media-item img, .media-item video { width: 100%; display: block; }
+    .media-caption { padding: 0.5rem; font-size: 0.875rem; color: #94a3b8; }
+    .timestamp { color: #64748b; font-size: 0.75rem; }
+    .stories { margin-top: 2rem; }
+    .story-table { width: 100%; border-collapse: collapse; }
+    .story-table th, .story-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
+    .story-table th { color: #4a9eff; }
+    .p0 { color: #ef4444; }
+    .p1 { color: #eab308; }
+    .deferred { color: #64748b; }
+    a { color: #4a9eff; }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: sprout-status-panel-v1</h1>
+  <p class="timestamp">Last updated: 2026-01-11</p>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-value">0/6</div>
+        <div class="summary-label">Phases Complete</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">0/5</div>
+        <div class="summary-label">Smoke Tests</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">0</div>
+        <div class="summary-label">Screenshots</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">🟡</div>
+        <div class="summary-label">Status: Ready</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>User Stories</h2>
+  <div class="stories">
+    <table class="story-table">
+      <tr>
+        <th>ID</th>
+        <th>Story</th>
+        <th>Priority</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>US-C001</td>
+        <td>View Sprout Status Badge</td>
+        <td class="p0">P0</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C002</td>
+        <td>Open and Close Drawer</td>
+        <td class="p0">P0</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C003</td>
+        <td>View Sprout Cards Grouped by Status</td>
+        <td class="p0">P0</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C004</td>
+        <td>View Empty State</td>
+        <td class="p1">P1</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C005</td>
+        <td>Receive Ready Notification</td>
+        <td class="p0">P0</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C006</td>
+        <td>View Research Results</td>
+        <td class="p0">P0</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C007</td>
+        <td>Plant New Sprout from Drawer</td>
+        <td class="p1">P1</td>
+        <td><span class="status pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>US-C008</td>
+        <td>Provide Feedback</td>
+        <td class="deferred">DEFERRED</td>
+        <td><span class="status pending">v1.1</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Phase Progress</h2>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 0: Pre-work</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Verify ResearchSprout schema, /explore toolbar, sprout data access</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 1: Schema & Types</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Define SproutStatusState, notification types</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2: Data Layer</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Create hooks: useSessionSprouts, useSproutPolling, useSproutNotifications</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 3: UI Components</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Build in isolation: Badge, Drawer, Card, StatusGroup, EmptyState, Toast</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 4: Page Assembly</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Wire to /explore: badge, hover behavior, data, expand/collapse, notifications</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 5: Polish & Edge Cases</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Empty state, keyboard nav, accessibility, failed sprout display</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 6: Testing</h3>
+      <span class="status pending">Pending</span>
+    </div>
+    <p>Write and pass 5 smoke tests for P0 stories</p>
+    <div class="media-grid"></div>
+  </div>
+
+  <h2>Resources</h2>
+  <ul>
+    <li><a href="https://www.notion.so/2e5780a78eef81afafcce9fe7103f604" target="_blank">User Stories & Acceptance Criteria (Notion)</a></li>
+    <li><a href="SPEC.md">Execution Contract (SPEC.md)</a></li>
+    <li><a href="DEVLOG.md">Development Log (DEVLOG.md)</a></li>
+  </ul>
+
+</body>
+</html>
