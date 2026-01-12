@@ -1,55 +1,141 @@
 // src/bedrock/consoles/ExperienceConsole/index.ts
-// ExperienceConsole - System Prompt Management
-// Sprint: bedrock-ia-rename-v1 (formerly ExperienceConsole)
+// Experience Console - Polymorphic Object Management
+// Sprint: unified-experience-console-v1
 //
-// Manages system prompts that control AI behavior on /explore.
-// Adapted from orphaned commit e61877c with health check features removed.
-// Health check integration deferred to future sprint.
+// DEX: Organic Scalability - console discovers types from registry
+// DEX: Declarative Sovereignty - component resolution from config
 
+import React from 'react';
 import { createBedrockConsole } from '../../patterns/console-factory';
 import { experienceConsoleConfig } from './ExperienceConsole.config';
-import { SystemPromptCard } from './SystemPromptCard';
-import { SystemPromptEditor } from './SystemPromptEditor';
-import { useExperienceData } from './useExperienceData';
-import type { SystemPromptPayload } from '@core/schema/system-prompt';
+import { useUnifiedExperienceData, type UnifiedExperiencePayload } from './useUnifiedExperienceData';
+import { resolveCardComponent, resolveEditorComponent } from './component-registry';
+import { getExperienceTypeDefinition, isExperienceObjectType } from '../../types/experience.types';
+import type { ObjectCardProps, ObjectEditorProps } from '../../patterns/console-factory.types';
+
+// =============================================================================
+// Polymorphic Card Component
+// =============================================================================
+
+/**
+ * Polymorphic Card Component
+ * Resolves actual card component based on object type from registry
+ */
+const PolymorphicCard: React.FC<ObjectCardProps<UnifiedExperiencePayload>> = (props) => {
+  const { object } = props;
+  const objectType = object.meta.type;
+
+  // Resolve component from registry
+  const typeDef = isExperienceObjectType(objectType)
+    ? getExperienceTypeDefinition(objectType)
+    : null;
+
+  if (!typeDef) {
+    console.error(`[PolymorphicCard] Unknown experience type: ${objectType}`);
+    return React.createElement('div', {
+      className: 'p-4 border border-red-500 rounded bg-red-500/10',
+    }, React.createElement('p', {
+      className: 'text-red-400 text-sm',
+    }, `Unknown type: ${objectType}`));
+  }
+
+  const CardComponent = resolveCardComponent(typeDef.cardComponent);
+  return React.createElement(CardComponent, props);
+};
+
+// =============================================================================
+// Polymorphic Editor Component
+// =============================================================================
+
+/**
+ * Polymorphic Editor Component
+ * Resolves actual editor component based on object type from registry
+ */
+const PolymorphicEditor: React.FC<ObjectEditorProps<UnifiedExperiencePayload>> = (props) => {
+  const { object } = props;
+  const objectType = object.meta.type;
+
+  // Resolve component from registry
+  const typeDef = isExperienceObjectType(objectType)
+    ? getExperienceTypeDefinition(objectType)
+    : null;
+
+  if (!typeDef) {
+    console.error(`[PolymorphicEditor] Unknown experience type: ${objectType}`);
+    return React.createElement('div', {
+      className: 'p-4',
+    }, React.createElement('p', {
+      className: 'text-red-400',
+    }, `Cannot edit unknown type: ${objectType}`));
+  }
+
+  const EditorComponent = resolveEditorComponent(typeDef.editorComponent);
+  return React.createElement(EditorComponent, props);
+};
+
+// =============================================================================
+// Experience Console Factory
+// =============================================================================
 
 /**
  * Experience Console
  *
- * Manages system prompts that control AI behavior on /explore.
- * Uses the Bedrock Console Factory pattern for consistent UX.
+ * Polymorphic console managing all registered experience object types.
+ * Types are discovered from EXPERIENCE_TYPE_REGISTRY at runtime.
  *
- * Features:
- * - View all system prompts (active, draft, archived)
- * - Edit system prompt content and behaviors
- * - Activate/deactivate prompts
- * - Server-side cache invalidation on activation
+ * Supported types (auto-discovered):
+ * - system-prompt: AI personality and behavior configuration
+ * - feature-flag: Feature toggles across the application
+ * - (future types added to registry will appear automatically)
  *
- * Future enhancements (see e61877c):
- * - Health check integration (read-only view)
- * - Combined experience object browser
+ * DEX Compliance:
+ * - Declarative Sovereignty: Components resolved from registry config
+ * - Organic Scalability: New types appear without console modification
+ * - Provenance: Type registry documents all type metadata
+ *
+ * @see EXPERIENCE_TYPE_REGISTRY for type definitions
+ * @see component-registry.ts for component mapping
+ * @see hook-registry.ts for data hook mapping
  */
-export const ExperienceConsole = createBedrockConsole<SystemPromptPayload>({
+export const ExperienceConsole = createBedrockConsole<UnifiedExperiencePayload>({
   config: experienceConsoleConfig,
-  useData: useExperienceData,
-  CardComponent: SystemPromptCard,
-  EditorComponent: SystemPromptEditor,
-  copilotTitle: 'System Prompt Copilot',
-  copilotPlaceholder: 'Edit this system prompt with AI assistance...',
+  useData: useUnifiedExperienceData,
+  CardComponent: PolymorphicCard,
+  EditorComponent: PolymorphicEditor,
+  copilotTitle: 'Experience Copilot',
+  copilotPlaceholder: 'Edit this experience object with AI assistance...',
 });
 
-// Re-export configuration for external use
-export { experienceConsoleConfig } from './ExperienceConsole.config';
+// =============================================================================
+// Re-exports for external use
+// =============================================================================
 
-// Re-export card and editor components
+// Configuration
+export { experienceConsoleConfig } from './ExperienceConsole.config';
+export { RESPONSE_MODE_CONFIG, CLOSING_BEHAVIOR_CONFIG } from './ExperienceConsole.config';
+
+// Unified data hook
+export { useUnifiedExperienceData } from './useUnifiedExperienceData';
+export type { UnifiedExperiencePayload } from './useUnifiedExperienceData';
+
+// Component registries
+export { resolveCardComponent, resolveEditorComponent } from './component-registry';
+export { resolveDataHook } from './hook-registry';
+
+// Type-specific components (for direct access if needed)
 export { SystemPromptCard } from './SystemPromptCard';
 export { SystemPromptEditor } from './SystemPromptEditor';
+export { FeatureFlagCard } from './FeatureFlagCard';
+export { FeatureFlagEditor } from './FeatureFlagEditor';
 
-// Re-export data hook and factory
+// Type-specific data hooks
 export { useExperienceData, createDefaultSystemPrompt } from './useExperienceData';
 export type { ExperienceDataResult } from './useExperienceData';
+export { useFeatureFlagsData, createDefaultFeatureFlag } from './useFeatureFlagsData';
+export type { FeatureFlagsDataResult } from './useFeatureFlagsData';
 
-// Re-export types for consumers
-export type { SystemPromptPayload } from '@core/schema/system-prompt';
+// Category config for feature flags (preserved for component use)
+export { CATEGORY_CONFIG } from './FeatureFlagConsole.config';
 
+// Default export
 export default ExperienceConsole;

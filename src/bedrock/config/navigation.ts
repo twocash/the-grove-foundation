@@ -61,12 +61,6 @@ export const BEDROCK_NAV_ITEMS: NavItem[] = [
     icon: 'smart_toy',
     path: '/bedrock/experience',
   },
-  {
-    id: 'feature-flags',
-    label: 'Feature Flags',
-    icon: 'toggle_on',
-    path: '/bedrock/feature-flags',
-  },
 
   // --- Future ---
   {
@@ -136,16 +130,9 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
   experience: {
     id: 'experience',
     title: 'Experience',
-    description: 'Manage AI system prompts for /explore',
+    description: 'Unified management: system prompts, feature flags, and more',
     icon: 'smart_toy',
     path: '/bedrock/experience',
-  },
-  'feature-flags': {
-    id: 'feature-flags',
-    title: 'Feature Flags',
-    description: 'Manage feature toggles for /explore',
-    icon: 'toggle_on',
-    path: '/bedrock/feature-flags',
   },
   journeys: {
     id: 'journeys',

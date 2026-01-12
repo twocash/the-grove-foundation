@@ -41,7 +41,6 @@ const PromptWorkshop = lazy(() =>
   import('../bedrock/consoles/PromptWorkshop').then((m) => ({ default: m.PromptWorkshopWithExtraction }))
 );
 const ExperienceConsole = lazy(() => import('../bedrock/consoles/ExperienceConsole'));
-const FeatureFlagConsole = lazy(() => import('../bedrock/consoles/ExperienceConsole/FeatureFlagConsole'));
 
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
@@ -246,21 +245,13 @@ export const routes: RouteObject[] = [
               </Suspense>
             ),
           },
-          // Experience Console (system prompts for /explore)
+          // Experience Console (unified: system prompts, feature flags)
+          // Sprint: unified-experience-console-v1 - polymorphic console
           {
             path: 'experience',
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <ExperienceConsole />
-              </Suspense>
-            ),
-          },
-          // Feature Flag Console (Sprint: feature-flags-v1)
-          {
-            path: 'feature-flags',
-            element: (
-              <Suspense fallback={<ConsoleLoadingFallback />}>
-                <FeatureFlagConsole />
               </Suspense>
             ),
           },

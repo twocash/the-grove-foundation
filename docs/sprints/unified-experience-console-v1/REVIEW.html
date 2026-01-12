@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprint Review: unified-experience-console-v1</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { border-bottom: 2px solid #4a9eff; padding-bottom: 0.5rem; }
+    h2 { color: #4a9eff; margin-top: 2rem; }
+    .phase { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .phase-header { display: flex; justify-content: space-between; align-items: center; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; }
+    .status.complete { background: #22c55e33; color: #22c55e; }
+    .status.in-progress { background: #eab30833; color: #eab308; }
+    .status.pending { background: #64748b33; color: #94a3b8; }
+    .verification { background: #1a1a2e; border-radius: 4px; padding: 1rem; margin-top: 1rem; }
+    .verification h4 { margin: 0 0 0.5rem 0; color: #94a3b8; }
+    .verification ul { margin: 0; padding-left: 1.5rem; }
+    .verification li { margin: 0.25rem 0; }
+    .check { color: #22c55e; }
+    .timestamp { color: #64748b; font-size: 0.75rem; }
+    .summary { background: #2F5C3B33; border-left: 3px solid #2F5C3B; padding: 1rem; margin: 1rem 0; }
+    code { background: #1a1a2e; padding: 0.125rem 0.25rem; border-radius: 2px; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: unified-experience-console-v1</h1>
+  <p class="timestamp">Last updated: 2026-01-12</p>
+
+  <div class="summary">
+    <h3>Sprint Summary</h3>
+    <p>Refactored the Experience console to be truly polymorphic—driven by <code>EXPERIENCE_TYPE_REGISTRY</code> rather than hardcoded to a single type. After this sprint, adding a new experience type requires only registry entries and component/hook registration, with no modifications to the console itself.</p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 1: Extend Registry Schema</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Modified</h4>
+      <ul>
+        <li><code>src/bedrock/types/experience.types.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Added <code>MetricDefinition</code>, <code>FilterDefinition</code>, <code>SortDefinition</code> interfaces</li>
+        <li class="check">Extended <code>ExperienceTypeDefinition</code> with polymorphic fields</li>
+        <li class="check">Updated registry entries with card/hook names</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 2: Create Component Registry</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Created</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/component-registry.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Created <code>CARD_COMPONENT_REGISTRY</code> and <code>EDITOR_COMPONENT_REGISTRY</code></li>
+        <li class="check">Implemented <code>resolveCardComponent()</code> and <code>resolveEditorComponent()</code></li>
+        <li class="check">Added validation helpers for component registration</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 3: Create Hook Registry</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Created</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/hook-registry.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Created <code>HOOK_REGISTRY</code> for data hook resolution</li>
+        <li class="check">Implemented <code>resolveDataHook()</code> with fail-fast error handling</li>
+        <li class="check">Added <code>validateHookRegistrations()</code> for registry validation</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 4: Create Unified Data Hook</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Created</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/useUnifiedExperienceData.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Created <code>UnifiedExperiencePayload</code> union type</li>
+        <li class="check">Implemented data composition from all registered types</li>
+        <li class="check">Routed CRUD operations to appropriate hooks based on object type</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 5: Update Console Config for Dynamic Generation</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Modified</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/ExperienceConsole.config.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Rewrote config with dynamic generation from registry</li>
+        <li class="check">Implemented <code>generateFilterOptions()</code>, <code>generateSortOptions()</code>, <code>generateMetrics()</code></li>
+        <li class="check">Config now auto-discovers types at runtime</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 6: Create Polymorphic Console Component</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Modified</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/index.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Created <code>PolymorphicCard</code> component with runtime resolution</li>
+        <li class="check">Created <code>PolymorphicEditor</code> component with runtime resolution</li>
+        <li class="check">Console now renders any registered type without modification</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 7: Route and Navigation Cleanup</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Modified</h4>
+      <ul>
+        <li><code>src/router/routes.tsx</code></li>
+        <li><code>src/bedrock/config/navigation.ts</code></li>
+      </ul>
+      <h4>Changes</h4>
+      <ul>
+        <li class="check">Removed <code>/bedrock/feature-flags</code> route</li>
+        <li class="check">Removed feature-flags navigation entry</li>
+        <li class="check">Updated Experience description: "Unified management: system prompts, feature flags, and more"</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 8: Delete Obsolete Files</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Files Deleted</h4>
+      <ul>
+        <li><code>src/bedrock/consoles/ExperienceConsole/FeatureFlagConsole.tsx</code></li>
+      </ul>
+      <h4>Files Preserved</h4>
+      <ul>
+        <li><code>FeatureFlagConsole.config.ts</code> - Contains <code>CATEGORY_CONFIG</code> used by card/editor</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h2>Phase 9: Visual Verification</h2>
+      <span class="status complete">Complete</span>
+    </div>
+    <div class="verification">
+      <h4>Verified at <code>http://localhost:3001/bedrock/experience</code></h4>
+      <ul>
+        <li class="check">Title: "Experience" with subtitle "Unified management: system prompts, feature flags, and more"</li>
+        <li class="check">Metrics: Shows Total, System Prompt, Feature Flag counts (dynamically generated)</li>
+        <li class="check">Filters: State, Type, Availability, Category, Header (registry-driven)</li>
+        <li class="check">Cards: Both system prompts and feature flags display in unified grid</li>
+        <li class="check">Polymorphic rendering: Each type uses its own card component</li>
+        <li class="check">Navigation: Feature Flags entry removed, only Experience remains</li>
+        <li class="check">Build passes with no errors</li>
+      </ul>
+      <div style="margin-top: 1rem;">
+        <img src="screenshots/unified-experience-console-v1.gif" alt="Unified Experience Console" style="max-width: 100%; border-radius: 8px; border: 1px solid #4a9eff33;">
+        <p style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Unified Experience Console showing both system prompts (green icons) and feature flags (red icon) in the same grid view.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary" style="margin-top: 2rem;">
+    <h3>DEX Compliance</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr style="border-bottom: 1px solid #4a9eff33;">
+        <th style="text-align: left; padding: 0.5rem;">Principle</th>
+        <th style="text-align: left; padding: 0.5rem;">Implementation</th>
+      </tr>
+      <tr>
+        <td style="padding: 0.5rem;">Declarative Sovereignty</td>
+        <td style="padding: 0.5rem;">Components resolved from registry config, not hardcoded</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.5rem;">Capability Agnosticism</td>
+        <td style="padding: 0.5rem;">Console works regardless of which types are registered</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.5rem;">Provenance</td>
+        <td style="padding: 0.5rem;">Type registry documents all type metadata</td>
+      </tr>
+      <tr>
+        <td style="padding: 0.5rem;">Organic Scalability</td>
+        <td style="padding: 0.5rem;">New types appear without console modification</td>
+      </tr>
+    </table>
+  </div>
+
+</body>
+</html>
