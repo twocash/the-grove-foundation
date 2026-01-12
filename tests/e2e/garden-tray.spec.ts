@@ -58,8 +58,8 @@ test.describe('Garden Tray - Smoke Tests', () => {
     const gardenTray = page.getByTestId('garden-tray')
     await expect(gardenTray).toBeVisible({ timeout: 10000 })
 
-    // Should show the garden emoji
-    const emoji = gardenTray.locator('span[role="img"]')
+    // Should show the garden header emoji (specifically the one with aria-label="Garden")
+    const emoji = gardenTray.getByRole('img', { name: 'Garden' })
     await expect(emoji).toBeVisible()
   })
 
@@ -211,11 +211,13 @@ test.describe('Garden Tray - Smoke Tests', () => {
     await page.waitForTimeout(500)
 
     // Either shows sprouts or empty state
-    const emptyState = gardenTray.locator('text="Select text to plant sprouts"')
-    const sproutRows = gardenTray.locator('[class*="SproutRow"], [data-testid*="sprout"]')
+    // Empty state shows when no sprouts exist
+    const emptyState = gardenTray.getByText('Select text to plant sprouts')
+    // Sprout rows have emoji indicators with role="img" and aria-label like "pending", "active", "completed"
+    const sproutEmojis = gardenTray.locator('span[role="img"][aria-label="pending"], span[role="img"][aria-label="active"], span[role="img"][aria-label="completed"], span[role="img"][aria-label="blocked"]')
 
     const hasEmptyState = await emptyState.isVisible().catch(() => false)
-    const hasSprouts = (await sproutRows.count()) > 0
+    const hasSprouts = (await sproutEmojis.count()) > 0
 
     // One must be true
     expect(hasEmptyState || hasSprouts).toBeTruthy()
