@@ -46,6 +46,7 @@ import { usePromptArchitect } from '@explore/hooks/usePromptArchitect';
 import { useResearchSprouts } from '@explore/context/ResearchSproutContext';
 import { useToast } from '@explore/context/ToastContext';
 import { GardenInspector } from '@explore/GardenInspector';
+import { GardenTray } from '@explore/components/GardenTray';
 
 export interface ExploreShellProps {
   initialLens?: string;
@@ -76,10 +77,14 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Sprint: sprout-research-v1 - Sprout research system
   // When enabled, intercepts sprout: commands for Prompt Architect flow
-  const isSproutResearchEnabled = useFeatureFlag('sprout-research');
+  // TEMP: Hard-coded to true until GCS feature flags load properly
+  // Original: const isSproutResearchEnabled = useFeatureFlag('sprout-research');
+  const isSproutResearchEnabled = true;
 
   // Sprint: sprout-research-v1, Phase 4e - Garden Inspector panel
-  const isGardenInspectorEnabled = useFeatureFlag('garden-inspector');
+  // TEMP: Hard-coded to true until GCS feature flags load properly
+  // Original: const isGardenInspectorEnabled = useFeatureFlag('garden-inspector');
+  const isGardenInspectorEnabled = true;
 
   // Sprint: kinetic-highlights-v1 - Look up backing prompts for highlights
   const { findPrompt } = usePromptForHighlight();
@@ -95,12 +100,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     onSproutReady: async (input) => {
       try {
         const newSprout = await createSprout(input);
+        // Sprint: garden-tray-mvp - Toast without modal action (GardenTray now shows sprouts)
         toast.success('Research sprout created', {
-          description: `"${newSprout.title}" is now pending execution`,
-          action: {
-            label: 'View Garden',
-            onClick: () => setOverlay({ type: 'garden-inspector' }),
-          },
+          description: `"${newSprout.title}" is now pending execution. Check the Garden tray →`,
         });
       } catch (error) {
         toast.error('Failed to create sprout', {
@@ -855,12 +857,15 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Sprout Tray (Sprint: kinetic-cultivation-v1) */}
-      <SproutTray
+      {/* Garden Tray (Sprint: garden-tray-mvp) - Shows Research Sprouts */}
+      <GardenTray />
+
+      {/* Legacy Sprout Tray (Sprint: kinetic-cultivation-v1) - Hidden pending cutover */}
+      {/* <SproutTray
         sprouts={sprouts}
         onDelete={deleteSprout}
         sessionCount={sessionSproutCount}
-      />
+      /> */}
 
       {/* Keyboard HUD (Sprint: kinetic-cultivation-v1) */}
       <AnimatePresence>
