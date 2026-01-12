@@ -98,9 +98,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // Build header flags for display
   const headerFlags = useMemo((): HeaderFlag[] => {
     return getHeaderFlags().map(flag => ({
-      flagId: flag.flagId,
-      label: flag.headerLabel || flag.title,
-      enabled: getFlagState(flag.flagId),
+      flagId: flag.id,
+      label: flag.headerLabel || flag.name,
+      enabled: getFlagState(flag.id),
       available: flag.available
     }));
   }, [getHeaderFlags, getFlagState]);
