@@ -1,10 +1,12 @@
 // src/explore/components/GardenTray/GardenTray.tsx
 // Slide-out tray showing Research Sprouts with filtering
 // Sprint: garden-tray-mvp, Phase 1
+// Enhanced: sprout-status-panel-v1, Phase 3
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResearchSprouts } from '@explore/context/ResearchSproutContext';
+import { useSproutNotifications } from '@explore/hooks/useSproutNotifications';
 import type { ResearchSproutStatus } from '@core/schema/research-sprout';
 import { SproutRow } from './SproutRow';
 
@@ -45,6 +47,12 @@ const STATUS_FILTER_OPTIONS: { value: ResearchSproutStatus | 'all'; label: strin
 export function GardenTray() {
   const { sprouts, isLoading, error, getStatusCounts } = useResearchSprouts();
 
+  // Notifications and pulse animation
+  const { pulseState, clearPulse } = useSproutNotifications({
+    enabled: true,
+    showToasts: true,
+  });
+
   // UI State
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -79,6 +87,21 @@ export function GardenTray() {
   // Get total count for badge
   const totalCount = sprouts.length;
 
+  // Get ready count for accessibility announcements
+  const readyCount = sprouts.filter(s => s.status === 'completed').length;
+
+  // Keyboard navigation: Escape closes expanded tray
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isExpanded) {
+      setIsExpanded(false);
+    }
+  }, [isExpanded]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
   return (
     <motion.div
       className="fixed right-0 top-0 h-full z-40
@@ -94,7 +117,19 @@ export function GardenTray() {
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
       data-testid="garden-tray"
+      role="complementary"
+      aria-label={`Research sprouts garden. ${totalCount} sprouts total, ${readyCount} ready.`}
     >
+      {/* Screen reader announcement for new ready sprouts */}
+      {pulseState.isPulsing && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="sr-only"
+        >
+          {pulseState.newReadyCount} research sprout{pulseState.newReadyCount !== 1 ? 's' : ''} ready to view
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between p-3 border-b border-[var(--glass-border)]">
         <div className="flex items-center gap-2">
@@ -112,15 +147,30 @@ export function GardenTray() {
           )}
         </div>
 
-        {/* Counter badge */}
+        {/* Counter badge with pulse animation */}
         <motion.span
           key={totalCount}
           initial={{ scale: 1.3 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="flex items-center justify-center min-w-[20px] h-5
+          animate={{
+            scale: pulseState.isPulsing ? [1, 1.2, 1] : 1,
+          }}
+          transition={
+            pulseState.isPulsing
+              ? { repeat: Infinity, duration: 0.8 }
+              : { type: 'spring', stiffness: 300, damping: 20 }
+          }
+          onClick={() => {
+            if (pulseState.isPulsing) {
+              clearPulse();
+            }
+          }}
+          className={`flex items-center justify-center min-w-[20px] h-5
                     px-1.5 rounded-full text-xs font-medium
-                    bg-emerald-500/20 text-emerald-400"
+                    ${pulseState.isPulsing
+                      ? 'bg-emerald-500/40 text-emerald-300 ring-2 ring-emerald-400/50 cursor-pointer'
+                      : 'bg-emerald-500/20 text-emerald-400'
+                    }`}
+          title={pulseState.isPulsing ? `${pulseState.newReadyCount} new ready!` : `${totalCount} sprouts`}
         >
           {totalCount}
         </motion.span>
@@ -137,7 +187,7 @@ export function GardenTray() {
           >
             {/* Search Input */}
             <div className="relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--glass-text-muted)]">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--glass-text-muted)]" aria-hidden="true">
                 🔍
               </span>
               <input
@@ -145,6 +195,7 @@ export function GardenTray() {
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search sprouts"
                 className="w-full pl-8 pr-3 py-1.5 text-sm
                          bg-[var(--glass-void)] rounded-md
                          border border-[var(--glass-border)]
@@ -158,6 +209,7 @@ export function GardenTray() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ResearchSproutStatus | 'all')}
+              aria-label="Filter by status"
               className="w-full px-3 py-1.5 text-sm
                        bg-[var(--glass-void)] rounded-md
                        border border-[var(--glass-border)]
@@ -213,6 +265,7 @@ export function GardenTray() {
                     sprout={sprout}
                     emoji={STATUS_EMOJI[sprout.status]}
                     isExpanded={isExpanded}
+                    isNewlyReady={pulseState.pulseSourceIds.includes(sprout.id)}
                   />
                 ))}
               </div>

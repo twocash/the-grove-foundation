@@ -11,8 +11,10 @@ import React, {
   useState,
   useCallback,
   useMemo,
+  useEffect,
   type ReactNode,
 } from 'react';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type {
   ResearchSprout,
   ResearchSproutStatus,
@@ -27,7 +29,99 @@ import type { FilterPresetId } from '@core/schema/research-sprout-registry';
 import {
   FILTER_PRESETS,
   DEFAULT_PAGE_SIZE,
+  RESEARCH_SPROUTS_TABLE,
 } from '@core/schema/research-sprout-registry';
+
+// =============================================================================
+// Supabase Client Singleton
+// =============================================================================
+
+let supabaseClient: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient | null {
+  if (supabaseClient) return supabaseClient;
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[ResearchSproutContext] Supabase credentials not configured');
+    return null;
+  }
+
+  supabaseClient = createClient(supabaseUrl, supabaseKey);
+  return supabaseClient;
+}
+
+/**
+ * Transform database row to ResearchSprout
+ */
+function rowToSprout(row: Record<string, unknown>): ResearchSprout {
+  return {
+    id: row.id as string,
+    spark: row.spark as string,
+    title: row.title as string,
+    groveId: row.grove_id as string,
+    status: row.status as ResearchSproutStatus,
+    strategy: row.strategy as ResearchSprout['strategy'],
+    branches: (row.branches as ResearchSprout['branches']) || [],
+    evidence: (row.evidence as ResearchSprout['evidence']) || [],
+    synthesis: row.synthesis as ResearchSprout['synthesis'] | null,
+    execution: row.execution as ResearchSprout['execution'] | null,
+    statusHistory: (row.status_history as ResearchSprout['statusHistory']) || [],
+    appliedRuleIds: (row.applied_rule_ids as string[]) || [],
+    inferenceConfidence: row.inference_confidence as number | null,
+    groveConfigSnapshot: row.grove_config_snapshot as ResearchSprout['groveConfigSnapshot'],
+    architectSessionId: row.architect_session_id as string | null,
+    parentSproutId: row.parent_sprout_id as string | null,
+    childSproutIds: (row.child_sprout_ids as string[]) || [],
+    creatorId: row.creator_id as string | undefined,
+    sessionId: row.session_id as string | undefined,
+    tags: (row.tags as string[]) || [],
+    notes: row.notes as string | undefined,
+    rating: row.rating as number | undefined,
+    reviewed: row.reviewed as boolean | undefined,
+    requiresReview: row.requires_review as boolean | undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+/**
+ * Transform ResearchSprout to database row format
+ */
+function sproutToRow(sprout: Partial<ResearchSprout> & { groveId: string }): Record<string, unknown> {
+  const row: Record<string, unknown> = {};
+
+  if (sprout.id !== undefined) row.id = sprout.id;
+  if (sprout.spark !== undefined) row.spark = sprout.spark;
+  if (sprout.title !== undefined) row.title = sprout.title;
+  if (sprout.groveId !== undefined) row.grove_id = sprout.groveId;
+  if (sprout.status !== undefined) row.status = sprout.status;
+  if (sprout.strategy !== undefined) row.strategy = sprout.strategy;
+  if (sprout.branches !== undefined) row.branches = sprout.branches;
+  if (sprout.evidence !== undefined) row.evidence = sprout.evidence;
+  if (sprout.synthesis !== undefined) row.synthesis = sprout.synthesis;
+  if (sprout.execution !== undefined) row.execution = sprout.execution;
+  if (sprout.statusHistory !== undefined) row.status_history = sprout.statusHistory;
+  if (sprout.appliedRuleIds !== undefined) row.applied_rule_ids = sprout.appliedRuleIds;
+  if (sprout.inferenceConfidence !== undefined) row.inference_confidence = sprout.inferenceConfidence;
+  if (sprout.groveConfigSnapshot !== undefined) row.grove_config_snapshot = sprout.groveConfigSnapshot;
+  if (sprout.architectSessionId !== undefined) row.architect_session_id = sprout.architectSessionId;
+  if (sprout.parentSproutId !== undefined) row.parent_sprout_id = sprout.parentSproutId;
+  if (sprout.childSproutIds !== undefined) row.child_sprout_ids = sprout.childSproutIds;
+  if (sprout.creatorId !== undefined) row.creator_id = sprout.creatorId;
+  if (sprout.sessionId !== undefined) row.session_id = sprout.sessionId;
+  if (sprout.tags !== undefined) row.tags = sprout.tags;
+  if (sprout.notes !== undefined) row.notes = sprout.notes;
+  if (sprout.rating !== undefined) row.rating = sprout.rating;
+  if (sprout.reviewed !== undefined) row.reviewed = sprout.reviewed;
+  if (sprout.requiresReview !== undefined) row.requires_review = sprout.requiresReview;
+  if (sprout.createdAt !== undefined) row.created_at = sprout.createdAt;
+  if (sprout.updatedAt !== undefined) row.updated_at = sprout.updatedAt;
+
+  return row;
+}
 
 // =============================================================================
 // Types
@@ -167,10 +261,32 @@ interface ResearchSproutProviderProps {
 }
 
 /**
- * Generate a UUID (simple implementation for MVP)
+ * Fetch sprouts from Supabase for a grove
  */
-function generateId(): string {
-  return 'rs-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+async function fetchSproutsFromSupabase(groveId: string): Promise<ResearchSprout[]> {
+  const client = getSupabaseClient();
+  if (!client) {
+    console.warn('[ResearchSproutContext] No Supabase client, returning empty array');
+    return [];
+  }
+
+  try {
+    const { data, error } = await client
+      .from(RESEARCH_SPROUTS_TABLE)
+      .select('*')
+      .eq('grove_id', groveId)
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('[ResearchSproutContext] Fetch error:', error.message);
+      throw new Error(error.message);
+    }
+
+    return (data || []).map(rowToSprout);
+  } catch (e) {
+    console.error('[ResearchSproutContext] Failed to fetch sprouts:', e);
+    throw e;
+  }
 }
 
 export function ResearchSproutProvider({
@@ -184,45 +300,77 @@ export function ResearchSproutProvider({
   const [error, setError] = useState<string | null>(null);
   const [groveId, setGroveId] = useState<string | null>(initialGroveId ?? null);
 
-  // Initialize for a grove
+  // Initialize for a grove - fetch sprouts from Supabase
   const initialize = useCallback(async (newGroveId: string) => {
     setIsLoading(true);
     setError(null);
     setGroveId(newGroveId);
 
     try {
-      // TODO Phase 2d: Fetch from Supabase
-      // For now, start with empty state
-      setSprouts([]);
+      const fetchedSprouts = await fetchSproutsFromSupabase(newGroveId);
+      setSprouts(fetchedSprouts);
+      console.log(`[ResearchSproutContext] Loaded ${fetchedSprouts.length} sprouts for grove ${newGroveId}`);
     } catch (e) {
+      console.error('[ResearchSproutContext] Initialize error:', e);
       setError(e instanceof Error ? e.message : 'Failed to initialize');
+      setSprouts([]); // Fallback to empty state
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  // Create a new sprout
+  // Create a new sprout - persist to Supabase
   const create = useCallback(async (input: CreateResearchSproutInput): Promise<ResearchSprout> => {
     if (!groveId) {
       throw new Error('Context not initialized with groveId');
     }
 
-    // Create sprout with factory function
+    // Create sprout with factory function (generates all default values)
     const sproutData = createResearchSprout({
       ...input,
       groveId,
     });
 
-    // Add ID
-    const newSprout: ResearchSprout = {
-      ...sproutData,
-      id: generateId(),
-    };
+    // Persist to Supabase
+    const client = getSupabaseClient();
+    if (!client) {
+      // Fallback to in-memory only (for development without Supabase)
+      const fallbackSprout: ResearchSprout = {
+        ...sproutData,
+        id: `rs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      };
+      console.warn('[ResearchSproutContext] No Supabase client, using in-memory only');
+      setSprouts(prev => [fallbackSprout, ...prev]);
+      return fallbackSprout;
+    }
 
-    // TODO Phase 2d: Insert into Supabase
-    setSprouts(prev => [newSprout, ...prev]);
+    try {
+      // Convert to database row format (let Supabase generate UUID)
+      const row = sproutToRow(sproutData);
+      delete row.id; // Let Supabase generate the UUID
 
-    return newSprout;
+      const { data, error } = await client
+        .from(RESEARCH_SPROUTS_TABLE)
+        .insert(row)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[ResearchSproutContext] Insert error:', error.message);
+        throw new Error(`Failed to save sprout: ${error.message}`);
+      }
+
+      const newSprout = rowToSprout(data);
+      console.log(`[ResearchSproutContext] Created sprout ${newSprout.id}: "${newSprout.title}"`);
+
+      // Update local state
+      setSprouts(prev => [newSprout, ...prev]);
+
+      return newSprout;
+    } catch (e) {
+      console.error('[ResearchSproutContext] Create error:', e);
+      throw e;
+    }
   }, [groveId]);
 
   // Get by ID
@@ -395,7 +543,7 @@ export function ResearchSproutProvider({
     setSelectedSproutId(id);
   }, []);
 
-  // Refresh from server
+  // Refresh from Supabase
   const refresh = useCallback(async () => {
     if (!groveId) return;
 
@@ -403,9 +551,11 @@ export function ResearchSproutProvider({
     setError(null);
 
     try {
-      // TODO Phase 2d: Fetch from Supabase
-      // For now, no-op
+      const fetchedSprouts = await fetchSproutsFromSupabase(groveId);
+      setSprouts(fetchedSprouts);
+      console.log(`[ResearchSproutContext] Refreshed ${fetchedSprouts.length} sprouts`);
     } catch (e) {
+      console.error('[ResearchSproutContext] Refresh error:', e);
       setError(e instanceof Error ? e.message : 'Failed to refresh');
     } finally {
       setIsLoading(false);
@@ -434,6 +584,14 @@ export function ResearchSproutProvider({
 
     return counts;
   }, [sprouts]);
+
+  // Auto-initialize when initialGroveId is provided
+  useEffect(() => {
+    if (initialGroveId && sprouts.length === 0 && !isLoading) {
+      console.log(`[ResearchSproutContext] Auto-initializing for grove: ${initialGroveId}`);
+      initialize(initialGroveId);
+    }
+  }, [initialGroveId, initialize, sprouts.length, isLoading]);
 
   // Memoized context value
   const value = useMemo<ResearchSproutContextValue>(() => ({
