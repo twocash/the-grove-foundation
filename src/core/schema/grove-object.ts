@@ -14,6 +14,7 @@ export type GroveObjectType =
   | 'research-sprout'        // Sprint: sprout-research-v1
   | 'prompt-architect-config' // Sprint: sprout-research-v1
   | 'system-prompt'
+  | 'feature-flag'           // Sprint: feature-flags-v1
   | 'node'
   | 'card'
   | string;

@@ -265,3 +265,13 @@ export {
   type QAIssue,
   deriveSequences
 } from './prompt';
+
+// Feature Flag types (Sprint: feature-flags-v1)
+export {
+  type FeatureFlagPayload,
+  type FeatureFlagCategory,
+  type FlagChangelogEntry,
+  isFeatureFlagPayload,
+  createFeatureFlagPayload,
+  addAvailabilityChange
+} from './feature-flag';

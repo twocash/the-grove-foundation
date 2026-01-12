@@ -39,7 +39,8 @@ import { useSproutStorage } from '../../../../hooks/useSproutStorage';
 import type { Sprout, SproutProvenance } from '@core/schema/sprout';
 import type { RhetoricalSpan, JourneyFork, PivotContext, StreamItem } from '@core/schema/stream';
 import { journeys } from '../../../data/journeys';
-import { useFeatureFlag } from '../../../../hooks/useFeatureFlags';
+import { useFeatureFlag, useFeatureFlags } from '../../../../hooks/useFeatureFlags';
+import type { HeaderFlag } from './KineticHeader';
 import { usePromptForHighlight } from '@explore/hooks/usePromptForHighlight';
 import { shouldTriggerPromptArchitect } from '@explore/services/prompt-architect-pipeline';
 import { usePromptArchitect } from '@explore/hooks/usePromptArchitect';
@@ -85,6 +86,30 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   // TEMP: Hard-coded to true until GCS feature flags load properly
   // Original: const isGardenInspectorEnabled = useFeatureFlag('garden-inspector');
   const isGardenInspectorEnabled = true;
+
+  // Sprint: feature-flags-v1 - Get header flags for KineticHeader toggles
+  const {
+    getHeaderFlags,
+    getFlag: getFlagState,
+    setUserPreference,
+    isLoading: flagsLoading
+  } = useFeatureFlags();
+
+  // Build header flags for display
+  const headerFlags = useMemo((): HeaderFlag[] => {
+    return getHeaderFlags().map(flag => ({
+      flagId: flag.flagId,
+      label: flag.headerLabel || flag.title,
+      enabled: getFlagState(flag.flagId),
+      available: flag.available
+    }));
+  }, [getHeaderFlags, getFlagState]);
+
+  // Handle flag toggle from header
+  const handleFlagToggle = useCallback((flagId: string, enabled: boolean) => {
+    setUserPreference(flagId, enabled);
+    console.log('[ExploreShell] Feature flag toggled:', flagId, enabled ? 'ON' : 'OFF');
+  }, [setUserPreference]);
 
   // Sprint: kinetic-highlights-v1 - Look up backing prompts for highlights
   const { findPrompt } = usePromptForHighlight();
@@ -675,6 +700,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         onHybridSearchToggle={handleHybridSearchToggle}
         journeyMode={journeyMode}
         onJourneyModeToggle={handleJourneyModeToggle}
+        headerFlags={headerFlags}
+        onFlagToggle={handleFlagToggle}
       />
 
       {/* Stream area - attach scrollRef and capture ref */}

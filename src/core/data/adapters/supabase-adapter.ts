@@ -1,5 +1,6 @@
 // src/core/data/adapters/supabase-adapter.ts
 // Supabase-backed adapter for production
+// Cache-bust: 2026-01-12T16:45:00Z - feature-flag support verified
 
 import type { GroveObject } from '@core/schema/grove-object';
 import type {
@@ -30,7 +31,14 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   moment: 'moments',
   prompt: 'prompts',
   'system-prompt': 'system_prompts',
+  'feature-flag': 'feature_flags',
 };
+
+/**
+ * Types that use meta+payload JSONB pattern instead of flattened columns.
+ * These require custom row/object transforms.
+ */
+const JSONB_META_TYPES = new Set<GroveObjectType>(['feature-flag']);
 
 /**
  * camelCase to snake_case converter
@@ -79,12 +87,24 @@ function toCamelCaseKeys(obj: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
- * Transform database row to GroveObject
+ * Transform database row to GroveObject.
+ * Handles both flattened column format and JSONB meta format.
  */
-function rowToGroveObject<T>(row: Record<string, unknown>): GroveObject<T> {
+function rowToGroveObject<T>(
+  row: Record<string, unknown>,
+  type?: GroveObjectType
+): GroveObject<T> {
   const camelRow = toCamelCaseKeys(row);
 
-  // Extract meta fields
+  // Check if this type uses JSONB meta pattern
+  if (type && JSONB_META_TYPES.has(type)) {
+    // JSONB meta pattern: meta and payload are stored as JSONB columns
+    const meta = camelRow.meta as GroveObject<T>['meta'];
+    const payload = camelRow.payload as T;
+    return { meta, payload };
+  }
+
+  // Flattened column pattern: extract meta fields from columns
   const meta = {
     id: camelRow.id as string,
     type: camelRow.type as string,
@@ -106,12 +126,26 @@ function rowToGroveObject<T>(row: Record<string, unknown>): GroveObject<T> {
 }
 
 /**
- * Transform GroveObject to database row
+ * Transform GroveObject to database row.
+ * Handles both flattened column format and JSONB meta format.
  */
 function groveObjectToRow<T>(
   type: GroveObjectType,
   obj: GroveObject<T>
 ): Record<string, unknown> {
+  // Check if this type uses JSONB meta pattern
+  if (JSONB_META_TYPES.has(type)) {
+    // JSONB meta pattern: store meta and payload as JSONB columns
+    return {
+      id: obj.meta.id,
+      meta: obj.meta,
+      payload: obj.payload,
+      created_at: obj.meta.createdAt,
+      updated_at: obj.meta.updatedAt,
+    };
+  }
+
+  // Flattened column pattern: extract meta fields to columns
   const row: Record<string, unknown> = {
     id: obj.meta.id,
     type: obj.meta.type || type,
@@ -222,7 +256,7 @@ export class SupabaseAdapter implements GroveDataProvider {
     }
 
     // If table exists but is empty, also fallback to defaults
-    const results = (data || []).map((row) => rowToGroveObject<T>(row as Record<string, unknown>));
+    const results = (data || []).map((row) => rowToGroveObject<T>(row as Record<string, unknown>, type));
     if (results.length === 0) {
       console.log(`[SupabaseAdapter] No ${type} data found, using defaults`);
       return getDefaults<T>(type);
@@ -255,7 +289,7 @@ export class SupabaseAdapter implements GroveDataProvider {
       throw new Error(`Failed to get ${type}/${id}: ${error.message}`);
     }
 
-    return data ? rowToGroveObject<T>(data as Record<string, unknown>) : null;
+    return data ? rowToGroveObject<T>(data as Record<string, unknown>, type) : null;
   }
 
   async create<T>(
@@ -286,7 +320,7 @@ export class SupabaseAdapter implements GroveDataProvider {
       throw new Error(`Failed to create ${type}: ${error.message}`);
     }
 
-    const created = rowToGroveObject<T>(data as Record<string, unknown>);
+    const created = rowToGroveObject<T>(data as Record<string, unknown>, type);
 
     // Optionally trigger embedding pipeline
     const shouldEmbed =
@@ -332,7 +366,7 @@ export class SupabaseAdapter implements GroveDataProvider {
       throw new Error(`Failed to update ${type}/${id}: ${error.message}`);
     }
 
-    return rowToGroveObject<T>(data as Record<string, unknown>);
+    return rowToGroveObject<T>(data as Record<string, unknown>, type);
   }
 
   async delete(type: GroveObjectType, id: string): Promise<void> {

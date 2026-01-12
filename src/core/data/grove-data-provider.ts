@@ -19,7 +19,8 @@ export type GroveObjectType =
   | 'moment'
   | 'document'
   | 'prompt'
-  | 'system-prompt';
+  | 'system-prompt'
+  | 'feature-flag';
 
 /**
  * Options for listing objects.

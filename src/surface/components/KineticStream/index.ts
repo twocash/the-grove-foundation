@@ -6,6 +6,6 @@ export { ExploreShell } from './ExploreShell';
 export { KineticRenderer } from './Stream/KineticRenderer';
 export { CommandConsole } from './CommandConsole';
 export { KineticHeader } from './KineticHeader';
-export type { KineticHeaderProps } from './KineticHeader';
+export type { KineticHeaderProps, HeaderFlag } from './KineticHeader';
 export { KineticWelcome } from './KineticWelcome';
 export type { KineticWelcomeProps } from './KineticWelcome';

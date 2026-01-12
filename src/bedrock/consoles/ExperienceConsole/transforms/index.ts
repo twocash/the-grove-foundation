@@ -6,3 +6,11 @@ export {
   validateSystemPromptWizardOutput,
   type SystemPromptWizardOutput,
 } from './system-prompt.transforms';
+
+export {
+  createFeatureFlagFromWizard,
+  validateFeatureFlagWizardOutput,
+  migrateLegacyFeatureFlag,
+  migrateLegacyFeatureFlags,
+  type FeatureFlagWizardOutput,
+} from './feature-flag.transforms';

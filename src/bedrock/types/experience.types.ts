@@ -10,6 +10,8 @@ import type { SystemPromptPayload } from '@core/schema/system-prompt';
 import { DEFAULT_SYSTEM_PROMPT_PAYLOAD } from '@core/schema/system-prompt';
 import type { PromptArchitectConfigPayload } from '@core/schema/prompt-architect-config';
 import { DEFAULT_PROMPT_ARCHITECT_CONFIG_PAYLOAD } from '@core/schema/prompt-architect-config';
+import type { FeatureFlagPayload } from '@core/schema/feature-flag';
+import { createFeatureFlagPayload } from '@core/schema/feature-flag';
 
 // =============================================================================
 // Registry Types
@@ -96,18 +98,22 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     color: '#7E57C2', // Purple for research
   } satisfies ExperienceTypeDefinition<PromptArchitectConfigPayload>,
 
+  // Sprint: feature-flags-v1 - Feature Flag management
+  // INSTANCE pattern: Many flags active simultaneously
+  'feature-flag': {
+    type: 'feature-flag',
+    label: 'Feature Flag',
+    icon: 'toggle_on',
+    description: 'Toggle features on/off across the application',
+    defaultPayload: createFeatureFlagPayload('new-flag'),
+    wizardId: undefined, // Simple form, no wizard needed
+    editorComponent: 'FeatureFlagEditor',
+    allowMultipleActive: true, // INSTANCE: Many active simultaneously
+    routePath: '/bedrock/feature-flags',
+    color: '#D95D39', // grove-clay (orange accent)
+  } satisfies ExperienceTypeDefinition<FeatureFlagPayload>,
+
   // Future types (commented templates for reference):
-  //
-  // 'feature-flag': {
-  //   type: 'feature-flag',
-  //   label: 'Feature Flag',
-  //   icon: 'flag',
-  //   description: 'Toggle features on/off',
-  //   defaultPayload: DEFAULT_FEATURE_FLAG_PAYLOAD,
-  //   editorComponent: 'FeatureFlagEditor',
-  //   allowMultipleActive: true,
-  //   routePath: '/bedrock/feature-flags',
-  // },
   //
   // 'welcome-config': {
   //   type: 'welcome-config',
@@ -137,7 +143,7 @@ export type ExperienceObjectType = keyof typeof EXPERIENCE_TYPE_REGISTRY;
 export interface ExperiencePayloadMap {
   'system-prompt': SystemPromptPayload;
   'prompt-architect-config': PromptArchitectConfigPayload;
-  // Future: 'feature-flag': FeatureFlagPayload;
+  'feature-flag': FeatureFlagPayload;
 }
 
 /**

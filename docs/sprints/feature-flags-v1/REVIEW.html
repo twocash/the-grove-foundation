@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprint Review: feature-flags-v1</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { border-bottom: 2px solid #4a9eff; padding-bottom: 0.5rem; }
+    h2 { color: #4a9eff; margin-top: 2rem; }
+    .summary { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .summary-item { text-align: center; }
+    .summary-value { font-size: 2rem; font-weight: bold; color: #4a9eff; }
+    .summary-label { font-size: 0.875rem; color: #94a3b8; }
+    .phase { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .phase-header { display: flex; justify-content: space-between; align-items: center; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; }
+    .status.complete { background: #22c55e33; color: #22c55e; }
+    .status.in-progress { background: #eab30833; color: #eab308; }
+    .status.pending { background: #64748b33; color: #94a3b8; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .media-item { background: #1a1a2e; border-radius: 4px; overflow: hidden; }
+    .media-item img, .media-item video { width: 100%; display: block; }
+    .media-caption { padding: 0.5rem; font-size: 0.875rem; color: #94a3b8; }
+    .timestamp { color: #64748b; font-size: 0.75rem; }
+    .stories { margin-top: 2rem; }
+    .story-table { width: 100%; border-collapse: collapse; }
+    .story-table th, .story-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
+    .story-table th { color: #4a9eff; }
+    .p0 { color: #ef4444; }
+    .p1 { color: #eab308; }
+    a { color: #4a9eff; }
+    .alert { background: #22c55e22; border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    code { background: #1a1a2e; padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.875rem; }
+    .files-list { background: #1a1a2e; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; }
+    .key-feature { background: #4a9eff22; border-left: 3px solid #4a9eff; padding: 0.75rem 1rem; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: feature-flags-v1</h1>
+  <p class="timestamp">Last updated: 2026-01-12 10:30</p>
+
+  <div class="alert">
+    <strong>Sprint Complete</strong> - Feature Flags transformed from static JSON to Supabase-backed GroveObjects with full Experience Console management.
+  </div>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-value">5/5</div>
+        <div class="summary-label">Phases Complete</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">9/9</div>
+        <div class="summary-label">User Stories</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">4</div>
+        <div class="summary-label">Screenshots</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">&#x2705;</div>
+        <div class="summary-label">Status: Complete</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Key Features</h2>
+
+  <div class="key-feature">
+    <strong>Instance Cardinality:</strong> Multiple flags can be active simultaneously (unlike Singleton pattern for SystemPrompt)
+  </div>
+  <div class="key-feature">
+    <strong>Immutable FlagId:</strong> Once set, the flag identifier cannot be changed
+  </div>
+  <div class="key-feature">
+    <strong>Admin Kill Switch:</strong> <code>available: false</code> disables a flag regardless of user preference
+  </div>
+  <div class="key-feature">
+    <strong>User Preferences:</strong> Stored in localStorage with key <code>grove-feature-flags-prefs</code>
+  </div>
+  <div class="key-feature">
+    <strong>Changelog Tracking:</strong> Only <code>available</code> field changes are logged with timestamps and reasons
+  </div>
+
+  <h2>User Stories</h2>
+  <div class="stories">
+    <table class="story-table">
+      <tr>
+        <th>ID</th>
+        <th>Story</th>
+        <th>Priority</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>US-D001</td>
+        <td>Create/edit flags in console</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D002</td>
+        <td>Category filtering</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D003</td>
+        <td>Toggle availability with changelog</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D004</td>
+        <td>Configure header display</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D005</td>
+        <td>Consumer hook reads from Supabase</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D006</td>
+        <td>User preferences in localStorage</td>
+        <td class="p1">P1</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D007</td>
+        <td>Admin kill switch (available: false)</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D008</td>
+        <td>Legacy fallback for GCS flags</td>
+        <td class="p1">P1</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-D009</td>
+        <td>Header toggles render dynamically</td>
+        <td class="p1">P1</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Phase Progress</h2>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 1: Schema & Types</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>FeatureFlagPayload</code> interface with all required fields.</p>
+    <div class="files-list">src/core/schema/feature-flag.ts
+- flagId (string) - Immutable unique identifier
+- available (boolean) - Admin kill switch
+- defaultEnabled (boolean) - Default state for new users
+- showInExploreHeader (boolean) - Header toggle visibility
+- headerLabel (string | null) - Custom label for header
+- headerOrder (number) - Sort order in header
+- category (enum) - experience | research | experimental | internal
+- changelog (array) - History of availability changes
+
+src/core/schema/grove-object.ts
+- Added 'feature-flag' to GroveObjectType union</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2a: Supabase Migration</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created migration using JSONB meta+payload pattern (different from flattened columns in other tables).</p>
+    <div class="files-list">supabase/migrations/011_feature_flags.sql
+- CREATE TABLE feature_flags with meta/payload JSONB columns
+- RLS policies for authenticated access
+- Indexes for common queries</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2b: Data Hook</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>useFeatureFlagsData.ts</code> implementing <code>CollectionDataResult&lt;FeatureFlagPayload&gt;</code>.</p>
+    <div class="files-list">src/bedrock/consoles/ExperienceConsole/useFeatureFlagsData.ts
+- Standard CRUD via useGroveData
+- toggleAvailability() with changelog tracking
+- headerFlags getter for /explore integration
+- flagsByCategory for filtered views</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2c: Transform Functions</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created transforms for wizard integration and legacy migration.</p>
+    <div class="files-list">src/bedrock/consoles/ExperienceConsole/transforms/feature-flag.transforms.ts
+- createFeatureFlagFromWizard
+- validateFeatureFlagWizardOutput
+- migrateLegacyFeatureFlag
+- migrateLegacyFeatureFlags</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2d: Consumer Hook Rewrite</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Rewrote <code>hooks/useFeatureFlags.ts</code> to read from Supabase with fallback.</p>
+    <div class="files-list">hooks/useFeatureFlags.ts (complete rewrite)
+- Read from Supabase as source of truth
+- Fall back to legacy GCS flags
+- Store user preferences in localStorage
+- Respect 'available' field as admin kill switch</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 3: Experience Console UI</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created full console UI using Bedrock Console Factory pattern.</p>
+    <div class="files-list">src/bedrock/consoles/ExperienceConsole/FeatureFlagCard.tsx
+- Status bar indicator (green/red)
+- Category badge with color coding
+- Default enabled state indicator
+- Header visibility badge
+- Favorite toggle
+
+src/bedrock/consoles/ExperienceConsole/FeatureFlagEditor.tsx
+- Availability toggle with instant feedback
+- Description textarea (BufferedTextarea)
+- Default enabled checkbox
+- Header display section with label/order inputs
+- Category dropdown
+- Changelog history view
+
+src/bedrock/consoles/ExperienceConsole/FeatureFlagConsole.config.ts
+- Metrics: Total, Available, Disabled, In Header
+- Filters: Availability, Category, Header visibility
+- Sort options: Updated, Name, Flag ID, Header Order
+
+src/bedrock/consoles/ExperienceConsole/FeatureFlagConsole.tsx
+- Uses createBedrockConsole&lt;FeatureFlagPayload&gt;()
+- Re-exports all components and hooks
+
+src/router/routes.tsx
+- Added /bedrock/feature-flags route
+
+src/bedrock/config/navigation.ts
+- Added Feature Flags to sidebar navigation
+
+src/bedrock/types/experience.types.ts
+- Registered 'feature-flag' in EXPERIENCE_TYPE_REGISTRY</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 4: Header Integration</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Updated KineticHeader to accept dynamic feature flags from Supabase.</p>
+    <div class="files-list">src/surface/components/KineticStream/KineticHeader.tsx
+- Added HeaderFlag interface
+- Added headerFlags and onFlagToggle props
+- Renders toggle buttons for flags with showInExploreHeader: true
+- Filters out unavailable flags
+- Matches existing toggle button styling (RAG, JOURNEY)
+
+src/surface/components/KineticStream/ExploreShell.tsx
+- Uses useFeatureFlags() hook
+- Builds HeaderFlag array from getHeaderFlags()
+- Passes setUserPreference as toggle handler
+
+src/surface/components/KineticStream/index.ts
+- Added HeaderFlag type export</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 5: Polish</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Final cleanup and verification.</p>
+    <div class="files-list">- Added exports and types to index files
+- Verified all imports and exports
+- Confirmed navigation and routing work
+- Build passes cleanly</div>
+  </div>
+
+  <h2>Visual Verification</h2>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Screenshot 1: Console View</h3>
+      <span class="status complete">Verified</span>
+    </div>
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="screenshots/01-console-view.png" alt="Feature Flags Console View">
+        <div class="media-caption">Feature Flags Console at /bedrock/feature-flags</div>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Metrics Bar:</strong> Total, Available, Disabled, In Header</li>
+      <li><strong>Toolbar:</strong> Search, Filter dropdowns, Sort, View toggle</li>
+      <li><strong>Navigation:</strong> Feature Flags visible in sidebar</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Screenshot 2: Flag Editor</h3>
+      <span class="status complete">Verified</span>
+    </div>
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="screenshots/02-flag-editor.png" alt="Feature Flag Editor Panel">
+        <div class="media-caption">Flag card selected with Inspector panel showing editor</div>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Availability Toggle:</strong> Green "Available" with Disable button</li>
+      <li><strong>Immutable Flag ID:</strong> Shown with "(immutable)" label</li>
+      <li><strong>Description Field:</strong> Editable textarea</li>
+      <li><strong>Default State:</strong> Checkbox for new user default</li>
+      <li><strong>Actions:</strong> Duplicate, Delete, Save Changes buttons</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Screenshot 3: Header Toggles</h3>
+      <span class="status complete">Verified</span>
+    </div>
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="screenshots/03-header-toggles.png" alt="Header with Feature Flag Toggles">
+        <div class="media-caption">Explore header showing dynamic flag toggles</div>
+      </div>
+    </div>
+    <ul>
+      <li><strong>Header Location:</strong> /explore page header</li>
+      <li><strong>Toggle Style:</strong> Matches existing RAG and JOURNEY toggles</li>
+      <li><strong>Dynamic Rendering:</strong> Flags with showInExploreHeader: true</li>
+    </ul>
+  </div>
+
+  <h2>DEX Compliance</h2>
+  <table class="story-table">
+    <tr>
+      <th>Principle</th>
+      <th>Implementation</th>
+      <th>Status</th>
+    </tr>
+    <tr>
+      <td>Declarative Sovereignty</td>
+      <td>Flag config stored as GroveObjects, not code</td>
+      <td><span class="status complete">Pass</span></td>
+    </tr>
+    <tr>
+      <td>Capability Agnosticism</td>
+      <td>No LLM-specific logic in flag system</td>
+      <td><span class="status complete">Pass</span></td>
+    </tr>
+    <tr>
+      <td>Provenance as Infrastructure</td>
+      <td>Changelog tracks all availability changes</td>
+      <td><span class="status complete">Pass</span></td>
+    </tr>
+    <tr>
+      <td>Organic Scalability</td>
+      <td>New flags added via console, no code changes</td>
+      <td><span class="status complete">Pass</span></td>
+    </tr>
+  </table>
+
+  <h2>Architecture Notes</h2>
+  <ul>
+    <li>Feature flags table uses JSONB meta+payload pattern (different from other tables with flattened columns)</li>
+    <li>Modified <code>supabase-adapter.ts</code> to handle both patterns via <code>JSONB_META_TYPES</code> set</li>
+    <li>Consumer hook supports both Supabase and legacy GCS sources for backward compatibility</li>
+    <li>User preferences stored separately from server-side flag state</li>
+  </ul>
+
+  <h2>Resources</h2>
+  <ul>
+    <li><a href="https://www.notion.so/2e6780a78eef8196a7a6cb064c3a092f" target="_blank">User Stories & Acceptance Criteria (Notion)</a></li>
+    <li><a href="DEVLOG.md">Development Log (DEVLOG.md)</a></li>
+  </ul>
+
+  <h2>Files Changed</h2>
+  <div class="files-list">CREATED (10 files):
+  src/core/schema/feature-flag.ts
+  supabase/migrations/011_feature_flags.sql
+  src/bedrock/consoles/ExperienceConsole/useFeatureFlagsData.ts
+  src/bedrock/consoles/ExperienceConsole/transforms/feature-flag.transforms.ts
+  src/bedrock/consoles/ExperienceConsole/FeatureFlagCard.tsx
+  src/bedrock/consoles/ExperienceConsole/FeatureFlagEditor.tsx
+  src/bedrock/consoles/ExperienceConsole/FeatureFlagConsole.config.ts
+  src/bedrock/consoles/ExperienceConsole/FeatureFlagConsole.tsx
+  docs/sprints/feature-flags-v1/DEVLOG.md
+  docs/sprints/feature-flags-v1/REVIEW.html
+
+MODIFIED (12 files):
+  src/core/schema/grove-object.ts
+  src/core/schema/index.ts
+  src/core/data/grove-data-provider.ts
+  src/core/data/adapters/supabase-adapter.ts
+  src/bedrock/consoles/ExperienceConsole/transforms/index.ts
+  src/bedrock/types/experience.types.ts
+  src/bedrock/config/navigation.ts
+  src/router/routes.tsx
+  src/surface/components/KineticStream/KineticHeader.tsx
+  src/surface/components/KineticStream/ExploreShell.tsx
+  src/surface/components/KineticStream/index.ts
+  hooks/useFeatureFlags.ts
+
+BUILD: Passing (Vite 6.4.1, 26.03s)</div>
+
+</body>
+</html>

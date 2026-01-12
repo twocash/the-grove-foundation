@@ -1,9 +1,17 @@
 // src/surface/components/KineticStream/KineticHeader.tsx
 // Header with lens/journey context pills
-// Sprint: kinetic-context-v1
+// Sprint: kinetic-context-v1, feature-flags-v1
 
 import React from 'react';
 import { getPersonaColors } from '../../../../data/narratives-schema';
+
+// Sprint: feature-flags-v1 - Header flag display
+export interface HeaderFlag {
+  flagId: string;
+  label: string;
+  enabled: boolean;
+  available: boolean;
+}
 
 const STAGE_DISPLAY: Record<string, { emoji: string; label: string }> = {
   ARRIVAL: { emoji: '👋', label: 'New' },
@@ -29,6 +37,9 @@ export interface KineticHeaderProps {
   // Sprint: prompt-journey-mode-v1
   journeyMode?: boolean;
   onJourneyModeToggle?: () => void;
+  // Sprint: feature-flags-v1 - Dynamic feature flag toggles
+  headerFlags?: HeaderFlag[];
+  onFlagToggle?: (flagId: string, enabled: boolean) => void;
 }
 
 const HeaderPill: React.FC<{
@@ -68,6 +79,8 @@ export const KineticHeader: React.FC<KineticHeaderProps> = ({
   onHybridSearchToggle,
   journeyMode,
   onJourneyModeToggle,
+  headerFlags,
+  onFlagToggle,
 }) => {
   const lensColors = lensColor ? getPersonaColors(lensColor) : null;
   const stageInfo = stage ? STAGE_DISPLAY[stage] : null;
@@ -128,6 +141,32 @@ export const KineticHeader: React.FC<KineticHeaderProps> = ({
           <span>JOURNEY</span>
           <span className="text-[9px] opacity-70">{journeyMode ? 'ON' : 'OFF'}</span>
         </button>
+      )}
+
+      {/* Sprint: feature-flags-v1 - Dynamic feature flag toggles */}
+      {headerFlags && headerFlags.length > 0 && onFlagToggle && (
+        <>
+          {headerFlags
+            .filter(flag => flag.available)
+            .map(flag => (
+              <button
+                key={flag.flagId}
+                onClick={() => onFlagToggle(flag.flagId, !flag.enabled)}
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium
+                  border transition-all duration-200
+                  ${flag.enabled
+                    ? 'bg-[var(--neon-cyan)]/20 border-[var(--neon-cyan)]/50 text-[var(--neon-cyan)]'
+                    : 'bg-[var(--glass-elevated)] border-[var(--glass-border)] text-[var(--glass-text-muted)]'
+                  }
+                  hover:border-[var(--neon-cyan)]/70`}
+                title={`Toggle ${flag.label}`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-[var(--neon-cyan)]' : 'bg-[var(--glass-text-subtle)]'}`} />
+                <span className="uppercase">{flag.label}</span>
+                <span className="text-[9px] opacity-70">{flag.enabled ? 'ON' : 'OFF'}</span>
+              </button>
+            ))}
+        </>
       )}
 
       {/* Center: Context Pills */}
