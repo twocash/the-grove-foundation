@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sprint Review: nursery-v1 (Course Correction)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #1a1a2e; color: #eee; }
+    h1 { border-bottom: 2px solid #4a9eff; padding-bottom: 0.5rem; }
+    h2 { color: #4a9eff; margin-top: 2rem; }
+    .summary { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .summary-item { text-align: center; }
+    .summary-value { font-size: 2rem; font-weight: bold; color: #4a9eff; }
+    .summary-label { font-size: 0.875rem; color: #94a3b8; }
+    .phase { background: #252542; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .phase-header { display: flex; justify-content: space-between; align-items: center; }
+    .status { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem; }
+    .status.complete { background: #22c55e33; color: #22c55e; }
+    .status.in-progress { background: #eab30833; color: #eab308; }
+    .status.pending { background: #64748b33; color: #94a3b8; }
+    .status.blocked { background: #ef444433; color: #ef4444; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .media-item { background: #1a1a2e; border-radius: 4px; overflow: hidden; }
+    .media-item img, .media-item video { width: 100%; display: block; }
+    .media-caption { padding: 0.5rem; font-size: 0.875rem; color: #94a3b8; }
+    .timestamp { color: #64748b; font-size: 0.75rem; }
+    .stories { margin-top: 2rem; }
+    .story-table { width: 100%; border-collapse: collapse; }
+    .story-table th, .story-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
+    .story-table th { color: #4a9eff; }
+    .p0 { color: #ef4444; }
+    .p1 { color: #eab308; }
+    a { color: #4a9eff; }
+    .alert { background: #ef444433; border: 1px solid #ef4444; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .alert.success { background: #22c55e22; border-color: #22c55e; }
+    .correction-note { background: #eab30822; border: 1px solid #eab308; border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    code { background: #1a1a2e; padding: 0.125rem 0.375rem; border-radius: 4px; font-size: 0.875rem; }
+    .files-list { background: #1a1a2e; padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: nursery-v1 (Course Correction)</h1>
+  <p class="timestamp">Last updated: 2026-01-11 18:15</p>
+
+  <div class="alert success">
+    <strong>Course Correction Complete</strong> - Original implementation was BLOCKED due to architecture violation.
+    Refactored to use <code>createBedrockConsole&lt;T&gt;()</code> factory pattern per DEX standards.
+  </div>
+
+  <div class="summary">
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-value">5/5</div>
+        <div class="summary-label">Refactor Phases</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">6/6</div>
+        <div class="summary-label">User Stories</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">2</div>
+        <div class="summary-label">Screenshots</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">&#x2705;</div>
+        <div class="summary-label">Status: Complete</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="correction-note">
+    <h3>Course Correction Summary</h3>
+    <p><strong>Problem:</strong> Original Sprint A delivered functional UI but bypassed the established console-factory pattern, creating a one-off custom build.</p>
+    <p><strong>Solution:</strong> Refactored to use <code>createBedrockConsole&lt;SproutPayload&gt;()</code> factory, matching Experience, Lens Workshop, and Prompt Workshop consoles.</p>
+    <p><strong>Reference:</strong> <a href="COURSE_CORRECTION.md">COURSE_CORRECTION.md</a></p>
+  </div>
+
+  <h2>User Stories</h2>
+  <div class="stories">
+    <table class="story-table">
+      <tr>
+        <th>ID</th>
+        <th>Story</th>
+        <th>Priority</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>US-A001</td>
+        <td>View Actionable Sprouts</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-A002</td>
+        <td>Open Sprout Inspector</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-A003</td>
+        <td>Promote Sprout to Garden</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-A004</td>
+        <td>Archive Sprout</td>
+        <td class="p0">P0</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-A005</td>
+        <td>View Archived Sprouts</td>
+        <td class="p1">P1</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+      <tr>
+        <td>US-A006</td>
+        <td>Restore Archived Sprout</td>
+        <td class="p1">P1</td>
+        <td><span class="status complete">Complete</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Refactor Phase Progress</h2>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 1: Config File</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>NurseryConsole.config.ts</code> with declarative configuration for metrics, filters, sort options, and navigation.</p>
+    <div class="files-list">
+src/bedrock/consoles/NurseryConsole/NurseryConsole.config.ts
+- Metrics: Total, Ready, Failed, Needs Review
+- Status display config with icons and colors
+- Archive reasons: low-quality, duplicate, off-topic, outdated, incomplete, other
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 2: Data Hook</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>useNurseryData.ts</code> implementing <code>CollectionDataResult&lt;SproutPayload&gt;</code> with extended operations.</p>
+    <div class="files-list">
+src/bedrock/consoles/NurseryConsole/useNurseryData.ts
+- SproutPayload interface with all ResearchSprout fields
+- Standard CRUD: create, update, remove, duplicate
+- Extended: promote(), archive(reason), restore()
+- GroveObject&lt;SproutPayload&gt; wrapper pattern
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 3: Card Component</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>SproutCard.tsx</code> implementing <code>ObjectCardProps&lt;SproutPayload&gt;</code>.</p>
+    <div class="files-list">
+src/bedrock/consoles/NurseryConsole/SproutCard.tsx
+- Status color bar (green=ready, red=failed, gray=archived)
+- Favorite toggle
+- Tags display (max 3 with overflow)
+- Confidence percentage and time since update
+- Needs Review indicator badge
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 4: Editor Component</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>SproutEditor.tsx</code> implementing <code>ObjectEditorProps&lt;SproutPayload&gt;</code>.</p>
+    <div class="files-list">
+src/bedrock/consoles/NurseryConsole/SproutEditor.tsx
+- STATUS section: badge + action buttons (Promote/Archive/Restore)
+- IDENTITY section: Title, Research Spark
+- Tags and Notes fields
+- Mark as Reviewed toggle
+- Synthesis display (collapsed by default)
+- Provenance section (collapsed)
+- Metadata: created/updated dates, ID
+- Archive dialog with reason selection
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 5: Factory Integration</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Created <code>index.ts</code> wiring all components via <code>createBedrockConsole&lt;SproutPayload&gt;()</code>.</p>
+    <div class="files-list">
+src/bedrock/consoles/NurseryConsole/index.ts
+- Factory wiring with config, useData, CardComponent, EditorComponent
+- Re-exports for config, components, types
+- Default export for lazy loading
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Phase 6: Cleanup</h3>
+      <span class="status complete">Complete</span>
+    </div>
+    <p>Deleted obsolete custom implementation files.</p>
+    <div class="files-list">
+DELETED: src/bedrock/consoles/NurseryConsole.tsx (old custom file)
+DELETED: src/bedrock/nursery/ (entire directory - 12 files)
+  - hooks/useNurserySprouts.ts
+  - hooks/usePromoteSprout.ts
+  - hooks/useArchiveSprout.ts
+  - hooks/useRestoreSprout.ts
+  - components/NurserySproutCard.tsx
+  - components/NurseryInspector.tsx
+  - components/PromoteDialog.tsx
+  - components/ArchiveDialog.tsx
+  - components/NurseryFilters.tsx
+  - types.ts
+  - NurseryConsole.tsx
+    </div>
+  </div>
+
+  <h2>Visual Verification</h2>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Screenshot 1: Main Console View</h3>
+      <span class="status complete">Verified</span>
+    </div>
+    <p>Nursery Console with metrics bar, filters, and sprout grid.</p>
+    <ul>
+      <li><strong>Metrics Bar:</strong> Total (1), Ready (0), Failed (0), Needs Review (0)</li>
+      <li><strong>Toolbar:</strong> Search, Status dropdown, Needs Review dropdown, Tags dropdown, Favorites, Sort, View toggle</li>
+      <li><strong>Navigation:</strong> Dashboard, Nursery (selected), Garden, Lens Workshop, Prompt Workshop, Experience, Journey Architect, Knowledge Vault</li>
+      <li><strong>Grid:</strong> SproutCard displaying "Test UUID persistence fix" with Archived status badge</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="phase-header">
+      <h3>Screenshot 2: Inspector Panel</h3>
+      <span class="status complete">Verified</span>
+    </div>
+    <p>SproutEditor inspector with full editing capabilities.</p>
+    <ul>
+      <li><strong>STATUS:</strong> Archived badge, Archive button</li>
+      <li><strong>IDENTITY:</strong> Title field, Research Spark textarea</li>
+      <li><strong>Tags:</strong> Comma-separated input</li>
+      <li><strong>Notes:</strong> Optional reviewer notes</li>
+      <li><strong>Mark as Reviewed:</strong> Toggle (enabled)</li>
+      <li><strong>PROVENANCE:</strong> Collapsible section</li>
+      <li><strong>METADATA:</strong> Created 1/11/2026, Updated 1/11/2026, ID displayed</li>
+      <li><strong>Actions:</strong> Saved indicator, duplicate button, delete button</li>
+    </ul>
+  </div>
+
+  <h2>DEX Compliance</h2>
+  <table class="story-table">
+    <tr>
+      <th>Principle</th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+    <tr>
+      <td>Declarative Sovereignty</td>
+      <td>Partial</td>
+      <td><span class="status complete">Full</span></td>
+    </tr>
+    <tr>
+      <td>Capability Agnosticism</td>
+      <td>Yes</td>
+      <td><span class="status complete">Yes</span></td>
+    </tr>
+    <tr>
+      <td>Provenance</td>
+      <td>Yes</td>
+      <td><span class="status complete">Yes</span></td>
+    </tr>
+    <tr>
+      <td>Organic Scalability</td>
+      <td><span class="status blocked">NO - custom one-off</span></td>
+      <td><span class="status complete">YES - factory pattern</span></td>
+    </tr>
+  </table>
+
+  <h2>Resources</h2>
+  <ul>
+    <li><a href="https://www.notion.so/2e5780a78eef8123aa8bdc33da6d4769" target="_blank">User Stories & Acceptance Criteria (Notion)</a></li>
+    <li><a href="SPEC.md">Execution Contract (SPEC.md)</a></li>
+    <li><a href="COURSE_CORRECTION.md">Course Correction Document</a></li>
+    <li><a href="DEVLOG.md">Development Log (DEVLOG.md)</a></li>
+  </ul>
+
+  <h2>Files Changed</h2>
+  <div class="files-list">
+CREATED (5 files):
+  src/bedrock/consoles/NurseryConsole/index.ts
+  src/bedrock/consoles/NurseryConsole/NurseryConsole.config.ts
+  src/bedrock/consoles/NurseryConsole/useNurseryData.ts
+  src/bedrock/consoles/NurseryConsole/SproutCard.tsx
+  src/bedrock/consoles/NurseryConsole/SproutEditor.tsx
+
+DELETED (13 files):
+  src/bedrock/consoles/NurseryConsole.tsx
+  src/bedrock/nursery/* (12 files)
+
+BUILD: Passing (Vite 6.4.1)
+  </div>
+
+</body>
+</html>

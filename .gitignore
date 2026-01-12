@@ -1,6 +1,9 @@
 # Claude Code settings (may contain API keys)
 .claude/
 
+# Serena MCP (local indexes and memories)
+.serena/
+
 # Dependencies
 node_modules
 .pnp
