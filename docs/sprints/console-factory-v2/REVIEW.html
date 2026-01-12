@@ -13,10 +13,6 @@
     .status.complete { background: #22c55e33; color: #22c55e; }
     .status.in-progress { background: #eab30833; color: #eab308; }
     .status.pending { background: #64748b33; color: #94a3b8; }
-    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .media-item { background: #1a1a2e; border-radius: 4px; overflow: hidden; }
-    .media-item img, .media-item video { width: 100%; display: block; }
-    .media-caption { padding: 0.5rem; font-size: 0.875rem; color: #94a3b8; }
     .timestamp { color: #64748b; font-size: 0.75rem; }
     .summary { background: #1e3a5f; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
     .summary h3 { color: #4a9eff; margin-top: 0; }
@@ -26,6 +22,12 @@
     .dex-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     .dex-table th, .dex-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #333; }
     .dex-table th { color: #4a9eff; }
+    .verification-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .verification-table th, .verification-table td { padding: 0.5rem; text-align: left; border-bottom: 1px solid #333; }
+    .verification-table th { color: #4a9eff; background: #1e3a5f; }
+    .check { color: #22c55e; font-weight: bold; }
+    .url-box { background: #1a1a2e; border: 1px solid #4a9eff; border-radius: 4px; padding: 1rem; margin: 1rem 0; }
+    .url-box code { background: #252542; padding: 0.5rem 1rem; display: block; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -48,6 +50,65 @@
       <li>Demo page at <code>/bedrock/factory-demo</code></li>
     </ul>
   </div>
+
+  <div class="url-box">
+    <strong>Local Development URL:</strong>
+    <code>http://localhost:3003</code>
+  </div>
+
+  <h2>Visual Verification Results</h2>
+  <p>All consoles verified working on 2026-01-12:</p>
+
+  <table class="verification-table">
+    <tr>
+      <th>Route</th>
+      <th>Console</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td><code>/bedrock/factory-demo</code></td>
+      <td>Console Factory v2 Demo</td>
+      <td class="check">PASS</td>
+      <td>3 feature flags, metrics row (3 Total, 2 Available, 1 Disabled, 2 In Header), filters, sort, favorites all working</td>
+    </tr>
+    <tr>
+      <td><code>/explore</code></td>
+      <td>Kinetic Stream</td>
+      <td class="check">PASS</td>
+      <td>No regression - Terminal working with lens selection, journey prompts</td>
+    </tr>
+    <tr>
+      <td><code>/bedrock</code></td>
+      <td>Dashboard</td>
+      <td class="check">PASS</td>
+      <td>Navigation sidebar, metrics cards, "Coming in future sprint" placeholders</td>
+    </tr>
+    <tr>
+      <td><code>/bedrock/nursery</code></td>
+      <td>Nursery</td>
+      <td class="check">PASS</td>
+      <td>7 sprouts displayed, metrics (7 Total, 0 Ready, 0 Failed, 0 Needs Review), filters working</td>
+    </tr>
+    <tr>
+      <td><code>/bedrock/experience</code></td>
+      <td>Experience</td>
+      <td class="check">PASS</td>
+      <td>10 experiences (system prompts + feature flags), polymorphic cards, status badges</td>
+    </tr>
+    <tr>
+      <td><code>/bedrock/garden</code></td>
+      <td>Garden</td>
+      <td class="check">PASS</td>
+      <td>Empty state displayed, "Add Files" / "Process Queue" / "Bulk Extract" actions visible</td>
+    </tr>
+    <tr>
+      <td><code>/bedrock/lenses</code></td>
+      <td>Lens Workshop</td>
+      <td class="check">PASS</td>
+      <td>10 lenses displayed, all Active, "New Lens" button, Style/Vocabulary/Color filters</td>
+    </tr>
+  </table>
 
   <div class="phase">
     <div class="phase-header">
@@ -90,30 +151,15 @@
 
   <div class="phase">
     <div class="phase-header">
-      <h2>Phase 8: Demo & Integration</h2>
+      <h2>Phase 8-9: Demo & Verification</h2>
       <span class="status complete">Complete</span>
     </div>
-    <p>Demo page showing SchemaConsole in action with feature flag schema and mock data.</p>
-    <div class="media-grid">
-      <div class="media-item">
-        <img src="screenshots/phase8-demo.png" alt="Phase 8 Demo - Console Factory v2">
-        <div class="media-caption">Console Factory v2 Demo at /bedrock/factory-demo showing schema-driven rendering with feature flags</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="phase">
-    <div class="phase-header">
-      <h2>Phase 9: Visual Verification</h2>
-      <span class="status complete">Complete</span>
-    </div>
-    <p>Final verification of all features working correctly.</p>
+    <p>Demo page and visual verification of all consoles.</p>
     <ul>
-      <li>Metrics row: 3 Total, 2 Available, 1 Disabled, 2 In Header</li>
-      <li>Search, filters, sort, favorites all functional</li>
-      <li>Universal cards with Active/Inactive status badges</li>
-      <li>Grid/list view toggle</li>
-      <li>Primary action button: "New Feature Flag"</li>
+      <li><code>src/bedrock/consoles/SchemaConsoleDemo.tsx</code> - Demo page component</li>
+      <li><code>src/router/routes.tsx</code> - Route for <code>/bedrock/factory-demo</code></li>
+      <li>All bedrock consoles verified working</li>
+      <li><code>/explore</code> verified - no regression</li>
     </ul>
   </div>
 
@@ -149,6 +195,13 @@
       <li><strong>Complex consoles:</strong> Continue using <code>createBedrockConsole</code> HOC for custom Card/Editor needs</li>
     </ul>
   </div>
+
+  <h2>Commits</h2>
+  <ul>
+    <li><code>0cf25a6</code> - feat(bedrock): Console Factory v2 - Phases 1-4</li>
+    <li><code>2dd4822</code> - feat(bedrock): Console Factory v2 - Phases 5-7</li>
+    <li><code>a17e348</code> - feat(bedrock): Console Factory v2 - Phase 8-9 Demo & Verification</li>
+  </ul>
 
 </body>
 </html>
