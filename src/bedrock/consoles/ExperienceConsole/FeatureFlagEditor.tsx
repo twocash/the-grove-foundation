@@ -75,70 +75,127 @@ export function FeatureFlagEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header section */}
-      <div className="px-4 py-3 border-b border-[var(--glass-border)]">
-        {/* Availability status */}
-        <div className={`
-          flex items-center gap-2 px-3 py-2 rounded-lg mb-3
-          ${isAvailable
-            ? 'bg-green-500/10 border border-green-500/30'
-            : 'bg-red-500/10 border border-red-500/30'
-          }
-        `}>
-          <span className={`material-symbols-outlined ${
-            isAvailable ? 'text-green-400' : 'text-red-400'
-          }`}>
-            {isAvailable ? 'toggle_on' : 'toggle_off'}
-          </span>
-          <span className={`font-medium ${
-            isAvailable ? 'text-green-400' : 'text-red-400'
-          }`}>
+      {/* Availability Status Banner (matches SystemPromptEditor pattern) */}
+      <div className={`
+        flex items-center gap-3 px-4 py-3 border-b transition-colors
+        ${isAvailable
+          ? 'bg-green-500/10 border-green-500/20'
+          : 'bg-red-500/10 border-red-500/20'
+        }
+      `}>
+        {/* Status dot with pulse animation when available */}
+        <span className="relative flex h-3 w-3">
+          {isAvailable && (
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+          )}
+          <span className={`
+            relative inline-flex rounded-full h-3 w-3
+            ${isAvailable ? 'bg-green-500' : 'bg-red-500'}
+          `} />
+        </span>
+
+        {/* Status text */}
+        <div className="flex-1">
+          <span className={`text-sm font-medium ${isAvailable ? 'text-green-300' : 'text-red-300'}`}>
             {isAvailable ? 'Available' : 'Disabled (Admin Kill Switch)'}
           </span>
-          <div className="flex-1" />
-          <GlassButton
-            size="sm"
-            variant={isAvailable ? 'danger' : 'success'}
-            onClick={handleToggleAvailability}
-            disabled={toggling}
-          >
-            {toggling ? 'Toggling...' : isAvailable ? 'Disable' : 'Enable'}
-          </GlassButton>
+          <p className={`text-xs ${isAvailable ? 'text-green-400/70' : 'text-red-400/70'}`}>
+            {isAvailable ? 'Flag is active and can be toggled by users' : 'Flag is disabled for all users'}
+          </p>
         </div>
 
-        {/* Title */}
-        <BufferedInput
-          value={flag.meta.title}
-          onChange={(val) => patchMeta('title', val)}
-          className="text-lg font-medium w-full bg-transparent border-none focus:outline-none text-[var(--glass-text-primary)]"
-          placeholder="Flag Title"
-        />
+        {/* Toggle button */}
+        <GlassButton
+          size="sm"
+          variant={isAvailable ? 'danger' : 'success'}
+          onClick={handleToggleAvailability}
+          disabled={toggling}
+        >
+          {toggling ? 'Toggling...' : isAvailable ? 'Disable' : 'Enable'}
+        </GlassButton>
+      </div>
 
-        {/* Flag ID (read-only) */}
-        <div className="flex items-center gap-2 mt-2 text-sm text-[var(--glass-text-muted)]">
-          <span className="material-symbols-outlined text-sm">key</span>
-          <code className="font-mono">{flag.payload.flagId}</code>
-          <span className="text-xs">(immutable)</span>
+      {/* Header: Icon + Title + Status Dot */}
+      <div className="px-4 py-3 border-b border-[var(--glass-border)]">
+        {/* Title row with icon and status */}
+        <div className="flex items-center gap-3">
+          <span className="material-symbols-outlined text-2xl text-[var(--neon-cyan)]">
+            flag
+          </span>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-semibold text-[var(--glass-text-primary)] truncate">
+              {flag.meta.title || 'Untitled Flag'}
+            </h1>
+            {/* Flag ID (read-only, mono) */}
+            <div className="flex items-center gap-2 mt-1">
+              <code className="font-mono text-sm text-[var(--glass-text-muted)]">
+                {flag.payload.flagId}
+              </code>
+            </div>
+          </div>
+          {/* Default state indicator */}
+          <div className={`
+            flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
+            ${isDefaultEnabled
+              ? 'bg-green-500/20 text-green-400'
+              : 'bg-gray-500/20 text-gray-400'
+            }
+          `}>
+            <span className="material-symbols-outlined text-sm">
+              {isDefaultEnabled ? 'check_circle' : 'cancel'}
+            </span>
+            {isDefaultEnabled ? 'On' : 'Off'}
+          </div>
         </div>
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-auto p-4 space-y-4">
-        {/* Description */}
-        <InspectorSection title="Description" icon="description">
-          <BufferedTextarea
-            value={flag.meta.description || ''}
-            onChange={(val) => patchMeta('description', val)}
-            className="w-full bg-[var(--glass-solid)] rounded-lg p-3 text-sm border border-[var(--glass-border)] focus:border-[var(--neon-cyan)] focus:outline-none text-[var(--glass-text-secondary)]"
-            placeholder="What does this flag control?"
-            rows={3}
-          />
+      <div className="flex-1 overflow-y-auto">
+        {/* === IDENTITY (Configuration - expanded by default) === */}
+        <InspectorSection title="Identity" collapsible defaultCollapsed={false}>
+          <div className="space-y-4">
+            {/* Title */}
+            <div>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Title</label>
+              <BufferedInput
+                value={flag.meta.title}
+                onChange={(val) => patchMeta('title', val)}
+                debounceMs={400}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
+                placeholder="Flag Title"
+                disabled={loading}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Description</label>
+              <BufferedTextarea
+                value={flag.meta.description || ''}
+                onChange={(val) => patchMeta('description', val)}
+                debounceMs={400}
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 resize-none"
+                placeholder="What does this flag control?"
+                rows={3}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Flag ID badge (read-only) */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[var(--glass-text-muted)]">Flag ID</span>
+              <code className="px-2 py-0.5 rounded-full bg-[var(--glass-surface)] text-sm font-mono text-[var(--glass-text-secondary)]">
+                {flag.payload.flagId}
+              </code>
+              <span className="text-xs text-[var(--glass-text-muted)]">(immutable)</span>
+            </div>
+          </div>
         </InspectorSection>
 
         <InspectorDivider />
 
-        {/* Default State */}
-        <InspectorSection title="Default State" icon="tune">
+        {/* === CONFIGURATION (expanded by default) === */}
+        <InspectorSection title="Default State" collapsible defaultCollapsed={false}>
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer group">
               <input
@@ -161,8 +218,8 @@ export function FeatureFlagEditor({
 
         <InspectorDivider />
 
-        {/* Header Display */}
-        <InspectorSection title="Explore Header" icon="visibility">
+        {/* === VISIBILITY (collapsed by default) === */}
+        <InspectorSection title="Explore Header" collapsible defaultCollapsed={true}>
           <div className="space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -216,8 +273,8 @@ export function FeatureFlagEditor({
 
         <InspectorDivider />
 
-        {/* Category */}
-        <InspectorSection title="Category" icon="category">
+        {/* === METADATA (collapsed by default) === */}
+        <InspectorSection title="Category" collapsible defaultCollapsed={true}>
           <select
             value={flag.payload.category}
             onChange={(e) => patchPayload('category', e.target.value)}
@@ -233,9 +290,9 @@ export function FeatureFlagEditor({
 
         <InspectorDivider />
 
-        {/* Changelog */}
+        {/* === HISTORY (collapsed by default) === */}
         {flag.payload.changelog.length > 0 && (
-          <InspectorSection title="Availability History" icon="history">
+          <InspectorSection title="Availability History" collapsible defaultCollapsed={true}>
             <div className="space-y-2 max-h-40 overflow-auto">
               {flag.payload.changelog.slice().reverse().map((entry, idx) => (
                 <div
@@ -267,14 +324,33 @@ export function FeatureFlagEditor({
         )}
       </div>
 
-      {/* Footer actions */}
-      <div className="px-4 py-3 border-t border-[var(--glass-border)] flex items-center justify-between">
+      {/* Footer actions (standardized layout) */}
+      <div className="px-4 py-3 border-t border-[var(--glass-border)] space-y-3">
+        {/* Primary action: Save (full width) */}
+        {hasChanges ? (
+          <GlassButton
+            variant="primary"
+            size="sm"
+            onClick={onSave}
+            disabled={loading}
+            className="w-full"
+          >
+            {loading ? 'Saving...' : 'Save Changes'}
+          </GlassButton>
+        ) : (
+          <div className="w-full px-4 py-2.5 rounded-lg bg-[var(--glass-surface)] text-[var(--glass-text-muted)] text-center text-sm">
+            No unsaved changes
+          </div>
+        )}
+
+        {/* Secondary actions */}
         <div className="flex items-center gap-2">
           <GlassButton
             variant="ghost"
             size="sm"
             onClick={onDuplicate}
             disabled={loading}
+            className="flex-1"
           >
             <span className="material-symbols-outlined text-sm mr-1">content_copy</span>
             Duplicate
@@ -284,19 +360,12 @@ export function FeatureFlagEditor({
             size="sm"
             onClick={onDelete}
             disabled={loading}
+            className="flex-1"
           >
             <span className="material-symbols-outlined text-sm mr-1">delete</span>
             Delete
           </GlassButton>
         </div>
-        <GlassButton
-          variant="primary"
-          size="sm"
-          onClick={onSave}
-          disabled={!hasChanges || loading}
-        >
-          {loading ? 'Saving...' : 'Save Changes'}
-        </GlassButton>
       </div>
     </div>
   );

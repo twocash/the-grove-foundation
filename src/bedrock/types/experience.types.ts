@@ -160,9 +160,8 @@ export const EXPERIENCE_TYPE_REGISTRY = {
       { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: status=active)', typeFilter: 'system-prompt' },
       { id: 'drafts', label: 'Drafts', icon: 'edit_note', query: 'count(where: status=draft)', typeFilter: 'system-prompt' },
     ],
-    filters: [
-      { field: 'meta.status', label: 'State', type: 'select', options: ['active', 'draft', 'archived'] },
-    ],
+    // Note: meta.status filter is provided by common statusFilter in ExperienceConsole.config.ts
+    // No type-specific filters needed for system-prompt
     sortOptions: [
       { field: 'payload.version', label: 'Version', direction: 'desc' },
     ],
