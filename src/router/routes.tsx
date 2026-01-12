@@ -42,6 +42,9 @@ const PromptWorkshop = lazy(() =>
 );
 const ExperienceConsole = lazy(() => import('../bedrock/consoles/ExperienceConsole'));
 
+// Console Factory v2 Demo (Sprint: console-factory-v2)
+const SchemaConsoleDemo = lazy(() => import('../bedrock/consoles/SchemaConsoleDemo'));
+
 // Loading fallback for lazy-loaded routes
 const LoadingFallback: React.FC = () => (
   <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center">
@@ -252,6 +255,16 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <ExperienceConsole />
+              </Suspense>
+            ),
+          },
+          // Console Factory v2 Demo
+          // Sprint: console-factory-v2 - Schema-driven console demonstration
+          {
+            path: 'factory-demo',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <SchemaConsoleDemo />
               </Suspense>
             ),
           },
