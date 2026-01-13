@@ -26,5 +26,15 @@ export default defineConfig({
       name: 'visual-qa',
       testDir: './tests/visual-qa',
     },
+    // Sprint: polish-demo-prep-v1 - Demo video recording
+    {
+      name: 'demo',
+      testDir: './tests/demo',
+      use: {
+        video: { mode: 'on', size: { width: 1280, height: 720 } },
+        viewport: { width: 1280, height: 720 },
+      },
+      timeout: 180000, // 3 minutes for demo tests
+    },
   ],
 })
