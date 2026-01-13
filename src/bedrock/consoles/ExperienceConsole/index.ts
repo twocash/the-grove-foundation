@@ -10,8 +10,8 @@ import { createBedrockConsole } from '../../patterns/console-factory';
 import { experienceConsoleConfig } from './ExperienceConsole.config';
 import { useUnifiedExperienceData, type UnifiedExperiencePayload } from './useUnifiedExperienceData';
 import { resolveCardComponent, resolveEditorComponent } from './component-registry';
-import { getExperienceTypeDefinition, isExperienceObjectType } from '../../types/experience.types';
-import type { ObjectCardProps, ObjectEditorProps } from '../../patterns/console-factory.types';
+import { getExperienceTypeDefinition, isExperienceObjectType, getAllExperienceTypes } from '../../types/experience.types';
+import type { ObjectCardProps, ObjectEditorProps, CreateOption } from '../../patterns/console-factory.types';
 
 // =============================================================================
 // Polymorphic Card Component
@@ -74,6 +74,27 @@ const PolymorphicEditor: React.FC<ObjectEditorProps<UnifiedExperiencePayload>> =
 };
 
 // =============================================================================
+// Create Options for Polymorphic Console
+// Sprint: experience-console-cleanup-v1
+// =============================================================================
+
+/**
+ * Generate create options from type registry
+ * Only includes types that belong to the Experience Console
+ */
+function getCreateOptions(): CreateOption[] {
+  return getAllExperienceTypes()
+    .filter((t) => t.routePath === '/bedrock/experience')
+    .map((t) => ({
+      type: t.type,
+      label: t.label,
+      icon: t.icon,
+      color: t.color,
+      description: t.description,
+    }));
+}
+
+// =============================================================================
 // Experience Console Factory
 // =============================================================================
 
@@ -86,6 +107,8 @@ const PolymorphicEditor: React.FC<ObjectEditorProps<UnifiedExperiencePayload>> =
  * Supported types (auto-discovered):
  * - system-prompt: AI personality and behavior configuration
  * - feature-flag: Feature toggles across the application
+ * - research-agent-config: Research execution configuration (SINGLETON)
+ * - writer-agent-config: Document writing configuration (SINGLETON)
  * - (future types added to registry will appear automatically)
  *
  * DEX Compliance:
@@ -104,6 +127,7 @@ export const ExperienceConsole = createBedrockConsole<UnifiedExperiencePayload>(
   EditorComponent: PolymorphicEditor,
   copilotTitle: 'Experience Copilot',
   copilotPlaceholder: 'Edit this experience object with AI assistance...',
+  createOptions: getCreateOptions(),
 });
 
 // =============================================================================
@@ -127,12 +151,22 @@ export { SystemPromptCard } from './SystemPromptCard';
 export { SystemPromptEditor } from './SystemPromptEditor';
 export { FeatureFlagCard } from './FeatureFlagCard';
 export { FeatureFlagEditor } from './FeatureFlagEditor';
+// Sprint: experience-console-cleanup-v1 - Agent config components
+export { ResearchAgentConfigCard } from './ResearchAgentConfigCard';
+export { ResearchAgentConfigEditor } from './ResearchAgentConfigEditor';
+export { WriterAgentConfigCard } from './WriterAgentConfigCard';
+export { WriterAgentConfigEditor } from './WriterAgentConfigEditor';
 
 // Type-specific data hooks
 export { useExperienceData, createDefaultSystemPrompt } from './useExperienceData';
 export type { ExperienceDataResult } from './useExperienceData';
 export { useFeatureFlagsData, createDefaultFeatureFlag } from './useFeatureFlagsData';
 export type { FeatureFlagsDataResult } from './useFeatureFlagsData';
+// Sprint: experience-console-cleanup-v1 - New agent config data hooks
+export { useResearchAgentConfigData, createDefaultResearchAgentConfig } from './useResearchAgentConfigData';
+export type { ResearchAgentConfigDataResult } from './useResearchAgentConfigData';
+export { useWriterAgentConfigData, createDefaultWriterAgentConfig } from './useWriterAgentConfigData';
+export type { WriterAgentConfigDataResult } from './useWriterAgentConfigData';
 
 // Category config for feature flags (preserved for component use)
 export { CATEGORY_CONFIG } from './FeatureFlagConsole.config';

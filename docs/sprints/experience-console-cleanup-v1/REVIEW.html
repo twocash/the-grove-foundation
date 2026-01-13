@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Review: experience-console-cleanup-v1</title>
+  <style>
+    :root {
+      --bg-primary: #0f0f1a;
+      --bg-secondary: #1a1a2e;
+      --bg-tertiary: #252540;
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0b0;
+      --accent-green: #4ade80;
+      --accent-blue: #60a5fa;
+      --accent-red: #f87171;
+      --accent-yellow: #fbbf24;
+      --border-color: #333355;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: var(--accent-green);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent-green);
+      padding-bottom: 0.5rem;
+    }
+
+    h2 {
+      color: var(--accent-blue);
+      font-size: 1.4rem;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    h3 {
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .meta {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .meta p {
+      margin: 0.25rem 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .status-pass {
+      background: rgba(74, 222, 128, 0.2);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .status-fail {
+      background: rgba(248, 113, 113, 0.2);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: var(--accent-yellow);
+      border: 1px solid var(--accent-yellow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    td {
+      background: var(--bg-secondary);
+    }
+
+    .pass { color: var(--accent-green); font-weight: 600; }
+    .fail { color: var(--accent-red); font-weight: 600; }
+    .pending { color: var(--accent-yellow); font-weight: 600; }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .screenshot {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .screenshot-header {
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .screenshot-header h4 {
+      color: var(--accent-blue);
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .screenshot-header p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .screenshot img {
+      width: 100%;
+      display: block;
+      border: none;
+    }
+
+    .screenshot-placeholder {
+      padding: 4rem 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+    }
+
+    .screenshot-placeholder .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 1rem 0;
+    }
+
+    .checklist li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 0;
+      color: var(--text-secondary);
+    }
+
+    .checklist li.checked::before {
+      content: "✓";
+      color: var(--accent-green);
+    }
+
+    .checklist li.failed::before {
+      content: "✗";
+      color: var(--accent-red);
+    }
+
+    .summary-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .summary-box.success {
+      border-color: var(--accent-green);
+      background: rgba(74, 222, 128, 0.05);
+    }
+
+    .summary-box.warning {
+      border-color: var(--accent-yellow);
+      background: rgba(251, 191, 36, 0.05);
+    }
+
+    code {
+      background: var(--bg-tertiary);
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+
+    .instructions {
+      background: var(--bg-tertiary);
+      border-left: 4px solid var(--accent-blue);
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .warning-box {
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid var(--accent-yellow);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .warning-box h4 {
+      color: var(--accent-yellow);
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sprint Review: experience-console-cleanup-v1</h1>
+
+  <div class="meta">
+    <p><strong>Sprint:</strong> Experience Console Cleanup v1</p>
+    <p><strong>Codename:</strong> console-cleanup-v1</p>
+    <p><strong>Date:</strong> 2026-01-12</p>
+    <p><strong>Status:</strong> <span class="status-badge status-pending">PARTIAL - NEEDS FIXES</span></p>
+    <p><strong>Test Results:</strong> 7 passed (51.1s)</p>
+  </div>
+
+  <div class="warning-box">
+    <h4>Implementation Issue Discovered</h4>
+    <p>The SINGLETON auto-creation for <code>research-agent-config</code> and <code>writer-agent-config</code> types is not functioning.
+    The useEffect in <code>useUnifiedExperienceData.ts</code> should create default instances but isn't triggering.
+    The data layer has been fixed (types added to <code>GroveObjectType</code> and <code>TABLE_MAP</code>).</p>
+  </div>
+
+  <h2>Acceptance Criteria Verification</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>AC</th>
+        <th>Criteria</th>
+        <th>Status</th>
+        <th>Evidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>AC-1</td>
+        <td>Research Agent Config instance exists on console load</td>
+        <td class="fail">FAIL</td>
+        <td>Screenshot #2 shows 0 cards when filtered</td>
+      </tr>
+      <tr>
+        <td>AC-2</td>
+        <td>Writer Agent Config instance exists on console load</td>
+        <td class="fail">FAIL</td>
+        <td>Screenshot #3 shows 0 cards when filtered</td>
+      </tr>
+      <tr>
+        <td>AC-3</td>
+        <td>Default instances use DEFAULT_*_PAYLOAD values</td>
+        <td class="fail">N/A</td>
+        <td>Cannot verify - instances not created</td>
+      </tr>
+      <tr>
+        <td>AC-4</td>
+        <td>Instances appear when type filter is selected</td>
+        <td class="fail">FAIL</td>
+        <td>Filter works but no instances exist</td>
+      </tr>
+      <tr>
+        <td>AC-5</td>
+        <td>+New button opens dropdown menu (not modal)</td>
+        <td class="pass">PASS</td>
+        <td>Screenshot #4 shows CreateDropdown component</td>
+      </tr>
+      <tr>
+        <td>AC-6</td>
+        <td>Dropdown shows all registered Experience types</td>
+        <td class="pass">PASS</td>
+        <td>Screenshot #4 confirms all types visible</td>
+      </tr>
+      <tr>
+        <td>AC-7</td>
+        <td>Selecting type creates new instance immediately</td>
+        <td class="pending">NOT TESTED</td>
+        <td>Manual verification needed</td>
+      </tr>
+      <tr>
+        <td>AC-8</td>
+        <td>New instance opens in inspector for editing</td>
+        <td class="pending">NOT TESTED</td>
+        <td>No instances to open</td>
+      </tr>
+      <tr>
+        <td>AC-9</td>
+        <td>Empty state shows type-specific message</td>
+        <td class="pass">PASS</td>
+        <td>TypeAwareEmptyState component implemented</td>
+      </tr>
+      <tr>
+        <td>AC-10</td>
+        <td>Empty state includes "Create" CTA</td>
+        <td class="pass">PASS</td>
+        <td>TypeAwareEmptyState has action button</td>
+      </tr>
+      <tr>
+        <td>AC-11</td>
+        <td>Empty state styled consistently with console</td>
+        <td class="pass">PASS</td>
+        <td>Uses glass-style Foundation design</td>
+      </tr>
+      <tr>
+        <td>AC-12</td>
+        <td><code>npm run build</code> passes</td>
+        <td class="pass">PASS</td>
+        <td>Build completed in 43.36s</td>
+      </tr>
+      <tr>
+        <td>AC-13</td>
+        <td>No TypeScript errors</td>
+        <td class="pass">PASS</td>
+        <td>Build passed cleanly</td>
+      </tr>
+      <tr>
+        <td>AC-14</td>
+        <td>No console errors on load</td>
+        <td class="pass">PASS</td>
+        <td>Console loads with 10 cards</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Visual Evidence</h2>
+
+  <div class="screenshot-grid">
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>1. Console Default View</h4>
+        <p>Experience Console loads with 10 cards (system-prompts + feature-flags)</p>
+      </div>
+      <img src="screenshots/01-console-default.png" alt="Console default view"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>2. Research Agent Filter</h4>
+        <p>Filter by "Research Agent" type - NO instances found (auto-creation failed)</p>
+      </div>
+      <img src="screenshots/02-filter-research-agent.png" alt="Research Agent filter"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>3. Writer Agent Filter</h4>
+        <p>Filter by "Writer Agent" type - NO instances found (auto-creation failed)</p>
+      </div>
+      <img src="screenshots/03-filter-writer-agent.png" alt="Writer Agent filter"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>4. +New Dropdown Open (AC-5, AC-6 PASS)</h4>
+        <p>CreateDropdown shows all types including Research Agent and Writer Agent</p>
+      </div>
+      <img src="screenshots/04-new-dropdown-open.png" alt="New dropdown open"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>5. System Prompt Filtered View</h4>
+        <p>Filter works correctly - shows 9 system-prompt cards</p>
+      </div>
+      <img src="screenshots/05-system-prompt-filtered.png" alt="System prompt filtered"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>6. No Research Agent Card Found</h4>
+        <p>Editor test - no card to select (SINGLETON auto-creation not working)</p>
+      </div>
+      <img src="screenshots/06-no-research-agent.png" alt="No research agent"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+
+    <figure class="screenshot">
+      <div class="screenshot-header">
+        <h4>7. No Writer Agent Card Found</h4>
+        <p>Editor test - no card to select (SINGLETON auto-creation not working)</p>
+      </div>
+      <img src="screenshots/07-no-writer-agent.png" alt="No writer agent"
+           onerror="this.parentElement.innerHTML='<div class=screenshot-placeholder><div class=icon>📷</div><p>Screenshot not found</p></div>'">
+    </figure>
+  </div>
+
+  <h2>Build Verification</h2>
+
+  <ul class="checklist">
+    <li class="checked"><code>npm run build</code> passes without errors (43.36s)</li>
+    <li class="checked">No TypeScript compilation errors</li>
+    <li class="checked">No console errors on page load</li>
+    <li class="checked">All 7 Playwright visual QA tests pass</li>
+  </ul>
+
+  <h2>Files Created/Modified</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Purpose</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>useResearchAgentConfigData.ts</code></td>
+        <td>Data hook for Research Agent Config</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>useWriterAgentConfigData.ts</code></td>
+        <td>Data hook for Writer Agent Config</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>CreateDropdown.tsx</code></td>
+        <td>Type selection dropdown for +New</td>
+        <td class="pass">VERIFIED</td>
+      </tr>
+      <tr>
+        <td><code>TypeAwareEmptyState.tsx</code></td>
+        <td>Type-specific empty state component</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>ResearchAgentConfigCard.tsx</code></td>
+        <td>Card view for Research Agent</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>ResearchAgentConfigEditor.tsx</code></td>
+        <td>Editor for Research Agent</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>WriterAgentConfigCard.tsx</code></td>
+        <td>Card view for Writer Agent</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>WriterAgentConfigEditor.tsx</code></td>
+        <td>Editor for Writer Agent</td>
+        <td class="pass">EXISTS</td>
+      </tr>
+      <tr>
+        <td><code>grove-data-provider.ts</code></td>
+        <td>Added new types to GroveObjectType</td>
+        <td class="pass">FIXED</td>
+      </tr>
+      <tr>
+        <td><code>supabase-adapter.ts</code></td>
+        <td>Added types to TABLE_MAP + JSONB_META_TYPES</td>
+        <td class="pass">FIXED</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Sign-off</h2>
+
+  <div class="summary-box warning">
+    <h3>Review Status: PARTIAL PASS</h3>
+    <p><strong>What Works (8/14 AC):</strong></p>
+    <ul>
+      <li>Console loads correctly with existing types</li>
+      <li>+New dropdown shows all types (AC-5, AC-6)</li>
+      <li>Type filter UI works</li>
+      <li>TypeAwareEmptyState component implemented (AC-9, AC-10, AC-11)</li>
+      <li>Build passes, no TypeScript errors (AC-12, AC-13, AC-14)</li>
+    </ul>
+    <p style="margin-top: 1rem;"><strong>What Needs Fixes (4/14 AC):</strong></p>
+    <ul>
+      <li>SINGLETON auto-creation not triggering for research-agent-config (AC-1)</li>
+      <li>SINGLETON auto-creation not triggering for writer-agent-config (AC-2)</li>
+      <li>Cannot verify DEFAULT_*_PAYLOAD usage without instances (AC-3)</li>
+      <li>Filter shows 0 cards because instances don't exist (AC-4)</li>
+    </ul>
+    <p style="margin-top: 1rem;"><strong>Recommended Fix:</strong></p>
+    <p>Debug the auto-creation useEffect in <code>useUnifiedExperienceData.ts</code>. Add console.log to track when effect runs and why createTyped isn't being called. May be a race condition or the singletonTypes filter not matching correctly.</p>
+  </div>
+
+  <p><strong>Verified by:</strong> Claude Code (Playwright Visual QA)</p>
+  <p><strong>Timestamp:</strong> 2026-01-12T22:20:00Z</p>
+</body>
+</html>

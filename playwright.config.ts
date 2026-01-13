@@ -1,7 +1,6 @@
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
-  testDir: './tests/e2e',
   timeout: 30000,
   reporter: [
     ['html'],
@@ -18,4 +17,14 @@ export default defineConfig({
     port: 3000,
     reuseExistingServer: true,
   },
+  projects: [
+    {
+      name: 'e2e',
+      testDir: './tests/e2e',
+    },
+    {
+      name: 'visual-qa',
+      testDir: './tests/visual-qa',
+    },
+  ],
 })

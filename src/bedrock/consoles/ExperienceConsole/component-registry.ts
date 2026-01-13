@@ -11,10 +11,14 @@ import type { ObjectCardProps, ObjectEditorProps } from '../../patterns/console-
 // Card components
 import { SystemPromptCard } from './SystemPromptCard';
 import { FeatureFlagCard } from './FeatureFlagCard';
+import { ResearchAgentConfigCard } from './ResearchAgentConfigCard';
+import { WriterAgentConfigCard } from './WriterAgentConfigCard';
 
 // Editor components
 import { SystemPromptEditor } from './SystemPromptEditor';
 import { FeatureFlagEditor } from './FeatureFlagEditor';
+import { ResearchAgentConfigEditor } from './ResearchAgentConfigEditor';
+import { WriterAgentConfigEditor } from './WriterAgentConfigEditor';
 
 // =============================================================================
 // Card Component Registry
@@ -32,6 +36,8 @@ import { FeatureFlagEditor } from './FeatureFlagEditor';
 export const CARD_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectCardProps<any>>> = {
   SystemPromptCard,
   FeatureFlagCard,
+  ResearchAgentConfigCard,
+  WriterAgentConfigCard,
   // Future types:
   // PromptArchitectConfigCard,
   // WelcomeConfigCard,
@@ -53,6 +59,8 @@ export const CARD_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectCardPro
 export const EDITOR_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectEditorProps<any>>> = {
   SystemPromptEditor,
   FeatureFlagEditor,
+  ResearchAgentConfigEditor,
+  WriterAgentConfigEditor,
   // Future types:
   // PromptArchitectConfigEditor,
   // WelcomeConfigEditor,

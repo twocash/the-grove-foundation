@@ -1,18 +1,23 @@
 // src/bedrock/consoles/ExperienceConsole/useUnifiedExperienceData.ts
 // Unified Experience Data Hook
 // Dynamically composes data from all registered experience types
-// Sprint: unified-experience-console-v1
+// Sprint: unified-experience-console-v1, experience-console-cleanup-v1
 //
 // DEX: Organic Scalability - new types discovered automatically from registry
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import type { GroveObject } from '@core/schema/grove-object';
 import type { SystemPromptPayload } from '@core/schema/system-prompt';
 import type { FeatureFlagPayload } from '@core/schema/feature-flag';
+import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
+import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
 import type { PatchOperation } from '@core/data/grove-data-provider';
 import { useExperienceData } from './useExperienceData';
 import { useFeatureFlagsData } from './useFeatureFlagsData';
+import { useResearchAgentConfigData } from './useResearchAgentConfigData';
+import { useWriterAgentConfigData } from './useWriterAgentConfigData';
+import { getAllExperienceTypes } from '../../types/experience.types';
 
 // =============================================================================
 // Union Type for All Experience Payloads
@@ -26,10 +31,22 @@ import { useFeatureFlagsData } from './useFeatureFlagsData';
  */
 export type UnifiedExperiencePayload =
   | SystemPromptPayload
-  | FeatureFlagPayload;
-  // Future types added here as registry grows:
-  // | PromptArchitectConfigPayload
-  // | WelcomeConfigPayload
+  | FeatureFlagPayload
+  | ResearchAgentConfigPayload
+  | WriterAgentConfigPayload;
+
+// =============================================================================
+// Extended Result Type
+// =============================================================================
+
+export interface UnifiedExperienceDataResult extends CollectionDataResult<UnifiedExperiencePayload> {
+  /**
+   * Create an object of a specific type
+   * @param type - The experience type to create
+   * @param defaults - Optional payload defaults
+   */
+  createTyped: (type: string, defaults?: Partial<UnifiedExperiencePayload>) => Promise<GroveObject<UnifiedExperiencePayload>>;
+}
 
 // =============================================================================
 // Unified Data Hook
@@ -43,6 +60,7 @@ export type UnifiedExperiencePayload =
  * - Merges results into unified collection
  * - Routes mutations to appropriate underlying hook based on object type
  * - Maintains type discrimination for proper CRUD operations
+ * - Auto-creates default instances for SINGLETON types (experience-console-cleanup-v1)
  *
  * KNOWN LIMITATION: React hooks cannot be called conditionally/dynamically.
  * When adding new types, this hook must be updated to call the new hook.
@@ -51,13 +69,15 @@ export type UnifiedExperiencePayload =
  *
  * @returns CollectionDataResult with objects from all registered types
  */
-export function useUnifiedExperienceData(): CollectionDataResult<UnifiedExperiencePayload> {
+export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
   // =========================================================================
   // Explicit hook calls - update when adding new types
   // This is required due to React's Rules of Hooks
   // =========================================================================
   const systemPromptData = useExperienceData();
   const featureFlagData = useFeatureFlagsData();
+  const researchAgentConfigData = useResearchAgentConfigData();
+  const writerAgentConfigData = useWriterAgentConfigData();
 
   // =========================================================================
   // Merge objects from all sources
@@ -66,21 +86,33 @@ export function useUnifiedExperienceData(): CollectionDataResult<UnifiedExperien
     return [
       ...systemPromptData.objects,
       ...featureFlagData.objects,
-      // Future types:
-      // ...promptArchitectConfigData.objects,
-      // ...welcomeConfigData.objects,
+      ...researchAgentConfigData.objects,
+      ...writerAgentConfigData.objects,
     ] as GroveObject<UnifiedExperiencePayload>[];
-  }, [systemPromptData.objects, featureFlagData.objects]);
+  }, [
+    systemPromptData.objects,
+    featureFlagData.objects,
+    researchAgentConfigData.objects,
+    writerAgentConfigData.objects,
+  ]);
 
   // =========================================================================
   // Aggregate loading state (any hook loading = unified loading)
   // =========================================================================
-  const loading = systemPromptData.loading || featureFlagData.loading;
+  const loading =
+    systemPromptData.loading ||
+    featureFlagData.loading ||
+    researchAgentConfigData.loading ||
+    writerAgentConfigData.loading;
 
   // =========================================================================
   // Aggregate errors (first error wins - could be improved to show all)
   // =========================================================================
-  const error = systemPromptData.error || featureFlagData.error;
+  const error =
+    systemPromptData.error ||
+    featureFlagData.error ||
+    researchAgentConfigData.error ||
+    writerAgentConfigData.error;
 
   // =========================================================================
   // Refetch all data sources
@@ -88,72 +120,197 @@ export function useUnifiedExperienceData(): CollectionDataResult<UnifiedExperien
   const refetch = useCallback(() => {
     systemPromptData.refetch();
     featureFlagData.refetch();
-  }, [systemPromptData.refetch, featureFlagData.refetch]);
+    researchAgentConfigData.refetch();
+    writerAgentConfigData.refetch();
+  }, [
+    systemPromptData.refetch,
+    featureFlagData.refetch,
+    researchAgentConfigData.refetch,
+    writerAgentConfigData.refetch,
+  ]);
 
   // =========================================================================
   // Route create to appropriate hook based on type
+  // Sprint: experience-console-cleanup-v1 - Added type parameter support
   // =========================================================================
-  const create = useCallback(async (defaults?: Partial<UnifiedExperiencePayload>): Promise<GroveObject<UnifiedExperiencePayload>> => {
-    // Type must be determined from context or defaults
-    // For the unified console, type is selected before create
-    // This is a simplified implementation - full version would accept type parameter
+  const createTyped = useCallback(
+    async (
+      type: string,
+      defaults?: Partial<UnifiedExperiencePayload>
+    ): Promise<GroveObject<UnifiedExperiencePayload>> => {
+      switch (type) {
+        case 'system-prompt':
+          return systemPromptData.create(defaults as Partial<SystemPromptPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'feature-flag':
+          return featureFlagData.create(defaults as Partial<FeatureFlagPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'research-agent-config':
+          return researchAgentConfigData.create(defaults as Partial<ResearchAgentConfigPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'writer-agent-config':
+          return writerAgentConfigData.create(defaults as Partial<WriterAgentConfigPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        default:
+          throw new Error(`Unknown experience type: ${type}`);
+      }
+    },
+    [systemPromptData.create, featureFlagData.create, researchAgentConfigData.create, writerAgentConfigData.create]
+  );
 
-    // Default to system-prompt if not specified
-    // In practice, the console will pass type info
-    return systemPromptData.create(defaults as Partial<SystemPromptPayload>) as Promise<GroveObject<UnifiedExperiencePayload>>;
-  }, [systemPromptData.create]);
+  // Legacy create (defaults to system-prompt for backwards compatibility)
+  const create = useCallback(
+    async (defaults?: Partial<UnifiedExperiencePayload>): Promise<GroveObject<UnifiedExperiencePayload>> => {
+      // Default to system-prompt if not specified
+      // In practice, the console should use createTyped
+      return createTyped('system-prompt', defaults);
+    },
+    [createTyped]
+  );
 
   // =========================================================================
   // Route update to appropriate hook based on object type
   // =========================================================================
-  const update = useCallback(async (id: string, operations: PatchOperation[]) => {
-    const obj = objects.find((o) => o.meta.id === id);
-    if (!obj) {
-      throw new Error(`Object not found: ${id}`);
-    }
+  const update = useCallback(
+    async (id: string, operations: PatchOperation[]) => {
+      const obj = objects.find((o) => o.meta.id === id);
+      if (!obj) {
+        throw new Error(`Object not found: ${id}`);
+      }
 
-    switch (obj.meta.type) {
-      case 'system-prompt':
-        return systemPromptData.update(id, operations);
-      case 'feature-flag':
-        return featureFlagData.update(id, operations);
-      default:
-        throw new Error(`Unknown experience type: ${obj.meta.type}`);
-    }
-  }, [objects, systemPromptData.update, featureFlagData.update]);
+      switch (obj.meta.type) {
+        case 'system-prompt':
+          return systemPromptData.update(id, operations);
+        case 'feature-flag':
+          return featureFlagData.update(id, operations);
+        case 'research-agent-config':
+          return researchAgentConfigData.update(id, operations);
+        case 'writer-agent-config':
+          return writerAgentConfigData.update(id, operations);
+        default:
+          throw new Error(`Unknown experience type: ${obj.meta.type}`);
+      }
+    },
+    [objects, systemPromptData.update, featureFlagData.update, researchAgentConfigData.update, writerAgentConfigData.update]
+  );
 
   // =========================================================================
   // Route remove to appropriate hook based on object type
   // =========================================================================
-  const remove = useCallback(async (id: string) => {
-    const obj = objects.find((o) => o.meta.id === id);
-    if (!obj) {
-      throw new Error(`Object not found: ${id}`);
-    }
+  const remove = useCallback(
+    async (id: string) => {
+      const obj = objects.find((o) => o.meta.id === id);
+      if (!obj) {
+        throw new Error(`Object not found: ${id}`);
+      }
 
-    switch (obj.meta.type) {
-      case 'system-prompt':
-        return systemPromptData.remove(id);
-      case 'feature-flag':
-        return featureFlagData.remove(id);
-      default:
-        throw new Error(`Unknown experience type: ${obj.meta.type}`);
-    }
-  }, [objects, systemPromptData.remove, featureFlagData.remove]);
+      switch (obj.meta.type) {
+        case 'system-prompt':
+          return systemPromptData.remove(id);
+        case 'feature-flag':
+          return featureFlagData.remove(id);
+        case 'research-agent-config':
+          return researchAgentConfigData.remove(id);
+        case 'writer-agent-config':
+          return writerAgentConfigData.remove(id);
+        default:
+          throw new Error(`Unknown experience type: ${obj.meta.type}`);
+      }
+    },
+    [objects, systemPromptData.remove, featureFlagData.remove, researchAgentConfigData.remove, writerAgentConfigData.remove]
+  );
 
   // =========================================================================
   // Route duplicate to appropriate hook based on object type
   // =========================================================================
-  const duplicate = useCallback(async (object: GroveObject<UnifiedExperiencePayload>): Promise<GroveObject<UnifiedExperiencePayload>> => {
-    switch (object.meta.type) {
-      case 'system-prompt':
-        return systemPromptData.duplicate(object as GroveObject<SystemPromptPayload>) as Promise<GroveObject<UnifiedExperiencePayload>>;
-      case 'feature-flag':
-        return featureFlagData.duplicate(object as GroveObject<FeatureFlagPayload>) as Promise<GroveObject<UnifiedExperiencePayload>>;
-      default:
-        throw new Error(`Unknown experience type: ${object.meta.type}`);
-    }
-  }, [systemPromptData.duplicate, featureFlagData.duplicate]);
+  const duplicate = useCallback(
+    async (object: GroveObject<UnifiedExperiencePayload>): Promise<GroveObject<UnifiedExperiencePayload>> => {
+      switch (object.meta.type) {
+        case 'system-prompt':
+          return systemPromptData.duplicate(object as GroveObject<SystemPromptPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'feature-flag':
+          return featureFlagData.duplicate(object as GroveObject<FeatureFlagPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'research-agent-config':
+          return researchAgentConfigData.duplicate(object as GroveObject<ResearchAgentConfigPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        case 'writer-agent-config':
+          return writerAgentConfigData.duplicate(object as GroveObject<WriterAgentConfigPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
+        default:
+          throw new Error(`Unknown experience type: ${object.meta.type}`);
+      }
+    },
+    [
+      systemPromptData.duplicate,
+      featureFlagData.duplicate,
+      researchAgentConfigData.duplicate,
+      writerAgentConfigData.duplicate,
+    ]
+  );
+
+  // =========================================================================
+  // Auto-create default instances for SINGLETON types
+  // Sprint: experience-console-cleanup-v1
+  // =========================================================================
+  const defaultsCreatedRef = useRef(false);
+  const [, setDefaultsVersion] = useState(0);
+
+  useEffect(() => {
+    // Only run once, after initial load
+    if (defaultsCreatedRef.current || loading) return;
+
+    // HOTFIX: Mark as in-progress IMMEDIATELY to prevent race condition
+    // The effect was re-triggering due to objects changing before async completed
+    // Sprint: experience-console-cleanup-v1
+    defaultsCreatedRef.current = true;
+
+    // Find SINGLETON types that need default instances in the Experience Console
+    // Excludes types that allow multiple active (like feature-flag)
+    const singletonTypes = getAllExperienceTypes().filter(
+      (t) => t.routePath === '/bedrock/experience' && !t.allowMultipleActive
+    );
+
+    const createDefaultsAsync = async () => {
+      let createdAny = false;
+
+      for (const typeDef of singletonTypes) {
+        // Check if instance exists for this type
+        const existingInstance = objects.find((o) => o.meta.type === typeDef.type);
+
+        if (!existingInstance) {
+          console.log(`[ExperienceConsole] Creating default instance for: ${typeDef.type}`);
+
+          try {
+            await createTyped(typeDef.type);
+            createdAny = true;
+          } catch (err) {
+            console.error(`[ExperienceConsole] Failed to create default for ${typeDef.type}:`, err);
+          }
+        }
+      }
+
+      // Force re-render if we created any defaults
+      if (createdAny) {
+        setDefaultsVersion((v) => v + 1);
+        // Refetch to ensure consistency with server
+        setTimeout(() => {
+          refetch();
+        }, 100);
+      }
+    };
+
+    createDefaultsAsync();
+  }, [objects, loading, createTyped, refetch]);
 
   // =========================================================================
   // Return unified result
@@ -167,6 +324,7 @@ export function useUnifiedExperienceData(): CollectionDataResult<UnifiedExperien
     update,
     remove,
     duplicate,
+    createTyped,
   };
 }
 
@@ -175,3 +333,5 @@ export function useUnifiedExperienceData(): CollectionDataResult<UnifiedExperien
 // =============================================================================
 export { useExperienceData } from './useExperienceData';
 export { useFeatureFlagsData } from './useFeatureFlagsData';
+export { useResearchAgentConfigData } from './useResearchAgentConfigData';
+export { useWriterAgentConfigData } from './useWriterAgentConfigData';

@@ -31,6 +31,32 @@ export interface CollectionDataResult<T> {
   remove: (id: string) => Promise<void>;
   /** Duplicate object */
   duplicate: (object: GroveObject<T>) => Promise<GroveObject<T>>;
+  /**
+   * Create an object of a specific type (polymorphic consoles only)
+   * Sprint: experience-console-cleanup-v1
+   */
+  createTyped?: (type: string, defaults?: Partial<T>) => Promise<GroveObject<T>>;
+}
+
+// =============================================================================
+// Polymorphic Console Types
+// Sprint: experience-console-cleanup-v1
+// =============================================================================
+
+/**
+ * Option for the create dropdown in polymorphic consoles
+ */
+export interface CreateOption {
+  /** Unique type identifier */
+  type: string;
+  /** Human-readable label */
+  label: string;
+  /** Material Symbols icon name */
+  icon: string;
+  /** Optional accent color */
+  color?: string;
+  /** Optional description */
+  description?: string;
 }
 
 // =============================================================================
@@ -154,6 +180,13 @@ export interface BedrockConsoleOptions<T> {
 
   /** Optional: Async action handler for slash commands */
   actionHandler?: CopilotActionHandler<T>;
+
+  /**
+   * Options for create dropdown in polymorphic consoles.
+   * If provided, +New button becomes a dropdown menu.
+   * Sprint: experience-console-cleanup-v1
+   */
+  createOptions?: CreateOption[];
 }
 
 // =============================================================================

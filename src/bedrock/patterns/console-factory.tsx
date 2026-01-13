@@ -58,6 +58,8 @@ import { FavoritesFilter } from '../components/FavoriteToggle';
 import { ViewModeToggle } from '../components/ViewModeToggle';
 import { ObjectList } from '../components/ObjectList';
 import { NoResultsState, NoItemsState } from '../components/EmptyState';
+import { CreateDropdown } from '../components/CreateDropdown';
+import { TypeAwareEmptyState } from '../components/TypeAwareEmptyState';
 
 // =============================================================================
 // Factory Function
@@ -92,6 +94,7 @@ export function createBedrockConsole<T>(
     copilotTitle = `${config.title} Copilot`,
     copilotPlaceholder = 'Edit with AI...',
     actionHandler,
+    createOptions,
   } = options;
 
   // The actual console component
@@ -100,6 +103,7 @@ export function createBedrockConsole<T>(
     const { openInspector, closeInspector, updateInspector } = useBedrockUI();
 
     // Data layer
+    // Sprint: experience-console-cleanup-v1 - added createTyped for polymorphic consoles
     const {
       objects,
       loading,
@@ -108,6 +112,7 @@ export function createBedrockConsole<T>(
       update,
       remove,
       duplicate,
+      createTyped,
     } = useData();
 
     // Collection view state
@@ -263,6 +268,22 @@ export function createBedrockConsole<T>(
       setSelectedId(newObject.meta.id);
     }, [create]);
 
+    // Sprint: experience-console-cleanup-v1 - Typed create for polymorphic consoles
+    const handleCreateTyped = useCallback(async (type: string) => {
+      try {
+        if (createTyped) {
+          const newObject = await createTyped(type);
+          setSelectedId(newObject.meta.id);
+        } else {
+          // Fallback to default create if createTyped not available
+          const newObject = await create();
+          setSelectedId(newObject.meta.id);
+        }
+      } catch (err) {
+        console.error('[Console] handleCreateTyped error:', err);
+      }
+    }, [create, createTyped]);
+
     // ==========================================================================
     // Inspector Registration
     // ==========================================================================
@@ -285,7 +306,9 @@ export function createBedrockConsole<T>(
 
     // Open/close inspector when selection changes
     useEffect(() => {
+      console.log('[Inspector Effect] selectedId:', selectedId, 'lastOpened:', lastOpenedIdRef.current, 'inspectorConfig:', !!inspectorConfig, 'selectedObject:', !!selectedObject);
       if (selectedId && selectedId !== lastOpenedIdRef.current && inspectorConfig) {
+        console.log('[Inspector Effect] Opening inspector for:', selectedId);
         lastOpenedIdRef.current = selectedId;
         // Reset version tracking for new selection
         lastObjectVersionRef.current = `${selectedObject?.meta.updatedAt}-${loading}-${hasChanges}`;
@@ -470,24 +493,34 @@ export function createBedrockConsole<T>(
       <div className="flex flex-col h-full">
         {/* Header with primary action */}
         {/* Sprint: extraction-pipeline-integration-v1 - Added headerContent slot for review queue button */}
+        {/* Sprint: experience-console-cleanup-v1 - Added dropdown support for polymorphic consoles */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)]">
           <div className="flex items-center gap-3">
             {headerContent}
           </div>
           {config.primaryAction && (
-            <GlassButton
-              onClick={handleCreate}
-              variant="primary"
-              size="sm"
-              disabled={loading}
-            >
-              {config.primaryAction.icon && (
-                <span className="material-symbols-outlined text-lg">
-                  {config.primaryAction.icon}
-                </span>
-              )}
-              {config.primaryAction.label}
-            </GlassButton>
+            createOptions && createOptions.length > 0 ? (
+              <CreateDropdown
+                options={createOptions}
+                onSelect={handleCreateTyped}
+                disabled={loading}
+                label={config.primaryAction.label}
+              />
+            ) : (
+              <GlassButton
+                onClick={handleCreate}
+                variant="primary"
+                size="sm"
+                disabled={loading}
+              >
+                {config.primaryAction.icon && (
+                  <span className="material-symbols-outlined text-lg">
+                    {config.primaryAction.icon}
+                  </span>
+                )}
+                {config.primaryAction.label}
+              </GlassButton>
+            )
           )}
         </div>
 
@@ -582,6 +615,15 @@ export function createBedrockConsole<T>(
               />
             ) : EmptyStateComponent ? (
               <EmptyStateComponent onCreate={handleCreate} />
+            ) : createOptions && createOptions.length > 0 ? (
+              /* Sprint: experience-console-cleanup-v1 - Type-aware empty state */
+              <TypeAwareEmptyState
+                config={config}
+                activeTypeFilter={filters['meta.type'] as string | undefined}
+                createOptions={createOptions}
+                onCreateTyped={handleCreateTyped}
+                onCreateDefault={handleCreate}
+              />
             ) : (
               <NoItemsState
                 title={`No ${config.title.toLowerCase()} yet`}
