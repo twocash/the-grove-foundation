@@ -53,8 +53,18 @@ export {
 export {
   useResearchAgent,
   useIsResearchExecuting,
-  useResearchProgress,
+  useResearchProgress as useResearchProgressEvents, // Renamed to avoid conflict
   type UseResearchAgentOptions,
   type ResearchExecutionState,
   type UseResearchAgentResult,
 } from './useResearchAgent';
+
+// Research Progress State (Sprint: progress-streaming-ui-v1)
+export {
+  useResearchProgress,
+  type ResearchProgressState,
+  type ProgressSource,
+  type ProgressPhase,
+  type TimestampedEvent,
+  type UseResearchProgressResult,
+} from './useResearchProgress';

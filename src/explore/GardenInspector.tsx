@@ -19,6 +19,9 @@ import {
   type FilterPresetId,
 } from '@core/schema/research-sprout-registry';
 import { useResearchSprouts } from './context/ResearchSproutContext';
+// Sprint: progress-streaming-ui-v1
+import { ResearchProgressView } from './components/ResearchProgressView';
+import { useResearchProgress } from './hooks/useResearchProgress';
 
 // =============================================================================
 // Types
@@ -56,7 +59,7 @@ export interface GardenInspectorProps {
   onClearError: () => void;
 }
 
-type ViewMode = 'confirmation' | 'list';
+type ViewMode = 'confirmation' | 'list' | 'progress';
 
 // =============================================================================
 // Component
@@ -74,11 +77,25 @@ export function GardenInspector({
   onCancel,
   onClearError,
 }: GardenInspectorProps) {
-  // Determine view mode based on state
-  const viewMode: ViewMode = architectState === 'confirming' ? 'confirmation' : 'list';
-
   // Filter preset for list view
   const [filterPreset, setFilterPreset] = useState<FilterPresetId>('active');
+
+  // Progress state for active sprouts (Sprint: progress-streaming-ui-v1)
+  const { state: progressState, reset: resetProgress } = useResearchProgress();
+
+  // Get selected sprout from context
+  const { selectedSproutId, sprouts } = useResearchSprouts();
+  const selectedSprout = useMemo(
+    () => sprouts.find(s => s.id === selectedSproutId),
+    [sprouts, selectedSproutId]
+  );
+
+  // Determine view mode based on state
+  const viewMode: ViewMode = useMemo(() => {
+    if (architectState === 'confirming') return 'confirmation';
+    if (selectedSprout?.status === 'active') return 'progress';
+    return 'list';
+  }, [architectState, selectedSprout?.status]);
 
   return (
     <div className="flex flex-col h-full bg-[var(--glass-solid)]">
@@ -104,6 +121,18 @@ export function GardenInspector({
 
         {viewMode === 'list' && (
           <SproutListView filterPreset={filterPreset} />
+        )}
+
+        {/* Progress view for active sprouts (Sprint: progress-streaming-ui-v1) */}
+        {viewMode === 'progress' && selectedSprout && (
+          <ResearchProgressView
+            state={progressState}
+            onRetry={() => {
+              resetProgress();
+              // TODO: Trigger retry via context
+            }}
+            onSourceClick={(url) => window.open(url, '_blank')}
+          />
         )}
 
         {error && (

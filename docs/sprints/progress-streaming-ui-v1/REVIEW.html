@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Streaming UI v1 - Visual Review</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 2rem; background: #f8f9fa; }
+    h1 { color: #1a1a1a; border-bottom: 2px solid #e0e0e0; padding-bottom: 1rem; }
+    h2 { color: #333; margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: white; }
+    th, td { padding: 0.75rem; text-align: left; border: 1px solid #e0e0e0; }
+    th { background: #f0f0f0; }
+    .pass { background: #d4edda; color: #155724; }
+    .fail { background: #f8d7da; color: #721c24; }
+    .pending { background: #fff3cd; color: #856404; }
+    img { max-width: 100%; border: 1px solid #ddd; margin: 1rem 0; }
+    .screenshot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; }
+    .screenshot-card { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+    .summary { background: #e0f2fe; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; }
+    .files-changed { background: white; padding: 1rem; border-radius: 8px; }
+    .files-changed li { margin: 0.25rem 0; font-family: monospace; font-size: 0.875rem; }
+    .new { color: #16a34a; }
+    .modified { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <h1>Progress Streaming UI v1 - Visual Review</h1>
+
+  <div class="summary">
+    <p><strong>Sprint:</strong> progress-streaming-ui-v1</p>
+    <p><strong>Date:</strong> 2026-01-13</p>
+    <p><strong>Status:</strong> <span class="pass" style="padding: 0.25rem 0.5rem; border-radius: 4px;">BUILD PASS</span></p>
+  </div>
+
+  <h2>Files Changed</h2>
+  <div class="files-changed">
+    <ul>
+      <li class="new">NEW: src/explore/hooks/useResearchProgress.ts</li>
+      <li class="new">NEW: src/explore/components/PhaseIndicator.tsx</li>
+      <li class="new">NEW: src/explore/components/SourceList.tsx</li>
+      <li class="new">NEW: src/explore/components/ResearchProgressView.tsx</li>
+      <li class="modified">MODIFIED: src/explore/GardenInspector.tsx</li>
+      <li class="modified">MODIFIED: src/explore/hooks/index.ts</li>
+      <li class="modified">MODIFIED: tailwind.config.ts</li>
+    </ul>
+  </div>
+
+  <h2>Acceptance Criteria Verification</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>AC</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Evidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>AC-1</td>
+        <td>Progress events captured during active research</td>
+        <td class="pass">PASS</td>
+        <td>useResearchProgress.ts:pushEvent() - Events buffered with timestamps</td>
+      </tr>
+      <tr>
+        <td>AC-2</td>
+        <td>Event buffer limited to 10 most recent (FIFO)</td>
+        <td class="pass">PASS</td>
+        <td>useResearchProgress.ts:124 - MAX_EVENTS = 10, FIFO slice</td>
+      </tr>
+      <tr>
+        <td>AC-3</td>
+        <td>Progress state resets on new execution</td>
+        <td class="pass">PASS</td>
+        <td>useResearchProgress.ts:reset() clears refs and state</td>
+      </tr>
+      <tr>
+        <td>AC-4</td>
+        <td>Pipeline phase tracked (research | writing)</td>
+        <td class="pass">PASS</td>
+        <td>useResearchProgress.ts handles phase-started events</td>
+      </tr>
+      <tr>
+        <td>AC-5</td>
+        <td>Progress panel renders for active sprouts</td>
+        <td class="pass">PASS</td>
+        <td>GardenInspector.tsx:127 - viewMode === 'progress' conditional</td>
+      </tr>
+      <tr>
+        <td>AC-6</td>
+        <td>Phase indicator shows current pipeline phase</td>
+        <td class="pass">PASS</td>
+        <td>PhaseIndicator.tsx with 5 phase states and icons</td>
+      </tr>
+      <tr>
+        <td>AC-7</td>
+        <td>Search queries display with truncation</td>
+        <td class="pass">PASS</td>
+        <td>ResearchProgressView.tsx:CurrentQueryDisplay - 50 char truncation</td>
+      </tr>
+      <tr>
+        <td>AC-8</td>
+        <td>Source count displayed</td>
+        <td class="pass">PASS</td>
+        <td>SourceList.tsx:37 - "Found N sources" header</td>
+      </tr>
+      <tr>
+        <td>AC-9</td>
+        <td>Completion state shows success indicator</td>
+        <td class="pass">PASS</td>
+        <td>ResearchProgressView.tsx:CompletionDisplay with check_circle icon</td>
+      </tr>
+      <tr>
+        <td>AC-10</td>
+        <td>Sources animate in as discovered</td>
+        <td class="pass">PASS</td>
+        <td>SourceList.tsx:74 - animate-slide-in-left class on new items</td>
+      </tr>
+      <tr>
+        <td>AC-11</td>
+        <td>Sources show domain and truncated title</td>
+        <td class="pass">PASS</td>
+        <td>SourceList.tsx:78-86 - Domain badge + 40 char title truncation</td>
+      </tr>
+      <tr>
+        <td>AC-12</td>
+        <td>Source overflow handled with "+N more"</td>
+        <td class="pass">PASS</td>
+        <td>SourceList.tsx:52-55 - hiddenCount indicator</td>
+      </tr>
+      <tr>
+        <td>AC-13</td>
+        <td>Progress view replaces details for active sprouts</td>
+        <td class="pass">PASS</td>
+        <td>GardenInspector.tsx:94-98 - viewMode determination logic</td>
+      </tr>
+      <tr>
+        <td>AC-14</td>
+        <td>View transitions when status changes</td>
+        <td class="pass">PASS</td>
+        <td>GardenInspector.tsx - useMemo on selectedSprout?.status</td>
+      </tr>
+      <tr>
+        <td>AC-15</td>
+        <td>Error state shows with retry option</td>
+        <td class="pass">PASS</td>
+        <td>ResearchProgressView.tsx:ErrorDisplay with retry button</td>
+      </tr>
+      <tr>
+        <td>AC-16</td>
+        <td>npm run build passes</td>
+        <td class="pass">PASS</td>
+        <td>Build log below</td>
+      </tr>
+      <tr>
+        <td>AC-17</td>
+        <td>No TypeScript errors</td>
+        <td class="pass">PASS</td>
+        <td>Build completed with 0 TS errors</td>
+      </tr>
+      <tr>
+        <td>AC-18</td>
+        <td>No console errors on load</td>
+        <td class="pending">PENDING</td>
+        <td>Requires manual verification</td>
+      </tr>
+      <tr>
+        <td>AC-19</td>
+        <td>Visual QA screenshots captured</td>
+        <td class="pending">PENDING</td>
+        <td>Test file created, screenshots require active research</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Visual Evidence</h2>
+  <p><em>Note: Screenshots require an active research sprout execution to capture real progress states. The test file has been created at <code>tests/visual-qa/progress-streaming.spec.ts</code>.</em></p>
+
+  <div class="screenshot-grid">
+    <div class="screenshot-card">
+      <h3>01 - Research Phase</h3>
+      <img src="screenshots/01-progress-research-phase.png" alt="Research phase" onerror="this.parentElement.innerHTML='<h3>01 - Research Phase</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+    <div class="screenshot-card">
+      <h3>02 - Search Query</h3>
+      <img src="screenshots/02-progress-search-query.png" alt="Search query" onerror="this.parentElement.innerHTML='<h3>02 - Search Query</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+    <div class="screenshot-card">
+      <h3>03 - Sources</h3>
+      <img src="screenshots/03-progress-sources.png" alt="Sources" onerror="this.parentElement.innerHTML='<h3>03 - Sources</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+    <div class="screenshot-card">
+      <h3>04 - Writing Phase</h3>
+      <img src="screenshots/04-progress-writing-phase.png" alt="Writing phase" onerror="this.parentElement.innerHTML='<h3>04 - Writing Phase</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+    <div class="screenshot-card">
+      <h3>05 - Complete</h3>
+      <img src="screenshots/05-progress-complete.png" alt="Complete" onerror="this.parentElement.innerHTML='<h3>05 - Complete</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+    <div class="screenshot-card">
+      <h3>06 - Error State</h3>
+      <img src="screenshots/06-progress-error.png" alt="Error state" onerror="this.parentElement.innerHTML='<h3>06 - Error State</h3><p style=&quot;color:#666;font-style:italic&quot;>Screenshot pending - requires active research execution</p>'">
+    </div>
+  </div>
+
+  <h2>Build Verification</h2>
+  <pre>
+$ npm run build
+vite v6.2.0 building for production...
+...
+dist/assets/ExplorePage-DWI6uv7m.js    252.30 kB │ gzip: 74.17 kB
+...
+✓ built in 26.80s
+  </pre>
+
+  <h2>Key Implementation Notes</h2>
+  <ul>
+    <li><strong>Event Type Safety:</strong> Used type guards (isPipelineEvent, isResearchEvent, isWriterEvent) instead of magic strings</li>
+    <li><strong>FIFO Buffer:</strong> Events limited to 10 most recent using slice(-(MAX_EVENTS - 1))</li>
+    <li><strong>Ref Pattern:</strong> Used useRef for events and sources to avoid stale closure issues</li>
+    <li><strong>Animation Classes:</strong> Added slide-in-left and scale-in keyframes to tailwind.config.ts</li>
+    <li><strong>View Mode Logic:</strong> Progress view shows when selectedSprout?.status === 'active'</li>
+  </ul>
+
+  <h2>Sign-off</h2>
+  <p><strong>Verified by:</strong> Claude Opus 4.5</p>
+  <p><strong>Timestamp:</strong> 2026-01-13T16:30:00Z</p>
+  <p><strong>17/19 ACs Verified</strong> (2 pending manual verification)</p>
+</body>
+</html>

@@ -113,11 +113,23 @@ const config: Config = {
         'pulse-pending': 'pulse-pending 2s ease-in-out infinite',
         'pulse-attention': 'pulse-attention 1.5s ease-in-out infinite',
         'pulse-active': 'pulse-active 2s ease-in-out infinite',
+        // Progress Streaming UI animations (Sprint: progress-streaming-ui-v1)
+        'slide-in-left': 'slide-in-left 200ms ease-out',
+        'scale-in': 'scale-in 300ms ease-out',
       },
       keyframes: {
         'glow-breathe': {
           '0%, 100%': { boxShadow: '0 0 5px rgba(0, 212, 255, 0.2)' },
           '50%': { boxShadow: '0 0 15px rgba(0, 212, 255, 0.4)' },
+        },
+        // Progress Streaming UI keyframes (Sprint: progress-streaming-ui-v1)
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-10px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
         // Garden Inspector badge keyframes (Phase 4c)
         'pulse-pending': {
