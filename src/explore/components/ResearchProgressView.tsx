@@ -1,6 +1,7 @@
 // src/explore/components/ResearchProgressView.tsx
 // Main progress display for active research
 // Sprint: progress-streaming-ui-v1
+// Sprint: polish-demo-prep-v1 - Enhanced progress indicators
 //
 // DEX: Capability Agnosticism
 // This component only consumes events - works regardless of underlying model.
@@ -8,7 +9,8 @@
 import { useEffect } from 'react';
 import { PhaseIndicator } from './PhaseIndicator';
 import { SourceList } from './SourceList';
-import type { ResearchProgressState } from '../hooks/useResearchProgress';
+import { ErrorDisplay, detectErrorPhase } from './ErrorDisplay';
+import type { ResearchProgressState, ProgressPhase } from '../hooks/useResearchProgress';
 
 interface ResearchProgressViewProps {
   state: ResearchProgressState;
@@ -55,6 +57,9 @@ export function ResearchProgressView({
 
           <PhaseIndicator phase={state.currentPhase} />
         </div>
+
+        {/* Phase progression bar (Sprint: polish-demo-prep-v1) */}
+        <PhaseProgressBar phase={state.currentPhase} />
       </div>
 
       {/* Content */}
@@ -77,9 +82,13 @@ export function ResearchProgressView({
           />
         </div>
 
-        {/* Error state */}
+        {/* Error state (Sprint: polish-demo-prep-v1 - Use enhanced ErrorDisplay) */}
         {state.currentPhase === 'error' && state.error && (
-          <ErrorDisplay error={state.error} onRetry={onRetry} />
+          <ErrorDisplay
+            phase={detectErrorPhase(state.error)}
+            message={state.error}
+            onRetry={onRetry}
+          />
         )}
 
         {/* Completion state */}
@@ -164,40 +173,101 @@ function BranchProgress({ branch }: BranchProgressProps) {
   );
 }
 
-interface ErrorDisplayProps {
-  error: string;
-  onRetry?: () => void;
+// =============================================================================
+// Phase Progress Bar (Sprint: polish-demo-prep-v1)
+// =============================================================================
+
+interface PhaseProgressBarProps {
+  phase: ProgressPhase;
 }
 
-function ErrorDisplay({ error, onRetry }: ErrorDisplayProps) {
+function PhaseProgressBar({ phase }: PhaseProgressBarProps) {
+  const phases: { key: ProgressPhase; label: string; icon: string }[] = [
+    { key: 'research', label: 'Research', icon: 'science' },
+    { key: 'writing', label: 'Writing', icon: 'edit_note' },
+    { key: 'complete', label: 'Complete', icon: 'check_circle' },
+  ];
+
+  const getPhaseStatus = (phaseKey: ProgressPhase): 'done' | 'active' | 'pending' => {
+    const order = ['idle', 'research', 'writing', 'complete', 'error'];
+    const currentIndex = order.indexOf(phase);
+    const phaseIndex = order.indexOf(phaseKey);
+
+    if (phase === 'error') {
+      // On error, mark previous phases as done
+      return phaseIndex < currentIndex ? 'done' : 'pending';
+    }
+
+    if (phaseIndex < currentIndex) return 'done';
+    if (phaseIndex === currentIndex) return 'active';
+    return 'pending';
+  };
+
   return (
-    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20
-                    border border-red-200 dark:border-red-800/50">
-      <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-red-500 text-xl">
-          error
-        </span>
-        <div className="flex-1">
-          <p className="text-sm font-medium text-red-700 dark:text-red-300">
-            Research Failed
-          </p>
-          <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-            {error}
-          </p>
-          {onRetry && (
-            <button
-              onClick={onRetry}
-              className="mt-3 px-4 py-1.5 text-sm font-medium
-                         bg-red-100 dark:bg-red-900/40
-                         text-red-700 dark:text-red-300
-                         rounded-lg hover:bg-red-200 dark:hover:bg-red-900/60
-                         transition-colors"
-            >
-              Retry Research
-            </button>
-          )}
-        </div>
-      </div>
+    <div className="flex items-center justify-between mt-3">
+      {phases.map((p, index) => {
+        const status = getPhaseStatus(p.key);
+        return (
+          <div key={p.key} className="flex items-center flex-1">
+            {/* Phase node */}
+            <div className="flex flex-col items-center">
+              <div
+                className={`
+                  w-8 h-8 rounded-full flex items-center justify-center
+                  transition-all duration-300
+                  ${status === 'done'
+                    ? 'bg-green-100 dark:bg-green-900/40'
+                    : status === 'active'
+                      ? 'bg-blue-100 dark:bg-blue-900/40 ring-2 ring-blue-400 ring-offset-1'
+                      : 'bg-slate-100 dark:bg-slate-800'
+                  }
+                `}
+              >
+                <span
+                  className={`
+                    material-symbols-outlined text-base
+                    ${status === 'done'
+                      ? 'text-green-600 dark:text-green-400'
+                      : status === 'active'
+                        ? 'text-blue-600 dark:text-blue-400 animate-pulse'
+                        : 'text-slate-400 dark:text-slate-500'
+                    }
+                  `}
+                >
+                  {status === 'done' ? 'check' : p.icon}
+                </span>
+              </div>
+              <span
+                className={`
+                  text-xs mt-1 font-medium
+                  ${status === 'done'
+                    ? 'text-green-600 dark:text-green-400'
+                    : status === 'active'
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-slate-400 dark:text-slate-500'
+                  }
+                `}
+              >
+                {p.label}
+              </span>
+            </div>
+
+            {/* Connector line (not after last phase) */}
+            {index < phases.length - 1 && (
+              <div className="flex-1 mx-2 h-0.5 relative">
+                <div className="absolute inset-0 bg-slate-200 dark:bg-slate-700 rounded" />
+                <div
+                  className={`
+                    absolute inset-0 bg-green-400 dark:bg-green-500 rounded
+                    transition-all duration-500
+                    ${status === 'done' ? 'w-full' : 'w-0'}
+                  `}
+                />
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
