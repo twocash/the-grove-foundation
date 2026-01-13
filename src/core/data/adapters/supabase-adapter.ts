@@ -425,13 +425,15 @@ export class SupabaseAdapter implements GroveDataProvider {
 
   /**
    * Trigger embedding pipeline for a document (non-blocking).
+   * Note: API expects documentIds (plural array), not documentId (singular).
    */
   private async triggerEmbedding(documentId: string): Promise<void> {
     try {
       await fetch('/api/knowledge/embed', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documentId }),
+        // Fix: API expects documentIds array, not singular documentId
+        body: JSON.stringify({ documentIds: [documentId] }),
       });
       console.log(`[SupabaseAdapter] Triggered embedding for ${documentId}`);
     } catch (error) {
