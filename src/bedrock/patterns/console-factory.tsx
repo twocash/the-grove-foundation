@@ -716,7 +716,7 @@ export function createBedrockConsole<T>(
         </div>
 
         {/* Content area */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6">
           {loading ? (
             <LoadingSkeleton viewMode={viewMode} />
           ) : results.length === 0 ? (

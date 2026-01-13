@@ -50,7 +50,7 @@ export function ThreeColumnLayout({
         )}
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-[var(--glass-void)]">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--glass-void)]">
           {content}
         </main>
 
