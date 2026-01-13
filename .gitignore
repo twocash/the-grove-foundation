@@ -1,6 +1,12 @@
 # Claude Code settings (may contain API keys)
 .claude/
 
+# Strategic briefing folder (onboarding materials, not source-controlled)
+strategic-briefing/
+
+# Grove knowledge base documents (master inventory folder)
+grove-documents/
+
 # Serena MCP (local indexes and memories)
 .serena/
 

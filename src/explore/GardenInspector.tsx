@@ -158,9 +158,15 @@ export function GardenInspector({
         )}
 
         {/* Results view for completed sprouts (Sprint: results-display-v1) */}
-        {viewMode === 'results' && researchDocument && (
+        {/* Sprint: knowledge-base-integration-v1 - Added sprout prop for KB provenance */}
+        {viewMode === 'results' && researchDocument && selectedSprout && (
           <ResearchResultsView
             document={researchDocument}
+            sprout={{
+              id: selectedSprout.id,
+              spark: selectedSprout.spark,
+              groveConfigSnapshot: selectedSprout.groveConfigSnapshot,
+            }}
             onBack={handleBackToList}
             onCopy={() => {
               console.log('[GardenInspector] Document copied to clipboard');

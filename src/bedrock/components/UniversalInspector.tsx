@@ -9,7 +9,11 @@ import React, { type ReactNode, useMemo, useCallback } from 'react';
 import { InspectorPanel, InspectorSection, InspectorDivider } from '../../shared/layout';
 import type { ConsoleSchema, InspectorField, InspectorSchema } from '../types/ConsoleSchema';
 import type { DraftState, BaseEntity } from '../services/types';
+import type { PatchOperation } from '../types/copilot.types';
+import type { GroveObject } from '../../core/schema/grove-object';
 import { getFieldValue, setFieldValue, groupFieldsBySection } from '../utils/schema-adapters';
+import { resolveCopilotConfig } from '../utils/copilot-factory';
+import InspectorCopilot from './InspectorCopilot';
 
 // =============================================================================
 // Types
@@ -38,6 +42,8 @@ export interface UniversalInspectorProps<T extends BaseEntity> {
   additionalActions?: ReactNode;
   /** Override header title */
   headerOverride?: ReactNode;
+  /** Handler for copilot patch operations (Sprint: inspector-copilot-v1) */
+  onCopilotPatch?: (operations: PatchOperation[]) => void;
 }
 
 // =============================================================================
@@ -279,8 +285,15 @@ export function UniversalInspector<T extends BaseEntity>({
   loading,
   additionalActions,
   headerOverride,
+  onCopilotPatch,
 }: UniversalInspectorProps<T>) {
   const inspectorSchema = schema.inspector;
+
+  // Resolve copilot configuration (Sprint: inspector-copilot-v1)
+  const copilotConfig = useMemo(() => {
+    if (!inspectorSchema.copilot) return null;
+    return resolveCopilotConfig(schema.id, inspectorSchema.copilot);
+  }, [schema.id, inspectorSchema.copilot]);
 
   // Get the data source (draft if available, otherwise original item)
   const data = draft.draft || item;
@@ -473,6 +486,16 @@ export function UniversalInspector<T extends BaseEntity>({
           );
         })}
       </InspectorPanel>
+
+      {/* Inspector Copilot (Sprint: inspector-copilot-v1) */}
+      {copilotConfig && copilotConfig.enabled && data && (
+        <InspectorCopilot
+          consoleId={schema.id}
+          config={copilotConfig}
+          object={data as unknown as GroveObject}
+          onApplyPatch={onCopilotPatch}
+        />
+      )}
     </div>
   );
 }

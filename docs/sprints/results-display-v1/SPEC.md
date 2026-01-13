@@ -11,7 +11,7 @@
 
 - [x] Read: `The_Trellis_Architecture__First_Order_Directives.md`
 - [x] Read: `Bedrock_Architecture_Specification.md`
-- [x] Read: `docs/BEDROCK_SPRINT_CONTRACT.md` (Binding Contract v1.2)
+- [x] Read: `docs/BEDROCK_SPRINT_CONTRACT.md` (Binding Contract v1.3)
 - [x] Read: `src/core/schema/research-document.ts`
 
 ---

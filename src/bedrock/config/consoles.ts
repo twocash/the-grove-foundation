@@ -93,6 +93,12 @@ export const systemPromptSchema: ConsoleSchema = {
       logic: { title: 'Generation Settings', defaultExpanded: false },
       metadata: { title: 'Metadata', defaultExpanded: false },
     },
+    // Sprint: inspector-copilot-v1 - Pilot copilot for system prompts
+    copilot: {
+      enabled: true,
+      title: 'Prompt Copilot',
+      placeholder: 'Try "set title to X" or "/help"',
+    },
   },
 
   cardActions: [
@@ -206,6 +212,12 @@ export const featureFlagSchema: ConsoleSchema = {
       config: { title: 'Default State', defaultExpanded: true },
       logic: { title: 'Explore Header', defaultExpanded: false },
       metadata: { title: 'Metadata', defaultExpanded: false },
+    },
+    // Sprint: inspector-copilot-v1 - Pilot copilot for feature flags
+    copilot: {
+      enabled: true,
+      title: 'Flag Copilot',
+      placeholder: 'Try "activate" or "set category to experimental"',
     },
   },
 

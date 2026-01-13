@@ -17,6 +17,8 @@ import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-con
 import { DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD } from '@core/schema/research-agent-config';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
 import { DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD } from '@core/schema/writer-agent-config';
+import type { CopilotStylePayload } from '@core/schema/copilot-style';
+import { DEFAULT_COPILOT_STYLE_PAYLOAD } from '@core/schema/copilot-style';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -269,6 +271,31 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<WriterAgentConfigPayload>,
 
+  // Sprint: inspector-copilot-v1 - Copilot Style configuration
+  // SINGLETON pattern: One active style per grove
+  'copilot-style': {
+    type: 'copilot-style',
+    label: 'Copilot Style',
+    icon: 'terminal',
+    description: 'Configure the terminal aesthetic for inspector copilot',
+    defaultPayload: DEFAULT_COPILOT_STYLE_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'CopilotStyleEditor',
+    allowMultipleActive: false, // SINGLETON: One active style
+    routePath: '/bedrock/experience',
+    color: '#00ff00', // Terminal green
+    // Polymorphic console support
+    cardComponent: 'CopilotStyleCard',
+    dataHookName: 'useCopilotStyleData',
+    searchFields: ['meta.title', 'meta.description', 'payload.preset'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: status=active)', typeFilter: 'copilot-style' },
+    ],
+    filters: [
+      { field: 'payload.preset', label: 'Preset', type: 'select', options: ['terminal-green', 'terminal-amber', 'terminal-cyan', 'custom'] },
+    ],
+  } satisfies ExperienceTypeDefinition<CopilotStylePayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -304,6 +331,7 @@ export interface ExperiencePayloadMap {
   'feature-flag': FeatureFlagPayload;
   'research-agent-config': ResearchAgentConfigPayload;
   'writer-agent-config': WriterAgentConfigPayload;
+  'copilot-style': CopilotStylePayload;
 }
 
 /**

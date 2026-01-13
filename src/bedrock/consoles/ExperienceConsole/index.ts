@@ -156,6 +156,9 @@ export { ResearchAgentConfigCard } from './ResearchAgentConfigCard';
 export { ResearchAgentConfigEditor } from './ResearchAgentConfigEditor';
 export { WriterAgentConfigCard } from './WriterAgentConfigCard';
 export { WriterAgentConfigEditor } from './WriterAgentConfigEditor';
+// Sprint: inspector-copilot-v1 - Copilot style components
+export { CopilotStyleCard } from './CopilotStyleCard';
+export { CopilotStyleEditor } from './CopilotStyleEditor';
 
 // Type-specific data hooks
 export { useExperienceData, createDefaultSystemPrompt } from './useExperienceData';
@@ -167,6 +170,9 @@ export { useResearchAgentConfigData, createDefaultResearchAgentConfig } from './
 export type { ResearchAgentConfigDataResult } from './useResearchAgentConfigData';
 export { useWriterAgentConfigData, createDefaultWriterAgentConfig } from './useWriterAgentConfigData';
 export type { WriterAgentConfigDataResult } from './useWriterAgentConfigData';
+// Sprint: inspector-copilot-v1 - Copilot style data hook
+export { useCopilotStyleData, createDefaultCopilotStyle } from './useCopilotStyleData';
+export type { CopilotStyleDataResult } from './useCopilotStyleData';
 
 // Category config for feature flags (preserved for component use)
 export { CATEGORY_CONFIG } from './FeatureFlagConsole.config';

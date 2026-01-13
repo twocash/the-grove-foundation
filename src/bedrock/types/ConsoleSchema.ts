@@ -7,6 +7,7 @@
 // requires only a schema definition—no new components.
 
 import type { LucideIcon } from 'lucide-react';
+import type { InspectorCopilotConfig } from './InspectorCopilotConfig';
 
 // =============================================================================
 // Filter Schema
@@ -82,6 +83,8 @@ export interface InspectorSchema {
     logic?: { title: string; defaultExpanded: boolean };
     metadata?: { title: string; defaultExpanded: boolean };
   };
+  /** Copilot configuration (Sprint: inspector-copilot-v1) */
+  copilot?: InspectorCopilotConfig;
 }
 
 // =============================================================================

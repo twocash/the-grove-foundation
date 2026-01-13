@@ -182,10 +182,9 @@ export const experienceConsoleConfig: ConsoleConfig = {
       { id: 'set-title', trigger: 'set title to *', description: 'Update the title' },
       { id: 'audit', trigger: '/audit', description: 'Review for consistency and gaps' },
     ],
-    quickActions: [
-      { id: 'audit', label: 'Audit', command: '/audit', icon: 'fact_check' },
-      { id: 'help', label: 'Help', command: 'help', icon: 'help' },
-    ],
+    // quickActions removed per inspector-copilot-v1: maximum minimalism
+    // Users type /help or /audit directly in terminal
+    quickActions: [],
   },
 
   // Sprint: singleton-pattern-factory-v1

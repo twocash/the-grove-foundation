@@ -8,6 +8,7 @@
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
 import { useExperienceData } from './useExperienceData';
 import { useFeatureFlagsData } from './useFeatureFlagsData';
+import { useCopilotStyleData } from './useCopilotStyleData';
 
 // =============================================================================
 // Hook Registry
@@ -29,6 +30,7 @@ import { useFeatureFlagsData } from './useFeatureFlagsData';
 export const HOOK_REGISTRY: Record<string, () => CollectionDataResult<any>> = {
   useExperienceData,
   useFeatureFlagsData,
+  useCopilotStyleData,
   // Future types:
   // usePromptArchitectConfigData,
   // useWelcomeConfigData,

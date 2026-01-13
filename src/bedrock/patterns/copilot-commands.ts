@@ -93,25 +93,111 @@ function parseValue(value: string, type: FieldMapping['type']): unknown {
   }
 }
 
+/**
+ * Strip common articles from field names
+ * "the title" → "title", "a description" → "description"
+ */
+function stripArticles(text: string): string {
+  return text.replace(/^(the|a|an)\s+/i, '').trim();
+}
+
+/**
+ * Calculate Levenshtein distance between two strings
+ * Sprint: inspector-copilot-v1 - Fuzzy matching support
+ */
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= a.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+}
+
+/**
+ * Calculate similarity score (0-1) between two strings
+ */
+function similarityScore(a: string, b: string): number {
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 1;
+  return 1 - levenshteinDistance(a, b) / maxLen;
+}
+
 function findFieldMapping(fieldName: string, consoleId: string): FieldMapping | null {
-  const normalized = fieldName.toLowerCase().trim();
+  // Strip articles and normalize
+  const normalized = stripArticles(fieldName.toLowerCase().trim());
 
-  // Check console-specific fields first
-  const consoleFields = CONSOLE_FIELDS[consoleId] || [];
-  for (const field of consoleFields) {
+  const allFields = [
+    ...(CONSOLE_FIELDS[consoleId] || []),
+    ...COMMON_META_FIELDS,
+  ];
+
+  // First pass: exact match
+  for (const field of allFields) {
     if (field.aliases.some(a => a === normalized)) {
       return field;
     }
   }
 
-  // Then check common meta fields
-  for (const field of COMMON_META_FIELDS) {
-    if (field.aliases.some(a => a === normalized)) {
-      return field;
+  // Second pass: fuzzy match with threshold
+  const SIMILARITY_THRESHOLD = 0.7;
+  let bestMatch: { field: FieldMapping; score: number } | null = null;
+
+  for (const field of allFields) {
+    for (const alias of field.aliases) {
+      const score = similarityScore(normalized, alias);
+      if (score >= SIMILARITY_THRESHOLD && (!bestMatch || score > bestMatch.score)) {
+        bestMatch = { field, score };
+      }
     }
   }
 
-  return null;
+  return bestMatch?.field || null;
+}
+
+/**
+ * Get field suggestions for autocomplete/error messages
+ * Sprint: inspector-copilot-v1
+ */
+function getFieldSuggestions(partial: string, consoleId: string, limit = 3): string[] {
+  const normalized = stripArticles(partial.toLowerCase().trim());
+
+  const allFields = [
+    ...(CONSOLE_FIELDS[consoleId] || []),
+    ...COMMON_META_FIELDS,
+  ];
+
+  // Score each field by similarity
+  const scored = allFields.flatMap(field =>
+    field.aliases.map(alias => ({
+      alias,
+      score: similarityScore(normalized, alias)
+    }))
+  );
+
+  // Sort by score descending and return top matches
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => s.alias);
 }
 
 // =============================================================================
@@ -120,22 +206,25 @@ function findFieldMapping(fieldName: string, consoleId: string): FieldMapping | 
 
 /**
  * Parse "set <field> to <value>" commands
+ * Sprint: inspector-copilot-v1 - Enhanced with fuzzy matching and suggestions
  */
 function parseSetCommand(input: string, consoleId: string): CommandResult {
   const match = input.match(/^set\s+(.+?)\s+to\s+(.+)$/i);
   if (!match) return { success: false, message: '' };
 
-  const [, fieldName, rawValue] = match;
+  const [, rawFieldName, rawValue] = match;
+  // Strip articles: "the title" → "title"
+  const fieldName = stripArticles(rawFieldName);
   const field = findFieldMapping(fieldName, consoleId);
 
   if (!field) {
-    const availableFields = [
-      ...COMMON_META_FIELDS,
-      ...(CONSOLE_FIELDS[consoleId] || []),
-    ].flatMap(f => f.aliases);
+    const suggestions = getFieldSuggestions(fieldName, consoleId, 3);
+    const suggestionText = suggestions.length > 0
+      ? `Did you mean: ${suggestions.join(', ')}?`
+      : 'Type /help to see available fields.';
     return {
       success: false,
-      message: `Unknown field: "${fieldName}". Available fields: ${availableFields.slice(0, 10).join(', ')}...`,
+      message: `Unknown field: "${fieldName}". ${suggestionText}`,
     };
   }
 
@@ -181,16 +270,23 @@ function parseActivateCommand(input: string): CommandResult {
 
 /**
  * Parse "clear <field>" commands
+ * Sprint: inspector-copilot-v1 - Enhanced with fuzzy matching and suggestions
  */
 function parseClearCommand(input: string, consoleId: string): CommandResult {
   const match = input.match(/^clear\s+(.+)$/i);
   if (!match) return { success: false, message: '' };
 
-  const [, fieldName] = match;
+  const [, rawFieldName] = match;
+  // Strip articles: "the title" → "title"
+  const fieldName = stripArticles(rawFieldName);
   const field = findFieldMapping(fieldName, consoleId);
 
   if (!field) {
-    return { success: false, message: `Unknown field: "${fieldName}"` };
+    const suggestions = getFieldSuggestions(fieldName, consoleId, 3);
+    const suggestionText = suggestions.length > 0
+      ? `Did you mean: ${suggestions.join(', ')}?`
+      : 'Type /help to see available fields.';
+    return { success: false, message: `Unknown field: "${fieldName}". ${suggestionText}` };
   }
 
   const emptyValue = field.type === 'array' ? [] : field.type === 'number' ? 0 : '';
@@ -250,22 +346,25 @@ async function parseReprocessCommand(input: string, object?: GroveObject): Promi
  * Parse "prepend <field> with <value>" commands
  * Prepends value to the existing field content
  * Sprint: prompt-wiring-v1
+ * Sprint: inspector-copilot-v1 - Enhanced with fuzzy matching and suggestions
  */
 export function parsePrependCommand(input: string, consoleId: string, object?: GroveObject): CommandResult {
   const match = input.match(/^prepend\s+(.+?)\s+with[:\s]+(.+)$/i);
   if (!match) return { success: false, message: '' };
 
-  const [, fieldName, rawValue] = match;
+  const [, rawFieldName, rawValue] = match;
+  // Strip articles: "the title" → "title"
+  const fieldName = stripArticles(rawFieldName);
   const field = findFieldMapping(fieldName, consoleId);
 
   if (!field) {
-    const availableFields = [
-      ...COMMON_META_FIELDS,
-      ...(CONSOLE_FIELDS[consoleId] || []),
-    ].flatMap(f => f.aliases);
+    const suggestions = getFieldSuggestions(fieldName, consoleId, 3);
+    const suggestionText = suggestions.length > 0
+      ? `Did you mean: ${suggestions.join(', ')}?`
+      : 'Type /help to see available fields.';
     return {
       success: false,
-      message: `Unknown field: "${fieldName}". Available fields: ${availableFields.slice(0, 10).join(', ')}...`,
+      message: `Unknown field: "${fieldName}". ${suggestionText}`,
     };
   }
 
@@ -314,8 +413,41 @@ function getNestedValue(obj: GroveObject, path: string): string {
 // =============================================================================
 
 /**
+ * Check if object is an active singleton (read-only mode)
+ * Sprint: inspector-copilot-v1 - Active configuration UX
+ */
+function isActiveConfiguration(object?: GroveObject): boolean {
+  return object?.meta?.status === 'active';
+}
+
+/**
+ * Check if input is asking to duplicate/clone
+ * Sprint: inspector-copilot-v1
+ */
+function isDuplicateRequest(input: string): boolean {
+  const duplicatePatterns = [
+    /^duplicate\s*(this)?$/i,
+    /^clone\s*(this)?$/i,
+    /^copy\s*(this)?$/i,
+    /^make\s+a?\s*copy$/i,
+  ];
+  return duplicatePatterns.some(p => p.test(input.trim()));
+}
+
+/**
+ * Check if input is a read-only command (help, fields, etc.)
+ * Sprint: inspector-copilot-v1
+ */
+function isReadOnlyCommand(input: string): boolean {
+  const lower = input.toLowerCase().trim();
+  const readOnlyCommands = ['help', '/help', '?', '/?', 'commands', '/commands', 'fields', '/fields'];
+  return readOnlyCommands.includes(lower);
+}
+
+/**
  * Parse a natural language command and return patch operations
  * Sprint: upload-pipeline-unification-v1 - Made async to support reprocess command
+ * Sprint: inspector-copilot-v1 - Added active configuration read-only mode
  */
 export async function parseCommand(
   input: string,
@@ -323,6 +455,32 @@ export async function parseCommand(
   object?: GroveObject
 ): Promise<CommandResult> {
   const trimmed = input.trim();
+
+  // Sprint: inspector-copilot-v1 - Handle duplicate request for active configs
+  if (isDuplicateRequest(trimmed)) {
+    return {
+      success: true,
+      message: `To duplicate this ${object?.meta?.title || 'item'}, use the duplicate button in the toolbar.`,
+      suggestions: [
+        { label: 'View fields', template: '/fields', icon: 'list' },
+        { label: 'Help', template: '/help', icon: 'help' },
+      ],
+    };
+  }
+
+  // Sprint: inspector-copilot-v1 - Active configuration read-only mode
+  // Only allow help/fields commands, not edits
+  if (isActiveConfiguration(object) && !isReadOnlyCommand(trimmed)) {
+    return {
+      success: false,
+      message: `This is an active configuration and cannot be edited directly. To make changes, duplicate it first or deactivate it.\n\nType /help to see available commands.`,
+      suggestions: [
+        { label: 'Duplicate', template: 'duplicate this', icon: 'content_copy' },
+        { label: 'Deactivate', template: 'deactivate', icon: 'pause' },
+        { label: 'Help', template: '/help', icon: 'help' },
+      ],
+    };
+  }
 
   // Check for reprocess command first (async)
   // Sprint: upload-pipeline-unification-v1
@@ -346,8 +504,25 @@ export async function parseCommand(
     }
   }
 
-  // Help command
-  if (trimmed.toLowerCase() === 'help' || trimmed === '?') {
+  // Fields command - list available fields
+  // Sprint: inspector-copilot-v1
+  const fieldsAliases = ['fields', '/fields'];
+  if (fieldsAliases.includes(trimmed.toLowerCase())) {
+    const fields = [
+      ...COMMON_META_FIELDS,
+      ...(CONSOLE_FIELDS[consoleId] || []),
+    ];
+    const fieldList = fields.map(f => `• **${f.aliases[0]}** (${f.type}) - ${f.description || 'No description'}`).join('\n');
+    return {
+      success: true,
+      message: `**Available fields:**\n${fieldList}`,
+    };
+  }
+
+  // Help command - support with or without slash
+  // Sprint: inspector-copilot-v1 - Added /help, /commands, /? aliases
+  const helpAliases = ['help', '/help', '?', '/?', 'commands', '/commands'];
+  if (helpAliases.includes(trimmed.toLowerCase())) {
     const fields = [
       ...COMMON_META_FIELDS,
       ...(CONSOLE_FIELDS[consoleId] || []),
@@ -355,13 +530,22 @@ export async function parseCommand(
     const fieldList = fields.map(f => `• ${f.aliases[0]}: ${f.description || f.type}`).join('\n');
     return {
       success: true,
-      message: `Available commands:\n• reprocess - Run all enrichment and save (Pipeline Monitor)\n• set <field> to <value>\n• prepend <field> with <value>\n• activate / deactivate\n• clear <field>\n\nAvailable fields:\n${fieldList}`,
+      message: `**Available commands:**
+• set <field> to <value> - Update a field
+• prepend <field> with <value> - Add to beginning
+• activate / deactivate - Change status
+• clear <field> - Reset a field
+• /fields - List available fields
+• reprocess - Re-run enrichment (documents only)
+
+**Available fields:**
+${fieldList}`,
     };
   }
 
   return {
     success: false,
-    message: `I didn't understand that. Try "reprocess", "set title to New Title", or type "help" for available commands.`,
+    message: `I didn't understand that. Try "set title to New Title" or type /help for available commands.`,
   };
 }
 

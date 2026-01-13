@@ -3,6 +3,3857 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "9aeacb93-bd24-479d-927d-5ead64ebb05b",
+      "timestamp": "2026-01-13T21:56:27.143Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "ac-kb001-kb-button-visible-and-enabled-for-complete-documents",
+              "name": "AC-KB001 - KB button visible and enabled for complete documents",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 7507
+            },
+            {
+              "id": "ac-kb002-kb-button-disabled-for-insufficient-evidence",
+              "name": "AC-KB002 - KB button disabled for insufficient evidence",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 5284
+            },
+            {
+              "id": "ac-kb003-kb-button-visible-for-partial-documents",
+              "name": "AC-KB003 - KB button visible for partial documents",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 4996
+            },
+            {
+              "id": "ac-kb004-kb-button-loading-state-on-click",
+              "name": "AC-KB004 - KB button loading state on click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 5394
+            },
+            {
+              "id": "ac-kb005-kb-button-shows-success-state-after-save",
+              "name": "AC-KB005 - KB button shows success state after save",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 7331
+            },
+            {
+              "id": "ac-kb006-toast-appears-after-kb-action",
+              "name": "AC-KB006 - Toast appears after KB action",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 8273
+            },
+            {
+              "id": "ac-kb007-full-results-view-with-kb-integration",
+              "name": "AC-KB007 - Full results view with KB integration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 5969
+            },
+            {
+              "id": "ac-kb008-mobile-layout-with-kb-button-375px",
+              "name": "AC-KB008 - Mobile layout with KB button (375px)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 4749
+            },
+            {
+              "id": "ac-kb009-kb-button-hover-state",
+              "name": "AC-KB009 - KB button hover state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 5424
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:56:27.152Z"
+      }
+    },
+    {
+      "id": "6ee066dc-6181-4051-b49e-e337bb521ccb",
+      "timestamp": "2026-01-13T21:52:32.155Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "ac-kb001-kb-button-visible-and-enabled-for-complete-documents",
+              "name": "AC-KB001 - KB button visible and enabled for complete documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 18955
+            },
+            {
+              "id": "ac-kb002-kb-button-disabled-for-insufficient-evidence",
+              "name": "AC-KB002 - KB button disabled for insufficient evidence",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 16905
+            },
+            {
+              "id": "ac-kb003-kb-button-visible-for-partial-documents",
+              "name": "AC-KB003 - KB button visible for partial documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 16980
+            },
+            {
+              "id": "ac-kb004-kb-button-loading-state-on-click",
+              "name": "AC-KB004 - KB button loading state on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17124
+            },
+            {
+              "id": "ac-kb005-kb-button-shows-success-state-after-save",
+              "name": "AC-KB005 - KB button shows success state after save",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17088
+            },
+            {
+              "id": "ac-kb006-toast-appears-after-kb-action",
+              "name": "AC-KB006 - Toast appears after KB action",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17146
+            },
+            {
+              "id": "ac-kb007-full-results-view-with-kb-integration",
+              "name": "AC-KB007 - Full results view with KB integration",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 16972
+            },
+            {
+              "id": "ac-kb008-mobile-layout-with-kb-button-375px",
+              "name": "AC-KB008 - Mobile layout with KB button (375px)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17060
+            },
+            {
+              "id": "ac-kb009-kb-button-hover-state",
+              "name": "AC-KB009 - KB button hover state",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17362
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:52:32.161Z"
+      }
+    },
+    {
+      "id": "9e5b1599-632a-49f2-ad45-cb423fed5184",
+      "timestamp": "2026-01-13T21:42:08.591Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "ac-kb001-kb-button-visible-and-enabled-for-complete-documents",
+              "name": "AC-KB001 - KB button visible and enabled for complete documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 24630
+            },
+            {
+              "id": "ac-kb002-kb-button-disabled-for-insufficient-evidence",
+              "name": "AC-KB002 - KB button disabled for insufficient evidence",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12451
+            },
+            {
+              "id": "ac-kb003-kb-button-visible-for-partial-documents",
+              "name": "AC-KB003 - KB button visible for partial documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11914
+            },
+            {
+              "id": "ac-kb004-kb-button-loading-state-on-click",
+              "name": "AC-KB004 - KB button loading state on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11931
+            },
+            {
+              "id": "ac-kb005-kb-button-shows-success-state-after-save",
+              "name": "AC-KB005 - KB button shows success state after save",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 13274
+            },
+            {
+              "id": "ac-kb006-toast-appears-after-kb-action",
+              "name": "AC-KB006 - Toast appears after KB action",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12045
+            },
+            {
+              "id": "ac-kb007-full-results-view-with-kb-integration",
+              "name": "AC-KB007 - Full results view with KB integration",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11930
+            },
+            {
+              "id": "ac-kb008-mobile-layout-with-kb-button-375px",
+              "name": "AC-KB008 - Mobile layout with KB button (375px)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11917
+            },
+            {
+              "id": "ac-kb009-kb-button-hover-state",
+              "name": "AC-KB009 - KB button hover state",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12015
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:42:08.598Z"
+      }
+    },
+    {
+      "id": "35643c1a-bac5-4442-bb01-bfd02eaf94bf",
+      "timestamp": "2026-01-13T21:38:14.322Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "terminal-shows-initial-welcome-message",
+              "name": "terminal shows initial welcome message",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-input-field",
+              "name": "terminal has input field",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-type-in-terminal-input",
+              "name": "can type in terminal input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-header-shows-controls",
+              "name": "terminal header shows controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "minimize-button-collapses-terminal-to-pill",
+              "name": "minimize button collapses terminal to pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-expand-from-minimized-pill",
+              "name": "can expand from minimized pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "typing-slash-shows-command-detection",
+              "name": "typing slash shows command detection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "help-command-recognized",
+              "name": "/help command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stats-command-recognized",
+              "name": "/stats command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "welcome-message-uses-arrow-formatting-for-prompts",
+              "name": "welcome message uses arrow formatting for prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-scrollable-message-area",
+              "name": "terminal has scrollable message area",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-has-correct-aria-attributes",
+              "name": "terminal drawer has correct ARIA attributes",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-button-has-accessible-label",
+              "name": "FAB button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "close-button-has-accessible-label",
+              "name": "close button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-opens-via-fab-button",
+              "name": "terminal opens via FAB button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-closes-via-close-button",
+              "name": "terminal closes via close button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-academic-lens",
+              "name": "URL lens parameter initializes academic lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-engineer-lens",
+              "name": "URL lens parameter initializes engineer lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "default-terminal-shows-generic-welcome-without-lens",
+              "name": "default terminal shows generic welcome without lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-toggles-terminal-state",
+              "name": "FAB toggles terminal state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-animation-classes-are-correct",
+              "name": "terminal drawer animation classes are correct",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "toggle-is-visible-in-header",
+              "name": "toggle is visible in header",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "toggle-changes-state-on-click",
+              "name": "toggle changes state on click",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "toggle-state-persists-after-refresh",
+              "name": "toggle state persists after refresh",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "genesis-initial-state-baseline",
+              "name": "genesis initial state baseline",
+              "status": "warn",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "genesis-expanded-page-baseline",
+              "name": "genesis expanded page baseline",
+              "status": "warn",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "genesis-split-layout-baseline",
+              "name": "genesis split layout baseline",
+              "status": "warn",
+              "message": "Passed",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "app-loads-with-engagementprovider",
+              "name": "app loads with EngagementProvider",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 9948
+            },
+            {
+              "id": "page-loads-in-hero-mode-by-default",
+              "name": "page loads in hero mode by default",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 10493
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10354
+            },
+            {
+              "id": "genesis-page-renders-with-paper-aesthetic",
+              "name": "Genesis page renders with paper aesthetic",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 10756
+            },
+            {
+              "id": "01-console-default-view-shows-all-experience-types",
+              "name": "01 - Console default view shows all experience types",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 13314
+            },
+            {
+              "id": "us-c001-garden-tray-is-visible-on-explore",
+              "name": "US-C001: Garden tray is visible on /explore",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 13943
+            },
+            {
+              "id": "displays-prompts-on-explore-page",
+              "name": "displays prompts on explore page",
+              "status": "pass",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 14812
+            },
+            {
+              "id": "engagement-hooks-work-after-migration",
+              "name": "engagement hooks work after migration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 5070
+            },
+            {
+              "id": "can-submit-a-query-via-input",
+              "name": "can submit a query via input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "shows-loading-state-while-waiting-for-response",
+              "name": "shows loading state while waiting for response",
+              "status": "warn",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "capture-screenshots-for-sprint-review",
+              "name": "capture screenshots for sprint review",
+              "status": "pass",
+              "message": "Passed",
+              "file": "feature-flags-v1-screenshots.spec.ts",
+              "duration": 15823
+            },
+            {
+              "id": "moment-appears-after-first-exchange",
+              "name": "moment appears after first exchange",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "moment-shows-create-my-lens-button",
+              "name": "moment shows Create My Lens button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "moment-shows-choose-existing-button",
+              "name": "moment shows Choose Existing button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "moment-shows-not-now-dismiss-button",
+              "name": "moment shows Not now dismiss button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "all-three-action-buttons-are-present",
+              "name": "all three action buttons are present",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "choose-existing-button-is-clickable",
+              "name": "Choose Existing button is clickable",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "create-my-lens-button-is-clickable",
+              "name": "Create My Lens button is clickable",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "not-now-dismisses-the-moment",
+              "name": "Not now dismisses the moment",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "moment-has-suggestion-badge",
+              "name": "moment has Suggestion badge",
+              "status": "warn",
+              "message": "Passed",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 16127
+            },
+            {
+              "id": "genesis-does-not-load-foundation-theme-json",
+              "name": "Genesis does not load Foundation theme JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 7181
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 8603
+            },
+            {
+              "id": "us-c001-badge-shows-sprout-count",
+              "name": "US-C001: Badge shows sprout count",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6622
+            },
+            {
+              "id": "content-rail-has-proper-structure",
+              "name": "content rail has proper structure",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 11303
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 6087
+            },
+            {
+              "id": "us-a001-nursery-console-loads-without-errors",
+              "name": "US-A001: Nursery console loads without errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 6602
+            },
+            {
+              "id": "02-research-agent-config-exists-ac-1-singleton-auto-creation",
+              "name": "02 - Research Agent Config exists (AC-1: SINGLETON auto-creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 9422
+            },
+            {
+              "id": "genesis-hero-section-has-correct-typography",
+              "name": "Genesis hero section has correct typography",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 4953
+            },
+            {
+              "id": "displays-prompts-on-explore-page",
+              "name": "displays prompts on explore page",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 24147
+            },
+            {
+              "id": "welcome-prompts-should-be-filtered-by-targeting-not-yet-implemented",
+              "name": "welcome prompts should be filtered by targeting (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-select-a-lens-from-header",
+              "name": "can select a lens from header",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "selecting-dr-chiang-lens-filters-prompts-not-yet-implemented",
+              "name": "selecting Dr. Chiang lens filters prompts (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stage-changes-after-interactions",
+              "name": "stage changes after interactions",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "prompts-change-based-on-stage-not-yet-implemented",
+              "name": "prompts change based on stage (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "renders-bold-text-as-clickable-concept-spans",
+              "name": "renders bold text as clickable concept spans",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 10694
+            },
+            {
+              "id": "us-c001-garden-emoji-is-displayed",
+              "name": "US-C001: Garden emoji is displayed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5537
+            },
+            {
+              "id": "genesis-maintains-ink-text-color",
+              "name": "Genesis maintains ink text color",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3973
+            },
+            {
+              "id": "genesis-grain-texture-is-visible",
+              "name": "Genesis grain texture is visible",
+              "status": "warn",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "displays-tier-filter-with-canonical-values",
+              "name": "displays tier filter with canonical values",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5263
+            },
+            {
+              "id": "us-a001-nursery-console-displays-title",
+              "name": "US-A001: Nursery console displays title",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 5451
+            },
+            {
+              "id": "us-a001-nursery-console-displays-filter-controls",
+              "name": "US-A001: Nursery console displays filter controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9777
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "warn",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "warn",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "renders-fork-buttons-when-navigation-present",
+              "name": "renders fork buttons when navigation present",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 3783
+            },
+            {
+              "id": "fork-buttons-have-correct-styling",
+              "name": "fork buttons have correct styling",
+              "status": "warn",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "activetree-is-visible-in-hero-section",
+              "name": "ActiveTree is visible in hero section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8441
+            },
+            {
+              "id": "us-a001-nursery-console-displays-search-input",
+              "name": "US-A001: Nursery console displays search input",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 4126
+            },
+            {
+              "id": "us-a001-nursery-shows-empty-state-or-sprout-list",
+              "name": "US-A001: Nursery shows empty state or sprout list",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "us-c002-tray-expands-on-hover",
+              "name": "US-C002: Tray expands on hover",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6946
+            },
+            {
+              "id": "renders-stream-container",
+              "name": "renders stream container",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 3485
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7940
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7900
+            },
+            {
+              "id": "activetree-has-pulsing-mode-initially",
+              "name": "ActiveTree has pulsing mode initially",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7544
+            },
+            {
+              "id": "us-c002-tray-collapses-on-mouse-leave",
+              "name": "US-C002: Tray collapses on mouse leave",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5180
+            },
+            {
+              "id": "us-a002-can-click-on-sprout-card-to-open-inspector",
+              "name": "US-A002: Can click on sprout card to open inspector",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 7327
+            },
+            {
+              "id": "applies-glass-styling-to-response-blocks",
+              "name": "applies glass styling to response blocks",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 6461
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7924
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6913
+            },
+            {
+              "id": "clicking-tree-triggers-split-layout",
+              "name": "clicking tree triggers split layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6234
+            },
+            {
+              "id": "us-c002-escape-key-closes-expanded-tray",
+              "name": "US-C002: Escape key closes expanded tray",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5630
+            },
+            {
+              "id": "fork-buttons-are-keyboard-accessible",
+              "name": "fork buttons are keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 5055
+            },
+            {
+              "id": "us-a002-escape-key-closes-inspector",
+              "name": "US-A002: Escape key closes inspector",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 6408
+            },
+            {
+              "id": "03-writer-agent-config-exists-ac-2-singleton-auto-creation",
+              "name": "03 - Writer Agent Config exists (AC-2: SINGLETON auto-creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 24167
+            },
+            {
+              "id": "loads-glass-css-variables",
+              "name": "loads glass CSS variables",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 4189
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5490
+            },
+            {
+              "id": "shows-inspector-when-document-is-selected",
+              "name": "shows inspector when document is selected",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 22326
+            },
+            {
+              "id": "us-c003-search-input-visible-when-expanded",
+              "name": "US-C003: Search input visible when expanded",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6394
+            },
+            {
+              "id": "terminal-panel-has-aria-attributes",
+              "name": "terminal panel has ARIA attributes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7228
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7959
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "warn",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "warn",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "us-a003-promote-button-is-visible-in-inspector-for-ready-sprouts",
+              "name": "US-A003: Promote button is visible in inspector for ready sprouts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 6897
+            },
+            {
+              "id": "loads-fork-button-css-variables",
+              "name": "loads fork button CSS variables",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 4009
+            },
+            {
+              "id": "04-new-dropdown-shows-all-types-ac-3-type-aware-creation",
+              "name": "04 - +New dropdown shows all types (AC-3: Type-aware creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 7697
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5681
+            },
+            {
+              "id": "us-c003-status-filter-dropdown-visible-when-expanded",
+              "name": "US-C003: Status filter dropdown visible when expanded",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 7257
+            },
+            {
+              "id": "landing-page-loads-without-critical-console-errors",
+              "name": "landing page loads without critical console errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4737
+            },
+            {
+              "id": "genesis-route-uses-genesis-surface",
+              "name": "Genesis route uses genesis surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3471
+            },
+            {
+              "id": "terminal-shows-lens-picker-after-tree-click",
+              "name": "terminal shows lens picker after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8209
+            },
+            {
+              "id": "us-a004-archive-button-is-visible-in-inspector-for-non-archived-sprouts",
+              "name": "US-A004: Archive button is visible in inspector for non-archived sprouts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 7628
+            },
+            {
+              "id": "page-renders-main-content",
+              "name": "page renders main content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3410
+            },
+            {
+              "id": "foundation-route-uses-foundation-surface",
+              "name": "Foundation route uses foundation surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3460
+            },
+            {
+              "id": "usepromptforhighlight-is-wired-functional",
+              "name": "usePromptForHighlight is wired (functional)",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 30148
+            },
+            {
+              "id": "05-empty-state-shows-type-aware-messaging-ac-4",
+              "name": "05 - Empty state shows type-aware messaging (AC-4)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 7935
+            },
+            {
+              "id": "desktop-shows-50-50-split",
+              "name": "desktop shows 50/50 split",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3691
+            },
+            {
+              "id": "us-c003-status-filter-has-correct-options",
+              "name": "US-C003: Status filter has correct options",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6213
+            },
+            {
+              "id": "terminal-panel-is-accessible",
+              "name": "terminal panel is accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3687
+            },
+            {
+              "id": "can-navigate-to-nursery-from-bedrock-dashboard",
+              "name": "can navigate to nursery from bedrock dashboard",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 5135
+            },
+            {
+              "id": "library-prompts-have-4d-targeting-configured",
+              "name": "library prompts have 4D targeting configured",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "tablet-shows-40-terminal-width",
+              "name": "tablet shows 40% terminal width",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4746
+            },
+            {
+              "id": "4d-targeting-dimensions-are-documented",
+              "name": "4D targeting dimensions are documented",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 300
+            },
+            {
+              "id": "theme-switches-when-navigating-between-surfaces",
+              "name": "Theme switches when navigating between surfaces",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 7636
+            },
+            {
+              "id": "prompts-update-based-on-interaction-count",
+              "name": "prompts update based on interaction count",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "context-fields.spec.ts",
+              "duration": 30132
+            },
+            {
+              "id": "us-c003-search-filters-sprout-list",
+              "name": "US-C003: Search filters sprout list",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6030
+            },
+            {
+              "id": "us-c004-shows-empty-state-or-sprout-list",
+              "name": "US-C004: Shows empty state or sprout list",
+              "status": "warn",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "foundation-dashboard-loads",
+              "name": "foundation dashboard loads",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4853
+            },
+            {
+              "id": "06-research-agent-editor-opens-in-inspector",
+              "name": "06 - Research Agent Editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 8072
+            },
+            {
+              "id": "mobile-shows-bottom-sheet",
+              "name": "mobile shows bottom sheet",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3370
+            },
+            {
+              "id": "activetree-has-proper-aria-labels",
+              "name": "ActiveTree has proper ARIA labels",
+              "status": "warn",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "known-gap-exploreshell-uses-static-welcomecontent-not-usesuggestedprompts",
+              "name": "KNOWN GAP: ExploreShell uses static welcomeContent, not useSuggestedPrompts",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 5263
+            },
+            {
+              "id": "foundation-has-dark-mode-class-applied",
+              "name": "Foundation has dark mode class applied",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 4150
+            },
+            {
+              "id": "usepromptforhighlight-is-using-targeting-partial-implementation",
+              "name": "usePromptForHighlight IS using targeting (partial implementation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 3051
+            },
+            {
+              "id": "surface-theme-loads-for-genesis-route",
+              "name": "Surface theme loads for genesis route",
+              "status": "warn",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "foundation-quantum-theme-loads-for-foundation-route",
+              "name": "Foundation quantum theme loads for foundation route",
+              "status": "warn",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "us-c005-badge-has-pulse-capability",
+              "name": "US-C005: Badge has pulse capability",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6859
+            },
+            {
+              "id": "theme-tokens-are-applied-to-foundation-components",
+              "name": "Theme tokens are applied to Foundation components",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3283
+            },
+            {
+              "id": "terminal-route-loads-correct-theme",
+              "name": "Terminal route loads correct theme",
+              "status": "warn",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "marketing-routes-use-surface-theme",
+              "name": "Marketing routes use surface theme",
+              "status": "warn",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "no-javascript-exceptions-on-page-load",
+              "name": "no JavaScript exceptions on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 7144
+            },
+            {
+              "id": "theme-json-files-are-valid-json",
+              "name": "Theme JSON files are valid JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 522
+            },
+            {
+              "id": "theme-inheritance-works-terminal-extends-surface",
+              "name": "Theme inheritance works (terminal extends surface)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 39
+            },
+            {
+              "id": "07-writer-agent-editor-opens-in-inspector",
+              "name": "07 - Writer Agent Editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 8838
+            },
+            {
+              "id": "us-c006-sprout-rows-are-clickable",
+              "name": "US-C006: Sprout rows are clickable",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4385
+            },
+            {
+              "id": "css-variables-are-injected-on-page-load",
+              "name": "CSS variables are injected on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 4410
+            },
+            {
+              "id": "can-navigate-to-foundation-from-home",
+              "name": "can navigate to foundation from home",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 5745
+            },
+            {
+              "id": "inspector-shows-collapsible-sections",
+              "name": "inspector shows collapsible sections",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 30132
+            },
+            {
+              "id": "nursery-route-accessible-directly",
+              "name": "nursery route accessible directly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 19419
+            },
+            {
+              "id": "content-rail-hides-terminal-when-not-visible",
+              "name": "content rail hides terminal when not visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 15229
+            },
+            {
+              "id": "ag-1-5-lens-picker-shows-persona-options-after-tree-click",
+              "name": "AG-1.5: lens picker shows persona options after tree click",
+              "status": "warn",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "us-c006-completed-sprout-shows-expandable-results",
+              "name": "US-C006: Completed sprout shows expandable results",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5591
+            },
+            {
+              "id": "can-toggle-status-filters",
+              "name": "can toggle status filters",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 3170
+            },
+            {
+              "id": "lens-selection-affects-prompt-filtering",
+              "name": "lens selection affects prompt filtering",
+              "status": "pass",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 13448
+            },
+            {
+              "id": "high-entropy-triggers-moment-based-prompts",
+              "name": "high entropy triggers moment-based prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "generates-prompts-after-2-interactions",
+              "name": "generates prompts after 2+ interactions",
+              "status": "warn",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "theme-mode-persistence-works",
+              "name": "Theme mode persistence works",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 8336
+            },
+            {
+              "id": "tray-has-proper-aria-role",
+              "name": "Tray has proper ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4820
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 30334
+            },
+            {
+              "id": "can-type-in-search-input",
+              "name": "can type in search input",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 5173
+            },
+            {
+              "id": "ag-1-6-selecting-a-lens-updates-engagement-state",
+              "name": "AG-1.6: selecting a lens updates engagement state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8966
+            },
+            {
+              "id": "tray-has-aria-label-with-counts",
+              "name": "Tray has ARIA label with counts",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4164
+            },
+            {
+              "id": "can-navigate-between-foundation-consoles",
+              "name": "can navigate between foundation consoles",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 13324
+            },
+            {
+              "id": "tier-dropdown-in-inspector-has-canonical-values",
+              "name": "tier dropdown in inspector has canonical values",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 13235
+            },
+            {
+              "id": "can-toggle-needs-review-filter",
+              "name": "can toggle needs review filter",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 4787
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6867
+            },
+            {
+              "id": "search-input-has-accessible-label",
+              "name": "Search input has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5335
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6786
+            },
+            {
+              "id": "status-filter-has-accessible-label",
+              "name": "Status filter has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5110
+            },
+            {
+              "id": "ag-1-7-content-rail-shows-hero-section-with-dynamic-content",
+              "name": "AG-1.7: content rail shows hero section with dynamic content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 12014
+            },
+            {
+              "id": "closes-inspector-when-close-button-clicked",
+              "name": "closes inspector when close button clicked",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 12413
+            },
+            {
+              "id": "shows-add-files-button",
+              "name": "shows Add Files button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "shows-process-queue-button",
+              "name": "shows Process Queue button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "capture-collapsed-state",
+              "name": "Capture collapsed state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5948
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 8033
+            },
+            {
+              "id": "ag-1-9-lens-persists-across-page-reload",
+              "name": "AG-1.9: lens persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7483
+            },
+            {
+              "id": "ag-2-3-url-lens-parameter-hydrates-state",
+              "name": "AG-2.3: URL lens parameter hydrates state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "capture-expanded-state-with-controls",
+              "name": "Capture expanded state with controls",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5258
+            },
+            {
+              "id": "ag-2-3b-url-lens-skips-lens-picker",
+              "name": "AG-2.3b: URL lens skips lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3332
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6599
+            },
+            {
+              "id": "ag-2-4-invalid-url-lens-falls-back-gracefully",
+              "name": "AG-2.4: invalid URL lens falls back gracefully",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 3844
+            },
+            {
+              "id": "capture-filtered-state",
+              "name": "Capture filtered state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5637
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6722
+            },
+            {
+              "id": "does-not-affect-page-load-performance",
+              "name": "Does not affect page load performance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4638
+            },
+            {
+              "id": "ag-2-5-multiple-seedling-clicks-are-idempotent",
+              "name": "AG-2.5: multiple seedling clicks are idempotent",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 9311
+            },
+            {
+              "id": "ag-2-7-corrupted-localstorage-recovers-gracefully",
+              "name": "AG-2.7: corrupted localStorage recovers gracefully",
+              "status": "warn",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "console-has-no-critical-errors-on-explore",
+              "name": "Console has no critical errors on /explore",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4238
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6133
+            },
+            {
+              "id": "gen-1-new-user-flow-tree-click-split-lens-select-collapsing-unlocked",
+              "name": "GEN-1: new user flow - tree click → split → lens select → collapsing → unlocked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6830
+            },
+            {
+              "id": "gen-2-returning-user-flow-tree-click-triggers-headline-collapse-not-skip-to-unlocked",
+              "name": "GEN-2: returning user flow - tree click triggers headline collapse (not skip to unlocked)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 12777
+            },
+            {
+              "id": "gen-3-lens-switch-via-header-picker-triggers-headline-update",
+              "name": "GEN-3: lens switch via header picker triggers headline update",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 11492
+            },
+            {
+              "id": "gen-4-auto-scroll-to-section-2-after-headline-collapse-completes",
+              "name": "GEN-4: auto-scroll to Section 2 after headline collapse completes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 14649
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 195,
+        "passed": 107,
+        "failed": 4,
+        "warnings": 84
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:38:14.328Z"
+      }
+    },
+    {
+      "id": "9bb97b38-7b0a-4744-b033-09f0817956c4",
+      "timestamp": "2026-01-13T21:37:34.203Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "ac-kb001-kb-button-visible-and-enabled-for-complete-documents",
+              "name": "AC-KB001 - KB button visible and enabled for complete documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11890
+            },
+            {
+              "id": "ac-kb002-kb-button-disabled-for-insufficient-evidence",
+              "name": "AC-KB002 - KB button disabled for insufficient evidence",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12227
+            },
+            {
+              "id": "ac-kb003-kb-button-visible-for-partial-documents",
+              "name": "AC-KB003 - KB button visible for partial documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12064
+            },
+            {
+              "id": "ac-kb004-kb-button-loading-state-on-click",
+              "name": "AC-KB004 - KB button loading state on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 11979
+            },
+            {
+              "id": "ac-kb005-kb-button-shows-success-state-after-save",
+              "name": "AC-KB005 - KB button shows success state after save",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 13649
+            },
+            {
+              "id": "ac-kb006-toast-appears-after-kb-action",
+              "name": "AC-KB006 - Toast appears after KB action",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 17368
+            },
+            {
+              "id": "ac-kb007-full-results-view-with-kb-integration",
+              "name": "AC-KB007 - Full results view with KB integration",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 13207
+            },
+            {
+              "id": "ac-kb008-mobile-layout-with-kb-button-375px",
+              "name": "AC-KB008 - Mobile layout with KB button (375px)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12367
+            },
+            {
+              "id": "ac-kb009-kb-button-hover-state",
+              "name": "AC-KB009 - KB button hover state",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12188
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:37:34.210Z"
+      }
+    },
+    {
+      "id": "03fbb64c-6ff1-4dfa-b95e-4cf8a47a111d",
+      "timestamp": "2026-01-13T21:31:12.476Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "ac-kb001-kb-button-visible-and-enabled-for-complete-documents",
+              "name": "AC-KB001 - KB button visible and enabled for complete documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 14001
+            },
+            {
+              "id": "ac-kb002-kb-button-disabled-for-insufficient-evidence",
+              "name": "AC-KB002 - KB button disabled for insufficient evidence",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12041
+            },
+            {
+              "id": "ac-kb003-kb-button-visible-for-partial-documents",
+              "name": "AC-KB003 - KB button visible for partial documents",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12149
+            },
+            {
+              "id": "ac-kb004-kb-button-loading-state-on-click",
+              "name": "AC-KB004 - KB button loading state on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12174
+            },
+            {
+              "id": "ac-kb005-kb-button-shows-success-state-after-save",
+              "name": "AC-KB005 - KB button shows success state after save",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12205
+            },
+            {
+              "id": "ac-kb006-toast-appears-after-kb-action",
+              "name": "AC-KB006 - Toast appears after KB action",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12169
+            },
+            {
+              "id": "ac-kb007-full-results-view-with-kb-integration",
+              "name": "AC-KB007 - Full results view with KB integration",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12121
+            },
+            {
+              "id": "ac-kb008-mobile-layout-with-kb-button-375px",
+              "name": "AC-KB008 - Mobile layout with KB button (375px)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12145
+            },
+            {
+              "id": "ac-kb009-kb-button-hover-state",
+              "name": "AC-KB009 - KB button hover state",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Results Display Demo') to be visible\u001b[22m\n",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\knowledge-base-integration.spec.ts",
+              "duration": 12138
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T21:31:12.486Z"
+      }
+    },
+    {
+      "id": "7730f4b7-8c4d-4ba7-9506-64a32cdaab2f",
+      "timestamp": "2026-01-13T20:45:22.780Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "terminal-shows-initial-welcome-message",
+              "name": "terminal shows initial welcome message",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-input-field",
+              "name": "terminal has input field",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-type-in-terminal-input",
+              "name": "can type in terminal input",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-header-shows-controls",
+              "name": "terminal header shows controls",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "minimize-button-collapses-terminal-to-pill",
+              "name": "minimize button collapses terminal to pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "can-expand-from-minimized-pill",
+              "name": "can expand from minimized pill",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "typing-slash-shows-command-detection",
+              "name": "typing slash shows command detection",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "help-command-recognized",
+              "name": "/help command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "stats-command-recognized",
+              "name": "/stats command recognized",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "welcome-message-uses-arrow-formatting-for-prompts",
+              "name": "welcome message uses arrow formatting for prompts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-has-scrollable-message-area",
+              "name": "terminal has scrollable message area",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-has-correct-aria-attributes",
+              "name": "terminal drawer has correct ARIA attributes",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-button-has-accessible-label",
+              "name": "FAB button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "close-button-has-accessible-label",
+              "name": "close button has accessible label",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\genesis-terminal.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-opens-via-fab-button",
+              "name": "terminal opens via FAB button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-closes-via-close-button",
+              "name": "terminal closes via close button",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-academic-lens",
+              "name": "URL lens parameter initializes academic lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "url-lens-parameter-initializes-engineer-lens",
+              "name": "URL lens parameter initializes engineer lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "default-terminal-shows-generic-welcome-without-lens",
+              "name": "default terminal shows generic welcome without lens",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "fab-toggles-terminal-state",
+              "name": "FAB toggles terminal state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-drawer-animation-classes-are-correct",
+              "name": "terminal drawer animation classes are correct",
+              "status": "warn",
+              "message": "Passed",
+              "file": "deprecated\\terminal-lens-flow.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "01-console-default-view-shows-all-experience-types",
+              "name": "01 - Console default view shows all experience types",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 9862
+            },
+            {
+              "id": "capture-screenshots-for-sprint-review",
+              "name": "capture screenshots for sprint review",
+              "status": "pass",
+              "message": "Passed",
+              "file": "feature-flags-v1-screenshots.spec.ts",
+              "duration": 15837
+            },
+            {
+              "id": "app-loads-with-engagementprovider",
+              "name": "app loads with EngagementProvider",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 18127
+            },
+            {
+              "id": "02-research-agent-config-exists-ac-1-singleton-auto-creation",
+              "name": "02 - Research Agent Config exists (AC-1: SINGLETON auto-creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 8644
+            },
+            {
+              "id": "genesis-page-renders-with-paper-aesthetic",
+              "name": "Genesis page renders with paper aesthetic",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3295
+            },
+            {
+              "id": "page-loads-in-hero-mode-with-terminal-hidden",
+              "name": "page loads in hero mode with terminal hidden",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 20429
+            },
+            {
+              "id": "displays-prompts-on-explore-page",
+              "name": "displays prompts on explore page",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 24398
+            },
+            {
+              "id": "welcome-prompts-should-be-filtered-by-targeting-not-yet-implemented",
+              "name": "welcome prompts should be filtered by targeting (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "page-loads-in-hero-mode-by-default",
+              "name": "page loads in hero mode by default",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 24283
+            },
+            {
+              "id": "us-c001-garden-tray-is-visible-on-explore",
+              "name": "US-C001: Garden tray is visible on /explore",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 24646
+            },
+            {
+              "id": "03-writer-agent-config-exists-ac-2-singleton-auto-creation",
+              "name": "03 - Writer Agent Config exists (AC-2: SINGLETON auto-creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 9700
+            },
+            {
+              "id": "displays-prompts-on-explore-page",
+              "name": "displays prompts on explore page",
+              "status": "pass",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 28940
+            },
+            {
+              "id": "engagement-hooks-work-after-migration",
+              "name": "engagement hooks work after migration",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-migration.spec.ts",
+              "duration": 11239
+            },
+            {
+              "id": "content-rail-has-proper-structure",
+              "name": "content rail has proper structure",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7548
+            },
+            {
+              "id": "genesis-initial-state-baseline",
+              "name": "genesis initial state baseline",
+              "status": "fail",
+              "message": "Error: A snapshot doesn't exist at C:\\GitHub\\the-grove-foundation\\tests\\e2e\\genesis-baseline.spec.ts-snapshots\\genesis-initial-baseline-e2e-win32.png, writing actual.",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 10258
+            },
+            {
+              "id": "tree-click-opens-terminal-and-shows-content",
+              "name": "tree click opens terminal and shows content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 12334
+            },
+            {
+              "id": "04-new-dropdown-shows-all-types-ac-3-type-aware-creation",
+              "name": "04 - +New dropdown shows all types (AC-3: Type-aware creation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 6546
+            },
+            {
+              "id": "toggle-is-visible-in-header",
+              "name": "toggle is visible in header",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: /RAG/i })\nExpected substring: \u001b[32m\"OFF\"\u001b[39m\nReceived string:    \u001b[31m\"RAGON\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: /RAG/i })\u001b[22m\n\u001b[2m    8 × locator resolved to <button title=\"Hybrid search enabled (vector + keyword + temporal)\" class=\"flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium↵            border transition-all duration-200↵            bg-[var(--neon-cyan)]/20 border-[var(--neon-cyan)]/50 text-[var(--neon-cyan)]↵            hover:border-[var(--neon-cyan)]/70\">…</button>\u001b[22m\n\u001b[2m      - unexpected value \"RAGON\"\u001b[22m\n",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 16764
+            },
+            {
+              "id": "activetree-is-visible-in-hero-section",
+              "name": "ActiveTree is visible in hero section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8515
+            },
+            {
+              "id": "tree-button-has-accessible-label",
+              "name": "tree button has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 8478
+            },
+            {
+              "id": "05-empty-state-shows-type-aware-messaging-ac-4",
+              "name": "05 - Empty state shows type-aware messaging (AC-4)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 7450
+            },
+            {
+              "id": "prompts-update-based-on-interaction-count",
+              "name": "prompts update based on interaction count",
+              "status": "pass",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 14538
+            },
+            {
+              "id": "genesis-does-not-load-foundation-theme-json",
+              "name": "Genesis does not load Foundation theme JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 25118
+            },
+            {
+              "id": "us-c001-badge-shows-sprout-count",
+              "name": "US-C001: Badge shows sprout count",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 20167
+            },
+            {
+              "id": "genesis-hero-section-has-correct-typography",
+              "name": "Genesis hero section has correct typography",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3871
+            },
+            {
+              "id": "activetree-has-pulsing-mode-initially",
+              "name": "ActiveTree has pulsing mode initially",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 9108
+            },
+            {
+              "id": "06-research-agent-editor-opens-in-inspector",
+              "name": "06 - Research Agent Editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 7897
+            },
+            {
+              "id": "us-c001-garden-emoji-is-displayed",
+              "name": "US-C001: Garden emoji is displayed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5448
+            },
+            {
+              "id": "genesis-maintains-ink-text-color",
+              "name": "Genesis maintains ink text color",
+              "status": "pass",
+              "message": "Passed",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 3272
+            },
+            {
+              "id": "lens-selection-affects-prompt-filtering",
+              "name": "lens selection affects prompt filtering",
+              "status": "pass",
+              "message": "Passed",
+              "file": "context-fields.spec.ts",
+              "duration": 13688
+            },
+            {
+              "id": "us-c002-tray-expands-on-hover",
+              "name": "US-C002: Tray expands on hover",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6203
+            },
+            {
+              "id": "07-writer-agent-editor-opens-in-inspector",
+              "name": "07 - Writer Agent Editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "experience-console-cleanup-v1.spec.ts",
+              "duration": 7539
+            },
+            {
+              "id": "clicking-tree-triggers-split-layout",
+              "name": "clicking tree triggers split layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 9094
+            },
+            {
+              "id": "genesis-grain-texture-is-visible",
+              "name": "Genesis grain texture is visible",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected: \u001b[32m\"http://localhost:3000/\"\u001b[39m\nReceived: \u001b[31m\"\"\u001b[39m\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 5000ms\u001b[22m\n",
+              "file": "genesis-visual-regression.spec.ts",
+              "duration": 4056
+            },
+            {
+              "id": "terminal-panel-has-aria-attributes",
+              "name": "terminal panel has ARIA attributes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8004
+            },
+            {
+              "id": "journey-pills-are-visible-after-lens-selection",
+              "name": "journey pills are visible after lens selection",
+              "status": "fail",
+              "message": "Error: A snapshot doesn't exist at C:\\GitHub\\the-grove-foundation\\tests\\e2e\\journey-screenshots.spec.ts-snapshots\\journey-pills-overview-e2e-win32.png, writing actual.",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 12689
+            },
+            {
+              "id": "can-select-a-lens-from-header",
+              "name": "can select a lens from header",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 30103
+            },
+            {
+              "id": "genesis-expanded-page-baseline",
+              "name": "genesis expanded page baseline",
+              "status": "fail",
+              "message": "Error: A snapshot doesn't exist at C:\\GitHub\\the-grove-foundation\\tests\\e2e\\genesis-baseline.spec.ts-snapshots\\genesis-expanded-baseline-e2e-win32.png, writing actual.",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 16801
+            },
+            {
+              "id": "selecting-dr-chiang-lens-filters-prompts-not-yet-implemented",
+              "name": "selecting Dr. Chiang lens filters prompts (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "terminal-shows-lens-picker-after-tree-click",
+              "name": "terminal shows lens picker after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7208
+            },
+            {
+              "id": "desktop-shows-50-50-split",
+              "name": "desktop shows 50/50 split",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4363
+            },
+            {
+              "id": "us-c002-tray-collapses-on-mouse-leave",
+              "name": "US-C002: Tray collapses on mouse leave",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 22200
+            },
+            {
+              "id": "can-submit-a-query-via-input",
+              "name": "can submit a query via input",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"query-block\"]')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"query-block\"]')\u001b[22m\n",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 8288
+            },
+            {
+              "id": "toggle-changes-state-on-click",
+              "name": "toggle changes state on click",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: /RAG/i })\nExpected substring: \u001b[32m\"OFF\"\u001b[39m\nReceived string:    \u001b[31m\"RAGON\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: /RAG/i })\u001b[22m\n\u001b[2m    5 × locator resolved to <button title=\"Hybrid search enabled (vector + keyword + temporal)\" class=\"flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium↵            border transition-all duration-200↵            bg-[var(--neon-cyan)]/20 border-[var(--neon-cyan)]/50 text-[var(--neon-cyan)]↵            hover:border-[var(--neon-cyan)]/70\">…</button>\u001b[22m\n\u001b[2m      - unexpected value \"RAGON\"\u001b[22m\n",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 19780
+            },
+            {
+              "id": "us-c002-escape-key-closes-expanded-tray",
+              "name": "US-C002: Escape key closes expanded tray",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5608
+            },
+            {
+              "id": "tablet-shows-40-terminal-width",
+              "name": "tablet shows 40% terminal width",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 7175
+            },
+            {
+              "id": "mobile-shows-bottom-sheet",
+              "name": "mobile shows bottom sheet",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6902
+            },
+            {
+              "id": "us-c003-search-input-visible-when-expanded",
+              "name": "US-C003: Search input visible when expanded",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 10661
+            },
+            {
+              "id": "us-c003-status-filter-dropdown-visible-when-expanded",
+              "name": "US-C003: Status filter dropdown visible when expanded",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 9562
+            },
+            {
+              "id": "us-c003-status-filter-has-correct-options",
+              "name": "US-C003: Status filter has correct options",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 20819
+            },
+            {
+              "id": "high-entropy-triggers-moment-based-prompts",
+              "name": "high entropy triggers moment-based prompts",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "context-fields.spec.ts",
+              "duration": 30159
+            },
+            {
+              "id": "terminal-panel-has-correct-aria-role",
+              "name": "terminal panel has correct ARIA role",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 30132
+            },
+            {
+              "id": "simulation-journey-start-screenshot",
+              "name": "simulation journey start screenshot",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 15219
+            },
+            {
+              "id": "genesis-split-layout-baseline",
+              "name": "genesis split layout baseline",
+              "status": "fail",
+              "message": "Error: A snapshot doesn't exist at C:\\GitHub\\the-grove-foundation\\tests\\e2e\\genesis-baseline.spec.ts-snapshots\\genesis-split-baseline-e2e-win32.png, writing actual.",
+              "file": "genesis-baseline.spec.ts",
+              "duration": 7588
+            },
+            {
+              "id": "us-c003-search-filters-sprout-list",
+              "name": "US-C003: Search filters sprout list",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 10716
+            },
+            {
+              "id": "us-a001-nursery-console-loads-without-errors",
+              "name": "US-A001: Nursery console loads without errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 12158
+            },
+            {
+              "id": "us-a001-nursery-console-displays-title",
+              "name": "US-A001: Nursery console displays title",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 8114
+            },
+            {
+              "id": "moment-appears-after-first-exchange",
+              "name": "moment appears after first exchange",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 24557
+            },
+            {
+              "id": "stakes-journey-start-screenshot",
+              "name": "stakes journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 26613
+            },
+            {
+              "id": "shows-loading-state-while-waiting-for-response",
+              "name": "shows loading state while waiting for response",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"response-block\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"response-block\"]')\u001b[22m\n",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 18638
+            },
+            {
+              "id": "stage-changes-after-interactions",
+              "name": "stage changes after interactions",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 30815
+            },
+            {
+              "id": "ratchet-journey-start-screenshot",
+              "name": "ratchet journey start screenshot",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 10828
+            },
+            {
+              "id": "prompts-change-based-on-stage-not-yet-implemented",
+              "name": "prompts change based on stage (NOT YET IMPLEMENTED)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 0
+            },
+            {
+              "id": "activetree-has-proper-aria-labels",
+              "name": "ActiveTree has proper ARIA labels",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while setting up \"page\".\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 30142
+            },
+            {
+              "id": "toggle-state-persists-after-refresh",
+              "name": "toggle state persists after refresh",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "explore-hybrid-toggle.spec.ts",
+              "duration": 30374
+            },
+            {
+              "id": "renders-bold-text-as-clickable-concept-spans",
+              "name": "renders bold text as clickable concept spans",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 14668
+            },
+            {
+              "id": "renders-fork-buttons-when-navigation-present",
+              "name": "renders fork buttons when navigation present",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 2841
+            },
+            {
+              "id": "terminal-shows-lens-picker-for-new-users",
+              "name": "terminal shows lens picker for new users",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 20284
+            },
+            {
+              "id": "us-c004-shows-empty-state-or-sprout-list",
+              "name": "US-C004: Shows empty state or sprout list",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+              "file": "garden-tray.spec.ts",
+              "duration": 30135
+            },
+            {
+              "id": "generates-prompts-after-2-interactions",
+              "name": "generates prompts after 2+ interactions",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "context-fields.spec.ts",
+              "duration": 30391
+            },
+            {
+              "id": "journey-click-triggers-xstate-transition",
+              "name": "journey click triggers XState transition",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: /simulation/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: /simulation/i }).first()\u001b[22m\n",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 14983
+            },
+            {
+              "id": "usepromptforhighlight-is-wired-functional",
+              "name": "usePromptForHighlight is wired (functional)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 15302
+            },
+            {
+              "id": "content-rail-hides-terminal-when-not-visible",
+              "name": "content rail hides terminal when not visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 8743
+            },
+            {
+              "id": "fork-buttons-have-correct-styling",
+              "name": "fork buttons have correct styling",
+              "status": "fail",
+              "message": "Error: page.evaluate: SecurityError: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules\n    at eval (eval at evaluate (:290:30), <anonymous>:3:87)\n    at UtilityScript.evaluate (<anonymous>:292:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 3648
+            },
+            {
+              "id": "us-a001-nursery-console-displays-filter-controls",
+              "name": "US-A001: Nursery console displays filter controls",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button:has-text(\"Ready\")')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('button:has-text(\"Ready\")')\u001b[22m\n",
+              "file": "nursery.spec.ts",
+              "duration": 16064
+            },
+            {
+              "id": "us-c005-badge-has-pulse-capability",
+              "name": "US-C005: Badge has pulse capability",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4083
+            },
+            {
+              "id": "landing-page-loads-without-critical-console-errors",
+              "name": "landing page loads without critical console errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 4450
+            },
+            {
+              "id": "journey-completion-can-be-tracked",
+              "name": "journey completion can be tracked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 5322
+            },
+            {
+              "id": "page-renders-main-content",
+              "name": "page renders main content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3186
+            },
+            {
+              "id": "us-c006-sprout-rows-are-clickable",
+              "name": "US-C006: Sprout rows are clickable",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4531
+            },
+            {
+              "id": "simulation-journey-visual-state",
+              "name": "simulation journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 4356
+            },
+            {
+              "id": "terminal-has-input-field-that-accepts-text",
+              "name": "terminal has input field that accepts text",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 12289
+            },
+            {
+              "id": "terminal-panel-is-accessible",
+              "name": "terminal panel is accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 3716
+            },
+            {
+              "id": "renders-stream-container",
+              "name": "renders stream container",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 8152
+            },
+            {
+              "id": "us-c006-completed-sprout-shows-expandable-results",
+              "name": "US-C006: Completed sprout shows expandable results",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 5290
+            },
+            {
+              "id": "foundation-dashboard-loads",
+              "name": "foundation dashboard loads",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 2963
+            },
+            {
+              "id": "us-a001-nursery-console-displays-search-input",
+              "name": "US-A001: Nursery console displays search input",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 7529
+            },
+            {
+              "id": "applies-glass-styling-to-response-blocks",
+              "name": "applies glass styling to response blocks",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 6626
+            },
+            {
+              "id": "tray-has-proper-aria-role",
+              "name": "Tray has proper ARIA role",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 6002
+            },
+            {
+              "id": "engineer-lens-url-shows-technical-content-after-tree-click",
+              "name": "engineer lens URL shows technical content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9017
+            },
+            {
+              "id": "no-javascript-exceptions-on-page-load",
+              "name": "no JavaScript exceptions on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 7012
+            },
+            {
+              "id": "fork-buttons-are-keyboard-accessible",
+              "name": "fork buttons are keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 4213
+            },
+            {
+              "id": "tray-has-aria-label-with-counts",
+              "name": "Tray has ARIA label with counts",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 3867
+            },
+            {
+              "id": "loads-glass-css-variables",
+              "name": "loads glass CSS variables",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 3189
+            },
+            {
+              "id": "can-navigate-to-foundation-from-home",
+              "name": "can navigate to foundation from home",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 6206
+            },
+            {
+              "id": "loads-fork-button-css-variables",
+              "name": "loads fork button CSS variables",
+              "status": "pass",
+              "message": "Passed",
+              "file": "kinetic-stream.spec.ts",
+              "duration": 2454
+            },
+            {
+              "id": "academic-lens-url-shows-research-content-after-tree-click",
+              "name": "academic lens URL shows research content after tree click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10290
+            },
+            {
+              "id": "moment-shows-create-my-lens-button",
+              "name": "moment shows Create My Lens button",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 29596
+            },
+            {
+              "id": "genesis-route-uses-genesis-surface",
+              "name": "Genesis route uses genesis surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 3303
+            },
+            {
+              "id": "search-input-has-accessible-label",
+              "name": "Search input has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 11023
+            },
+            {
+              "id": "foundation-route-uses-foundation-surface",
+              "name": "Foundation route uses foundation surface",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 2918
+            },
+            {
+              "id": "displays-tier-filter-with-canonical-values",
+              "name": "displays tier filter with canonical values",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('select').filter({ hasText: 'All Tiers' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('select').filter({ hasText: 'All Tiers' })\u001b[22m\n",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 20998
+            },
+            {
+              "id": "can-navigate-between-foundation-consoles",
+              "name": "can navigate between foundation consoles",
+              "status": "pass",
+              "message": "Passed",
+              "file": "smoke.spec.ts",
+              "duration": 10736
+            },
+            {
+              "id": "theme-switches-when-navigating-between-surfaces",
+              "name": "Theme switches when navigating between surfaces",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 5198
+            },
+            {
+              "id": "stakes-journey-visual-state",
+              "name": "stakes journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 30231
+            },
+            {
+              "id": "ag-1-5-lens-picker-shows-persona-options-after-tree-click",
+              "name": "AG-1.5: lens picker shows persona options after tree click",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.terminal-panel').locator('button').filter({ hasText: /(Observer|Engineer|Investor|Builder|Citizen)/i }).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.terminal-panel').locator('button').filter({ hasText: /(Observer|Engineer|Investor|Builder|Citizen)/i }).first()\u001b[22m\n",
+              "file": "active-grove.spec.ts",
+              "duration": 13084
+            },
+            {
+              "id": "us-a001-nursery-shows-empty-state-or-sprout-list",
+              "name": "US-A001: Nursery shows empty state or sprout list",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "nursery.spec.ts",
+              "duration": 5964
+            },
+            {
+              "id": "library-prompts-have-4d-targeting-configured",
+              "name": "library prompts have 4D targeting configured",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded while setting up \"page\".\u001b[39m",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 30047
+            },
+            {
+              "id": "surface-theme-loads-for-genesis-route",
+              "name": "Surface theme loads for genesis route",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "theme-loading.spec.ts",
+              "duration": 2952
+            },
+            {
+              "id": "invalid-lens-parameter-shows-lens-picker",
+              "name": "invalid lens parameter shows lens picker",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 7448
+            },
+            {
+              "id": "ratchet-journey-visual-state",
+              "name": "ratchet journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7563
+            },
+            {
+              "id": "status-filter-has-accessible-label",
+              "name": "Status filter has accessible label",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 15793
+            },
+            {
+              "id": "foundation-has-dark-mode-class-applied",
+              "name": "Foundation has dark mode class applied",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 10504
+            },
+            {
+              "id": "theme-tokens-are-applied-to-foundation-components",
+              "name": "Theme tokens are applied to Foundation components",
+              "status": "pass",
+              "message": "Passed",
+              "file": "surface-theming.spec.ts",
+              "duration": 2888
+            },
+            {
+              "id": "4d-targeting-dimensions-are-documented",
+              "name": "4D targeting dimensions are documented",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 331
+            },
+            {
+              "id": "shows-inspector-when-document-is-selected",
+              "name": "shows inspector when document is selected",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 12308
+            },
+            {
+              "id": "capture-collapsed-state",
+              "name": "Capture collapsed state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 12436
+            },
+            {
+              "id": "us-a002-can-click-on-sprout-card-to-open-inspector",
+              "name": "US-A002: Can click on sprout card to open inspector",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 9257
+            },
+            {
+              "id": "known-gap-exploreshell-uses-static-welcomecontent-not-usesuggestedprompts",
+              "name": "KNOWN GAP: ExploreShell uses static welcomeContent, not useSuggestedPrompts",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 9883
+            },
+            {
+              "id": "ag-1-6-selecting-a-lens-updates-engagement-state",
+              "name": "AG-1.6: selecting a lens updates engagement state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 12485
+            },
+            {
+              "id": "usepromptforhighlight-is-using-targeting-partial-implementation",
+              "name": "usePromptForHighlight IS using targeting (partial implementation)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "explore-prompt-targeting.spec.ts",
+              "duration": 2264
+            },
+            {
+              "id": "capture-expanded-state-with-controls",
+              "name": "Capture expanded state with controls",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4352
+            },
+            {
+              "id": "inspector-shows-collapsible-sections",
+              "name": "inspector shows collapsible sections",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 12341
+            },
+            {
+              "id": "moment-shows-choose-existing-button",
+              "name": "moment shows Choose Existing button",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 19412
+            },
+            {
+              "id": "capture-filtered-state",
+              "name": "Capture filtered state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4671
+            },
+            {
+              "id": "diary-journey-visual-state",
+              "name": "diary journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 25315
+            },
+            {
+              "id": "does-not-affect-page-load-performance",
+              "name": "Does not affect page load performance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 3800
+            },
+            {
+              "id": "us-a002-escape-key-closes-inspector",
+              "name": "US-A002: Escape key closes inspector",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 14562
+            },
+            {
+              "id": "tier-dropdown-in-inspector-has-canonical-values",
+              "name": "tier dropdown in inspector has canonical values",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 12381
+            },
+            {
+              "id": "console-has-no-critical-errors-on-explore",
+              "name": "Console has no critical errors on /explore",
+              "status": "pass",
+              "message": "Passed",
+              "file": "garden-tray.spec.ts",
+              "duration": 4472
+            },
+            {
+              "id": "emergence-journey-visual-state",
+              "name": "emergence journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 7498
+            },
+            {
+              "id": "terminal-route-loads-correct-theme",
+              "name": "Terminal route loads correct theme",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "surface-theming.spec.ts",
+              "duration": 16816
+            },
+            {
+              "id": "no-lens-parameter-shows-lens-picker-for-new-users",
+              "name": "no lens parameter shows lens picker for new users",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9739
+            },
+            {
+              "id": "us-a003-promote-button-is-visible-in-inspector-for-ready-sprouts",
+              "name": "US-A003: Promote button is visible in inspector for ready sprouts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 7092
+            },
+            {
+              "id": "foundation-quantum-theme-loads-for-foundation-route",
+              "name": "Foundation quantum theme loads for foundation route",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "theme-loading.spec.ts",
+              "duration": 5386
+            },
+            {
+              "id": "us-a004-archive-button-is-visible-in-inspector-for-non-archived-sprouts",
+              "name": "US-A004: Archive button is visible in inspector for non-archived sprouts",
+              "status": "warn",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 7320
+            },
+            {
+              "id": "closes-inspector-when-close-button-clicked",
+              "name": "closes inspector when close button clicked",
+              "status": "warn",
+              "message": "Passed",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 12581
+            },
+            {
+              "id": "marketing-routes-use-surface-theme",
+              "name": "Marketing routes use surface theme",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m",
+              "file": "surface-theming.spec.ts",
+              "duration": 2846
+            },
+            {
+              "id": "ag-1-7-content-rail-shows-hero-section-with-dynamic-content",
+              "name": "AG-1.7: content rail shows hero section with dynamic content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 28446
+            },
+            {
+              "id": "theme-json-files-are-valid-json",
+              "name": "Theme JSON files are valid JSON",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 677
+            },
+            {
+              "id": "theme-inheritance-works-terminal-extends-surface",
+              "name": "Theme inheritance works (terminal extends surface)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 107
+            },
+            {
+              "id": "lens-selection-persists-across-page-reload",
+              "name": "lens selection persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10275
+            },
+            {
+              "id": "css-variables-are-injected-on-page-load",
+              "name": "CSS variables are injected on page load",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 4343
+            },
+            {
+              "id": "moment-shows-not-now-dismiss-button",
+              "name": "moment shows Not now dismiss button",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 20774
+            },
+            {
+              "id": "theme-mode-persistence-works",
+              "name": "Theme mode persistence works",
+              "status": "pass",
+              "message": "Passed",
+              "file": "theme-loading.spec.ts",
+              "duration": 6379
+            },
+            {
+              "id": "architecture-journey-visual-state",
+              "name": "architecture journey visual state",
+              "status": "warn",
+              "message": "Passed",
+              "file": "journey-screenshots.spec.ts",
+              "duration": 25599
+            },
+            {
+              "id": "journey-completion-persists-across-page-reload",
+              "name": "journey completion persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9043
+            },
+            {
+              "id": "can-navigate-to-nursery-from-bedrock-dashboard",
+              "name": "can navigate to nursery from bedrock dashboard",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 19989
+            },
+            {
+              "id": "nursery-route-accessible-directly",
+              "name": "nursery route accessible directly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 3389
+            },
+            {
+              "id": "ag-1-9-lens-persists-across-page-reload",
+              "name": "AG-1.9: lens persists across page reload",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 22520
+            },
+            {
+              "id": "desktop-shows-side-by-side-layout",
+              "name": "desktop shows side-by-side layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 9848
+            },
+            {
+              "id": "shows-add-files-button",
+              "name": "shows Add Files button",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: 'Add Files' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: 'Add Files' })\u001b[22m\n",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 7938
+            },
+            {
+              "id": "ag-2-3-url-lens-parameter-hydrates-state",
+              "name": "AG-2.3: URL lens parameter hydrates state",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeTruthy\u001b[2m()\u001b[22m\n\nReceived: \u001b[31mnull\u001b[39m",
+              "file": "active-grove.spec.ts",
+              "duration": 3892
+            },
+            {
+              "id": "can-toggle-status-filters",
+              "name": "can toggle status filters",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 9550
+            },
+            {
+              "id": "ag-2-3b-url-lens-skips-lens-picker",
+              "name": "AG-2.3b: URL lens skips lens picker",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 5910
+            },
+            {
+              "id": "can-type-in-search-input",
+              "name": "can type in search input",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 5326
+            },
+            {
+              "id": "mobile-terminal-is-still-accessible",
+              "name": "mobile terminal is still accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 14470
+            },
+            {
+              "id": "can-toggle-needs-review-filter",
+              "name": "can toggle needs review filter",
+              "status": "pass",
+              "message": "Passed",
+              "file": "nursery.spec.ts",
+              "duration": 2856
+            },
+            {
+              "id": "ag-2-4-invalid-url-lens-falls-back-gracefully",
+              "name": "AG-2.4: invalid URL lens falls back gracefully",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 4551
+            },
+            {
+              "id": "all-three-action-buttons-are-present",
+              "name": "all three action buttons are present",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 20763
+            },
+            {
+              "id": "shows-process-queue-button",
+              "name": "shows Process Queue button",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('button').filter({ hasText: 'Process Queue' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('button').filter({ hasText: 'Process Queue' })\u001b[22m\n",
+              "file": "pipeline-inspector.spec.ts",
+              "duration": 7430
+            },
+            {
+              "id": "tree-button-is-keyboard-accessible",
+              "name": "tree button is keyboard accessible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 10266
+            },
+            {
+              "id": "ag-2-5-multiple-seedling-clicks-are-idempotent",
+              "name": "AG-2.5: multiple seedling clicks are idempotent",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 9219
+            },
+            {
+              "id": "terminal-announces-expanded-state",
+              "name": "terminal announces expanded state",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6305
+            },
+            {
+              "id": "terminal-is-hidden-from-screen-readers-when-closed",
+              "name": "terminal is hidden from screen readers when closed",
+              "status": "pass",
+              "message": "Passed",
+              "file": "engagement-behaviors.spec.ts",
+              "duration": 6644
+            },
+            {
+              "id": "ag-2-7-corrupted-localstorage-recovers-gracefully",
+              "name": "AG-2.7: corrupted localStorage recovers gracefully",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoThrow\u001b[2m()\u001b[22m\n\nError name:    \u001b[31m\"SyntaxError\"\u001b[39m\nError message: \u001b[31m\"Unexpected token 'o', \\\"not-valid-json{{{\\\" is not valid JSON\"\u001b[39m\n\n    \u001b[0m \u001b[90m 477 |\u001b[39m     \u001b[90m// Either null (reset) or valid JSON\u001b[39m\n     \u001b[90m 478 |\u001b[39m     \u001b[36mif\u001b[39m (newState) {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 479 |\u001b[39m       expect(() \u001b[33m=>\u001b[39m \u001b[33mJSON\u001b[39m\u001b[33m.\u001b[39mparse(newState))\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoThrow()\n     \u001b[90m     |\u001b[39m                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 480 |\u001b[39m     }\n     \u001b[90m 481 |\u001b[39m   })\n     \u001b[90m 482 |\u001b[39m })\u001b[0m\n\n      \u001b[2mat \u001b[22mfile:/C:/GitHub/the-grove-foundation/tests/e2e/active-grove.spec.ts\u001b[2m:479:25\u001b[22m\n      \u001b[2mat Object.<anonymous> (\u001b[22mnode_modules/playwright/lib/common/expectBundleImpl.js\u001b[2m:293:1495)\u001b[22m\n      \u001b[2mat Object.w [as toThrow] (\u001b[22mnode_modules/playwright/lib/common/expectBundleImpl.js\u001b[2m:338:895)\u001b[22m\n      \u001b[2mat callback (\u001b[22mnode_modules/playwright/lib/matchers/expect.js\u001b[2m:260:40)\u001b[22m\n      \u001b[2mat Zone.run (\u001b[22mnode_modules/playwright-core/lib/server/utils/zones.js\u001b[2m:42:36)\u001b[22m\n      \u001b[2mat Proxy.toThrow (\u001b[22mnode_modules/playwright/lib/matchers/expect.js\u001b[2m:261:79)\u001b[22m\n      \u001b[2mat \u001b[22mfile:/C:/GitHub/the-grove-foundation/tests/e2e/active-grove.spec.ts\u001b[2m:479:46\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:322:9\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/testInfo.js\u001b[2m:311:11\u001b[22m\n      \u001b[2mat TimeoutManager.withRunnable (\u001b[22mnode_modules/playwright/lib/worker/timeoutManager.js\u001b[2m:67:14)\u001b[22m\n      \u001b[2mat TestInfoImpl._runWithTimeout (\u001b[22mnode_modules/playwright/lib/worker/testInfo.js\u001b[2m:309:7)\u001b[22m\n      \u001b[2mat \u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:320:7\u001b[22m\n      \u001b[2mat WorkerMain._runTest (\u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:295:5)\u001b[22m\n      \u001b[2mat WorkerMain.runTestGroup (\u001b[22mnode_modules/playwright/lib/worker/workerMain.js\u001b[2m:199:11)\u001b[22m\n      \u001b[2mat process.<anonymous> (\u001b[22mnode_modules/playwright/lib/common/process.js\u001b[2m:65:22)\u001b[22m",
+              "file": "active-grove.spec.ts",
+              "duration": 10780
+            },
+            {
+              "id": "choose-existing-button-is-clickable",
+              "name": "Choose Existing button is clickable",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 18770
+            },
+            {
+              "id": "gen-1-new-user-flow-tree-click-split-lens-select-collapsing-unlocked",
+              "name": "GEN-1: new user flow - tree click → split → lens select → collapsing → unlocked",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 6067
+            },
+            {
+              "id": "gen-2-returning-user-flow-tree-click-triggers-headline-collapse-not-skip-to-unlocked",
+              "name": "GEN-2: returning user flow - tree click triggers headline collapse (not skip to unlocked)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 12716
+            },
+            {
+              "id": "create-my-lens-button-is-clickable",
+              "name": "Create My Lens button is clickable",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 18738
+            },
+            {
+              "id": "gen-3-lens-switch-via-header-picker-triggers-headline-update",
+              "name": "GEN-3: lens switch via header picker triggers headline update",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 12044
+            },
+            {
+              "id": "gen-4-auto-scroll-to-section-2-after-headline-collapse-completes",
+              "name": "GEN-4: auto-scroll to Section 2 after headline collapse completes",
+              "status": "pass",
+              "message": "Passed",
+              "file": "active-grove.spec.ts",
+              "duration": 15087
+            },
+            {
+              "id": "not-now-dismisses-the-moment",
+              "name": "Not now dismisses the moment",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 18842
+            },
+            {
+              "id": "moment-has-suggestion-badge",
+              "name": "moment has Suggestion badge",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"moment-object\"]')\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"moment-object\"]')\u001b[22m\n",
+              "file": "moment-custom-lens-offer.spec.ts",
+              "duration": 18470
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 195,
+        "passed": 112,
+        "failed": 45,
+        "warnings": 38
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T20:45:22.792Z"
+      }
+    },
+    {
+      "id": "ffef88bc-acf3-4411-9fae-f774e2bab753",
+      "timestamp": "2026-01-13T04:59:23.426Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "01-console-default-view-shows-all-objects",
+              "name": "01 - Console default view shows all objects",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 10251
+            },
+            {
+              "id": "02-filter-by-research-agent-type-shows-default-instance",
+              "name": "02 - Filter by Research Agent type shows default instance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 7959
+            },
+            {
+              "id": "03-filter-by-writer-agent-type-shows-default-instance",
+              "name": "03 - Filter by Writer Agent type shows default instance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 7661
+            },
+            {
+              "id": "04-new-button-dropdown-shows-all-types",
+              "name": "04 - New button dropdown shows all types",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 7037
+            },
+            {
+              "id": "05-research-agent-config-editor-opens-in-inspector",
+              "name": "05 - Research Agent Config editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 8057
+            },
+            {
+              "id": "06-writer-agent-config-editor-opens-in-inspector",
+              "name": "06 - Writer Agent Config editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 8152
+            },
+            {
+              "id": "07-empty-state-shows-type-specific-guidance",
+              "name": "07 - Empty state shows type-specific guidance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 7040
+            },
+            {
+              "id": "generate-verification-summary",
+              "name": "Generate verification summary",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 367
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T04:59:23.437Z"
+      }
+    },
+    {
+      "id": "a8274d64-966a-4df2-9e23-6d53592d6610",
+      "timestamp": "2026-01-13T03:56:15.531Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "01-console-default-view-shows-all-objects",
+              "name": "01 - Console default view shows all objects",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 5969
+            },
+            {
+              "id": "02-filter-by-research-agent-type-shows-default-instance",
+              "name": "02 - Filter by Research Agent type shows default instance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 4689
+            },
+            {
+              "id": "03-filter-by-writer-agent-type-shows-default-instance",
+              "name": "03 - Filter by Writer Agent type shows default instance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 5098
+            },
+            {
+              "id": "04-new-button-dropdown-shows-all-types",
+              "name": "04 - New button dropdown shows all types",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 4157
+            },
+            {
+              "id": "05-research-agent-config-editor-opens-in-inspector",
+              "name": "05 - Research Agent Config editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 5271
+            },
+            {
+              "id": "06-writer-agent-config-editor-opens-in-inspector",
+              "name": "06 - Writer Agent Config editor opens in inspector",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 5324
+            },
+            {
+              "id": "07-empty-state-shows-type-specific-guidance",
+              "name": "07 - Empty state shows type-specific guidance",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 4105
+            },
+            {
+              "id": "generate-verification-summary",
+              "name": "Generate verification summary",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\visual-qa\\experience-console.spec.ts",
+              "duration": 238
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T03:56:15.544Z"
+      }
+    },
+    {
       "id": "364bb0b4-f455-42fa-b5ec-d485f14f8969",
       "timestamp": "2025-12-28T07:19:30.108Z",
       "configVersion": "external",

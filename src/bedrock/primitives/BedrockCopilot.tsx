@@ -31,10 +31,12 @@ interface ActionResult {
 /** Type alias for parseCommand result (now includes suggestions) */
 type CommandParseResult = ActionResult;
 
-/** Default quick actions when none provided */
+/** Default quick actions when none provided
+ * Sprint: inspector-copilot-v1 - Removed activate (should be context-aware, not universal)
+ * Keep only help for discoverability
+ */
 const DEFAULT_QUICK_ACTIONS: QuickAction[] = [
-  { id: 'activate', label: 'Activate', command: 'activate', icon: 'toggle_on' },
-  { id: 'help', label: 'Help', command: 'help', icon: 'help' },
+  { id: 'help', label: 'Help', command: '/help', icon: 'help' },
 ];
 
 interface BedrockCopilotProps {
@@ -169,6 +171,12 @@ export function BedrockCopilot({
     }
 
     setIsProcessing(false);
+
+    // Sprint: inspector-copilot-v1 - Auto-focus input after response
+    // Use requestAnimationFrame to ensure DOM is updated before focusing
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   }, [input, isProcessing, consoleId, object, onApplyPatch, onAction]);
 
   // Execute quick action - handles both slash commands and regular commands
@@ -213,70 +221,95 @@ export function BedrockCopilot({
     }
     setInput('');
     setIsProcessing(false);
+
+    // Sprint: inspector-copilot-v1 - Auto-focus input after response
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
   }, [consoleId, object, onApplyPatch, onAction]);
 
+  // Sprint: inspector-copilot-v1 - Terminal styling
+  // Mini-terminal aesthetic with JetBrains Mono, clearly differentiated from inspector
+  // Simple markdown renderer for terminal output
+  const renderMarkdown = (text: string) => {
+    // Split by lines and process each
+    const lines = text.split('\n');
+    return lines.map((line, i) => {
+      // Bold: **text** or __text__
+      let processed = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[#00ff00]">$1</strong>');
+      processed = processed.replace(/__(.+?)__/g, '<strong class="text-[#00ff00]">$1</strong>');
+      // Inline code: `code`
+      processed = processed.replace(/`(.+?)`/g, '<code class="px-1 bg-[#1a1a1a] rounded text-[#00ff00]/80">$1</code>');
+      // Bullet points: • or -
+      if (processed.startsWith('• ') || processed.startsWith('- ')) {
+        processed = `<span class="text-[#00ff00]/60">•</span> ${processed.slice(2)}`;
+      }
+      return (
+        <span key={i} className="block" dangerouslySetInnerHTML={{ __html: processed }} />
+      );
+    });
+  };
+
   return (
-    <div className="border-t border-[var(--glass-border-bright)] bg-[var(--glass-panel)]">
+    <div className="border-t border-[#1a1a1a] bg-[#0d0d0d] font-mono mx-2 mb-2 rounded-lg overflow-hidden">
       {/* Header - always visible */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="w-full px-4 py-3 flex items-center justify-between hover:bg-[var(--glass-solid)] transition-colors"
+        className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-[#1a1a1a] transition-colors"
         aria-expanded={!isCollapsed}
       >
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-lg text-[var(--neon-green)]">smart_toy</span>
-          <span className="text-sm font-medium text-[var(--glass-text-primary)]">
+          <span className="text-[#00ff00] text-xs">▸</span>
+          <span className="text-xs font-medium text-[#00ff00]/80 uppercase tracking-wider">
             {title}
           </span>
           {isProcessing && (
-            <span className="w-2 h-2 rounded-full bg-[var(--neon-green)] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00ff00] animate-pulse" />
           )}
         </div>
-        <span className="material-symbols-outlined text-lg text-[var(--glass-text-muted)]">
-          {isCollapsed ? 'expand_less' : 'expand_more'}
+        <span className="text-xs text-[#666]">
+          {isCollapsed ? '[+]' : '[-]'}
         </span>
       </button>
 
       {/* Expandable content */}
       {!isCollapsed && (
-        <div className="border-t border-[var(--glass-border)]">
-          {/* Quick Actions */}
-          <div className="px-4 py-2 border-b border-[var(--glass-border)]">
-            <div className="flex flex-wrap gap-2">
-              {quickActions.map(action => (
-                <button
-                  key={action.command}
-                  onClick={() => executeQuickAction(action.command)}
-                  disabled={isProcessing}
-                  className="px-3 py-1.5 text-xs rounded-full bg-[var(--neon-green)]/10 text-[var(--neon-green)] hover:bg-[var(--neon-green)]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-sm">{action.icon}</span>
-                  {action.label}
-                </button>
-              ))}
+        <div className="border-t border-[#1a1a1a]">
+          {/* Quick Actions - only show if there are any */}
+          {quickActions.length > 0 && (
+            <div className="px-4 py-2.5 border-b border-[#1a1a1a]">
+              <div className="flex flex-wrap gap-2">
+                {quickActions.map(action => (
+                  <button
+                    key={action.command}
+                    onClick={() => executeQuickAction(action.command)}
+                    disabled={isProcessing}
+                    className="px-2.5 py-1 text-[10px] rounded border border-[#333] bg-[#1a1a1a] text-[#00ff00]/70 hover:bg-[#222] hover:border-[#00ff00]/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-mono uppercase tracking-wide"
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Message History */}
+          {/* Message History - Terminal style with markdown */}
           {messages.length > 0 && (
-            <div className="overflow-y-auto px-4 py-3 space-y-3 max-h-[200px]">
+            <div className="overflow-y-auto px-4 py-3 space-y-2 max-h-[200px] text-xs">
               {messages.map(message => (
-                <div
-                  key={message.id}
-                  className={`text-sm ${message.role === 'user' ? 'text-right' : ''}`}
-                >
+                <div key={message.id} className="leading-relaxed">
                   {message.role === 'user' ? (
-                    <span className="inline-block px-3 py-2 rounded-lg bg-[var(--neon-cyan)]/20 text-[var(--glass-text-primary)] max-w-[80%]">
-                      {message.content}
-                    </span>
+                    <div className="text-[#888]">
+                      <span className="text-[#00ff00]">{'>'}</span> {message.content}
+                    </div>
                   ) : (
-                    <div className="inline-block max-w-[80%] text-left">
-                      <span className="block px-3 py-2 rounded-lg bg-[var(--glass-solid)] text-[var(--glass-text-secondary)] whitespace-pre-wrap">
-                        {message.content}
-                      </span>
-                      {/* Clickable Suggestions - Sprint: copilot-suggestions-hotfix-v1 */}
+                    <div className="mt-1">
+                      <div className="text-[#aaa] pl-3 border-l-2 border-[#333] space-y-0.5">
+                        {renderMarkdown(message.content)}
+                      </div>
+                      {/* Clickable Suggestions */}
                       {message.suggestions && message.suggestions.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-[var(--glass-border)]">
+                        <div className="flex flex-wrap gap-1.5 mt-2 pl-3">
                           {message.suggestions.map((s, i) => (
                             <button
                               key={i}
@@ -284,15 +317,8 @@ export function BedrockCopilot({
                                 setInput(s.template);
                                 inputRef.current?.focus();
                               }}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px]
-                                         bg-[var(--neon-green)]/10 text-[var(--neon-green)]
-                                         border border-[var(--neon-green)]/20
-                                         hover:bg-[var(--neon-green)]/20 hover:border-[var(--neon-green)]/40
-                                         transition-colors cursor-pointer"
+                              className="text-[10px] px-2 py-1 rounded border border-[#333] bg-[#1a1a1a] text-[#00ff00]/60 hover:text-[#00ff00] hover:border-[#00ff00]/30 transition-colors"
                             >
-                              {s.icon && (
-                                <span className="material-symbols-outlined text-xs">{s.icon}</span>
-                              )}
                               {s.label}
                             </button>
                           ))}
@@ -306,9 +332,10 @@ export function BedrockCopilot({
             </div>
           )}
 
-          {/* Input */}
-          <form onSubmit={handleSubmit} className="p-3">
-            <div className="flex gap-2">
+          {/* Input - Terminal prompt style */}
+          <form onSubmit={handleSubmit} className="px-4 py-3 border-t border-[#1a1a1a]">
+            <div className="flex items-center gap-2">
+              <span className="text-[#00ff00] text-xs">{'>'}</span>
               <input
                 ref={inputRef}
                 type="text"
@@ -316,15 +343,17 @@ export function BedrockCopilot({
                 onChange={e => setInput(e.target.value)}
                 placeholder={placeholder}
                 disabled={isProcessing}
-                className="flex-1 px-3 py-2 text-sm rounded-lg border border-[var(--glass-border-bright)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-green)]/50 focus:border-[var(--neon-green)]/60 disabled:opacity-50"
+                className="flex-1 bg-transparent text-xs text-[#ccc] placeholder:text-[#444] focus:outline-none disabled:opacity-50 font-mono"
               />
-              <button
-                type="submit"
-                disabled={!input.trim() || isProcessing}
-                className="px-3 py-2 rounded-lg bg-[var(--neon-green)]/20 text-[var(--neon-green)] hover:bg-[var(--neon-green)]/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="material-symbols-outlined text-lg">send</span>
-              </button>
+              {input.trim() && (
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="text-[#00ff00]/60 hover:text-[#00ff00] transition-colors text-xs px-2"
+                >
+                  ⏎
+                </button>
+              )}
             </div>
           </form>
         </div>

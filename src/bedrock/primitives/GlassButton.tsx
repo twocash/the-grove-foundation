@@ -12,7 +12,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 type NeonAccent = 'green' | 'cyan' | 'amber' | 'violet';
 
-interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface GlassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Button variant */
   variant?: ButtonVariant;
   /** Button size */

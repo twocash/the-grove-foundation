@@ -32,13 +32,21 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   prompt: 'prompts',
   'system-prompt': 'system_prompts',
   'feature-flag': 'feature_flags',
+  'research-agent-config': 'research_agent_configs',
+  'writer-agent-config': 'writer_agent_configs',
+  'copilot-style': 'copilot_styles',
 };
 
 /**
  * Types that use meta+payload JSONB pattern instead of flattened columns.
  * These require custom row/object transforms.
  */
-const JSONB_META_TYPES = new Set<GroveObjectType>(['feature-flag']);
+const JSONB_META_TYPES = new Set<GroveObjectType>([
+  'feature-flag',
+  'research-agent-config',
+  'writer-agent-config',
+  'copilot-style',
+]);
 
 /**
  * camelCase to snake_case converter

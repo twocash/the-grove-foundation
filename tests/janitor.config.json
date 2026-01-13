@@ -1,0 +1,23 @@
+{
+  "targets": [
+    "tests/e2e/**/*.spec.ts",
+    "tests/visual-qa/**/*.spec.ts"
+  ],
+  "exclude": [
+    "tests/e2e/deprecated/**"
+  ],
+  "maxFixAttemptsPerTest": 3,
+  "maxTotalFixes": 20,
+  "autoFixCategories": ["selector", "timing", "import"],
+  "dryRun": false,
+  "reportPath": "docs/test-janitor-report.md",
+  "selectorPreferences": {
+    "preferred": ["data-testid", "aria-label", "role"],
+    "avoid": ["class", "nth-child", "xpath"]
+  },
+  "timingDefaults": {
+    "waitForSelector": 5000,
+    "waitForNavigation": 10000,
+    "actionTimeout": 15000
+  }
+}

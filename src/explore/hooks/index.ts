@@ -68,3 +68,10 @@ export {
   type TimestampedEvent,
   type UseResearchProgressResult,
 } from './useResearchProgress';
+
+// Knowledge Base Integration (Sprint: knowledge-base-integration-v1)
+export {
+  useKnowledgeBase,
+  type UseKnowledgeBaseState,
+  type UseKnowledgeBaseReturn,
+} from './useKnowledgeBase';

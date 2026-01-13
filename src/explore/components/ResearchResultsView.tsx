@@ -1,6 +1,7 @@
 // src/explore/components/ResearchResultsView.tsx
 // Main research document display component
 // Sprint: results-display-v1
+// Sprint: knowledge-base-integration-v1 - Added KB button with toast feedback
 //
 // DEX: Declarative Sovereignty
 // Component renders any ResearchDocument - no hardcoded display logic.
@@ -10,15 +11,20 @@ import type { ResearchDocument } from '@core/schema/research-document';
 import { PositionCard, ConfidenceBadge } from './PositionCard';
 import { AnalysisSection } from './AnalysisSection';
 import { CitationsSection } from './CitationsSection';
+import { AddToKnowledgeBaseButton } from './AddToKnowledgeBaseButton';
+import { useToast } from '../context/ToastContext';
+import type { SproutInput, ResearchDocumentInput } from '../services/knowledge-base-integration';
 
 interface ResearchResultsViewProps {
   /** The research document to display */
   document: ResearchDocument;
+  /** Optional: sprout for KB provenance (required for KB functionality) */
+  sprout?: SproutInput;
   /** Optional: show compact version */
   compact?: boolean;
   /** Callback when copy is clicked */
   onCopy?: () => void;
-  /** Callback when "Add to KB" is clicked (v1: disabled) */
+  /** @deprecated Use sprout prop instead. Callback when "Add to KB" is clicked */
   onAddToKnowledgeBase?: () => void;
   /** Callback when back button is clicked */
   onBack?: () => void;
@@ -36,12 +42,14 @@ interface ResearchResultsViewProps {
  */
 export function ResearchResultsView({
   document,
+  sprout,
   compact = false,
   onCopy,
   onAddToKnowledgeBase,
   onBack,
 }: ResearchResultsViewProps) {
   const [copySuccess, setCopySuccess] = useState(false);
+  const toast = useToast();
 
   // Handle copy to clipboard
   const handleCopy = useCallback(async () => {
@@ -141,10 +149,29 @@ export function ResearchResultsView({
 
       {/* Actions footer */}
       <ResultsActions
+        document={document}
+        sprout={sprout}
         onCopy={handleCopy}
         copySuccess={copySuccess}
         onAddToKnowledgeBase={onAddToKnowledgeBase}
-        disableKB={true} // v1: disabled
+        onDocumentAdded={(documentId) => {
+          toast.success('Added to Grove knowledge base', {
+            description: 'Your research has been saved to the corpus.',
+            action: {
+              label: 'View in Corpus',
+              onClick: () => {
+                window.location.href = `/foundation/knowledge?doc=${documentId}`;
+              },
+            },
+            duration: 5000,
+          });
+        }}
+        onAddError={(error) => {
+          toast.error('Failed to add to knowledge base', {
+            description: error,
+            duration: 5000,
+          });
+        }}
       />
     </div>
   );
@@ -205,18 +232,41 @@ function LimitationsNote({ limitations }: LimitationsNoteProps) {
 }
 
 interface ResultsActionsProps {
+  document: ResearchDocument;
+  sprout?: SproutInput;
   onCopy: () => void;
   copySuccess: boolean;
   onAddToKnowledgeBase?: () => void;
-  disableKB?: boolean;
+  onDocumentAdded?: (documentId: string) => void;
+  onAddError?: (error: string) => void;
 }
 
 function ResultsActions({
+  document,
+  sprout,
   onCopy,
   copySuccess,
   onAddToKnowledgeBase,
-  disableKB = false,
+  onDocumentAdded,
+  onAddError,
 }: ResultsActionsProps) {
+  // Convert ResearchDocument to ResearchDocumentInput format
+  const documentInput: ResearchDocumentInput = {
+    id: document.id,
+    evidenceBundleId: document.evidenceBundleId,
+    query: document.query,
+    position: document.position,
+    analysis: document.analysis,
+    limitations: document.limitations,
+    citations: document.citations,
+    wordCount: document.wordCount,
+    status: document.status,
+    confidenceScore: document.confidenceScore,
+  };
+
+  // Show KB button only if sprout is provided
+  const canAddToKB = sprout !== undefined;
+
   return (
     <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-700
                     flex items-center justify-between gap-2">
@@ -227,21 +277,33 @@ function ResultsActions({
 
       {/* Right side: actions */}
       <div className="flex items-center gap-2">
-        {/* Add to Knowledge Base (disabled for v1) */}
-        <button
-          onClick={onAddToKnowledgeBase}
-          disabled={disableKB}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
-                     text-slate-500 dark:text-slate-400
-                     border border-slate-200 dark:border-slate-700 rounded-lg
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     hover:bg-slate-50 dark:hover:bg-slate-800
-                     transition-colors"
-          title={disableKB ? 'Coming in a future update' : 'Add to Knowledge Base'}
-        >
-          <span className="material-symbols-outlined text-base">library_add</span>
-          <span className="hidden sm:inline">Add to KB</span>
-        </button>
+        {/* Add to Knowledge Base */}
+        {canAddToKB ? (
+          <AddToKnowledgeBaseButton
+            document={documentInput}
+            sprout={sprout}
+            onAdded={(documentId) => {
+              onDocumentAdded?.(documentId);
+              onAddToKnowledgeBase?.();
+            }}
+            onError={onAddError}
+          />
+        ) : (
+          <button
+            onClick={onAddToKnowledgeBase}
+            disabled={true}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
+                       text-slate-500 dark:text-slate-400
+                       border border-slate-200 dark:border-slate-700 rounded-lg
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       hover:bg-slate-50 dark:hover:bg-slate-800
+                       transition-colors"
+            title="Sprout context required for KB integration"
+          >
+            <span className="material-symbols-outlined text-base">library_add</span>
+            <span className="hidden sm:inline">Add to KB</span>
+          </button>
+        )}
 
         {/* Copy to clipboard */}
         <button

@@ -67,10 +67,9 @@ export const featureFlagConsoleConfig: ConsoleConfig = {
       { id: 'set-description', trigger: 'set description to *', description: 'Update the description' },
       { id: 'toggle', trigger: '/toggle', description: 'Toggle flag availability' },
     ],
-    quickActions: [
-      { id: 'toggle', label: 'Toggle', command: '/toggle', icon: 'toggle_on' },
-      { id: 'help', label: 'Help', command: 'help', icon: 'help' },
-    ],
+    // quickActions removed per inspector-copilot-v1: maximum minimalism
+    // Users type /help or /toggle directly in terminal
+    quickActions: [],
   },
 };
 

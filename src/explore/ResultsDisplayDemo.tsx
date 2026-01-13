@@ -1,6 +1,7 @@
 // src/explore/ResultsDisplayDemo.tsx
 // Demo page for Results Display components
 // Sprint: results-display-v1
+// Sprint: knowledge-base-integration-v1 - Added mock sprout for KB button testing
 //
 // This page renders the Results Display components with mock data
 // for visual testing and screenshots.
@@ -12,6 +13,17 @@ import {
   createMockPartialDocument,
   createMockInsufficientDocument,
 } from './mocks/mock-research-document';
+import type { SproutInput } from './services/knowledge-base-integration';
+import { ToastProvider } from './context/ToastContext';
+
+// Mock sprout for KB integration testing
+const MOCK_SPROUT: SproutInput = {
+  id: 'mock-sprout-001',
+  spark: 'What is the ratchet effect in AI infrastructure?',
+  groveConfigSnapshot: {
+    configVersionId: 'config-v1-snapshot',
+  },
+};
 
 type DemoMode = 'complete' | 'partial' | 'insufficient';
 
@@ -31,6 +43,7 @@ export function ResultsDisplayDemo() {
   })();
 
   return (
+    <ToastProvider>
     <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Demo Controls */}
       <div className="sticky top-0 z-50 bg-slate-800 border-b border-slate-700 px-4 py-3">
@@ -78,6 +91,7 @@ export function ResultsDisplayDemo() {
         <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
           <ResearchResultsView
             document={document}
+            sprout={MOCK_SPROUT}
             onBack={() => alert('Back button clicked')}
             onCopy={() => console.log('Document copied')}
           />
@@ -96,6 +110,7 @@ export function ResultsDisplayDemo() {
         </details>
       </div>
     </div>
+    </ToastProvider>
   );
 }
 

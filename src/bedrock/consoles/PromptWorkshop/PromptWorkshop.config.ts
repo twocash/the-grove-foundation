@@ -82,14 +82,9 @@ export const promptWorkshopConfig: ConsoleConfig = {
       // Sprint: prompt-copilot-actions-v1
       { id: 'enrich', trigger: '/enrich', description: 'Enrich metadata (targeting + title suggestions)', aliases: ['enrich', 'enrich metadata'] },
     ],
-    // Sprint: prompt-copilot-actions-v1 - Quick action buttons
-    quickActions: [
-      { id: 'suggest-targeting', label: 'Update Targeting', command: '/suggest-targeting', icon: 'target' },
-      { id: 'make-compelling', label: 'Suggest Headlines', command: '/make-compelling', icon: 'auto_awesome' },
-      { id: 'enrich', label: 'Enrich Metadata', command: '/enrich', icon: 'psychology' },
-      { id: 'activate', label: 'Activate', command: 'activate', icon: 'toggle_on' },
-      { id: 'help', label: 'Help', command: 'help', icon: 'help' },
-    ],
+    // quickActions removed per inspector-copilot-v1: maximum minimalism
+    // Users type /help, /enrich, /suggest-targeting directly in terminal
+    quickActions: [],
   },
 };
 

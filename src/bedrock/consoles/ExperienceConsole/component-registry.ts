@@ -13,12 +13,14 @@ import { SystemPromptCard } from './SystemPromptCard';
 import { FeatureFlagCard } from './FeatureFlagCard';
 import { ResearchAgentConfigCard } from './ResearchAgentConfigCard';
 import { WriterAgentConfigCard } from './WriterAgentConfigCard';
+import { CopilotStyleCard } from './CopilotStyleCard';
 
 // Editor components
 import { SystemPromptEditor } from './SystemPromptEditor';
 import { FeatureFlagEditor } from './FeatureFlagEditor';
 import { ResearchAgentConfigEditor } from './ResearchAgentConfigEditor';
 import { WriterAgentConfigEditor } from './WriterAgentConfigEditor';
+import { CopilotStyleEditor } from './CopilotStyleEditor';
 
 // =============================================================================
 // Card Component Registry
@@ -38,6 +40,7 @@ export const CARD_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectCardPro
   FeatureFlagCard,
   ResearchAgentConfigCard,
   WriterAgentConfigCard,
+  CopilotStyleCard,
   // Future types:
   // PromptArchitectConfigCard,
   // WelcomeConfigCard,
@@ -61,6 +64,7 @@ export const EDITOR_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectEdito
   FeatureFlagEditor,
   ResearchAgentConfigEditor,
   WriterAgentConfigEditor,
+  CopilotStyleEditor,
   // Future types:
   // PromptArchitectConfigEditor,
   // WelcomeConfigEditor,

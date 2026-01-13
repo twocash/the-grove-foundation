@@ -11,12 +11,14 @@ import type { SystemPromptPayload } from '@core/schema/system-prompt';
 import type { FeatureFlagPayload } from '@core/schema/feature-flag';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
+import type { CopilotStylePayload } from '@core/schema/copilot-style';
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
 import type { PatchOperation } from '@core/data/grove-data-provider';
 import { useExperienceData } from './useExperienceData';
 import { useFeatureFlagsData } from './useFeatureFlagsData';
 import { useResearchAgentConfigData } from './useResearchAgentConfigData';
 import { useWriterAgentConfigData } from './useWriterAgentConfigData';
+import { useCopilotStyleData } from './useCopilotStyleData';
 import { getAllExperienceTypes } from '../../types/experience.types';
 
 // =============================================================================
@@ -33,7 +35,8 @@ export type UnifiedExperiencePayload =
   | SystemPromptPayload
   | FeatureFlagPayload
   | ResearchAgentConfigPayload
-  | WriterAgentConfigPayload;
+  | WriterAgentConfigPayload
+  | CopilotStylePayload;
 
 // =============================================================================
 // Extended Result Type
@@ -78,6 +81,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
   const featureFlagData = useFeatureFlagsData();
   const researchAgentConfigData = useResearchAgentConfigData();
   const writerAgentConfigData = useWriterAgentConfigData();
+  const copilotStyleData = useCopilotStyleData();
 
   // =========================================================================
   // Merge objects from all sources
@@ -88,12 +92,14 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
       ...featureFlagData.objects,
       ...researchAgentConfigData.objects,
       ...writerAgentConfigData.objects,
+      ...copilotStyleData.objects,
     ] as GroveObject<UnifiedExperiencePayload>[];
   }, [
     systemPromptData.objects,
     featureFlagData.objects,
     researchAgentConfigData.objects,
     writerAgentConfigData.objects,
+    copilotStyleData.objects,
   ]);
 
   // =========================================================================
@@ -103,7 +109,8 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     systemPromptData.loading ||
     featureFlagData.loading ||
     researchAgentConfigData.loading ||
-    writerAgentConfigData.loading;
+    writerAgentConfigData.loading ||
+    copilotStyleData.loading;
 
   // =========================================================================
   // Aggregate errors (first error wins - could be improved to show all)
@@ -112,7 +119,8 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     systemPromptData.error ||
     featureFlagData.error ||
     researchAgentConfigData.error ||
-    writerAgentConfigData.error;
+    writerAgentConfigData.error ||
+    copilotStyleData.error;
 
   // =========================================================================
   // Refetch all data sources
@@ -122,11 +130,13 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     featureFlagData.refetch();
     researchAgentConfigData.refetch();
     writerAgentConfigData.refetch();
+    copilotStyleData.refetch();
   }, [
     systemPromptData.refetch,
     featureFlagData.refetch,
     researchAgentConfigData.refetch,
     writerAgentConfigData.refetch,
+    copilotStyleData.refetch,
   ]);
 
   // =========================================================================
@@ -155,11 +165,15 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return writerAgentConfigData.create(defaults as Partial<WriterAgentConfigPayload>) as Promise<
             GroveObject<UnifiedExperiencePayload>
           >;
+        case 'copilot-style':
+          return copilotStyleData.create(defaults as Partial<CopilotStylePayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
         default:
           throw new Error(`Unknown experience type: ${type}`);
       }
     },
-    [systemPromptData.create, featureFlagData.create, researchAgentConfigData.create, writerAgentConfigData.create]
+    [systemPromptData.create, featureFlagData.create, researchAgentConfigData.create, writerAgentConfigData.create, copilotStyleData.create]
   );
 
   // Legacy create (defaults to system-prompt for backwards compatibility)
@@ -191,11 +205,13 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return researchAgentConfigData.update(id, operations);
         case 'writer-agent-config':
           return writerAgentConfigData.update(id, operations);
+        case 'copilot-style':
+          return copilotStyleData.update(id, operations);
         default:
           throw new Error(`Unknown experience type: ${obj.meta.type}`);
       }
     },
-    [objects, systemPromptData.update, featureFlagData.update, researchAgentConfigData.update, writerAgentConfigData.update]
+    [objects, systemPromptData.update, featureFlagData.update, researchAgentConfigData.update, writerAgentConfigData.update, copilotStyleData.update]
   );
 
   // =========================================================================
@@ -217,11 +233,13 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return researchAgentConfigData.remove(id);
         case 'writer-agent-config':
           return writerAgentConfigData.remove(id);
+        case 'copilot-style':
+          return copilotStyleData.remove(id);
         default:
           throw new Error(`Unknown experience type: ${obj.meta.type}`);
       }
     },
-    [objects, systemPromptData.remove, featureFlagData.remove, researchAgentConfigData.remove, writerAgentConfigData.remove]
+    [objects, systemPromptData.remove, featureFlagData.remove, researchAgentConfigData.remove, writerAgentConfigData.remove, copilotStyleData.remove]
   );
 
   // =========================================================================
@@ -247,6 +265,9 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           break;
         case 'writer-agent-config':
           result = await writerAgentConfigData.duplicate(object as GroveObject<WriterAgentConfigPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
+        case 'copilot-style':
+          result = await copilotStyleData.duplicate(object as GroveObject<CopilotStylePayload>) as GroveObject<UnifiedExperiencePayload>;
           break;
         default:
           throw new Error(`Unknown experience type: ${object.meta.type}`);
@@ -274,6 +295,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
       featureFlagData.duplicate,
       researchAgentConfigData.duplicate,
       writerAgentConfigData.duplicate,
+      copilotStyleData.duplicate,
     ]
   );
 
@@ -354,3 +376,4 @@ export { useExperienceData } from './useExperienceData';
 export { useFeatureFlagsData } from './useFeatureFlagsData';
 export { useResearchAgentConfigData } from './useResearchAgentConfigData';
 export { useWriterAgentConfigData } from './useWriterAgentConfigData';
+export { useCopilotStyleData } from './useCopilotStyleData';

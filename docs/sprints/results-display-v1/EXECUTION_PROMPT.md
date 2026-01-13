@@ -6,9 +6,24 @@
 
 ## BINDING CONTRACT
 
-**You are bound by the Bedrock Sprint Contract v1.2.**
+**You are bound by the Bedrock Sprint Contract v1.3.**
 
-Before proceeding, acknowledge these non-negotiable requirements:
+### Agent Role Declaration (Article X, Section 10.1)
+
+| Property | Value |
+|----------|-------|
+| **Role** | Developer |
+| **Sprint** | results-display-v1 |
+| **Mode** | Execute |
+| **Status File** | `~/.claude/notes/sprint-status-live.md` |
+
+### Status Update Protocol (Section 6.4)
+
+**REQUIRED:** Write status entries to `~/.claude/notes/sprint-status-live.md`:
+1. **STARTED** — When beginning sprint work
+2. **IN_PROGRESS** — At each phase completion
+3. **COMPLETE** — When done with test results
+4. **BLOCKED** — If unable to proceed
 
 ### Article IX: Visual Verification Requirements
 - Code that compiles is NOT proof that features work
@@ -42,13 +57,14 @@ Every feature must answer YES to:
 
 ## Context
 
-You are continuing work on **The Grove Foundation** project. Your task is to execute **Sprint 5: Results Display v1**.
+You are continuing work on **The Grove Foundation** project. Your task is to execute **Results Display v1**.
 
 **Previous sprints completed:**
-- Sprint 1: Evidence Collection Engine ✅
-- Sprint 2: Writer Agent Foundation ✅
-- Sprint 3: Pipeline Integration v1 🚀 (in progress)
+- Evidence Collection Engine v1 ✅
+- Writer Agent Foundation v1 ✅
+- Pipeline Integration v1 ✅
 - Experience Console Cleanup v1 ✅
+- Progress Streaming UI v1 ✅
 
 **This sprint:** Beautiful ResearchDocument rendering in GardenInspector.
 
@@ -59,10 +75,11 @@ You are continuing work on **The Grove Foundation** project. Your task is to exe
 Execute the Results Display sprint following these phases:
 
 ### Phase 0: Pre-work (Verify Context)
-1. Read the spec: `docs/sprints/results-display-v1/SPEC.md`
-2. Read ResearchDocument schema: `src/core/schema/research-document.ts`
-3. Read GardenInspector: `src/explore/GardenInspector.tsx`
-4. Confirm you understand the document structure (position, analysis, citations)
+1. Write STARTED status entry to `~/.claude/notes/sprint-status-live.md`
+2. Read the spec: `docs/sprints/results-display-v1/SPEC.md`
+3. Read ResearchDocument schema: `src/core/schema/research-document.ts`
+4. Read GardenInspector: `src/explore/GardenInspector.tsx`
+5. Confirm you understand the document structure (position, analysis, citations)
 
 ### Phase 1: CitationBlock Component
 Create `src/explore/components/CitationBlock.tsx`:
@@ -73,12 +90,16 @@ Create `src/explore/components/CitationBlock.tsx`:
 - "Accessed" timestamp
 - Hover state reveals full snippet
 
+Write IN_PROGRESS status entry after completion.
+
 ### Phase 2: PositionCard Component
 Create position statement display:
 - Large, prominent quote block
 - Gradient background (purple/blue)
 - Rounded corners with subtle border
 - Confidence score badge in corner
+
+Write IN_PROGRESS status entry after completion.
 
 ### Phase 3: AnalysisSection Component
 Create markdown analysis renderer:
@@ -87,6 +108,8 @@ Create markdown analysis renderer:
 - Clicking citation scrolls to CitationsSection
 - Proper typography (line-height, spacing)
 
+Write IN_PROGRESS status entry after completion.
+
 ### Phase 4: ResearchResultsView Component
 Create `src/explore/components/ResearchResultsView.tsx`:
 - Compose PositionCard, AnalysisSection, CitationsSection
@@ -94,12 +117,16 @@ Create `src/explore/components/ResearchResultsView.tsx`:
 - Copy to clipboard functionality
 - "Add to Knowledge Base" button (disabled for v1)
 
+Write IN_PROGRESS status entry after completion.
+
 ### Phase 5: GardenInspector Integration
 Modify `src/explore/GardenInspector.tsx`:
 - Add new view mode: 'results'
 - Show ResearchResultsView when sprout is completed
 - Add back button to return to list
 - Handle loading state while document loads
+
+Write IN_PROGRESS status entry after completion.
 
 ### Phase 6: Visual QA Testing
 Create `tests/visual-qa/results-display.spec.ts`:
@@ -110,11 +137,13 @@ Create `tests/visual-qa/results-display.spec.ts`:
 - Test insufficient evidence state
 - Test mobile layout
 
+Write IN_PROGRESS status entry after completion.
+
 ### Phase 7: Documentation
 Complete sprint docs:
 - Capture all screenshots
 - Create `REVIEW.html` with AC-to-evidence mapping
-- Update Notion sprint status
+- Write COMPLETE status entry with test results
 
 ---
 
@@ -241,11 +270,13 @@ Scenario: Results display on mobile
 - [ ] On `main` or feature branch
 - [ ] No imports from `src/foundation/`
 - [ ] ResearchDocument schema understood
+- [ ] STARTED status entry written
 
 **After each phase:**
 - [ ] Component renders correctly
 - [ ] TypeScript compiles without errors
 - [ ] Visual appearance matches design
+- [ ] IN_PROGRESS status entry written
 
 **Final verification (Article IX):**
 - [ ] All screenshots captured in `screenshots/` directory
@@ -254,22 +285,17 @@ Scenario: Results display on mobile
 - [ ] Playwright visual QA tests pass
 - [ ] `npm run build` passes
 - [ ] Sign-off recorded with timestamp
+- [ ] COMPLETE status entry written with test results
 
 ---
 
 ## Important Notes
 
 1. **Keep LLM placeholders** — Don't wire real LLM calls. Display is the goal.
-
 2. **Use mock data** — Create a mock ResearchDocument for development/testing.
-
 3. **Mobile-first** — Build responsive from the start, not as afterthought.
-
 4. **Citation scroll** — Use `scrollIntoView` with smooth behavior for citation clicks.
-
 5. **Copy format** — When copying, format as clean markdown suitable for pasting into docs.
-
-6. **Update Notion** — When complete, update Sprint Execution Tracker status.
 
 ---
 
@@ -278,6 +304,8 @@ Scenario: Results display on mobile
 - **Codename:** results-display-v1
 - **Branch:** Create `feature/results-display-v1` if needed
 - **Commit style:** `feat(explore): Results Display v1 - [description]`
+- **Contract:** Bedrock Sprint Contract v1.3
+- **Role Definition:** `.agent/roles/developer.md`
 
 ---
 
@@ -287,8 +315,11 @@ Scenario: Results display on mobile
 cd C:\GitHub\the-grove-foundation
 ```
 
-Then read the SPEC.md and begin Phase 0.
+Then:
+1. Write STARTED entry to `~/.claude/notes/sprint-status-live.md`
+2. Read the SPEC.md
+3. Begin Phase 0
 
 **Remember: Visual verification is MANDATORY. No exceptions.**
 
-Good luck!
+**Contract Ready: YES**

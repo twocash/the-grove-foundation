@@ -1,0 +1,411 @@
+// src/explore/services/research-pipeline.ts
+// Research Pipeline - Orchestrates Research Agent → Writer Agent flow
+// Sprint: pipeline-integration-v1
+//
+// DEX: Provenance as Infrastructure
+// Every step is tracked with progress events and timing metadata.
+
+import type { ResearchSprout } from '@core/schema/research-sprout';
+import type { ResearchBranch, Evidence } from '@core/schema/research-strategy';
+import type {
+  EvidenceBundle,
+  BranchEvidence,
+  Source,
+} from '@core/schema/evidence-bundle';
+import { createEvidenceBundle } from '@core/schema/evidence-bundle';
+import type { ResearchDocument } from '@core/schema/research-document';
+import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
+import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
+
+import {
+  createResearchAgent,
+  type ResearchExecutionResult,
+  type ResearchProgressEvent,
+} from './research-agent';
+import {
+  writeResearchDocument,
+  type WriterProgress,
+} from './writer-agent';
+import {
+  loadResearchAgentConfig,
+  loadWriterAgentConfig,
+} from './config-loader';
+
+// =============================================================================
+// Types
+// =============================================================================
+
+/**
+ * Pipeline configuration
+ */
+export interface PipelineConfig {
+  /** Overall pipeline timeout in ms (default: 90000) */
+  timeout?: number;
+
+  /** Optional custom research agent config (overrides grove config) */
+  researchConfig?: Partial<ResearchAgentConfigPayload>;
+
+  /** Optional custom writer config (overrides grove config) */
+  writerConfig?: Partial<WriterAgentConfigPayload>;
+}
+
+/**
+ * Pipeline execution result
+ */
+export interface PipelineResult {
+  /** Whether the pipeline completed successfully */
+  success: boolean;
+
+  /** Generated research document (if writing phase completed) */
+  document?: ResearchDocument;
+
+  /** Collected evidence bundle (even on partial failure) */
+  evidence?: EvidenceBundle;
+
+  /** Error details if pipeline failed */
+  error?: {
+    phase: 'research' | 'writing' | 'timeout';
+    message: string;
+  };
+
+  /** Execution timing metadata */
+  execution: {
+    startedAt: string;
+    completedAt: string;
+    researchDuration: number;
+    writingDuration: number;
+  };
+}
+
+/**
+ * Pipeline progress event union type
+ * Combines pipeline-level events with forwarded agent events
+ */
+export type PipelineProgressEvent =
+  | { type: 'phase-started'; phase: 'research' | 'writing' }
+  | { type: 'phase-completed'; phase: 'research' | 'writing'; duration: number }
+  | { type: 'pipeline-complete'; totalDuration: number }
+  | { type: 'pipeline-error'; phase: 'research' | 'writing' | 'timeout'; message: string }
+  | ResearchProgressEvent
+  | WriterProgress;
+
+/**
+ * Progress callback type
+ */
+export type OnPipelineProgressFn = (event: PipelineProgressEvent) => void;
+
+// =============================================================================
+// Evidence Adapter
+// =============================================================================
+
+/**
+ * Convert Research Agent results to EvidenceBundle format
+ *
+ * The Research Agent returns Evidence[] flat array grouped by branch.
+ * The Writer Agent expects EvidenceBundle with BranchEvidence[] structure.
+ */
+function buildEvidenceBundle(
+  sproutId: string,
+  researchResult: ResearchExecutionResult
+): EvidenceBundle {
+  // Convert ResearchBranch[] to BranchEvidence[]
+  const branchEvidence: BranchEvidence[] = researchResult.branches.map(branch => {
+    // Convert Evidence[] to Source[]
+    const sources: Source[] = (branch.evidence || []).map(ev => ({
+      url: ev.source,
+      title: extractTitleFromEvidence(ev),
+      snippet: ev.content.slice(0, 500), // Truncate for snippet
+      accessedAt: ev.collectedAt,
+      sourceType: ev.sourceType,
+    }));
+
+    // Calculate relevance score as average of evidence relevance
+    const avgRelevance = sources.length > 0
+      ? (branch.evidence || []).reduce((sum, e) => sum + e.relevance, 0) / sources.length
+      : 0;
+
+    return {
+      branchQuery: branch.queries[0] || branch.label,
+      sources,
+      findings: [], // Empty for v1.0 - future: extract findings from evidence
+      relevanceScore: avgRelevance,
+      status: mapBranchStatus(branch.status),
+    };
+  });
+
+  // Calculate execution time from result metadata
+  const startTime = new Date(researchResult.execution.startedAt).getTime();
+  const endTime = new Date(researchResult.execution.completedAt).getTime();
+  const executionTime = endTime - startTime;
+
+  return createEvidenceBundle(
+    sproutId,
+    branchEvidence,
+    executionTime,
+    researchResult.execution.apiCallCount
+  );
+}
+
+/**
+ * Extract a title from evidence content
+ */
+function extractTitleFromEvidence(evidence: Evidence): string {
+  // Try to extract from URL
+  try {
+    const url = new URL(evidence.source);
+    const pathParts = url.pathname.split('/').filter(Boolean);
+    if (pathParts.length > 0) {
+      // Clean up the last path segment as title
+      const lastPart = pathParts[pathParts.length - 1];
+      return decodeURIComponent(lastPart)
+        .replace(/[-_]/g, ' ')
+        .replace(/\.\w+$/, '') // Remove extension
+        .slice(0, 100);
+    }
+  } catch {
+    // Invalid URL, fall through
+  }
+
+  // Fall back to first line of content
+  const firstLine = evidence.content.split('\n')[0];
+  return firstLine.slice(0, 100) || 'Untitled Source';
+}
+
+/**
+ * Map research branch status to evidence bundle status
+ */
+function mapBranchStatus(
+  status: 'pending' | 'active' | 'complete'
+): 'pending' | 'complete' | 'failed' | 'budget-exceeded' {
+  switch (status) {
+    case 'complete':
+      return 'complete';
+    case 'active':
+    case 'pending':
+    default:
+      return 'pending';
+  }
+}
+
+// =============================================================================
+// Timeout Utility
+// =============================================================================
+
+/**
+ * Wrap a promise with a timeout
+ */
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage = 'Operation timed out'
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
+
+    promise
+      .then(result => {
+        clearTimeout(timer);
+        resolve(result);
+      })
+      .catch(err => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
+// =============================================================================
+// Main Pipeline Function
+// =============================================================================
+
+/**
+ * Execute the full research pipeline: Research Agent → Writer Agent
+ *
+ * @param sprout - The research sprout to process
+ * @param config - Optional pipeline configuration
+ * @param onProgress - Optional progress callback
+ * @returns Pipeline result with document, evidence, or error
+ */
+export async function executeResearchPipeline(
+  sprout: ResearchSprout,
+  config?: PipelineConfig,
+  onProgress?: OnPipelineProgressFn
+): Promise<PipelineResult> {
+  const startedAt = new Date().toISOString();
+  const timeout = config?.timeout ?? 90000;
+
+  console.log(`[Pipeline] Starting pipeline for sprout: ${sprout.id}`);
+  console.log(`[Pipeline] Timeout: ${timeout}ms`);
+
+  // Load configs
+  const [researchConfig, writerConfig] = await Promise.all([
+    loadResearchAgentConfig(sprout.groveId),
+    loadWriterAgentConfig(sprout.groveId),
+  ]);
+
+  // Apply config overrides
+  const finalResearchConfig = {
+    ...researchConfig,
+    ...config?.researchConfig,
+  };
+  const finalWriterConfig = {
+    ...writerConfig,
+    ...config?.writerConfig,
+  };
+
+  let researchDuration = 0;
+  let writingDuration = 0;
+  let evidenceBundle: EvidenceBundle | undefined;
+  let document: ResearchDocument | undefined;
+
+  try {
+    // =========================================================================
+    // Phase 1: Research
+    // =========================================================================
+    onProgress?.({ type: 'phase-started', phase: 'research' });
+    const researchStartTime = Date.now();
+
+    console.log('[Pipeline] Starting research phase...');
+
+    // Create agent with config
+    const agent = createResearchAgent({
+      branchDelay: finalResearchConfig.branchDelay,
+      maxApiCalls: finalResearchConfig.maxApiCalls,
+      simulationMode: false,
+    });
+
+    // Execute research with timeout
+    const researchResult = await withTimeout(
+      agent.execute(sprout, (event) => {
+        // Forward research agent events
+        onProgress?.(event);
+      }),
+      timeout,
+      'Research phase timed out'
+    );
+
+    researchDuration = Date.now() - researchStartTime;
+    console.log(`[Pipeline] Research phase completed in ${researchDuration}ms`);
+
+    onProgress?.({
+      type: 'phase-completed',
+      phase: 'research',
+      duration: researchDuration,
+    });
+
+    // Check for research failure
+    if (!researchResult.success) {
+      throw new Error(
+        researchResult.execution.errorMessage || 'Research agent failed'
+      );
+    }
+
+    // Build evidence bundle from research result
+    evidenceBundle = buildEvidenceBundle(sprout.id, researchResult);
+    console.log(`[Pipeline] Evidence bundle created: ${evidenceBundle.totalSources} sources`);
+
+    // =========================================================================
+    // Phase 2: Writing
+    // =========================================================================
+    onProgress?.({ type: 'phase-started', phase: 'writing' });
+    const writingStartTime = Date.now();
+
+    console.log('[Pipeline] Starting writing phase...');
+
+    // Calculate remaining timeout
+    const remainingTimeout = timeout - researchDuration;
+    if (remainingTimeout <= 0) {
+      throw new Error('No time remaining for writing phase');
+    }
+
+    // Execute writing with remaining timeout
+    document = await withTimeout(
+      writeResearchDocument(
+        evidenceBundle,
+        sprout.spark, // Use the original question
+        finalWriterConfig,
+        (event) => {
+          // Forward writer agent events
+          onProgress?.(event);
+        }
+      ),
+      remainingTimeout,
+      'Writing phase timed out'
+    );
+
+    writingDuration = Date.now() - writingStartTime;
+    console.log(`[Pipeline] Writing phase completed in ${writingDuration}ms`);
+
+    onProgress?.({
+      type: 'phase-completed',
+      phase: 'writing',
+      duration: writingDuration,
+    });
+
+    // =========================================================================
+    // Success
+    // =========================================================================
+    const completedAt = new Date().toISOString();
+    const totalDuration = researchDuration + writingDuration;
+
+    onProgress?.({ type: 'pipeline-complete', totalDuration });
+
+    console.log(`[Pipeline] Pipeline completed successfully in ${totalDuration}ms`);
+
+    return {
+      success: true,
+      document,
+      evidence: evidenceBundle,
+      execution: {
+        startedAt,
+        completedAt,
+        researchDuration,
+        writingDuration,
+      },
+    };
+
+  } catch (error) {
+    // =========================================================================
+    // Error Handling
+    // =========================================================================
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const isTimeout = errorMessage.includes('timed out');
+    const isResearchPhase = !evidenceBundle;
+
+    const phase: 'research' | 'writing' | 'timeout' = isTimeout
+      ? 'timeout'
+      : isResearchPhase
+        ? 'research'
+        : 'writing';
+
+    console.error(`[Pipeline] Error in ${phase} phase: ${errorMessage}`);
+
+    onProgress?.({
+      type: 'pipeline-error',
+      phase,
+      message: errorMessage,
+    });
+
+    const completedAt = new Date().toISOString();
+
+    return {
+      success: false,
+      document: undefined,
+      evidence: evidenceBundle, // Return partial results if available
+      error: {
+        phase,
+        message: errorMessage,
+      },
+      execution: {
+        startedAt,
+        completedAt,
+        researchDuration,
+        writingDuration,
+      },
+    };
+  }
+}
+
+// Types are exported inline with their definitions above

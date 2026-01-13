@@ -979,3 +979,66 @@ gcloud storage cp docs/knowledge/hubs.json gs://grove-assets/knowledge/hubs.json
 # Verify
 gcloud storage cat gs://grove-assets/knowledge/hubs.json | head -20
 ```
+
+---
+
+## Notion Sprint Workflow
+
+### Grove Feature Roadmap Database
+
+Sprints are tracked in the **Grove Feature Roadmap** database in Notion:
+- **Database ID:** `cb49453c-022c-477d-a35b-744531e7d161`
+- **Data Source:** `collection://d94fde99-e81e-4a70-8cfa-9bc3317267c5`
+
+### Sprint Status Values
+
+| Status | Meaning |
+|--------|---------|
+| 💡 idea | Initial concept, not yet planned |
+| 📝 draft-spec | Specification being written |
+| 🔍 needs-audit | Requires review before proceeding |
+| 🎯 ready | Artifacts complete, ready for execution |
+| 🚀 in-progress | Currently being implemented |
+| ✅ complete | Implementation finished |
+| 📦 archived | No longer active |
+| blocked | Waiting on dependencies |
+
+### Sprint Preparation Workflow
+
+When preparing a sprint, follow this sequence:
+
+1. **User Story Refinery** → Create user stories in Notion under sprint page
+2. **Foundation Loop** → Create artifacts in `docs/sprints/{sprint-name}/`
+3. **Update Notion Status** → Change database property from `💡 idea` to `🎯 ready`
+4. **Grove Execution Protocol** → Execute using `EXECUTION_PROMPT.md`
+
+### Updating Sprint Status
+
+**IMPORTANT:** When sprint artifacts are complete, update BOTH:
+1. **Page content** - Add "Sprint Status" section with artifact links
+2. **Database property** - Update `Status` field to match actual state
+
+```
+# Example: Update status to ready
+mcp__plugin_Notion_notion__notion-update-page({
+  page_id: "sprint-page-id",
+  command: "update_properties",
+  properties: { "Status": "🎯 ready" }
+})
+```
+
+### Sprint Artifact Locations
+
+| Location | Purpose |
+|----------|---------|
+| Notion page content | High-level overview, stakeholder visibility |
+| `docs/sprints/{name}/` | Detailed artifacts for execution |
+| `docs/sprints/{name}/EXECUTION_PROMPT.md` | Self-contained handoff |
+
+### Quick Reference: Sprint Page Update
+
+After completing Foundation Loop, update the sprint page:
+1. Add Sprint Status section to page content
+2. Add artifacts table with local paths
+3. Add epics checklist
+4. Update database Status property to `🎯 ready`

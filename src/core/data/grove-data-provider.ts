@@ -20,7 +20,10 @@ export type GroveObjectType =
   | 'document'
   | 'prompt'
   | 'system-prompt'
-  | 'feature-flag';
+  | 'feature-flag'
+  | 'research-agent-config'
+  | 'writer-agent-config'
+  | 'copilot-style';
 
 /**
  * Options for listing objects.
