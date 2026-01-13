@@ -187,6 +187,26 @@ export const experienceConsoleConfig: ConsoleConfig = {
       { id: 'help', label: 'Help', command: 'help', icon: 'help' },
     ],
   },
+
+  // Sprint: singleton-pattern-factory-v1
+  // Singleton config for per-type active enforcement
+  singleton: {
+    enabled: true,
+    statusField: 'meta.status',
+    activeValue: 'active',
+    draftValue: 'draft',
+    archivedValue: 'archived',
+    // Per-type singletons: one active SystemPrompt, one active ResearchAgentConfig, etc.
+    typeField: 'meta.type',
+    versioning: {
+      versionField: 'payload.version',
+      previousIdField: 'payload.previousVersionId',
+      changelogField: 'payload.changelog',
+    },
+    // TODO: Add cache invalidation endpoint when API is ready
+    // cacheInvalidationEndpoint: '/api/cache/invalidate',
+    // cacheInvalidationType: 'experience-config',
+  },
 };
 
 // =============================================================================

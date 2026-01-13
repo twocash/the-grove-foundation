@@ -110,6 +110,53 @@ export interface CopilotConfig {
 }
 
 // =============================================================================
+// Singleton Configuration
+// Sprint: singleton-pattern-factory-v1
+// =============================================================================
+
+/**
+ * Versioning configuration for singleton objects
+ * Enables automatic version creation when editing active configs
+ */
+export interface SingletonVersioningConfig {
+  /** Field path for version number, e.g., 'payload.version' */
+  versionField: string;
+  /** Field path for previous version ID, e.g., 'payload.previousVersionId' */
+  previousIdField: string;
+  /** Optional field path for changelog notes, e.g., 'payload.changelog' */
+  changelogField?: string;
+}
+
+/**
+ * Configuration for singleton behavior in consoles
+ * Ensures only one object of a type can be active at a time
+ */
+export interface SingletonConfig {
+  /** Enable singleton behavior */
+  enabled: boolean;
+  /** Field path for status, e.g., 'meta.status' */
+  statusField: string;
+  /** Value indicating active status, e.g., 'active' */
+  activeValue: string;
+  /** Value indicating draft status, e.g., 'draft' */
+  draftValue: string;
+  /** Value indicating archived status, e.g., 'archived' */
+  archivedValue: string;
+  /**
+   * For polymorphic consoles: field path for type discrimination
+   * When set, singletons are per-type (e.g., one active ResearchAgent, one active WriterAgent)
+   * e.g., 'meta.type'
+   */
+  typeField?: string;
+  /** Versioning configuration (optional) */
+  versioning?: SingletonVersioningConfig;
+  /** Cache invalidation endpoint (optional), e.g., '/api/cache/invalidate' */
+  cacheInvalidationEndpoint?: string;
+  /** Cache invalidation type identifier, e.g., 'system-prompt' */
+  cacheInvalidationType?: string;
+}
+
+// =============================================================================
 // Primary Action Configuration
 // =============================================================================
 
@@ -154,4 +201,9 @@ export interface ConsoleConfig {
   navigation: NavItemConfig[];
   collectionView: CollectionViewConfig;
   copilot: CopilotConfig;
+  /**
+   * Singleton configuration for enforcing single-active-object behavior
+   * Sprint: singleton-pattern-factory-v1
+   */
+  singleton?: SingletonConfig;
 }

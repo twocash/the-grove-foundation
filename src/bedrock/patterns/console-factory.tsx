@@ -35,6 +35,7 @@ import type {
   BedrockConsoleOptions,
   BedrockConsoleProps,
   MetricData,
+  SingletonOps,
 } from './console-factory.types';
 
 // Hooks
@@ -44,6 +45,10 @@ import { usePatchHistory } from './usePatchHistory';
 
 // Utils
 import { toMaterialIcon } from '../utils/icon-mapping';
+import {
+  getNestedValue as getNestedFieldValue,
+  toJsonPointer,
+} from '../utils/nested-field';
 
 // Primitives
 import { GlassButton } from '../primitives/GlassButton';
@@ -257,11 +262,33 @@ export function createBedrockConsole<T>(
       closeInspector();
     }, [selectedObject, remove, closeInspector]);
 
+    // Sprint: singleton-pattern-factory-v1 - Singleton-aware duplicate
+    // When duplicating a singleton, always create as draft with reset versioning
     const handleDuplicate = useCallback(async () => {
       if (!selectedObject) return;
-      const newObject = await duplicate(selectedObject);
+
+      let overrides: Record<string, unknown> | undefined;
+
+      if (config.singleton?.enabled) {
+        const { statusField, draftValue, versioning } = config.singleton;
+        overrides = {};
+
+        // Force draft status
+        overrides[statusField] = draftValue;
+
+        // Reset versioning if configured
+        if (versioning) {
+          overrides[versioning.versionField] = 1;
+          overrides[versioning.previousIdField] = undefined;
+          if (versioning.changelogField) {
+            overrides[versioning.changelogField] = undefined;
+          }
+        }
+      }
+
+      const newObject = await duplicate(selectedObject, overrides);
       setSelectedId(newObject.meta.id);
-    }, [selectedObject, duplicate]);
+    }, [selectedObject, duplicate, config.singleton]);
 
     const handleCreate = useCallback(async () => {
       const newObject = await create();
@@ -283,6 +310,97 @@ export function createBedrockConsole<T>(
         console.error('[Console] handleCreateTyped error:', err);
       }
     }, [create, createTyped]);
+
+    // ==========================================================================
+    // Singleton Operations
+    // Sprint: singleton-pattern-factory-v1
+    // ==========================================================================
+
+    // Compute singleton state for selected object
+    const singletonOps = useMemo((): SingletonOps | undefined => {
+      if (!config.singleton?.enabled || !selectedObject) return undefined;
+
+      const { statusField, activeValue, draftValue, archivedValue, typeField } = config.singleton;
+      const currentStatus = getNestedFieldValue<string>(selectedObject, statusField);
+      const currentType = typeField ? getNestedFieldValue<string>(selectedObject, typeField) : null;
+
+      // Determine state
+      const isActive = currentStatus === activeValue;
+      const isDraft = currentStatus === draftValue;
+      const isArchived = currentStatus === archivedValue;
+
+      // Activate: archive current active of same type, then set this to active
+      const activate = async () => {
+        if (!selectedObject) return;
+
+        // Find current active of same type
+        const currentActive = objects.find(o => {
+          if (o.meta.id === selectedObject.meta.id) return false;
+          const objStatus = getNestedFieldValue<string>(o, statusField);
+          if (objStatus !== activeValue) return false;
+          // Check type match for polymorphic consoles
+          if (typeField) {
+            const objType = getNestedFieldValue<string>(o, typeField);
+            return objType === currentType;
+          }
+          return true;
+        });
+
+        // Archive-first pattern: archive old before activating new
+        if (currentActive) {
+          await update(currentActive.meta.id, [
+            { op: 'replace', path: toJsonPointer(statusField), value: archivedValue },
+          ]);
+        }
+
+        // Activate target
+        await update(selectedObject.meta.id, [
+          { op: 'replace', path: toJsonPointer(statusField), value: activeValue },
+        ]);
+
+        // Cache invalidation if configured
+        if (config.singleton.cacheInvalidationEndpoint) {
+          try {
+            await fetch(config.singleton.cacheInvalidationEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ type: config.singleton.cacheInvalidationType }),
+            });
+          } catch (err) {
+            console.warn('[Console] Cache invalidation failed:', err);
+          }
+        }
+
+        setHasChanges(false);
+      };
+
+      // Archive: set status to archived
+      const archive = async () => {
+        if (!selectedObject) return;
+        await update(selectedObject.meta.id, [
+          { op: 'replace', path: toJsonPointer(statusField), value: archivedValue },
+        ]);
+        setHasChanges(false);
+      };
+
+      // Restore as draft: set status to draft
+      const restoreAsDraft = async () => {
+        if (!selectedObject) return;
+        await update(selectedObject.meta.id, [
+          { op: 'replace', path: toJsonPointer(statusField), value: draftValue },
+        ]);
+        setHasChanges(false);
+      };
+
+      return {
+        isActive,
+        isDraft,
+        isArchived,
+        activate,
+        archive,
+        restoreAsDraft,
+      };
+    }, [config.singleton, selectedObject, objects, update]);
 
     // ==========================================================================
     // Inspector Registration
@@ -325,6 +443,7 @@ export function createBedrockConsole<T>(
               hasChanges={hasChanges}
               onSetCopilotInput={setCopilotInput}
               onSelectObject={setSelectedId}
+              singletonOps={singletonOps}
             />
           ),
           copilot: config.copilot.enabled ? (
@@ -396,6 +515,7 @@ export function createBedrockConsole<T>(
                 hasChanges={hasChanges}
                 onSetCopilotInput={(input) => setCopilotInputRef.current(input)}
                 onSelectObject={setSelectedId}
+                singletonOps={singletonOps}
               />
             ),
             copilot: config.copilot.enabled ? (

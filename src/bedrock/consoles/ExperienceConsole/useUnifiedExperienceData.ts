@@ -226,29 +226,48 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
 
   // =========================================================================
   // Route duplicate to appropriate hook based on object type
+  // Sprint: singleton-pattern-factory-v1 - added overrides param for factory support
   // =========================================================================
   const duplicate = useCallback(
-    async (object: GroveObject<UnifiedExperiencePayload>): Promise<GroveObject<UnifiedExperiencePayload>> => {
+    async (
+      object: GroveObject<UnifiedExperiencePayload>,
+      overrides?: Record<string, unknown>
+    ): Promise<GroveObject<UnifiedExperiencePayload>> => {
+      let result: GroveObject<UnifiedExperiencePayload>;
+
       switch (object.meta.type) {
         case 'system-prompt':
-          return systemPromptData.duplicate(object as GroveObject<SystemPromptPayload>) as Promise<
-            GroveObject<UnifiedExperiencePayload>
-          >;
+          result = await systemPromptData.duplicate(object as GroveObject<SystemPromptPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
         case 'feature-flag':
-          return featureFlagData.duplicate(object as GroveObject<FeatureFlagPayload>) as Promise<
-            GroveObject<UnifiedExperiencePayload>
-          >;
+          result = await featureFlagData.duplicate(object as GroveObject<FeatureFlagPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
         case 'research-agent-config':
-          return researchAgentConfigData.duplicate(object as GroveObject<ResearchAgentConfigPayload>) as Promise<
-            GroveObject<UnifiedExperiencePayload>
-          >;
+          result = await researchAgentConfigData.duplicate(object as GroveObject<ResearchAgentConfigPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
         case 'writer-agent-config':
-          return writerAgentConfigData.duplicate(object as GroveObject<WriterAgentConfigPayload>) as Promise<
-            GroveObject<UnifiedExperiencePayload>
-          >;
+          result = await writerAgentConfigData.duplicate(object as GroveObject<WriterAgentConfigPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
         default:
           throw new Error(`Unknown experience type: ${object.meta.type}`);
       }
+
+      // Apply overrides if provided (factory singleton pattern support)
+      // Note: Underlying hooks already set status='draft' and reset versioning
+      // Overrides are mainly for consistency with factory's declarative config
+      if (overrides) {
+        // Apply dot-path overrides to nested object structure
+        for (const [path, value] of Object.entries(overrides)) {
+          const parts = path.split('.');
+          let current: Record<string, unknown> = result as unknown as Record<string, unknown>;
+          for (let i = 0; i < parts.length - 1; i++) {
+            current = current[parts[i]] as Record<string, unknown>;
+          }
+          current[parts[parts.length - 1]] = value;
+        }
+      }
+
+      return result;
     },
     [
       systemPromptData.duplicate,

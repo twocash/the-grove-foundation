@@ -29,8 +29,11 @@ export interface CollectionDataResult<T> {
   update: (id: string, operations: PatchOperation[]) => Promise<void>;
   /** Delete object */
   remove: (id: string) => Promise<void>;
-  /** Duplicate object */
-  duplicate: (object: GroveObject<T>) => Promise<GroveObject<T>>;
+  /**
+   * Duplicate object with optional field overrides
+   * Sprint: singleton-pattern-factory-v1 - added overrides param for singleton support
+   */
+  duplicate: (object: GroveObject<T>, overrides?: Record<string, unknown>) => Promise<GroveObject<T>>;
   /**
    * Create an object of a specific type (polymorphic consoles only)
    * Sprint: experience-console-cleanup-v1
@@ -86,6 +89,25 @@ export interface ObjectCardProps<T> {
 // =============================================================================
 
 /**
+ * Singleton operations passed to editors when singleton config is enabled
+ * Sprint: singleton-pattern-factory-v1
+ */
+export interface SingletonOps {
+  /** Whether this object is the active singleton (of its type) */
+  isActive: boolean;
+  /** Whether this object is a draft */
+  isDraft: boolean;
+  /** Whether this object is archived */
+  isArchived: boolean;
+  /** Activate this object (archives current active of same type) */
+  activate: () => Promise<void>;
+  /** Archive this object */
+  archive: () => Promise<void>;
+  /** Restore archived object as draft */
+  restoreAsDraft: () => Promise<void>;
+}
+
+/**
  * Props passed to editor components
  */
 export interface ObjectEditorProps<T> {
@@ -107,6 +129,11 @@ export interface ObjectEditorProps<T> {
   onSetCopilotInput?: (input: string) => void;
   /** Handler to change selected object (e.g., after version creation) */
   onSelectObject?: (id: string) => void;
+  /**
+   * Singleton operations (only present when console has singleton config enabled)
+   * Sprint: singleton-pattern-factory-v1
+   */
+  singletonOps?: SingletonOps;
 }
 
 // =============================================================================
