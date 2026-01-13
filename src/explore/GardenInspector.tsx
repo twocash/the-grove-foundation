@@ -21,7 +21,7 @@ import {
 import { useResearchSprouts } from './context/ResearchSproutContext';
 // Sprint: progress-streaming-ui-v1
 import { ResearchProgressView } from './components/ResearchProgressView';
-import { useResearchProgress } from './hooks/useResearchProgress';
+import { useResearchExecution } from './context/ResearchExecutionContext';
 
 // =============================================================================
 // Types
@@ -81,7 +81,7 @@ export function GardenInspector({
   const [filterPreset, setFilterPreset] = useState<FilterPresetId>('active');
 
   // Progress state for active sprouts (Sprint: progress-streaming-ui-v1)
-  const { state: progressState, reset: resetProgress } = useResearchProgress();
+  const { progressState, resetProgress } = useResearchExecution();
 
   // Get selected sprout from context
   const { selectedSproutId, sprouts } = useResearchSprouts();
@@ -288,6 +288,8 @@ function ConfirmationView({
           placeholder="Give your research a descriptive title..."
           disabled={isProcessing}
           className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
+                     text-slate-900 dark:text-slate-100
+                     placeholder:text-slate-400 dark:placeholder:text-slate-500
                      border border-slate-300 dark:border-slate-600 rounded-lg
                      focus:outline-none focus:ring-2 focus:ring-purple-500/50
                      disabled:opacity-50 disabled:cursor-not-allowed"
@@ -306,6 +308,8 @@ function ConfirmationView({
           rows={5}
           disabled={isProcessing}
           className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
+                     text-slate-900 dark:text-slate-100
+                     placeholder:text-slate-400 dark:placeholder:text-slate-500
                      border border-slate-300 dark:border-slate-600 rounded-lg
                      focus:outline-none focus:ring-2 focus:ring-purple-500/50
                      resize-none font-mono

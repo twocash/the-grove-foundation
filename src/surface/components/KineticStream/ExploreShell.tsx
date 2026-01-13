@@ -45,6 +45,7 @@ import { usePromptForHighlight } from '@explore/hooks/usePromptForHighlight';
 import { shouldTriggerPromptArchitect } from '@explore/services/prompt-architect-pipeline';
 import { usePromptArchitect } from '@explore/hooks/usePromptArchitect';
 import { useResearchSprouts } from '@explore/context/ResearchSproutContext';
+import { useResearchExecution } from '@explore/context/ResearchExecutionContext';
 import { useToast } from '@explore/context/ToastContext';
 import { GardenInspector } from '@explore/GardenInspector';
 import { GardenTray } from '@explore/components/GardenTray';
@@ -116,7 +117,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Sprint: sprout-research-v1, Phase 4f - Prompt Architect and sprout creation hooks
   const toast = useToast();
-  const { create: createSprout, groveId } = useResearchSprouts();
+  const { create: createSprout, groveId, selectSprout } = useResearchSprouts();
+  const { startResearch } = useResearchExecution();
 
   // Prompt Architect hook for the confirmation flow
   const promptArchitect = usePromptArchitect({
@@ -125,9 +127,30 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     onSproutReady: async (input) => {
       try {
         const newSprout = await createSprout(input);
-        // Sprint: garden-tray-mvp - Toast without modal action (GardenTray now shows sprouts)
+        // Sprint: progress-streaming-ui-v1 - Auto-start research execution
         toast.success('Research sprout created', {
-          description: `"${newSprout.title}" is now pending execution. Check the Garden tray →`,
+          description: `"${newSprout.title}" - Starting research execution...`,
+        });
+
+        // Select the sprout so progress view shows
+        selectSprout(newSprout.id);
+
+        // Start research pipeline execution
+        // This runs async - progress will stream to GardenInspector
+        startResearch(newSprout).then((result) => {
+          if (result.success) {
+            toast.success('Research complete', {
+              description: `"${newSprout.title}" has finished. View results in the Garden.`,
+            });
+          } else if (result.error) {
+            toast.error('Research failed', {
+              description: result.error.message,
+            });
+          }
+        }).catch((err) => {
+          toast.error('Research execution error', {
+            description: err instanceof Error ? err.message : 'Unknown error',
+          });
         });
       } catch (error) {
         toast.error('Failed to create sprout', {
