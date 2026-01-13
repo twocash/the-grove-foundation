@@ -1,8 +1,8 @@
 # Bedrock Sprint Contract
 
-**Version:** 1.1  
-**Status:** BINDING FOR ALL BEDROCK DEVELOPMENT  
-**Amended:** January 4, 2026 (Added core infrastructure provisions)  
+**Version:** 1.3
+**Status:** BINDING FOR ALL BEDROCK DEVELOPMENT
+**Amended:** January 13, 2026 (Added agent coordination protocol)  
 **Effective:** December 30, 2025  
 **Branch:** `bedrock`
 
@@ -351,6 +351,38 @@ src/core/
 └── utils/        # Shared utilities
 ```
 
+### Section 6.4: Live Status Updates
+
+Every agent executing a sprint MUST maintain status updates in the shared status file.
+
+**File Location:** `~/.claude/notes/sprint-status-live.md`
+
+**Protocol:**
+1. Append STARTED entry when beginning sprint work
+2. Append IN_PROGRESS entry at each phase completion
+3. Append COMPLETE entry with test results when done
+4. Append BLOCKED entry if unable to proceed
+
+**Entry Format:**
+```markdown
+---
+## {ISO Timestamp} | {Sprint Name} | {Phase}
+**Agent:** {role} / {branch or session-id}
+**Status:** STARTED | IN_PROGRESS | COMPLETE | BLOCKED
+**Summary:** {1-2 sentences describing work done}
+**Files:** {key files changed, comma-separated}
+**Tests:** {pass/fail count or "N/A"}
+**Unblocks:** {what this completion enables}
+**Next:** {recommended next action}
+---
+```
+
+**Benefits:**
+- Zero-friction agent coordination (agents write, Sprintmaster reads)
+- Audit trail (append-only preserves history)
+- Parallel sprint coordination (multiple agents, one log)
+- Resumable sessions (new agents read history for context)
+
 ---
 
 ## Article VII: Enforcement
@@ -441,16 +473,276 @@ src/core/                       # Shared infrastructure (both bedrock + legacy)
 
 ---
 
+## Article IX: Visual Verification Requirements
+
+**Added:** January 12, 2026 (Post experience-console-cleanup-v1 retrospective)
+
+### Section 9.1: Visual Verification Mandate
+
+Every sprint that modifies UI MUST include visual verification before completion. **Code that compiles is not proof that features work.** Screenshots are required evidence.
+
+**Rationale:** The `experience-console-cleanup-v1` sprint exposed a pattern where code "compiles and passes build" but UI features are non-functional. This wastes downstream sprint time debugging "working" code.
+
+### Section 9.2: Required Artifacts
+
+Every UI sprint MUST produce:
+
+| Artifact | Location | Purpose |
+|----------|----------|---------|
+| Screenshots | `docs/sprints/{sprint-name}/screenshots/` | Visual proof of ACs |
+| REVIEW.html | `docs/sprints/{sprint-name}/REVIEW.html` | AC-to-evidence mapping |
+| Playwright tests | `tests/visual-qa/{feature}.spec.ts` | Automated screenshot capture |
+
+### Section 9.3: Minimum Screenshot Coverage
+
+For any UI sprint, capture at minimum:
+
+1. **Default state** — Feature loads correctly
+2. **Each acceptance criterion** — Visual proof it works
+3. **Interactive elements** — Dropdowns open, buttons respond
+4. **Empty/error states** — Graceful handling
+5. **Inspector/editor views** — Forms render correctly
+
+### Section 9.4: Playwright Visual QA Pattern
+
+```typescript
+// tests/visual-qa/{feature}.spec.ts
+import { test, expect } from '@playwright/test';
+
+const SCREENSHOT_DIR = 'docs/sprints/{sprint-name}/screenshots';
+
+test.describe('{Feature} Visual QA', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/{route}');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('01 - {AC description}', async ({ page }) => {
+    // Setup state
+    await page.screenshot({
+      path: `${SCREENSHOT_DIR}/01-{description}.png`,
+      fullPage: true,
+    });
+    // Assert expected elements
+  });
+});
+```
+
+### Section 9.5: REVIEW.html Requirements
+
+Every sprint REVIEW.html MUST include:
+
+```html
+<!-- Required sections -->
+<h2>Acceptance Criteria Verification</h2>
+<!-- Table mapping each AC to PASS/FAIL with screenshot evidence -->
+
+<h2>Visual Evidence</h2>
+<!-- All screenshots with captions -->
+
+<h2>Build Verification</h2>
+<!-- npm run build, TypeScript errors, console errors -->
+
+<h2>Sign-off</h2>
+<!-- Verified by, timestamp -->
+```
+
+### Section 9.6: Completion Gate
+
+A sprint is **NOT COMPLETE** until:
+
+- [ ] All screenshots captured in `screenshots/` directory
+- [ ] REVIEW.html shows each AC mapped to evidence
+- [ ] All AC status badges are PASS (not PENDING)
+- [ ] Playwright visual QA tests pass
+- [ ] `npm run build` passes
+- [ ] Sign-off recorded with timestamp
+
+### Section 9.7: Prohibited Practices
+
+The following are **explicitly prohibited**:
+
+1. **Code-only completion** — Marking sprint complete based solely on `npm run build` passing
+2. **Deferred verification** — "We'll test it manually later"
+3. **Assumed functionality** — "It compiles so it works"
+4. **Missing REVIEW.html** — Sprint artifacts incomplete without visual proof
+5. **PENDING status at completion** — All ACs must be verified PASS or FAIL
+
+### Section 9.8: Non-UI Sprints
+
+Sprints that don't modify UI (e.g., core infrastructure, schemas, services) may omit visual verification if:
+
+1. Sprint SPEC.md explicitly states "Non-UI Sprint"
+2. No React components created or modified
+3. No user-facing behavior changes
+
+Such sprints still require:
+- `npm run build` passing
+- Unit test coverage for new code
+- Console logging verification where applicable
+
+---
+
+## Article X: Agent Roles
+
+**Added:** January 13, 2026
+
+### Section 10.1: Role Declaration
+
+Every agent session MUST declare its role at conversation start:
+
+| Property | Value |
+|----------|-------|
+| Role | Sprintmaster / Developer / QA Reviewer |
+| Sprint | {sprint-name} or "Pipeline Coordination" |
+| Mode | plan / execute / review |
+
+### Section 10.2: Role Definitions
+
+**Sprintmaster** (Plan Mode)
+
+| Responsibility | Description |
+|----------------|-------------|
+| Pipeline coordination | Track sprints, clear gates, spot parallelism opportunities |
+| Notion sync | Update databases to match actual sprint state |
+| QA lead | Review REVIEW.html, verify screenshots against ACs |
+| Code review | Assess code against spec, write bug reports |
+| Contract amendments | Update this contract when patterns evolve |
+
+**PROHIBITED:** Code changes, bug fixes, implementation work, starting new development
+
+**Developer** (Execute Mode)
+
+| Responsibility | Description |
+|----------------|-------------|
+| Sprint execution | Follow EXECUTION_PROMPT phases |
+| Code changes | Implement features per spec |
+| Status updates | Write entries to `sprint-status-live.md` per Section 6.4 |
+| Visual verification | Capture screenshots per Article IX |
+| REVIEW.html | Complete acceptance criteria evidence |
+
+**PROHIBITED:** Notion updates, starting sprints without gate clearance, architectural decisions without spec
+
+**QA Reviewer** (Review Mode)
+
+| Responsibility | Description |
+|----------------|-------------|
+| AC verification | Check REVIEW.html against spec |
+| Screenshot audit | Verify visual evidence completeness |
+| Bug reports | Document issues with reproduction steps |
+| Test coverage | Verify appropriate test coverage |
+
+**PROHIBITED:** Code fixes, Notion updates, architectural decisions
+
+### Section 10.3: Role Boundaries
+
+Agents MUST NOT:
+- Perform actions outside their declared role
+- Switch roles mid-session without explicit user handoff
+- Override another agent's work without coordination
+
+### Section 10.4: Coordination Protocol
+
+The standard coordination flow:
+
+1. **Developer** completes work → writes COMPLETE status to `sprint-status-live.md`
+2. **Sprintmaster** reads status → triggers QA review, updates Notion
+3. **QA Reviewer** verifies → writes bug reports if needed
+4. **Sprintmaster** clears gate → updates Notion, assigns next sprint
+5. **Developer** receives next sprint assignment with gate clearance
+
+### Section 10.5: Role Activation
+
+Agents are activated with explicit prompts:
+
+**Sprintmaster:**
+```
+You are acting as SPRINTMASTER for the Grove Foundation.
+You operate in PLAN MODE - read-only except notes/plans.
+Read sprint status: ~/.claude/notes/sprint-status-live.md
+Reference: .agent/roles/sprintmaster.md
+```
+
+**Developer:**
+```
+You are acting as DEVELOPER for sprint: {sprint-name}.
+Execute per: docs/sprints/{name}/EXECUTION_PROMPT.md
+Write status to: ~/.claude/notes/sprint-status-live.md
+Reference: .agent/roles/developer.md
+```
+
+**QA Reviewer:**
+```
+You are acting as QA REVIEWER for sprint: {sprint-name}.
+Review: docs/sprints/{name}/REVIEW.html against SPEC.md
+Reference: .agent/roles/qa-reviewer.md
+```
+
+---
+
 ## Signatures
 
 By commencing work on the `bedrock` branch, contributors agree to this contract.
 
-**Effective Date:** December 30, 2025  
-**Version:** 1.1
+**Effective Date:** December 30, 2025
+**Version:** 1.2
 
 ---
 
 ## Changelog
+
+### v1.3 (January 13, 2026)
+
+**Section 6.4: Live Status Updates (NEW)**
+
+1. **Status Protocol:** Agents must maintain append-only status file
+2. **Entry Format:** Standardized markdown template for status entries
+3. **File Location:** `~/.claude/notes/sprint-status-live.md`
+
+**Article X: Agent Roles (NEW)**
+
+1. **Section 10.1:** Role Declaration — agents must declare role at session start
+2. **Section 10.2:** Role Definitions — Sprintmaster, Developer, QA Reviewer with responsibilities and prohibitions
+3. **Section 10.3:** Role Boundaries — agents must not exceed their declared role
+4. **Section 10.4:** Coordination Protocol — standard flow for multi-agent coordination
+5. **Section 10.5:** Role Activation — explicit prompts for activating each role
+
+**Rationale:** Multiple agents working in parallel on Grove Foundation sprints need a mechanized coordination system. The status protocol enables zero-friction updates between agents. Role definitions prevent scope creep and clarify responsibilities. Inspired by Navigator plugin concepts but customized for sprint-aligned workflow.
+
+---
+
+### v1.2 (January 12, 2026)
+
+**Article IX: Visual Verification Requirements (NEW)**
+
+1. **Section 9.1:** Visual Verification Mandate
+   - Code that compiles is not proof features work
+   - Screenshots required as evidence for all UI sprints
+
+2. **Section 9.2:** Required Artifacts
+   - Screenshots directory in sprint folder
+   - REVIEW.html mapping ACs to evidence
+   - Playwright visual QA tests
+
+3. **Section 9.3-9.4:** Screenshot Coverage & Playwright Pattern
+   - Minimum coverage requirements
+   - Standard test file structure
+
+4. **Section 9.5-9.6:** REVIEW.html Requirements & Completion Gate
+   - Required sections in review document
+   - Checklist that must pass before sprint completion
+
+5. **Section 9.7:** Prohibited Practices
+   - Explicitly bans code-only completion
+   - Bans deferred verification
+   - Bans PENDING status at completion
+
+6. **Section 9.8:** Non-UI Sprint Exemption
+   - Criteria for when visual verification may be skipped
+
+**Rationale:** The `experience-console-cleanup-v1` sprint delivered code that compiled but had no visible instances in the UI. This wasted time in downstream sprints debugging "working" features. Visual verification prevents this class of bug from shipping.
+
+---
 
 ### v1.1 (January 4, 2026)
 
