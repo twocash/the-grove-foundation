@@ -13,6 +13,7 @@ import {
   Beaker,
   Settings,
   Search,
+  Pencil,
   type LucideIcon,
 } from 'lucide-react';
 import type { ConsoleSchema, ConsoleSchemaRegistry } from '../types/ConsoleSchema';
@@ -468,6 +469,114 @@ export const researchAgentConfigSchema: ConsoleSchema = {
 };
 
 // =============================================================================
+// Writer Agent Config Console Schema
+// Sprint: writer-agent-v1
+// =============================================================================
+
+export const writerAgentConfigSchema: ConsoleSchema = {
+  id: 'writer-agent-config',
+
+  identity: {
+    title: 'Writer Agents',
+    subtitle: 'Configure document writing behavior',
+    icon: Pencil,
+    color: 'text-teal-500',
+  },
+
+  filters: [
+    {
+      id: 'status',
+      label: 'Status',
+      type: 'select',
+      options: ['active', 'draft', 'archived'],
+      field: 'meta.status',
+    },
+  ],
+
+  list: {
+    cardVariant: 'standard',
+    sortOptions: [
+      { id: 'updated', label: 'Recently Updated', field: 'meta.updatedAt', direction: 'desc' },
+      { id: 'name', label: 'Name', field: 'meta.title', direction: 'asc' },
+    ],
+    defaultSort: 'updated',
+    viewToggle: false,
+  },
+
+  inspector: {
+    titleField: 'meta.title',
+    subtitleField: 'meta.id',
+    statusField: 'meta.status',
+    activeValue: 'active',
+    fields: [
+      // Identity section
+      { id: 'title', label: 'Title', type: 'text', section: 'identity', required: true, path: 'meta.title' },
+      { id: 'description', label: 'Description', type: 'textarea', section: 'identity', path: 'meta.description' },
+      { id: 'status', label: 'Status', type: 'readonly', section: 'identity', path: 'meta.status' },
+
+      // Voice section
+      { id: 'formality', label: 'Formality', type: 'select', section: 'voice', path: 'payload.voice.formality', options: [
+        { value: 'casual', label: 'Casual' },
+        { value: 'professional', label: 'Professional' },
+        { value: 'academic', label: 'Academic' },
+        { value: 'technical', label: 'Technical' },
+      ]},
+      { id: 'perspective', label: 'Perspective', type: 'select', section: 'voice', path: 'payload.voice.perspective', options: [
+        { value: 'first-person', label: 'First Person' },
+        { value: 'third-person', label: 'Third Person' },
+        { value: 'neutral', label: 'Neutral' },
+      ]},
+      { id: 'personality', label: 'Personality', type: 'text', section: 'voice', path: 'payload.voice.personality', helpText: 'Optional personality descriptor' },
+
+      // Structure section
+      { id: 'includePosition', label: 'Include Position', type: 'toggle', section: 'structure', path: 'payload.documentStructure.includePosition' },
+      { id: 'includeLimitations', label: 'Include Limitations', type: 'toggle', section: 'structure', path: 'payload.documentStructure.includeLimitations' },
+      { id: 'citationStyle', label: 'Citation Style', type: 'select', section: 'structure', path: 'payload.documentStructure.citationStyle', options: [
+        { value: 'inline', label: 'Inline [1]' },
+        { value: 'endnote', label: 'Endnotes' },
+      ]},
+      { id: 'citationFormat', label: 'Citation Format', type: 'select', section: 'structure', path: 'payload.documentStructure.citationFormat', options: [
+        { value: 'simple', label: 'Simple' },
+        { value: 'apa', label: 'APA' },
+        { value: 'chicago', label: 'Chicago' },
+      ]},
+      { id: 'maxLength', label: 'Max Length (words)', type: 'number', section: 'structure', path: 'payload.documentStructure.maxLength', helpText: '100-10000 words' },
+
+      // Quality section
+      { id: 'requireCitations', label: 'Require Citations', type: 'toggle', section: 'quality', path: 'payload.qualityRules.requireCitations' },
+      { id: 'minConfidenceToInclude', label: 'Min Confidence', type: 'number', section: 'quality', path: 'payload.qualityRules.minConfidenceToInclude', helpText: 'Threshold 0-1' },
+      { id: 'flagUncertainty', label: 'Flag Uncertainty', type: 'toggle', section: 'quality', path: 'payload.qualityRules.flagUncertainty' },
+
+      // Metadata section
+      { id: 'createdAt', label: 'Created', type: 'readonly', section: 'metadata', path: 'meta.createdAt' },
+      { id: 'updatedAt', label: 'Updated', type: 'readonly', section: 'metadata', path: 'meta.updatedAt' },
+    ],
+    sections: {
+      identity: { title: 'Identity', defaultExpanded: true },
+      voice: { title: 'Voice & Tone', defaultExpanded: true },
+      structure: { title: 'Document Structure', defaultExpanded: true },
+      quality: { title: 'Quality Rules', defaultExpanded: false },
+      metadata: { title: 'Metadata', defaultExpanded: false },
+    },
+  },
+
+  cardActions: [],
+
+  inspectorActions: {
+    primary: { id: 'save', label: 'Save Changes', type: 'primary' },
+    secondary: [
+      { id: 'duplicate', label: 'Duplicate', icon: 'content_copy', type: 'secondary' },
+      { id: 'delete', label: 'Delete', icon: 'delete', type: 'danger', confirmMessage: 'Delete this writer config?' },
+    ],
+  },
+
+  metrics: [
+    { id: 'total', label: 'Total', icon: 'category', query: 'count(*)' },
+    { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: meta.status=active)' },
+  ],
+};
+
+// =============================================================================
 // Console Schema Registry
 // =============================================================================
 
@@ -481,6 +590,7 @@ export const CONSOLE_SCHEMA_REGISTRY: ConsoleSchemaRegistry = {
   'research-sprout': researchSproutSchema,
   'prompt-architect-config': promptArchitectConfigSchema,
   'research-agent-config': researchAgentConfigSchema,
+  'writer-agent-config': writerAgentConfigSchema,
 };
 
 // =============================================================================

@@ -15,6 +15,8 @@ import type { FeatureFlagPayload } from '@core/schema/feature-flag';
 import { createFeatureFlagPayload } from '@core/schema/feature-flag';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 import { DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD } from '@core/schema/research-agent-config';
+import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
+import { DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD } from '@core/schema/writer-agent-config';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -245,6 +247,28 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<ResearchAgentConfigPayload>,
 
+  // Sprint: writer-agent-v1 - Writer Agent configuration
+  // SINGLETON pattern: One active config per grove
+  'writer-agent-config': {
+    type: 'writer-agent-config',
+    label: 'Writer Agent',
+    icon: 'edit_note',
+    description: 'Configure document writing: voice, structure, citation format',
+    defaultPayload: DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'WriterAgentConfigEditor',
+    allowMultipleActive: false, // SINGLETON: One active config
+    routePath: '/bedrock/experience',
+    color: '#26A69A', // Teal for writing
+    // Polymorphic console support
+    cardComponent: 'WriterAgentConfigCard',
+    dataHookName: 'useWriterAgentConfigData',
+    searchFields: ['meta.title', 'meta.description'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: status=active)', typeFilter: 'writer-agent-config' },
+    ],
+  } satisfies ExperienceTypeDefinition<WriterAgentConfigPayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -279,6 +303,7 @@ export interface ExperiencePayloadMap {
   'prompt-architect-config': PromptArchitectConfigPayload;
   'feature-flag': FeatureFlagPayload;
   'research-agent-config': ResearchAgentConfigPayload;
+  'writer-agent-config': WriterAgentConfigPayload;
 }
 
 /**
