@@ -1,16 +1,19 @@
 // src/explore/GardenInspector.tsx
 // Garden Inspector - Research sprout management panel
 // Sprint: sprout-research-v1, Phase 4a
+// Sprint: results-display-v1 - Added results view for completed sprouts
 //
 // Multi-purpose component:
 // 1. Confirmation dialog when Prompt Architect is in 'confirming' state
 // 2. Status-grouped list of research sprouts
 // 3. Pulsing badge indicators for pending/blocked items
+// 4. Results display for completed sprouts
 
 import { useState, useMemo, useCallback } from 'react';
 import type { EditableManifest, PromptArchitectState } from './hooks/usePromptArchitect';
 import type { ResearchBranch, ResearchStrategy } from '@core/schema/research-strategy';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
+import type { ResearchDocument } from '@core/schema/research-document';
 import {
   RESEARCH_SPROUT_STATUS_LABELS,
   RESEARCH_SPROUT_STATUS_ICONS,
@@ -22,6 +25,9 @@ import { useResearchSprouts } from './context/ResearchSproutContext';
 // Sprint: progress-streaming-ui-v1
 import { ResearchProgressView } from './components/ResearchProgressView';
 import { useResearchExecution } from './context/ResearchExecutionContext';
+// Sprint: results-display-v1
+import { ResearchResultsView } from './components/ResearchResultsView';
+import { createMockResearchDocument } from './mocks/mock-research-document';
 
 // =============================================================================
 // Types
@@ -59,7 +65,7 @@ export interface GardenInspectorProps {
   onClearError: () => void;
 }
 
-type ViewMode = 'confirmation' | 'list' | 'progress';
+type ViewMode = 'confirmation' | 'list' | 'progress' | 'results';
 
 // =============================================================================
 // Component
@@ -84,7 +90,7 @@ export function GardenInspector({
   const { progressState, resetProgress } = useResearchExecution();
 
   // Get selected sprout from context
-  const { selectedSproutId, sprouts } = useResearchSprouts();
+  const { selectedSproutId, sprouts, selectSprout } = useResearchSprouts();
   const selectedSprout = useMemo(
     () => sprouts.find(s => s.id === selectedSproutId),
     [sprouts, selectedSproutId]
@@ -94,8 +100,24 @@ export function GardenInspector({
   const viewMode: ViewMode = useMemo(() => {
     if (architectState === 'confirming') return 'confirmation';
     if (selectedSprout?.status === 'active') return 'progress';
+    if (selectedSprout?.status === 'completed') return 'results';
     return 'list';
   }, [architectState, selectedSprout?.status]);
+
+  // Get mock research document for completed sprouts (Sprint: results-display-v1)
+  // TODO: Replace with actual document retrieval from storage
+  const researchDocument: ResearchDocument | null = useMemo(() => {
+    if (selectedSprout?.status === 'completed') {
+      // For MVP, generate mock document based on sprout's spark
+      return createMockResearchDocument(selectedSprout.spark);
+    }
+    return null;
+  }, [selectedSprout]);
+
+  // Handler for returning to list view
+  const handleBackToList = useCallback(() => {
+    selectSprout(null);
+  }, [selectSprout]);
 
   return (
     <div className="flex flex-col h-full bg-[var(--glass-solid)]">
@@ -135,6 +157,17 @@ export function GardenInspector({
           />
         )}
 
+        {/* Results view for completed sprouts (Sprint: results-display-v1) */}
+        {viewMode === 'results' && researchDocument && (
+          <ResearchResultsView
+            document={researchDocument}
+            onBack={handleBackToList}
+            onCopy={() => {
+              console.log('[GardenInspector] Document copied to clipboard');
+            }}
+          />
+        )}
+
         {error && (
           <ErrorBanner error={error} onDismiss={onClearError} />
         )}
@@ -163,27 +196,65 @@ interface HeaderProps {
 }
 
 function GardenInspectorHeader({ viewMode, filterPreset, onFilterChange }: HeaderProps) {
+  // Get icon and title based on view mode
+  const getHeaderContent = () => {
+    switch (viewMode) {
+      case 'confirmation':
+        return {
+          icon: 'science',
+          title: 'New Research Sprout',
+          subtitle: 'Review and confirm your research plan',
+          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
+          iconColor: 'text-purple-600 dark:text-purple-400',
+        };
+      case 'progress':
+        return {
+          icon: 'monitoring',
+          title: 'Research in Progress',
+          subtitle: 'Collecting and analyzing evidence...',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          iconColor: 'text-blue-600 dark:text-blue-400',
+        };
+      case 'results':
+        return {
+          icon: 'article',
+          title: 'Research Results',
+          subtitle: 'View and export your findings',
+          bgColor: 'bg-green-50 dark:bg-green-900/30',
+          iconColor: 'text-green-600 dark:text-green-400',
+        };
+      default:
+        return {
+          icon: 'park',
+          title: 'Research Garden',
+          subtitle: `Viewing ${FILTER_PRESETS[filterPreset].label.toLowerCase()}`,
+          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
+          iconColor: 'text-purple-600 dark:text-purple-400',
+        };
+    }
+  };
+
+  const { icon, title, subtitle, bgColor, iconColor } = getHeaderContent();
+
   return (
     <div className="px-4 py-3 border-b border-border-light dark:border-slate-700">
       <div className="flex items-center gap-3">
         {/* Icon */}
-        <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/30
+        <div className={`w-8 h-8 rounded-lg ${bgColor}
                         border border-border-light dark:border-slate-700
-                        flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">
-            {viewMode === 'confirmation' ? 'science' : 'park'}
+                        flex items-center justify-center shrink-0`}>
+          <span className={`material-symbols-outlined ${iconColor} text-lg`}>
+            {icon}
           </span>
         </div>
 
         {/* Title */}
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {viewMode === 'confirmation' ? 'New Research Sprout' : 'Research Garden'}
+            {title}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-            {viewMode === 'confirmation'
-              ? 'Review and confirm your research plan'
-              : `Viewing ${FILTER_PRESETS[filterPreset].label.toLowerCase()}`}
+            {subtitle}
           </p>
         </div>
 

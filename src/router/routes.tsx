@@ -15,6 +15,7 @@ const BedrockWorkspace = lazy(() => import('../bedrock/BedrockWorkspace'));
 
 // Dev components for testing
 const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
+const ResultsDisplayDemo = lazy(() => import('../explore/ResultsDisplayDemo'));
 
 // Kinetic Stream exploration surface
 const ExplorePage = lazy(() => import('../surface/pages/ExplorePage'));
@@ -277,6 +278,14 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<WorkspaceLoadingFallback />}>
             <StreamDemo />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/dev/results-display',
+        element: (
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <ResultsDisplayDemo />
           </Suspense>
         ),
       },

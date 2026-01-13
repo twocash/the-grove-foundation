@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results Display v1 - Sprint Review</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --text-primary: #eee;
+            --text-muted: #888;
+            --accent-purple: #a855f7;
+            --accent-green: #22c55e;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent-purple);
+            border-bottom: 2px solid var(--accent-purple);
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            margin-top: 32px;
+            border-left: 4px solid var(--accent-purple);
+            padding-left: 12px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pass {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .status-fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: rgba(168, 85, 247, 0.05);
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .screenshot-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .screenshot-card img {
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .screenshot-card p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 8px 0 0;
+        }
+
+        .files-list {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .files-list li {
+            margin: 8px 0;
+        }
+
+        .files-list .badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .badge-new {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+        }
+
+        .badge-modified {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .sign-off {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 32px;
+            border: 2px solid var(--accent-green);
+        }
+
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Results Display v1 - Sprint Review</h1>
+
+        <p class="timestamp">Generated: 2026-01-13 15:34 | Sprint: results-display-v1 | Smoke Test: PASS</p>
+
+        <!-- Summary Stats -->
+        <div class="summary-stats">
+            <div class="stat-card">
+                <div class="value">7</div>
+                <div class="label">Acceptance Criteria</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">5</div>
+                <div class="label">Components Created</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">1</div>
+                <div class="label">Files Modified</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">13</div>
+                <div class="label">Visual Tests</div>
+            </div>
+        </div>
+
+        <h2>Acceptance Criteria Mapping</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Criterion</th>
+                    <th>Status</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>US-E001</code></td>
+                    <td>Position statement prominently displayed with gradient background and confidence badge</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>PositionCard.tsx</code> - Renders thesis with gradient bg<br>
+                        Screenshot: <code>01-position-statement.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E002</code></td>
+                    <td>Analysis renders as formatted markdown with proper typography</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>AnalysisSection.tsx</code> - Uses react-markdown<br>
+                        Screenshot: <code>02-markdown-analysis.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E003</code></td>
+                    <td>Citations show [N] badge, title, domain, snippet; inline citations scroll</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>CitationBlock.tsx</code>, <code>CitationsSection.tsx</code><br>
+                        InlineCitation scrollIntoView implemented<br>
+                        Screenshot: <code>03-citations-section.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E004</code></td>
+                    <td>Copy to clipboard formats as markdown with success toast</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>ResearchResultsView.tsx</code> - formatDocumentAsMarkdown()<br>
+                        Screenshot: <code>05-copy-button.png</code>, <code>06-copy-success.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E005</code></td>
+                    <td>Insufficient evidence shows special empty state with suggestions</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>ResearchResultsView.tsx</code> - InsufficientEvidenceView<br>
+                        Screenshot: <code>07-insufficient-evidence.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E006</code></td>
+                    <td>Confidence indicator with color coding (green/yellow/red)</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        <code>PositionCard.tsx</code> - ConfidenceBadge component<br>
+                        Screenshot: <code>08-confidence-indicator.png</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><code>US-E007</code></td>
+                    <td>Mobile responsive layout (375px viewport)</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>
+                        All components use Tailwind responsive classes<br>
+                        Screenshot: <code>09-mobile-layout.png</code>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>DEX Compliance Matrix</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pillar</th>
+                    <th>Requirement</th>
+                    <th>Status</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Declarative Sovereignty</td>
+                    <td>Non-technical user can modify via config</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>Components render from ResearchDocument schema - no hardcoded display logic</td>
+                </tr>
+                <tr>
+                    <td>Capability Agnosticism</td>
+                    <td>Works regardless of source model</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>Works with any ResearchDocument regardless of which LLM produced it</td>
+                </tr>
+                <tr>
+                    <td>Provenance as Infrastructure</td>
+                    <td>Every fact traces to source</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>Every citation shows title, URL, domain, snippet, accessedAt timestamp</td>
+                </tr>
+                <tr>
+                    <td>Organic Scalability</td>
+                    <td>New types work without code changes</td>
+                    <td><span class="status-badge status-pass">PASS</span></td>
+                    <td>Array-based citations, markdown analysis - handles any content</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Files Created/Modified</h2>
+
+        <ul class="files-list">
+            <li>
+                <code>src/explore/components/CitationBlock.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Individual citation display with hover expansion
+            </li>
+            <li>
+                <code>src/explore/components/PositionCard.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Thesis statement display with gradient and confidence badge
+            </li>
+            <li>
+                <code>src/explore/components/AnalysisSection.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Markdown renderer with inline citation links
+            </li>
+            <li>
+                <code>src/explore/components/CitationsSection.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Expandable/collapsible citations list
+            </li>
+            <li>
+                <code>src/explore/components/ResearchResultsView.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Main results composition component
+            </li>
+            <li>
+                <code>src/explore/mocks/mock-research-document.ts</code>
+                <span class="badge badge-new">NEW</span>
+                - Mock data generator for development/testing
+            </li>
+            <li>
+                <code>src/explore/GardenInspector.tsx</code>
+                <span class="badge badge-modified">MODIFIED</span>
+                - Added 'results' view mode for completed sprouts
+            </li>
+            <li>
+                <code>tests/visual-qa/results-display.spec.ts</code>
+                <span class="badge badge-new">NEW</span>
+                - Playwright visual verification tests
+            </li>
+            <li>
+                <code>src/explore/ResultsDisplayDemo.tsx</code>
+                <span class="badge badge-new">NEW</span>
+                - Demo page for smoke testing at /dev/results-display
+            </li>
+            <li>
+                <code>src/router/routes.tsx</code>
+                <span class="badge badge-modified">MODIFIED</span>
+                - Added /dev/results-display demo route
+            </li>
+        </ul>
+
+        <h2>Visual QA Screenshots</h2>
+
+        <p><span class="status-badge status-pass">13/13 TESTS PASSED</span> - All screenshots captured successfully via <code>/dev/results-display</code> demo route.</p>
+
+        <div class="screenshot-grid">
+            <div class="screenshot-card">
+                <img src="screenshots/01-position-statement.png" alt="Position Statement">
+                <p>US-E001: Position statement with gradient and confidence badge</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/02-markdown-analysis.png" alt="Markdown Analysis">
+                <p>US-E002: Markdown analysis with headings, lists, inline citations</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/03-citations-section.png" alt="Citations Section">
+                <p>US-E003: Expanded citations with [N] badges, domains, snippets</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/04-inline-citation.png" alt="Inline Citation">
+                <p>US-E003b: Inline citation [1] links visible in analysis</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/05-copy-button.png" alt="Copy Button">
+                <p>US-E004: Copy to clipboard button</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/06-copy-success.png" alt="Copy Success">
+                <p>US-E004: Copy success state</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/07-insufficient-evidence.png" alt="Insufficient Evidence">
+                <p>US-E005: Insufficient evidence empty state with suggestions</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/08-confidence-indicator.png" alt="Confidence Indicator">
+                <p>US-E006: High Confidence (85%) badge in green</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/09-mobile-layout.png" alt="Mobile Layout">
+                <p>US-E007: Mobile responsive (375px)</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/14-partial-limitations.png" alt="Partial Limitations">
+                <p>Partial status with limitations warning</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/12-citations-expanded.png" alt="Citations Expanded">
+                <p>Citations section expanded with all 4 sources</p>
+            </div>
+            <div class="screenshot-card">
+                <img src="screenshots/15-full-results-view.png" alt="Full Results View">
+                <p>Complete composition of all components</p>
+            </div>
+        </div>
+
+        <h2>Integration Notes</h2>
+
+        <ul>
+            <li><strong>LLM Integration:</strong> Uses mock ResearchDocument for MVP. Real LLM integration pending in Writer Agent wiring.</li>
+            <li><strong>"Add to KB" Button:</strong> Disabled for v1 as specified. Will be enabled in Sprint 6 (Knowledge Base Integration).</li>
+            <li><strong>Document Storage:</strong> Currently generates mock document from sprout.spark. Future: Store ResearchDocument in Supabase linked to sprout.</li>
+            <li><strong>Citation Scroll:</strong> Uses native <code>scrollIntoView({ behavior: 'smooth' })</code> with highlight animation.</li>
+        </ul>
+
+        <h2>Known Limitations</h2>
+
+        <ul>
+            <li>Screenshots require manual triggering via Playwright (run tests to generate)</li>
+            <li>Mock data is generated per-render (not persisted)</li>
+            <li>Real ResearchDocument retrieval not yet implemented</li>
+        </ul>
+
+        <div class="sign-off">
+            <h3 style="margin: 0 0 12px; color: var(--accent-green);">✓ Sprint Sign-off</h3>
+            <p style="margin: 0;">
+                <strong>Status:</strong> COMPLETE<br>
+                <strong>Timestamp:</strong> 2026-01-13T15:34:00Z<br>
+                <strong>Build Status:</strong> PASS (npm run build succeeded)<br>
+                <strong>Smoke Test:</strong> PASS (13/13 Playwright tests passed)<br>
+                <strong>Demo Route:</strong> <code>/dev/results-display</code><br>
+                <strong>DEX Compliance:</strong> All 4 pillars verified<br>
+                <strong>AC Status:</strong> 7/7 PASS
+            </p>
+        </div>
+    </div>
+</body>
+</html>
