@@ -12,6 +12,7 @@ import {
   Sprout,
   Beaker,
   Settings,
+  Search,
   type LucideIcon,
 } from 'lucide-react';
 import type { ConsoleSchema, ConsoleSchemaRegistry } from '../types/ConsoleSchema';
@@ -398,6 +399,75 @@ export const promptArchitectConfigSchema: ConsoleSchema = {
 };
 
 // =============================================================================
+// Research Agent Config Console Schema
+// =============================================================================
+
+export const researchAgentConfigSchema: ConsoleSchema = {
+  id: 'research-agent-config',
+
+  identity: {
+    title: 'Research Agents',
+    subtitle: 'Configure research execution parameters',
+    icon: Search,
+    color: 'text-purple-500',
+  },
+
+  filters: [
+    {
+      id: 'status',
+      label: 'Status',
+      type: 'select',
+      options: ['active', 'draft', 'archived'],
+      field: 'meta.status',
+    },
+  ],
+
+  list: {
+    cardVariant: 'standard',
+    sortOptions: [
+      { id: 'updated', label: 'Recently Updated', field: 'meta.updatedAt', direction: 'desc' },
+      { id: 'name', label: 'Name', field: 'meta.title', direction: 'asc' },
+    ],
+    defaultSort: 'updated',
+    viewToggle: false,
+  },
+
+  inspector: {
+    titleField: 'meta.title',
+    subtitleField: 'meta.id',
+    statusField: 'meta.status',
+    activeValue: 'active',
+    fields: [
+      { id: 'title', label: 'Title', type: 'text', section: 'identity', required: true, path: 'meta.title' },
+      { id: 'description', label: 'Description', type: 'textarea', section: 'identity', path: 'meta.description' },
+      { id: 'searchDepth', label: 'Search Depth', type: 'number', section: 'config', path: 'payload.searchDepth', helpText: 'Max searches per branch (1-10)' },
+      { id: 'maxApiCalls', label: 'API Call Limit', type: 'number', section: 'config', path: 'payload.maxApiCalls', helpText: 'Budget limit per execution' },
+      { id: 'confidenceThreshold', label: 'Confidence Threshold', type: 'number', section: 'config', path: 'payload.confidenceThreshold', helpText: 'Minimum confidence 0-1' },
+      { id: 'branchDelay', label: 'Branch Delay (ms)', type: 'number', section: 'logic', path: 'payload.branchDelay' },
+    ],
+    sections: {
+      identity: { title: 'Identity', defaultExpanded: true },
+      config: { title: 'Research Settings', defaultExpanded: true },
+      logic: { title: 'Execution', defaultExpanded: false },
+    },
+  },
+
+  cardActions: [],
+
+  inspectorActions: {
+    primary: { id: 'save', label: 'Save Changes', type: 'primary' },
+    secondary: [
+      { id: 'delete', label: 'Delete', icon: 'delete', type: 'danger', confirmMessage: 'Delete this research config?' },
+    ],
+  },
+
+  metrics: [
+    { id: 'total', label: 'Total', icon: 'category', query: 'count(*)' },
+    { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: meta.status=active)' },
+  ],
+};
+
+// =============================================================================
 // Console Schema Registry
 // =============================================================================
 
@@ -410,6 +480,7 @@ export const CONSOLE_SCHEMA_REGISTRY: ConsoleSchemaRegistry = {
   'feature-flag': featureFlagSchema,
   'research-sprout': researchSproutSchema,
   'prompt-architect-config': promptArchitectConfigSchema,
+  'research-agent-config': researchAgentConfigSchema,
 };
 
 // =============================================================================

@@ -20,6 +20,8 @@ import type {
   Evidence,
   BranchStatus,
 } from '@core/schema/research-strategy';
+import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
+import { DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD } from '@core/schema/research-agent-config';
 
 // =============================================================================
 // Types
@@ -104,7 +106,7 @@ export interface ResearchAgent {
 const DEFAULT_CONFIG: Required<ResearchAgentConfig> = {
   branchDelay: 1000,
   maxApiCalls: 10,
-  simulationMode: true, // MVP: simulate by default
+  simulationMode: false, // evidence-collection-v1: Real execution by default
   simulatedQueryDelay: 500,
 };
 
@@ -178,6 +180,11 @@ export function createResearchAgent(
     isExecutingFlag = true;
     cancelRequested = false;
 
+    // Sprint: evidence-collection-v1 - Execution logging
+    console.log(`[ResearchAgent] Starting research for sprout: ${sprout.id}`);
+    console.log(`[ResearchAgent] Branches to process: ${sprout.branches.length}`);
+    console.log(`[ResearchAgent] Simulation mode: ${cfg.simulationMode}`);
+
     const startedAt = new Date().toISOString();
     let apiCallCount = 0;
     let tokenCount = 0;
@@ -192,6 +199,9 @@ export function createResearchAgent(
           errorMessage = 'Execution cancelled';
           break;
         }
+
+        // Sprint: evidence-collection-v1 - Branch logging
+        console.log(`[ResearchAgent] Processing branch: ${branch.label}`);
 
         // Emit branch started
         onProgress?.({
@@ -229,20 +239,42 @@ export function createResearchAgent(
             index: i,
           });
 
-          // Execute query (simulation or real)
+          // Execute query
+          // Sprint: evidence-collection-v1 - Real execution mode
           let evidence: Evidence;
 
           if (cfg.simulationMode) {
-            // Simulate execution delay
-            await delay(cfg.simulatedQueryDelay);
-            evidence = generateSimulatedEvidence(branch.id, query, i);
-            tokenCount += 150 + Math.floor(Math.random() * 100); // Simulated tokens
-          } else {
-            // TODO: Real LLM/search API call
-            // For now, fall back to simulation
+            // Legacy simulation mode (deprecated)
             await delay(cfg.simulatedQueryDelay);
             evidence = generateSimulatedEvidence(branch.id, query, i);
             tokenCount += 150 + Math.floor(Math.random() * 100);
+          } else {
+            // Real execution mode via ResearchExecutionEngine
+            // Note: Full engine integration at sprout level coming in future refactor
+            // For now, generate placeholder evidence with real execution logging
+            const engineConfig: ResearchAgentConfigPayload = {
+              ...DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD,
+              maxApiCalls: cfg.maxApiCalls,
+              branchDelay: cfg.branchDelay,
+            };
+
+            console.log(`[ResearchAgent] Real execution mode - query: "${query}"`);
+            console.log(`[ResearchAgent] Engine config:`, engineConfig);
+
+            // Placeholder evidence with real execution marker
+            evidence = {
+              id: `ev-${branch.id}-${i}-${Date.now().toString(36)}`,
+              source: `https://search.grove/real/${encodeURIComponent(query.slice(0, 20))}`,
+              sourceType: 'practitioner',
+              content: `[Real search pending for: "${query}"]\n\n` +
+                `Gemini grounding integration required.\n` +
+                `Branch: ${branch.label}\n` +
+                `Query ${i + 1}/${branch.queries.length}`,
+              relevance: 0.5,
+              confidence: 0.5,
+              collectedAt: new Date().toISOString(),
+            };
+            tokenCount += 100; // Placeholder token count
           }
 
           apiCallCount++;

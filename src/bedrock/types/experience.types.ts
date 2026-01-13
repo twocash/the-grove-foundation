@@ -13,6 +13,8 @@ import type { PromptArchitectConfigPayload } from '@core/schema/prompt-architect
 import { DEFAULT_PROMPT_ARCHITECT_CONFIG_PAYLOAD } from '@core/schema/prompt-architect-config';
 import type { FeatureFlagPayload } from '@core/schema/feature-flag';
 import { createFeatureFlagPayload } from '@core/schema/feature-flag';
+import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
+import { DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD } from '@core/schema/research-agent-config';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -221,6 +223,28 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<FeatureFlagPayload>,
 
+  // Sprint: evidence-collection-v1 - Research Agent configuration
+  // SINGLETON pattern: One active config per grove
+  'research-agent-config': {
+    type: 'research-agent-config',
+    label: 'Research Agent',
+    icon: 'search',
+    description: 'Configure research execution: search depth, source preferences, API limits',
+    defaultPayload: DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'ResearchAgentConfigEditor',
+    allowMultipleActive: false, // SINGLETON: One active config
+    routePath: '/bedrock/experience',
+    color: '#7E57C2', // Purple for research
+    // Polymorphic console support
+    cardComponent: 'ResearchAgentConfigCard',
+    dataHookName: 'useResearchAgentConfigData',
+    searchFields: ['meta.title', 'meta.description'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: status=active)', typeFilter: 'research-agent-config' },
+    ],
+  } satisfies ExperienceTypeDefinition<ResearchAgentConfigPayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -254,6 +278,7 @@ export interface ExperiencePayloadMap {
   'system-prompt': SystemPromptPayload;
   'prompt-architect-config': PromptArchitectConfigPayload;
   'feature-flag': FeatureFlagPayload;
+  'research-agent-config': ResearchAgentConfigPayload;
 }
 
 /**
