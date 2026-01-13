@@ -1,17 +1,19 @@
 // src/bedrock/consoles/ExperienceConsole/WriterAgentConfigEditor.tsx
 // Editor component for Writer Agent Config
 // Sprint: experience-console-cleanup-v1
+// Hotfix: singleton-pattern-v1 - full SystemPromptEditor pattern with versioning
 //
 // IMPORTANT: This editor uses BufferedInput for text fields.
 // This prevents the inspector input race condition where rapid typing loses characters.
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
 import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
+import { useWriterAgentConfigData } from './useWriterAgentConfigData';
 
 // Voice formality options
 const FORMALITY_OPTIONS = [
@@ -53,9 +55,155 @@ export function WriterAgentConfigEditor({
   onDuplicate,
   loading,
   hasChanges,
+  onSelectObject,
 }: ObjectEditorProps<WriterAgentConfigPayload>) {
-  const isActive = config.meta.status === 'active';
+  // Get functions from data hook
+  const { activate, activeConfig, update, saveAndActivate } = useWriterAgentConfigData();
+  const [activating, setActivating] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [discarding, setDiscarding] = useState(false);
+
+  // Optimistic UI: track if we just activated (before props update)
+  const [justActivated, setJustActivated] = useState(false);
+
+  // Reset justActivated when config changes or status updates
+  useEffect(() => {
+    setJustActivated(false);
+  }, [config.meta.id]);
+
+  useEffect(() => {
+    if (config.meta.status === 'active') {
+      setJustActivated(false);
+    }
+  }, [config.meta.status]);
+
+  // Status checks - include optimistic justActivated for immediate UI feedback
+  const isActive = config.meta.status === 'active' || justActivated;
+  const isArchived = config.meta.status === 'archived' && !justActivated;
+  const isDraft = config.meta.status === 'draft' && !justActivated;
+
+  // Track which payload fields have been modified for version creation
+  const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
+
+  // Snapshot of original state for discard functionality
+  const originalSnapshotRef = useRef<{ meta: typeof config.meta; payload: typeof config.payload } | null>(null);
+
+  // Capture snapshot when config changes (new selection) and no pending changes
+  useEffect(() => {
+    if (!hasChanges) {
+      originalSnapshotRef.current = {
+        meta: { ...config.meta },
+        payload: {
+          ...config.payload,
+          voice: { ...config.payload.voice },
+          documentStructure: { ...config.payload.documentStructure },
+          qualityRules: { ...config.payload.qualityRules },
+        },
+      };
+      // Reset modification tracking for new selection
+      setModifiedFields(new Set());
+    }
+  }, [config.meta.id, hasChanges]);
+
   const { voice, documentStructure, qualityRules } = config.payload;
+
+  // Handle activation
+  const handleActivate = useCallback(async () => {
+    setActivating(true);
+    try {
+      await activate(config.meta.id);
+      // Optimistic UI: show as active immediately
+      setJustActivated(true);
+      console.log('[WriterAgentConfigEditor] Activation successful');
+    } catch (error) {
+      console.error('[WriterAgentConfigEditor] Activation failed:', error);
+    } finally {
+      setActivating(false);
+    }
+  }, [activate, config.meta.id]);
+
+  // Handle save with versioning for active configs
+  const handleSaveWithVersioning = useCallback(async () => {
+    setSaving(true);
+    try {
+      if (isActive && modifiedFields.size > 0) {
+        // Active config with changes: create new version
+        // Build partial payload with all current nested values for modified fields
+        const pendingChanges: Partial<WriterAgentConfigPayload> = {};
+
+        modifiedFields.forEach(fieldName => {
+          if (fieldName === 'voice') {
+            pendingChanges.voice = { ...config.payload.voice };
+          } else if (fieldName === 'documentStructure') {
+            pendingChanges.documentStructure = { ...config.payload.documentStructure };
+          } else if (fieldName === 'qualityRules') {
+            pendingChanges.qualityRules = { ...config.payload.qualityRules };
+          }
+        });
+
+        console.log('[WriterAgentConfigEditor] Creating version with changes:',
+          Object.keys(pendingChanges));
+
+        const newConfig = await saveAndActivate(config, pendingChanges);
+        setModifiedFields(new Set()); // Reset tracking
+        onSave(); // Clear hasChanges flag
+
+        // Switch inspector to the newly created config
+        if (onSelectObject && newConfig) {
+          console.log('[WriterAgentConfigEditor] Switching to new version:', newConfig.meta.id);
+          onSelectObject(newConfig.meta.id);
+        }
+      } else {
+        // Draft/archived or no changes: use regular save
+        onSave();
+      }
+    } catch (error) {
+      console.error('[WriterAgentConfigEditor] Save failed:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [onSave, isActive, modifiedFields, config, saveAndActivate, onSelectObject]);
+
+  // Handle discard - restore original snapshot
+  const handleDiscard = useCallback(async () => {
+    if (!originalSnapshotRef.current) {
+      console.warn('[WriterAgentConfigEditor] No snapshot to restore');
+      return;
+    }
+
+    setDiscarding(true);
+    try {
+      const snapshot = originalSnapshotRef.current;
+
+      // Build patch operations to restore original state
+      const operations: PatchOperation[] = [];
+
+      // Restore meta fields
+      for (const [key, value] of Object.entries(snapshot.meta)) {
+        if (key !== 'id' && key !== 'type') { // Don't patch immutable fields
+          operations.push({ op: 'replace', path: `/meta/${key}`, value });
+        }
+      }
+
+      // Restore payload fields (including nested objects)
+      for (const [key, value] of Object.entries(snapshot.payload)) {
+        operations.push({ op: 'replace', path: `/payload/${key}`, value });
+      }
+
+      // Apply restore operations
+      await update(config.meta.id, operations);
+
+      // Reset modification tracking
+      setModifiedFields(new Set());
+
+      // Call onSave to clear hasChanges flag
+      onSave();
+    } catch (error) {
+      console.error('[WriterAgentConfigEditor] Discard failed:', error);
+    } finally {
+      setDiscarding(false);
+    }
+  }, [update, config.meta.id, onSave]);
 
   // Helper to generate patch operations for meta fields
   const patchMeta = useCallback(
@@ -68,9 +216,11 @@ export function WriterAgentConfigEditor({
     [onEdit]
   );
 
-  // Helper to patch nested payload fields
+  // Helper to patch nested voice fields
   const patchVoice = useCallback(
     (field: string, value: unknown) => {
+      // Track that voice section was modified
+      setModifiedFields(prev => new Set(prev).add('voice'));
       const ops: PatchOperation[] = [
         { op: 'replace', path: `/payload/voice/${field}`, value },
       ];
@@ -79,8 +229,11 @@ export function WriterAgentConfigEditor({
     [onEdit]
   );
 
+  // Helper to patch nested documentStructure fields
   const patchDocStructure = useCallback(
     (field: string, value: unknown) => {
+      // Track that documentStructure section was modified
+      setModifiedFields(prev => new Set(prev).add('documentStructure'));
       const ops: PatchOperation[] = [
         { op: 'replace', path: `/payload/documentStructure/${field}`, value },
       ];
@@ -89,8 +242,11 @@ export function WriterAgentConfigEditor({
     [onEdit]
   );
 
+  // Helper to patch nested qualityRules fields
   const patchQualityRules = useCallback(
     (field: string, value: unknown) => {
+      // Track that qualityRules section was modified
+      setModifiedFields(prev => new Set(prev).add('qualityRules'));
       const ops: PatchOperation[] = [
         { op: 'replace', path: `/payload/qualityRules/${field}`, value },
       ];
@@ -101,32 +257,59 @@ export function WriterAgentConfigEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Status Banner */}
-      <div className={`
-        flex items-center gap-3 px-4 py-3 border-b transition-colors
-        ${isActive
-          ? 'bg-teal-500/10 border-teal-500/20'
-          : 'bg-slate-500/10 border-slate-500/20'
-        }
-      `}>
-        <span className="relative flex h-3 w-3">
-          {isActive && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
-          )}
-          <span className={`
-            relative inline-flex rounded-full h-3 w-3
-            ${isActive ? 'bg-teal-500' : 'bg-slate-500'}
-          `} />
-        </span>
-        <div className="flex-1">
-          <span className={`text-sm font-medium ${isActive ? 'text-teal-300' : 'text-slate-300'}`}>
-            {isActive ? 'Active Configuration' : 'Draft Configuration'}
+      {/* Active Status Indicator */}
+      {isActive && (
+        <div className={`
+          flex items-center gap-3 px-4 py-3 border-b transition-colors
+          ${hasChanges
+            ? 'bg-amber-500/10 border-amber-500/30'
+            : 'bg-teal-500/10 border-teal-500/20'
+          }
+        `}>
+          <span className="relative flex h-3 w-3">
+            {!hasChanges && (
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75" />
+            )}
+            <span className={`
+              relative inline-flex rounded-full h-3 w-3
+              ${hasChanges ? 'bg-amber-500' : 'bg-teal-500'}
+            `} />
           </span>
-          <p className={`text-xs ${isActive ? 'text-teal-400/70' : 'text-slate-400/70'}`}>
-            SINGLETON: Only one Writer Agent config can be active
-          </p>
+          <div className="flex-1">
+            <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-teal-300'}`}>
+              {hasChanges ? 'Active Configuration (editing...)' : 'Active Configuration'}
+            </span>
+            <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-teal-400/70'}`}>
+              {hasChanges
+                ? 'Changes pending — save or discard below'
+                : 'SINGLETON: Only one Writer Agent config can be active'
+              }
+            </p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Draft Banner */}
+      {isDraft && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
+          <span className="material-symbols-outlined text-amber-400 text-base">edit_note</span>
+          <span className="text-sm text-amber-300">
+            Draft — {activeConfig
+              ? `Active: "${activeConfig.meta.title}"`
+              : 'No active config set'}
+          </span>
+        </div>
+      )}
+
+      {/* Archived Banner */}
+      {isArchived && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/10 border-b border-gray-500/20">
+          <span className="material-symbols-outlined text-gray-400 text-base">archive</span>
+          <span className="text-sm text-gray-300">
+            Archived — no longer in use
+          </span>
+        </div>
+      )}
 
       {/* Header */}
       <div className="px-4 py-3 border-b border-[var(--glass-border)]">
@@ -172,6 +355,18 @@ export function WriterAgentConfigEditor({
                 rows={2}
                 disabled={loading}
               />
+            </div>
+            {/* Version badge */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[var(--glass-text-muted)]">Version</span>
+              <span className="px-2 py-0.5 rounded-full bg-[var(--glass-surface)] text-sm text-[var(--glass-text-secondary)]">
+                v{config.payload.version || 1}
+              </span>
+              {config.payload.previousVersionId && (
+                <span className="text-xs text-[var(--glass-text-muted)]">
+                  (from previous version)
+                </span>
+              )}
             </div>
           </div>
         </InspectorSection>
@@ -326,7 +521,7 @@ export function WriterAgentConfigEditor({
                 step={100}
                 value={documentStructure.maxLength || ''}
                 onChange={(e) => patchDocStructure('maxLength', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-32 bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm border border-[var(--glass-border)] focus:border-teal-500 focus:outline-none"
+                className="w-32 bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)] border border-[var(--glass-border)] focus:border-teal-500 focus:outline-none"
                 placeholder="No limit"
               />
             </div>
@@ -386,47 +581,186 @@ export function WriterAgentConfigEditor({
             </div>
           </div>
         </InspectorSection>
+
+        <InspectorDivider />
+
+        {/* Changelog (if exists) */}
+        {config.payload.changelog && (
+          <>
+            <InspectorSection title="Version Notes" collapsible defaultCollapsed={true}>
+              <p className="text-sm text-[var(--glass-text-secondary)]">
+                {config.payload.changelog}
+              </p>
+            </InspectorSection>
+            <InspectorDivider />
+          </>
+        )}
+
+        {/* Metadata */}
+        <InspectorSection title="Metadata">
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-[var(--glass-text-muted)]">Created</dt>
+              <dd className="text-[var(--glass-text-secondary)]">
+                {new Date(config.meta.createdAt).toLocaleDateString()}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-[var(--glass-text-muted)]">Updated</dt>
+              <dd className="text-[var(--glass-text-secondary)]">
+                {new Date(config.meta.updatedAt).toLocaleDateString()}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-[var(--glass-text-muted)]">ID</dt>
+              <dd className="text-[var(--glass-text-muted)] font-mono text-xs truncate max-w-[200px]">
+                {config.meta.id}
+              </dd>
+            </div>
+          </dl>
+        </InspectorSection>
       </div>
 
       {/* Footer actions */}
-      <div className="px-4 py-3 border-t border-[var(--glass-border)] space-y-3">
-        {hasChanges ? (
-          <GlassButton
-            variant="primary"
-            size="sm"
-            onClick={onSave}
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? 'Saving...' : 'Save Changes'}
-          </GlassButton>
-        ) : (
-          <div className="w-full px-4 py-2.5 rounded-lg bg-[var(--glass-surface)] text-[var(--glass-text-muted)] text-center text-sm">
-            No unsaved changes
-          </div>
-        )}
+      <div className="flex-shrink-0 p-4 border-t border-[var(--glass-border)] bg-[var(--glass-panel)]">
+        <div className="flex flex-col gap-3">
 
-        <div className="flex items-center gap-2">
-          <GlassButton
-            variant="ghost"
-            size="sm"
-            onClick={onDuplicate}
-            disabled={loading}
-            className="flex-1"
-          >
-            <span className="material-symbols-outlined text-sm mr-1">content_copy</span>
-            Duplicate
-          </GlassButton>
-          <GlassButton
-            variant="danger"
-            size="sm"
-            onClick={onDelete}
-            disabled={loading}
-            className="flex-1"
-          >
-            <span className="material-symbols-outlined text-sm mr-1">delete</span>
-            Delete
-          </GlassButton>
+          {/* === ACTIVE CONFIG: Save/Discard or Status === */}
+          {isActive && (
+            hasChanges ? (
+              // Editing mode: Discard + Save & Activate
+              <div className="flex items-center gap-2">
+                <GlassButton
+                  onClick={handleDiscard}
+                  variant="ghost"
+                  size="sm"
+                  disabled={loading || discarding || saving}
+                  className="border border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                >
+                  <span className="material-symbols-outlined text-lg mr-1">undo</span>
+                  {discarding ? 'Discarding...' : 'Discard'}
+                </GlassButton>
+                <GlassButton
+                  onClick={handleSaveWithVersioning}
+                  variant="primary"
+                  size="sm"
+                  disabled={loading || saving || discarding}
+                  className="flex-1 bg-teal-600 hover:bg-teal-500"
+                >
+                  <span className="material-symbols-outlined text-lg mr-1">
+                    {saving ? 'hourglass_empty' : 'cloud_upload'}
+                  </span>
+                  {saving ? 'Saving...' : 'Save & Activate'}
+                </GlassButton>
+              </div>
+            ) : (
+              // Saved mode: Show "Active Configuration" status button
+              <div
+                className="w-full px-4 py-2.5 rounded-lg bg-teal-600/90 text-white text-center
+                           flex items-center justify-center gap-2 cursor-default"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                </span>
+                <span className="font-medium">Active Configuration</span>
+              </div>
+            )
+          )}
+
+          {/* === DRAFT: Activate button === */}
+          {isDraft && (
+            <GlassButton
+              onClick={handleActivate}
+              variant="primary"
+              size="sm"
+              disabled={loading || activating || hasChanges}
+              className="w-full bg-teal-600 hover:bg-teal-500"
+              title={hasChanges ? 'Save changes before activating' : 'Make this the active config'}
+            >
+              <span className="material-symbols-outlined text-lg mr-2">
+                {activating ? 'hourglass_empty' : 'rocket_launch'}
+              </span>
+              {activating ? 'Activating...' : 'Activate This Config'}
+            </GlassButton>
+          )}
+
+          {/* === DRAFT: Save changes row === */}
+          {isDraft && (
+            <div className="flex items-center gap-2">
+              <GlassButton
+                onClick={handleSaveWithVersioning}
+                variant="primary"
+                size="sm"
+                disabled={loading || saving || !hasChanges}
+                className="flex-1"
+              >
+                {saving ? 'Saving...' : hasChanges ? 'Save Changes' : 'Saved'}
+              </GlassButton>
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                title="Duplicate"
+              >
+                <span className="material-symbols-outlined text-lg">content_copy</span>
+              </GlassButton>
+              <GlassButton
+                onClick={onDelete}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="text-red-400 hover:text-red-300"
+                title="Delete"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </GlassButton>
+            </div>
+          )}
+
+          {/* === ACTIVE: Secondary actions row === */}
+          {isActive && (
+            <div className="flex items-center justify-center gap-2">
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                title="Create a copy as draft"
+              >
+                <span className="material-symbols-outlined text-lg mr-1">content_copy</span>
+                Duplicate
+              </GlassButton>
+            </div>
+          )}
+
+          {/* === ARCHIVED: Restore/Delete === */}
+          {isArchived && (
+            <div className="flex items-center gap-2">
+              <GlassButton
+                onClick={onDuplicate}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="flex-1"
+                title="Create a new draft from this archived config"
+              >
+                <span className="material-symbols-outlined text-lg mr-1">content_copy</span>
+                Restore as Draft
+              </GlassButton>
+              <GlassButton
+                onClick={onDelete}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+                className="text-red-400 hover:text-red-300"
+                title="Delete permanently"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </GlassButton>
+            </div>
+          )}
         </div>
       </div>
     </div>

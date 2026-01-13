@@ -12,6 +12,17 @@ import { z } from 'zod';
 // =============================================================================
 
 export const ResearchAgentConfigPayloadSchema = z.object({
+  // === VERSIONING (Sprint: singleton-pattern-v1) ===
+  /** Version number (increments on each save-and-activate) */
+  version: z.number().min(1).default(1),
+
+  /** ID of previous version (for version history) */
+  previousVersionId: z.string().optional(),
+
+  /** Changelog for this version */
+  changelog: z.string().optional(),
+
+  // === RESEARCH SETTINGS ===
   /** Maximum searches per branch (default: 3) */
   searchDepth: z.number().min(1).max(10).default(3),
 
@@ -35,6 +46,7 @@ export type ResearchAgentConfigPayload = z.infer<typeof ResearchAgentConfigPaylo
 // =============================================================================
 
 export const DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD: ResearchAgentConfigPayload = {
+  version: 1,
   searchDepth: 3,
   sourcePreferences: ['academic', 'practitioner'],
   confidenceThreshold: 0.6,

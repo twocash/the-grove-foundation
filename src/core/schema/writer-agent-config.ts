@@ -69,6 +69,17 @@ export type QualityRulesConfig = z.infer<typeof QualityRulesConfigSchema>;
 // =============================================================================
 
 export const WriterAgentConfigPayloadSchema = z.object({
+  // === VERSIONING (Sprint: singleton-pattern-v1) ===
+  /** Version number (increments on each save-and-activate) */
+  version: z.number().min(1).default(1),
+
+  /** ID of previous version (for version history) */
+  previousVersionId: z.string().optional(),
+
+  /** Changelog for this version */
+  changelog: z.string().optional(),
+
+  // === WRITER SETTINGS ===
   /** Voice and tone settings */
   voice: VoiceConfigSchema,
 
@@ -86,6 +97,7 @@ export type WriterAgentConfigPayload = z.infer<typeof WriterAgentConfigPayloadSc
 // =============================================================================
 
 export const DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD: WriterAgentConfigPayload = {
+  version: 1,
   voice: {
     formality: 'professional',
     perspective: 'neutral',
