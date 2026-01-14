@@ -20,13 +20,15 @@ interface SproutRowProps {
   isExpanded: boolean;
   /** Whether this is a newly ready sprout (for highlight) */
   isNewlyReady?: boolean;
+  /** Callback when completed sprout is selected for full results view */
+  onSelect?: (sproutId: string) => void;
 }
 
 // =============================================================================
 // Component
 // =============================================================================
 
-export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false }: SproutRowProps) {
+export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false, onSelect }: SproutRowProps) {
   const [isResultsExpanded, setIsResultsExpanded] = useState(false);
 
   // Can show results only for completed sprouts with synthesis
@@ -34,7 +36,13 @@ export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false }: S
 
   const handleClick = () => {
     if (hasResults && isExpanded) {
-      setIsResultsExpanded(prev => !prev);
+      // Sprint: results-wiring-v1 - Open full results view when onSelect provided
+      if (onSelect) {
+        onSelect(sprout.id);
+      } else {
+        // Fallback to inline expansion if no onSelect handler
+        setIsResultsExpanded(prev => !prev);
+      }
     }
   };
 
@@ -96,18 +104,22 @@ export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false }: S
           >
             <div className="px-3 pb-3 pt-1 space-y-2 border-t border-[var(--glass-border)]">
               {/* Confidence Badge */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-[var(--glass-text-muted)]">Confidence:</span>
-                <ConfidenceBadge confidence={sprout.synthesis.confidence} />
-              </div>
+              {sprout.synthesis.confidence !== undefined && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--glass-text-muted)]">Confidence:</span>
+                  <ConfidenceBadge confidence={sprout.synthesis.confidence} />
+                </div>
+              )}
 
               {/* Summary */}
-              <div className="text-xs text-[var(--glass-text-secondary)] leading-relaxed">
-                {sprout.synthesis.summary}
-              </div>
+              {sprout.synthesis.summary && (
+                <div className="text-xs text-[var(--glass-text-secondary)] leading-relaxed">
+                  {sprout.synthesis.summary}
+                </div>
+              )}
 
               {/* Insights Preview */}
-              {sprout.synthesis.insights.length > 0 && (
+              {sprout.synthesis.insights && sprout.synthesis.insights.length > 0 && (
                 <div className="space-y-1">
                   <span className="text-xs text-[var(--glass-text-muted)]">Key Insights:</span>
                   <ul className="text-xs text-[var(--glass-text-secondary)] space-y-0.5 pl-3">

@@ -27,7 +27,8 @@ import { ResearchProgressView } from './components/ResearchProgressView';
 import { useResearchExecution } from './context/ResearchExecutionContext';
 // Sprint: results-display-v1
 import { ResearchResultsView } from './components/ResearchResultsView';
-import { createMockResearchDocument } from './mocks/mock-research-document';
+// Sprint: results-wiring-v1 - Real data with fallback converter
+import { sproutToResearchDocument } from './utils/sprout-to-document';
 
 // =============================================================================
 // Types
@@ -104,12 +105,11 @@ export function GardenInspector({
     return 'list';
   }, [architectState, selectedSprout?.status]);
 
-  // Get mock research document for completed sprouts (Sprint: results-display-v1)
-  // TODO: Replace with actual document retrieval from storage
+  // Real research document from sprout or fallback conversion (Sprint: results-wiring-v1)
   const researchDocument: ResearchDocument | null = useMemo(() => {
     if (selectedSprout?.status === 'completed') {
-      // For MVP, generate mock document based on sprout's spark
-      return createMockResearchDocument(selectedSprout.spark);
+      // Use stored document, or convert legacy sprout
+      return selectedSprout.researchDocument ?? sproutToResearchDocument(selectedSprout);
     }
     return null;
   }, [selectedSprout]);
