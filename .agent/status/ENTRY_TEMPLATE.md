@@ -190,4 +190,18 @@ When writing a new entry:
 
 ---
 
+---
+
+## Source Control Policy
+
+| Location | Git Status | Committed When |
+|----------|------------|----------------|
+| `.agent/status/current/*.md` | **Gitignored** | Never (ephemeral) |
+| `.agent/status/archive/*.md` | **Tracked** | On log rotation |
+
+**Rationale:** Current entries are volatile working state (heartbeats, IN_PROGRESS).
+Archive is the permanent audit trail, committed when Randy rotates logs.
+
+---
+
 *Entry Template v1.0 - Phase 2 of Coordination Infrastructure v2*
