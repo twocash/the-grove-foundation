@@ -31,6 +31,9 @@ dist
 .env.test.local
 .env.production.local
 
+# Claude Code temp directories
+tmpclaude-*
+
 # Misc
 .DS_Store
 .npmrc
