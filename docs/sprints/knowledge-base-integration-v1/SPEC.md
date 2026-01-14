@@ -15,12 +15,18 @@
 
 | Field | Value |
 |-------|-------|
-| **Current Phase** | Phase 7 - Complete |
-| **Status** | ✅ Complete |
+| **Current Phase** | Phase 7 - Complete + Hotfix |
+| **Status** | ✅ Complete (hotfix applied) |
 | **Blocking Issues** | None |
 | **Last Updated** | 2026-01-13 |
-| **Next Action** | Ready for merge |
-| **Attention Anchor** | Sprint complete |
+| **Next Action** | Commit hotfix, deploy |
+| **Attention Anchor** | Sprint complete, schema fix applied |
+
+### Hotfix Applied (2026-01-13)
+
+Schema mismatch discovered during local testing. The `document` type collided with RAG `documents` table.
+
+**Fix:** Created `corpus_documents` table (migration 014) with JSONB meta+payload pattern. Updated SupabaseAdapter mapping. See `SESSION_NOTES.md` for details.
 
 ---
 

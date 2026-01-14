@@ -25,7 +25,7 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   journey: 'journeys',
   hub: 'hubs',
   sprout: 'documents', // Filter by tier = 'sprout'
-  document: 'documents', // No tier filter
+  document: 'corpus_documents', // Research corpus documents (JSONB meta+payload)
   node: 'journey_nodes',
   card: 'cards',
   moment: 'moments',
@@ -46,6 +46,7 @@ const JSONB_META_TYPES = new Set<GroveObjectType>([
   'research-agent-config',
   'writer-agent-config',
   'copilot-style',
+  'document', // Corpus documents use JSONB meta+payload (migration 014)
 ]);
 
 /**
