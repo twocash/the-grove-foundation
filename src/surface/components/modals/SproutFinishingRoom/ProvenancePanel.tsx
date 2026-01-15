@@ -1,10 +1,11 @@
 // src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx
-// Sprint: S2-SFR-Display - US-B001, US-B002
+// Sprint: S2-SFR-Display - US-B001, US-B002, US-B003, US-B004
 
 import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 import { CognitiveRoutingSection } from './components/CognitiveRoutingSection';
+import { CollapsibleSection } from './components/CollapsibleSection';
 
 export interface ProvenancePanelProps {
   sprout: Sprout;
@@ -15,8 +16,8 @@ export interface ProvenancePanelProps {
  *
  * US-B001: Display lens origin
  * US-B002: Cognitive routing with expandable details
- * US-B003: Knowledge sources (TBD)
- * US-B004: Collapsible sections (TBD)
+ * US-B003: Knowledge sources list
+ * US-B004: Collapsible panel sections
  */
 export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
   // US-B001: Extract lens name with fallback
@@ -30,30 +31,32 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
 
   return (
     <aside className="w-[280px] flex-shrink-0 border-r border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto">
-      {/* US-B001: Origin Section */}
-      <section className="p-4 border-b border-ink/10 dark:border-white/10">
-        <h3 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-3">
-          Origin
-        </h3>
+      {/* US-B001 + US-B004: Origin Section (collapsible) */}
+      <CollapsibleSection
+        title="Origin"
+        icon="🔮"
+        iconLabel="Lens"
+        storageKey="origin"
+        defaultExpanded={true}
+      >
         <div className="flex items-center gap-2">
-          <span className="text-lg" role="img" aria-label="Lens">
-            🔮
-          </span>
           <span className="text-sm font-medium text-ink dark:text-paper">
             {lensName}
           </span>
         </div>
-      </section>
+      </CollapsibleSection>
 
-      {/* US-B002: Cognitive Routing Section */}
+      {/* US-B002: Cognitive Routing Section (has own expand/collapse) */}
       <CognitiveRoutingSection routing={cognitiveRouting} />
 
-      {/* US-B003: Knowledge Sources Section */}
-      <section className="p-4">
-        <h3 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-3 flex items-center gap-2">
-          <span role="img" aria-label="Knowledge sources">📚</span>
-          Knowledge Sources
-        </h3>
+      {/* US-B003 + US-B004: Knowledge Sources Section (collapsible) */}
+      <CollapsibleSection
+        title="Knowledge Sources"
+        icon="📚"
+        iconLabel="Knowledge sources"
+        storageKey="knowledge-sources"
+        defaultExpanded={true}
+      >
         {knowledgeFiles.length > 0 ? (
           <ul className="space-y-1">
             {knowledgeFiles.map((file, idx) => (
@@ -71,7 +74,7 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
             No sources referenced
           </p>
         )}
-      </section>
+      </CollapsibleSection>
     </aside>
   );
 };
