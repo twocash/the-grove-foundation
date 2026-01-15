@@ -275,3 +275,28 @@ export {
   createFeatureFlagPayload,
   addAvailabilityChange
 } from './feature-flag';
+
+// 4D Experience Model types (Sprint: terminology-migration-4d)
+export {
+  // Canonical 4D types
+  type CognitiveDomain,
+  type ExperienceSequence,
+  type ExperienceMoment,
+  // Legacy aliases (deprecated)
+  type Hub,
+  type Sequence,
+  type Moment,
+  // Type guards
+  isCognitiveDomain,
+  isExperienceSequence,
+  isExperienceMoment,
+  // Utilities
+  EXPERIENCE_4D_TERMINOLOGY,
+  get4DTerminology
+} from './experience-4d';
+
+// Cognitive Routing (4D provenance model)
+export {
+  type CognitiveRouting,
+  buildCognitiveRouting
+} from './cognitive-routing';
