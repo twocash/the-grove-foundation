@@ -11,6 +11,18 @@
 
 ---
 
+## Multi-Model Context
+
+This document serves as shared context for all agents working on Grove Foundation, regardless of underlying model:
+
+- **Claude** (via Claude Code) - Primary development agent
+- **Gemini** (via API) - Planning and analysis
+- **Local models** (Kimik2, etc.) - Specialized tasks
+
+All agents share this context. Model-specific behaviors live in skill files (`~/.claude/skills/`), not here.
+
+---
+
 ## Architecture Summary (Post-Sprint 4)
 
 The codebase follows a three-layer architecture:
@@ -79,7 +91,7 @@ The codebase follows a three-layer architecture:
 | Backend | Express | 4.21.2 |
 | Runtime | Node.js | 20 (Alpine) |
 | Cloud | GCP (Cloud Run, GCS) | - |
-| AI | Google Gemini | 2.0-flash / 2.5-flash |
+| AI | Multi-model (Gemini, Claude, local) | 2.0-flash / 2.5-flash |
 | Language | TypeScript | 5.8.2 |
 
 ---
@@ -94,7 +106,7 @@ The codebase follows a three-layer architecture:
 | `/foundation/narrative` | NarrativeArchitect | Persona/card management |
 | `/foundation/engagement` | EngagementBridge | Event bus monitoring |
 | `/foundation/knowledge` | KnowledgeVault | RAG document management |
-| `/foundation/tuner` | RealityTuner | Flags + Topic hubs |
+| `/foundation/tuner` | RealityTuner | Flags + Cognitive domains |
 | `/foundation/audio` | AudioStudio | TTS generation |
 
 **Legacy Redirect:** `?admin=true` → `/foundation`
@@ -105,18 +117,18 @@ The codebase follows a three-layer architecture:
 
 ### Core Module (`src/core/`)
 - `schema/base.ts` - SectionId, ChatMessage, NarrativeNode
-- `schema/narrative.ts` - Persona, Card, GlobalSettings, TopicHub
+- `schema/narrative.ts` - Persona, Card, GlobalSettings, CognitiveDomain
 - `schema/engagement.ts` - EngagementState, Events, Triggers
 - `schema/lens.ts` - CustomLens, Archetype, UserInputs
 - `engine/triggerEvaluator.ts` - Reveal trigger evaluation
-- `engine/topicRouter.ts` - Query-to-hub routing
+- `engine/topicRouter.ts` - Query-to-cognitive-domain routing
 - `config/defaults.ts` - All DEFAULT_* values
 
 ### Foundation Consoles (`src/foundation/consoles/`)
 - `NarrativeArchitect.tsx` - Persona/card management
 - `EngagementBridge.tsx` - Event bus monitor
 - `KnowledgeVault.tsx` - RAG management
-- `RealityTuner.tsx` - Feature flags + Topic hubs
+ innumerable- `RealityTuner.tsx` - Feature flags + Cognitive domains
 - `AudioStudio.tsx` - TTS generation
 
 ### Surface Application
@@ -131,7 +143,7 @@ The codebase follows a three-layer architecture:
 - `services/audioService.ts` - TTS generation, WAV header handling
 
 ### Hooks (State Management)
-- `hooks/useNarrativeEngine.ts` - Primary v2 hook for lens/journey state
+- `hooks/useNarrativeEngine.ts` - Primary v2 hook for lens/experience sequence state
 - `hooks/useEngagementBus.ts` - Core engagement bus singleton (7 React hooks)
 - `hooks/useEngagementBridge.ts` - Backward-compatible bridge (replaces useRevealState)
 - `hooks/useCustomLens.ts` - Custom lens CRUD with encrypted localStorage
@@ -139,14 +151,14 @@ The codebase follows a three-layer architecture:
 - `hooks/useStreakTracking.ts` - User-local streak data persistence
 
 ### Types
-- `types.ts` - Legacy v1 types (SectionId, ChatMessage, NarrativeNode)
+- `types.ts` - Legacy v1 types (SectionId, ChatMessage, ExperienceMoment)
 - `types/lens.ts` - Custom lens and archetype types
 - `types/engagement.ts` - Engagement bus events, state, triggers
 
 ### Utils
 - `utils/engagementTriggers.ts` - Declarative trigger configuration engine
-- `utils/threadGenerator.ts` - Journey thread generation
-- `utils/topicRouter.ts` - Topic hub query routing
+- `utils/threadGenerator.ts` - Experience sequence thread generation
+- `utils/topicRouter.ts` - Cognitive domain query routing
 - `utils/encryption.ts` - AES-256 encryption for custom lens data
 
 ### Backend
@@ -172,19 +184,19 @@ The Core Loop:
 ### Data Schema (types.ts)
 
 ```typescript
-interface NarrativeNode {
+interface ExperienceMoment {
   id: string;              // e.g., "uni-hedge"
   label: string;           // UI button text
   query: string;           // LLM instruction
   contextSnippet?: string; // RAG override (verbatim quote)
-  next: string[];          // IDs of following nodes
+  next: string[];          // IDs of following moments
   sectionId?: SectionId;   // Entry point for section
   sourceFile?: string;     // Traceability
 }
 
 interface NarrativeGraph {
   version: string;
-  nodes: Record<string, NarrativeNode>;
+  moments: Record<string, ExperienceMoment>;
 }
 ```
 
@@ -201,7 +213,7 @@ interface NarrativeGraph {
 - `hooks/useNarrative.ts` - React hook for accessing narrative graph
 - `components/AdminNarrativeConsole.tsx` - Admin UI for narrative management
 - `components/NarrativeGraphView.tsx` - Visual graph editor
-- `components/NarrativeNodeCard.tsx` - Individual node editor card
+- `components/NarrativeNodeCard.tsx` - Individual experience moment editor card
 - `components/PromptHooks.tsx` - Dynamic prompt triggers from narrative graph
 - `components/Terminal.tsx` - Graph-aware chat with curated follow-ups
 
@@ -255,9 +267,9 @@ gcloud builds submit --config cloudbuild.yaml
 Access admin dashboard: `?admin=true` query parameter
 
 Tabs (6 total):
-- **Narrative Engine** - Personas, cards, journey management
+- **Narrative Engine** - Personas, cards, experience sequence management
 - **Flags** - Feature flag toggles
-- **Topic Hubs** - Query routing configuration
+- **Cognitive Domains** - Query routing configuration
 - **Audio Studio** - TTS generation, track management
 - **Knowledge Base** - RAG document management
 - **Engagement** - Event bus monitor, trigger simulation
@@ -274,151 +286,28 @@ Tabs (6 total):
 
 ---
 
-## Completed Sprints: Narrative Engine
+## Completed Sprints (Summary)
 
-### Sprint 1: Foundation ✓
-- [x] Define NarrativeNode/NarrativeGraph in types.ts
-- [x] GET /api/narrative endpoint
-- [x] POST /api/admin/narrative endpoint
-- [x] Seed narratives.json with University Journey example
+| Sprint | Key Deliverables | Primary Files |
+|--------|------------------|---------------|
+| 1-4: Narrative Engine | Graph-based narrative system, admin console | `hooks/useNarrative.ts`, `types.ts` |
+| 5-6: Custom Lens & Reveals | Lens wizard, reveal overlays, encryption | `components/Terminal/CustomLensWizard/`, `hooks/useRevealState.ts` |
+| 8: Engagement Bus | Event-driven state machine, triggers | `hooks/useEngagementBus.ts`, `types/engagement.ts` |
+| 9-12: Surface/Foundation | Route-based architecture, Tailwind npm | `src/surface/`, `src/foundation/` |
+| 13: Tiered RAG | Cognitive domain routing, two-tier context loading | `src/core/engine/ragLoader.ts`, `docs/knowledge/hubs.json` |
+| 14: A/B Testing | Deterministic variants, Genesis dashboard | `utils/abTesting.ts`, Genesis console |
+| 15: Sprout System | Capture responses with provenance | `src/core/schema/sprout.ts`, `hooks/useSproutStorage.ts` |
+| 16: Kinetic Commands | Declarative command system, palette | `src/core/commands/`, `components/Terminal/CommandPalette.tsx` |
 
-### Sprint 2: Generator ✓
-- [x] Install pdf-parse, multer
-- [x] Narrative Architect system prompt
-- [x] POST /api/admin/generate-narrative endpoint
-- [x] Basic AdminNarrativeConsole.tsx
+**Key APIs added across sprints:**
 
-### Sprint 3: Editor ✓
-- [x] NarrativeNodeCard.tsx component
-- [x] NarrativeGraphView.tsx component
-- [x] Visual graph editor UI
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/generate-lens` | AI lens generation |
+| `POST /api/admin/narrative` | Save narrative graph |
+| `POST /api/admin/generate-narrative` | Extract graph from file |
 
-### Sprint 4: Integration ✓
-- [x] useNarrative hook
-- [x] Refactor PromptHooks for dynamic data
-- [x] Terminal graph-aware state
-- [x] Curated follow-up chips
-
----
-
-## Completed Sprints: Custom Lens Creator & Reveal System
-
-### Sprint 5: Custom Lens Creator ✓
-- [x] `types/lens.ts` - LensCandidate, UserInputs, WizardState types
-- [x] `POST /api/generate-lens` - AI-powered lens generation endpoint
-- [x] `components/Terminal/CustomLensWizard/` - Multi-step wizard UI
-  - PrivacyStep, InputStep, GeneratingStep, SelectStep, ConfirmStep
-- [x] `hooks/useCustomLens.ts` - Custom lens persistence (localStorage with encryption)
-- [x] `utils/encryption.ts` - AES-256 encryption for sensitive lens data
-- [x] LensPicker integration with custom lens creation
-- [x] `utils/funnelAnalytics.ts` - Analytics tracking throughout wizard funnel
-
-### Sprint 6: Reveal System ✓
-- [x] `hooks/useRevealState.ts` - Reveal progression state management
-- [x] `utils/revealTiming.ts` - Timing-based reveal triggers
-- [x] `components/Terminal/Reveals/` - Reveal overlay components
-  - SimulationReveal - "You're in a simulation" dramatic reveal
-  - CustomLensOffer - Offer to create personalized lens
-  - TerminatorMode - Unlock advanced "no guardrails" mode
-  - FounderStory - Personal narrative from founder
-- [x] `components/Terminal/ConversionCTA/` - Archetype-specific CTAs
-- [x] Journey completion tracking with progressive reveals
-
-### Key Custom Lens Files
-
-| File | Purpose |
-|------|---------|
-| `types/lens.ts` | TypeScript types for lens wizard and candidates |
-| `hooks/useCustomLens.ts` | Custom lens CRUD with encrypted localStorage |
-| `hooks/useRevealState.ts` | Track reveal progression and session state |
-| `utils/funnelAnalytics.ts` | Wizard funnel analytics tracking |
-| `components/Terminal/CustomLensWizard/` | 5-step wizard components |
-| `components/Terminal/Reveals/` | Dramatic reveal overlays |
-| `components/Terminal/ConversionCTA/` | Archetype-specific conversion panels |
-
-### Custom Lens API
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| POST | `/api/generate-lens` | Generate 3 personalized lens options from user inputs |
-
-### Reveal Progression
-
-1. **Simulation Reveal** - After 3+ exchanges, shows "you're in a simulation" message
-2. **Custom Lens Offer** - After acknowledging simulation, offers personalized lens
-3. **Terminator Mode** - After 10+ minutes active, unlocks "no guardrails" mode
-4. **Founder Story** - After journey completion, shows personal narrative
-5. **Conversion CTA** - Final archetype-specific call-to-action
-
----
-
-## Completed Sprints: Engagement Bus (Sprint 8)
-
-### Sprint 8: Unified Engagement State Machine ✓
-
-**Problem Solved:** Three critical bugs in reveal system:
-1. Alternative triggers never fired (missing function params)
-2. React state timing issues (reveals checked before state updated)
-3. Scattered engagement metrics across multiple hooks
-
-**Architecture:** Event-driven singleton bus with declarative trigger configuration
-
-- [x] `types/engagement.ts` - Full type system (events, state, triggers, conditions)
-- [x] `hooks/useEngagementBus.ts` - Core singleton with 7 React hooks
-- [x] `hooks/useEngagementBridge.ts` - Backward-compatible bridge (replaces useRevealState)
-- [x] `utils/engagementTriggers.ts` - Declarative trigger configuration engine
-- [x] `components/Admin/EngagementConsole.tsx` - Admin UI for monitoring/simulating
-- [x] `docs/ENGAGEMENT_BUS_INTEGRATION.md` - Migration guide
-- [x] Terminal.tsx integration with event emissions
-
-### Key Engagement Bus Files
-
-| File | Purpose |
-|------|---------|
-| `types/engagement.ts` | Type definitions for events, state, triggers |
-| `hooks/useEngagementBus.ts` | Core singleton and 7 React hooks |
-| `hooks/useEngagementBridge.ts` | Drop-in replacement for useRevealState |
-| `utils/engagementTriggers.ts` | DEFAULT_TRIGGERS and evaluation engine |
-| `components/Admin/EngagementConsole.tsx` | Admin monitoring/simulation UI |
-
-### Event Types Emitted
-
-```typescript
-emit.exchangeSent(query, responseLength, cardId?)
-emit.journeyStarted(lensId, threadLength)
-emit.journeyCompleted(lensId, durationMinutes, cardsVisited)
-emit.topicExplored(topicId, topicLabel)
-emit.cardVisited(cardId, cardLabel, fromCard?)
-emit.lensSelected(lensId, isCustom, archetypeId?)
-emit.revealShown(revealType)
-emit.revealDismissed(revealType, action)
-```
-
-### Trigger Configuration (Declarative)
-
-```typescript
-{
-  id: 'simulation-reveal',
-  reveal: 'simulation',
-  priority: 100,
-  enabled: true,
-  conditions: {
-    OR: [
-      { field: 'journeysCompleted', value: { gte: 1 } },
-      { field: 'exchangeCount', value: { gte: 5 } },
-      { field: 'minutesActive', value: { gte: 3 } }
-    ]
-  },
-  requiresAcknowledgment: []
-}
-```
-
-### Admin Engagement Console
-
-Access via `/foundation/engagement`:
-- **Monitor**: Live metrics, event log, reveal queue status
-- **Triggers**: Enable/disable triggers, view conditions
-- **Simulate**: Manually emit events for testing
+**Engagement Bus Events:** `exchangeSent`, `sequenceStarted`, `sequenceCompleted`, `domainExplored`, `cardVisited`, `lensSelected`, `revealShown`, `revealDismissed`
 
 ---
 
@@ -448,7 +337,7 @@ location.reload();
 
 | Symptom | First Check |
 |---------|-------------|
-| Cards not appearing | Schema loaded? Journey active? Card has `next[]`? |
+| Cards not appearing | Schema loaded? Experience sequence active? Card has `next[]`? |
 | Reveals not triggering | Engagement state metrics? Trigger enabled? Already shown? |
 | Streak missing | Feature flag enabled? localStorage has streak data? |
 | Custom lens not saving | Encryption key exists? API call succeeded? |
@@ -459,7 +348,7 @@ location.reload();
 | Console | Debug Capability |
 |---------|------------------|
 | `/foundation/engagement` | Live metrics, event history, trigger status |
-| `/foundation/tuner` | Feature flags, topic hub query testing |
+| `/foundation/tuner` | Feature flags, cognitive domain query testing |
 | `/foundation/narrative` | Card connections, persona filtering |
 
 ### Key Data Flows
@@ -467,7 +356,7 @@ location.reload();
 **Message → Response:**
 ```
 Terminal.handleSendMessage() → chatService.streamChat()
-  → server.js /api/chat → routeToHub() → Gemini API
+  → server.js /api/chat → routeToDomain() → Gemini API
   → Stream to client → useEngagementEmit().exchangeSent()
 ```
 
@@ -480,505 +369,33 @@ emit('EXCHANGE_SENT') → EngagementBus.processEvent()
 
 ---
 
-## Completed Sprints: Surface/Foundation Migration (Sprints 9-12)
-
-### Sprint 9 (Routing + Tailwind): ✓
-- React Router v7 installed
-- Tailwind migrated from CDN to npm
-- Route-based navigation (`/`, `/foundation/*`)
-- Legacy `?admin=true` redirect
-
-### Sprint 10 (Foundation Layout): ✓
-- HUDHeader, NavSidebar, GridViewport components
-- Foundation design system (obsidian, holo-cyan)
-- DataPanel, GlowButton, MetricCard base components
-
-### Sprint 11 (Console Migration): ✓
-- NarrativeArchitect (from NarrativeConsole)
-- EngagementBridge (from EngagementConsole)
-- KnowledgeVault (from AdminRAGConsole)
-- RealityTuner (merged FeatureFlags + TopicHubs)
-- AudioStudio (from AdminAudioConsole)
-
-### Sprint 12 (Core Extraction): ✓
-- `src/core/schema/` - All type definitions
-- `src/core/engine/` - triggerEvaluator, topicRouter
-- `src/core/config/` - All defaults
-- Path aliases: `@core`, `@surface`, `@foundation`
-- Backward compatibility shims
-
----
-
-## Completed Sprints: Tiered RAG Architecture (Sprint 13)
-
-### Sprint 13: Tiered RAG with Topic Hub Routing ✓
-
-**Problem Solved:** Monolithic RAG loading (557KB → 50KB truncation with alphabetical loading) → lost relevant content
-
-**Solution:** Intelligent tiered loading with Topic Hub routing
-- **Before**: 28,313 bytes (~7K tokens), alphabetical, no relevance
-- **After**: 12,333 bytes Tier 1 + 27,259 bytes Tier 2 when hub matches (~10K tokens total)
-- **Result**: ~90% token reduction for generic queries, ~100% relevance improvement
-
-### Architecture
-
-```
-User Query → Topic Router → Tag Matching → Hub Selection
-                                              ↓
-                              ┌───────────────┴───────────────┐
-                              │                               │
-                         Tier 1 (~15KB)                  Tier 2 (~30KB)
-                         Always loaded                   If hub matches
-                         - grove-overview.md             - Hub primary file
-                         - key-concepts.md               - Supporting files
-                         - visionary-narrative.md
-```
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/core/schema/rag.ts` | HubsManifest, TieredContextResult types |
-| `src/core/engine/ragLoader.ts` | TypeScript tiered loader |
-| `docs/knowledge/hubs.json` | Declarative manifest (8 hubs) - also in GCS |
-| `server.js` | Production tiered RAG implementation |
-| `src/core/config/defaults.ts` | 8 TopicHub definitions with tags |
-
-### Topic Hubs (8 total)
-
-| Hub ID | Tags (sample) |
-|--------|---------------|
-| `ratchet-effect` | ratchet, 21 months, 7 month, doubling |
-| `infrastructure-bet` | $380 billion, hyperscaler, datacenter |
-| `observer-dynamic` | observer, gardener, simulation, watching |
-| `meta-philosophy` | meta, architecture, inside, already here |
-| `cognitive-split` | cognitive split, hierarchical, local, cloud |
-| `diary-system` | diary, memory, narrative, tamagotchi |
-| `technical-arch` | technical, NATS, CRDT, distributed |
-| `governance` | governance, foundation, knowledge commons |
-
-### GCS Data Files
-
-- `gs://grove-assets/knowledge/hubs.json` - Manifest (5-min cache TTL)
-- `gs://grove-assets/knowledge/_default/` - Tier 1 files
-- `gs://grove-assets/knowledge/*.md` - Tier 2 knowledge files (hashed names)
-
-### Cache Invalidation
-
-- Manifest cache: 5-min TTL, invalidates on admin save via `/api/admin/narrative`
-- File cache: 10-min TTL per file
-
----
-
-## Completed Sprints: A/B Testing & Genesis Dashboard (Sprint 14)
-
-### Sprint 14: A/B Testing Infrastructure + Genesis Dashboard ✓
-
-**Features Added:**
-- Deterministic A/B variant selection based on session ID
-- Hook variant support for prompt hooks across all sections
-- CTA variant support for Get Involved buttons
-- Genesis dashboard for metrics visualization
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/core/schema/ab-testing.ts` | HookVariant, ABTest, VariantSelection types |
-| `utils/abTesting.ts` | selectVariant(), getSessionId(), getHookVariant() |
-| `utils/genesisMetrics.ts` | aggregateGenesisMetrics(), getVariantPerformance() |
-| `src/foundation/consoles/Genesis.tsx` | Genesis dashboard with 3 tabs |
-
-### A/B Testing Architecture
-
-```
-Session ID (localStorage) + Element ID
-         ↓
-    Hash Function (deterministic)
-         ↓
-    Weight-based Selection
-         ↓
-    Same variant every time for same user
-```
-
-### Variant Configuration
-
-Variants are defined in `constants.ts`:
-
-```typescript
-// Hook variants in SECTION_HOOKS
-{
-  text: "What is the Ratchet Effect?",
-  prompt: "...",
-  variants: [
-    { id: "ratchet-1a", text: "What is the Ratchet Effect?", weight: 50 },
-    { id: "ratchet-1b", text: "Explain the Ratchet", weight: 50 }
-  ]
-}
-
-// CTA variants in CTA_VARIANTS
-{
-  readResearch: {
-    id: 'cta-read-research',
-    variants: [
-      { id: 'read-1a', text: 'Read on Notion', weight: 50 },
-      { id: 'read-1b', text: 'View White Paper', weight: 50 }
-    ]
-  }
-}
-```
-
-### Genesis Dashboard
-
-Access via `/foundation/genesis`:
-
-| Tab | Purpose |
-|-----|---------|
-| Overview | Core metrics grid, top hooks, section engagement |
-| Variants | Variant performance table, click distribution |
-| Funnel | Wizard conversion funnel visualization |
-
-### Telemetry Integration
-
-`trackPromptHookClicked()` now includes:
-- `variantId` - Which variant was shown
-- `experimentId` - Which experiment the variant belongs to
-
----
-
-## Completed Sprints: Sprout System (Sprint 15)
-
-### Sprint 15: Sprout System MVP
-
-**Goal:** Transform the Terminal from a content delivery interface into a content refinement engine where users can capture valuable LLM responses as "sprouts" with full provenance.
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/core/schema/sprout.ts` | Sprout, SproutProvenance, SproutStorage types |
-| `hooks/useSproutStorage.ts` | localStorage CRUD with v2 migration |
-| `hooks/useSproutCapture.ts` | Capture hook with flag parsing and provenance |
-| `hooks/useSproutStats.ts` | Aggregated statistics |
-| `components/Terminal/CommandInput/commands/sprout.ts` | /sprout command |
-| `components/Terminal/CommandInput/commands/garden.ts` | /garden command (switches mode) |
-| `src/widget/views/GardenView.tsx` | Garden mode view with sprout gallery |
-| `components/Terminal/Modals/GardenModal.tsx` | @deprecated - replaced by GardenView |
-| `docs/SPROUT_SYSTEM.md` | Academic architecture document |
-
-### Commands Added
-
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| `/sprout` | `/capture`, `/save` | Capture last response as a sprout |
-| `/garden` | `/sprouts`, `/contributions` | Switch to garden mode (view sprouts) |
-
-### Sprout Command Flags
-
-```bash
-/sprout                          # Capture with no tags
-/sprout --tag=ratchet            # Capture with single tag
-/sprout --tags=ratchet,infra     # Capture with multiple tags
-/sprout --note="Great framing"   # Capture with annotation
-```
-
-### localStorage Keys
-
-| Key | Purpose |
-|-----|---------|
-| `grove-sprouts` | All captured sprouts with provenance |
-| `grove-session-id` | Anonymous session identifier |
-
-### Data Model
-
-```typescript
-interface SproutProvenance {
-  lens: { id: string; name: string } | null;
-  hub: { id: string; name: string } | null;
-  journey: { id: string; name: string } | null;
-  node: { id: string; name: string } | null;
-  knowledgeFiles: string[];
-  model?: string;
-  generatedAt: string;
-}
-
-interface Sprout {
-  id: string;           // UUID
-  capturedAt: string;   // ISO timestamp
-  response: string;     // Verbatim LLM output
-  query: string;        // User's original query
-  provenance?: SproutProvenance; // Rich context (v2)
-  // Legacy flat fields (v1 - preserved for compatibility)
-  personaId: string;    // Active lens ID
-  journeyId: string;    // Active journey ID
-  hubId: string;        // Topic hub matched
-  nodeId: string;       // Card/node triggered
-  status: 'sprout' | 'sapling' | 'tree'; // Lifecycle stage
-  tags: string[];       // User annotations
-  notes: string;        // Human commentary
-  sessionId: string;    // Anonymous session
-  creatorId: string;    // Future: Grove ID
-}
-```
-
-### Storage Schema
-
-- **Version 1**: Original flat provenance fields
-- **Version 2**: Added `SproutProvenance` with human-readable names
-- Storage automatically migrates v1 → v2 on load
-
-### StatsModal Integration
-
-The `/stats` command now includes a "Your Garden" section showing:
-- Total sprouts captured
-- Contribution lifecycle visualization
-- Sprouts by tag breakdown
-- Network Impact placeholder (future)
-
-### Future Phases
-
-| Phase | Capability |
-|-------|------------|
-| 2 | Grove ID integration, claim anonymous sprouts |
-| 3 | Server-side storage, admin review workflow |
-| 4 | Network propagation, credit attribution |
-
-### Sprint 15b: Sprout System Wiring
-
-**Goal:** Connect the Sprout infrastructure to the Terminal and Widget modes.
-
-**Changes:**
-- Added `SproutProvenance` with human-readable names for lens, hub, journey, node
-- Storage schema migrated to v2 with automatic backward-compatible migration
-- Terminal now builds provenance with names via `getLastResponse()` callback
-- `/garden` command switches to garden mode instead of opening modal
-- GardenView displays real sprout gallery with growth stage grouping
-- StatsModal includes "View Garden →" link to switch modes
-- Widget `incrementSproutCount()` called on successful captures
-
-**Key Integration Points:**
-- `CommandContext.getLastResponse()` - Returns last AI response for capture
-- `CommandContext.getSessionContext()` - Returns current lens/journey/node context
-- `CommandContext.captureSprout()` - Executes capture with provenance
-- `CommandResult.type: 'action'` with `action: 'switch-mode'` for mode transitions
-
----
-
-## Completed Sprints: Kinetic Command System (Sprint 16)
-
-### Sprint 16: Terminal Kinetic Commands v1
-
-**Goal:** Transform the Terminal from a reactive chatbot to a **kinetic interface** with declarative command processing, enabling slash commands for navigation, actions, and future Proto-Skills.
-
-### Architecture
-
-The command system follows the three-layer architecture:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      USER INPUT                              │
-│              "/journey ghost" OR "What is Grove?"           │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     INPUT ROUTER                             │
-│           isCommand(input) → "/" prefix check               │
-└─────────────────────────────────────────────────────────────┘
-                    │               │
-            ┌───────┘               └────────┐
-            ▼                                ▼
-┌─────────────────────┐          ┌─────────────────────┐
-│   COMMAND ENGINE    │          │    CHAT ENGINE      │
-│  (src/core/commands)│          │  (existing API)     │
-│                     │          │                     │
-│  Parser → Registry  │          │  sendMessageStream  │
-│  → Resolver         │          │                     │
-│  → Executor         │          └─────────────────────┘
-└─────────────────────┘
-```
-
-### Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/core/commands/schema.ts` | CommandDefinition, CommandAction types |
-| `src/core/commands/command-definitions.ts` | 8 declarative command configs |
-| `src/core/commands/registry.ts` | CommandRegistry class (lookup, search) |
-| `src/core/commands/parser.ts` | Tokenizer, parseCommand, isCommand |
-| `src/core/commands/executor.ts` | ExecutionContext, executeCommand |
-| `src/core/commands/resolvers/` | journey.ts, lens.ts fuzzy matchers |
-| `components/Terminal/CommandPalette.tsx` | Searchable command picker UI |
-| `components/Terminal/StatsOverlay.tsx` | Session statistics display |
-| `components/Terminal/useCommands.ts` | React hook bridging core to Terminal |
-
-### Commands Available
-
-| Command | Aliases | Description |
-|---------|---------|-------------|
-| `/journey [name]` | `/j` | Start or pick a journey |
-| `/lens [name]` | `/l` | Switch or pick a lens |
-| `/plant` | `/p`, `/sprout` | Capture current response |
-| `/stats` | — | View session statistics |
-| `/garden` | `/g` | View captured sprouts |
-| `/explore` | `/e` | Enter explore mode |
-| `/help` | `/?`, `/commands` | Show command palette |
-| `/welcome` | — | Show welcome screen |
-
-### Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+K` / `Cmd+K` | Open command palette |
-| `/` in input | Trigger command hints |
-| Arrow keys | Navigate command palette |
-| `Enter` | Execute selected command |
-| `Escape` | Close palette |
-
-### Patterns Established
-
-| Pattern | Description |
-|---------|-------------|
-| **Registry Pattern** | Declarative mapping of triggers → actions |
-| **Discriminated Union** | Type-safe action handling via `type` field |
-| **Resolver Pattern** | Fuzzy matching with suggestions |
-| **Execution Context** | Dependency injection for handlers |
-| **Fallback Actions** | Graceful degradation when args missing |
-
-### Extension Guide
-
-**Adding a new command (no TypeScript changes):**
-```typescript
-// Add to command-definitions.ts
-{
-  id: 'my-command',
-  trigger: 'mycommand',
-  aliases: ['mc'],
-  description: 'Does something useful',
-  category: 'action',
-  action: { type: 'show-overlay', overlay: 'my-overlay' }
-}
-```
-
-**Adding a new resolver:**
-```typescript
-// Create resolvers/mytype.ts
-export const myResolver: Resolver<MyType> = {
-  type: 'mytype',
-  resolve(value, context) { /* fuzzy match */ },
-  getSuggestions(partial, context) { /* autocomplete */ }
-};
-```
-
-### Repurposing Potential
-
-The command architecture can power:
-- **Voice Commands**: Speech-to-text → parseCommand → executor
-- **API Endpoints**: `POST /api/commands { "command": "/journey ghost" }`
-- **CLI Tools**: Node.js CLI consuming `@core/commands`
-- **Macro System**: Chain commands with `/macro`
-- **Foundation Admin**: `/publish`, `/audit` commands
-- **Proto-Skills**: `/skill clinical-intake` → spawn skill context
-
-### DEX Alignment
-
-| Pillar | Implementation |
-|--------|----------------|
-| **Declarative Sovereignty** | Commands in JSON, not code |
-| **Capability Agnosticism** | Same commands regardless of AI model |
-| **Provenance** | Every execution loggable with context |
-| **Organic Scalability** | 8 → 80 commands without restructuring |
-
----
-
 ## CI/CD and Deployment
 
-### Git Worktree Setup
+**Full source control protocol:** `.agent/protocols/source-control.md`
 
-This project uses Claude Code worktrees. The main repository is at:
-- **Main repo**: `C:\GitHub\the-grove-foundation` (branch: main)
-- **Worktrees**: `C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch-name>`
+### Worktree Setup
 
-### Deployment Checklist
+- **Main repo:** `C:\GitHub\the-grove-foundation` (branch: main)
+- **Worktrees:** `C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch>`
 
-**CRITICAL**: Cloud Build runs from the main repo, NOT worktrees.
+**CRITICAL:** Cloud Build runs from main repo, NOT worktrees.
 
-1. **Develop in worktree**
-   ```bash
-   cd C:\Users\jim\.claude-worktrees\the-grove-foundation\<branch>
-   # Make changes, test locally
-   ```
+### Deploy Sequence
 
-2. **Commit and push**
-   ```bash
-   git add . && git commit -m "..." && git push origin <branch>
-   ```
-
-3. **Create PR and merge**
-   ```bash
-   gh pr create --title "..." --body "..."
-   gh pr merge <number> --merge
-   ```
-
-4. **Sync main repo and deploy**
-   ```bash
-   cd C:\GitHub\the-grove-foundation
-   git fetch origin && git pull origin main
-   gcloud builds submit --config cloudbuild.yaml
-   ```
-
-5. **Verify deployment**
-   ```bash
-   gcloud run services describe grove-foundation --region=us-central1 \
-     --format="value(status.latestReadyRevisionName)"
-   ```
-
-### Post-Deployment Testing
-
-Run the RAG test matrix after each deployment:
-
-| Query | Expected Hub | Expected Behavior |
-|-------|--------------|-------------------|
-| "Tell me about the Ratchet" | ratchet-effect | Tier 2 loads, ~40KB total |
-| "Observer dynamic" | observer-dynamic | Tier 2 loads |
-| "How does Grove work?" | (none) | Tier 1 only, ~12KB |
-| "$380 billion" | infrastructure-bet | Tier 2 loads |
-| "Inside Grove?" | meta-philosophy | Tier 2 loads |
-
-Check logs to verify:
 ```bash
-gcloud logging read "resource.type=cloud_run_revision AND textPayload:RAG" --limit=10
+# After PR merged
+cd C:\GitHub\the-grove-foundation
+git fetch origin && git pull origin main
+gcloud builds submit --config cloudbuild.yaml
 ```
 
-Expected log pattern:
-```
-[RAG] Manifest loaded: 8 hubs
-[RAG] Loading Tier 1 (budget: 15000 bytes)
-[RAG] Tier 1 loaded: 12333 bytes from 3 files
-[RAG] Loading Tier 2: <hub-id> (budget: X bytes)
-[RAG] Tier 2 loaded: X bytes
-[RAG] Total context: X bytes (~Y tokens)
-```
+### Common Issues
 
-### Common Deployment Issues
-
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Old code in production | Built from worktree not main | Pull to main repo, rebuild |
-| Manifest not loading | GCS file missing/corrupt | Check `gs://grove-assets/knowledge/hubs.json` |
-| File not found | Filename mismatch (spaces, hashes) | Check `gcsFileMapping` in manifest |
-| Rate limit errors | Gemini quota exhausted | Wait ~60s, retry |
-
-### GCS Data Sync
-
-When updating manifest or knowledge files:
-```bash
-# Upload manifest
-gcloud storage cp docs/knowledge/hubs.json gs://grove-assets/knowledge/hubs.json
-
-# Verify
-gcloud storage cat gs://grove-assets/knowledge/hubs.json | head -20
-```
+| Issue | Fix |
+|-------|-----|
+| Old code in production | Pull to main repo, rebuild |
+| Manifest not loading | Check `gs://grove-assets/knowledge/domains.json` |
+| Rate limit errors | Wait ~60s, retry |
 
 ---
 
@@ -1042,3 +459,172 @@ After completing Foundation Loop, update the sprint page:
 2. Add artifacts table with local paths
 3. Add epics checklist
 4. Update database Status property to `🎯 ready`
+
+### Epic Organization
+
+Epics group related sprints into a coherent feature delivery. The Grove Feature Roadmap uses a hierarchical structure:
+
+```
+Epic (🏔️ large feature)
+├── Sprint 1 (foundation)
+├── Sprint 2 (display/data)
+├── Sprint 3 (actions/integration)
+└── Sprint N (polish/testing)
+```
+
+**Database Fields for Epic Tracking:**
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| **Effort** | Set to `🏔️ epic` for parent epic entries | `🏔️ epic` |
+| **Parent Spec** | Text field linking sprint to parent epic | `Sprout Finishing Room v1` |
+| **Status** | Track overall epic progress via child sprint statuses | `✅ complete` |
+
+### Naming Conventions
+
+**Epic Naming:** `Feature Name vX`
+- Example: `Sprout Finishing Room v1`, `Research Lifecycle v1`, `Knowledge Commons Pipeline v1`
+
+**Sprint Naming:** `SN-EPIC-SprintName` or `SN||EPIC-SprintName`
+- `SN` = Sprint number within the epic (S1, S2, S3...)
+- `EPIC` = 2-4 letter abbreviation of the epic name
+- `SprintName` = Descriptive name for the sprint's focus
+
+**Examples (SFR Epic):**
+```
+Epic: Sprout Finishing Room v1
+├── S1-SFR-Shell        # Foundation sprint
+├── S2||SFR-Display     # Display sprint
+└── S3||SFR-Actions     # Actions sprint
+```
+
+**Examples (Research Lifecycle Epic):**
+```
+Epic: Research Lifecycle v1
+├── S1-RL-Evidence      # Evidence collection
+├── S2-RL-Writer        # Writer agent
+├── S3-RL-Pipeline      # Pipeline integration
+└── S7-RL-Polish        # Demo prep (non-sequential OK)
+```
+
+### Epic Completion Workflow
+
+1. **Mark child sprints complete** as they finish
+2. **Update epic status** when all child sprints complete
+3. **Archive status entries** for completed sprints
+4. **Document epic in closure report** (see `.agent/status/SPRINT_CLOSURE_*.md`)
+
+### Finding What's Next
+
+To identify the next sprint in an epic:
+1. Query Grove Feature Roadmap with `Parent Spec` = epic name
+2. Filter by `Status` != `✅ complete`
+3. Sort by sprint number (S1, S2, S3...)
+
+```
+# Example: Find incomplete SFR sprints
+Search: "Parent Spec: Sprout Finishing Room v1" + Status != complete
+```
+
+---
+
+## Agent Coordination System
+
+### Skills Inventory
+
+| Skill | Triggers | Purpose |
+|-------|----------|---------|
+| `/randy` | "chief-of-staff", "cos", "infrastructure check" | Infrastructure health, protocol validation (run FIRST) |
+| `/sprintmaster` | "let's roll", "sprint status", "what's cooking" | Session warmup, pipeline dashboard, agent dispatch |
+| `/grove-foundation-loop` | "plan sprint", "Foundation Loop", "Trellis" | Sprint planning with tier selection |
+| `/grove-execution-protocol` | "sprint", "implement", "build feature" | Execution contracts, DEX compliance |
+| `/user-story-refinery` | "user stories", "acceptance criteria" | Generate Gherkin ACs from requirements |
+| `/dex-master` | post-commit, manual scan | Code review → Fix Queue + Strategic Notes |
+| `/mine-sweeper` | "test cleanup", "fix tests", "clear fixme" | Test debt cleanup with strangler fig boundaries |
+| `/product-manager` | "product vision", "draft brief", "roadmap" | Strategic product ownership, DEX-aligned briefs |
+| `/ui-ux-designer` | "wireframe", "mockup", "design system" | Interface design, pattern documentation |
+| `/user-experience-chief` | (with Product Pod) | DEX guardian, approval authority |
+
+### Status Log System
+
+**Location:** `.agent/status/current/{NNN}-{timestamp}-{agent}.md`
+
+**Template:** `.agent/status/ENTRY_TEMPLATE.md`
+
+**Status values:** STARTED → IN_PROGRESS → COMPLETE (with BLOCKED branch)
+
+**Heartbeat:** Update `heartbeat:` field in-place every 5 min during active work. 30-min staleness threshold.
+
+### Agent Startup Sequence
+
+```
+1. /randy              # FIRST - infrastructure health check
+2. /sprintmaster       # Pipeline dashboard, agent dispatch
+3. Developer/QA/etc.   # As dispatched per sprint queue
+```
+
+**Chief of Staff runs first.** If infrastructure is unhealthy, fix before spawning other agents.
+
+### Key File Locations
+
+| Location | Purpose | Git |
+|----------|---------|-----|
+| `~/.claude/skills/` | Skill definitions | Local |
+| `.agent/roles/` | Role definitions | Tracked |
+| `.agent/config/` | Coordination config | Tracked |
+| `.agent/status/current/` | Active entries | **Gitignored** |
+| `.agent/status/archive/` | Historical entries | Tracked |
+| `~/.claude/notes/grove-runbook.md` | Central agent reference | Local |
+
+### Product Pod Workflow
+
+The Product Pod is a collaborative team of three skills for new product initiatives:
+
+**Members:**
+- **Product Manager** - Drafts briefs, DEX compliance, Advisory Council integration
+- **UI/UX Designer** - Wireframes, pattern documentation, accessibility
+- **User Experience Chief** - DEX guardian, approval authority, cross-functional alignment
+
+**Workflow:**
+```
+Initiative triggered
+       │
+       ▼
+┌─────────────────┐
+│ Product Manager │ ◄─── Drafts Product Brief
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   UX Chief      │ ◄─── Reviews DEX alignment
+│                 │      Consults Advisory Council
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  UI/UX Designer │ ◄─── Creates wireframes
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   UX Chief      │ ◄─── Final DEX sign-off
+│   APPROVAL      │
+└────────┬────────┘
+         │
+         ▼
+   User Review → user-story-refinery
+```
+
+**Spawn Command:**
+```
+spawn product-pod {initiative}
+```
+
+### DEX Pillars (verified by UX Chief)
+
+| Pillar | Verification |
+|--------|--------------|
+| **Declarative Sovereignty** | Can behavior be changed via config, not code? |
+| **Capability Agnosticism** | Does it work regardless of which model executes? |
+| **Provenance as Infrastructure** | Is origin/authorship tracked for all data? |
+| **Organic Scalability** | Does structure support growth without redesign? |
