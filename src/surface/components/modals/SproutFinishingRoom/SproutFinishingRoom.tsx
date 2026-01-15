@@ -32,13 +32,11 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // US-A001: Modal respects isOpen prop
-  if (!isOpen) {
-    return null;
-  }
-
   // US-A003: Escape key closes modal
+  // Hook must be called unconditionally per Rules of Hooks
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
@@ -47,21 +45,29 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [isOpen, onClose]);
 
   // US-A001: Prevent body scroll when modal is open
   useEffect(() => {
+    if (!isOpen) return;
+
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = originalOverflow;
     };
-  }, []);
+  }, [isOpen]);
 
   // US-A003: Focus trap - focus close button on mount
   useEffect(() => {
+    if (!isOpen) return;
     closeButtonRef.current?.focus();
-  }, []);
+  }, [isOpen]);
+
+  // US-A001: Modal respects isOpen prop - early return AFTER hooks
+  if (!isOpen) {
+    return null;
+  }
 
   // US-A003: Focus trap implementation
   const handleKeyDownTrap = useCallback((event: React.KeyboardEvent) => {
