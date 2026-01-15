@@ -25,6 +25,9 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
   // US-B002: Build cognitive routing from provenance
   const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
 
+  // US-B003: Extract knowledge files
+  const knowledgeFiles = sprout.provenance?.knowledgeFiles || [];
+
   return (
     <aside className="w-[280px] flex-shrink-0 border-r border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto">
       {/* US-B001: Origin Section */}
@@ -45,11 +48,29 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
       {/* US-B002: Cognitive Routing Section */}
       <CognitiveRoutingSection routing={cognitiveRouting} />
 
-      {/* Placeholder for US-B003: Knowledge Sources */}
+      {/* US-B003: Knowledge Sources Section */}
       <section className="p-4">
-        <p className="text-xs text-ink-muted dark:text-paper/50 font-mono">
-          Knowledge Sources (US-B003)
-        </p>
+        <h3 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-3 flex items-center gap-2">
+          <span role="img" aria-label="Knowledge sources">📚</span>
+          Knowledge Sources
+        </h3>
+        {knowledgeFiles.length > 0 ? (
+          <ul className="space-y-1">
+            {knowledgeFiles.map((file, idx) => (
+              <li
+                key={idx}
+                className="text-sm text-ink-muted dark:text-paper/70 flex items-center gap-2"
+              >
+                <span className="text-ink/30 dark:text-paper/30">•</span>
+                <span className="font-mono text-xs truncate">{file}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-ink-muted dark:text-paper/50 italic">
+            No sources referenced
+          </p>
+        )}
       </section>
     </aside>
   );
