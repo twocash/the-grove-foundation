@@ -45,7 +45,8 @@ const STATUS_FILTER_OPTIONS: { value: ResearchSproutStatus | 'all'; label: strin
 // =============================================================================
 
 export function GardenTray() {
-  const { sprouts, isLoading, error, getStatusCounts } = useResearchSprouts();
+  // Sprint: results-wiring-v1 - Add selectSprout for opening full results view
+  const { sprouts, isLoading, error, getStatusCounts, selectSprout } = useResearchSprouts();
 
   // Notifications and pulse animation
   const { pulseState, clearPulse } = useSproutNotifications({
@@ -266,6 +267,7 @@ export function GardenTray() {
                     emoji={STATUS_EMOJI[sprout.status]}
                     isExpanded={isExpanded}
                     isNewlyReady={pulseState.pulseSourceIds.includes(sprout.id)}
+                    onSelect={selectSprout}
                   />
                 ))}
               </div>

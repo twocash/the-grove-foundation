@@ -2,6 +2,10 @@
 // Mock ResearchDocument for development and testing
 // Sprint: results-display-v1
 //
+// @deprecated Use sprout.researchDocument or sproutToResearchDocument() instead.
+// This mock was replaced in results-wiring-v1 sprint.
+// Kept for test fixtures and ResultsDisplayDemo component.
+//
 // This generates realistic mock data for the Results Display components.
 
 import type { ResearchDocument, Citation } from '@core/schema/research-document';

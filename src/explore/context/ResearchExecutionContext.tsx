@@ -95,7 +95,7 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
         // Transition to completed
         await transitionStatus(sprout.id, 'completed', 'Research pipeline completed', 'system');
 
-        // Update with results
+        // Update with results - including the full ResearchDocument for display
         await updateResults(sprout.id, {
           synthesis: {
             documentId: result.document.id,
@@ -110,6 +110,8 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
             apiCallCount: 0, // Not tracked in pipeline result
             errorMessage: undefined,
           },
+          // Store full document for direct display (results-wiring-v1)
+          researchDocument: result.document,
         });
       } else if (result.error) {
         // Transition to blocked on error

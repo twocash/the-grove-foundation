@@ -16,7 +16,7 @@ Sprint execution and implementation for Grove Foundation features.
 |----------------|-------------|
 | Sprint execution | Follow EXECUTION_PROMPT phases |
 | Code changes | Implement features per spec |
-| Status updates | Write entries to `sprint-status-live.md` per Section 6.4 |
+| Status updates | Write entries to `.agent/status/current/` |
 | Visual verification | Capture screenshots per Article IX |
 | REVIEW.html | Complete acceptance criteria evidence |
 | Tests | Run tests, fix failures |
@@ -34,33 +34,76 @@ Sprint execution and implementation for Grove Foundation features.
 - Test results
 - Screenshots in `docs/sprints/{name}/screenshots/`
 - REVIEW.html
-- Status updates to `sprint-status-live.md`
+- Status entries in `.agent/status/current/`
 
 ## Status File
 
-Write status updates to: `~/.claude/notes/sprint-status-live.md`
+**Location:** `.agent/status/current/` (numbered YAML+markdown files)
+
+**Legacy (read-only):** `~/.claude/notes/sprint-status-live.md`
+
+**Template reference:** `.agent/status/ENTRY_TEMPLATE.md`
 
 ### When to Write Status
 
-1. **STARTED** — When beginning sprint work
-2. **IN_PROGRESS** — At each phase completion
-3. **COMPLETE** — When sprint is done with test results
-4. **BLOCKED** — If unable to proceed
+| Status | When | New File? |
+|--------|------|-----------|
+| **STARTED** | Beginning sprint work | Yes - new entry |
+| **IN_PROGRESS** | Phase completion | Yes - new entry |
+| **COMPLETE** | Sprint done, tests pass | Yes - new entry |
+| **BLOCKED** | Cannot proceed | Yes - new entry |
+| **heartbeat** | Every 5 min during active work | No - update in-place |
 
-### Entry Format
+### File Naming
 
-```markdown
+```
+{NNN}-{timestamp}-{agent}.md
+
+Example: 001-2026-01-14T03-30-00Z-developer.md
+```
+
+### Entry Format (YAML + Markdown)
+
+```yaml
 ---
-## {ISO Timestamp} | {Sprint Name} | {Phase}
-**Agent:** Developer / {branch or session-id}
-**Status:** STARTED | IN_PROGRESS | COMPLETE | BLOCKED
+timestamp: 2026-01-14T03:30:00Z
+sprint: results-wiring-v1
+status: IN_PROGRESS
+agent: developer
+branch: main
+heartbeat: 2026-01-14T03:30:00Z
+severity: INFO
+sprint_id:                           # Leave empty - Sprintmaster backfills
+notion_synced: false
+phase: Implementation
+commit:
+---
+
+## 2026-01-14T03:30:00Z | Results Wiring v1 | Implementation
+
+**Agent:** Developer / main
+**Status:** IN_PROGRESS
 **Summary:** {1-2 sentences describing work done}
 **Files:** {key files changed, comma-separated}
 **Tests:** {pass/fail count or "N/A"}
+**Commit:** {hash or TBD}
 **Unblocks:** {what this completion enables}
 **Next:** {recommended next action}
----
 ```
+
+### Heartbeat Updates
+
+During active IN_PROGRESS work, update `heartbeat:` field every 5 minutes (YAML only, not markdown body).
+
+### Status State Machine
+
+```
+STARTED -> IN_PROGRESS -> COMPLETE
+               |
+           BLOCKED -> IN_PROGRESS -> COMPLETE
+```
+
+See `.agent/status/ENTRY_TEMPLATE.md` for full rules.
 
 ## Activation Prompt
 
@@ -71,13 +114,14 @@ Your responsibilities:
 - Execute sprint phases per EXECUTION_PROMPT
 - Write code following established patterns
 - Run tests and fix failures
-- Write status updates to live log
+- Write status entries to .agent/status/current/
 - Capture screenshots for QA
 - Complete REVIEW.html
 
 Execute per: docs/sprints/{name}/EXECUTION_PROMPT.md
-Write status to: ~/.claude/notes/sprint-status-live.md
+Write status to: .agent/status/current/{NNN}-{timestamp}-developer.md
 Reference: .agent/roles/developer.md
+Template: .agent/status/ENTRY_TEMPLATE.md
 
 On completion: Write COMPLETE entry with test results.
 You do NOT update Notion directly - Sprintmaster handles that.
@@ -86,9 +130,10 @@ You do NOT update Notion directly - Sprintmaster handles that.
 ## Sprint Execution Flow
 
 1. Receive sprint assignment from Sprintmaster (with gate clearance)
-2. Write STARTED status entry
+2. Write STARTED status entry to `.agent/status/current/`
 3. Execute phases per EXECUTION_PROMPT
 4. Write IN_PROGRESS entries at phase boundaries
-5. Complete visual verification (Article IX)
-6. Write COMPLETE status with test results
-7. Wait for Sprintmaster to clear next gate
+5. Update heartbeat every 5 minutes during active work
+6. Complete visual verification (Article IX)
+7. Write COMPLETE status with test results
+8. Wait for Sprintmaster to sync Notion and clear next gate

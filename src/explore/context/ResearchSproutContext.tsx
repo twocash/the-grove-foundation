@@ -12,6 +12,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -21,6 +22,7 @@ import type {
   CreateResearchSproutInput,
   StatusTransition,
 } from '@core/schema/research-sprout';
+import type { ResearchDocument } from '@core/schema/research-document';
 import {
   createResearchSprout,
   canTransitionTo,
@@ -68,6 +70,7 @@ function rowToSprout(row: Record<string, unknown>): ResearchSprout {
     evidence: (row.evidence as ResearchSprout['evidence']) || [],
     synthesis: row.synthesis as ResearchSprout['synthesis'] | null,
     execution: row.execution as ResearchSprout['execution'] | null,
+    researchDocument: row.research_document as ResearchDocument | undefined,
     statusHistory: (row.status_history as ResearchSprout['statusHistory']) || [],
     appliedRuleIds: (row.applied_rule_ids as string[]) || [],
     inferenceConfidence: row.inference_confidence as number | null,
@@ -103,6 +106,7 @@ function sproutToRow(sprout: Partial<ResearchSprout> & { groveId: string }): Rec
   if (sprout.evidence !== undefined) row.evidence = sprout.evidence;
   if (sprout.synthesis !== undefined) row.synthesis = sprout.synthesis;
   if (sprout.execution !== undefined) row.execution = sprout.execution;
+  if (sprout.researchDocument !== undefined) row.research_document = sprout.researchDocument;
   if (sprout.statusHistory !== undefined) row.status_history = sprout.statusHistory;
   if (sprout.appliedRuleIds !== undefined) row.applied_rule_ids = sprout.appliedRuleIds;
   if (sprout.inferenceConfidence !== undefined) row.inference_confidence = sprout.inferenceConfidence;
@@ -217,10 +221,10 @@ interface ResearchSproutActions {
     updates: Partial<Pick<ResearchSprout, 'tags' | 'notes' | 'rating' | 'reviewed'>>
   ) => Promise<ResearchSprout>;
 
-  /** Update sprout with research results (branches, evidence, synthesis, execution) */
+  /** Update sprout with research results (branches, evidence, synthesis, execution, researchDocument) */
   updateResults: (
     id: string,
-    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview'>>
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument'>>
   ) => Promise<ResearchSprout>;
 
   /** Add a child sprout ID to parent's childSproutIds array (Sprint: sprout-research-v1, Phase 5d) */
@@ -289,6 +293,78 @@ async function fetchSproutsFromSupabase(groveId: string): Promise<ResearchSprout
   }
 }
 
+/**
+ * Fetch a single sprout from Supabase by ID
+ * Returns null if not found or Supabase not configured
+ */
+async function fetchSproutById(id: string): Promise<ResearchSprout | null> {
+  const client = getSupabaseClient();
+  if (!client) {
+    console.warn('[ResearchSproutContext] No Supabase client for single fetch');
+    return null;
+  }
+
+  try {
+    const { data, error } = await client
+      .from(RESEARCH_SPROUTS_TABLE)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      // PGRST116 = no rows found (not an error condition)
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      console.error('[ResearchSproutContext] Single fetch error:', error.message);
+      return null;
+    }
+
+    return data ? rowToSprout(data) : null;
+  } catch (e) {
+    console.error('[ResearchSproutContext] Failed to fetch sprout by ID:', e);
+    return null;
+  }
+}
+
+/**
+ * Persist sprout updates to Supabase
+ * Returns true on success, false on failure (with logged error)
+ */
+async function persistSproutToSupabase(
+  id: string,
+  updates: Partial<ResearchSprout>
+): Promise<boolean> {
+  const client = getSupabaseClient();
+  if (!client) {
+    console.warn('[ResearchSproutContext] No Supabase client, skipping persist');
+    return true; // Not a failure, just no persistence
+  }
+
+  try {
+    const row = sproutToRow({ ...updates, groveId: updates.groveId || '' });
+    // Remove fields that shouldn't be updated
+    delete row.id;
+    delete row.created_at;
+    delete row.grove_id; // Can't change grove
+
+    const { error } = await client
+      .from(RESEARCH_SPROUTS_TABLE)
+      .update(row)
+      .eq('id', id);
+
+    if (error) {
+      console.error('[ResearchSproutContext] Persist error:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    console.error('[ResearchSproutContext] Failed to persist sprout:', e);
+    return false;
+  }
+}
+
 export function ResearchSproutProvider({
   children,
   initialGroveId,
@@ -300,8 +376,56 @@ export function ResearchSproutProvider({
   const [error, setError] = useState<string | null>(null);
   const [groveId, setGroveId] = useState<string | null>(initialGroveId ?? null);
 
+  // Ref to always have current sprouts (avoids stale closure in callbacks)
+  // This is critical for operations that happen immediately after create()
+  const sproutsRef = useRef<ResearchSprout[]>([]);
+  sproutsRef.current = sprouts;
+
+  // Track if we've already attempted initialization (prevents infinite loop when sprouts=0)
+  const hasInitializedRef = useRef(false);
+
+  /**
+   * Get a sprout by ID from local state, or fetch from Supabase if not found.
+   * This solves the race condition where a sprout is created but React state
+   * hasn't updated yet when we try to operate on it.
+   */
+  const getOrFetchById = useCallback(async (id: string): Promise<ResearchSprout> => {
+    // Check local state first (using ref for always-current value)
+    const local = sproutsRef.current.find(s => s.id === id);
+    if (local) {
+      return local;
+    }
+
+    // Not in local state - this can happen due to React state timing
+    // Fetch directly from Supabase
+    console.log(`[ResearchSproutContext] Sprout ${id.slice(0, 8)} not in local state, fetching from database`);
+    const remote = await fetchSproutById(id);
+
+    if (!remote) {
+      throw new Error(`Sprout not found: ${id}`);
+    }
+
+    // Add to ref IMMEDIATELY (check for duplicates)
+    if (!sproutsRef.current.find(s => s.id === id)) {
+      console.log(`[ResearchSproutContext] Adding fetched sprout ${id.slice(0, 8)} to local state`);
+      sproutsRef.current = [remote, ...sproutsRef.current];
+    }
+    // Also schedule React state update
+    setSprouts(prev => {
+      if (prev.find(s => s.id === id)) {
+        return prev; // Already added
+      }
+      return [remote, ...prev];
+    });
+
+    return remote;
+  }, []); // No dependencies needed - uses ref for sprouts
+
   // Initialize for a grove - fetch sprouts from Supabase
   const initialize = useCallback(async (newGroveId: string) => {
+    // Mark that we've attempted initialization (prevents infinite loop)
+    hasInitializedRef.current = true;
+
     setIsLoading(true);
     setError(null);
     setGroveId(newGroveId);
@@ -340,6 +464,8 @@ export function ResearchSproutProvider({
         id: `rs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       };
       console.warn('[ResearchSproutContext] No Supabase client, using in-memory only');
+      // Update ref IMMEDIATELY
+      sproutsRef.current = [fallbackSprout, ...sproutsRef.current];
       setSprouts(prev => [fallbackSprout, ...prev]);
       return fallbackSprout;
     }
@@ -363,7 +489,8 @@ export function ResearchSproutProvider({
       const newSprout = rowToSprout(data);
       console.log(`[ResearchSproutContext] Created sprout ${newSprout.id}: "${newSprout.title}"`);
 
-      // Update local state
+      // Update ref IMMEDIATELY (before setSprouts) - critical for subsequent operations
+      sproutsRef.current = [newSprout, ...sproutsRef.current];
       setSprouts(prev => [newSprout, ...prev]);
 
       return newSprout;
@@ -429,17 +556,15 @@ export function ResearchSproutProvider({
     };
   }, [sprouts]);
 
-  // Transition status
+  // Transition status (with Supabase fallback lookup and persistence)
   const transitionStatus = useCallback(async (
     id: string,
     newStatus: ResearchSproutStatus,
     reason: string,
     actor?: string
   ): Promise<ResearchSprout> => {
-    const sprout = sprouts.find(s => s.id === id);
-    if (!sprout) {
-      throw new Error(`Sprout not found: ${id}`);
-    }
+    // Use getOrFetchById to handle race conditions after create()
+    const sprout = await getOrFetchById(id);
 
     if (!canTransitionTo(sprout.status, newStatus)) {
       throw new Error(
@@ -463,80 +588,127 @@ export function ResearchSproutProvider({
       updatedAt: now,
     };
 
-    // TODO Phase 2d: Update in Supabase
+    // Persist to Supabase
+    const persisted = await persistSproutToSupabase(id, {
+      status: updated.status,
+      statusHistory: updated.statusHistory,
+      updatedAt: updated.updatedAt,
+    });
+
+    if (!persisted) {
+      console.warn(`[ResearchSproutContext] Failed to persist status transition for ${id.slice(0, 8)}, continuing with local state`);
+    }
+
+    // Update ref IMMEDIATELY (before setSprouts) to prevent stale reads
+    // This is critical because setSprouts callback may not execute before next read
+    sproutsRef.current = sproutsRef.current.map(s => s.id === id ? updated : s);
+
+    // Also schedule React state update for re-renders
     setSprouts(prev => prev.map(s => s.id === id ? updated : s));
 
+    console.log(`[ResearchSproutContext] Transitioned ${id.slice(0, 8)}: ${sprout.status} → ${newStatus}`);
     return updated;
-  }, [sprouts]);
+  }, [getOrFetchById]);
 
-  // Update sprout fields
+  // Update sprout fields (with Supabase fallback lookup and persistence)
   const update = useCallback(async (
     id: string,
     updates: Partial<Pick<ResearchSprout, 'tags' | 'notes' | 'rating' | 'reviewed'>>
   ): Promise<ResearchSprout> => {
-    const sprout = sprouts.find(s => s.id === id);
-    if (!sprout) {
-      throw new Error(`Sprout not found: ${id}`);
-    }
+    // Use getOrFetchById to handle race conditions
+    const sprout = await getOrFetchById(id);
 
+    const now = new Date().toISOString();
     const updated: ResearchSprout = {
       ...sprout,
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
     };
 
-    // TODO Phase 2d: Update in Supabase
+    // Persist to Supabase
+    const persisted = await persistSproutToSupabase(id, {
+      ...updates,
+      updatedAt: now,
+    });
+
+    if (!persisted) {
+      console.warn(`[ResearchSproutContext] Failed to persist update for ${id.slice(0, 8)}, continuing with local state`);
+    }
+
+    // Update ref IMMEDIATELY (before setSprouts)
+    sproutsRef.current = sproutsRef.current.map(s => s.id === id ? updated : s);
     setSprouts(prev => prev.map(s => s.id === id ? updated : s));
 
     return updated;
-  }, [sprouts]);
+  }, [getOrFetchById]);
 
-  // Update sprout with research results (Sprint: sprout-research-v1, Phase 5c)
+  // Update sprout with research results (with Supabase fallback lookup and persistence)
   const updateResults = useCallback(async (
     id: string,
-    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview'>>
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument'>>
   ): Promise<ResearchSprout> => {
-    const sprout = sprouts.find(s => s.id === id);
-    if (!sprout) {
-      throw new Error(`Sprout not found: ${id}`);
-    }
+    // Use getOrFetchById to handle race conditions
+    const sprout = await getOrFetchById(id);
 
+    const now = new Date().toISOString();
     const updated: ResearchSprout = {
       ...sprout,
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
     };
 
-    // TODO Phase 2d: Update in Supabase
+    // Persist to Supabase
+    const persisted = await persistSproutToSupabase(id, {
+      ...updates,
+      updatedAt: now,
+    });
+
+    if (!persisted) {
+      console.warn(`[ResearchSproutContext] Failed to persist results for ${id.slice(0, 8)}, continuing with local state`);
+    }
+
+    // Update ref IMMEDIATELY (before setSprouts)
+    sproutsRef.current = sproutsRef.current.map(s => s.id === id ? updated : s);
     setSprouts(prev => prev.map(s => s.id === id ? updated : s));
 
     return updated;
-  }, [sprouts]);
+  }, [getOrFetchById]);
 
-  // Add child sprout ID to parent (Sprint: sprout-research-v1, Phase 5d)
+  // Add child sprout ID to parent (with Supabase fallback lookup and persistence)
   const addChildSproutId = useCallback(async (
     parentId: string,
     childId: string
   ): Promise<void> => {
-    const parent = sprouts.find(s => s.id === parentId);
-    if (!parent) {
-      throw new Error(`Parent sprout not found: ${parentId}`);
-    }
+    // Use getOrFetchById to handle race conditions
+    const parent = await getOrFetchById(parentId);
 
     // Avoid duplicates
     if (parent.childSproutIds.includes(childId)) {
       return;
     }
 
+    const now = new Date().toISOString();
+    const updatedChildIds = [...parent.childSproutIds, childId];
     const updated: ResearchSprout = {
       ...parent,
-      childSproutIds: [...parent.childSproutIds, childId],
-      updatedAt: new Date().toISOString(),
+      childSproutIds: updatedChildIds,
+      updatedAt: now,
     };
 
-    // TODO Phase 2d: Update in Supabase
+    // Persist to Supabase
+    const persisted = await persistSproutToSupabase(parentId, {
+      childSproutIds: updatedChildIds,
+      updatedAt: now,
+    });
+
+    if (!persisted) {
+      console.warn(`[ResearchSproutContext] Failed to persist child ID for ${parentId.slice(0, 8)}, continuing with local state`);
+    }
+
+    // Update ref IMMEDIATELY (before setSprouts)
+    sproutsRef.current = sproutsRef.current.map(s => s.id === parentId ? updated : s);
     setSprouts(prev => prev.map(s => s.id === parentId ? updated : s));
-  }, [sprouts]);
+  }, [getOrFetchById]);
 
   // Select sprout
   const selectSprout = useCallback((id: string | null) => {
@@ -586,12 +758,15 @@ export function ResearchSproutProvider({
   }, [sprouts]);
 
   // Auto-initialize when initialGroveId is provided
+  // Uses ref to prevent infinite loop when sprouts.length stays 0 (no sprouts or Supabase not configured)
+  // Only runs ONCE - no dependencies that could cause re-execution
   useEffect(() => {
-    if (initialGroveId && sprouts.length === 0 && !isLoading) {
+    if (initialGroveId && !hasInitializedRef.current) {
       console.log(`[ResearchSproutContext] Auto-initializing for grove: ${initialGroveId}`);
       initialize(initialGroveId);
     }
-  }, [initialGroveId, initialize, sprouts.length, isLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialGroveId]); // Only depend on initialGroveId, not isLoading or initialize
 
   // Memoized context value
   const value = useMemo<ResearchSproutContextValue>(() => ({

@@ -117,7 +117,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Sprint: sprout-research-v1, Phase 4f - Prompt Architect and sprout creation hooks
   const toast = useToast();
-  const { create: createSprout, groveId, selectSprout } = useResearchSprouts();
+  // Sprint: results-wiring-v1 - Add selectedSproutId for results display
+  const { create: createSprout, groveId, selectSprout, selectedSproutId } = useResearchSprouts();
   const { startResearch } = useResearchExecution();
 
   // Prompt Architect hook for the confirmation flow
@@ -164,6 +165,26 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       });
     },
   });
+
+  // Sprint: results-wiring-v1 - Auto-open GardenInspector when a sprout is selected from GardenTray
+  // Fix: Removed researchSprouts from dependencies to prevent flashing from array reference changes
+  // The overlay opens once when selectedSproutId changes; GardenInspector handles its own data lookup
+  const lastOpenedSproutIdRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!selectedSproutId) {
+      lastOpenedSproutIdRef.current = null;
+      return;
+    }
+
+    // Prevent re-opening for the same sprout
+    if (lastOpenedSproutIdRef.current === selectedSproutId) {
+      return;
+    }
+
+    // Open the overlay - GardenInspector will handle fetching the correct data
+    lastOpenedSproutIdRef.current = selectedSproutId;
+    setOverlay({ type: 'garden-inspector' });
+  }, [selectedSproutId]);
 
   const [journeyMode, setJourneyMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -826,9 +847,20 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       )}
 
       {/* Garden Inspector Overlay - Sprint: sprout-research-v1, Phase 4f */}
+      {/* Sprint: results-wiring-v1 - Added click-outside-to-close and selection clearing */}
+      {/* Fix: Top-aligned (not center) to prevent jumping when tab content changes */}
       {overlay.type === 'garden-inspector' && isGardenInspectorEnabled && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden">
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-black/50 backdrop-blur-sm overflow-y-auto"
+          onClick={(e) => {
+            // Click on backdrop (not the modal content) closes the overlay
+            if (e.target === e.currentTarget) {
+              selectSprout(null);
+              setOverlay({ type: 'none' });
+            }
+          }}
+        >
+          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-lg w-full mx-4 min-h-[400px] max-h-[85vh] overflow-hidden">
             <GardenInspector
               architectState={promptArchitect.state}
               manifest={promptArchitect.manifest}
@@ -843,6 +875,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
               }}
               onCancel={() => {
                 promptArchitect.cancel();
+                selectSprout(null);
                 setOverlay({ type: 'none' });
               }}
               onClearError={promptArchitect.clearError}
