@@ -1,0 +1,372 @@
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+  &lt;title&gt;S1-SFR-Shell Review - Sprout Finishing Room Foundation&lt;/title&gt;
+  &lt;style&gt;
+    :root {
+      --color-paper: #fbfaf9;
+      --color-ink: #1c1c1c;
+      --color-ink-muted: #575757;
+      --color-grove-forest: #2f5c3b;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.6;
+      color: var(--color-ink);
+      background-color: var(--color-paper);
+      margin: 0;
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .status-badge {
+      background: var(--color-grove-forest);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-badge::before {
+      content: '✅';
+    }
+
+    .sprint-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--color-paper) 0%, rgba(47, 92, 59, 0.05) 100%);
+      border-radius: 1rem;
+      border: 1px solid rgba(28, 28, 28, 0.1);
+    }
+
+    .sprint-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: -0.025em;
+    }
+
+    .sprint-subtitle {
+      font-size: 1.125rem;
+      margin: 0.5rem 0 0 0;
+      opacity: 0.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(28, 28, 28, 0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-grove-forest);
+    }
+
+    .user-story {
+      background: rgba(47, 92, 59, 0.05);
+      border-left: 4px solid var(--color-grove-forest);
+    }
+
+    .gherkin-scenario {
+      background: rgba(0, 0, 0, 0.02);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    .gherkin-keyword {
+      color: var(--color-grove-forest);
+      font-weight: 600;
+    }
+
+    .file-list {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      background: rgba(0, 0, 0, 0.02);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .file-list > div {
+      margin: 0.25rem 0;
+    }
+
+    .center-layout {
+      background: rgba(0, 0, 0, 0.02);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .layout-diagram {
+      white-space: pre;
+      line-height: 1.2;
+      font-size: 0.875rem;
+    }
+
+    .responsive-specs {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .responsive-specs h4 {
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .spec-term {
+      font-weight: 600;
+      color: var(--color-grove-forest);
+    }
+
+    .commit-list {
+      background: rgba(0, 0, 0, 0.02);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .commit-hash {
+      color: var(--color-grove-forest);
+      font-weight: 700;
+    }
+
+    .verification-commands {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border: 2px solid rgba(47, 92, 59, 0.2);
+    }
+
+    .cmd {
+      font-family: 'JetBrains Mono', monospace;
+      background: black;
+      color: #00ff00;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      overflow-x: auto;
+    }
+
+    .generation-note {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1rem;
+      background: rgba(47, 92, 59, 0.05);
+      border-radius: 0.75rem;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header class=&quot;sprint-header&quot;&gt;
+    &lt;h1 class=&quot;sprint-title&quot;&gt;S1-SFR-Shell&lt;/h1&gt;
+    &lt;p class=&quot;sprint-subtitle&quot;&gt;Finishing Room Foundation - Sprint Review&lt;/p&gt;
+    &lt;div class=&quot;status-badge&quot;&gt;COMPLETED&lt;/div&gt;
+  &lt;/header&gt;
+
+  &lt;section class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;h3&gt;Sprint Overview&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;Goal:&lt;/strong&gt; Build the foundation shell for the Sprout Finishing Room&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Duration:&lt;/strong&gt; Small sprint (1-2 days)&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Stories:&lt;/strong&gt; 4 completed (US-A001 through US-A004)&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Architecture:&lt;/strong&gt; Three-column modal with responsive design&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Next Steps:&lt;/strong&gt; Sprint 2 (Provenance Panel) and Sprint 3 (Action Panel)&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;h3&gt;Layout Architecture&lt;/h3&gt;
+      &lt;p&gt;Three-column responsive modal workspace for research artifact inspection and refinement.&lt;/p&gt;
+      &lt;div class=&quot;center-layout&quot;&gt;
+        &lt;pre class=&quot;layout-diagram&quot;&gt;┌─────────────────────────────────────────────────────────────────┐
+│  🌱 SPROUT FINISHING ROOM        [Sprout Title...]      [✕ Close] │
+├─────────────────┬───────────────────────────────────┬─────────────┤
+│                 │                                   │             │
+│  PROVENANCE     │  DOCUMENT VIEWER                  │  ACTION      │
+│  PANEL (S2)     │  (S2)                             │  PANEL (S3)  │
+│  280px fixed    │  flex: 1                          │  320px       │
+│                 │                                   │  fixed       │
+└─────────────────┴───────────────────────────────────┴─────────────┘
+│ SPROUT.FINISHING.v1 │ Status: READY │ Created: 5m ago │ [●] │
+└─────────────────────────────────────────────────────────────────┘&lt;/pre&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;card responsive-specs&quot;&gt;
+    &lt;h3&gt;Responsive Design&lt;/h3&gt;
+    &lt;div class=&quot;specs-grid&quot;&gt;
+      &lt;div class=&quot;spec-term&quot;&gt;&amp;gt;1280px:&lt;/div&gt;
+      &lt;div&gt;Full three-column layout&lt;/div&gt;
+
+      &lt;div class=&quot;spec-term&quot;&gt;1024-1279px:&lt;/div&gt;
+      &lt;div&gt;Reduced widths (240px, 280px), stacked provenance/actions&lt;/div&gt;
+
+      &lt;div class=&quot;spec-term&quot;&gt;&amp;lt;1024px:&lt;/div&gt;
+      &lt;div&gt;Mobile layout with tabs (future Sprint 2)&lt;/div&gt;
+
+      &lt;div class=&quot;spec-term&quot;&gt;&amp;lt;768px:&lt;/div&gt;
+      &lt;div&gt;Single column, panels hidden&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;card user-story&quot;&gt;
+      &lt;h3&gt;US-A001: Modal Container Shell&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;As an&lt;/strong&gt; Explorer&lt;br&gt;
+      &lt;strong&gt;I want to&lt;/strong&gt; see the Finishing Room open as a modal overlay&lt;br&gt;
+      &lt;strong&gt;So that&lt;/strong&gt; I can focus on the research document without leaving my current context&lt;/p&gt;
+
+      &lt;div class=&quot;gherkin-scenario&quot;&gt;
+        &lt;div&gt;&lt;span class=&quot;gherkin-keyword&quot;&gt;Scenario:&lt;/span&gt; Modal opens with proper overlay&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Given&lt;/span&gt; I am on the Surface experience&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;When&lt;/span&gt; the SproutFinishingRoom component is rendered with isOpen=true&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Then&lt;/span&gt; a modal overlay should appear&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;And&lt;/span&gt; the overlay should have a semi-transparent backdrop&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;And&lt;/span&gt; the modal should be centered in the viewport&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;And&lt;/span&gt; clicking the backdrop should call onClose&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card user-story&quot;&gt;
+      &lt;h3&gt;US-A002: Three-Column Layout&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;As an&lt;/strong&gt; Explorer&lt;br&gt;
+      &lt;strong&gt;I want to&lt;/strong&gt; see the Finishing Room in a clear three-column layout&lt;br&gt;
+      &lt;strong&gt;So that&lt;/strong&gt; I can easily navigate between provenance, content, and actions&lt;/p&gt;
+
+      &lt;div class=&quot;gherkin-scenario&quot;&gt;
+        &lt;div&gt;&lt;span class=&quot;gherkin-keyword&quot;&gt;Scenario:&lt;/span&gt; Three columns render at desktop width&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Given&lt;/span&gt; the viewport is wider than 1280px&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;When&lt;/span&gt; the Finishing Room modal is open&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Then&lt;/span&gt; I should see three distinct columns&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;And&lt;/span&gt; columns should have proper widths and placeholder content&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;card user-story&quot;&gt;
+      &lt;h3&gt;US-A003: Close Modal via Button or Escape&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;As an&lt;/strong&gt; Explorer&lt;br&gt;
+      &lt;strong&gt;I want to&lt;/strong&gt; close the Finishing Room via close button or Escape key&lt;br&gt;
+      &lt;strong&gt;So that&lt;/strong&gt; I can return to my previous context quickly&lt;/p&gt;
+
+      &lt;div class=&quot;gherkin-scenario&quot;&gt;
+        &lt;div&gt;&lt;span class=&quot;gherkin-keyword&quot;&gt;Scenario:&lt;/span&gt; Close button in header&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Given&lt;/span&gt; the Finishing Room modal is open&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;When&lt;/span&gt; I click the close button (✕) in the header&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Then&lt;/span&gt; the onClose callback should be invoked&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;And&lt;/span&gt; the modal should close&lt;/div&gt;
+
+        &lt;div&gt;&lt;span class=&quot;gherkin-keyword&quot;&gt;Scenario:&lt;/span&gt; Escape key closes modal&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;When&lt;/span&gt; I press the Escape key with modal open&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Then&lt;/span&gt; the onClose callback should be invoked&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card user-story&quot;&gt;
+      &lt;h3&gt;US-A004: Status Bar Displays Metadata&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;As an&lt;/strong&gt; Explorer&lt;br&gt;
+      &lt;strong&gt;I want to&lt;/strong&gt; see status information in the footer bar&lt;br&gt;
+      &lt;strong&gt;So that&lt;/strong&gt; I understand the state and freshness of the research document&lt;/p&gt;
+
+      &lt;div class=&quot;gherkin-scenario&quot;&gt;
+        &lt;div&gt;&lt;span class=&quot;gherkin-keyword&quot;&gt;Scenario:&lt;/span&gt; Status bar shows sprout metadata&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Given&lt;/span&gt; the Finishing Room modal is open&lt;/div&gt;
+        &lt;div&gt;• &lt;span class=&quot;gherkin-keyword&quot;&gt;Then&lt;/span&gt; status bar displays version, status, timestamp, and health indicator&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;h3&gt;Files Created&lt;/h3&gt;
+      &lt;div class=&quot;file-list&quot;&gt;
+        &lt;div&gt;📁 src/surface/components/modals/SproutFinishingRoom/&lt;/div&gt;
+        &lt;div&gt;├── index.tsx&lt;/div&gt;
+        &lt;div&gt;├── SproutFinishingRoom.tsx&lt;/div&gt;
+        &lt;div&gt;├── FinishingRoomHeader.tsx&lt;/div&gt;
+        &lt;div&gt;├── ProvenancePanel.tsx&lt;/div&gt;
+        &lt;div&gt;├── DocumentViewer.tsx&lt;/div&gt;
+        &lt;div&gt;├── ActionPanel.tsx&lt;/div&gt;
+        &lt;div&gt;├── FinishingRoomStatus.tsx&lt;/div&gt;
+        &lt;div&gt;└── styles.css&lt;/div&gt;
+        &lt;div&gt;&lt;/div&gt;
+        &lt;div&gt;📄 tests/e2e/sprout-finishing-room.spec.ts&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;card&quot;&gt;
+      &lt;h3&gt;Commits&lt;/h3&gt;
+      &lt;div class=&quot;commit-list&quot;&gt;
+        &lt;div&gt;&lt;span class=&quot;commit-hash&quot;&gt;26f8a9c&lt;/span&gt; feat(sfr): US-A001 - Modal container shell&lt;/div&gt;
+        &lt;div&gt;&lt;span class=&quot;commit-hash&quot;&gt;9d4b2f1&lt;/span&gt; feat(sfr): US-A002 - Three-column layout&lt;/div&gt;
+        &lt;div&gt;&lt;span class=&quot;commit-hash&quot;&gt;c8e5d7a&lt;/span&gt; feat(sfr): US-A003 - Close modal via button/Escape&lt;/div&gt;
+        &lt;div&gt;&lt;span class=&quot;commit-hash&quot;&gt;4f9a3b8&lt;/span&gt; feat(sfr): US-A004 - Status bar displays metadata&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;section class=&quot;card verification-commands&quot;&gt;
+    &lt;h3&gt;Verification Commands&lt;/h3&gt;
+    &lt;p&gt;Run these commands to verify the sprint implementation:&lt;/p&gt;
+
+    &lt;div class=&quot;cmd&quot;&gt;npm run build&lt;/div&gt;
+    &lt;p&gt;✅ Should complete without TypeScript errors&lt;/p&gt;
+
+    &lt;div class=&quot;cmd&quot;&gt;npm test&lt;/div&gt;
+    &lt;p&gt;✅ Test file exists and npm test runs without errors&lt;/p&gt;
+
+    &lt;div class=&quot;cmd&quot;&gt;git log --oneline -n 4&lt;/div&gt;
+    &lt;p&gt;✅ Should show the 4 user story commits with proper formatting&lt;/p&gt;
+
+    &lt;p&gt;&lt;strong&gt;Next Steps:&lt;/strong&gt;&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Sprint Review: Code review and QA verification&lt;/li&gt;
+      &lt;li&gt;Sprint 2: Provenance Panel implementation&lt;/li&gt;
+      &lt;li&gt;Integration: Connect Finishing Room to Garden mode&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/section&gt;
+
+  &lt;footer class=&quot;generation-note&quot;&gt;
+    &lt;p&gt;🤖 Generated with &lt;a href=&quot;https://claude.com/claude-code&quot; style=&quot;color: var(--color-grove-forest);&quot;&gt;Claude Code&lt;/a&gt; - Sprint S1-SFR-Shell&lt;/p&gt;
+  &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;

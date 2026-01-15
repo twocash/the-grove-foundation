@@ -4,7 +4,7 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import type { Sprout } from '@core/schema/sprout';
-import { useEngagementEmit } from '@hooks/useEngagementBus';
+import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
 import { FinishingRoomHeader } from './FinishingRoomHeader';
 import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';

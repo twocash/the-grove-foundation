@@ -713,6 +713,16 @@ export function ResearchSproutProvider({
   // Select sprout
   const selectSprout = useCallback((id: string | null) => {
     setSelectedSproutId(id);
+
+    // Sprint: sprout-finishing-room-v1, US-E001
+    // Dispatch event to open Sprout Finishing Room
+    if (id) {
+      console.log('[ResearchSproutContext] Opening Sprout Finishing Room for:', id);
+      window.dispatchEvent(new CustomEvent('open-finishing-room', {
+        detail: { sproutId: id },
+        bubbles: true
+      }));
+    }
   }, []);
 
   // Refresh from Supabase

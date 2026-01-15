@@ -3,8 +3,8 @@
 
 import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
-import { useEngagementEmit } from '@hooks/useEngagementBus';
-import { useSproutStorage } from '@hooks/useSproutStorage';
+import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
+import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
 import { useToast } from '@explore/context/ToastContext';
 import { ReviseForm } from './components/ReviseForm';
 import { PromotionChecklist } from './components/PromotionChecklist';

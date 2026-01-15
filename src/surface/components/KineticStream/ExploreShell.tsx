@@ -117,8 +117,8 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
 
   // Sprint: sprout-research-v1, Phase 4f - Prompt Architect and sprout creation hooks
   const toast = useToast();
-  // Sprint: results-wiring-v1 - Add selectedSproutId for results display
-  const { create: createSprout, groveId, selectSprout, selectedSproutId } = useResearchSprouts();
+  // Sprint: results-wiring-v1 - selectSprout opens SproutFinishingRoom via custom event
+  const { create: createSprout, groveId, selectSprout } = useResearchSprouts();
   const { startResearch } = useResearchExecution();
 
   // Prompt Architect hook for the confirmation flow
@@ -166,25 +166,9 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     },
   });
 
-  // Sprint: results-wiring-v1 - Auto-open GardenInspector when a sprout is selected from GardenTray
-  // Fix: Removed researchSprouts from dependencies to prevent flashing from array reference changes
-  // The overlay opens once when selectedSproutId changes; GardenInspector handles its own data lookup
-  const lastOpenedSproutIdRef = React.useRef<string | null>(null);
-  React.useEffect(() => {
-    if (!selectedSproutId) {
-      lastOpenedSproutIdRef.current = null;
-      return;
-    }
-
-    // Prevent re-opening for the same sprout
-    if (lastOpenedSproutIdRef.current === selectedSproutId) {
-      return;
-    }
-
-    // Open the overlay - GardenInspector will handle fetching the correct data
-    lastOpenedSproutIdRef.current = selectedSproutId;
-    setOverlay({ type: 'garden-inspector' });
-  }, [selectedSproutId]);
+  // Sprint: sprout-finishing-room-v1 - REMOVED old GardenInspector auto-open
+  // The new SproutFinishingRoom opens via custom event from FinishingRoomGlobal in RootLayout.tsx
+  // Old code deleted to prevent modal stacking bug (two modals opening simultaneously)
 
   const [journeyMode, setJourneyMode] = useState(() => {
     if (typeof window !== 'undefined') {

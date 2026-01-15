@@ -628,7 +628,13 @@ export function useEngagementEmit() {
       emit('HUB_VISITED', { hubId }),
 
     pivotClicked: () =>
-      emit('PIVOT_CLICKED', {})
+      emit('PIVOT_CLICKED', {}),
+
+    // Custom event emission for arbitrary event names (S3||SFR-Actions)
+    custom: (eventName: string, payload: Record<string, unknown>) => {
+      console.log('[EngagementBus] Custom event:', eventName, payload);
+      // For now, just log the event - can be extended to emit through the bus
+    }
   }), [emit]);
 }
 
