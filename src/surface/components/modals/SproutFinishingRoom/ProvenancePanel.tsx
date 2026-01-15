@@ -1,8 +1,10 @@
 // src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx
-// Sprint: S2-SFR-Display - US-B001 Display lens origin
+// Sprint: S2-SFR-Display - US-B001, US-B002
 
 import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
+import { CognitiveRoutingSection } from './components/CognitiveRoutingSection';
 
 export interface ProvenancePanelProps {
   sprout: Sprout;
@@ -12,13 +14,16 @@ export interface ProvenancePanelProps {
  * ProvenancePanel - Left column (280px fixed)
  *
  * US-B001: Display lens origin
- * US-B002: Cognitive routing (TBD)
+ * US-B002: Cognitive routing with expandable details
  * US-B003: Knowledge sources (TBD)
  * US-B004: Collapsible sections (TBD)
  */
 export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
   // US-B001: Extract lens name with fallback
   const lensName = sprout.provenance?.lens?.name || 'Default Lens';
+
+  // US-B002: Build cognitive routing from provenance
+  const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
 
   return (
     <aside className="w-[280px] flex-shrink-0 border-r border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto">
@@ -37,12 +42,8 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
         </div>
       </section>
 
-      {/* Placeholder for US-B002: Cognitive Routing */}
-      <section className="p-4 border-b border-ink/10 dark:border-white/10">
-        <p className="text-xs text-ink-muted dark:text-paper/50 font-mono">
-          Cognitive Routing (US-B002)
-        </p>
-      </section>
+      {/* US-B002: Cognitive Routing Section */}
+      <CognitiveRoutingSection routing={cognitiveRouting} />
 
       {/* Placeholder for US-B003: Knowledge Sources */}
       <section className="p-4">
