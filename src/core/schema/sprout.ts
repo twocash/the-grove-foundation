@@ -2,6 +2,9 @@
 // Sprint: Sprout System → sprout-declarative-v1
 // Sprout data model for capturing LLM responses with full provenance
 // v3: Adds 8-stage botanical lifecycle and ResearchManifest support
+// v3.1: Adds optional ResearchDocument for structured research display (S2-SFR-Display)
+
+import type { ResearchDocument } from './research-document';
 
 /**
  * Provenance - Human-readable lineage of an insight
@@ -97,6 +100,9 @@ export interface Sprout {
 
   /** Research manifest for research sprouts (sprout-declarative-v1) */
   researchManifest?: ResearchManifest;
+
+  /** Structured research document for json-render display (S2-SFR-Display) */
+  researchDocument?: ResearchDocument;
 
   /** User-assigned tags for categorization */
   tags: string[];
