@@ -1,9 +1,10 @@
 // src/surface/components/modals/SproutFinishingRoom/SproutFinishingRoom.tsx
-// Sprint: S1-SFR-Shell - US-A001 Modal Container Shell
+// Sprint: S1-SFR-Shell → S3||SFR-Actions
 // Three-column modal workspace for inspecting and refining research artifacts
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import { useEngagementEmit } from '@hooks/useEngagementBus';
 import { FinishingRoomHeader } from './FinishingRoomHeader';
 import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';
@@ -14,6 +15,8 @@ export interface SproutFinishingRoomProps {
   sprout: Sprout;
   isOpen: boolean;
   onClose: () => void;
+  /** Callback when sprout is updated (archive, note, etc.) */
+  onSproutUpdate?: (sprout: Sprout) => void;
 }
 
 /**
@@ -23,17 +26,25 @@ export interface SproutFinishingRoomProps {
  * US-A002: Three-column layout renders
  * US-A003: Close via button or Escape
  * US-A004: Status bar displays metadata
+ * US-E001: Engagement events on open/close
  */
 export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   sprout,
   isOpen,
-  onClose
+  onClose,
+  onSproutUpdate,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const emit = useEngagementEmit();
+
+  // US-E001: Emit finishingRoomOpened when modal opens
+  useEffect(() => {
+    if (!isOpen) return;
+    emit.custom('finishingRoomOpened', { sproutId: sprout.id });
+  }, [isOpen, sprout.id, emit]);
 
   // US-A003: Escape key closes modal
-  // Hook must be called unconditionally per Rules of Hooks
   useEffect(() => {
     if (!isOpen) return;
 
@@ -70,7 +81,7 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   }
 
   // US-A003: Focus trap implementation
-  const handleKeyDownTrap = useCallback((event: React.KeyboardEvent) => {
+  const handleKeyDownTrap = (event: React.KeyboardEvent) => {
     if (event.key !== 'Tab') return;
 
     const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
@@ -95,7 +106,7 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
         firstElement.focus();
       }
     }
-  }, []);
+  };
 
   // US-A001: Clicking backdrop calls onClose
   const handleBackdropClick = (event: React.MouseEvent) => {
@@ -103,6 +114,12 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
       onClose();
     }
   };
+
+  // US-E001: Wrap onClose to emit event
+  const handleClose = useCallback(() => {
+    emit.custom('finishingRoomClosed', { sproutId: sprout.id });
+    onClose();
+  }, [emit, sprout.id, onClose]);
 
   const headerId = 'finishing-room-title';
 
@@ -126,7 +143,7 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
         <FinishingRoomHeader
           sprout={sprout}
           headerId={headerId}
-          onClose={onClose}
+          onClose={handleClose}
           closeButtonRef={closeButtonRef}
         />
 
@@ -139,7 +156,11 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
           <DocumentViewer sprout={sprout} />
 
           {/* Right column - Action Panel (320px fixed) */}
-          <ActionPanel sprout={sprout} />
+          <ActionPanel
+            sprout={sprout}
+            onClose={handleClose}
+            onSproutUpdate={onSproutUpdate}
+          />
         </div>
 
         {/* US-A004: Status bar footer */}
