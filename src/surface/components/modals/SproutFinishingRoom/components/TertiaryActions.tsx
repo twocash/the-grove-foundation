@@ -1,9 +1,9 @@
 // src/surface/components/modals/SproutFinishingRoom/components/TertiaryActions.tsx
-// Sprint: S3||SFR-Actions - US-D002, US-D003 Tertiary actions
-// (US-D004 Export to be added in subsequent commit)
+// Sprint: S3||SFR-Actions - US-D002, US-D003, US-D004 Tertiary actions
 
 import React, { useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 
 export type TertiaryAction = 'archive' | 'annotate' | 'export';
 
@@ -17,7 +17,7 @@ export interface TertiaryActionsProps {
  *
  * US-D002: Archive sprout to garden
  * US-D003: Add private note annotation
- * US-D004: Export document (to be added)
+ * US-D004: Export document to markdown
  */
 export const TertiaryActions: React.FC<TertiaryActionsProps> = ({
   sprout,
@@ -39,6 +39,35 @@ export const TertiaryActions: React.FC<TertiaryActionsProps> = ({
       e.preventDefault();
       handleSaveNote();
     }
+  };
+
+  // US-D004: Export to markdown
+  const handleExport = () => {
+    const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
+
+    // Build markdown content with provenance header
+    const content = `# ${sprout.query}
+
+---
+**Generated:** ${new Date(sprout.capturedAt).toLocaleDateString()}
+**Lens:** ${sprout.provenance?.lens?.name || 'Default'}
+**Cognitive Path:** ${cognitiveRouting.path}
+---
+
+${sprout.response}
+`;
+
+    // Create and trigger download
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sprout-${sprout.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Notify parent
+    onAction('export');
   };
 
   return (
@@ -115,6 +144,24 @@ export const TertiaryActions: React.FC<TertiaryActionsProps> = ({
             </div>
           </div>
         )}
+
+        {/* US-D004: Export Document */}
+        <button
+          onClick={handleExport}
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ink/5 dark:hover:bg-white/5 transition-colors text-left"
+        >
+          <span className="text-lg" role="img" aria-label="Export">
+            📤
+          </span>
+          <div>
+            <span className="text-sm font-medium text-ink dark:text-paper">
+              Export Document
+            </span>
+            <p className="text-xs text-ink-muted dark:text-paper/50">
+              Download as Markdown
+            </p>
+          </div>
+        </button>
       </div>
     </div>
   );
