@@ -100,8 +100,8 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
 
       {/* S6-SL-ObservableSignals: Usage Signals Section */}
       <FinishingRoomSignalsSection
-        sproutId={sprout.meta.id}
-        sproutQuery={sprout.payload.spark}
+        sproutId={sprout.id}
+        sproutQuery={sprout.query}
       />
     </aside>
   );
