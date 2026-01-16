@@ -33,3 +33,11 @@ export { researchDocumentToRenderTree } from './transform';
 
 // Renderer - renders trees using registry
 export { Renderer } from './Renderer';
+
+// Signals module (from ExperienceConsole json-render)
+// Re-exported for use in FinishingRoom signals section
+export {
+  SignalsRegistry,
+  signalAggregationToRenderTree,
+  createEmptySignalsTree,
+} from '@bedrock/consoles/ExperienceConsole/json-render';

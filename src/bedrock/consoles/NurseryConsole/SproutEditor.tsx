@@ -17,6 +17,7 @@ import {
 } from './NurseryConsole.config';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
+import { SproutSignalsPanel } from './SproutSignalsPanel';
 
 // =============================================================================
 // Helper Components
@@ -472,6 +473,16 @@ export function SproutEditor({
             )}
           </dl>
         </InspectorSection>
+
+        <InspectorDivider />
+
+        {/* === USAGE SIGNALS (S6-SL-ObservableSignals) === */}
+        <SproutSignalsPanel
+          sproutId={sprout.meta.id}
+          sproutQuery={sprout.payload.spark}
+          collapsible
+          defaultCollapsed
+        />
 
         <InspectorDivider />
 

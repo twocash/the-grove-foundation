@@ -317,3 +317,37 @@ export {
   getActiveModel,
   getTierForStageFromModel
 } from './lifecycle-config';
+
+// Sprout Signals types (Sprint: S6-SL-ObservableSignals v1)
+// Phase 2 of Observable Knowledge System EPIC
+export {
+  type SproutEventType,
+  type EventProvenance,
+  type SproutUsageEventBase,
+  type SproutViewedEvent,
+  type SproutRetrievedEvent,
+  type SproutReferencedEvent,
+  type SproutSearchedEvent,
+  type SproutRatedEvent,
+  type SproutExportedEvent,
+  type SproutPromotedEvent,
+  type SproutRefinedEvent,
+  type SproutUsageEvent,
+  type SignalAggregation,
+  SPROUT_EVENT_TYPES,
+  EventProvenanceSchema,
+  SproutUsageEventBaseSchema,
+  SproutViewedMetadataSchema,
+  SproutRetrievedMetadataSchema,
+  SproutReferencedMetadataSchema,
+  SproutSearchedMetadataSchema,
+  SproutRatedMetadataSchema,
+  SproutExportedMetadataSchema,
+  SproutPromotedMetadataSchema,
+  SproutRefinedMetadataSchema,
+  SignalAggregationSchema,
+  isSproutUsageEvent,
+  isSignalAggregation,
+  EMPTY_AGGREGATION,
+  createEmptyAggregation
+} from './sprout-signals';

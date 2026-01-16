@@ -5,6 +5,7 @@ import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
 import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
+import { useSproutSignals } from '../../../hooks/useSproutSignals';
 import { useToast } from '@explore/context/ToastContext';
 import { ReviseForm } from './components/ReviseForm';
 import { PromotionChecklist } from './components/PromotionChecklist';
@@ -32,10 +33,28 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 }) => {
   const emit = useEngagementEmit();
   const { updateSprout, getSprout } = useSproutStorage();
+  const signals = useSproutSignals();
   const toast = useToast();
+
+  // S6-SL-ObservableSignals: Build provenance from sprout
+  const buildProvenance = () => ({
+    lensId: sprout.provenance?.lens?.id,
+    lensName: sprout.provenance?.lens?.name,
+    journeyId: sprout.provenance?.journey?.id,
+    journeyName: sprout.provenance?.journey?.name,
+    hubId: sprout.provenance?.hub?.id,
+    hubName: sprout.provenance?.hub?.name,
+  });
 
   // US-D001: Revise & Resubmit (stubbed)
   const handleRevisionSubmit = (notes: string) => {
+    // S6-SL-ObservableSignals: Emit sprout_refined signal
+    signals.emitRefined(
+      sprout.id,
+      { refinementType: 'revise', charsDelta: notes.length },
+      buildProvenance()
+    );
+
     emit.custom('sproutRefinementSubmitted', {
       sproutId: sprout.id,
       revisionNotes: notes,
@@ -45,6 +64,8 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
   // US-D005: Promote to RAG - S4-SL-TierProgression: Also update stage
   const handlePromote = async (content: string, selectedItems: string[]) => {
+    const previousStage = sprout.stage || 'seed';
+
     try {
       const response = await fetch('/api/knowledge/upload', {
         method: 'POST',
@@ -77,6 +98,13 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         toast.warning('Content saved, but tier update failed.');
       }
 
+      // S6-SL-ObservableSignals: Emit sprout_promoted signal
+      signals.emitPromoted(
+        sprout.id,
+        { fromTier: previousStage, toTier: 'established' },
+        buildProvenance()
+      );
+
       emit.custom('sproutPromotedToRag', { sproutId: sprout.id, selectedItems });
       toast.success('Promoted to Sapling! Added to Knowledge Commons.');
     } catch (error) {
@@ -103,6 +131,14 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       case 'annotate':
         const note = payload as string;
         updateSprout(sprout.id, { notes: note });
+
+        // S6-SL-ObservableSignals: Emit sprout_refined signal for annotations
+        signals.emitRefined(
+          sprout.id,
+          { refinementType: 'annotate', charsDelta: note.length },
+          buildProvenance()
+        );
+
         emit.custom('sproutAnnotated', { sproutId: sprout.id, note });
         toast.success('Note saved');
         // Notify parent of update
@@ -113,6 +149,13 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         break;
 
       case 'export':
+        // S6-SL-ObservableSignals: Emit sprout_exported signal
+        signals.emitExported(
+          sprout.id,
+          { format: 'markdown' },
+          buildProvenance()
+        );
+
         emit.custom('sproutExported', { sproutId: sprout.id, format: 'markdown' });
         toast.success('Document exported');
         break;

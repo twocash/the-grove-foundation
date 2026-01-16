@@ -2,9 +2,10 @@
 // Sprint: S1-SFR-Shell → S3||SFR-Actions
 // Three-column modal workspace for inspecting and refining research artifacts
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
+import { useSproutSignals } from '../../../hooks/useSproutSignals';
 import { FinishingRoomHeader } from './FinishingRoomHeader';
 import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';
@@ -37,6 +38,39 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const emit = useEngagementEmit();
+  const signals = useSproutSignals();
+
+  // Track view start time for duration calculation
+  const viewStartRef = useRef<number>(0);
+
+  // S6-SL-ObservableSignals: Emit sprout_viewed on open with duration tracking
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Start tracking view time
+    viewStartRef.current = Date.now();
+
+    // Build provenance from sprout
+    const provenance = {
+      lensId: sprout.provenance?.lens?.id,
+      lensName: sprout.provenance?.lens?.name,
+      journeyId: sprout.provenance?.journey?.id,
+      journeyName: sprout.provenance?.journey?.name,
+      hubId: sprout.provenance?.hub?.id,
+      hubName: sprout.provenance?.hub?.name,
+    };
+
+    // Emit viewed event (debounced by useSproutSignals)
+    signals.emitViewed(sprout.id, {}, provenance);
+
+    // Emit duration on unmount
+    return () => {
+      if (viewStartRef.current > 0) {
+        const viewDurationMs = Date.now() - viewStartRef.current;
+        signals.emitViewed(sprout.id, { viewDurationMs }, provenance);
+      }
+    };
+  }, [isOpen, sprout.id, sprout.provenance, signals]);
 
   // US-E001: Emit finishingRoomOpened when modal opens
   useEffect(() => {

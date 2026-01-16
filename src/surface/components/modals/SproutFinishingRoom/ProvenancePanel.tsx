@@ -1,12 +1,14 @@
 // src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx
 // Sprint: S2-SFR-Display - US-B001, US-B002, US-B003, US-B004
 // Enhanced: S4-SL-TierProgression - Lifecycle section with TierBadge
+// Enhanced: S6-SL-ObservableSignals - Usage Signals section
 
 import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 import { CognitiveRoutingSection } from './components/CognitiveRoutingSection';
 import { CollapsibleSection } from './components/CollapsibleSection';
+import { FinishingRoomSignalsSection } from './components/FinishingRoomSignalsSection';
 import { TierBadge, stageToTier } from '@surface/components/TierBadge';
 
 export interface ProvenancePanelProps {
@@ -95,6 +97,12 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
           </p>
         )}
       </CollapsibleSection>
+
+      {/* S6-SL-ObservableSignals: Usage Signals Section */}
+      <FinishingRoomSignalsSection
+        sproutId={sprout.meta.id}
+        sproutQuery={sprout.payload.spark}
+      />
     </aside>
   );
 };
