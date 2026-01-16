@@ -32,7 +32,9 @@ const AudioStudio = lazy(() => import('../foundation/consoles/AudioStudio'));
 const Genesis = lazy(() => import('../foundation/consoles/Genesis'));
 const HealthDashboard = lazy(() => import('../foundation/consoles/HealthDashboard'));
 const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
-const FederationConsole = lazy(() => import('../foundation/consoles/FederationConsole'));
+// QUARANTINED - FederationConsole moved to quarantine branch
+// See: quarantine/federation-frozen-zone on GitHub
+// const FederationConsole = lazy(() => import('../foundation/consoles/FederationConsole'));
 
 // Bedrock consoles (knowledge curation layer)
 const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
@@ -193,12 +195,21 @@ export const routes: RouteObject[] = [
               </Suspense>
             ),
           },
+          // QUARANTINED - Federation Console moving to v1.0 location
+          // To re-enable: Implement in /src/bedrock/consoles/FederationConsole/
+          // { path: 'federation', element: <FederationConsole /> },
+
+          // Placeholder to prevent 404:
           {
             path: 'federation',
             element: (
-              <Suspense fallback={<ConsoleLoadingFallback />}>
-                <FederationConsole />
-              </Suspense>
+              <div className="p-8 text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Federation Console</h2>
+                <p className="text-gray-600">Migrating to v1.0 architecture</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  See: quarantine/federation-frozen-zone on GitHub
+                </p>
+              </div>
             ),
           },
         ],
