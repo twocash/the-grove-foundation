@@ -1,6 +1,16 @@
-// tests/e2e/federation.spec.ts
-// E2E tests for federation system
-// Sprint: EPIC5-SL-Federation v1
+/**
+ * Federation Console E2E Tests
+ *
+ * ⚠️ TESTS TEMPORARILY SKIPPED ⚠️
+ *
+ * The Federation Console was implemented in a frozen zone (/src/foundation/)
+ * and has been quarantined pending v1.0 migration.
+ *
+ * Tests will be re-enabled when v1.0 implementation is complete at:
+ * /src/bedrock/consoles/FederationConsole/
+ *
+ * To re-enable: Change test.skip back to test and update paths.
+ */
 
 import { test, expect } from '@playwright/test';
 
@@ -19,7 +29,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F001: Federation Console loads correctly', async ({ page }) => {
+  test.skip('US-F001: Federation Console loads correctly', async ({ page }) => {
     // Verify the page title
     await expect(page).toHaveTitle(/The Grove/);
 
@@ -33,7 +43,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F002: Service Discovery tab navigation', async ({ page }) => {
+  test.skip('US-F002: Service Discovery tab navigation', async ({ page }) => {
     // Click on Service Discovery tab
     await page.click('button:has-text("Service Discovery")');
 
@@ -48,7 +58,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F003: Topology tab navigation', async ({ page }) => {
+  test.skip('US-F003: Topology tab navigation', async ({ page }) => {
     // Click on Topology tab
     await page.click('button:has-text("Topology")');
 
@@ -62,7 +72,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F004: Provenance Tracer tab navigation', async ({ page }) => {
+  test.skip('US-F004: Provenance Tracer tab navigation', async ({ page }) => {
     // Click on Provenance Tracer tab
     await page.click('button:has-text("Provenance Tracer")');
 
@@ -77,7 +87,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F005: Tab navigation flow', async ({ page }) => {
+  test.skip('US-F005: Tab navigation flow', async ({ page }) => {
     // Navigate through all tabs using nth to select the correct button
     const tabs = [
       { name: 'Dashboard', selector: 'button:has-text("Dashboard")', index: 0 },
@@ -98,7 +108,7 @@ test.describe('Federation System E2E', () => {
     }
   });
 
-  test('US-F006: Test Sprint Registration', async ({ page }) => {
+  test.skip('US-F006: Test Sprint Registration', async ({ page }) => {
     // Go to Dashboard tab
     await page.click('button:has-text("Dashboard")');
 
@@ -121,7 +131,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F007: Sprint Actions - Heartbeat', async ({ page }) => {
+  test.skip('US-F007: Sprint Actions - Heartbeat', async ({ page }) => {
     // Go to Dashboard tab
     await page.click('text=Dashboard');
 
@@ -144,7 +154,7 @@ test.describe('Federation System E2E', () => {
     }
   });
 
-  test('US-F008: Mobile responsive layout', async ({ page }) => {
+  test.skip('US-F008: Mobile responsive layout', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
@@ -158,7 +168,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F009: Error handling', async ({ page }) => {
+  test.skip('US-F009: Error handling', async ({ page }) => {
     // Navigate to provenance tracer
     await page.click('text=Provenance Tracer');
 
@@ -179,7 +189,7 @@ test.describe('Federation System E2E', () => {
     });
   });
 
-  test('US-F010: Performance - Page load time', async ({ page }) => {
+  test.skip('US-F010: Performance - Page load time', async ({ page }) => {
     // Measure page load time
     const startTime = Date.now();
     await page.goto('/foundation/federation');
