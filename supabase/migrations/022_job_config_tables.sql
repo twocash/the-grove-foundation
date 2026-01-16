@@ -145,10 +145,14 @@ RETURNS UUID AS $$
 DECLARE
   v_execution_id UUID;
   v_duration_ms INTEGER;
+  v_started_at TIMESTAMPTZ;
 BEGIN
+  -- Capture start time for duration calculation
+  v_started_at := now();
+
   -- Calculate duration if completed
   IF p_status IN ('success', 'failure', 'timeout', 'cancelled') THEN
-    v_duration_ms := EXTRACT(EPOCH FROM (now() - started_at))::INTEGER * 1000;
+    v_duration_ms := EXTRACT(EPOCH FROM (now() - v_started_at))::INTEGER * 1000;
   END IF;
 
   -- Insert execution record
@@ -158,6 +162,7 @@ BEGIN
     result,
     error,
     attempt_number,
+    started_at,
     duration_ms,
     completed_at
   ) VALUES (
@@ -166,6 +171,7 @@ BEGIN
     p_result,
     p_error,
     p_attempt_number,
+    v_started_at,
     v_duration_ms,
     CASE WHEN p_status IN ('success', 'failure', 'timeout', 'cancelled') THEN now() ELSE NULL END
   ) RETURNING id INTO v_execution_id;

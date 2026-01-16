@@ -75,9 +75,9 @@ export function useSproutAggregations(
 
     try {
       const { data, error: fetchError } = await client
-        .from('sprout_signal_aggregations')
+        .from('document_signal_aggregations')
         .select('*')
-        .eq('sprout_id', sproutId)
+        .eq('document_id', sproutId)
         .eq('period', period)
         .single();
 
@@ -92,7 +92,7 @@ export function useSproutAggregations(
 
       // Transform snake_case to camelCase
       const transformed: SignalAggregation = {
-        sproutId: data.sprout_id,
+        sproutId: data.document_id,
         period: data.period,
         viewCount: data.view_count,
         retrievalCount: data.retrieval_count,
@@ -142,8 +142,8 @@ export function useSproutAggregations(
 
     try {
       // Call the RPC function to refresh aggregations
-      const { error: rpcError } = await client.rpc('refresh_signal_aggregations', {
-        sprout_id: sproutId,
+      const { error: rpcError } = await client.rpc('refresh_document_aggregations', {
+        document_id: sproutId,
         period,
       });
 
