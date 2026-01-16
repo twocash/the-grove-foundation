@@ -10,6 +10,7 @@ import { useExperienceData } from './useExperienceData';
 import { useFeatureFlagsData } from './useFeatureFlagsData';
 import { useCopilotStyleData } from './useCopilotStyleData';
 import { useLifecycleConfigData } from './useLifecycleConfigData';
+import { useAdvancementRuleData } from './useAdvancementRuleData';
 
 // =============================================================================
 // Hook Registry
@@ -33,6 +34,7 @@ export const HOOK_REGISTRY: Record<string, () => CollectionDataResult<any>> = {
   useFeatureFlagsData,
   useCopilotStyleData,
   useLifecycleConfigData, // Sprint: S5-SL-LifecycleEngine v1
+  useAdvancementRuleData, // Sprint: S7-SL-AutoAdvancement v1
   // Future types:
   // usePromptArchitectConfigData,
   // useWelcomeConfigData,

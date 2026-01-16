@@ -628,3 +628,58 @@ spawn product-pod {initiative}
 | **Capability Agnosticism** | Does it work regardless of which model executes? |
 | **Provenance as Infrastructure** | Is origin/authorship tracked for all data? |
 | **Organic Scalability** | Does structure support growth without redesign? |
+
+### UX Chief: Drift Detector (v1.0 Strangler Fig)
+
+**Purpose:** Proactively detect and block backwards drift toward frozen legacy code during the strangler fig migration from MVP (Foundation/Terminal) to v1.0 reference implementation (Bedrock/Explore).
+
+#### ❌ Frozen Zones (NEVER Reference)
+
+| Frozen Path | Status | Reason |
+|-------------|--------|--------|
+| `/foundation/*` | FROZEN | Legacy admin UI, locked for migration |
+| `/terminal/*` | FROZEN | MVP chat interface, superseded by /explore |
+| `src/foundation/consoles/*` | FROZEN | All Foundation consoles locked |
+| `server.js` GCS loaders | DEPRECATED | v1.0 uses GroveDataProvider |
+| `components/AdminNarrativeConsole.tsx` | FROZEN | Legacy admin tooling |
+
+#### ✅ v1.0 Patterns (ALWAYS Use)
+
+| Pattern | v1.0 Implementation |
+|---------|---------------------|
+| Admin UI | `/bedrock/consoles/ExperienceConsole` |
+| User Chat | `/explore` |
+| Config Storage | Supabase tables (NOT GCS files) |
+| Data Access | `useGroveData()` hook |
+| Console Pattern | ExperienceConsole factory |
+
+#### 🚨 High-Risk Terminology
+
+When these terms appear in briefs/specs, **IMMEDIATELY ASK** for clarification:
+
+| Term | Legacy Meaning | v1.0 Equivalent |
+|------|----------------|-----------------|
+| **RealityTuner** | Foundation console | ExperienceConsole (if ported) |
+| **Terminal** | MVP chat interface | /explore |
+| **AdminNarrativeConsole** | Foundation editor | N/A (deprecated) |
+| **GCS infrastructure files** | `infrastructure/*.json` | Supabase tables |
+| **server.js endpoints** | `/api/admin/*` routes | Supabase + GroveDataProvider |
+| **Foundation theme** | Old design system | Quantum Glass v1.0 |
+
+#### Pre-Approval Checklist
+
+Before UX Chief sign-off, VERIFY:
+
+- [ ] NO references to /foundation or /terminal paths
+- [ ] NO GCS file storage for new configs
+- [ ] NO custom CRUD (uses useGroveData pattern)
+- [ ] NO Foundation-specific components
+- [ ] Design system specified as Quantum Glass v1.0 (NOT Living Glass v2)
+- [ ] Console integration uses ExperienceConsole factory
+- [ ] SINGLETON enforcement via factory (not manual)
+
+**IF ANY FAIL → BLOCK APPROVAL**
+
+**Full protocol:** `.agent/roles/user-experience-chief-DRIFT_DETECTOR.md`
+
+**Motto:** *"Frozen means frozen. Detect drift early, block drift firmly."*
