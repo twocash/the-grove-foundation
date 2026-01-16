@@ -80,6 +80,10 @@ export interface GroveObjectMeta {
   // Organization
   tags?: string[];
   favorite?: boolean;
+
+  // Federation metadata (EPIC5-SL-Federation v1)
+  federationId?: string;
+  federationPath?: string[];
 }
 
 /**
