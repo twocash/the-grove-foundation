@@ -3,6 +3,1099 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "c94dc244-ce29-4d22-ac4b-fdab3016e910",
+      "timestamp": "2026-01-15T21:11:46.026Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 15894
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6575
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6305
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5489
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5337
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5660
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5580
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5866
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6401
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:11:46.032Z"
+      }
+    },
+    {
+      "id": "0f65e002-978b-496f-be21-27a230632e1e",
+      "timestamp": "2026-01-15T21:10:21.904Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 14604
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6607
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5679
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5511
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5407
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6486
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3455
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5612
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6021
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:10:21.912Z"
+      }
+    },
+    {
+      "id": "78e76b79-6a4b-4213-83c1-5557b4cd0cb7",
+      "timestamp": "2026-01-15T21:09:01.162Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 17496
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6207
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3409
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6097
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5768
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6133
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5967
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5688
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5803
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:09:01.166Z"
+      }
+    },
+    {
+      "id": "34b611fe-8dac-4566-b278-84108e609e32",
+      "timestamp": "2026-01-15T21:07:38.087Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 12677
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:07:38.091Z"
+      }
+    },
+    {
+      "id": "a7380562-f657-4a9d-8056-ca239e63aca0",
+      "timestamp": "2026-01-15T21:06:11.356Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 22131
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:06:11.361Z"
+      }
+    },
+    {
+      "id": "f2cbf0b9-4cf6-417c-925c-6df113168b2c",
+      "timestamp": "2026-01-15T21:04:34.375Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 21624
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:04:34.379Z"
+      }
+    },
+    {
+      "id": "f2e578a7-988d-4934-8588-7960462aa6d6",
+      "timestamp": "2026-01-15T21:02:33.819Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 20930
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:02:33.822Z"
+      }
+    },
+    {
+      "id": "316df95f-0bd3-446a-a33b-5ffbc82dc422",
+      "timestamp": "2026-01-15T21:01:51.664Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 26850
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 13655
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 16667
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 17350
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 18155
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 17252
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 17510
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 14382
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 14028
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T21:01:51.669Z"
+      }
+    },
+    {
+      "id": "7507d592-45fa-4793-871d-ee5bb9ab3382",
+      "timestamp": "2026-01-15T20:55:00.980Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 23384
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 11804
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T20:55:00.985Z"
+      }
+    },
+    {
+      "id": "4b974aee-9962-4200-9c5d-76aff46dee50",
+      "timestamp": "2026-01-15T20:53:04.244Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 21190
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 9861
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 9422
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 12281
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n\u001b[2m    - waiting for\" http://localhost:3000/\" navigation to finish...\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3000/\"\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 10134
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 9717
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 12030
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 9539
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "fail",
+              "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[role=\"dialog\"]') to be visible\u001b[22m\n",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 12532
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 9,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T20:53:04.249Z"
+      }
+    },
+    {
+      "id": "004d0ba0-a37a-407f-b21a-41851b0c82e0",
+      "timestamp": "2026-01-15T20:24:45.252Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "warn",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 12354
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3734
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 6062
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5233
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5475
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 2999
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5346
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3005
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3050
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 0,
+        "warnings": 9
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T20:24:45.258Z"
+      }
+    },
+    {
+      "id": "c185b8c3-91b3-4c87-845e-20b44674993f",
+      "timestamp": "2026-01-15T20:21:15.141Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "warn",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 16147
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 3253
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5473
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 2989
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5593
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5906
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5518
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5524
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5704
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 0,
+        "warnings": 9
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T20:21:15.153Z"
+      }
+    },
+    {
+      "id": "d063c45c-2111-4b07-8c9c-ac006f3aeb88",
+      "timestamp": "2026-01-15T20:11:00.773Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "warn",
+          "checks": [
+            {
+              "id": "us-d001-revise-resubmit-form-renders-correctly",
+              "name": "US-D001: Revise & Resubmit form renders correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 9342
+            },
+            {
+              "id": "us-d001-revise-submission-shows-toast-stubbed",
+              "name": "US-D001: Revise submission shows toast (stubbed)",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 5730
+            },
+            {
+              "id": "us-d005-promotion-checklist-renders-with-defaults",
+              "name": "US-D005: Promotion checklist renders with defaults",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4533
+            },
+            {
+              "id": "us-d005-checklist-items-toggle-correctly",
+              "name": "US-D005: Checklist items toggle correctly",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4683
+            },
+            {
+              "id": "us-d002-archive-button-visible-in-tertiary-section",
+              "name": "US-D002: Archive button visible in tertiary section",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4587
+            },
+            {
+              "id": "us-d003-note-input-appears-on-click",
+              "name": "US-D003: Note input appears on click",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4356
+            },
+            {
+              "id": "us-d004-export-button-visible-and-functional",
+              "name": "US-D004: Export button visible and functional",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4450
+            },
+            {
+              "id": "us-e001-full-action-panel-renders-all-sections",
+              "name": "US-E001: Full Action Panel renders all sections",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4750
+            },
+            {
+              "id": "us-e001-action-panel-right-column-layout",
+              "name": "US-E001: Action Panel right column layout",
+              "status": "warn",
+              "message": "Passed",
+              "file": "s3-sfr-actions-visual.spec.ts",
+              "duration": 4517
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 0,
+        "failed": 0,
+        "warnings": 9
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-15T20:11:00.778Z"
+      }
+    },
+    {
+      "id": "01a50ae0-87cc-499e-a41b-e1af84e17784",
+      "timestamp": "2026-01-14T02:09:57.725Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "ac-rw001-shows-real-citations-not-quantum-computing-mock",
+              "name": "AC-RW001: Shows REAL citations, not quantum computing mock",
+              "status": "pass",
+              "message": "Passed",
+              "file": "results-wiring.spec.ts",
+              "duration": 11585
+            },
+            {
+              "id": "ac-rw004-legacy-sprouts-render-without-errors",
+              "name": "AC-RW004: Legacy sprouts render without errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "results-wiring.spec.ts",
+              "duration": 8118
+            },
+            {
+              "id": "ac-rw005-zero-console-errors-during-display",
+              "name": "AC-RW005: Zero console errors during display",
+              "status": "pass",
+              "message": "Passed",
+              "file": "results-wiring.spec.ts",
+              "duration": 8526
+            },
+            {
+              "id": "ac-rw003-confidence-score-reflects-actual-synthesis",
+              "name": "AC-RW003: Confidence score reflects actual synthesis",
+              "status": "pass",
+              "message": "Passed",
+              "file": "results-wiring.spec.ts",
+              "duration": 8529
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-14T02:09:57.743Z"
+      }
+    },
+    {
+      "id": "a38476fc-2ea9-4e8d-88d9-6932402cb6f1",
+      "timestamp": "2026-01-13T23:13:03.230Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "complete-lifecycle-sprout-to-document-demo",
+              "name": "Complete lifecycle: sprout to document @demo",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\demo\\research-lifecycle-demo.spec.ts",
+              "duration": 89772
+            },
+            {
+              "id": "ui-components-error-handling-display-demo",
+              "name": "UI Components: Error handling display @demo",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\demo\\research-lifecycle-demo.spec.ts",
+              "duration": 4930
+            },
+            {
+              "id": "ui-components-garden-inspector-view-demo",
+              "name": "UI Components: Garden Inspector view @demo",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\demo\\research-lifecycle-demo.spec.ts",
+              "duration": 5927
+            },
+            {
+              "id": "results-display-demo-page",
+              "name": "Results display demo page",
+              "status": "pass",
+              "message": "Passed",
+              "file": "C:\\GitHub\\the-grove-foundation\\tests\\demo\\research-lifecycle-demo.spec.ts",
+              "duration": 4714
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-13T23:13:03.239Z"
+      }
+    },
+    {
       "id": "9aeacb93-bd24-479d-927d-5ead64ebb05b",
       "timestamp": "2026-01-13T21:56:27.143Z",
       "configVersion": "external",

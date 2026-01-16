@@ -1,11 +1,13 @@
 // src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx
 // Sprint: S2-SFR-Display - US-B001, US-B002, US-B003, US-B004
+// Enhanced: S4-SL-TierProgression - Lifecycle section with TierBadge
 
 import React from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 import { CognitiveRoutingSection } from './components/CognitiveRoutingSection';
 import { CollapsibleSection } from './components/CollapsibleSection';
+import { TierBadge, stageToTier } from '@surface/components/TierBadge';
 
 export interface ProvenancePanelProps {
   sprout: Sprout;
@@ -72,6 +74,24 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
         ) : (
           <p className="text-sm text-ink-muted dark:text-paper/50 italic">
             No sources referenced
+          </p>
+        )}
+      </CollapsibleSection>
+
+      {/* S4-SL-TierProgression: Lifecycle Section */}
+      <CollapsibleSection
+        title="Lifecycle"
+        icon="🌱"
+        iconLabel="Lifecycle stage"
+        storageKey="lifecycle"
+        defaultExpanded={true}
+      >
+        <div className="flex items-center gap-2">
+          <TierBadge tier={stageToTier(sprout.stage)} size="md" showLabel />
+        </div>
+        {sprout.promotedAt && (
+          <p className="text-xs text-ink-muted dark:text-paper/50 mt-2">
+            Promoted {new Date(sprout.promotedAt).toLocaleDateString()}
           </p>
         )}
       </CollapsibleSection>

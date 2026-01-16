@@ -39,9 +39,16 @@ test.describe('Surface Theming', () => {
   });
 
   test('Theme switches when navigating between surfaces', async ({ page }) => {
-    // Start at genesis
+    // Clear localStorage to ensure consistent theme state
     await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
+    await page.reload();
     await page.waitForLoadState('networkidle');
+
+    // Wait for theme to load (async fetch)
+    await page.waitForTimeout(500);
 
     const genesisThemeBg = await page.evaluate(() => {
       return getComputedStyle(document.documentElement)
@@ -53,6 +60,9 @@ test.describe('Surface Theming', () => {
     await page.goto('/foundation');
     await page.waitForLoadState('networkidle');
 
+    // Wait for theme to load (async fetch)
+    await page.waitForTimeout(500);
+
     const foundationThemeBg = await page.evaluate(() => {
       return getComputedStyle(document.documentElement)
         .getPropertyValue('--theme-bg-primary')
@@ -60,7 +70,8 @@ test.describe('Surface Theming', () => {
     });
 
     // The theme backgrounds should be different between surfaces
-    // Genesis uses paper cream, Foundation uses dark obsidian
+    // Genesis uses paper cream (#FBFBF9), Foundation defaults to dark obsidian (#0D0D0D)
+    // Note: If both are the same, theme loading may have failed - check that themes load
     expect(genesisThemeBg).not.toBe(foundationThemeBg);
   });
 

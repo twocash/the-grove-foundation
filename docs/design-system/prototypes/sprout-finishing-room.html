@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprout Finishing Room - High-Fidelity Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       DESIGN TOKENS - Living Glass Theme
+       ======================================== */
+    :root {
+      /* Core Colors */
+      --void: #030712;
+      --glass: rgba(15, 23, 42, 0.6);
+      --glass-solid: #1e293b;
+
+      /* Text Hierarchy */
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --text-faint: #475569;
+
+      /* Borders */
+      --border-default: rgba(148, 163, 184, 0.15);
+      --border-hover: rgba(148, 163, 184, 0.25);
+      --border-subtle: rgba(148, 163, 184, 0.08);
+
+      /* Accent Colors */
+      --grove-forest: #2F5C3B;
+      --grove-clay: #D95D39;
+      --neon-green: #10b981;
+      --neon-cyan: #06b6d4;
+
+      /* Glows */
+      --glow-green: 0 0 20px rgba(16, 185, 129, 0.3);
+      --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.3);
+
+      /* Typography */
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      /* Spacing */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+
+      /* Easing */
+      --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    /* ========================================
+       RESET & BASE
+       ======================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--void);
+      color: var(--text-body);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ========================================
+       BACKDROP
+       ======================================== */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(8px);
+      animation: backdrop-fade 0.3s var(--ease-out);
+    }
+
+    @keyframes backdrop-fade {
+      from { opacity: 0; backdrop-filter: blur(0); }
+      to { opacity: 1; backdrop-filter: blur(8px); }
+    }
+
+    /* ========================================
+       FINISHING ROOM MODAL
+       ======================================== */
+    .finishing-room {
+      position: relative;
+      width: 95vw;
+      height: 95vh;
+      max-width: 1600px;
+      max-height: 900px;
+      background: var(--void);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modal-enter 0.3s var(--ease-out);
+      box-shadow:
+        0 0 0 1px rgba(16, 185, 129, 0.1),
+        0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes modal-enter {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* ========================================
+       HEADER BAR
+       ======================================== */
+    .header-bar {
+      height: 48px;
+      background: var(--void);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .header-bar::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(16, 185, 129, 0.3),
+        transparent
+      );
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .header-icon {
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .header-center {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 400px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    /* ========================================
+       MAIN CONTENT AREA (Three Columns)
+       ======================================== */
+    .content-area {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ========================================
+       PROVENANCE PANEL (Left)
+       ======================================== */
+    .provenance-panel {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid var(--border-default);
+      overflow-y: auto;
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .panel-section-header {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-subtle);
+      margin-bottom: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .panel-section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .provenance-item {
+      padding: var(--space-3);
+      background: rgba(15, 23, 42, 0.3);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .provenance-item:hover {
+      border-color: var(--border-hover);
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    .provenance-item-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-subtle);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .provenance-item-value {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .provenance-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    /* Sources List */
+    .sources-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .source-item {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-body);
+      padding: var(--space-1) var(--space-2);
+      cursor: pointer;
+      transition: color 0.15s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .source-item:hover {
+      color: var(--neon-cyan);
+    }
+
+    .source-item::before {
+      content: '▸';
+      color: var(--text-subtle);
+      font-size: 10px;
+    }
+
+    /* Cognitive Routing Details */
+    .provenance-item.expanded {
+      padding-bottom: var(--space-2);
+    }
+
+    .routing-details {
+      margin-top: var(--space-2);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .routing-detail {
+      display: flex;
+      gap: var(--space-2);
+      padding: var(--space-1) 0;
+      font-size: 12px;
+    }
+
+    .routing-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      min-width: 70px;
+    }
+
+    .routing-value {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    /* ========================================
+       DOCUMENT VIEWER (Center)
+       ======================================== */
+    .document-viewer {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-6);
+      background: var(--void);
+    }
+
+    .document-thesis {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .document-analysis {
+      font-size: 16px;
+      color: var(--text-body);
+      line-height: 1.7;
+      margin-bottom: var(--space-6);
+    }
+
+    .document-analysis p {
+      margin-bottom: var(--space-4);
+    }
+
+    .document-citations {
+      margin-top: var(--space-6);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .citations-header {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-3);
+    }
+
+    .citation-item {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .citation-item:last-child {
+      border-bottom: none;
+    }
+
+    .citation-number {
+      color: var(--neon-cyan);
+      margin-right: var(--space-2);
+    }
+
+    /* ========================================
+       ACTION PANEL (Right)
+       ======================================== */
+    .action-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border-left: 1px solid var(--border-default);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      overflow-y: auto;
+    }
+
+    /* Primary Action Section */
+    .action-section-primary {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      padding: var(--space-4);
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: var(--space-3);
+    }
+
+    .section-title-primary {
+      color: var(--neon-green);
+    }
+
+    .section-title-secondary {
+      color: var(--neon-cyan);
+    }
+
+    .revision-textarea {
+      width: 100%;
+      min-height: 80px;
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      padding: var(--space-3);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--text-body);
+      resize: vertical;
+      margin-bottom: var(--space-3);
+    }
+
+    .revision-textarea:focus {
+      outline: none;
+      border-color: var(--neon-green);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    .revision-textarea::placeholder {
+      color: var(--text-faint);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      background: var(--neon-green);
+      color: var(--void);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-primary:hover {
+      background: #0ea574;
+      box-shadow: var(--glow-green);
+    }
+
+    /* Secondary Action Section */
+    .action-section-secondary {
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.15);
+      border-radius: 8px;
+      padding: var(--space-4);
+    }
+
+    .promotion-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      background: rgba(3, 7, 18, 0.3);
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s var(--ease-out);
+    }
+
+    .checklist-item:hover {
+      border-color: var(--border-hover);
+      background: rgba(3, 7, 18, 0.5);
+    }
+
+    .checklist-item.checked {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(6, 182, 212, 0.1);
+    }
+
+    .checklist-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--border-hover);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 10px;
+      color: transparent;
+      transition: all 0.15s var(--ease-out);
+    }
+
+    .checklist-item.checked .checklist-checkbox {
+      background: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      color: var(--void);
+    }
+
+    .checklist-label {
+      font-size: 13px;
+      color: var(--text-body);
+      flex: 1;
+    }
+
+    .checklist-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-subtle);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: var(--space-2) var(--space-4);
+      background: transparent;
+      color: var(--neon-cyan);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: var(--neon-cyan);
+    }
+
+    /* Tertiary Actions */
+    .action-section-tertiary {
+      margin-top: auto;
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .tertiary-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .btn-tertiary {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s var(--ease-out);
+      text-align: left;
+    }
+
+    .btn-tertiary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+    }
+
+    .btn-tertiary-icon {
+      width: 16px;
+      text-align: center;
+    }
+
+    /* ========================================
+       STATUS BAR (Footer)
+       ======================================== */
+    .status-bar {
+      height: 32px;
+      background: rgba(3, 7, 18, 0.95);
+      border-top: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-subtle);
+      flex-shrink: 0;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .status-divider {
+      color: var(--border-default);
+    }
+
+    .status-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--neon-green);
+      animation: pulse-slow 2s var(--ease-in-out) infinite;
+    }
+
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* ========================================
+       INTERACTIVE STATES
+       ======================================== */
+
+    /* Toggle checklist items on click */
+    .checklist-item:active {
+      transform: scale(0.98);
+    }
+
+    /* Focus states for accessibility */
+    .close-btn:focus,
+    .btn-primary:focus,
+    .btn-secondary:focus,
+    .btn-tertiary:focus,
+    .provenance-item:focus,
+    .checklist-item:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+    }
+
+    /* ========================================
+       RESPONSIVE HINTS
+       ======================================== */
+    @media (max-width: 1279px) {
+      .provenance-panel { width: 240px; }
+      .action-panel { width: 280px; }
+    }
+
+    @media (max-width: 1023px) {
+      .provenance-panel { width: 60px; padding: var(--space-2); }
+      .provenance-item-value { display: none; }
+      .panel-section-header { display: none; }
+      .sources-list { display: none; }
+    }
+
+    /* ========================================
+       DESIGN NOTES (Dev Reference)
+       ======================================== */
+    .design-notes {
+      position: fixed;
+      bottom: var(--space-4);
+      right: var(--space-4);
+      background: rgba(217, 93, 57, 0.9);
+      color: white;
+      padding: var(--space-2) var(--space-3);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Backdrop -->
+  <div class="backdrop"></div>
+
+  <!-- Finishing Room Modal -->
+  <div class="finishing-room" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+
+    <!-- Header Bar -->
+    <header class="header-bar">
+      <div class="header-left">
+        <span class="header-icon">🌱</span>
+        <span class="header-title" id="modal-title">Sprout Finishing Room</span>
+      </div>
+      <div class="header-center">
+        The Ratchet Effect: Infrastructure Cost Dynamics in AI Systems
+      </div>
+      <button class="close-btn" aria-label="Close finishing room">×</button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- Provenance Panel (Left) -->
+      <aside class="provenance-panel">
+        <section>
+          <h3 class="panel-section-header">Origin</h3>
+          <div class="provenance-items">
+            <div class="provenance-item" tabindex="0" role="button" aria-label="View lens details">
+              <div class="provenance-item-label">🔮 Lens</div>
+              <div class="provenance-item-value">Academic Researcher</div>
+            </div>
+            <div class="provenance-item expanded" tabindex="0" role="button" aria-label="View cognitive routing">
+              <div class="provenance-item-label">🧠 Cognitive Routing</div>
+              <div class="provenance-item-value">Infrastructure Analysis Path</div>
+              <div class="routing-details">
+                <div class="routing-detail">
+                  <span class="routing-label">Path:</span>
+                  <span class="routing-value">deep-dive → cost-dynamics</span>
+                </div>
+                <div class="routing-detail">
+                  <span class="routing-label">Prompt:</span>
+                  <span class="routing-value">Analytical research mode</span>
+                </div>
+                <div class="routing-detail">
+                  <span class="routing-label">Inspiration:</span>
+                  <span class="routing-value">User query on ownership models</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h3 class="panel-section-header">Knowledge Sources</h3>
+          <div class="sources-list">
+            <div class="source-item" tabindex="0">grove-overview.md</div>
+            <div class="source-item" tabindex="0">ratchet-effect.md</div>
+            <div class="source-item" tabindex="0">funding-models.md</div>
+            <div class="source-item" tabindex="0">infrastructure-bet.md</div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Document Viewer (Center) -->
+      <article class="document-viewer">
+        <h1 class="document-thesis">
+          The dominant model in current distributed inference networks charges per inference-second or per-token, creating a perpetual rental relationship where users never accumulate equity in the computational infrastructure they rely upon.
+        </h1>
+
+        <div class="document-analysis">
+          <p>
+            This analysis examines what we term the "Ratchet Effect" — a systematic dynamic where AI infrastructure costs increase unidirectionally, creating path dependencies that lock organizations into cloud-first strategies regardless of long-term cost efficiency.
+          </p>
+          <p>
+            The ratchet operates through three primary mechanisms: capability escalation (where newer models require proportionally more compute), data gravity (where accumulated context makes migration prohibitively expensive), and workflow integration (where AI capabilities become embedded in processes faster than alternatives can be evaluated).
+          </p>
+          <p>
+            Our research suggests that the 21-month doubling time for AI inference costs—combined with the 7-month capability refresh cycle—creates a window where local ownership becomes economically viable for organizations processing more than approximately 2M tokens per month sustained.
+          </p>
+          <p>
+            The Grove architecture addresses this through a fundamentally different ownership model: rather than renting access to centralized infrastructure, participants acquire fractional ownership in distributed compute capacity that appreciates with network growth.
+          </p>
+        </div>
+
+        <section class="document-citations">
+          <h2 class="citations-header">Sources Cited</h2>
+          <div class="citation-item">
+            <span class="citation-number">[1]</span>
+            Anthropic API Pricing Documentation (2024). Token-based pricing model analysis.
+          </div>
+          <div class="citation-item">
+            <span class="citation-number">[2]</span>
+            Stanford HAI. "AI Index Report 2024: Infrastructure Costs Chapter."
+          </div>
+          <div class="citation-item">
+            <span class="citation-number">[3]</span>
+            Epoch AI. "Compute Trends Across Three Eras of Machine Learning."
+          </div>
+          <div class="citation-item">
+            <span class="citation-number">[4]</span>
+            Internal Grove Foundation Research. "Local vs. Cloud TCO Analysis."
+          </div>
+        </section>
+      </article>
+
+      <!-- Action Panel (Right) -->
+      <aside class="action-panel">
+
+        <!-- Primary Action: Revise & Resubmit -->
+        <section class="action-section-primary">
+          <h3 class="section-title section-title-primary">Revise & Resubmit</h3>
+          <textarea
+            class="revision-textarea"
+            placeholder="Add revision instructions... e.g., 'Focus more on the 7-month cycle dynamics'"
+            aria-label="Revision instructions"
+          ></textarea>
+          <button class="btn-primary" type="button">Submit for Revision</button>
+        </section>
+
+        <!-- Secondary Action: Add to Field -->
+        <section class="action-section-secondary">
+          <h3 class="section-title section-title-secondary">Add to Field</h3>
+          <div class="promotion-checklist" role="group" aria-label="Content to promote">
+            <div class="checklist-item checked" tabindex="0" role="checkbox" aria-checked="true">
+              <span class="checklist-checkbox">✓</span>
+              <span class="checklist-label">Thesis Statement</span>
+              <span class="checklist-meta">250 words</span>
+            </div>
+            <div class="checklist-item" tabindex="0" role="checkbox" aria-checked="false">
+              <span class="checklist-checkbox">✓</span>
+              <span class="checklist-label">Full Analysis</span>
+              <span class="checklist-meta">2,500 words</span>
+            </div>
+            <div class="checklist-item checked" tabindex="0" role="checkbox" aria-checked="true">
+              <span class="checklist-checkbox">✓</span>
+              <span class="checklist-label">Discovered Sources</span>
+              <span class="checklist-meta">4 URLs</span>
+            </div>
+            <div class="checklist-item" tabindex="0" role="checkbox" aria-checked="false">
+              <span class="checklist-checkbox">✓</span>
+              <span class="checklist-label">My Annotation</span>
+              <span class="checklist-meta">Add note</span>
+            </div>
+          </div>
+          <button class="btn-secondary" type="button">Promote Selected</button>
+        </section>
+
+        <!-- Tertiary Actions -->
+        <section class="action-section-tertiary">
+          <div class="tertiary-actions">
+            <button class="btn-tertiary" type="button">
+              <span class="btn-tertiary-icon">📁</span>
+              Archive to Garden
+            </button>
+            <button class="btn-tertiary" type="button">
+              <span class="btn-tertiary-icon">📝</span>
+              Add Private Note
+            </button>
+            <button class="btn-tertiary" type="button">
+              <span class="btn-tertiary-icon">📤</span>
+              Export Document
+            </button>
+          </div>
+        </section>
+
+      </aside>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <span>SPROUT.FINISHING.v1</span>
+        <span class="status-divider">│</span>
+        <span>Status: READY</span>
+        <span class="status-divider">│</span>
+        <span>Created: 2m ago</span>
+      </div>
+      <div class="status-indicator" aria-label="System ready"></div>
+    </footer>
+
+  </div>
+
+  <!-- Design Notes Badge -->
+  <div class="design-notes">
+    🎨 High-Fidelity Prototype v1.0
+  </div>
+
+  <!-- Interactive Script -->
+  <script>
+    // Toggle checklist items
+    document.querySelectorAll('.checklist-item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.classList.toggle('checked');
+        const isChecked = item.classList.contains('checked');
+        item.setAttribute('aria-checked', isChecked);
+      });
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+    });
+
+    // Close button
+    document.querySelector('.close-btn').addEventListener('click', () => {
+      alert('Modal would close here');
+    });
+
+    // Escape key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        alert('Modal would close on Escape');
+      }
+    });
+
+    // Log interactions for demo
+    document.querySelectorAll('.provenance-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const label = item.querySelector('.provenance-item-value').textContent;
+        console.log(`Provenance clicked: ${label}`);
+      });
+    });
+
+    document.querySelectorAll('.source-item').forEach(item => {
+      item.addEventListener('click', () => {
+        console.log(`Source clicked: ${item.textContent}`);
+      });
+    });
+
+    document.querySelector('.btn-primary').addEventListener('click', () => {
+      const textarea = document.querySelector('.revision-textarea');
+      console.log(`Revision submitted: ${textarea.value || '(empty)'}`);
+      alert('Revision submitted for processing!');
+    });
+
+    document.querySelector('.btn-secondary').addEventListener('click', () => {
+      const checked = document.querySelectorAll('.checklist-item.checked');
+      const items = Array.from(checked).map(item =>
+        item.querySelector('.checklist-label').textContent
+      );
+      console.log('Promoting:', items);
+      alert(`Promoting: ${items.join(', ')}`);
+    });
+  </script>
+</body>
+</html>

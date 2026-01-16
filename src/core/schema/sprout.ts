@@ -98,6 +98,9 @@ export interface Sprout {
   /** Growth stage in botanical lifecycle (sprout-declarative-v1) */
   stage: SproutStage;
 
+  /** ISO timestamp when promoted to 'established' (S4-SL-TierProgression) */
+  promotedAt?: string;
+
   /** Research manifest for research sprouts (sprout-declarative-v1) */
   researchManifest?: ResearchManifest;
 

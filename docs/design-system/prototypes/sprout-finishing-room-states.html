@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprout Finishing Room - State Variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #030712;
+      --glass: rgba(15, 23, 42, 0.6);
+      --glass-solid: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #e2e8f0;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --text-faint: #475569;
+      --border-default: rgba(148, 163, 184, 0.15);
+      --border-hover: rgba(148, 163, 184, 0.25);
+      --border-subtle: rgba(148, 163, 184, 0.08);
+      --grove-forest: #2F5C3B;
+      --grove-clay: #D95D39;
+      --neon-green: #10b981;
+      --neon-cyan: #06b6d4;
+      --error-red: #ef4444;
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: #0a0a0a;
+      color: var(--text-body);
+      padding: var(--space-8);
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: var(--space-8);
+    }
+
+    .state-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+      max-width: 1400px;
+    }
+
+    .state-card {
+      background: var(--void);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .state-label {
+      background: var(--glass-solid);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .state-preview {
+      height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ========================================
+       EMPTY STATE
+       ======================================== */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: var(--space-4);
+      animation: pulse-slow 2s var(--ease-in-out) infinite;
+    }
+
+    .empty-state-title {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-2);
+    }
+
+    .empty-state-text {
+      font-size: 14px;
+      margin-bottom: var(--space-6);
+      max-width: 280px;
+    }
+
+    .empty-state-progress {
+      width: 120px;
+      height: 4px;
+      background: var(--glass-solid);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .empty-state-progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--neon-green), var(--neon-cyan));
+      animation: progress-indeterminate 1.5s var(--ease-in-out) infinite;
+    }
+
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    @keyframes progress-indeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* ========================================
+       LOADING STATE
+       ======================================== */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-4);
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border-default);
+      border-top-color: var(--neon-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .loading-progress {
+      width: 200px;
+      height: 2px;
+      background: var(--border-default);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+
+    .loading-progress-bar {
+      height: 100%;
+      width: 60%;
+      background: var(--neon-green);
+      animation: loading-pulse 2s var(--ease-in-out) infinite;
+    }
+
+    @keyframes loading-pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Background content (blurred during loading) */
+    .loading-bg-content {
+      filter: blur(4px);
+      opacity: 0.4;
+      pointer-events: none;
+      padding: var(--space-6);
+    }
+
+    .loading-bg-content h2 {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-3);
+    }
+
+    .loading-bg-content p {
+      font-size: 14px;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+
+    /* ========================================
+       ERROR STATE
+       ======================================== */
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-6);
+    }
+
+    .error-icon {
+      width: 64px;
+      height: 64px;
+      border: 2px solid var(--error-red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: var(--space-4);
+      animation: error-pulse 2s var(--ease-in-out) infinite;
+    }
+
+    @keyframes error-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+    }
+
+    .error-title {
+      font-size: 16px;
+      color: var(--error-red);
+      margin-bottom: var(--space-2);
+    }
+
+    .error-message {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+      max-width: 320px;
+    }
+
+    .error-code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-subtle);
+      background: rgba(239, 68, 68, 0.1);
+      padding: var(--space-2) var(--space-3);
+      border-radius: 4px;
+      margin-bottom: var(--space-4);
+    }
+
+    .error-actions {
+      display: flex;
+      gap: var(--space-3);
+    }
+
+    .btn-retry {
+      padding: var(--space-2) var(--space-4);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--error-red);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-retry:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--error-red);
+    }
+
+    .btn-dismiss {
+      padding: var(--space-2) var(--space-4);
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-dismiss:hover {
+      border-color: var(--border-hover);
+      color: var(--text-secondary);
+    }
+
+    /* ========================================
+       SUCCESS STATE
+       ======================================== */
+    .success-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-6);
+      position: relative;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      border: 2px solid var(--neon-green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin-bottom: var(--space-4);
+      animation: success-pop 0.5s var(--ease-out);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+    }
+
+    @keyframes success-pop {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .success-message {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+    }
+
+    .success-details {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 8px;
+      padding: var(--space-3) var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    .success-detail-item {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-body);
+      padding: var(--space-1) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .success-detail-item::before {
+      content: '✓';
+      color: var(--neon-green);
+    }
+
+    .btn-done {
+      padding: var(--space-3) var(--space-6);
+      background: var(--neon-green);
+      color: var(--void);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease-out);
+    }
+
+    .btn-done:hover {
+      background: #0ea574;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Particle effects for success */
+    .particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: var(--grove-clay);
+      border-radius: 50%;
+      animation: particle-rise 2s var(--ease-out) forwards;
+    }
+
+    @keyframes particle-rise {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-200px) scale(0.3);
+      }
+    }
+
+    .particle:nth-child(1) { left: 30%; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 40%; animation-delay: 0.1s; }
+    .particle:nth-child(3) { left: 50%; animation-delay: 0.2s; }
+    .particle:nth-child(4) { left: 60%; animation-delay: 0.15s; }
+    .particle:nth-child(5) { left: 70%; animation-delay: 0.25s; }
+    .particle:nth-child(6) { left: 35%; animation-delay: 0.3s; }
+    .particle:nth-child(7) { left: 55%; animation-delay: 0.05s; }
+    .particle:nth-child(8) { left: 65%; animation-delay: 0.35s; }
+
+    /* ========================================
+       ERROR TOAST (inline display)
+       ======================================== */
+    .toast-container {
+      position: absolute;
+      bottom: var(--space-4);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .error-toast {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      padding: var(--space-3) var(--space-4);
+      border-radius: 6px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      animation: slide-up 0.3s var(--ease-out);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast-icon {
+      font-size: 16px;
+    }
+
+    .toast-dismiss {
+      background: none;
+      border: none;
+      color: white;
+      opacity: 0.7;
+      cursor: pointer;
+      margin-left: var(--space-2);
+      font-size: 18px;
+    }
+
+    .toast-dismiss:hover {
+      opacity: 1;
+    }
+
+    /* ========================================
+       ANNOTATIONS
+       ======================================== */
+    .annotation {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--grove-clay);
+      background: rgba(217, 93, 57, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px dashed rgba(217, 93, 57, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <h1>Sprout Finishing Room — State Variations</h1>
+  <p class="subtitle">Visual reference for all UI states in the component</p>
+
+  <div class="state-grid">
+
+    <!-- Empty/Loading State -->
+    <div class="state-card">
+      <div class="state-label">Empty State (Loading Document)</div>
+      <div class="state-preview">
+        <div class="empty-state">
+          <div class="empty-state-icon">🌱</div>
+          <div class="empty-state-title">Loading Research</div>
+          <div class="empty-state-text">
+            Retrieving document and analyzing provenance chain...
+          </div>
+          <div class="empty-state-progress">
+            <div class="empty-state-progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Processing State (Revision Submitted) -->
+    <div class="state-card">
+      <div class="state-label">Loading State (Processing Revision)</div>
+      <div class="state-preview">
+        <div class="loading-bg-content">
+          <h2>The Ratchet Effect: Infrastructure Cost Dynamics</h2>
+          <p>The dominant model in current distributed inference networks charges per inference-second or per-token, creating a perpetual rental relationship...</p>
+        </div>
+        <div class="loading-overlay">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Processing Revision</div>
+          <div class="loading-progress">
+            <div class="loading-progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="state-card">
+      <div class="state-label">Error State (Action Failed)</div>
+      <div class="state-preview">
+        <div class="error-state">
+          <div class="error-icon">⚠</div>
+          <div class="error-title">Revision Failed</div>
+          <div class="error-message">
+            Unable to queue revision request. The research agent may be at capacity.
+          </div>
+          <div class="error-code">ERR_AGENT_QUEUE_FULL</div>
+          <div class="error-actions">
+            <button class="btn-retry">Try Again</button>
+            <button class="btn-dismiss">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div class="state-card">
+      <div class="state-label">Success State (After Promotion)</div>
+      <div class="state-preview">
+        <div class="success-state">
+          <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          <div class="success-icon">✓</div>
+          <div class="success-title">Added to Field</div>
+          <div class="success-message">
+            Selected content has been promoted to your knowledge base.
+          </div>
+          <div class="success-details">
+            <div class="success-detail-item">Thesis Statement (250 words)</div>
+            <div class="success-detail-item">Discovered Sources (4 URLs)</div>
+          </div>
+          <button class="btn-done">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Error Toast Example (separate) -->
+  <div style="margin-top: 48px; max-width: 700px;">
+    <div class="state-card">
+      <div class="state-label">Error Toast (Inline Notification)</div>
+      <div class="state-preview" style="height: 200px; background: var(--glass-solid);">
+        <div class="toast-container">
+          <div class="error-toast">
+            <span class="toast-icon">⚠</span>
+            <span>Failed to export document. Please try again.</span>
+            <button class="toast-dismiss">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design Notes -->
+  <div style="margin-top: 48px; padding: 24px; background: var(--void); border: 1px solid var(--border-default); border-radius: 8px; max-width: 700px;">
+    <h2 style="font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--grove-clay); margin-bottom: 16px;">Implementation Notes</h2>
+    <ul style="font-size: 14px; color: var(--text-body); line-height: 1.8; list-style: none;">
+      <li style="margin-bottom: 8px;">
+        <span style="color: var(--neon-green);">●</span>
+        <strong>Empty State:</strong> Shows when sprout exists but document hasn't loaded. Progress bar is indeterminate.
+      </li>
+      <li style="margin-bottom: 8px;">
+        <span style="color: var(--neon-cyan);">●</span>
+        <strong>Loading State:</strong> Overlays content during async operations. Background content remains visible but blurred.
+      </li>
+      <li style="margin-bottom: 8px;">
+        <span style="color: var(--error-red);">●</span>
+        <strong>Error State:</strong> Full-panel error for critical failures. Toast for recoverable errors.
+      </li>
+      <li>
+        <span style="color: var(--grove-clay);">●</span>
+        <strong>Success State:</strong> Brief celebration with Grove Clay particles. Auto-dismisses after 3 seconds or on click.
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

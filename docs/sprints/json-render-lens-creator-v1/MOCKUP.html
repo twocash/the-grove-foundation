@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON-Render Custom Lens Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="flex flex-col h-screen">
+        <!-- Header -->
+        <header class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">🔮</span>
+                <h1 class="font-mono text-xs uppercase tracking-widest">Custom Lens Creator</h1>
+            </div>
+            <div class="text-sm font-medium">Skeptical Engineer Lens</div>
+            <button class="p-1.5 rounded-md hover:bg-gray-100 transition-colors" title="Close">
+                <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"></path>
+                    <path d="m6 6 12 12"></path>
+                </svg>
+            </button>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Conversation Panel -->
+            <div class="flex-1 flex flex-col border-r border-gray-200 bg-white">
+                <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                    <!-- User Message -->
+                    <div class="flex justify-end">
+                        <div class="bg-purple-600 text-white rounded-lg p-3 max-w-lg">
+                            <p>Create a lens for skeptical engineers who think distributed AI is hype.</p>
+                        </div>
+                    </div>
+                    <!-- AI Message -->
+                    <div class="flex">
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-lg">
+                            <p>Here's a draft. I've focused on a technical, data-driven tone. How does this look?</p>
+                        </div>
+                    </div>
+                    <!-- Validation Error Message -->
+                    <div class="flex">
+                        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 max-w-lg" role="alert">
+                            <p class="font-bold">Correction</p>
+                            <p>I've made a mistake in the output. I'm correcting it now...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Bar -->
+                <div class="px-4 py-3 border-t border-gray-200 bg-white">
+                    <div class="flex items-center space-x-2">
+                        <input type="text" placeholder="Type your message..." class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <button class="px-4 py-2 rounded-md bg-purple-600 text-white font-medium hover:bg-purple-700 transition-colors">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Preview Panel -->
+            <div class="flex-1 flex flex-col bg-gray-50">
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                    <h2 class="font-mono text-xs uppercase tracking-widest">Live Preview</h2>
+                    <button class="p-1.5 rounded-md hover:bg-gray-200 transition-colors" title="Toggle Raw JSON View">
+                        <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div class="space-y-6">
+                        <!-- HeroSection -->
+                        <div class="p-6 border border-gray-200 rounded-lg bg-white">
+                            <h2 class="text-2xl font-bold mb-2">The Infrastructure Bet</h2>
+                            <p class="text-gray-600">A technical, evidence-first exploration of distributed AI.</p>
+                        </div>
+                        <!-- ProblemFrame -->
+                        <div class="p-6 border border-gray-200 rounded-lg bg-white">
+                            <h3 class="font-bold mb-2">Problem Frame</h3>
+                            <blockquote class="border-l-4 border-purple-500 pl-4 italic">
+                                <p>"The cloud is just someone else's computer."</p>
+                                <footer class="text-sm text-gray-500 mt-2">- Anonymous Engineer</footer>
+                            </blockquote>
+                        </div>
+                        <!-- SourceList -->
+                        <div class="p-6 border border-gray-200 rounded-lg bg-white">
+                            <h3 class="font-bold mb-2">Sources</h3>
+                            <ul>
+                                <li class="text-sm text-gray-600">[1] The Ratchet Effect in Distributed Systems</li>
+                            </ul>
+                        </div>
+                        <!-- NavigationPrompt -->
+                        <div class="p-6 border border-gray-200 rounded-lg bg-white">
+                            <button class="w-full text-left p-4 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
+                                <span class="font-medium text-purple-700">Explore the Ratchet Effect Journey</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -43,7 +43,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     toast.success('Revision submitted for processing!');
   };
 
-  // US-D005: Promote to RAG
+  // US-D005: Promote to RAG - S4-SL-TierProgression: Also update stage
   const handlePromote = async (content: string, selectedItems: string[]) => {
     try {
       const response = await fetch('/api/knowledge/upload', {
@@ -60,8 +60,25 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
       if (!response.ok) throw new Error('Upload failed');
 
+      // S4-SL-TierProgression: Update stage to 'established' with timestamp
+      try {
+        updateSprout(sprout.id, {
+          stage: 'established',
+          promotedAt: new Date().toISOString(),
+        });
+
+        // Notify parent of update
+        if (onSproutUpdate) {
+          const updated = getSprout(sprout.id);
+          if (updated) onSproutUpdate(updated);
+        }
+      } catch (stageError) {
+        console.error('Stage update failed:', stageError);
+        toast.warning('Content saved, but tier update failed.');
+      }
+
       emit.custom('sproutPromotedToRag', { sproutId: sprout.id, selectedItems });
-      toast.success('Content promoted to Knowledge Commons');
+      toast.success('Promoted to Sapling! Added to Knowledge Commons.');
     } catch (error) {
       toast.error('Failed to promote content');
     }

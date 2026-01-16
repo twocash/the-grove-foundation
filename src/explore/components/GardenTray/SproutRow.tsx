@@ -2,10 +2,12 @@
 // Individual sprout row for GardenTray with expandable results
 // Sprint: garden-tray-mvp, Phase 2a
 // Enhanced: sprout-status-panel-v1, Phase 3c
+// Enhanced: S4-SL-TierProgression - Added TierBadge
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ResearchSprout } from '@core/schema/research-sprout';
+import { TierBadge, statusToTier } from '@surface/components/TierBadge';
 
 // =============================================================================
 // Types
@@ -78,6 +80,15 @@ export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false, onS
           >
             {sprout.title}
           </motion.span>
+        )}
+
+        {/* S4-SL-TierProgression: Tier Badge */}
+        {isExpanded && (
+          <TierBadge
+            tier={statusToTier(sprout.status)}
+            size="sm"
+            className="ml-auto mr-2 flex-shrink-0"
+          />
         )}
 
         {/* Expand indicator for completed sprouts */}

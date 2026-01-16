@@ -1,8 +1,10 @@
 // src/surface/components/modals/SproutFinishingRoom/FinishingRoomHeader.tsx
 // Sprint: S1-SFR-Shell - US-A001/US-A003 Header with close button
+// Enhanced: S4-SL-TierProgression - Dynamic TierBadge
 
 import React, { RefObject } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import { TierBadge, stageToTier } from '@surface/components/TierBadge';
 
 export interface FinishingRoomHeaderProps {
   sprout: Sprout;
@@ -30,11 +32,14 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
 
   return (
     <header className="flex items-center justify-between px-4 py-3 border-b border-ink/10 dark:border-white/10 bg-paper/50 dark:bg-ink/50">
-      {/* Left: Icon and title */}
+      {/* Left: Icon and title - S4-SL-TierProgression: Dynamic TierBadge */}
       <div className="flex items-center gap-3">
-        <span className="text-xl" role="img" aria-label="Sprout">
-          🌱
-        </span>
+        <TierBadge
+          tier={stageToTier(sprout.stage)}
+          size="lg"
+          showLabel={false}
+          tooltip={`Current tier: ${stageToTier(sprout.stage)}`}
+        />
         <h1
           id={headerId}
           className="text-sm font-mono font-semibold text-ink dark:text-paper uppercase tracking-wider"
