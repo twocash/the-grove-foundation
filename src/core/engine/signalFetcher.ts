@@ -13,11 +13,11 @@ import { DEFAULT_SIGNALS } from '@core/schema/advancement';
 // =============================================================================
 
 /**
- * Row shape from sprout_signal_aggregations table
+ * Row shape from document_signal_aggregations table
  */
 export interface SignalAggregationRow {
   id: string;
-  sprout_id: string;
+  document_id: string;
   period: 'all_time' | 'last_30d' | 'last_7d';
   // Retrieval signals
   view_count: number;
@@ -114,82 +114,82 @@ export interface SupabaseClientLike {
 // =============================================================================
 
 /**
- * Fetch observable signals for a single sprout.
+ * Fetch observable signals for a single document.
  *
  * @param supabase - Supabase client
- * @param sproutId - The sprout ID
+ * @param documentId - The document ID
  * @param options - Fetch options
  * @returns ObservableSignals or defaults if not found
  */
 export async function fetchSignalsForSprout(
   supabase: SupabaseClientLike,
-  sproutId: string,
+  documentId: string,
   options: FetchSignalsOptions = {}
 ): Promise<ObservableSignals> {
   const period = options.period ?? 'all_time';
 
   try {
     const { data, error } = await supabase
-      .from('sprout_signal_aggregations')
+      .from('document_signal_aggregations')
       .select('*')
-      .eq('sprout_id', sproutId)
+      .eq('document_id', documentId)
       .eq('period', period)
       .single();
 
     if (error || !data) {
-      console.warn(`No signals found for sprout ${sproutId}, using defaults`);
+      console.warn(`No signals found for document ${documentId}, using defaults`);
       return { ...DEFAULT_SIGNALS };
     }
 
     return mapAggregationToSignals(data);
   } catch (err) {
-    console.error(`Error fetching signals for sprout ${sproutId}:`, err);
+    console.error(`Error fetching signals for document ${documentId}:`, err);
     return { ...DEFAULT_SIGNALS };
   }
 }
 
 /**
- * Fetch observable signals for multiple sprouts (batch).
+ * Fetch observable signals for multiple documents (batch).
  * More efficient than individual fetches for batch processing.
  *
  * @param supabase - Supabase client
- * @param sproutIds - Array of sprout IDs
+ * @param documentIds - Array of document IDs
  * @param options - Fetch options
- * @returns Map of sprout ID to ObservableSignals
+ * @returns Map of document ID to ObservableSignals
  */
 export async function fetchSignalsForSprouts(
   supabase: SupabaseClientLike,
-  sproutIds: string[],
+  documentIds: string[],
   options: FetchSignalsOptions = {}
 ): Promise<Map<string, ObservableSignals>> {
   const period = options.period ?? 'all_time';
   const result = new Map<string, ObservableSignals>();
 
   // Initialize all with defaults
-  for (const id of sproutIds) {
+  for (const id of documentIds) {
     result.set(id, { ...DEFAULT_SIGNALS });
   }
 
-  if (sproutIds.length === 0) {
+  if (documentIds.length === 0) {
     return result;
   }
 
   try {
     const { data, error } = await supabase
-      .from('sprout_signal_aggregations')
+      .from('document_signal_aggregations')
       .select('*')
       .eq('period', period)
-      .in('sprout_id', sproutIds);
+      .in('document_id', documentIds);
 
     if (error) {
       console.error('Error fetching batch signals:', error);
       return result;
     }
 
-    // Map results to sprout IDs
+    // Map results to document IDs
     if (data) {
       for (const row of data) {
-        result.set(row.sprout_id, mapAggregationToSignals(row));
+        result.set(row.document_id, mapAggregationToSignals(row));
       }
     }
 
@@ -237,16 +237,16 @@ export interface ExtendedSignalData extends ObservableSignals {
  */
 export async function fetchExtendedSignals(
   supabase: SupabaseClientLike,
-  sproutId: string,
+  documentId: string,
   options: FetchSignalsOptions = {}
 ): Promise<ExtendedSignalData> {
   const period = options.period ?? 'all_time';
 
   try {
     const { data, error } = await supabase
-      .from('sprout_signal_aggregations')
+      .from('document_signal_aggregations')
       .select('*')
-      .eq('sprout_id', sproutId)
+      .eq('document_id', documentId)
       .eq('period', period)
       .single();
 
@@ -269,7 +269,7 @@ export async function fetchExtendedSignals(
       advancementEligible: data.advancement_eligible,
     };
   } catch (err) {
-    console.error(`Error fetching extended signals for sprout ${sproutId}:`, err);
+    console.error(`Error fetching extended signals for document ${documentId}:`, err);
     return { ...DEFAULT_SIGNALS };
   }
 }

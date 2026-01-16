@@ -15,7 +15,8 @@ export type GroveObjectType =
   | 'prompt-architect-config' // Sprint: sprout-research-v1
   | 'system-prompt'
   | 'feature-flag'           // Sprint: feature-flags-v1
-  | 'advancement-rule'       // Sprint: S7-SL-AutoAdvancement v1
+  | 'advancement-rule'      // Sprint: S7-SL-AutoAdvancement v1
+  | 'job-config'            // Sprint: S7.5-SL-JobConfigSystem v1
   | 'node'
   | 'card'
   | string;

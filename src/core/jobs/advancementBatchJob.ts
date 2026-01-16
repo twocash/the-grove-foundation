@@ -29,19 +29,14 @@ import {
 // =============================================================================
 
 /**
- * Sprout row from database
+ * Document row from database
  */
-export interface SproutRow {
+export interface DocumentRow {
   id: string;
-  payload: {
-    tier?: string;
-    lifecycleModelId?: string;
-    [key: string]: unknown;
-  };
-  meta: {
-    title?: string;
-    [key: string]: unknown;
-  };
+  title: string;
+  tier: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -205,29 +200,22 @@ async function fetchEnabledRules(
 }
 
 /**
- * Fetch sprouts eligible for advancement evaluation
+ * Fetch documents eligible for advancement evaluation
  */
 async function fetchEligibleSprouts(
   supabase: SupabaseClientLike,
   tiers: string[],
   lifecycleModelId?: string,
   limit?: number
-): Promise<SproutRow[]> {
-  // Build query for sprouts in target tiers
+): Promise<DocumentRow[]> {
+  // Build query for documents in target tiers
   let query = (supabase as any)
-    .from('sprouts')
-    .select('id, payload, meta');
+    .from('documents')
+    .select('id, title, tier, created_at, updated_at');
 
-  // Filter by tiers (using JSONB)
+  // Filter by tiers (direct column access)
   if (tiers.length > 0) {
-    // Supabase doesn't have a direct "in" for JSONB, so we use OR
-    const tierFilters = tiers.map((t) => `payload->>tier.eq.${t}`).join(',');
-    // For now, fetch all and filter in memory
-    // TODO: Optimize with proper RPC or view
-  }
-
-  if (lifecycleModelId) {
-    query = query.eq('payload->>lifecycleModelId', lifecycleModelId);
+    query = query.in('tier', tiers);
   }
 
   if (limit) {
@@ -237,43 +225,38 @@ async function fetchEligibleSprouts(
   const { data, error } = await query;
 
   if (error) {
-    console.error('[AdvancementBatch] Error fetching sprouts:', error);
+    console.error('[AdvancementBatch] Error fetching documents:', error);
     return [];
   }
 
-  // Filter by tier in memory (until we optimize the query)
-  const sprouts = (data ?? []) as SproutRow[];
-  if (tiers.length > 0) {
-    return sprouts.filter((s) => tiers.includes(s.payload?.tier ?? ''));
-  }
-  return sprouts;
+  return (data ?? []) as DocumentRow[];
 }
 
 /**
- * Process a single sprout for advancement
+ * Process a single document for advancement
  */
 async function processSpout(
   supabase: SupabaseClientLike,
-  sprout: SproutRow,
+  document: DocumentRow,
   rules: RuleWithId[],
   signalsMap: Map<string, ObservableSignals>,
   dryRun: boolean
 ): Promise<AdvancementJobResult> {
-  const currentTier = sprout.payload?.tier ?? 'seed';
-  const lifecycleModelId = sprout.payload?.lifecycleModelId ?? 'botanical';
+  const currentTier = document.tier;
+  const lifecycleModelId = 'botanical'; // Documents don't have lifecycle model ID
 
   // Build sprout context
   const context: SproutContext = {
-    id: sprout.id,
+    id: document.id,
     currentTier,
     lifecycleModelId,
   };
 
   // Get signals
-  const signals = signalsMap.get(sprout.id);
+  const signals = signalsMap.get(document.id);
   if (!signals) {
     return {
-      sproutId: sprout.id,
+      sproutId: document.id,
       success: true,
       advanced: false,
     };
@@ -284,7 +267,7 @@ async function processSpout(
 
   if (!result || !result.shouldAdvance) {
     return {
-      sproutId: sprout.id,
+      sproutId: document.id,
       success: true,
       advanced: false,
     };
@@ -292,9 +275,9 @@ async function processSpout(
 
   // Log what would happen in dry run mode
   if (dryRun) {
-    console.log(`[AdvancementBatch] DRY RUN: Would advance ${sprout.id} from ${currentTier} to ${result.toTier}`);
+    console.log(`[AdvancementBatch] DRY RUN: Would advance ${document.id} from ${currentTier} to ${result.toTier}`);
     return {
-      sproutId: sprout.id,
+      sproutId: document.id,
       success: true,
       advanced: true,
       fromTier: currentTier,
@@ -305,9 +288,9 @@ async function processSpout(
 
   // Apply advancement
   try {
-    await applyAdvancement(supabase, sprout.id, currentTier, result);
+    await applyAdvancement(supabase, document.id, currentTier, result);
     return {
-      sproutId: sprout.id,
+      sproutId: document.id,
       success: true,
       advanced: true,
       fromTier: currentTier,
@@ -315,9 +298,9 @@ async function processSpout(
       ruleId: result.ruleId,
     };
   } catch (err) {
-    console.error(`[AdvancementBatch] Failed to apply advancement for ${sprout.id}:`, err);
+    console.error(`[AdvancementBatch] Failed to apply advancement for ${document.id}:`, err);
     return {
-      sproutId: sprout.id,
+      sproutId: document.id,
       success: false,
       advanced: false,
       error: err instanceof Error ? err.message : 'Failed to apply advancement',
@@ -326,60 +309,51 @@ async function processSpout(
 }
 
 /**
- * Apply advancement: update sprout tier and log event
+ * Apply advancement: update document tier and log event
  */
 async function applyAdvancement(
   supabase: SupabaseClientLike,
-  sproutId: string,
+  documentId: string,
   fromTier: string,
   result: AdvancementResult
 ): Promise<void> {
   const timestamp = new Date().toISOString();
 
-  // Update sprout tier
-  const { error: updateError } = await (supabase as any)
-    .from('sprouts')
-    .update({
-      payload: (supabase as any).raw(`payload || '{"tier": "${result.toTier}"}'::jsonb`),
-    })
-    .eq('id', sproutId);
+  // Use RPC function to update document tier
+  const { data: updateResult, error: updateError } = await (supabase as any)
+    .rpc('update_document_tier', {
+      p_document_id: documentId,
+      p_new_tier: result.toTier,
+    });
 
   if (updateError) {
-    throw new Error(`Failed to update sprout tier: ${updateError.message}`);
+    throw new Error(`Failed to update document tier: ${updateError.message}`);
   }
 
-  // Log advancement event
-  const event: Partial<AdvancementEvent> = {
-    sproutId,
-    ruleId: result.ruleId,
-    fromTier,
-    toTier: result.toTier,
-    criteriaMet: result.criteriaResults,
-    signalValues: result.signalValues,
-    timestamp,
-    eventType: 'auto-advancement',
-    rolledBack: false,
-  };
+  if (!updateResult) {
+    throw new Error('Tier update returned false (document not found or already at target tier)');
+  }
 
-  const { error: eventError } = await (supabase as any)
-    .from('advancement_events')
-    .insert({
-      sprout_id: sproutId,
-      rule_id: result.ruleId,
-      from_tier: fromTier,
-      to_tier: result.toTier,
-      criteria_met: result.criteriaResults,
-      signal_values: result.signalValues,
-      event_type: 'auto-advancement',
-      rolled_back: false,
+  // Use RPC function to log advancement event
+  const { data: eventId, error: eventError } = await (supabase as any)
+    .rpc('insert_advancement_event', {
+      p_document_id: documentId,
+      p_rule_id: result.ruleId,
+      p_from_tier: fromTier,
+      p_to_tier: result.toTier,
+      p_criteria_met: result.criteriaResults,
+      p_signal_values: result.signalValues,
+      p_event_type: 'auto-advancement',
     });
 
   if (eventError) {
-    console.error(`[AdvancementBatch] Failed to log event for ${sproutId}:`, eventError);
+    console.error(`[AdvancementBatch] Failed to log event for ${documentId}:`, eventError);
     // Don't throw - the advancement was applied successfully
+  } else {
+    console.log(`[AdvancementBatch] Logged advancement event: ${eventId}`);
   }
 
-  console.log(`[AdvancementBatch] Advanced ${sproutId}: ${fromTier} → ${result.toTier}`);
+  console.log(`[AdvancementBatch] Advanced ${documentId}: ${fromTier} → ${result.toTier}`);
 }
 
 /**
@@ -424,25 +398,25 @@ export async function triggerAdvancementBatch(
 }
 
 /**
- * Evaluate advancement for a single sprout (without applying).
+ * Evaluate advancement for a single document (without applying).
  * Useful for preview/testing in UI.
  */
 export async function previewAdvancement(
   supabase: SupabaseClientLike,
-  sproutId: string,
+  documentId: string,
   options: { signalPeriod?: 'all_time' | 'last_30d' | 'last_7d' } = {}
 ): Promise<AdvancementResult | null> {
   const { signalPeriod = 'all_time' } = options;
 
-  // Fetch sprout
-  const { data: sprout, error: sproutError } = await (supabase as any)
-    .from('sprouts')
-    .select('id, payload')
-    .eq('id', sproutId)
+  // Fetch document
+  const { data: document, error: documentError } = await (supabase as any)
+    .from('documents')
+    .select('id, tier')
+    .eq('id', documentId)
     .single();
 
-  if (sproutError || !sprout) {
-    console.error('[AdvancementBatch] Sprout not found:', sproutId);
+  if (documentError || !document) {
+    console.error('[AdvancementBatch] Document not found:', documentId);
     return null;
   }
 
@@ -450,8 +424,8 @@ export async function previewAdvancement(
   const rules = await fetchEnabledRules(supabase);
 
   // Fetch signals
-  const signalsMap = await fetchSignalsForSprouts(supabase, [sproutId], { period: signalPeriod });
-  const signals = signalsMap.get(sproutId);
+  const signalsMap = await fetchSignalsForSprouts(supabase, [documentId], { period: signalPeriod });
+  const signals = signalsMap.get(documentId);
 
   if (!signals) {
     return null;
@@ -459,9 +433,9 @@ export async function previewAdvancement(
 
   // Build context
   const context: SproutContext = {
-    id: sproutId,
-    currentTier: sprout.payload?.tier ?? 'seed',
-    lifecycleModelId: sprout.payload?.lifecycleModelId ?? 'botanical',
+    id: documentId,
+    currentTier: document.tier,
+    lifecycleModelId: 'botanical',
   };
 
   // Evaluate
