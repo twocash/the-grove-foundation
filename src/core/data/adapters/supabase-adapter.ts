@@ -36,6 +36,7 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   'writer-agent-config': 'writer_agent_configs',
   'copilot-style': 'copilot_styles',
   'lifecycle-config': 'lifecycle_configs', // Sprint: S5-SL-LifecycleEngine v1
+  'job-config': 'job_configs', // Sprint: S7.5-SL-JobConfigSystem v1
 };
 
 /**
@@ -49,6 +50,7 @@ const JSONB_META_TYPES = new Set<GroveObjectType>([
   'copilot-style',
   'document', // Corpus documents use JSONB meta+payload (migration 014)
   'lifecycle-config', // Sprint: S5-SL-LifecycleEngine v1
+  'job-config', // Sprint: S7.5-SL-JobConfigSystem v1
 ]);
 
 /**

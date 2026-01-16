@@ -145,12 +145,29 @@ Added "Critical Bug Fixes - Post-Sprint" section to:
 
 ---
 
+## Bug 3: SupabaseAdapter Unknown Object Type
+**Error:** `Error: Unknown object type: job-config at SupabaseAdapter.subscribe`
+
+**Root Cause:**
+- SupabaseAdapter's `TABLE_MAP` didn't include `job-config` mapping
+- SupabaseAdapter's `JSONB_META_TYPES` set didn't include `job-config`
+
+**Fix Applied:**
+- Modified `src/core/data/adapters/supabase-adapter.ts`
+  - Added `'job-config': 'job_configs'` to `TABLE_MAP` (line 39)
+  - Added `'job-config'` to `JSONB_META_TYPES` set (line 53)
+
+**Status:** ✅ FIXED (build and E2E tests verify)
+
+---
+
 ## Lessons Learned
 
 1. **Type Safety**: Always verify property access against actual type definitions
 2. **Database Schema**: Ensure code changes include necessary schema migrations
-3. **Testing**: E2E tests with console monitoring catch runtime errors that unit tests miss
-4. **Migration Strategy**: Use descriptive migration names and include context in comments
+3. **Adapter Configuration**: When adding new object types, update ALL adapters (SupabaseAdapter, etc.)
+4. **Testing**: E2E tests with console monitoring catch runtime errors that unit tests miss
+5. **Migration Strategy**: Use descriptive migration names and include context in comments
 
 ---
 
@@ -160,6 +177,7 @@ Added "Critical Bug Fixes - Post-Sprint" section to:
 2. ✅ Implemented console monitoring in all E2E tests (Constraint 11)
 3. ✅ Verified DEX compliance in all implementations
 4. ✅ Documented all database schema changes
+5. ✅ Created adapter configuration checklist for new object types
 
 ---
 
@@ -169,6 +187,7 @@ Added "Critical Bug Fixes - Post-Sprint" section to:
 |------|--------|-------------|
 | `src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx` | ✅ Fixed | Corrected property access |
 | `supabase/migrations/023_add_research_document_column.sql` | ✅ Created | Database migration |
+| `src/core/data/adapters/supabase-adapter.ts` | ✅ Fixed | Added job-config to TABLE_MAP and JSONB_META_TYPES |
 | `docs/sprints/job-config-system-v1/DEVLOG.md` | ✅ Updated | Bug fix documentation |
 | `tests/e2e/job-config.spec.ts` | ✅ Passing | E2E test suite |
 
@@ -177,9 +196,10 @@ Added "Critical Bug Fixes - Post-Sprint" section to:
 ## Next Steps
 
 1. ✅ Database migration applied
-2. ✅ All fixes verified
-3. ✅ Documentation updated
-4. ✅ Tests passing
+2. ✅ SupabaseAdapter configured
+3. ✅ All fixes verified
+4. ✅ Documentation updated
+5. ✅ Tests passing
 
 **No further action required** - All critical bugs have been resolved and verified.
 

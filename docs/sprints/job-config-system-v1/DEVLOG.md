@@ -259,6 +259,22 @@
 
 ---
 
+### Bug 3: SupabaseAdapter Unknown Object Type
+**Error:** `Error: Unknown object type: job-config at SupabaseAdapter.subscribe (supabase-adapter.ts:403:13)`
+
+**Root Cause:**
+- SupabaseAdapter's `TABLE_MAP` didn't include `job-config` mapping to database table
+- SupabaseAdapter's `JSONB_META_TYPES` set didn't include `job-config`
+
+**Fix Applied:**
+- Modified `src/core/data/adapters/supabase-adapter.ts`
+  - Added `'job-config': 'job_configs'` to `TABLE_MAP` (line 39)
+  - Added `'job-config'` to `JSONB_META_TYPES` set (line 53)
+
+**Status:** ✅ FIXED (build and E2E tests verify)
+
+---
+
 ### Verification
 - ✅ Build: PASSED (no compilation errors)
 - ✅ E2E Tests: 3/3 PASSED (zero critical console errors)
@@ -270,7 +286,7 @@
 ## Summary
 
 **Phases Complete:** 6/6
-**Bug Fixes:** 2/2
+**Bug Fixes:** 3/3
 **Status:** ✅ COMPLETE
 **Completion Date:** 2026-01-16 13:05
 **Bug Fix Date:** 2026-01-16
