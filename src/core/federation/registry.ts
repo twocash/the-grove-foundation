@@ -16,7 +16,7 @@ import {
   paginateResults,
   PaginatedResult,
 } from './schema';
-import { EventEmitter } from 'events';
+import { EventEmitter } from '@core/utils/event-emitter';
 
 export interface RegisterOptions {
   force?: boolean;

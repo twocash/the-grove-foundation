@@ -3,7 +3,7 @@
 // Sprint: EPIC5-SL-Federation v1
 
 import React, { useState, useEffect } from 'react';
-import { useFederation } from '@hooks/useFederation';
+import { useFederation } from '../hooks/useFederation';
 import type { SprintRegistration, DiscoveryCriteria, Capability } from '@core/federation/schema';
 import { FederationCard } from './FederationCard';
 import { CapabilityTag } from './CapabilityTag';

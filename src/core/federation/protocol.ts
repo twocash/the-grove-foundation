@@ -2,7 +2,7 @@
 // Cross-sprint communication protocol
 // Sprint: EPIC5-SL-Federation v1
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from '@core/utils/event-emitter';
 import {
   SprintId,
   Capability,

@@ -3,7 +3,7 @@
 // Sprint: EPIC5-SL-Federation v1
 
 import React, { useState, useEffect } from 'react';
-import { useFederation } from '@hooks/useFederation';
+import { useFederation } from '../hooks/useFederation';
 import type { ProvenanceChain, ProvenanceNode, VerificationResult } from '@core/federation/schema';
 
 export interface ProvenanceTracerProps {

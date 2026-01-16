@@ -2,7 +2,7 @@
 // Cross-sprint provenance tracking
 // Sprint: EPIC5-SL-Federation v1
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from '@core/utils/event-emitter';
 import type { GroveObject } from '@core/schema/grove-object';
 import {
   FederatedProvenance,

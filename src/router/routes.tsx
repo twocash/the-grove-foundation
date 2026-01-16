@@ -32,6 +32,7 @@ const AudioStudio = lazy(() => import('../foundation/consoles/AudioStudio'));
 const Genesis = lazy(() => import('../foundation/consoles/Genesis'));
 const HealthDashboard = lazy(() => import('../foundation/consoles/HealthDashboard'));
 const SproutQueue = lazy(() => import('../foundation/consoles/SproutQueue'));
+const FederationConsole = lazy(() => import('../foundation/consoles/FederationConsole'));
 
 // Bedrock consoles (knowledge curation layer)
 const BedrockDashboard = lazy(() => import('../bedrock/consoles/BedrockDashboard'));
@@ -189,6 +190,14 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <SproutQueue />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'federation',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <FederationConsole />
               </Suspense>
             ),
           },
