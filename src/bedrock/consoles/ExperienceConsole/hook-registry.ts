@@ -11,6 +11,7 @@ import { useFeatureFlagsData } from './useFeatureFlagsData';
 import { useCopilotStyleData } from './useCopilotStyleData';
 import { useLifecycleConfigData } from './useLifecycleConfigData';
 import { useAdvancementRuleData } from './useAdvancementRuleData';
+import { useJobConfigData } from './useJobConfigData'; // Sprint: S7.5-SL-JobConfigSystem v1
 
 // =============================================================================
 // Hook Registry
@@ -35,6 +36,7 @@ export const HOOK_REGISTRY: Record<string, () => CollectionDataResult<any>> = {
   useCopilotStyleData,
   useLifecycleConfigData, // Sprint: S5-SL-LifecycleEngine v1
   useAdvancementRuleData, // Sprint: S7-SL-AutoAdvancement v1
+  useJobConfigData, // Sprint: S7.5-SL-JobConfigSystem v1
   // Future types:
   // usePromptArchitectConfigData,
   // useWelcomeConfigData,

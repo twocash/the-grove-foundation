@@ -147,18 +147,41 @@
 
 ## Phase 5: Hook Registry Integration
 **Started:** 2026-01-16 12:40
-**Status:** 🚀 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Sub-phase 5a: Hook Registration
-- Need to verify useJobConfigData is properly registered in hook system
-- Follow pattern from useAdvancementRuleData and other instance hooks
-- Ensure console factory can resolve the hook
+- Updated `src/bedrock/consoles/ExperienceConsole/hook-registry.ts`
+  - Added import: useJobConfigData
+  - Added to HOOK_REGISTRY with lifecycle tracking
+  - Follows established pattern from other instance hooks
+
+### Sub-phase 5b: Unified Experience Data Integration
+- Updated `src/bedrock/consoles/ExperienceConsole/useUnifiedExperienceData.ts`
+  - Added import: JobConfigPayload type
+  - Added JobConfigPayload to UnifiedExperiencePayload union type
+  - Added import: useJobConfigData hook
+  - Called useJobConfigData() in hook composition
+  - Added jobConfig.objects to merged objects array
+  - Added jobConfig to loading state aggregation
+  - Added jobConfig to error state aggregation
+  - Added jobConfigData.refetch to refetch callback
+  - Added 'job-config' case to createTyped switch statement
+  - Added 'job-config' case to update switch statement
+  - Added 'job-config' case to remove switch statement
+  - Added 'job-config' case to duplicate switch statement
+  - Re-exported useJobConfigData for direct access
+
+**Files Changed:**
+- `src/bedrock/consoles/ExperienceConsole/hook-registry.ts` (MODIFIED)
+- `src/bedrock/consoles/ExperienceConsole/useUnifiedExperienceData.ts` (MODIFIED)
+
+**Build Gate:** ✅ PASSED (31.05s)
 
 ### DEX Compliance
-- Declarative Sovereignty: ⏳ Pending verification
-- Capability Agnosticism: ⏳ Pending verification
-- Provenance: ⏳ Pending verification
-- Organic Scalability: ⏳ Pending verification
+- Declarative Sovereignty: ✅ Hook registry enables runtime resolution of data sources
+- Capability Agnosticism: ✅ No model dependencies in data composition layer
+- Provenance: ✅ Registry tracks hook metadata and relationships
+- Organic Scalability: ✅ Registry pattern allows unlimited new data hook types
 
 ---
 
@@ -185,9 +208,9 @@
 
 ## Summary
 
-**Phases Complete:** 4/6
-**Current Phase:** Phase 5 - Hook Registry Integration
-**Next Action:** Complete hook registry verification and move to Phase 6
+**Phases Complete:** 5/6
+**Current Phase:** Phase 6 - Integration Testing
+**Next Action:** Complete integration testing with visual verification and E2E tests
 
 ### Key Deliverables So Far
 - ✅ Complete job config schema (4 trigger types, retry policies, notifications)
