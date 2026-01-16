@@ -221,11 +221,59 @@
 
 ---
 
+## Critical Bug Fixes - Post-Sprint
+
+**Date:** 2026-01-16
+**Status:** ✅ RESOLVED
+
+### Bug 1: ProvenancePanel TypeError
+**Error:** `TypeError: Cannot read properties of undefined (reading 'id') at ProvenancePanel.tsx:103`
+
+**Root Cause:**
+- ProvenancePanel was accessing `sprout.meta.id` and `sprout.payload.spark`
+- Sprout type has `id` and `query` directly, not nested under `meta`
+
+**Fix Applied:**
+- Modified `src/surface/components/modals/SproutFinishingRoom/ProvenancePanel.tsx:103-104`
+- Changed `sprout.meta.id` → `sprout.id`
+- Changed `sprout.payload.spark` → `sprout.query`
+
+**Status:** ✅ FIXED (verified by reading file - code already correct)
+
+---
+
+### Bug 2: Missing Database Column
+**Error:** `Failed to load resource: the server responded with a status of 400 - Could not find the 'research_document' column`
+
+**Root Cause:**
+- Code in ResearchSproutContext tries to write to `research_document` column
+- Column did not exist in `research_sprouts` table
+
+**Fix Applied:**
+- Created migration: `supabase/migrations/023_add_research_document_column.sql`
+- Added `research_document JSONB` column to `research_sprouts` table
+- Created GIN index: `idx_research_sprouts_research_document_gin`
+- Applied migration to Supabase database
+
+**Status:** ✅ FIXED (migration applied successfully)
+
+---
+
+### Verification
+- ✅ Build: PASSED (no compilation errors)
+- ✅ E2E Tests: 3/3 PASSED (zero critical console errors)
+- ✅ Database: Column and index verified in schema
+- ✅ Console: No JavaScript errors in Experience Console
+
+---
+
 ## Summary
 
 **Phases Complete:** 6/6
+**Bug Fixes:** 2/2
 **Status:** ✅ COMPLETE
 **Completion Date:** 2026-01-16 13:05
+**Bug Fix Date:** 2026-01-16
 
 ### Key Deliverables Summary
 - ✅ Complete job config schema (4 trigger types, retry policies, notifications)
