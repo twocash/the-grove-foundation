@@ -19,6 +19,8 @@ import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config'
 import { DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD } from '@core/schema/writer-agent-config';
 import type { CopilotStylePayload } from '@core/schema/copilot-style';
 import { DEFAULT_COPILOT_STYLE_PAYLOAD } from '@core/schema/copilot-style';
+import type { LifecycleConfigPayload } from '@core/schema/lifecycle-config';
+import { DEFAULT_LIFECYCLE_CONFIG_PAYLOAD } from '@core/schema/lifecycle-config';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -296,6 +298,28 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<CopilotStylePayload>,
 
+  // Sprint: S5-SL-LifecycleEngine v1 - Lifecycle configuration
+  // SINGLETON pattern: One active config per grove
+  'lifecycle-config': {
+    type: 'lifecycle-config',
+    label: 'Lifecycle Config',
+    icon: 'timeline',
+    description: 'Configure tier labels, emojis, and stage-to-tier mappings for sprout lifecycle',
+    defaultPayload: DEFAULT_LIFECYCLE_CONFIG_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'LifecycleConfigEditor',
+    allowMultipleActive: false, // SINGLETON: One active config
+    routePath: '/bedrock/experience',
+    color: '#8BC34A', // Light green for lifecycle/growth
+    // Polymorphic console support
+    cardComponent: 'LifecycleConfigCard',
+    dataHookName: 'useLifecycleConfigData',
+    searchFields: ['meta.title', 'meta.description', 'payload.activeModelId'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: status=active)', typeFilter: 'lifecycle-config' },
+    ],
+  } satisfies ExperienceTypeDefinition<LifecycleConfigPayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -332,6 +356,7 @@ export interface ExperiencePayloadMap {
   'research-agent-config': ResearchAgentConfigPayload;
   'writer-agent-config': WriterAgentConfigPayload;
   'copilot-style': CopilotStylePayload;
+  'lifecycle-config': LifecycleConfigPayload; // Sprint: S5-SL-LifecycleEngine v1
 }
 
 /**

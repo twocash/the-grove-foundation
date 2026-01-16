@@ -8,6 +8,7 @@ import type { GroveObjectType } from './grove-data-provider';
 import type { Persona } from '@/data/narratives-schema';
 import type { PromptPayload } from '@core/schema/prompt';
 import type { PromptProvenance, PromptSurface, HighlightTrigger } from '@core/context-fields/types';
+import { DEFAULT_LIFECYCLE_CONFIG_PAYLOAD, type LifecycleConfigPayload } from '@core/schema/lifecycle-config';
 
 // Import prompt data files
 import basePrompts from '@data/prompts/base.prompts.json';
@@ -162,6 +163,23 @@ export function getDefaults<T>(type: GroveObjectType): GroveObject<T>[] {
         ...((highlightPrompts as { prompts: LegacyPrompt[] }).prompts),
       ];
       return allPrompts.map(promptToGroveObject) as GroveObject<T>[];
+    }
+    // Sprint: S5-SL-LifecycleEngine v1 - Default lifecycle configuration
+    case 'lifecycle-config': {
+      const now = new Date().toISOString();
+      const defaultConfig: GroveObject<LifecycleConfigPayload> = {
+        meta: {
+          id: 'default-lifecycle-config',
+          type: 'lifecycle-config',
+          title: 'Default Lifecycle Configuration',
+          description: 'Botanical growth model for sprout lifecycle',
+          status: 'active',
+          createdAt: now,
+          updatedAt: now,
+        },
+        payload: DEFAULT_LIFECYCLE_CONFIG_PAYLOAD,
+      };
+      return [defaultConfig] as GroveObject<T>[];
     }
     default:
       return EMPTY_DEFAULTS as GroveObject<T>[];

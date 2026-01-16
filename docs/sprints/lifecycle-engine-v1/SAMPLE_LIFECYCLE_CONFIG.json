@@ -1,0 +1,400 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Information Lifecycle Configuration",
+  "description": "Sample lifecycle configuration showing botanical (system) and academic (custom) models",
+  "version": "1.0.0",
+  "activeModelId": "botanical",
+  "models": [
+    {
+      "id": "botanical",
+      "name": "Botanical Growth",
+      "description": "Default lifecycle model using botanical metaphor for sprout tier progression",
+      "isEditable": false,
+      "status": "active",
+      "category": "botanical",
+      "tiers": [
+        {
+          "id": "seed",
+          "emoji": "🌰",
+          "label": "Seed",
+          "order": 0,
+          "description": "Initial idea or concept, not yet developed"
+        },
+        {
+          "id": "sprout",
+          "emoji": "🌱",
+          "label": "Sprout",
+          "order": 1,
+          "description": "Early growth, actively developing"
+        },
+        {
+          "id": "sapling",
+          "emoji": "🌿",
+          "label": "Sapling",
+          "order": 2,
+          "description": "Established foundation, growing stronger"
+        },
+        {
+          "id": "tree",
+          "emoji": "🌳",
+          "label": "Tree",
+          "order": 3,
+          "description": "Mature and stable, providing value"
+        },
+        {
+          "id": "grove",
+          "emoji": "🌲",
+          "label": "Grove",
+          "order": 4,
+          "description": "Interconnected ecosystem of knowledge"
+        }
+      ],
+      "mappings": [
+        {
+          "stage": "tender",
+          "tierId": "seed",
+          "description": "New sprout, just created"
+        },
+        {
+          "stage": "rooting",
+          "tierId": "seed",
+          "description": "Establishing initial connections"
+        },
+        {
+          "stage": "sprouting",
+          "tierId": "sprout",
+          "description": "Active development phase"
+        },
+        {
+          "stage": "established",
+          "tierId": "sapling",
+          "description": "Core structure solidified"
+        },
+        {
+          "stage": "flourishing",
+          "tierId": "tree",
+          "description": "Mature and productive"
+        },
+        {
+          "stage": "mature",
+          "tierId": "grove",
+          "description": "Part of larger knowledge network"
+        }
+      ],
+      "metadata": {
+        "createdAt": "2026-01-01T00:00:00Z",
+        "updatedAt": "2026-01-01T00:00:00Z",
+        "createdBy": "system",
+        "lastActivated": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "academic-peer-review",
+      "name": "Academic Peer Review",
+      "description": "Lifecycle model based on academic publishing workflow",
+      "isEditable": true,
+      "status": "draft",
+      "category": "academic",
+      "tiers": [
+        {
+          "id": "draft",
+          "emoji": "📝",
+          "label": "Draft",
+          "order": 0,
+          "description": "Initial manuscript or research notes"
+        },
+        {
+          "id": "preprint",
+          "emoji": "📄",
+          "label": "Preprint",
+          "order": 1,
+          "description": "Shared for early feedback"
+        },
+        {
+          "id": "under-review",
+          "emoji": "🔍",
+          "label": "Under Review",
+          "order": 2,
+          "description": "Submitted for peer review"
+        },
+        {
+          "id": "revised",
+          "emoji": "✏️",
+          "label": "Revised",
+          "order": 3,
+          "description": "Incorporating reviewer feedback"
+        },
+        {
+          "id": "accepted",
+          "emoji": "✅",
+          "label": "Accepted",
+          "order": 4,
+          "description": "Accepted for publication"
+        },
+        {
+          "id": "published",
+          "emoji": "📚",
+          "label": "Published",
+          "order": 5,
+          "description": "Publicly available and citable"
+        },
+        {
+          "id": "cited",
+          "emoji": "🎓",
+          "label": "Cited",
+          "order": 6,
+          "description": "Referenced by other works"
+        }
+      ],
+      "mappings": [
+        {
+          "stage": "tender",
+          "tierId": "draft",
+          "description": "Initial research notes"
+        },
+        {
+          "stage": "rooting",
+          "tierId": "draft",
+          "description": "Developing manuscript structure"
+        },
+        {
+          "stage": "sprouting",
+          "tierId": "preprint",
+          "description": "Sharing early version"
+        },
+        {
+          "stage": "established",
+          "tierId": "under-review",
+          "description": "Formal peer review process"
+        },
+        {
+          "stage": "flourishing",
+          "tierId": "accepted",
+          "description": "Accepted and being prepared for publication"
+        },
+        {
+          "stage": "mature",
+          "tierId": "published",
+          "description": "Published and contributing to field"
+        }
+      ],
+      "metadata": {
+        "createdAt": "2026-01-10T14:30:00Z",
+        "updatedAt": "2026-01-15T09:15:00Z",
+        "createdBy": "user-12345",
+        "lastModifiedBy": "user-12345"
+      }
+    },
+    {
+      "id": "creative-project",
+      "name": "Creative Project",
+      "description": "Lifecycle for creative works and artistic projects",
+      "isEditable": true,
+      "status": "draft",
+      "category": "creative",
+      "tiers": [
+        {
+          "id": "idea",
+          "emoji": "💡",
+          "label": "Idea",
+          "order": 0,
+          "description": "Initial creative spark"
+        },
+        {
+          "id": "sketch",
+          "emoji": "✏️",
+          "label": "Sketch",
+          "order": 1,
+          "description": "Rough drafts and experimentation"
+        },
+        {
+          "id": "prototype",
+          "emoji": "🎨",
+          "label": "Prototype",
+          "order": 2,
+          "description": "Working prototype or mockup"
+        },
+        {
+          "id": "refined",
+          "emoji": "✨",
+          "label": "Refined",
+          "order": 3,
+          "description": "Polished and nearly complete"
+        },
+        {
+          "id": "released",
+          "emoji": "🚀",
+          "label": "Released",
+          "order": 4,
+          "description": "Published or launched"
+        }
+      ],
+      "mappings": [
+        {
+          "stage": "tender",
+          "tierId": "idea",
+          "description": "Brainstorming phase"
+        },
+        {
+          "stage": "rooting",
+          "tierId": "sketch",
+          "description": "Early sketches and drafts"
+        },
+        {
+          "stage": "sprouting",
+          "tierId": "prototype",
+          "description": "Building working version"
+        },
+        {
+          "stage": "established",
+          "tierId": "refined",
+          "description": "Polish and refinement"
+        },
+        {
+          "stage": "flourishing",
+          "tierId": "released",
+          "description": "Public release"
+        },
+        {
+          "stage": "mature",
+          "tierId": "released",
+          "description": "Established work with ongoing impact"
+        }
+      ],
+      "metadata": {
+        "createdAt": "2026-01-12T16:00:00Z",
+        "updatedAt": "2026-01-12T16:00:00Z",
+        "createdBy": "user-67890"
+      }
+    },
+    {
+      "id": "software-development",
+      "name": "Software Development",
+      "description": "Lifecycle for software features and code modules",
+      "isEditable": true,
+      "status": "archived",
+      "category": "technical",
+      "tiers": [
+        {
+          "id": "backlog",
+          "emoji": "📋",
+          "label": "Backlog",
+          "order": 0,
+          "description": "Planned feature not yet started"
+        },
+        {
+          "id": "wip",
+          "emoji": "⚙️",
+          "label": "In Progress",
+          "order": 1,
+          "description": "Actively being developed"
+        },
+        {
+          "id": "testing",
+          "emoji": "🧪",
+          "label": "Testing",
+          "order": 2,
+          "description": "Code complete, undergoing QA"
+        },
+        {
+          "id": "deployed",
+          "emoji": "🌐",
+          "label": "Deployed",
+          "order": 3,
+          "description": "Live in production"
+        },
+        {
+          "id": "stable",
+          "emoji": "💎",
+          "label": "Stable",
+          "order": 4,
+          "description": "Mature and well-tested"
+        }
+      ],
+      "mappings": [
+        {
+          "stage": "tender",
+          "tierId": "backlog",
+          "description": "Feature request logged"
+        },
+        {
+          "stage": "rooting",
+          "tierId": "wip",
+          "description": "Development started"
+        },
+        {
+          "stage": "sprouting",
+          "tierId": "wip",
+          "description": "Core functionality implemented"
+        },
+        {
+          "stage": "established",
+          "tierId": "testing",
+          "description": "In QA and testing phase"
+        },
+        {
+          "stage": "flourishing",
+          "tierId": "deployed",
+          "description": "Released to production"
+        },
+        {
+          "stage": "mature",
+          "tierId": "stable",
+          "description": "Battle-tested and reliable"
+        }
+      ],
+      "metadata": {
+        "createdAt": "2025-12-01T10:00:00Z",
+        "updatedAt": "2026-01-05T12:00:00Z",
+        "createdBy": "user-11111",
+        "archivedAt": "2026-01-08T15:30:00Z",
+        "archivedReason": "Replaced by botanical model for consistency"
+      }
+    }
+  ],
+  "sproutStages": [
+    {
+      "id": "tender",
+      "label": "Tender",
+      "description": "Newly created, fragile",
+      "order": 0
+    },
+    {
+      "id": "rooting",
+      "label": "Rooting",
+      "description": "Establishing foundations",
+      "order": 1
+    },
+    {
+      "id": "sprouting",
+      "label": "Sprouting",
+      "description": "Active growth",
+      "order": 2
+    },
+    {
+      "id": "established",
+      "label": "Established",
+      "description": "Stable and growing",
+      "order": 3
+    },
+    {
+      "id": "flourishing",
+      "label": "Flourishing",
+      "description": "Thriving and productive",
+      "order": 4
+    },
+    {
+      "id": "mature",
+      "label": "Mature",
+      "description": "Fully developed",
+      "order": 5
+    }
+  ],
+  "metadata": {
+    "schemaVersion": "1.0.0",
+    "lastUpdated": "2026-01-15T10:00:00Z",
+    "environment": "production",
+    "totalModels": 4,
+    "activeModel": "botanical"
+  }
+}

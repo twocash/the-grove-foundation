@@ -300,3 +300,20 @@ export {
   type CognitiveRouting,
   buildCognitiveRouting
 } from './cognitive-routing';
+
+// Lifecycle Config types (Sprint: S5-SL-LifecycleEngine v1)
+export {
+  type TierDefinition,
+  type StageTierMapping,
+  type LifecycleModel,
+  type LifecycleConfigPayload,
+  DEFAULT_BOTANICAL_MODEL,
+  DEFAULT_LIFECYCLE_CONFIG_PAYLOAD,
+  FALLBACK_TIER_CONFIG,
+  FALLBACK_STAGE_TO_TIER,
+  isTierDefinition,
+  isLifecycleModel,
+  isLifecycleConfigPayload,
+  getActiveModel,
+  getTierForStageFromModel
+} from './lifecycle-config';

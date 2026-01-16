@@ -12,6 +12,7 @@ import type { FeatureFlagPayload } from '@core/schema/feature-flag';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
 import type { CopilotStylePayload } from '@core/schema/copilot-style';
+import type { LifecycleConfigPayload } from '@core/schema/lifecycle-config';
 import type { CollectionDataResult } from '../../patterns/console-factory.types';
 import type { PatchOperation } from '@core/data/grove-data-provider';
 import { useExperienceData } from './useExperienceData';
@@ -19,6 +20,7 @@ import { useFeatureFlagsData } from './useFeatureFlagsData';
 import { useResearchAgentConfigData } from './useResearchAgentConfigData';
 import { useWriterAgentConfigData } from './useWriterAgentConfigData';
 import { useCopilotStyleData } from './useCopilotStyleData';
+import { useLifecycleConfigData } from './useLifecycleConfigData';
 import { getAllExperienceTypes } from '../../types/experience.types';
 
 // =============================================================================
@@ -36,7 +38,8 @@ export type UnifiedExperiencePayload =
   | FeatureFlagPayload
   | ResearchAgentConfigPayload
   | WriterAgentConfigPayload
-  | CopilotStylePayload;
+  | CopilotStylePayload
+  | LifecycleConfigPayload; // Sprint: S5-SL-LifecycleEngine v1
 
 // =============================================================================
 // Extended Result Type
@@ -82,6 +85,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
   const researchAgentConfigData = useResearchAgentConfigData();
   const writerAgentConfigData = useWriterAgentConfigData();
   const copilotStyleData = useCopilotStyleData();
+  const lifecycleConfigData = useLifecycleConfigData(); // Sprint: S5-SL-LifecycleEngine v1
 
   // =========================================================================
   // Merge objects from all sources
@@ -93,6 +97,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
       ...researchAgentConfigData.objects,
       ...writerAgentConfigData.objects,
       ...copilotStyleData.objects,
+      ...lifecycleConfigData.objects, // Sprint: S5-SL-LifecycleEngine v1
     ] as GroveObject<UnifiedExperiencePayload>[];
   }, [
     systemPromptData.objects,
@@ -100,6 +105,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     researchAgentConfigData.objects,
     writerAgentConfigData.objects,
     copilotStyleData.objects,
+    lifecycleConfigData.objects, // Sprint: S5-SL-LifecycleEngine v1
   ]);
 
   // =========================================================================
@@ -110,7 +116,8 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     featureFlagData.loading ||
     researchAgentConfigData.loading ||
     writerAgentConfigData.loading ||
-    copilotStyleData.loading;
+    copilotStyleData.loading ||
+    lifecycleConfigData.loading; // Sprint: S5-SL-LifecycleEngine v1
 
   // =========================================================================
   // Aggregate errors (first error wins - could be improved to show all)
@@ -120,7 +127,8 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     featureFlagData.error ||
     researchAgentConfigData.error ||
     writerAgentConfigData.error ||
-    copilotStyleData.error;
+    copilotStyleData.error ||
+    lifecycleConfigData.error; // Sprint: S5-SL-LifecycleEngine v1
 
   // =========================================================================
   // Refetch all data sources
@@ -131,12 +139,14 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
     researchAgentConfigData.refetch();
     writerAgentConfigData.refetch();
     copilotStyleData.refetch();
+    lifecycleConfigData.refetch(); // Sprint: S5-SL-LifecycleEngine v1
   }, [
     systemPromptData.refetch,
     featureFlagData.refetch,
     researchAgentConfigData.refetch,
     writerAgentConfigData.refetch,
     copilotStyleData.refetch,
+    lifecycleConfigData.refetch, // Sprint: S5-SL-LifecycleEngine v1
   ]);
 
   // =========================================================================
@@ -169,11 +179,15 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return copilotStyleData.create(defaults as Partial<CopilotStylePayload>) as Promise<
             GroveObject<UnifiedExperiencePayload>
           >;
+        case 'lifecycle-config': // Sprint: S5-SL-LifecycleEngine v1
+          return lifecycleConfigData.create(defaults as Partial<LifecycleConfigPayload>) as Promise<
+            GroveObject<UnifiedExperiencePayload>
+          >;
         default:
           throw new Error(`Unknown experience type: ${type}`);
       }
     },
-    [systemPromptData.create, featureFlagData.create, researchAgentConfigData.create, writerAgentConfigData.create, copilotStyleData.create]
+    [systemPromptData.create, featureFlagData.create, researchAgentConfigData.create, writerAgentConfigData.create, copilotStyleData.create, lifecycleConfigData.create]
   );
 
   // Legacy create (defaults to system-prompt for backwards compatibility)
@@ -207,11 +221,13 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return writerAgentConfigData.update(id, operations);
         case 'copilot-style':
           return copilotStyleData.update(id, operations);
+        case 'lifecycle-config': // Sprint: S5-SL-LifecycleEngine v1
+          return lifecycleConfigData.update(id, operations);
         default:
           throw new Error(`Unknown experience type: ${obj.meta.type}`);
       }
     },
-    [objects, systemPromptData.update, featureFlagData.update, researchAgentConfigData.update, writerAgentConfigData.update, copilotStyleData.update]
+    [objects, systemPromptData.update, featureFlagData.update, researchAgentConfigData.update, writerAgentConfigData.update, copilotStyleData.update, lifecycleConfigData.update]
   );
 
   // =========================================================================
@@ -235,11 +251,13 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
           return writerAgentConfigData.remove(id);
         case 'copilot-style':
           return copilotStyleData.remove(id);
+        case 'lifecycle-config': // Sprint: S5-SL-LifecycleEngine v1
+          return lifecycleConfigData.remove(id);
         default:
           throw new Error(`Unknown experience type: ${obj.meta.type}`);
       }
     },
-    [objects, systemPromptData.remove, featureFlagData.remove, researchAgentConfigData.remove, writerAgentConfigData.remove, copilotStyleData.remove]
+    [objects, systemPromptData.remove, featureFlagData.remove, researchAgentConfigData.remove, writerAgentConfigData.remove, copilotStyleData.remove, lifecycleConfigData.remove]
   );
 
   // =========================================================================
@@ -269,6 +287,9 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
         case 'copilot-style':
           result = await copilotStyleData.duplicate(object as GroveObject<CopilotStylePayload>) as GroveObject<UnifiedExperiencePayload>;
           break;
+        case 'lifecycle-config': // Sprint: S5-SL-LifecycleEngine v1
+          result = await lifecycleConfigData.duplicate(object as GroveObject<LifecycleConfigPayload>) as GroveObject<UnifiedExperiencePayload>;
+          break;
         default:
           throw new Error(`Unknown experience type: ${object.meta.type}`);
       }
@@ -296,6 +317,7 @@ export function useUnifiedExperienceData(): UnifiedExperienceDataResult {
       researchAgentConfigData.duplicate,
       writerAgentConfigData.duplicate,
       copilotStyleData.duplicate,
+      lifecycleConfigData.duplicate, // Sprint: S5-SL-LifecycleEngine v1
     ]
   );
 
@@ -377,3 +399,4 @@ export { useFeatureFlagsData } from './useFeatureFlagsData';
 export { useResearchAgentConfigData } from './useResearchAgentConfigData';
 export { useWriterAgentConfigData } from './useWriterAgentConfigData';
 export { useCopilotStyleData } from './useCopilotStyleData';
+export { useLifecycleConfigData } from './useLifecycleConfigData'; // Sprint: S5-SL-LifecycleEngine v1

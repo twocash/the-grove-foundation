@@ -23,7 +23,8 @@ export type GroveObjectType =
   | 'feature-flag'
   | 'research-agent-config'
   | 'writer-agent-config'
-  | 'copilot-style';
+  | 'copilot-style'
+  | 'lifecycle-config'; // Sprint: S5-SL-LifecycleEngine v1
 
 /**
  * Options for listing objects.

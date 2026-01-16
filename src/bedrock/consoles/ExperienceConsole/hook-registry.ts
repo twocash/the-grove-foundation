@@ -9,6 +9,7 @@ import type { CollectionDataResult } from '../../patterns/console-factory.types'
 import { useExperienceData } from './useExperienceData';
 import { useFeatureFlagsData } from './useFeatureFlagsData';
 import { useCopilotStyleData } from './useCopilotStyleData';
+import { useLifecycleConfigData } from './useLifecycleConfigData';
 
 // =============================================================================
 // Hook Registry
@@ -31,6 +32,7 @@ export const HOOK_REGISTRY: Record<string, () => CollectionDataResult<any>> = {
   useExperienceData,
   useFeatureFlagsData,
   useCopilotStyleData,
+  useLifecycleConfigData, // Sprint: S5-SL-LifecycleEngine v1
   // Future types:
   // usePromptArchitectConfigData,
   // useWelcomeConfigData,
