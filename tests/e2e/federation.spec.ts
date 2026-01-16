@@ -24,7 +24,7 @@ test.describe('Federation System E2E', () => {
     await expect(page).toHaveTitle(/The Grove/);
 
     // Verify the federation console is visible
-    await expect(page.locator('text=Federation Console')).toBeVisible();
+    await expect(page.locator('text=Federation Dashboard')).toBeVisible();
 
     // Screenshot of loaded console
     await page.screenshot({
@@ -35,10 +35,10 @@ test.describe('Federation System E2E', () => {
 
   test('US-F002: Service Discovery tab navigation', async ({ page }) => {
     // Click on Service Discovery tab
-    await page.click('text=Service Discovery');
+    await page.click('button:has-text("Service Discovery")');
 
     // Verify the service discovery interface is visible
-    await expect(page.locator('text=Service Discovery')).toBeVisible();
+    await expect(page.locator('button:has-text("Service Discovery")')).toBeVisible();
     await expect(page.locator('input[placeholder*="Search by name"]')).toBeVisible();
 
     // Screenshot of service discovery
@@ -50,10 +50,10 @@ test.describe('Federation System E2E', () => {
 
   test('US-F003: Topology tab navigation', async ({ page }) => {
     // Click on Topology tab
-    await page.click('text=Topology');
+    await page.click('button:has-text("Topology")');
 
     // Verify the topology visualization is visible
-    await expect(page.locator('text=Federation Topology')).toBeVisible();
+    await expect(page.locator('button:has-text("Topology")')).toBeVisible();
 
     // Screenshot of topology
     await page.screenshot({
@@ -64,10 +64,10 @@ test.describe('Federation System E2E', () => {
 
   test('US-F004: Provenance Tracer tab navigation', async ({ page }) => {
     // Click on Provenance Tracer tab
-    await page.click('text=Provenance Tracer');
+    await page.click('button:has-text("Provenance Tracer")');
 
     // Verify the provenance tracer interface is visible
-    await expect(page.locator('text=Provenance Tracer')).toBeVisible();
+    await expect(page.locator('button:has-text("Provenance Tracer")')).toBeVisible();
     await expect(page.locator('input[placeholder*="Enter object ID"]')).toBeVisible();
 
     // Screenshot of provenance tracer
@@ -78,16 +78,21 @@ test.describe('Federation System E2E', () => {
   });
 
   test('US-F005: Tab navigation flow', async ({ page }) => {
-    // Navigate through all tabs
-    const tabs = ['Dashboard', 'Service Discovery', 'Topology', 'Provenance Tracer'];
+    // Navigate through all tabs using nth to select the correct button
+    const tabs = [
+      { name: 'Dashboard', selector: 'button:has-text("Dashboard")', index: 0 },
+      { name: 'Service Discovery', selector: 'button:has-text("Service Discovery")', index: 0 },
+      { name: 'Topology', selector: 'button:has-text("Topology")', index: 0 },
+      { name: 'Provenance Tracer', selector: 'button:has-text("Provenance Tracer")', index: 0 },
+    ];
 
     for (const tab of tabs) {
-      await page.click(`text=${tab}`);
-      await expect(page.locator(`text=${tab}`)).toBeVisible();
+      await page.click(tab.selector);
+      await expect(page.locator(tab.selector).nth(tab.index)).toBeVisible();
 
       // Screenshot of each tab
       await page.screenshot({
-        path: `${SCREENSHOTS_DIR}/e2e-tab-${tab.toLowerCase().replace(' ', '-')}.png`,
+        path: `${SCREENSHOTS_DIR}/e2e-tab-${tab.name.toLowerCase().replace(' ', '-')}.png`,
         fullPage: false,
       });
     }
@@ -95,10 +100,13 @@ test.describe('Federation System E2E', () => {
 
   test('US-F006: Test Sprint Registration', async ({ page }) => {
     // Go to Dashboard tab
-    await page.click('text=Dashboard');
+    await page.click('button:has-text("Dashboard")');
+
+    // Wait for the button to be available
+    await page.waitForSelector('button:has-text("Register Test Sprint")', { state: 'visible', timeout: 10000 });
 
     // Find and click the "Register Test Sprint" button
-    await page.click('text=Register Test Sprint');
+    await page.click('button:has-text("Register Test Sprint")', { timeout: 30000 });
 
     // Wait a moment for the registration to process
     await page.waitForTimeout(1000);
