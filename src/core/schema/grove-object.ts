@@ -19,6 +19,7 @@ export type GroveObjectType =
   | 'job-config'            // Sprint: S7.5-SL-JobConfigSystem v1
   | 'node'
   | 'card'
+  | 'lifecycle-model'       // Sprint: EPIC4-SL-MultiModel v1
   | string;
 
 /**
@@ -108,3 +109,26 @@ export function isGroveObjectMeta(obj: unknown): obj is GroveObjectMeta {
     typeof o.title === 'string'
   );
 }
+
+/**
+ * Type map: Grove object type → its payload type
+ *
+ * Used for type-safe access to object payloads.
+ * Add new types here when creating new GroveObject patterns.
+ */
+export type GroveObjectPayloadMap = {
+  'lens': unknown;
+  'journey': unknown;
+  'hub': unknown;
+  'sprout': unknown;
+  'research-sprout': unknown;
+  'prompt-architect-config': unknown;
+  'system-prompt': unknown;
+  'feature-flag': unknown;
+  'advancement-rule': unknown;
+  'job-config': unknown;
+  'node': unknown;
+  'card': unknown;
+  'lifecycle-model': unknown;
+  [key: string]: unknown;
+};

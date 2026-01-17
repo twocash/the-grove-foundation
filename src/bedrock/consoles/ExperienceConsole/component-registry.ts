@@ -17,6 +17,7 @@ import { CopilotStyleCard } from './CopilotStyleCard';
 import { LifecycleConfigCard } from './LifecycleConfigCard';
 import { AdvancementRuleCard } from './AdvancementRuleCard';
 import { JobConfigCard } from './JobConfigCard';
+import { ModelCard } from './ModelCard';
 
 // Editor components
 import { SystemPromptEditor } from './SystemPromptEditor';
@@ -27,6 +28,7 @@ import { CopilotStyleEditor } from './CopilotStyleEditor';
 import { LifecycleConfigEditor } from './LifecycleConfigEditor';
 import { AdvancementRuleEditor } from './AdvancementRuleEditor';
 import { JobConfigEditor } from './JobConfigEditor';
+import { ModelEditor } from './ModelEditor';
 
 // =============================================================================
 // Card Component Registry
@@ -50,6 +52,7 @@ export const CARD_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectCardPro
   LifecycleConfigCard, // Sprint: S5-SL-LifecycleEngine v1
   AdvancementRuleCard, // Sprint: S7-SL-AutoAdvancement v1
   JobConfigCard, // Sprint: S7.5-SL-JobConfigSystem v1
+  ModelCard, // Sprint: EPIC4-SL-MultiModel v1
   // Future types:
   // PromptArchitectConfigCard,
   // WelcomeConfigCard,
@@ -77,6 +80,7 @@ export const EDITOR_COMPONENT_REGISTRY: Record<string, ComponentType<ObjectEdito
   LifecycleConfigEditor, // Sprint: S5-SL-LifecycleEngine v1
   AdvancementRuleEditor, // Sprint: S7-SL-AutoAdvancement v1
   JobConfigEditor, // Sprint: S7.5-SL-JobConfigSystem v1
+  ModelEditor, // Sprint: EPIC4-SL-MultiModel v1
   // Future types:
   // PromptArchitectConfigEditor,
   // WelcomeConfigEditor,
