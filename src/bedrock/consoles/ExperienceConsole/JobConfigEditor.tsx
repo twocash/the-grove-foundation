@@ -34,7 +34,9 @@ export function JobConfigEditor({
   loading,
   hasChanges,
 }: ObjectEditorProps<JobConfigPayload>) {
-  const { toggleEnabled, runJob } = useJobConfigData();
+  // DEX: Use onEdit+onSave from console factory instead of separate data hooks
+  // This keeps data flow through single source (declarative sovereignty)
+  const { runJob } = useJobConfigData();
   const [isRunning, setIsRunning] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
@@ -93,17 +95,21 @@ export function JobConfigEditor({
     [onEdit]
   );
 
-  // Toggle job enabled/disabled
-  const handleToggleEnabled = useCallback(async () => {
+  // Toggle job enabled/disabled - DEX pattern: use onEdit+onSave for declarative flow
+  const handleToggleEnabled = useCallback(() => {
     setIsToggling(true);
-    try {
-      await toggleEnabled(job.meta.id);
-    } catch (error) {
-      console.error('[JobConfigEditor] Toggle failed:', error);
-    } finally {
+    const now = new Date().toISOString();
+    const ops: PatchOperation[] = [
+      { op: 'replace', path: '/payload/enabled', value: !isEnabled },
+      { op: 'replace', path: '/meta/updatedAt', value: now },
+    ];
+    onEdit(ops);
+    // Use setTimeout to allow state to propagate before save
+    setTimeout(() => {
+      onSave();
       setIsToggling(false);
-    }
-  }, [job.meta.id, toggleEnabled]);
+    }, 50);
+  }, [isEnabled, onEdit, onSave]);
 
   // Run job manually
   const handleRunJob = useCallback(async () => {
@@ -119,31 +125,31 @@ export function JobConfigEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Status Banner */}
+      {/* Status Banner - high contrast for visibility */}
       <div className={`
-        flex items-center gap-3 px-4 py-3 border-b transition-colors
+        flex items-center gap-3 px-4 py-3 border-b-2 transition-colors
         ${isEnabled
-          ? 'bg-green-500/10 border-green-500/20'
-          : 'bg-red-500/10 border-red-500/20'
+          ? 'bg-emerald-500/15 border-emerald-500/40'
+          : 'bg-slate-500/15 border-slate-500/40'
         }
       `}>
         {/* Status dot with pulse animation when enabled */}
         <span className="relative flex h-3 w-3">
           {isEnabled && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           )}
           <span className={`
             relative inline-flex rounded-full h-3 w-3
-            ${isEnabled ? 'bg-green-500' : 'bg-red-500'}
+            ${isEnabled ? 'bg-emerald-500' : 'bg-slate-500'}
           `} />
         </span>
 
         {/* Status text */}
         <div className="flex-1">
-          <span className={`text-sm font-medium ${isEnabled ? 'text-green-300' : 'text-red-300'}`}>
+          <span className={`text-sm font-semibold ${isEnabled ? 'text-emerald-300' : 'text-slate-300'}`}>
             {isEnabled ? 'Enabled' : 'Disabled'}
           </span>
-          <p className={`text-xs ${isEnabled ? 'text-green-400/70' : 'text-red-400/70'}`}>
+          <p className={`text-xs ${isEnabled ? 'text-emerald-400/80' : 'text-slate-400/80'}`}>
             {isEnabled ? 'Job can be executed' : 'Job is paused and will not execute'}
           </p>
         </div>

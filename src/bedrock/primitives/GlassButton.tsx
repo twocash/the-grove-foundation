@@ -8,7 +8,7 @@ import React from 'react';
 // Types
 // =============================================================================
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg';
 type NeonAccent = 'green' | 'cyan' | 'amber' | 'violet';
 
@@ -104,6 +104,11 @@ export function GlassButton({
       bg-red-500/10 hover:bg-red-500/20
       text-red-400 border-red-500/30
       shadow-[0_0_15px_rgba(239,68,68,0.15)]
+    `,
+    success: `
+      bg-emerald-500/20 hover:bg-emerald-500/30
+      text-emerald-400 border-emerald-500/40
+      shadow-[0_0_15px_rgba(16,185,129,0.2)]
     `,
   };
 

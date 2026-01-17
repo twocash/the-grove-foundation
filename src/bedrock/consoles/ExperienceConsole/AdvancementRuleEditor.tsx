@@ -13,7 +13,7 @@ import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
 import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
-import { useAdvancementRuleData } from './useAdvancementRuleData';
+// Note: useAdvancementRuleData removed - using onEdit+onSave pattern from console factory (DEX)
 
 // =============================================================================
 // Constants
@@ -126,7 +126,8 @@ export function AdvancementRuleEditor({
   loading,
   hasChanges,
 }: ObjectEditorProps<AdvancementRulePayload>) {
-  const { toggleEnabled } = useAdvancementRuleData();
+  // DEX: Use onEdit+onSave from console factory instead of separate data hooks
+  // This keeps data flow through single source (declarative sovereignty)
   const [toggling, setToggling] = useState(false);
 
   const isEnabled = rule.payload.isEnabled;
@@ -153,17 +154,21 @@ export function AdvancementRuleEditor({
     [onEdit]
   );
 
-  // Toggle enabled state
-  const handleToggleEnabled = useCallback(async () => {
+  // Toggle enabled state - DEX pattern: use onEdit+onSave for declarative flow
+  const handleToggleEnabled = useCallback(() => {
     setToggling(true);
-    try {
-      await toggleEnabled(rule.meta.id);
-    } catch (error) {
-      console.error('[AdvancementRuleEditor] Toggle failed:', error);
-    } finally {
+    const now = new Date().toISOString();
+    const ops: PatchOperation[] = [
+      { op: 'replace', path: '/payload/isEnabled', value: !isEnabled },
+      { op: 'replace', path: '/meta/updatedAt', value: now },
+    ];
+    onEdit(ops);
+    // Use setTimeout to allow state to propagate before save
+    setTimeout(() => {
+      onSave();
       setToggling(false);
-    }
-  }, [rule.meta.id, toggleEnabled]);
+    }, 50);
+  }, [isEnabled, onEdit, onSave]);
 
   // Update a criterion
   const handleCriterionChange = useCallback(
@@ -197,31 +202,31 @@ export function AdvancementRuleEditor({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Enabled Status Banner */}
+      {/* Enabled Status Banner - high contrast for visibility */}
       <div className={`
-        flex items-center gap-3 px-4 py-3 border-b transition-colors
+        flex items-center gap-3 px-4 py-3 border-b-2 transition-colors
         ${isEnabled
-          ? 'bg-green-500/10 border-green-500/20'
-          : 'bg-slate-500/10 border-slate-500/20'
+          ? 'bg-emerald-500/15 border-emerald-500/40'
+          : 'bg-slate-500/15 border-slate-500/40'
         }
       `}>
         {/* Status dot with pulse animation when enabled */}
         <span className="relative flex h-3 w-3">
           {isEnabled && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           )}
           <span className={`
             relative inline-flex rounded-full h-3 w-3
-            ${isEnabled ? 'bg-green-500' : 'bg-slate-500'}
+            ${isEnabled ? 'bg-emerald-500' : 'bg-slate-500'}
           `} />
         </span>
 
         {/* Status text */}
         <div className="flex-1">
-          <span className={`text-sm font-medium ${isEnabled ? 'text-green-300' : 'text-slate-300'}`}>
+          <span className={`text-sm font-semibold ${isEnabled ? 'text-emerald-300' : 'text-slate-300'}`}>
             {isEnabled ? 'Enabled' : 'Disabled'}
           </span>
-          <p className={`text-xs ${isEnabled ? 'text-green-400/70' : 'text-slate-400/70'}`}>
+          <p className={`text-xs ${isEnabled ? 'text-emerald-400/80' : 'text-slate-400/80'}`}>
             {isEnabled ? 'Rule is active for batch evaluation' : 'Rule is not evaluated during batch runs'}
           </p>
         </div>
