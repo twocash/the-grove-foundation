@@ -20,6 +20,10 @@ export interface SignalsTransformOptions {
   title?: string;
   /** Sprout query for subtitle context */
   sproutQuery?: string;
+  /** Number of columns for metric rows (default 4, use 2 for compact) */
+  columns?: 2 | 3 | 4;
+  /** Compact mode - hides less essential components */
+  compact?: boolean;
 }
 
 const DEFAULT_OPTIONS: SignalsTransformOptions = {
@@ -27,6 +31,8 @@ const DEFAULT_OPTIONS: SignalsTransformOptions = {
   timelineLimit: 10,
   showThresholds: true,
   title: 'Usage Signals',
+  columns: 4,
+  compact: false,
 };
 
 /**
@@ -88,7 +94,7 @@ export function signalAggregationToRenderTree(
   children.push({
     type: 'MetricRow',
     props: {
-      columns: 4,
+      columns: opts.columns || 4,
       metrics: [
         {
           label: 'Views',
@@ -122,7 +128,7 @@ export function signalAggregationToRenderTree(
   children.push({
     type: 'MetricRow',
     props: {
-      columns: 4,
+      columns: opts.columns || 4,
       metrics: [
         {
           label: 'Upvotes',
@@ -168,73 +174,79 @@ export function signalAggregationToRenderTree(
     },
   });
 
-  // 5. Diversity badge
-  const diversityBreakdown = {
-    uniqueSessions: aggregation.uniqueSessions,
-    uniqueLenses: aggregation.uniqueLenses,
-    uniqueHubs: aggregation.uniqueHubs,
-    uniqueUsers: aggregation.uniqueUsers > 0 ? aggregation.uniqueUsers : undefined,
-  };
+  // 5. Diversity badge (skip in compact mode - takes too much width)
+  if (!opts.compact) {
+    const diversityBreakdown = {
+      uniqueSessions: aggregation.uniqueSessions,
+      uniqueLenses: aggregation.uniqueLenses,
+      uniqueHubs: aggregation.uniqueHubs,
+      uniqueUsers: aggregation.uniqueUsers > 0 ? aggregation.uniqueUsers : undefined,
+    };
 
-  children.push({
-    type: 'DiversityBadge',
-    props: {
-      index: aggregation.diversityIndex,
-      breakdown: diversityBreakdown,
-    },
-  });
-
-  // 6. Event breakdown
-  const events = [
-    { type: 'sprout_viewed', count: aggregation.viewCount },
-    { type: 'sprout_retrieved', count: aggregation.retrievalCount },
-    { type: 'sprout_referenced', count: aggregation.referenceCount },
-    { type: 'sprout_searched', count: aggregation.searchAppearances },
-    { type: 'sprout_rated', count: totalVotes },
-    { type: 'sprout_exported', count: aggregation.exportCount },
-    { type: 'sprout_promoted', count: aggregation.promotionCount },
-    { type: 'sprout_refined', count: aggregation.refinementCount },
-  ].filter(e => e.count > 0);
-
-  const totalEvents = events.reduce((sum, e) => sum + e.count, 0);
-
-  if (totalEvents > 0) {
     children.push({
-      type: 'EventBreakdown',
+      type: 'DiversityBadge',
       props: {
-        events: events.map(e => ({
-          type: e.type,
-          count: e.count,
-          percentage: (e.count / totalEvents) * 100,
-        })),
-        total: totalEvents,
-        showLabels: true,
+        index: aggregation.diversityIndex,
+        breakdown: diversityBreakdown,
       },
     });
   }
 
-  // 7. Funnel chart (engagement stages)
-  const funnelStages = [
-    { stage: 'viewed', label: 'Viewed', count: aggregation.viewCount },
-    { stage: 'engaged', label: 'Engaged', count: aggregation.retrievalCount + aggregation.referenceCount },
-    { stage: 'rated', label: 'Rated', count: totalVotes },
-    { stage: 'actioned', label: 'Actioned', count: aggregation.exportCount + aggregation.promotionCount + aggregation.refinementCount },
-  ];
+  // 6. Event breakdown (skip in compact mode)
+  if (!opts.compact) {
+    const events = [
+      { type: 'sprout_viewed', count: aggregation.viewCount },
+      { type: 'sprout_retrieved', count: aggregation.retrievalCount },
+      { type: 'sprout_referenced', count: aggregation.referenceCount },
+      { type: 'sprout_searched', count: aggregation.searchAppearances },
+      { type: 'sprout_rated', count: totalVotes },
+      { type: 'sprout_exported', count: aggregation.exportCount },
+      { type: 'sprout_promoted', count: aggregation.promotionCount },
+      { type: 'sprout_refined', count: aggregation.refinementCount },
+    ].filter(e => e.count > 0);
 
-  const maxFunnelCount = Math.max(...funnelStages.map(s => s.count), 1);
+    const totalEvents = events.reduce((sum, e) => sum + e.count, 0);
 
-  children.push({
-    type: 'FunnelChart',
-    props: {
-      stages: funnelStages.map(s => ({
-        stage: s.stage,
-        label: s.label,
-        count: s.count,
-        percentage: (s.count / maxFunnelCount) * 100,
-      })),
-      showConversionRates: opts.showConversionRates,
-    },
-  });
+    if (totalEvents > 0) {
+      children.push({
+        type: 'EventBreakdown',
+        props: {
+          events: events.map(e => ({
+            type: e.type,
+            count: e.count,
+            percentage: (e.count / totalEvents) * 100,
+          })),
+          total: totalEvents,
+          showLabels: true,
+        },
+      });
+    }
+  }
+
+  // 7. Funnel chart (skip in compact mode)
+  if (!opts.compact) {
+    const funnelStages = [
+      { stage: 'viewed', label: 'Viewed', count: aggregation.viewCount },
+      { stage: 'engaged', label: 'Engaged', count: aggregation.retrievalCount + aggregation.referenceCount },
+      { stage: 'rated', label: 'Rated', count: totalVotes },
+      { stage: 'actioned', label: 'Actioned', count: aggregation.exportCount + aggregation.promotionCount + aggregation.refinementCount },
+    ];
+
+    const maxFunnelCount = Math.max(...funnelStages.map(s => s.count), 1);
+
+    children.push({
+      type: 'FunnelChart',
+      props: {
+        stages: funnelStages.map(s => ({
+          stage: s.stage,
+          label: s.label,
+          count: s.count,
+          percentage: (s.count / maxFunnelCount) * 100,
+        })),
+        showConversionRates: opts.showConversionRates,
+      },
+    });
+  }
 
   // 8. Advancement indicator
   children.push({
@@ -284,7 +296,7 @@ export function createEmptySignalsTree(
       {
         type: 'MetricRow',
         props: {
-          columns: 4,
+          columns: opts.columns || 4,
           metrics: [
             { label: 'Views', value: 0, format: 'number' as const },
             { label: 'Retrievals', value: 0, format: 'number' as const },
