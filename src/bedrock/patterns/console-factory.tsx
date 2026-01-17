@@ -105,7 +105,7 @@ export function createBedrockConsole<T>(
   // The actual console component
   // Sprint: extraction-pipeline-integration-v1 - Added props support for external filters and selection
   function BedrockConsole({ externalFilters, headerContent, externalSelectedId }: BedrockConsoleProps) {
-    const { openInspector, closeInspector, updateInspector } = useBedrockUI();
+    const { openInspector, closeInspector, updateInspector, metricsBarVisible } = useBedrockUI();
 
     // Data layer
     // Sprint: experience-console-cleanup-v1 - added createTyped for polymorphic consoles
@@ -644,8 +644,8 @@ export function createBedrockConsole<T>(
           )}
         </div>
 
-        {/* Metrics Row */}
-        {config.metrics.length > 0 && (
+        {/* Metrics Row - conditionally rendered based on user preference */}
+        {config.metrics.length > 0 && metricsBarVisible && (
           <div className="px-6 py-4 border-b border-[var(--glass-border)]">
             <MetricsRow
               configs={config.metrics}

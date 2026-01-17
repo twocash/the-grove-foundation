@@ -9,6 +9,7 @@ import { BedrockCopilotProvider, useBedrockCopilot } from './context/BedrockCopi
 import { BedrockLayout } from './primitives/BedrockLayout';
 import { BedrockNav } from './primitives/BedrockNav';
 import { BedrockInspector } from './primitives/BedrockInspector';
+import { MetricsToggle } from './components/MetricsToggle';
 import { BEDROCK_NAV_ITEMS, CONSOLE_METADATA, getCopilotActionsForConsole } from './config';
 
 // =============================================================================
@@ -64,6 +65,7 @@ function BedrockWorkspaceInner() {
               </span>
             </div>
           }
+          footer={<MetricsToggle />}
         />
       }
       content={<Outlet key={location.pathname} />}

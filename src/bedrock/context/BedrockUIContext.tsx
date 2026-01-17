@@ -21,6 +21,10 @@ interface BedrockUIState {
   /** Currently selected object ID (for tracking) */
   selectedObjectId: string | null;
 
+  // Metrics bar state
+  /** Whether metrics bar is visible (persisted to localStorage) */
+  metricsBarVisible: boolean;
+
   // Inspector state
   /** Whether inspector is open */
   inspectorOpen: boolean;
@@ -41,6 +45,10 @@ interface BedrockUIActions {
   setActiveConsole: (id: string) => void;
   /** Set selected object ID */
   setSelectedObjectId: (id: string | null) => void;
+
+  // Metrics bar actions
+  /** Set metrics bar visibility (persists to localStorage) */
+  setMetricsBarVisible: (visible: boolean) => void;
 
   // Inspector actions
   /** Open inspector with config */
@@ -67,10 +75,30 @@ interface BedrockUIProviderProps {
   children: ReactNode;
 }
 
+const METRICS_BAR_STORAGE_KEY = 'bedrock-metrics-bar-visible';
+
 export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
   // Console state
   const [activeConsole, setActiveConsole] = useState('dashboard');
   const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null);
+
+  // Metrics bar state (persisted to localStorage)
+  const [metricsBarVisible, setMetricsBarVisibleState] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const stored = localStorage.getItem(METRICS_BAR_STORAGE_KEY);
+      return stored !== null ? JSON.parse(stored) : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const setMetricsBarVisible = useCallback((visible: boolean) => {
+    setMetricsBarVisibleState(visible);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(METRICS_BAR_STORAGE_KEY, JSON.stringify(visible));
+    }
+  }, []);
 
   // Inspector state
   const [inspectorOpen, setInspectorOpen] = useState(false);
@@ -113,6 +141,7 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
     // State
     activeConsole,
     selectedObjectId,
+    metricsBarVisible,
     inspectorOpen,
     inspectorTitle,
     inspectorSubtitle,
@@ -122,6 +151,7 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
     // Actions
     setActiveConsole,
     setSelectedObjectId,
+    setMetricsBarVisible,
     openInspector,
     closeInspector,
     updateInspector,

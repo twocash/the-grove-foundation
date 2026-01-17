@@ -105,8 +105,10 @@ export function StatCard({
   const colors = accentStyles[accent];
   const isInteractive = Boolean(onClick);
 
+  // Sprint: bedrock-ui-compact-v1 - Tighter dimensions for IDE-like density
   const baseClasses = `
-    flex items-center gap-4 p-4 rounded-xl border transition-all duration-200
+    flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200
+    motion-reduce:transition-none
     bg-[var(--glass-solid)] border-white/5
     ${colors.glow}
     ${isInteractive ? 'cursor-pointer hover:border-white/10 hover:bg-[var(--glass-elevated)]' : ''}
@@ -115,10 +117,10 @@ export function StatCard({
 
   const content = (
     <>
-      {/* Icon */}
+      {/* Icon - Sprint: bedrock-ui-compact-v1 - Reduced from 48px to 40px */}
       {config.icon && (
-        <div className={`w-12 h-12 rounded-xl ${colors.bg} flex items-center justify-center flex-shrink-0`}>
-          <span className={`material-symbols-outlined text-2xl ${colors.icon}`}>
+        <div className={`w-10 h-10 rounded-lg ${colors.bg} flex items-center justify-center flex-shrink-0`}>
+          <span className={`material-symbols-outlined text-xl ${colors.icon}`}>
             {config.icon}
           </span>
         </div>

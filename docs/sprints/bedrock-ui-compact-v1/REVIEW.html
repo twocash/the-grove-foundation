@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Review: bedrock-ui-compact-v1</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-elevated: #1a1a24;
+      --text-primary: #f0f0f5;
+      --text-muted: #8888a0;
+      --accent-cyan: #22d3ee;
+      --accent-green: #22c55e;
+      --accent-amber: #fbbf24;
+      --accent-violet: #a855f7;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .status-complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .summary-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .summary-card .value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .summary-card .label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Sections */
+    section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--text-primary);
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover { background: var(--bg-elevated); }
+
+    .pass { color: var(--accent-green); }
+    .pending { color: var(--accent-amber); }
+
+    /* Phase Cards */
+    .phase-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .phase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .phase-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .phase-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .phase-status.complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .phase-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Screenshots */
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .screenshot-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* File Changes */
+    .file-list {
+      list-style: none;
+    }
+
+    .file-list li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .file-new { color: var(--accent-green); }
+    .file-modified { color: var(--accent-amber); }
+
+    .file-badge {
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-new {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .badge-modified {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--accent-amber);
+    }
+
+    /* Features */
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-list li {
+      padding: 0.75rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feature-list li:last-child { border-bottom: none; }
+
+    .feature-icon {
+      color: var(--accent-cyan);
+      font-size: 1.25rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Bedrock Compact Mode</h1>
+      <p class="subtitle">Sprint: bedrock-ui-compact-v1 | Protocol: Grove Execution v1.5</p>
+      <div class="status-badge status-complete">
+        <span>✓</span> Sprint Complete
+      </div>
+    </header>
+
+    <!-- Summary Metrics -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="value">7/7</div>
+        <div class="label">Phases Complete</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">2/2</div>
+        <div class="label">E2E Tests Passing</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">7</div>
+        <div class="label">Screenshots Captured</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">4</div>
+        <div class="label">User Stories Delivered</div>
+      </div>
+    </div>
+
+    <!-- User Stories -->
+    <section>
+      <h2>📋 User Stories</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>US-BUC001</td>
+            <td>Toggle Metrics Bar Visibility</td>
+            <td>P0</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>US-BUC002</td>
+            <td>Persist Compact Mode Preference</td>
+            <td>P0</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>US-BUC003</td>
+            <td>Access Toggle from All Consoles</td>
+            <td>P1</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>US-BUC004</td>
+            <td>Compact StatCard Dimensions</td>
+            <td>P1</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Phase Progress -->
+    <section>
+      <h2>📊 Phase Progress</h2>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 1: Add metricsBarVisible state to BedrockUIContext</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Added metricsBarVisible boolean state with localStorage persistence. SSR-safe implementation
+          using typeof window checks. Exposed setMetricsBarVisible action through context.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 2: Add conditional render in console-factory</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Modified MetricsRow render to include && metricsBarVisible conditional. All Bedrock consoles
+          using the factory pattern now respect the toggle preference.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 3: Create MetricsToggle component</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Created new component at src/bedrock/components/MetricsToggle.tsx with accessibility features
+          (focus ring, aria-pressed, keyboard navigation) and motion-reduce support.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 4: Wire toggle into BedrockWorkspace nav</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Integrated MetricsToggle into BedrockNav footer slot. Toggle is now accessible from all
+          Bedrock consoles via the sidebar navigation.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 5: Tighten StatCard dimensions</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Reduced padding (p-4 → px-4 py-3), gap (gap-4 → gap-3), icon size (48px → 40px),
+          and icon text size (text-2xl → text-xl) for IDE-like density.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 6: Visual verification and screenshots</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Captured 7 screenshots using Playwright. Created E2E test suite with 2 tests covering
+          toggle functionality and localStorage persistence.
+        </p>
+        <div class="screenshot-grid">
+          <div class="screenshot-item">
+            <img src="screenshots/01-metrics-visible.png" alt="Metrics bar visible default state">
+            <div class="screenshot-caption">Default state: Metrics bar visible</div>
+          </div>
+          <div class="screenshot-item">
+            <img src="screenshots/03-toggle-visible-state.png" alt="Toggle in visible state">
+            <div class="screenshot-caption">Toggle showing "Hide Stats" option</div>
+          </div>
+          <div class="screenshot-item">
+            <img src="screenshots/04-toggle-hover.png" alt="Toggle hover state">
+            <div class="screenshot-caption">Toggle hover interaction</div>
+          </div>
+          <div class="screenshot-item">
+            <img src="screenshots/05-metrics-hidden.png" alt="Metrics hidden">
+            <div class="screenshot-caption">Metrics bar hidden, content expanded</div>
+          </div>
+          <div class="screenshot-item">
+            <img src="screenshots/06-metrics-restored.png" alt="Metrics restored">
+            <div class="screenshot-caption">Metrics bar restored after toggle</div>
+          </div>
+          <div class="screenshot-item">
+            <img src="screenshots/07-persistence-after-refresh.png" alt="Persistence after refresh">
+            <div class="screenshot-caption">Preference persists after page refresh</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 7: Create REVIEW.html and complete sprint</span>
+          <span class="phase-status complete">✓ Complete</span>
+        </div>
+        <p class="phase-description">
+          Generated this review document with all screenshots, test results, and file changes
+          documented for user handoff.
+        </p>
+      </div>
+    </section>
+
+    <!-- Test Results -->
+    <section>
+      <h2>🧪 Test Results</h2>
+
+      <h3>E2E Tests (Playwright)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>US-BUC001</td>
+            <td>Toggle metrics bar visibility - shows/hides metrics, verifies localStorage</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>US-BUC002</td>
+            <td>Preference persists across page refresh</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Build Verification</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Check</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TypeScript Compilation (npm run build)</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>ESLint (npm run lint)</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>Vite Dev Server</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Files Changed -->
+    <section>
+      <h2>📁 Files Changed</h2>
+      <ul class="file-list">
+        <li>
+          <span class="file-badge badge-new">NEW</span>
+          <span class="file-new">src/bedrock/components/MetricsToggle.tsx</span>
+        </li>
+        <li>
+          <span class="file-badge badge-new">NEW</span>
+          <span class="file-new">tests/e2e/compact-mode-verification.spec.ts</span>
+        </li>
+        <li>
+          <span class="file-badge badge-modified">MOD</span>
+          <span class="file-modified">src/bedrock/context/BedrockUIContext.tsx</span>
+        </li>
+        <li>
+          <span class="file-badge badge-modified">MOD</span>
+          <span class="file-modified">src/bedrock/patterns/console-factory.tsx</span>
+        </li>
+        <li>
+          <span class="file-badge badge-modified">MOD</span>
+          <span class="file-modified">src/bedrock/BedrockWorkspace.tsx</span>
+        </li>
+        <li>
+          <span class="file-badge badge-modified">MOD</span>
+          <span class="file-modified">src/bedrock/primitives/StatCard.tsx</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Key Features -->
+    <section>
+      <h2>✨ Key Features Delivered</h2>
+      <ul class="feature-list">
+        <li>
+          <span class="feature-icon">👁️</span>
+          <div>
+            <strong>Metrics Bar Toggle</strong><br>
+            Users can show/hide the metrics bar from the nav sidebar footer. Toggle updates immediately
+            with smooth transition animations.
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">💾</span>
+          <div>
+            <strong>Persistent Preferences</strong><br>
+            Toggle preference saved to localStorage (key: bedrock-metrics-bar-visible). Survives page
+            refresh and browser restart.
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">🎨</span>
+          <div>
+            <strong>Compact StatCard Styling</strong><br>
+            Tighter dimensions for a more IDE-like aesthetic. Reduced padding, gap, and icon sizes
+            while maintaining readability.
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">♿</span>
+          <div>
+            <strong>Accessibility Compliant</strong><br>
+            Toggle includes focus ring, aria-pressed attribute, keyboard navigation, and respects
+            prefers-reduced-motion media query.
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">🔧</span>
+          <div>
+            <strong>SSR-Safe Implementation</strong><br>
+            All localStorage access guarded with typeof window checks for server-side rendering
+            compatibility.
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- DEX Compliance -->
+    <section>
+      <h2>🏛️ DEX Compliance</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Pillar</th>
+            <th>How This Sprint Supports</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Declarative Sovereignty</td>
+            <td>Toggle state managed through context, not hardcoded. Could be extended to config.</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>Capability Agnosticism</td>
+            <td>Pure UI feature with no model dependencies. Works regardless of AI backend.</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+          <tr>
+            <td>Provenance as Infrastructure</td>
+            <td>N/A for this sprint - no data artifacts created.</td>
+            <td class="pass">✓ N/A</td>
+          </tr>
+          <tr>
+            <td>Organic Scalability</td>
+            <td>Uses existing factory pattern. Toggle can be extended to more preferences.</td>
+            <td class="pass">✓ PASS</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>Generated by Grove Execution Protocol v1.5</p>
+      <p>Sprint completed: 2026-01-17</p>
+    </footer>
+  </div>
+</body>
+</html>
