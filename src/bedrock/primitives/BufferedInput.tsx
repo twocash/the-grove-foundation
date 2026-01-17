@@ -18,14 +18,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 // =============================================================================
 
 interface BufferedInputProps {
-  value: string;
+  value: string | number;
   onChange: (value: string) => void;
   onBlur?: () => void;
   debounceMs?: number;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
-  type?: 'text' | 'email' | 'url' | 'password';
+  type?: 'text' | 'email' | 'url' | 'password' | 'number';
+  /** HTML input attributes for number inputs */
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
 }
 
 interface BufferedTextareaProps {
@@ -152,9 +156,14 @@ export function BufferedInput({
   placeholder,
   className = '',
   type = 'text',
+  min,
+  max,
+  step,
 }: BufferedInputProps) {
+  // Convert number values to string for internal state
+  const stringValue = typeof value === 'number' ? String(value) : value;
   const { localValue, handleChange, handleFocus, handleBlur } = useBufferedInput(
-    value,
+    stringValue,
     onChange,
     debounceMs
   );
@@ -172,6 +181,9 @@ export function BufferedInput({
       disabled={disabled}
       placeholder={placeholder}
       className={className}
+      min={min}
+      max={max}
+      step={step}
     />
   );
 }

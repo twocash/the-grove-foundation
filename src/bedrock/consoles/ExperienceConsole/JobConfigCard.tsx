@@ -160,14 +160,14 @@ export function JobConfigCard({
             flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
             ${lastRunStatus === 'success' ? 'bg-green-500/20 text-green-400' : ''}
             ${lastRunStatus === 'failure' ? 'bg-red-500/20 text-red-400' : ''}
-            ${lastRunStatus === 'running' ? 'bg-blue-500/20 text-blue-400' : ''}
-            ${!['success', 'failure', 'running'].includes(lastRunStatus) ? 'bg-slate-500/20 text-slate-400' : ''}
+            ${lastRunStatus === 'timeout' ? 'bg-amber-500/20 text-amber-400' : ''}
+            ${lastRunStatus === 'cancelled' ? 'bg-slate-500/20 text-slate-400' : ''}
           `}>
             <span className="material-symbols-outlined text-xs">
               {lastRunStatus === 'success' && 'check_circle'}
               {lastRunStatus === 'failure' && 'error'}
-              {lastRunStatus === 'running' && 'hourglass_top'}
-              {!['success', 'failure', 'running'].includes(lastRunStatus) && 'help'}
+              {lastRunStatus === 'timeout' && 'timer_off'}
+              {lastRunStatus === 'cancelled' && 'cancel'}
             </span>
             {lastRunStatus}
           </span>

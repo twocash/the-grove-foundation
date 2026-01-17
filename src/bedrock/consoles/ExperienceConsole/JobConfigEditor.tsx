@@ -539,12 +539,13 @@ export function JobConfigEditor({
                         material-symbols-outlined text-sm
                         ${record.status === 'success' ? 'text-green-400' : ''}
                         ${record.status === 'failure' ? 'text-red-400' : ''}
-                        ${record.status === 'running' ? 'text-blue-400' : ''}
+                        ${record.status === 'timeout' ? 'text-amber-400' : ''}
+                        ${record.status === 'cancelled' ? 'text-slate-400' : ''}
                       `}>
                         {record.status === 'success' && 'check_circle'}
                         {record.status === 'failure' && 'error'}
-                        {record.status === 'running' && 'hourglass_top'}
-                        {!['success', 'failure', 'running'].includes(record.status) && 'help'}
+                        {record.status === 'timeout' && 'timer_off'}
+                        {record.status === 'cancelled' && 'cancel'}
                       </span>
                       <div>
                         <div className="text-sm text-[var(--glass-text-primary)]">

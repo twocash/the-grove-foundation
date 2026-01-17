@@ -194,7 +194,7 @@ async function fetchEnabledRules(
   }
 
   return (data ?? []).map((row: GroveObject<AdvancementRulePayload>) => ({
-    id: row.id,
+    id: row.meta.id,
     payload: row.payload,
   }));
 }

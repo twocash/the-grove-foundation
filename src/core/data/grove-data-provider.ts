@@ -24,7 +24,10 @@ export type GroveObjectType =
   | 'research-agent-config'
   | 'writer-agent-config'
   | 'copilot-style'
-  | 'lifecycle-config'; // Sprint: S5-SL-LifecycleEngine v1
+  | 'lifecycle-config'      // Sprint: S5-SL-LifecycleEngine v1
+  | 'advancement-rule'      // Sprint: S7-SL-AutoAdvancement v1
+  | 'job-config'            // Sprint: S7.5-SL-JobConfigSystem v1
+  | 'lifecycle-model';      // Sprint: EPIC4-SL-MultiModel v1
 
 /**
  * Options for listing objects.
