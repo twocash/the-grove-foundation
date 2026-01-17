@@ -122,6 +122,14 @@ export function FeatureFlagCard({
             Header
           </span>
         )}
+
+        {/* A/B Testing indicator */}
+        {flag.payload.modelVariants && flag.payload.modelVariants.length > 0 && (
+          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400">
+            <span className="material-symbols-outlined text-xs">science</span>
+            A/B Test ({flag.payload.modelVariants.length})
+          </span>
+        )}
       </div>
 
       {/* Footer */}

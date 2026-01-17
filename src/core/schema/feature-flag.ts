@@ -37,6 +37,55 @@ export type FeatureFlagCategory =
   | 'internal';    // Internal/developer features
 
 /**
+ * Model variant for A/B testing different lifecycle models.
+ */
+export interface ModelVariant {
+  /** Unique identifier for the variant */
+  variantId: string;
+
+  /** Display name for the variant */
+  name: string;
+
+  /** Description of what makes this variant different */
+  description?: string;
+
+  /** Percentage of traffic to allocate (0-100) */
+  trafficAllocation: number;
+
+  /** ID of the lifecycle model to use for this variant */
+  modelId?: string;
+
+  /** Custom configuration for this variant */
+  config?: Record<string, unknown>;
+}
+
+/**
+ * Performance metrics for tracking A/B test results.
+ */
+export interface VariantPerformanceMetrics {
+  /** Total impressions */
+  impressions: number;
+
+  /** Total conversions */
+  conversions: number;
+
+  /** Conversion rate (0-1) */
+  conversionRate: number;
+
+  /** Average engagement time (ms) */
+  avgEngagementTime: number;
+
+  /** Success rate (0-1) */
+  successRate: number;
+
+  /** User satisfaction score (0-1) */
+  satisfactionScore: number;
+
+  /** Last updated timestamp */
+  lastUpdated: string;
+}
+
+/**
  * Payload for a feature flag GroveObject.
  *
  * Key design decisions:
@@ -91,6 +140,30 @@ export interface FeatureFlagPayload {
    * Only records when `available` field changes.
    */
   changelog: FlagChangelogEntry[];
+
+  /**
+   * Model variants for A/B testing (Sprint: EPIC4-SL-MultiModel v1).
+   * When present, the flag becomes a model variant test.
+   */
+  modelVariants?: ModelVariant[];
+
+  /**
+   * Performance metrics for each variant (Sprint: EPIC4-SL-MultiModel v1).
+   * Keyed by variantId for easy lookup.
+   */
+  variantPerformance?: Record<string, VariantPerformanceMetrics>;
+
+  /**
+   * Whether to enable deterministic assignment (Sprint: EPIC4-SL-MultiModel v1).
+   * When true, users get consistent variant assignments.
+   */
+  deterministicAssignment: boolean;
+
+  /**
+   * Seed for deterministic assignment (Sprint: EPIC4-SL-MultiModel v1).
+   * Ensures reproducible variant selection.
+   */
+  assignmentSeed?: string;
 }
 
 /**
@@ -111,7 +184,10 @@ export function isFeatureFlagPayload(obj: unknown): obj is FeatureFlagPayload {
     ['experience', 'research', 'experimental', 'internal'].includes(
       payload.category as string
     ) &&
-    Array.isArray(payload.changelog)
+    Array.isArray(payload.changelog) &&
+    (payload.modelVariants === undefined || Array.isArray(payload.modelVariants)) &&
+    (payload.variantPerformance === undefined || typeof payload.variantPerformance === 'object') &&
+    typeof payload.deterministicAssignment === 'boolean'
   );
 }
 
@@ -131,6 +207,10 @@ export function createFeatureFlagPayload(
     headerOrder: options?.headerOrder ?? 0,
     category: options?.category ?? 'experimental',
     changelog: [],
+    modelVariants: options?.modelVariants,
+    variantPerformance: options?.variantPerformance,
+    deterministicAssignment: options?.deterministicAssignment ?? true,
+    assignmentSeed: options?.assignmentSeed,
   };
 }
 
@@ -157,4 +237,167 @@ export function addAvailabilityChange(
     available: newValue,
     changelog: [...payload.changelog, entry],
   };
+}
+
+/**
+ * Select a variant based on traffic allocation (Sprint: EPIC4-SL-MultiModel v1).
+ * Uses deterministic assignment if enabled, otherwise random assignment.
+ */
+export function selectVariant(
+  variants: ModelVariant[],
+  userId: string,
+  deterministic: boolean = true,
+  seed?: string
+): ModelVariant | null {
+  if (!variants || variants.length === 0) return null;
+
+  if (!deterministic) {
+    // Random assignment
+    const random = Math.random() * 100;
+    let cumulative = 0;
+    for (const variant of variants) {
+      cumulative += variant.trafficAllocation;
+      if (random <= cumulative) {
+        return variant;
+      }
+    }
+    return variants[0]; // Fallback
+  }
+
+  // Deterministic assignment using hash of userId + seed
+  const hashSeed = seed || 'default-seed';
+  const hash = simpleHash(`${userId}-${hashSeed}`);
+  const normalized = (hash % 10000) / 100; // 0-100
+
+  let cumulative = 0;
+  for (const variant of variants) {
+    cumulative += variant.trafficAllocation;
+    if (normalized <= cumulative) {
+      return variant;
+    }
+  }
+  return variants[0]; // Fallback
+}
+
+/**
+ * Simple hash function for deterministic variant assignment.
+ */
+function simpleHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Update performance metrics for a variant (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function updateVariantPerformance(
+  payload: FeatureFlagPayload,
+  variantId: string,
+  update: Partial<VariantPerformanceMetrics>
+): FeatureFlagPayload {
+  if (!payload.variantPerformance) {
+    payload.variantPerformance = {};
+  }
+
+  const current = payload.variantPerformance[variantId] || {
+    impressions: 0,
+    conversions: 0,
+    conversionRate: 0,
+    avgEngagementTime: 0,
+    successRate: 0,
+    satisfactionScore: 0,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  const updated: VariantPerformanceMetrics = {
+    ...current,
+    ...update,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  // Recalculate derived metrics
+  if (updated.impressions > 0) {
+    updated.conversionRate = updated.conversions / updated.impressions;
+  }
+
+  return {
+    ...payload,
+    variantPerformance: {
+      ...payload.variantPerformance,
+      [variantId]: updated,
+    },
+  };
+}
+
+/**
+ * Record an impression for a variant (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function recordVariantImpression(
+  payload: FeatureFlagPayload,
+  variantId: string
+): FeatureFlagPayload {
+  return updateVariantPerformance(payload, variantId, {
+    impressions: (payload.variantPerformance?.[variantId]?.impressions || 0) + 1,
+  });
+}
+
+/**
+ * Record a conversion for a variant (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function recordVariantConversion(
+  payload: FeatureFlagPayload,
+  variantId: string
+): FeatureFlagPayload {
+  const current = payload.variantPerformance?.[variantId];
+  const currentConversions = current?.conversions || 0;
+  const currentImpressions = current?.impressions || 0;
+
+  return updateVariantPerformance(payload, variantId, {
+    conversions: currentConversions + 1,
+  });
+}
+
+/**
+ * Create a model variant with defaults (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function createModelVariant(
+  variantId: string,
+  name: string,
+  trafficAllocation: number,
+  options?: Partial<ModelVariant>
+): ModelVariant {
+  return {
+    variantId,
+    name,
+    trafficAllocation,
+    description: options?.description,
+    modelId: options?.modelId,
+    config: options?.config,
+  };
+}
+
+/**
+ * Validate that traffic allocations sum to 100 (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function validateTrafficAllocation(variants: ModelVariant[]): boolean {
+  const total = variants.reduce((sum, v) => sum + v.trafficAllocation, 0);
+  return Math.abs(total - 100) < 0.01;
+}
+
+/**
+ * Normalize traffic allocations to sum to 100 (Sprint: EPIC4-SL-MultiModel v1).
+ */
+export function normalizeTrafficAllocation(variants: ModelVariant[]): ModelVariant[] {
+  const total = variants.reduce((sum, v) => sum + v.trafficAllocation, 0);
+  if (total === 0) return variants;
+
+  return variants.map(v => ({
+    ...v,
+    trafficAllocation: (v.trafficAllocation / total) * 100,
+  }));
 }
