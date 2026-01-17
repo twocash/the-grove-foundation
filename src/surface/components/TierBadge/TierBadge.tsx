@@ -67,8 +67,12 @@ export const TierBadge: React.FC<TierBadgeProps> = ({
     const tierDef = allTiers.find((t) => t.id === tier);
 
     if (tierDef) {
+      // Sanitize emoji: if it looks like SVG markup, use fallback
+      const rawEmoji = tierDef.emoji;
+      const isSvgString = rawEmoji && (rawEmoji.startsWith('<svg') || rawEmoji.includes('<path'));
+
       return {
-        emoji: tierDef.emoji,
+        emoji: isSvgString ? (TIER_CONFIG.emoji[tier as SproutTier] ?? '🌱') : rawEmoji,
         label: tierDef.label,
       };
     }

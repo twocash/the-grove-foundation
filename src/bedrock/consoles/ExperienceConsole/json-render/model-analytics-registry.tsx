@@ -239,6 +239,13 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
   TierDistribution: ({ element }) => {
     const props = element.props as TierDistributionProps;
 
+    // Helper to sanitize emoji: if it looks like SVG markup, use fallback
+    const sanitizeEmoji = (emoji: string | undefined): string => {
+      if (!emoji) return '📊';
+      if (emoji.startsWith('<svg') || emoji.includes('<path')) return '📊';
+      return emoji;
+    };
+
     return (
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-[var(--glass-text-primary)] mb-4">
@@ -248,7 +255,7 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
           {props.tiers.map(tier => (
             <div key={tier.id} className="flex items-center gap-3">
               <div className="flex items-center gap-2 flex-1">
-                <span className="text-xl">{tier.emoji || '📊'}</span>
+                <span className="text-xl">{sanitizeEmoji(tier.emoji)}</span>
                 <span className="text-[var(--glass-text-primary)] font-medium">
                   {tier.label}
                 </span>
