@@ -93,7 +93,10 @@ function checkTriggerPrerequisites(trigger: TriggerConfig, state: EngagementStat
  */
 export function evaluateTriggers(
   triggers: TriggerConfig[],
-  state: EngagementState
+  state: EngagementState,
+  options?: {
+    onCrossSprintEvent?: (event: { type: string; data: Record<string, unknown> }) => void;
+  }
 ): RevealQueueItem[] {
   const queue: RevealQueueItem[] = [];
 
@@ -118,6 +121,21 @@ export function evaluateTriggers(
         queuedAt: new Date().toISOString(),
         metadata: trigger.metadata
       });
+
+      // Emit federation event for cross-sprint triggers (EPIC5-SL-Federation v1)
+      if (options?.onCrossSprintEvent && trigger.metadata?.crossSprint) {
+        options.onCrossSprintEvent({
+          type: 'trigger.cross-sprint',
+          data: {
+            triggerId: trigger.id,
+            reveal: trigger.reveal,
+            state: {
+              sessionId: state.sessionId,
+              stage: state.stage,
+            },
+          },
+        });
+      }
     }
   }
 
@@ -130,9 +148,12 @@ export function evaluateTriggers(
  */
 export function getNextReveal(
   triggers: TriggerConfig[],
-  state: EngagementState
+  state: EngagementState,
+  options?: {
+    onCrossSprintEvent?: (event: { type: string; data: Record<string, unknown> }) => void;
+  }
 ): RevealQueueItem | null {
-  const queue = evaluateTriggers(triggers, state);
+  const queue = evaluateTriggers(triggers, state, options);
   return queue[0] || null;
 }
 

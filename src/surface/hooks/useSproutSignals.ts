@@ -231,16 +231,16 @@ export function useSproutSignals(defaultProvenance?: Partial<EventProvenance>): 
       const { error } = await client.from('sprout_usage_events').insert(records);
 
       if (error) {
-        console.error('[SproutSignals] Batch insert failed:', error);
-        // Move failed batch to offline queue
+        // Suppress "relation does not exist" errors - migration not applied
+        if (!error.message.includes('relation') && !error.message.includes('does not exist')) {
+          console.warn('[SproutSignals] Batch insert failed:', error.message);
+        }
+        // Move failed batch to offline queue for potential retry
         queueRef.current = [...queueRef.current, ...batch];
         saveOfflineQueue(queueRef.current);
       }
     } catch (e) {
-      console.error('[SproutSignals] Batch insert error:', e);
-      // Move failed batch to offline queue
-      queueRef.current = [...queueRef.current, ...batch];
-      saveOfflineQueue(queueRef.current);
+      // Silent fail - signals are non-critical functionality
     }
   }, []);
 
@@ -268,7 +268,10 @@ export function useSproutSignals(defaultProvenance?: Partial<EventProvenance>): 
       const { error } = await client.from('sprout_usage_events').insert(records);
 
       if (error) {
-        console.error('[SproutSignals] Queue flush failed:', error);
+        // Suppress "relation does not exist" errors
+        if (!error.message.includes('relation') && !error.message.includes('does not exist')) {
+          console.warn('[SproutSignals] Queue flush failed:', error.message);
+        }
         // Restore queue on failure
         queueRef.current = queue;
         saveOfflineQueue(queueRef.current);
@@ -277,7 +280,7 @@ export function useSproutSignals(defaultProvenance?: Partial<EventProvenance>): 
         console.log(`[SproutSignals] Flushed ${queue.length} queued events`);
       }
     } catch (e) {
-      console.error('[SproutSignals] Queue flush error:', e);
+      // Silent fail
       queueRef.current = queue;
       saveOfflineQueue(queueRef.current);
     }

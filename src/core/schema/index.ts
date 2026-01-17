@@ -318,6 +318,31 @@ export {
   getTierForStageFromModel
 } from './lifecycle-config';
 
+// Lifecycle Model types (Sprint: EPIC4-SL-MultiModel v1)
+export {
+  type LifecycleTier,
+  type ValidationRule,
+  type ModelTemplate,
+  type LifecycleModelPayload,
+  type LifecycleModel,
+  isLifecycleModelPayload,
+  createLifecycleModelPayload,
+  getSortedTiers,
+  getTierById,
+  getNextTier,
+  getPreviousTier,
+  validateTierRequirements,
+  createModelFromTemplate,
+  // Default templates
+  BOTANICAL_MODEL_TEMPLATE,
+  ACADEMIC_MODEL_TEMPLATE,
+  RESEARCH_MODEL_TEMPLATE,
+  CREATIVE_MODEL_TEMPLATE,
+  DEFAULT_MODEL_TEMPLATES,
+  getModelTemplate,
+  createLifecycleModelFromTemplate
+} from './lifecycle-model';
+
 // Sprout Signals types (Sprint: S6-SL-ObservableSignals v1)
 // Phase 2 of Observable Knowledge System EPIC
 export {

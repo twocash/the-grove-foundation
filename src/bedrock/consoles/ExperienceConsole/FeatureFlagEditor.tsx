@@ -290,6 +290,147 @@ export function FeatureFlagEditor({
 
         <InspectorDivider />
 
+        {/* === A/B TESTING CONFIGURATION (collapsed by default) === */}
+        <InspectorSection
+          title="A/B Testing Configuration"
+          subtitle="Configure model variants for testing"
+          collapsible
+          defaultCollapsed={true}
+        >
+          <div className="space-y-3">
+            {/* Deterministic Assignment Toggle */}
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={flag.payload.deterministicAssignment ?? true}
+                onChange={(e) => patchPayload('deterministicAssignment', e.target.checked)}
+                className="w-5 h-5 rounded accent-[var(--neon-cyan)]"
+              />
+              <div>
+                <span className="text-sm text-[var(--glass-text-primary)]">
+                  Deterministic Assignment
+                </span>
+                <p className="text-xs text-[var(--glass-text-muted)]">
+                  Users get consistent variant assignments
+                </p>
+              </div>
+            </label>
+
+            {/* Assignment Seed */}
+            {flag.payload.deterministicAssignment && (
+              <div className="pl-8">
+                <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
+                  Assignment Seed
+                </label>
+                <BufferedInput
+                  value={flag.payload.assignmentSeed || ''}
+                  onChange={(val) => patchPayload('assignmentSeed', val || undefined)}
+                  className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm border border-[var(--glass-border)] focus:border-[var(--neon-cyan)] focus:outline-none"
+                  placeholder="Optional seed for reproducible assignments"
+                />
+              </div>
+            )}
+
+            {/* Model Variants Info */}
+            <div className="p-3 bg-[var(--glass-elevated)] border border-[var(--glass-border)] rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-[var(--glass-text-primary)]">
+                  Model Variants
+                </span>
+                <span className="text-xs text-[var(--glass-text-muted)]">
+                  {flag.payload.modelVariants?.length || 0} variants
+                </span>
+              </div>
+
+              {flag.payload.modelVariants && flag.payload.modelVariants.length > 0 ? (
+                <div className="space-y-2">
+                  {flag.payload.modelVariants.map((variant, idx) => (
+                    <div
+                      key={variant.variantId}
+                      className="p-2 bg-[var(--glass-solid)] rounded border border-[var(--glass-border)]"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[var(--glass-text-primary)]">
+                          {variant.name}
+                        </span>
+                        <span className="text-xs text-[var(--glass-text-muted)]">
+                          {variant.trafficAllocation}%
+                        </span>
+                      </div>
+                      {variant.description && (
+                        <p className="text-xs text-[var(--glass-text-muted)] mt-1">
+                          {variant.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[var(--glass-text-muted)] italic">
+                  No variants configured
+                </p>
+              )}
+
+              <GlassButton
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  // TODO: Implement variant editor modal
+                  console.log('Open variant editor');
+                }}
+                className="w-full mt-3"
+              >
+                <span className="material-symbols-outlined text-sm mr-1">add</span>
+                Manage Variants
+              </GlassButton>
+            </div>
+
+            {/* Performance Metrics */}
+            {flag.payload.variantPerformance && Object.keys(flag.payload.variantPerformance).length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-[var(--glass-text-primary)] mb-2">
+                  Performance Metrics
+                </h4>
+                <div className="space-y-2">
+                  {Object.entries(flag.payload.variantPerformance).map(([variantId, metrics]) => (
+                    <div
+                      key={variantId}
+                      className="p-3 bg-[var(--glass-elevated)] border border-[var(--glass-border)] rounded-lg"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-[var(--glass-text-primary)]">
+                          {variantId}
+                        </span>
+                        <span className="text-xs text-[var(--glass-text-muted)]">
+                          {metrics.conversionRate > 0 ? `${(metrics.conversionRate * 100).toFixed(1)}% CR` : 'No data'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                          <span className="text-[var(--glass-text-muted)]">Impressions:</span>
+                          <span className="ml-1 text-[var(--glass-text-secondary)]">{metrics.impressions}</span>
+                        </div>
+                        <div>
+                          <span className="text-[var(--glass-text-muted)]">Conversions:</span>
+                          <span className="ml-1 text-[var(--glass-text-secondary)]">{metrics.conversions}</span>
+                        </div>
+                        <div>
+                          <span className="text-[var(--glass-text-muted)]">Engagement:</span>
+                          <span className="ml-1 text-[var(--glass-text-secondary)]">
+                            {metrics.avgEngagementTime > 0 ? `${(metrics.avgEngagementTime / 1000).toFixed(1)}s` : 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </InspectorSection>
+
+        <InspectorDivider />
+
         {/* === HISTORY (collapsed by default) === */}
         {flag.payload.changelog.length > 0 && (
           <InspectorSection title="Availability History" collapsible defaultCollapsed={true}>

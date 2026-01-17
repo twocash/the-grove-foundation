@@ -21,8 +21,8 @@ import {
 /** How long the pulse animation lasts (ms) */
 const PULSE_DURATION = 3000;
 
-/** Polling interval for status changes (ms) */
-const POLL_INTERVAL = 5000;
+/** Polling interval for status changes (ms) - 15 seconds to reduce network traffic */
+const POLL_INTERVAL = 15000;
 
 // =============================================================================
 // Hook: useSproutNotifications

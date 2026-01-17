@@ -35,9 +35,15 @@ function buildCompactRenderTree(
       sproutQuery,
       showConversionRates: false, // Keep it compact
       showThresholds: false,
+      columns: 2, // 2 columns for narrow 280px sidebar
+      compact: true,
     });
   }
-  return createEmptySignalsTree(sproutId, period, { sproutQuery });
+  return createEmptySignalsTree(sproutId, period, {
+    sproutQuery,
+    columns: 2,
+    compact: true,
+  });
 }
 
 /**

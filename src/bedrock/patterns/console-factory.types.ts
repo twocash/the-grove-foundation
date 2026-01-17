@@ -134,6 +134,11 @@ export interface ObjectEditorProps<T> {
    * Sprint: singleton-pattern-factory-v1
    */
   singletonOps?: SingletonOps;
+  /**
+   * Refresh data from backend - call after operations that modify data
+   * outside the normal edit/save flow (e.g., toggle enabled state)
+   */
+  onRefresh?: () => Promise<void>;
 }
 
 // =============================================================================

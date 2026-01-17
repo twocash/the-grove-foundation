@@ -21,6 +21,10 @@ import type { CopilotStylePayload } from '@core/schema/copilot-style';
 import { DEFAULT_COPILOT_STYLE_PAYLOAD } from '@core/schema/copilot-style';
 import type { LifecycleConfigPayload } from '@core/schema/lifecycle-config';
 import { DEFAULT_LIFECYCLE_CONFIG_PAYLOAD } from '@core/schema/lifecycle-config';
+import type { AdvancementRulePayload } from '@core/schema/advancement';
+import { DEFAULT_ADVANCEMENT_RULE_PAYLOAD } from '@core/schema/advancement';
+import type { JobConfigPayload } from '@core/schema/job-config';
+import { createJobConfigPayload } from '@core/schema/job-config';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -320,6 +324,71 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<LifecycleConfigPayload>,
 
+  // Sprint: S7-SL-AutoAdvancement v1 - Advancement rule configuration
+  // INSTANCE pattern: Many rules active simultaneously
+  'advancement-rule': {
+    type: 'advancement-rule',
+    label: 'Advancement Rule',
+    icon: 'trending_up',
+    description: 'Define criteria for automatic tier advancement based on observable signals',
+    defaultPayload: DEFAULT_ADVANCEMENT_RULE_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'AdvancementRuleEditor',
+    allowMultipleActive: true, // INSTANCE: Many rules active simultaneously
+    routePath: '/bedrock/experience',
+    color: '#4CAF50', // Green for advancement/growth
+    // Polymorphic console support
+    cardComponent: 'AdvancementRuleCard',
+    dataHookName: 'useAdvancementRuleData',
+    searchFields: ['meta.title', 'meta.description', 'payload.fromTier', 'payload.toTier'],
+    metrics: [
+      { id: 'enabled', label: 'Enabled', icon: 'check_circle', query: 'count(where: payload.isEnabled=true)', typeFilter: 'advancement-rule' },
+      { id: 'disabled', label: 'Disabled', icon: 'block', query: 'count(where: payload.isEnabled=false)', typeFilter: 'advancement-rule' },
+    ],
+    filters: [
+      { field: 'payload.isEnabled', label: 'Enabled', type: 'select', options: ['true', 'false'] },
+      { field: 'payload.fromTier', label: 'From Tier', type: 'select', options: ['seed', 'sprout', 'sapling', 'tree'] },
+      { field: 'payload.toTier', label: 'To Tier', type: 'select', options: ['sprout', 'sapling', 'tree', 'grove'] },
+    ],
+    sortOptions: [
+      { field: 'payload.fromTier', label: 'From Tier', direction: 'asc' },
+      { field: 'payload.toTier', label: 'To Tier', direction: 'asc' },
+    ],
+  } satisfies ExperienceTypeDefinition<AdvancementRulePayload>,
+
+  // Sprint: S7.5-SL-JobConfigSystem v1 - Job configuration
+  // INSTANCE pattern: Many job configs active simultaneously
+  'job-config': {
+    type: 'job-config',
+    label: 'Job Config',
+    icon: 'schedule',
+    description: 'Configure cron jobs and automated tasks',
+    defaultPayload: createJobConfigPayload('new-job', 'New Job', 'manual'),
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'JobConfigEditor',
+    allowMultipleActive: true, // INSTANCE: Many job configs active simultaneously
+    routePath: '/bedrock/experience',
+    color: '#2196F3', // Blue for jobs/automation
+    // Polymorphic console support
+    cardComponent: 'JobConfigCard',
+    dataHookName: 'useJobConfigData',
+    searchFields: ['meta.title', 'meta.description', 'payload.jobId', 'payload.jobName', 'payload.tags'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: payload.enabled=true)', typeFilter: 'job-config' },
+      { id: 'paused', label: 'Paused', icon: 'pause_circle', query: 'count(where: payload.enabled=false)', typeFilter: 'job-config' },
+      { id: 'scheduled', label: 'Scheduled', icon: 'schedule', query: 'count(where: payload.triggerType=schedule)', typeFilter: 'job-config' },
+    ],
+    filters: [
+      { field: 'payload.enabled', label: 'Status', type: 'select', options: ['true', 'false'] },
+      { field: 'payload.triggerType', label: 'Trigger', type: 'select', options: ['schedule', 'webhook', 'manual', 'dependency'] },
+    ],
+    sortOptions: [
+      { field: 'payload.jobId', label: 'Job ID', direction: 'asc' },
+      { field: 'payload.priority', label: 'Priority', direction: 'desc' },
+      { field: 'meta.updatedAt', label: 'Updated', direction: 'desc' },
+    ],
+  } satisfies ExperienceTypeDefinition<JobConfigPayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -357,6 +426,8 @@ export interface ExperiencePayloadMap {
   'writer-agent-config': WriterAgentConfigPayload;
   'copilot-style': CopilotStylePayload;
   'lifecycle-config': LifecycleConfigPayload; // Sprint: S5-SL-LifecycleEngine v1
+  'advancement-rule': AdvancementRulePayload; // Sprint: S7-SL-AutoAdvancement v1
+  'job-config': JobConfigPayload; // Sprint: S7.5-SL-JobConfigSystem v1
 }
 
 /**

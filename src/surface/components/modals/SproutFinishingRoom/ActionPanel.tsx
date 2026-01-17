@@ -73,7 +73,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         body: JSON.stringify({
           title: sprout.query,
           content,
-          tier: 2,
+          tier: 'sprout', // Valid tier string: seed, sprout, sapling, tree, grove
           sourceType: 'sprout',
           sourceUrl: `sprout://${sprout.id}`,
         }),

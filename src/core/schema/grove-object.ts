@@ -15,8 +15,11 @@ export type GroveObjectType =
   | 'prompt-architect-config' // Sprint: sprout-research-v1
   | 'system-prompt'
   | 'feature-flag'           // Sprint: feature-flags-v1
+  | 'advancement-rule'      // Sprint: S7-SL-AutoAdvancement v1
+  | 'job-config'            // Sprint: S7.5-SL-JobConfigSystem v1
   | 'node'
   | 'card'
+  | 'lifecycle-model'       // Sprint: EPIC4-SL-MultiModel v1
   | string;
 
 /**
@@ -78,6 +81,10 @@ export interface GroveObjectMeta {
   // Organization
   tags?: string[];
   favorite?: boolean;
+
+  // Federation metadata (EPIC5-SL-Federation v1)
+  federationId?: string;
+  federationPath?: string[];
 }
 
 /**
@@ -102,3 +109,26 @@ export function isGroveObjectMeta(obj: unknown): obj is GroveObjectMeta {
     typeof o.title === 'string'
   );
 }
+
+/**
+ * Type map: Grove object type → its payload type
+ *
+ * Used for type-safe access to object payloads.
+ * Add new types here when creating new GroveObject patterns.
+ */
+export type GroveObjectPayloadMap = {
+  'lens': unknown;
+  'journey': unknown;
+  'hub': unknown;
+  'sprout': unknown;
+  'research-sprout': unknown;
+  'prompt-architect-config': unknown;
+  'system-prompt': unknown;
+  'feature-flag': unknown;
+  'advancement-rule': unknown;
+  'job-config': unknown;
+  'node': unknown;
+  'card': unknown;
+  'lifecycle-model': unknown;
+  [key: string]: unknown;
+};

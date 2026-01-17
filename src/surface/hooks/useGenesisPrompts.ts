@@ -2,7 +2,7 @@
 // Fetch genesis-welcome prompts using Grove data layer
 // Sprint: system-prompt-integration-v1
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { useGroveData } from '@core/data';
 
 export interface GenesisPrompt {
@@ -22,11 +22,12 @@ interface PromptPayload {
  */
 export function useGenesisPrompts(_lensId?: string | null) {
   const { objects: allPrompts, loading, error } = useGroveData<PromptPayload>('prompt');
+  const hasLoggedRef = useRef(false);
 
   const prompts = useMemo(() => {
     // Filter to genesis-welcome tagged prompts
-    const genesisPrompts = allPrompts.filter(p => 
-      p.meta.tags?.includes('genesis-welcome') && 
+    const genesisPrompts = allPrompts.filter(p =>
+      p.meta.tags?.includes('genesis-welcome') &&
       p.meta.status === 'active'
     );
 
@@ -44,13 +45,17 @@ export function useGenesisPrompts(_lensId?: string | null) {
       }));
   }, [allPrompts]);
 
-  if (process.env.NODE_ENV === 'development' && prompts.length > 0) {
-    console.log('[useGenesisPrompts] Loaded', prompts.length, 'genesis-welcome prompts');
-  }
+  // Log only once on initial load
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && prompts.length > 0 && !hasLoggedRef.current) {
+      console.log('[useGenesisPrompts] Loaded', prompts.length, 'genesis-welcome prompts');
+      hasLoggedRef.current = true;
+    }
+  }, [prompts.length]);
 
-  return { 
-    prompts, 
-    isLoading: loading, 
-    error: error ? new Error(error) : null 
+  return {
+    prompts,
+    isLoading: loading,
+    error: error ? new Error(error) : null
   };
 }
