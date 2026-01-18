@@ -11,6 +11,141 @@ Given-When-Then
 - E2E tests
 - Visual tests
 
+---
+
+## E2E Test Specification
+
+### Test Structure
+All E2E tests follow the Grove Developer SOP v2.0 pattern:
+
+```
+tests/e2e/s9-sl-federation/
+├── _test-data.ts           # Test presets and seeding utilities
+├── _test-utils.ts          # Console capture, error filtering
+├── grove-registration.spec.ts   # US-001 tests
+├── grove-discovery.spec.ts      # US-002 tests
+├── tier-mapping.spec.ts         # US-003 tests
+├── knowledge-exchange.spec.ts   # US-004, US-005 tests
+├── cross-grove-attribution.spec.ts  # US-006 tests
+├── trust-governance.spec.ts     # US-007 tests
+└── federation-management.spec.ts    # US-008 tests
+```
+
+### Visual Verification Points
+
+| User Story | Screenshot | Verification |
+|------------|------------|--------------|
+| US-001 | `grove-registration-wizard.png` | Registration form visible, all fields present |
+| US-001 | `grove-registration-complete.png` | Confirmation message, credentials displayed |
+| US-002 | `grove-discovery-search.png` | Search results with trust badges |
+| US-002 | `grove-discovery-filters.png` | Filter controls, pagination visible |
+| US-003 | `tier-mapping-editor.png` | Side-by-side tier systems, visual connectors |
+| US-003 | `tier-mapping-validation.png` | Validation errors displayed clearly |
+| US-004 | `knowledge-request-form.png` | Request form with content type, tier, keywords |
+| US-005 | `knowledge-offer-form.png` | Offer form with sharing policies |
+| US-006 | `federated-content-attribution.png` | Full attribution chain visible |
+| US-007 | `trust-connection-review.png` | Connection request details, approve/deny buttons |
+| US-008 | `federation-dashboard.png` | Connection list, activity metrics |
+| US-008 | `federation-analytics.png` | Charts, metrics, export controls |
+
+### Test Data Seeding
+
+**CRITICAL**: All E2E tests MUST seed realistic data before assertions.
+
+```typescript
+// tests/e2e/s9-sl-federation/_test-data.ts
+import { Page } from '@playwright/test';
+
+export const TEST_PRESETS = {
+  registeredGrove: {
+    'grove-federation-state': JSON.stringify({
+      registered: true,
+      groveId: 'grove-research-collective-7a3f',
+      groveName: 'Research Collective',
+      description: 'Distributed AI research network',
+      tierSystem: ['Seed', 'Sprout', 'Sapling', 'Tree'],
+      verificationStatus: 'verified',
+      federationCredentials: { publicKey: 'pk_test_abc123' }
+    })
+  },
+
+  connectedGroves: {
+    'grove-federation-connections': JSON.stringify([
+      {
+        id: 'grove-ai-ethics-2b1c',
+        name: 'AI Ethics Collective',
+        trustLevel: 0.87,
+        verificationStatus: 'verified',
+        lastActivity: new Date().toISOString()
+      },
+      {
+        id: 'grove-ml-research-9d4e',
+        name: 'ML Research Network',
+        trustLevel: 0.92,
+        verificationStatus: 'verified',
+        lastActivity: new Date().toISOString()
+      }
+    ])
+  },
+
+  tierMappings: {
+    'grove-tier-mappings': JSON.stringify({
+      'grove-ai-ethics-2b1c': {
+        myTier: 'Tree',
+        theirTier: 'Published',
+        semanticRule: 'Mature, validated content ready for distribution'
+      }
+    })
+  },
+
+  pendingRequests: {
+    'grove-knowledge-requests': JSON.stringify([
+      {
+        id: 'req-001',
+        fromGrove: 'grove-ai-ethics-2b1c',
+        contentType: 'Research Analysis',
+        tier: 'Sapling',
+        keywords: ['distributed inference'],
+        status: 'pending',
+        timestamp: new Date().toISOString()
+      }
+    ])
+  }
+};
+
+export async function seedFederationData(
+  page: Page,
+  preset: keyof typeof TEST_PRESETS
+): Promise<void> {
+  const data = TEST_PRESETS[preset];
+  await page.evaluate((entries) => {
+    Object.entries(entries).forEach(([key, value]) => {
+      localStorage.setItem(key, value as string);
+    });
+  }, data);
+}
+
+export async function clearFederationData(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('grove-federation') || k.startsWith('grove-tier') || k.startsWith('grove-knowledge'))
+      .forEach(k => localStorage.removeItem(k));
+  });
+}
+```
+
+### Screenshots Are EVIDENCE
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Directory | `docs/sprints/s9-sl-federation-v1/screenshots/e2e/` |
+| Naming | `{story-id}-{description}.png` (e.g., `us001-registration-complete.png`) |
+| Minimum | 50+ screenshots for Sprint-tier |
+| Verification | Each screenshot must be visually verified before commit |
+| Documentation | Screenshots referenced in REVIEW.html for stakeholder review |
+
+---
+
 ## Acceptance Criteria
 
 ### US-001: Grove Registration
