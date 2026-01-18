@@ -90,5 +90,58 @@ export {
 } from './model-analytics-transform';
 export type { ModelAnalyticsTransformOptions } from './model-analytics-transform';
 
+// Attribution Catalog - component vocabulary with Zod schemas
+export {
+  AttributionCatalog,
+  AttributionHeaderSchema,
+  TokenBalanceCardSchema,
+  ReputationCardSchema,
+  ReputationTierSchema,
+  TierProgressBarSchema,
+  BadgeRaritySchema,
+  BadgeCategorySchema,
+  BadgeItemSchema,
+  BadgeGridSchema,
+  AttributionEventItemSchema,
+  RecentActivityListSchema,
+  BadgeCategoryStatsSchema,
+  BadgeRarityStatsSchema,
+  BadgeStatsSummarySchema,
+  MetricsRowSchema,
+} from './attribution-catalog';
+
+export type {
+  AttributionCatalogType,
+  AttributionHeaderProps,
+  TokenBalanceCardProps,
+  ReputationCardProps,
+  ReputationTier as AttributionReputationTier,
+  TierProgressBarProps,
+  BadgeRarity,
+  BadgeCategory,
+  BadgeItemProps,
+  BadgeGridProps,
+  AttributionEventItemProps,
+  RecentActivityListProps,
+  BadgeCategoryStatsProps,
+  BadgeRarityStatsProps,
+  BadgeStatsSummaryProps,
+  MetricsRowProps as AttributionMetricsRowProps,
+  RenderElement as AttributionRenderElement,
+  RenderTree as AttributionRenderTree,
+} from './attribution-catalog';
+
+// Attribution Registry - maps catalog to React components
+export { AttributionRegistry } from './attribution-registry';
+export type { AttributionComponentRegistry } from './attribution-registry';
+
+// Attribution Transform - converts attribution data to render trees
+export {
+  attributionDataToRenderTree,
+  createEmptyAttributionTree,
+  createCompactAttributionTree,
+} from './attribution-transform';
+export type { AttributionTransformOptions } from './attribution-transform';
+
 // Note: Renderer is shared with SproutFinishingRoom/json-render/Renderer.tsx
 // Import from there when rendering: import { Renderer } from '@surface/components/modals/SproutFinishingRoom/json-render'
