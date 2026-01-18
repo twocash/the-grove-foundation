@@ -49,3 +49,39 @@ export {
   updateEntropyState,
   dismissEntropy
 } from './entropyDetector';
+
+// Attribution Calculator (Knowledge Economy)
+// Sprint: S11-SL-Attribution v1
+export {
+  type AttributionCalculatorConfig,
+  type CreateAttributionEventInput,
+  type AttributionSummary,
+  DEFAULT_CALCULATOR_CONFIG,
+  calculateNetworkBonus,
+  calculateReputationScore,
+  updateReputationFromAttribution,
+  updateTokenBalance,
+  updateNetworkInfluence,
+  createAttributionEvent,
+  addEventToChain,
+  createAttributionChain,
+  createEmptyTokenBalance,
+  createEmptyReputationScore,
+  calculateAttributionSummary
+} from './attributionCalculator';
+
+// Badge Award Engine (Knowledge Economy)
+// Sprint: S11-SL-Attribution v1 - Phase 3
+export {
+  type BadgeEvaluationContext,
+  type BadgeStatistics,
+  evaluateCriteria,
+  isNewlyEarned,
+  detectTierChange,
+  evaluateBadges,
+  getNewlyEarnedBadges,
+  awardBadge,
+  awardBadges,
+  toEarnedBadgeRecords,
+  calculateBadgeStatistics
+} from './badgeAwardEngine';

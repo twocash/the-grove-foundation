@@ -7,14 +7,25 @@
 
 ---
 
+## The Maxim
+
+> **"Read = json-render. Write = React."**
+
+If the UI **displays** data → json-render.
+If the UI **edits** data → React.
+
+**No exceptions. No debates.**
+
+---
+
 ## Executive Summary
 
-The json-render pattern is now a **mandatory** part of Grove's 1.0 architecture for declarative UI rendering. This guide establishes when, why, and how to use json-render, and provides a factory for creating new catalog entries.
+The json-render pattern is **mandatory** for all display UIs in Grove's 1.0 architecture.
 
-**TL;DR:**
-- ✅ **REQUIRED**: Analytics dashboards, status displays, read-only UIs
-- ❌ **FORBIDDEN**: Interactive forms, stateful editors, complex workflows
-- ⚠️ **EVALUATE**: Conditional rendering, multi-stage interactions
+| UI Purpose | Pattern | Examples |
+|------------|---------|----------|
+| **Displays data** | json-render | Dashboards, status panels, analytics, metrics, reports, AI-generated content |
+| **Edits data** | React | Forms, editors, wizards, input fields, toggles, interactive controls |
 
 ---
 
@@ -55,67 +66,37 @@ Json-render is a **declarative component vocabulary** that implements a three-la
 
 ## When to Use json-render
 
-### ✅ MANDATORY USE CASES
+### The Rule
 
-**1. Analytics Dashboards**
-- Metrics, KPIs, progress indicators
-- Signal aggregation displays
-- Research document visualizations
+**Read = json-render. Write = React.**
 
-**Example:**
+Ask one question: *"Does this UI edit data or display data?"*
+
+| Answer | Pattern |
+|--------|---------|
+| Displays data | json-render |
+| Edits data | React |
+
+### json-render Examples (Displays Data)
+
 ```typescript
-// SignalsCatalog - Shows sprout usage analytics
-SignalsCatalog = {
-  components: {
-    MetricCard, QualityGauge, DiversityBadge,
-    FunnelChart, ActivityTimeline, AdvancementIndicator
-  }
-}
+// Analytics dashboard - DISPLAYS metrics
+SignalsCatalog = { MetricCard, QualityGauge, FunnelChart, ActivityTimeline }
+
+// Job status panel - DISPLAYS execution state
+JobStatusCatalog = { JobPhaseIndicator, JobProgressBar, JobLogEntry }
+
+// Research document - DISPLAYS AI-generated content
+ResearchCatalog = { ResearchHeader, AnalysisBlock, SourceList }
+
+// Attribution dashboard - DISPLAYS token economics
+AttributionCatalog = { RewardSummary, QualityMultiplier, ReputationBadge }
 ```
 
-**2. Status Displays**
-- Job execution status (queued → running → complete)
-- System health indicators
-- Real-time monitoring UIs
+### React Examples (Edits Data)
 
-**Example:**
 ```typescript
-// JobStatusCatalog - Shows batch job status
-JobStatusCatalog = {
-  components: {
-    JobPhaseIndicator, JobProgressBar, JobLogEntry,
-    JobErrorAlert, NextRunCountdown
-  }
-}
-```
-
-**3. Read-Only Information UIs**
-- AI-generated content structures
-- Research documents
-- Audit trails
-- Provenance displays
-
-**Example:**
-```typescript
-// ResearchCatalog - Shows AI-generated research documents
-ResearchCatalog = {
-  components: {
-    ResearchHeader, AnalysisBlock, SourceList,
-    LimitationsBlock, Metadata
-  }
-}
-```
-
-### ❌ FORBIDDEN USE CASES
-
-**1. Interactive Forms**
-- User input fields
-- Editors with controlled inputs
-- CRUD operations
-
-**Correct Pattern:**
-```typescript
-// JobConfigEditor.tsx - Interactive form
+// Job config editor - EDITS settings
 export function JobConfigEditor({ object, onEdit }) {
   return (
     <form>
@@ -126,54 +107,33 @@ export function JobConfigEditor({ object, onEdit }) {
     </form>
   );
 }
-```
 
-**2. Stateful Components**
-- Components with local state
-- Toggle buttons
-- Modal dialogs
-
-**Correct Pattern:**
-```typescript
+// Toggle, modal, wizard - EDITS state
 // Use traditional React patterns with useState, useEffect
-// NOT json-render
 ```
 
-**3. Complex Workflows**
-- Multi-step wizards
-- Conditional logic
-- User interaction flows
+### Hybrid UIs
 
-### ⚠️ EVALUATE USE CASES
+Some screens have both display and edit sections. Split them:
 
-**1. Conditional Rendering (Case-by-Case)**
-```typescript
-// If simple conditional based on data → json-render OK
-{
-  type: 'JobErrorAlert',
-  props: { show: execution.errors > 0, error: execution.error }
-}
-
-// If complex user-driven logic → traditional React
-if (userHasPermission && config.isEnabled) { ... }
 ```
-
-**2. Partial Interactivity (Use Hybrid Pattern)**
-```typescript
-// Most readable approach:
 ┌─────────────────────────────────────┐
-│  Config Form Section                 │ ← Traditional React
-│  - Input fields                     │
-│  - Validation                       │
+│  Editor Section (React)              │ ← Edits data
+│  - Input fields                      │
+│  - Validation                        │
+│  - Save button                       │
 └─────────────────────────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────────┐
-│  Status Display Section               │ ← json-render
-│  - Live progress                    │
-│  - Metrics                          │
+│  Preview Section (json-render)       │ ← Displays data
+│  - Live preview                      │
+│  - Metrics                           │
+│  - Status indicators                 │
 └─────────────────────────────────────┘
 ```
+
+**The boundary is always the same: Read vs Write.**
 
 ---
 
@@ -568,21 +528,20 @@ test('renders correctly', async ({ page }) => {
 
 ## Conclusion
 
-Json-render is a powerful pattern for declarative UI in Grove. Use it for:
-- ✅ Analytics dashboards
-- ✅ Status displays
-- ✅ Read-only information UIs
+**The Maxim: "Read = json-render. Write = React."**
 
-Don't use it for:
-- ❌ Interactive forms
-- ❌ Stateful editors
-- ❌ Complex workflows
+One question decides it: *Does this UI display data or edit data?*
 
-When in doubt, ask:
-> **"Can this UI be expressed as a pure function of domain data?"**
->
-> If yes → json-render
-> If no → traditional React
+| Display | Edit |
+|---------|------|
+| json-render | React |
+| Dashboards | Forms |
+| Status panels | Editors |
+| Analytics | Wizards |
+| Reports | Toggles |
+| Previews | Inputs |
+
+**No exceptions. No debates.**
 
 ---
 

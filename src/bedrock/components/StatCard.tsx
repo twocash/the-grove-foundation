@@ -43,12 +43,19 @@ export function StatCard({
 }: StatCardProps) {
   const isInteractive = Boolean(onClick);
 
+  // Trend color mapping using Quantum Glass variables
+  const trendColor = trend === 'up'
+    ? 'text-[var(--neon-green)]'
+    : trend === 'down'
+      ? 'text-[var(--neon-amber)]'
+      : 'text-[var(--glass-text-muted)]';
+
   const content = (
     <>
       {/* Icon */}
       {icon && (
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <span className="material-symbols-outlined text-xl text-primary">{icon}</span>
+        <div className="w-10 h-10 rounded-lg bg-[var(--neon-cyan)]/10 flex items-center justify-center flex-shrink-0">
+          <span className="material-symbols-outlined text-xl text-[var(--neon-cyan)]">{icon}</span>
         </div>
       )}
 
@@ -56,26 +63,18 @@ export function StatCard({
       <div className="flex-1 min-w-0">
         {loading ? (
           <div className="space-y-2">
-            <div className="h-7 w-16 bg-surface-hover-light dark:bg-surface-hover-dark rounded animate-pulse" />
-            <div className="h-4 w-24 bg-surface-hover-light dark:bg-surface-hover-dark rounded animate-pulse" />
+            <div className="h-7 w-16 bg-[var(--glass-panel)] rounded animate-pulse" />
+            <div className="h-4 w-24 bg-[var(--glass-panel)] rounded animate-pulse" />
           </div>
         ) : (
           <>
-            <div className="text-2xl font-semibold text-foreground-light dark:text-foreground-dark">
+            <div className="text-2xl font-semibold text-[var(--glass-text-primary)]">
               {value}
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-light dark:text-muted-dark">{label}</span>
+              <span className="text-[var(--glass-text-muted)]">{label}</span>
               {trend && trendValue && (
-                <span
-                  className={`flex items-center gap-0.5 ${
-                    trend === 'up'
-                      ? 'text-green-600 dark:text-green-400'
-                      : trend === 'down'
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-muted-light dark:text-muted-dark'
-                  }`}
-                >
+                <span className={`flex items-center gap-0.5 ${trendColor}`}>
                   <span className="material-symbols-outlined text-sm">
                     {trend === 'up' ? 'trending_up' : trend === 'down' ? 'trending_down' : 'trending_flat'}
                   </span>
@@ -84,7 +83,7 @@ export function StatCard({
               )}
             </div>
             {description && (
-              <p className="text-xs text-muted-light dark:text-muted-dark mt-1 truncate">
+              <p className="text-xs text-[var(--glass-text-muted)] mt-1 truncate">
                 {description}
               </p>
             )}
@@ -95,16 +94,16 @@ export function StatCard({
   );
 
   const baseClasses = `
-    flex items-center gap-4 p-4 rounded-lg
-    bg-surface-light dark:bg-surface-dark
-    border border-border-light dark:border-border-dark
+    flex items-center gap-3 px-4 py-3 rounded-xl
+    bg-[var(--glass-solid)] border border-white/5
+    shadow-[0_0_20px_rgba(34,211,238,0.1)]
   `;
 
   if (isInteractive) {
     return (
       <button
         onClick={onClick}
-        className={`${baseClasses} w-full text-left hover:bg-surface-hover-light dark:hover:bg-surface-hover-dark transition-colors cursor-pointer`}
+        className={`${baseClasses} w-full text-left hover:bg-[var(--glass-elevated)] hover:border-white/10 transition-colors cursor-pointer`}
       >
         {content}
       </button>

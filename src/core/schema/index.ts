@@ -376,3 +376,141 @@ export {
   EMPTY_AGGREGATION,
   createEmptyAggregation
 } from './sprout-signals';
+
+// Attribution Economy types (Sprint: S11-SL-Attribution v1)
+// Knowledge Economy & Rewards system
+export {
+  // Reputation Tiers
+  type ReputationTier,
+  type ReputationTierConfig,
+  REPUTATION_TIERS,
+  REPUTATION_TIER_CONFIGS,
+  // Content Tiers
+  type ContentTierLevel,
+  BASE_TOKENS,
+  TIER_LABELS,
+  // Quality Multipliers
+  type QualityMultiplierRange,
+  QUALITY_MULTIPLIER_RANGES,
+  getQualityMultiplier,
+  getReputationTier,
+  getTierMultiplier,
+  // Core Types
+  type AttributionEvent,
+  type TokenBalance,
+  type ReputationScore,
+  type NetworkInfluence,
+  type EconomicSetting,
+  type ChainEvent,
+  type AttributionChain,
+  // Calculation
+  type TokenCalculationInput,
+  type TokenCalculationResult,
+  calculateTokens,
+  // View
+  type GroveEconomicSummary,
+  // Type Guards
+  isAttributionEvent,
+  isTokenBalance,
+  isReputationScore,
+  isNetworkInfluence,
+  isAttributionChain,
+  // API Types
+  type CalculateAttributionRequest,
+  type CalculateAttributionResponse,
+  type GetEconomicSummaryRequest,
+  type GetEconomicSummaryResponse,
+  type UpdateReputationRequest,
+  type UpdateReputationResponse,
+  // Schemas
+  AttributionEventSchema,
+  TokenBalanceSchema,
+  ReputationScoreSchema,
+  NetworkInfluenceSchema,
+  EconomicSettingSchema,
+  ChainEventSchema,
+  AttributionChainSchema
+} from './attribution';
+
+// Quality Score types (Sprint: S10.1-SL-AICuration v2)
+// AI-curated quality assessment for sprouts
+export {
+  // Dimensions
+  type QualityDimensions,
+  type DimensionConfig,
+  QualityDimensionsSchema,
+  DIMENSION_CONFIGS,
+  // Grades
+  type QualityGrade,
+  type QualityGradeConfig,
+  QUALITY_GRADES,
+  QUALITY_GRADE_CONFIGS,
+  getQualityGrade,
+  getQualityGradeConfig,
+  // Thresholds
+  type QualityThresholds,
+  QualityThresholdsSchema,
+  DEFAULT_QUALITY_THRESHOLDS,
+  getQualityGradeWithThresholds,
+  // Quality Score
+  type QualityStatus,
+  type QualityScore,
+  QualityStatusSchema,
+  QualityScoreSchema,
+  // Sprout Integration
+  type SproutQualityMeta,
+  SproutQualityMetaSchema,
+  // Filters
+  type QualityFilterState,
+  type QualityFilterPreset,
+  QualityFilterStateSchema,
+  QUALITY_FILTER_PRESETS,
+  // Federated Learning
+  type FederatedConsentLevel,
+  type FederatedLearningConfig,
+  FederatedLearningConfigSchema,
+  DEFAULT_FEDERATED_CONFIG,
+  // Utilities
+  calculateOverallScore,
+  passesQualityFilter,
+  parseQualityFilterFromURL,
+  serializeQualityFilterToURL,
+  // Type Guards
+  isQualityScore,
+  isQualityDimensions,
+  isSproutQualityMeta,
+  isQualityFilterState,
+} from './quality';
+
+// Badge System types (Sprint: S11-SL-Attribution v1 - Phase 3)
+// Reputation badges and achievement system
+export {
+  // Categories & Rarity
+  type BadgeCategory,
+  type BadgeRarity,
+  type BadgeRarityConfig,
+  BADGE_CATEGORIES,
+  BADGE_RARITIES,
+  BADGE_RARITY_CONFIGS,
+  // Criteria
+  type BadgeCriteriaType,
+  type BadgeCriteria,
+  BadgeCriteriaSchema,
+  // Badge Definitions
+  type BadgeDefinition,
+  BadgeDefinitionSchema,
+  BADGE_DEFINITIONS,
+  getAllBadgeDefinitions,
+  getBadgeDefinition,
+  getBadgesByCategory,
+  getBadgesByRarity,
+  // Earned Badges
+  type EarnedBadge,
+  EarnedBadgeSchema,
+  // Results
+  type BadgeAwardResult,
+  type BadgeEvaluationResult,
+  // Type Guards
+  isBadgeDefinition,
+  isEarnedBadge
+} from './badges';

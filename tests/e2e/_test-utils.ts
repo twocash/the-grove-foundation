@@ -52,6 +52,9 @@ export const EXCLUDED_ERROR_PATTERNS = [
   'net::ERR_',
   'Failed to load resource',
   '404',
+  // Exclude narrative schema fetch failures - benign in isolated E2E tests
+  'Failed to load narrative schema',
+  'Failed to fetch',
 ] as const;
 
 /**

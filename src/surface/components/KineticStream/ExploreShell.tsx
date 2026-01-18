@@ -714,7 +714,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
   }, [submit, effectivePersonaBehaviors]);
 
   return (
-    <div className="kinetic-surface flex flex-col h-screen bg-[var(--glass-void)]">
+    <div className="kinetic-surface flex flex-col h-screen bg-glass-void">
       {/* Header with context pills */}
       <KineticHeader
         lensName={lensData?.publicLabel || 'Choose Lens'}
@@ -778,7 +778,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       {/* Lens Picker Overlay */}
       {overlay.type === 'lens-picker' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto">
+          <div className="bg-glass-solid rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto">
             <LensPicker
               mode="compact"
               onBack={() => setOverlay({ type: 'none' })}
@@ -791,7 +791,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       {/* Journey Picker Overlay */}
       {overlay.type === 'journey-picker' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto p-6">
+          <div className="bg-glass-solid rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-auto p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-[var(--glass-text-primary)]">Choose a Journey</h2>
               <button
@@ -821,7 +821,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
       {/* Custom Lens Wizard Overlay */}
       {overlay.type === 'custom-lens-wizard' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-auto">
+          <div className="bg-glass-solid rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-auto">
             <CustomLensWizard
               onComplete={handleWizardComplete}
               onCancel={handleWizardCancel}
@@ -844,7 +844,7 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
             }
           }}
         >
-          <div className="bg-[var(--glass-solid)] rounded-lg shadow-xl max-w-lg w-full mx-4 min-h-[400px] max-h-[85vh] overflow-hidden">
+          <div className="bg-glass-solid rounded-lg shadow-xl max-w-lg w-full mx-4 min-h-[400px] max-h-[85vh] overflow-hidden">
             <GardenInspector
               architectState={promptArchitect.state}
               manifest={promptArchitect.manifest}

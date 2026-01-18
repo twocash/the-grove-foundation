@@ -89,6 +89,31 @@ export interface SproutPayload {
 
   /** Inference model used */
   inferenceModel: string | null;
+
+  // ─────────────────────────────────────────────────────────────
+  // Quality Assessment (S10.1-SL-AICuration v2)
+  // ─────────────────────────────────────────────────────────────
+
+  /** Quality assessment status */
+  qualityStatus: 'scored' | 'pending' | 'error' | 'not-assessed';
+
+  /** Full quality score object (if scored) */
+  qualityScore?: {
+    overall: number;
+    dimensions: {
+      accuracy: number;
+      utility: number;
+      novelty: number;
+      provenance: number;
+    };
+    assessedAt: string;
+    assessedBy: string;
+    confidence: number;
+    networkPercentile?: number;
+  };
+
+  /** Quality error message (if error) */
+  qualityError?: string;
 }
 
 // =============================================================================
@@ -100,6 +125,11 @@ export interface SproutPayload {
  */
 function rowToGroveObject(row: Record<string, unknown>): GroveObject<SproutPayload> {
   const status = row.status as ResearchSproutStatus;
+
+  // Parse quality data from row
+  const qualityScore = row.quality_score as SproutPayload['qualityScore'] | null;
+  const qualityStatus = (row.quality_status as SproutPayload['qualityStatus']) || 'not-assessed';
+  const qualityError = row.quality_error as string | undefined;
 
   return {
     meta: {
@@ -128,6 +158,10 @@ function rowToGroveObject(row: Record<string, unknown>): GroveObject<SproutPaylo
       archivedAt: row.archived_at as string | null,
       completedAt: row.completed_at as string | null,
       inferenceModel: row.inference_model as string | null,
+      // Quality fields (S10.1-SL-AICuration v2)
+      qualityStatus,
+      qualityScore: qualityScore || undefined,
+      qualityError,
     },
   };
 }
