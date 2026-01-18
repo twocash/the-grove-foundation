@@ -120,7 +120,7 @@ export function GardenInspector({
   }, [selectSprout]);
 
   return (
-    <div className="flex flex-col h-full bg-[var(--glass-solid)]">
+    <div className="flex flex-col h-full bg-glass-solid">
       {/* Header */}
       <GardenInspectorHeader
         viewMode={viewMode}
@@ -210,32 +210,32 @@ function GardenInspectorHeader({ viewMode, filterPreset, onFilterChange }: Heade
           icon: 'science',
           title: 'New Research Sprout',
           subtitle: 'Review and confirm your research plan',
-          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
-          iconColor: 'text-purple-600 dark:text-purple-400',
+          bgColor: 'bg-neon-violet/10',
+          iconColor: 'text-neon-violet',
         };
       case 'progress':
         return {
           icon: 'monitoring',
           title: 'Research in Progress',
           subtitle: 'Collecting and analyzing evidence...',
-          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-          iconColor: 'text-blue-600 dark:text-blue-400',
+          bgColor: 'bg-neon-cyan/10',
+          iconColor: 'text-neon-cyan',
         };
       case 'results':
         return {
           icon: 'article',
           title: 'Research Results',
           subtitle: 'View and export your findings',
-          bgColor: 'bg-green-50 dark:bg-green-900/30',
-          iconColor: 'text-green-600 dark:text-green-400',
+          bgColor: 'bg-neon-green/10',
+          iconColor: 'text-neon-green',
         };
       default:
         return {
           icon: 'park',
           title: 'Research Garden',
           subtitle: `Viewing ${FILTER_PRESETS[filterPreset].label.toLowerCase()}`,
-          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
-          iconColor: 'text-purple-600 dark:text-purple-400',
+          bgColor: 'bg-neon-violet/10',
+          iconColor: 'text-neon-violet',
         };
     }
   };
@@ -243,11 +243,11 @@ function GardenInspectorHeader({ viewMode, filterPreset, onFilterChange }: Heade
   const { icon, title, subtitle, bgColor, iconColor } = getHeaderContent();
 
   return (
-    <div className="px-4 py-3 border-b border-border-light dark:border-slate-700">
+    <div className="px-4 py-3 border-b border-white/5">
       <div className="flex items-center gap-3">
         {/* Icon */}
         <div className={`w-8 h-8 rounded-lg ${bgColor}
-                        border border-border-light dark:border-slate-700
+                        border border-white/10
                         flex items-center justify-center shrink-0`}>
           <span className={`material-symbols-outlined ${iconColor} text-lg`}>
             {icon}
@@ -256,10 +256,10 @@ function GardenInspectorHeader({ viewMode, filterPreset, onFilterChange }: Heade
 
         {/* Title */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <h3 className="text-sm font-semibold text-glass-text-primary">
             {title}
           </h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+          <p className="text-xs text-glass-text-muted truncate">
             {subtitle}
           </p>
         </div>
@@ -273,8 +273,8 @@ function GardenInspectorHeader({ viewMode, filterPreset, onFilterChange }: Heade
                 onClick={() => onFilterChange(id as FilterPresetId)}
                 className={`px-2 py-1 text-xs rounded-full transition-colors
                   ${filterPreset === id
-                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                    : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-neon-violet/20 text-neon-violet'
+                    : 'text-glass-text-muted hover:bg-white/5'
                   }`}
               >
                 {preset.label}
@@ -323,16 +323,16 @@ function ConfirmationView({
   return (
     <div className="p-4 space-y-4">
       {/* Spark (Original Query) */}
-      <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+      <div className="p-3 bg-slate-800 rounded-lg border border-slate-600">
         <div className="flex items-start gap-2">
-          <span className="material-symbols-outlined text-slate-400 text-base mt-0.5">
+          <span className="material-symbols-outlined text-amber-400 text-base mt-0.5">
             lightbulb
           </span>
           <div>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">
+            <p className="text-xs font-medium text-white mb-1">
               Research Spark
             </p>
-            <p className="text-sm text-slate-900 dark:text-slate-100 leading-relaxed">
+            <p className="text-sm text-white leading-relaxed">
               {manifest.spark}
             </p>
           </div>
@@ -341,12 +341,12 @@ function ConfirmationView({
 
       {/* Summary (if available) */}
       {summary && (
-        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800/50">
+        <div className="p-3 bg-violet-900/50 rounded-lg border border-violet-500/30">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-purple-500 text-base mt-0.5">
+            <span className="material-symbols-outlined text-violet-400 text-base mt-0.5">
               auto_awesome
             </span>
-            <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
+            <p className="text-xs text-violet-300 leading-relaxed">
               {summary}
             </p>
           </div>
@@ -355,7 +355,7 @@ function ConfirmationView({
 
       {/* Title */}
       <div>
-        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+        <label className="block text-xs font-medium text-white mb-1.5">
           Title
         </label>
         <input
@@ -364,18 +364,18 @@ function ConfirmationView({
           onChange={handleTitleChange}
           placeholder="Give your research a descriptive title..."
           disabled={isProcessing}
-          className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
-                     text-slate-900 dark:text-slate-100
-                     placeholder:text-slate-400 dark:placeholder:text-slate-500
-                     border border-slate-300 dark:border-slate-600 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-purple-500/50
+          className="w-full px-3 py-2 text-sm bg-slate-800
+                     text-white
+                     placeholder:text-slate-500
+                     border border-slate-600 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500
                      disabled:opacity-50 disabled:cursor-not-allowed"
         />
       </div>
 
       {/* Prompt / Instructions (MVP: maps to notes field, will become system prompt) */}
       <div>
-        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">
+        <label className="block text-xs font-medium text-white mb-1.5">
           Instructions / Prompt
         </label>
         <textarea
@@ -384,15 +384,15 @@ function ConfirmationView({
           placeholder="Provide specific instructions for how the AI should approach this research..."
           rows={5}
           disabled={isProcessing}
-          className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900
-                     text-slate-900 dark:text-slate-100
-                     placeholder:text-slate-400 dark:placeholder:text-slate-500
-                     border border-slate-300 dark:border-slate-600 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-purple-500/50
+          className="w-full px-3 py-2 text-sm bg-slate-800
+                     text-white
+                     placeholder:text-slate-500
+                     border border-slate-600 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500
                      resize-none font-mono
                      disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+        <p className="text-xs text-slate-400 mt-1">
           This will guide the research agent's behavior and focus areas.
         </p>
       </div>
@@ -562,13 +562,13 @@ interface ConfirmationFooterProps {
 
 function ConfirmationFooter({ isProcessing, onConfirm, onCancel }: ConfirmationFooterProps) {
   return (
-    <div className="px-4 py-3 border-t border-border-light dark:border-slate-700
+    <div className="px-4 py-3 border-t border-white/5
                     flex items-center justify-end gap-2">
       <button
         onClick={onCancel}
         disabled={isProcessing}
-        className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400
-                   hover:text-slate-900 dark:hover:text-slate-100
+        className="px-4 py-2 text-sm font-medium text-glass-text-muted
+                   hover:text-glass-text-primary
                    disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Cancel
@@ -577,8 +577,8 @@ function ConfirmationFooter({ isProcessing, onConfirm, onCancel }: ConfirmationF
         onClick={onConfirm}
         disabled={isProcessing}
         className="px-4 py-2 text-sm font-medium text-white
-                   bg-purple-600 hover:bg-purple-700
-                   rounded-lg shadow-sm
+                   bg-neon-violet hover:bg-neon-violet/80
+                   rounded-lg shadow-sm shadow-neon-violet/25
                    disabled:opacity-50 disabled:cursor-not-allowed
                    transition-colors flex items-center gap-2"
       >
@@ -622,10 +622,10 @@ function SproutListView({ filterPreset }: SproutListViewProps) {
   if (sprouts.length === 0 && !isLoading) {
     return (
       <div className="p-6 text-center">
-        <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600 block mb-3">
+        <span className="material-symbols-outlined text-4xl text-glass-text-muted/50 block mb-3">
           potted_plant
         </span>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-glass-text-muted">
           {filterPreset === 'active' && activeCount === 0
             ? 'No active research sprouts'
             : filterPreset === 'attention'
@@ -634,8 +634,8 @@ function SproutListView({ filterPreset }: SproutListViewProps) {
                 ? 'No completed research yet'
                 : 'No research sprouts yet'}
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-          Use <code className="font-mono bg-slate-100 dark:bg-slate-800 px-1 rounded">sprout:</code> to start a research investigation
+        <p className="text-xs text-glass-text-muted/70 mt-1">
+          Use <code className="font-mono bg-glass-panel px-1 rounded">sprout:</code> to start a research investigation
         </p>
       </div>
     );
@@ -645,10 +645,10 @@ function SproutListView({ filterPreset }: SproutListViewProps) {
   if (isLoading) {
     return (
       <div className="p-6 text-center">
-        <span className="material-symbols-outlined text-4xl text-purple-400 animate-pulse block mb-3">
+        <span className="material-symbols-outlined text-4xl text-neon-violet animate-pulse block mb-3">
           science
         </span>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-glass-text-muted">
           Loading research sprouts...
         </p>
       </div>
@@ -680,7 +680,7 @@ function SproutListView({ filterPreset }: SproutListViewProps) {
       {/* Load more indicator */}
       {hasMore && (
         <div className="text-center py-2">
-          <span className="text-xs text-slate-400 dark:text-slate-500">
+          <span className="text-xs text-glass-text-muted/70">
             Showing {sprouts.length} of {total} sprouts
           </span>
         </div>
@@ -756,14 +756,14 @@ function StatusBadge({ status, count, pulsing = false }: StatusBadgeProps) {
   const icon = RESEARCH_SPROUT_STATUS_ICONS[status];
   const label = RESEARCH_SPROUT_STATUS_LABELS[status];
 
-  // Color classes mapping
+  // Color classes mapping - using Quantum Glass variables
   const colorClasses: Record<string, string> = {
-    amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    slate: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400',
-    red: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    gray: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
+    amber: 'bg-neon-amber/20 text-neon-amber',
+    blue: 'bg-neon-cyan/20 text-neon-cyan',
+    slate: 'bg-glass-panel text-glass-text-muted',
+    red: 'bg-red-500/20 text-red-400',
+    green: 'bg-neon-green/20 text-neon-green',
+    gray: 'bg-glass-panel text-glass-text-muted',
   };
 
   // Animation class based on status (Phase 4c)
@@ -876,8 +876,8 @@ function SproutStatusGroup({ status, sprouts, selectedId, onSelect }: SproutStat
     <div className="space-y-2">
       {/* Group Header */}
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-slate-400 text-base">{icon}</span>
-        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+        <span className="material-symbols-outlined text-glass-text-muted text-base">{icon}</span>
+        <span className="text-xs font-medium text-glass-text-muted uppercase tracking-wide">
           {label} ({sprouts.length})
         </span>
       </div>
@@ -914,14 +914,14 @@ function SproutCard({ sprout, isSelected, onSelect }: SproutCardProps) {
   // Format relative time
   const relativeTime = formatRelativeTime(sprout.updatedAt);
 
-  // Border color based on status
+  // Border color based on status - using Quantum Glass variables
   const borderClasses: Record<string, string> = {
-    amber: 'border-l-amber-400',
-    blue: 'border-l-blue-400',
-    slate: 'border-l-slate-400',
+    amber: 'border-l-[var(--neon-amber)]',
+    blue: 'border-l-[var(--neon-cyan)]',
+    slate: 'border-l-[var(--glass-text-muted)]',
     red: 'border-l-red-400',
-    green: 'border-l-green-400',
-    gray: 'border-l-gray-400',
+    green: 'border-l-[var(--neon-green)]',
+    gray: 'border-l-[var(--glass-text-muted)]',
   };
 
   return (
@@ -930,22 +930,22 @@ function SproutCard({ sprout, isSelected, onSelect }: SproutCardProps) {
       className={`w-full text-left p-3 rounded-lg border-l-4 transition-colors
         ${borderClasses[color]}
         ${isSelected
-          ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50'
-          : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+          ? 'bg-neon-violet/10 border border-neon-violet/30'
+          : 'bg-glass-panel border border-white/5 hover:bg-glass-elevated'
         }`}
     >
       {/* Title */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-slate-900 dark:text-slate-100 line-clamp-2">
+        <p className="text-sm font-medium text-glass-text-primary line-clamp-2">
           {sprout.title || sprout.spark.slice(0, 50)}
         </p>
-        <span className="material-symbols-outlined text-slate-400 text-base shrink-0">
+        <span className="material-symbols-outlined text-glass-text-muted text-base shrink-0">
           {icon}
         </span>
       </div>
 
       {/* Metadata */}
-      <div className="flex items-center gap-3 mt-2 text-xs text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-3 mt-2 text-xs text-glass-text-muted">
         {/* Branches */}
         <span className="flex items-center gap-1">
           <span className="material-symbols-outlined text-sm">account_tree</span>
@@ -966,9 +966,9 @@ function SproutCard({ sprout, isSelected, onSelect }: SproutCardProps) {
 
       {/* Progress indicator for active sprouts */}
       {sprout.status === 'active' && sprout.execution && (
-        <div className="mt-2 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+        <div className="mt-2 h-1 bg-glass-panel rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 animate-pulse"
+            className="h-full bg-neon-cyan animate-pulse"
             style={{
               width: `${Math.min((sprout.execution.apiCallCount / 10) * 100, 90)}%`,
             }}
@@ -1009,18 +1009,18 @@ interface ErrorBannerProps {
 
 function ErrorBanner({ error, onDismiss }: ErrorBannerProps) {
   return (
-    <div className="mx-4 my-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg
-                    border border-red-200 dark:border-red-800/50">
+    <div className="mx-4 my-2 p-3 bg-red-500/10 rounded-lg
+                    border border-red-500/30">
       <div className="flex items-start gap-2">
-        <span className="material-symbols-outlined text-red-500 text-base mt-0.5">
+        <span className="material-symbols-outlined text-red-400 text-base mt-0.5">
           error
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          <p className="text-sm text-red-400">{error}</p>
         </div>
         <button
           onClick={onDismiss}
-          className="p-1 text-red-400 hover:text-red-600 transition-colors"
+          className="p-1 text-red-400/70 hover:text-red-400 transition-colors"
         >
           <span className="material-symbols-outlined text-base">close</span>
         </button>

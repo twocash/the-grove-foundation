@@ -75,6 +75,31 @@ const config: Config = {
           elevated: '#1A1A1A',     // Modals, dropdowns
           surface: '#242424',      // Interactive surfaces, hover states
         },
+
+        // ============================================================
+        // QUANTUM GLASS TOKENS (Explore/Bedrock - Unified dark theme)
+        // These mirror CSS variables for reliable Tailwind compilation
+        // ============================================================
+        glass: {
+          void: '#030712',
+          panel: 'rgba(17, 24, 39, 0.6)',
+          solid: '#111827',
+          elevated: 'rgba(30, 41, 59, 0.4)',
+          border: 'rgba(255, 255, 255, 0.08)',
+        },
+        'glass-text': {
+          primary: '#ffffff',
+          secondary: 'rgba(255, 255, 255, 0.87)',
+          muted: '#94a3b8',
+          body: 'rgba(255, 255, 255, 0.72)',
+        },
+        neon: {
+          cyan: '#22d3ee',
+          violet: '#8b5cf6',
+          green: '#10b981',
+          amber: '#f59e0b',
+          rose: '#f43f5e',
+        },
         holo: {
           cyan: '#00D4FF',         // Primary accent
           magenta: '#FF00D4',      // Secondary accent
