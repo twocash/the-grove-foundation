@@ -20,6 +20,9 @@ export type GroveObjectType =
   | 'node'
   | 'card'
   | 'lifecycle-model'       // Sprint: EPIC4-SL-MultiModel v1
+  | 'attribution-event'     // Sprint: S11-SL-Attribution v1
+  | 'economic-setting'      // Sprint: S11-SL-Attribution v1
+  | 'quality-threshold'     // Sprint: S10-SL-AICuration v1
   | string;
 
 /**

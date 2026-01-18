@@ -27,7 +27,14 @@ export type GroveObjectType =
   | 'lifecycle-config'      // Sprint: S5-SL-LifecycleEngine v1
   | 'advancement-rule'      // Sprint: S7-SL-AutoAdvancement v1
   | 'job-config'            // Sprint: S7.5-SL-JobConfigSystem v1
-  | 'lifecycle-model';      // Sprint: EPIC4-SL-MultiModel v1
+  | 'lifecycle-model'       // Sprint: EPIC4-SL-MultiModel v1
+  | 'quality-threshold'     // Sprint: S10-SL-AICuration v1
+  | 'attribution-event'     // Sprint: S11-SL-Attribution v1
+  | 'token-balance'         // Sprint: S11-SL-Attribution v1
+  | 'reputation-score'      // Sprint: S11-SL-Attribution v1
+  | 'network-influence'     // Sprint: S11-SL-Attribution v1
+  | 'economic-setting'      // Sprint: S11-SL-Attribution v1
+  | 'attribution-chain';    // Sprint: S11-SL-Attribution v1
 
 /**
  * Options for listing objects.

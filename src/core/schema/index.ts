@@ -376,3 +376,58 @@ export {
   EMPTY_AGGREGATION,
   createEmptyAggregation
 } from './sprout-signals';
+
+// Attribution Economy types (Sprint: S11-SL-Attribution v1)
+// Knowledge Economy & Rewards system
+export {
+  // Reputation Tiers
+  type ReputationTier,
+  type ReputationTierConfig,
+  REPUTATION_TIERS,
+  REPUTATION_TIER_CONFIGS,
+  // Content Tiers
+  type ContentTierLevel,
+  BASE_TOKENS,
+  TIER_LABELS,
+  // Quality Multipliers
+  type QualityMultiplierRange,
+  QUALITY_MULTIPLIER_RANGES,
+  getQualityMultiplier,
+  getReputationTier,
+  getTierMultiplier,
+  // Core Types
+  type AttributionEvent,
+  type TokenBalance,
+  type ReputationScore,
+  type NetworkInfluence,
+  type EconomicSetting,
+  type ChainEvent,
+  type AttributionChain,
+  // Calculation
+  type TokenCalculationInput,
+  type TokenCalculationResult,
+  calculateTokens,
+  // View
+  type GroveEconomicSummary,
+  // Type Guards
+  isAttributionEvent,
+  isTokenBalance,
+  isReputationScore,
+  isNetworkInfluence,
+  isAttributionChain,
+  // API Types
+  type CalculateAttributionRequest,
+  type CalculateAttributionResponse,
+  type GetEconomicSummaryRequest,
+  type GetEconomicSummaryResponse,
+  type UpdateReputationRequest,
+  type UpdateReputationResponse,
+  // Schemas
+  AttributionEventSchema,
+  TokenBalanceSchema,
+  ReputationScoreSchema,
+  NetworkInfluenceSchema,
+  EconomicSettingSchema,
+  ChainEventSchema,
+  AttributionChainSchema
+} from './attribution';
