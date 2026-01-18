@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Review: gardeninspector-modal-v1</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --text-primary: #e8e8ed;
+      --text-secondary: #a0a0b0;
+      --text-muted: #6b6b7a;
+      --accent-amber: #f59e0b;
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --border: #2a2a3a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-amber), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent-green);
+      color: #000;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--accent-violet);
+      border-radius: 2px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin: 1.5rem 0 1rem;
+    }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .phase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .phase-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .phase-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .phase-status.complete {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .phase-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .screenshot-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .screenshot-caption {
+      padding: 1rem;
+    }
+
+    .screenshot-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .screenshot-desc {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .zone-indicator {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+
+    .zone-amber {
+      background: var(--accent-amber);
+      color: #000;
+    }
+
+    .zone-violet {
+      background: var(--accent-violet);
+      color: #fff;
+    }
+
+    .zone-cyan {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.9rem;
+    }
+
+    .file-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+    }
+
+    .dex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .dex-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .dex-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dex-check {
+      color: var(--accent-green);
+    }
+
+    .dex-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .philosophy-box {
+      background: linear-gradient(135deg, var(--accent-amber)10, var(--accent-violet)10);
+      border: 1px solid var(--accent-violet);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .philosophy-title {
+      font-weight: 700;
+      color: var(--accent-violet);
+      margin-bottom: 0.5rem;
+    }
+
+    .philosophy-text {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>GardenInspector Modal Redesign</h1>
+      <p class="subtitle">Sprint: gardeninspector-modal-v1 | Protocol: Grove Execution Protocol v1.5</p>
+      <div class="status-badge">
+        <span>COMPLETE</span>
+      </div>
+    </header>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">4/4</div>
+        <div class="metric-label">Phases Complete</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">7</div>
+        <div class="metric-label">Screenshots Captured</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">1</div>
+        <div class="metric-label">E2E Tests</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">0</div>
+        <div class="metric-label">Console Errors</div>
+      </div>
+    </div>
+
+    <div class="philosophy-box">
+      <div class="philosophy-title">The Moment of Crystallization</div>
+      <p class="philosophy-text">
+        The GardenInspector modal represents the most philosophically significant UI moment in Grove:
+        when a spark (ephemeral thought) collapses into a sprout (persistent research object).
+        This is the attention-to-persistence pipeline in action.
+      </p>
+    </div>
+
+    <section>
+      <h2>Three Zones Design</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+        The modal is organized into three conceptual zones, each with distinct visual treatment to communicate provenance:
+      </p>
+
+      <div class="dex-grid">
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="zone-indicator zone-amber">ZONE 1</span>
+            Spark Origin (The Past)
+          </div>
+          <div class="dex-desc">
+            Amber glow showing the user's original question - the spark that started the research journey.
+          </div>
+        </div>
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="zone-indicator zone-violet">ZONE 2</span>
+            AI Interpretation (The Bridge)
+          </div>
+          <div class="dex-desc">
+            Violet accent with "AI SUGGESTED" provenance marker - making AI contribution visible.
+          </div>
+        </div>
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="zone-indicator zone-cyan">ZONE 3</span>
+            Human Shaping (The Future)
+          </div>
+          <div class="dex-desc">
+            Neutral glass inputs with cyan focus rings - ready for human attention and editing.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase Progress</h2>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 1: Foundation - Audit & Analysis</span>
+          <span class="phase-status complete">COMPLETE</span>
+        </div>
+        <p class="phase-description">
+          Audited provenance data chain, documented current styling issues, captured "before" screenshots.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 2: Core Styling - Three Zones Implementation</span>
+          <span class="phase-status complete">COMPLETE</span>
+        </div>
+        <p class="phase-description">
+          Applied Quantum Glass styling to ConfirmationView. Added amber glow for spark, "AI SUGGESTED" marker,
+          and cyan focus rings for inputs.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 3: Polish</span>
+          <span class="phase-status complete">COMPLETE</span>
+        </div>
+        <p class="phase-description">
+          Verified empty, loading, and error states use consistent Quantum Glass styling.
+        </p>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 4: Verification</span>
+          <span class="phase-status complete">COMPLETE</span>
+        </div>
+        <p class="phase-description">
+          E2E tests pass with zero console errors. All screenshots captured and embedded.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Visual Evidence</h2>
+
+      <h3>Before State</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-card">
+          <img src="screenshots/1d-modal-current-state.png" alt="Modal before styling changes">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">Before: Standard Tailwind Styling</div>
+            <div class="screenshot-desc">
+              Modal using bg-slate-800, text-white, and standard borders.
+              No visual hierarchy showing provenance flow.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>After State - Three Zones Applied</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-card">
+          <img src="screenshots/2a-modal-three-zones.png" alt="Modal with Three Zones styling">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">After: Three Zones Design</div>
+            <div class="screenshot-desc">
+              <span class="zone-indicator zone-amber">AMBER</span> Spark origin with glow
+              <span class="zone-indicator zone-violet">VIOLET</span> AI interpretation
+            </div>
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/2b-title-focus-state.png" alt="Title input with focus">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">Focus State: Title Input</div>
+            <div class="screenshot-desc">
+              <span class="zone-indicator zone-cyan">CYAN</span> focus ring indicates active input in Zone 3
+            </div>
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/2c-instructions-focus-state.png" alt="Instructions textarea with focus">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">Focus State: Instructions</div>
+            <div class="screenshot-desc">
+              Consistent cyan focus ring on textarea for user instructions
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Journey Screenshots</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-card">
+          <img src="screenshots/1a-before-explore-landing.png" alt="Explore landing page">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">Step 1: Explore Landing</div>
+            <div class="screenshot-desc">Initial /explore page before interaction</div>
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/1c-sprout-command-typed.png" alt="Sprout command typed">
+          <div class="screenshot-caption">
+            <div class="screenshot-title">Step 2: Sprout Command</div>
+            <div class="screenshot-desc">User types "sprout:" command to initiate research capture</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>DEX Compliance</h2>
+      <div class="dex-grid">
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="dex-check">&#10003;</span>
+            Declarative Sovereignty
+          </div>
+          <div class="dex-desc">All styling via CSS variables that can be themed without code changes</div>
+        </div>
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="dex-check">&#10003;</span>
+            Capability Agnosticism
+          </div>
+          <div class="dex-desc">Pure UI - works regardless of which model powers the Prompt Architect</div>
+        </div>
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="dex-check">&#10003;</span>
+            Provenance as Infrastructure
+          </div>
+          <div class="dex-desc">Spark origin and AI contribution visually distinguished with color zones</div>
+        </div>
+        <div class="dex-card">
+          <div class="dex-title">
+            <span class="dex-check">&#10003;</span>
+            Organic Scalability
+          </div>
+          <div class="dex-desc">Using established Quantum Glass tokens, consistent with Bedrock consoles</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Files Changed</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Changes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="file-path">src/explore/GardenInspector.tsx</td>
+            <td>Three Zones styling in ConfirmationView (lines 323-414)</td>
+          </tr>
+          <tr>
+            <td class="file-path">tests/e2e/gardeninspector-modal.spec.ts</td>
+            <td>E2E test for modal verification with console monitoring</td>
+          </tr>
+          <tr>
+            <td class="file-path">docs/sprints/gardeninspector-modal-v1/DEVLOG.md</td>
+            <td>Sprint execution documentation</td>
+          </tr>
+          <tr>
+            <td class="file-path">docs/sprints/gardeninspector-modal-v1/REVIEW.html</td>
+            <td>Visual review document (this file)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Test Results</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Status</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>E2E: Phase 2 - Verify Three Zones styling</td>
+            <td style="color: var(--accent-green);">PASS</td>
+            <td>Modal opens, styling applied, focus states work</td>
+          </tr>
+          <tr>
+            <td>Console Error Check</td>
+            <td style="color: var(--accent-green);">PASS</td>
+            <td>Zero critical console errors during test</td>
+          </tr>
+          <tr>
+            <td>Build Verification</td>
+            <td style="color: var(--accent-green);">PASS</td>
+            <td>npm run build completes without errors</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <p>Sprint Review generated by Grove Execution Protocol v1.5</p>
+      <p>Date: 2026-01-17 | Route: /explore</p>
+    </footer>
+  </div>
+</body>
+</html>

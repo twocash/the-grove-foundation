@@ -322,40 +322,54 @@ function ConfirmationView({
 
   return (
     <div className="p-4 space-y-4">
-      {/* Spark (Original Query) */}
-      <div className="p-3 bg-slate-800 rounded-lg border border-slate-600">
+      {/* ZONE 1: SPARK ORIGIN (The Past) - Amber accent */}
+      {/* The spark is the moment of curiosity that started this journey */}
+      <div className="p-3 bg-[var(--glass-panel)] rounded-lg
+                      border border-[var(--neon-amber)]/30
+                      shadow-[0_0_12px_rgba(245,158,11,0.15)]">
         <div className="flex items-start gap-2">
-          <span className="material-symbols-outlined text-amber-400 text-base mt-0.5">
+          <span className="material-symbols-outlined text-[var(--neon-amber)] text-base mt-0.5">
             lightbulb
           </span>
           <div>
-            <p className="text-xs font-medium text-white mb-1">
+            <p className="text-xs font-medium text-[var(--neon-amber)] mb-1">
               Research Spark
             </p>
-            <p className="text-sm text-white leading-relaxed">
+            <p className="text-sm text-[var(--glass-text-primary)] leading-relaxed">
               {manifest.spark}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Summary (if available) */}
+      {/* ZONE 2: AI INTERPRETATION (The Bridge) - Violet accent */}
+      {/* AI's contribution with visible provenance marker */}
       {summary && (
-        <div className="p-3 bg-violet-900/50 rounded-lg border border-violet-500/30">
+        <div className="p-3 bg-[var(--neon-violet)]/10 rounded-lg
+                        border border-[var(--neon-violet)]/30
+                        shadow-[0_0_8px_rgba(139,92,246,0.1)]">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-violet-400 text-base mt-0.5">
+            <span className="material-symbols-outlined text-[var(--neon-violet)] text-base mt-0.5">
               auto_awesome
             </span>
-            <p className="text-xs text-violet-300 leading-relaxed">
-              {summary}
-            </p>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-medium text-[var(--neon-violet)]/70 uppercase tracking-wide mb-1">
+                AI Suggested
+              </p>
+              <p className="text-xs text-[var(--glass-text-secondary)] leading-relaxed">
+                {summary}
+              </p>
+            </div>
           </div>
         </div>
       )}
 
+      {/* ZONE 3: HUMAN SHAPING (The Future) - Neutral glass */}
+      {/* Where human attention shapes the research direction */}
+
       {/* Title */}
       <div>
-        <label className="block text-xs font-medium text-white mb-1.5">
+        <label className="block text-xs font-medium text-[var(--glass-text-muted)] mb-1.5">
           Title
         </label>
         <input
@@ -364,18 +378,19 @@ function ConfirmationView({
           onChange={handleTitleChange}
           placeholder="Give your research a descriptive title..."
           disabled={isProcessing}
-          className="w-full px-3 py-2 text-sm bg-slate-800
-                     text-white
-                     placeholder:text-slate-500
-                     border border-slate-600 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 text-sm bg-[var(--glass-solid)]
+                     text-[var(--glass-text-primary)]
+                     placeholder:text-[var(--glass-text-muted)]
+                     border border-[var(--glass-border)] rounded-lg
+                     focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 focus:border-[var(--neon-cyan)]/50
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-colors"
         />
       </div>
 
       {/* Prompt / Instructions (MVP: maps to notes field, will become system prompt) */}
       <div>
-        <label className="block text-xs font-medium text-white mb-1.5">
+        <label className="block text-xs font-medium text-[var(--glass-text-muted)] mb-1.5">
           Instructions / Prompt
         </label>
         <textarea
@@ -384,15 +399,16 @@ function ConfirmationView({
           placeholder="Provide specific instructions for how the AI should approach this research..."
           rows={5}
           disabled={isProcessing}
-          className="w-full px-3 py-2 text-sm bg-slate-800
-                     text-white
-                     placeholder:text-slate-500
-                     border border-slate-600 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500
+          className="w-full px-3 py-2 text-sm bg-[var(--glass-solid)]
+                     text-[var(--glass-text-primary)]
+                     placeholder:text-[var(--glass-text-muted)]
+                     border border-[var(--glass-border)] rounded-lg
+                     focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 focus:border-[var(--neon-cyan)]/50
                      resize-none font-mono
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-colors"
         />
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-[var(--glass-text-muted)] mt-1">
           This will guide the research agent's behavior and focus areas.
         </p>
       </div>
@@ -567,8 +583,10 @@ function ConfirmationFooter({ isProcessing, onConfirm, onCancel }: ConfirmationF
       <button
         onClick={onCancel}
         disabled={isProcessing}
-        className="px-4 py-2 text-sm font-medium text-glass-text-muted
-                   hover:text-glass-text-primary
+        className="px-4 py-2 text-sm font-medium text-[var(--glass-text-secondary)]
+                   hover:text-[var(--glass-text-primary)]
+                   border border-[var(--glass-border)] rounded-lg
+                   hover:border-[var(--glass-text-muted)]
                    disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         Cancel
