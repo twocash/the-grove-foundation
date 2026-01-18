@@ -62,14 +62,15 @@ export const BEDROCK_NAV_ITEMS: NavItem[] = [
     path: '/bedrock/experience',
   },
 
-  // --- Future ---
+  // --- Community ---
   {
-    id: 'journeys',
-    label: 'Journey Architect',
-    icon: 'route',
-    path: '/bedrock/journeys',
-    disabled: true, // Coming in future sprint
+    id: 'attribution',
+    label: 'Community',
+    icon: 'groups',
+    path: '/bedrock/attribution',
   },
+
+  // --- Future ---
   {
     id: 'knowledge',
     label: 'Knowledge Vault',
@@ -134,12 +135,12 @@ export const CONSOLE_METADATA: Record<string, ConsoleMetadata> = {
     icon: 'smart_toy',
     path: '/bedrock/experience',
   },
-  journeys: {
-    id: 'journeys',
-    title: 'Journey Architect',
-    description: 'Design guided exploration journeys',
-    icon: 'route',
-    path: '/bedrock/journeys',
+  attribution: {
+    id: 'attribution',
+    title: 'Community',
+    description: 'Your contribution rewards and reputation',
+    icon: 'groups',
+    path: '/bedrock/attribution',
   },
   knowledge: {
     id: 'knowledge',

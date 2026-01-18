@@ -70,7 +70,7 @@ export function AttributionDashboard({
       {
         title: 'Knowledge Economy',
         subtitle: 'Your contribution rewards and reputation',
-        showHeader: !compact,
+        showHeader: false, // Layout provides header via CONSOLE_METADATA
         showMetrics: true,
         showTierProgress: !compact,
         showBadges: true,
@@ -98,8 +98,8 @@ export function AttributionDashboard({
 
   // Full dashboard via json-render
   return (
-    <div className={`space-y-6 ${className}`} data-testid="attribution-dashboard">
-      {/* Header with tier badge */}
+    <div className={`p-6 space-y-6 ${className}`} data-testid="attribution-dashboard">
+      {/* Header with title and tier badge */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-[var(--glass-text-primary)]">
@@ -118,7 +118,9 @@ export function AttributionDashboard({
       </div>
 
       {/* json-render content */}
-      <Renderer tree={renderTree} registry={AttributionRegistry} />
+      <div className="[&_.json-render-root]:space-y-6">
+        <Renderer tree={renderTree} registry={AttributionRegistry} />
+      </div>
     </div>
   );
 }
