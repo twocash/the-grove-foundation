@@ -46,6 +46,9 @@ const PromptWorkshop = lazy(() =>
 );
 const ExperienceConsole = lazy(() => import('../bedrock/consoles/ExperienceConsole'));
 
+// Attribution Dashboard (Sprint: S11-SL-Attribution v1 - Phase 4)
+const AttributionDashboard = lazy(() => import('../bedrock/consoles/AttributionDashboard'));
+
 // Console Factory v2 Demo (Sprint: console-factory-v2)
 const SchemaConsoleDemo = lazy(() => import('../bedrock/consoles/SchemaConsoleDemo'));
 
@@ -286,6 +289,16 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <SchemaConsoleDemo />
+              </Suspense>
+            ),
+          },
+          // Attribution Dashboard (Knowledge Economy)
+          // Sprint: S11-SL-Attribution v1 - Phase 4
+          {
+            path: 'attribution',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <AttributionDashboard showDetails />
               </Suspense>
             ),
           },

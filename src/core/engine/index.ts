@@ -69,3 +69,19 @@ export {
   createEmptyReputationScore,
   calculateAttributionSummary
 } from './attributionCalculator';
+
+// Badge Award Engine (Knowledge Economy)
+// Sprint: S11-SL-Attribution v1 - Phase 3
+export {
+  type BadgeEvaluationContext,
+  type BadgeStatistics,
+  evaluateCriteria,
+  isNewlyEarned,
+  detectTierChange,
+  evaluateBadges,
+  getNewlyEarnedBadges,
+  awardBadge,
+  awardBadges,
+  toEarnedBadgeRecords,
+  calculateBadgeStatistics
+} from './badgeAwardEngine';

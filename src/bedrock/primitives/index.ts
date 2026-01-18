@@ -51,3 +51,33 @@ export { UtilityBar } from './UtilityBar';
 // =============================================================================
 
 export { BufferedInput, BufferedTextarea } from './BufferedInput';
+
+// =============================================================================
+// Reputation & Badge Primitives (S11-SL-Attribution v1 - Phase 3)
+// =============================================================================
+
+export {
+  ReputationTierBadge,
+  NoviceBadge,
+  DevelopingBadge,
+  CompetentBadge,
+  ExpertBadge,
+  LegendaryBadge,
+  TierProgressIndicator,
+  type ReputationTierBadgeProps,
+  type TierProgressIndicatorProps,
+} from './ReputationTierBadge';
+
+export {
+  AchievementBadge,
+  BadgeCard,
+  type AchievementBadgeProps,
+  type BadgeCardProps,
+} from './AchievementBadge';
+
+export {
+  BadgeTray,
+  BadgeSummary,
+  type BadgeTrayProps,
+  type BadgeSummaryProps,
+} from './BadgeTray';

@@ -431,3 +431,36 @@ export {
   ChainEventSchema,
   AttributionChainSchema
 } from './attribution';
+
+// Badge System types (Sprint: S11-SL-Attribution v1 - Phase 3)
+// Reputation badges and achievement system
+export {
+  // Categories & Rarity
+  type BadgeCategory,
+  type BadgeRarity,
+  type BadgeRarityConfig,
+  BADGE_CATEGORIES,
+  BADGE_RARITIES,
+  BADGE_RARITY_CONFIGS,
+  // Criteria
+  type BadgeCriteriaType,
+  type BadgeCriteria,
+  BadgeCriteriaSchema,
+  // Badge Definitions
+  type BadgeDefinition,
+  BadgeDefinitionSchema,
+  BADGE_DEFINITIONS,
+  getAllBadgeDefinitions,
+  getBadgeDefinition,
+  getBadgesByCategory,
+  getBadgesByRarity,
+  // Earned Badges
+  type EarnedBadge,
+  EarnedBadgeSchema,
+  // Results
+  type BadgeAwardResult,
+  type BadgeEvaluationResult,
+  // Type Guards
+  isBadgeDefinition,
+  isEarnedBadge
+} from './badges';

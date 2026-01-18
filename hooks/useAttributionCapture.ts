@@ -24,6 +24,11 @@ import {
   createEmptyReputationScore,
   DEFAULT_CALCULATOR_CONFIG
 } from '../src/core/engine/attributionCalculator';
+import {
+  evaluateBadges,
+  type BadgeEvaluationContext
+} from '../src/core/engine/badgeAwardEngine';
+import type { BadgeAwardResult } from '../src/core/schema/badges';
 
 // =============================================================================
 // Local Storage Keys
@@ -52,6 +57,8 @@ export interface AttributionCaptureResult {
   updatedBalance: TokenBalance;
   updatedReputation: ReputationScore;
   chain?: AttributionChain;
+  /** Newly awarded badges (S11 Phase 3) */
+  newBadges?: BadgeAwardResult[];
 }
 
 export interface AttributionStorage {
@@ -266,6 +273,21 @@ export function useAttributionCapture() {
         chain = addEventToChain(chain, event);
       }
 
+      // Evaluate badges (S11 Phase 3)
+      const badgeContext: BadgeEvaluationContext = {
+        reputation: updatedReputation,
+        tokenBalance: updatedBalance,
+        earnedBadges: updatedReputation.badges || [],
+        previousReputation: sourceReputation
+      };
+
+      const badgeResult = evaluateBadges(badgeContext);
+
+      // Update reputation with newly earned badges
+      if (badgeResult.newBadges.length > 0) {
+        updatedReputation.badges = badgeResult.earnedBadges;
+      }
+
       // Save all updates
       storage.tokenBalances[sourceGroveId] = updatedBalance;
       storage.reputationScores[sourceGroveId] = updatedReputation;
@@ -284,14 +306,16 @@ export function useAttributionCapture() {
         qualityScore: qualityScoreValue,
         finalTokens: event.finalTokens,
         newBalance: updatedBalance.currentBalance,
-        reputationTier: updatedReputation.currentTier
+        reputationTier: updatedReputation.currentTier,
+        newBadges: badgeResult.newBadges.length > 0 ? badgeResult.newBadges.map(b => b.badge.name) : undefined
       });
 
       return {
         event,
         updatedBalance,
         updatedReputation,
-        chain
+        chain,
+        newBadges: badgeResult.newBadges.length > 0 ? badgeResult.newBadges : undefined
       };
     } catch (error) {
       console.error('[Attribution] Capture failed:', error);
@@ -350,6 +374,16 @@ export function useAttributionCapture() {
   }, []);
 
   /**
+   * Get earned badges for a grove (S11 Phase 3)
+   */
+  const getEarnedBadges = useCallback((groveId?: string): string[] => {
+    const id = groveId || getDefaultGroveId();
+    const storage = loadStorage();
+    const reputation = storage.reputationScores[id];
+    return reputation?.badges || [];
+  }, []);
+
+  /**
    * Clear all attribution data (for testing/reset)
    */
   const clearAttributionData = useCallback((): void => {
@@ -372,6 +406,7 @@ export function useAttributionCapture() {
     getAttributionChain,
     getCurrentGroveId,
     getAttributionData,
+    getEarnedBadges,  // S11 Phase 3
 
     // State
     isProcessing,
