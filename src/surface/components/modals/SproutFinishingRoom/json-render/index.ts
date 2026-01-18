@@ -1,5 +1,6 @@
 // src/surface/components/modals/SproutFinishingRoom/json-render/index.ts
 // Sprint: S2-SFR-Display - US-C001 json-render module exports
+// Updated: S13-BD-LayoutDensity-v1 - Added layout density exports
 // Pattern: json-render (Vercel Labs pattern for AI-generated component trees)
 
 // Catalog - component vocabulary with Zod schemas
@@ -32,7 +33,12 @@ export type { ComponentRegistry } from './registry';
 export { researchDocumentToRenderTree } from './transform';
 
 // Renderer - renders trees using registry
-export { Renderer } from './Renderer';
+export { Renderer, useLayoutContext } from './Renderer';
+
+// Layout Density System (S13-BD-LayoutDensity-v1)
+export type { LayoutDensity, LayoutConfig, ResolvedLayout } from './layout-types';
+export { DENSITY_PRESETS, DEFAULT_DENSITY } from './layout-presets';
+export { useResolvedLayout } from './useResolvedLayout';
 
 // Signals module (from ExperienceConsole json-render)
 // Re-exported for use in FinishingRoom signals section

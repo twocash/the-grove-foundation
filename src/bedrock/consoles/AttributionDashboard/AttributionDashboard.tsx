@@ -1,6 +1,7 @@
 // src/bedrock/consoles/AttributionDashboard/AttributionDashboard.tsx
 // Economic Dashboard for Attribution System
 // Sprint: S11-SL-Attribution v1 - Phase 4
+// Updated: S13-BD-LayoutDensity-v1 - Migrated to declarative layout prop
 //
 // Displays token balance, reputation tier, and earned badges
 // Uses json-render pattern for consistent, composable rendering
@@ -118,9 +119,11 @@ export function AttributionDashboard({
       </div>
 
       {/* json-render content */}
-      <div className="[&_.json-render-root]:space-y-6">
-        <Renderer tree={renderTree} registry={AttributionRegistry} />
-      </div>
+      <Renderer
+        tree={renderTree}
+        registry={AttributionRegistry}
+        layout={{ density: 'spacious', containerPadding: 'p-0' }}
+      />
     </div>
   );
 }
