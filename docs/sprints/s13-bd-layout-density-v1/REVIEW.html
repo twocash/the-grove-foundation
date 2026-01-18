@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprint Review: S13-BD-LayoutDensity-v1</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-elevated: #1a1a24;
+      --text-primary: #f0f0f5;
+      --text-muted: #8888a0;
+      --accent-cyan: #22d3ee;
+      --accent-green: #22c55e;
+      --accent-amber: #fbbf24;
+      --accent-violet: #a855f7;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .status-complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .summary-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .summary-card .value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .summary-card .label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin: 1.5rem 0 1rem;
+      color: var(--text-primary);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover { background: var(--bg-elevated); }
+
+    .pass { color: var(--accent-green); }
+    .pending { color: var(--accent-amber); }
+
+    .phase-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .phase-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .phase-title {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .phase-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .phase-status.complete {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .phase-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .screenshot-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .file-list {
+      list-style: none;
+    }
+
+    .file-list li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .file-new { color: var(--accent-green); }
+    .file-modified { color: var(--accent-amber); }
+
+    .file-badge {
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-new {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--accent-green);
+    }
+
+    .badge-modified {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--accent-amber);
+    }
+
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-list li {
+      padding: 0.75rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .feature-list li:last-child { border-bottom: none; }
+
+    .feature-icon {
+      color: var(--accent-cyan);
+      font-size: 1.25rem;
+    }
+
+    code {
+      background: var(--bg-elevated);
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      color: var(--accent-cyan);
+    }
+
+    pre {
+      background: var(--bg-elevated);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Layout Density System</h1>
+      <p class="subtitle">Sprint: S13-BD-LayoutDensity-v1 | Protocol: Grove Execution v1.5</p>
+      <div class="status-badge status-complete">
+        <span>✓</span> Sprint Complete
+      </div>
+    </header>
+
+    <!-- Summary Metrics -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="value">3/3</div>
+        <div class="label">Phases Complete</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">22</div>
+        <div class="label">Unit Tests Passing</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">19</div>
+        <div class="label">E2E Tests Passing</div>
+      </div>
+      <div class="summary-card">
+        <div class="value">20</div>
+        <div class="label">Screenshots Captured</div>
+      </div>
+    </div>
+
+    <!-- Sprint Summary -->
+    <section>
+      <h2>Sprint Summary</h2>
+      <p>Implemented a declarative layout density system for json-render that eliminates CSS hacks and enables consistent spacing configuration across all dashboards.</p>
+
+      <h3>Core Deliverables</h3>
+      <ul class="feature-list">
+        <li>
+          <span class="feature-icon">✓</span>
+          <div>
+            <strong>LayoutConfig TypeScript Interface</strong>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Three density presets: compact, comfortable, spacious with optional token overrides</p>
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">✓</span>
+          <div>
+            <strong>DENSITY_PRESETS Object</strong>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Tailwind class mappings for each density level based on 4px grid</p>
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">✓</span>
+          <div>
+            <strong>Renderer Integration</strong>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Added <code>layout</code> prop with LayoutContext for child component access</p>
+          </div>
+        </li>
+        <li>
+          <span class="feature-icon">✓</span>
+          <div>
+            <strong>CSS Hack Migration</strong>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Eliminated all <code>[&_.json-render-root]:space-y-*</code> patterns</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Density Presets Reference -->
+    <section>
+      <h2>Density Presets</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Density</th>
+            <th>Container Padding</th>
+            <th>Section Gap</th>
+            <th>Card Gap</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>compact</code></td>
+            <td><code>p-3</code></td>
+            <td><code>space-y-2</code></td>
+            <td><code>gap-2</code></td>
+            <td>Dense data displays, dashboards</td>
+          </tr>
+          <tr>
+            <td><code>comfortable</code></td>
+            <td><code>p-6</code></td>
+            <td><code>space-y-4</code></td>
+            <td><code>gap-4</code></td>
+            <td>Default, balanced spacing</td>
+          </tr>
+          <tr>
+            <td><code>spacious</code></td>
+            <td><code>p-8</code></td>
+            <td><code>space-y-6</code></td>
+            <td><code>gap-6</code></td>
+            <td>Readability-focused layouts</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Phase Breakdown -->
+    <section>
+      <h2>Implementation Phases</h2>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 1: Type System & Presets</span>
+          <span class="phase-status complete">Complete</span>
+        </div>
+        <p class="phase-description">Created LayoutConfig interface, LayoutDensity type, and DENSITY_PRESETS with Tailwind class mappings.</p>
+        <ul class="file-list">
+          <li>
+            <span class="file-badge badge-new">NEW</span>
+            <span class="file-new">src/surface/components/modals/SproutFinishingRoom/json-render/layout-types.ts</span>
+          </li>
+          <li>
+            <span class="file-badge badge-new">NEW</span>
+            <span class="file-new">src/surface/components/modals/SproutFinishingRoom/json-render/layout-presets.ts</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 2: Renderer Integration</span>
+          <span class="phase-status complete">Complete</span>
+        </div>
+        <p class="phase-description">Created useResolvedLayout hook and integrated layout prop into Renderer with LayoutContext.</p>
+        <ul class="file-list">
+          <li>
+            <span class="file-badge badge-new">NEW</span>
+            <span class="file-new">src/surface/components/modals/SproutFinishingRoom/json-render/useResolvedLayout.ts</span>
+          </li>
+          <li>
+            <span class="file-badge badge-modified">MOD</span>
+            <span class="file-modified">src/surface/components/modals/SproutFinishingRoom/json-render/Renderer.tsx</span>
+          </li>
+          <li>
+            <span class="file-badge badge-modified">MOD</span>
+            <span class="file-modified">src/surface/components/modals/SproutFinishingRoom/json-render/index.ts</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="phase-card">
+        <div class="phase-header">
+          <span class="phase-title">Phase 3: CSS Hack Migration</span>
+          <span class="phase-status complete">Complete</span>
+        </div>
+        <p class="phase-description">Migrated AttributionDashboard from CSS hack to declarative layout prop.</p>
+        <ul class="file-list">
+          <li>
+            <span class="file-badge badge-modified">MOD</span>
+            <span class="file-modified">src/bedrock/consoles/AttributionDashboard/AttributionDashboard.tsx</span>
+          </li>
+        </ul>
+        <h4 style="margin-top: 1rem; color: var(--text-muted);">Migration Pattern:</h4>
+        <pre>// BEFORE (CSS hack)
+&lt;div className="[&_.json-render-root]:space-y-6"&gt;
+  &lt;Renderer tree={tree} registry={registry} /&gt;
+&lt;/div&gt;
+
+// AFTER (declarative)
+&lt;Renderer
+  tree={tree}
+  registry={registry}
+  layout={{ density: 'spacious', containerPadding: 'p-0' }}
+/&gt;</pre>
+      </div>
+    </section>
+
+    <!-- Test Results -->
+    <section>
+      <h2>Test Results</h2>
+
+      <h3>Unit Tests (22 passing)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Test Suite</th>
+            <th>Tests</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DENSITY_PRESETS</td>
+            <td>6</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>DEFAULT_DENSITY</td>
+            <td>2</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useResolvedLayout (default)</td>
+            <td>2</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useResolvedLayout (presets)</td>
+            <td>3</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useResolvedLayout (overrides)</td>
+            <td>4</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useResolvedLayout (memoization)</td>
+            <td>2</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useResolvedLayout (real-world)</td>
+            <td>3</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>E2E Tests (19 passing)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Test Suite</th>
+            <th>Tests</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Attribution Dashboard Migration</td>
+            <td>4</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Bedrock Console Integration</td>
+            <td>2</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>CSS Hack Elimination</td>
+            <td>1</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Visual Density Comparison</td>
+            <td>3</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Cross-Page Verification</td>
+            <td>3</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Default Behavior</td>
+            <td>2</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Migration Evidence</td>
+            <td>4</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Visual Evidence -->
+    <section>
+      <h2>Visual Evidence</h2>
+
+      <h3>Layout Density in Action</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/01-attribution-dashboard-no-css-hacks.png" alt="Attribution Dashboard">
+          <div class="screenshot-caption">01: Attribution Dashboard - No CSS Hacks</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/02-json-render-root-spacious-p0.png" alt="json-render-root">
+          <div class="screenshot-caption">02: json-render-root with spacious + p-0 override</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/03-section-spacing-space-y-6.png" alt="Section Spacing">
+          <div class="screenshot-caption">03: Section spacing (space-y-6)</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/07-css-hacks-eliminated.png" alt="CSS Hacks Eliminated">
+          <div class="screenshot-caption">07: CSS Hacks Eliminated Verification</div>
+        </div>
+      </div>
+
+      <h3>Cross-Page Verification</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/11-attribution-layout.png" alt="Attribution Layout">
+          <div class="screenshot-caption">11: Attribution Page Layout</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/11-experience-layout.png" alt="Experience Layout">
+          <div class="screenshot-caption">11: Experience Console Layout</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/15-default-density-comfortable.png" alt="Default Density">
+          <div class="screenshot-caption">15: Default Density (comfortable)</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/e2e/19-token-override-p0.png" alt="Token Override">
+          <div class="screenshot-caption">19: Token Override (containerPadding: p-0)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Acceptance Criteria -->
+    <section>
+      <h2>Acceptance Criteria Verification</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>Evidence</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Compact density applies p-3, space-y-2, gap-2</td>
+            <td>Unit tests: DENSITY_PRESETS.compact</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Comfortable density applies p-6, space-y-4, gap-4</td>
+            <td>Unit tests: DENSITY_PRESETS.comfortable</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Spacious density applies p-8, space-y-6, gap-6</td>
+            <td>Unit tests: DENSITY_PRESETS.spacious + E2E screenshot 03</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Default density is comfortable</td>
+            <td>Unit tests + E2E screenshot 15</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Token overrides work correctly</td>
+            <td>Unit tests + E2E screenshot 19</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>All CSS hacks eliminated</td>
+            <td>E2E test 07 + grep verification</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>useLayoutContext accessible to children</td>
+            <td>Renderer.tsx exports useLayoutContext</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+          <tr>
+            <td>Build succeeds with zero errors</td>
+            <td>npm run build ✓</td>
+            <td class="pass">✓ Pass</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Usage Guide -->
+    <section>
+      <h2>Usage Guide</h2>
+
+      <h3>Basic Usage</h3>
+      <pre>import { Renderer } from '@surface/components/modals/SproutFinishingRoom/json-render';
+
+// Default comfortable density
+&lt;Renderer tree={tree} registry={registry} /&gt;
+
+// Explicit density selection
+&lt;Renderer tree={tree} registry={registry} layout={{ density: 'compact' }} /&gt;
+
+// With token override
+&lt;Renderer
+  tree={tree}
+  registry={registry}
+  layout={{ density: 'spacious', containerPadding: 'p-0' }}
+/&gt;</pre>
+
+      <h3>Accessing Layout in Child Components</h3>
+      <pre>import { useLayoutContext } from '@surface/components/modals/SproutFinishingRoom/json-render';
+
+function MyComponent() {
+  const layout = useLayoutContext();
+  return &lt;div className={layout?.cardGap}&gt;...&lt;/div&gt;;
+}</pre>
+    </section>
+
+    <footer>
+      <p>Sprint: S13-BD-LayoutDensity-v1 | Completed: 2026-01-18</p>
+      <p>Protocol: Grove Execution v1.5 | Agent: Developer</p>
+    </footer>
+  </div>
+</body>
+</html>

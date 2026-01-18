@@ -212,6 +212,138 @@ npm audit --audit-level moderate
 
 ---
 
+## Visual Testing Requirements (SOP v2.0)
+
+### Screenshot Directory Structure
+```
+docs/sprints/s9-sl-federation-v1/screenshots/
+├── e2e/                          # E2E test screenshots
+│   ├── us001-registration-wizard.png
+│   ├── us001-registration-complete.png
+│   ├── us002-grove-discovery.png
+│   ├── us003-tier-mapping-editor.png
+│   └── ...
+├── visual/                       # Component visual tests
+│   ├── grove-card-variants.png
+│   ├── trust-badge-levels.png
+│   └── ...
+└── manual/                       # Manual verification screenshots
+    ├── console-clean-state.png
+    └── ...
+```
+
+### Screenshot Requirements (Minimum 50+ for Sprint-tier)
+
+| Category | Minimum Count | Purpose |
+|----------|---------------|---------|
+| E2E Screenshots | 30+ | User story acceptance evidence |
+| Visual Component | 15+ | Component state verification |
+| Console/Debug | 5+ | Zero-error state proof |
+
+### Test Data Seeding (CRITICAL)
+
+**Before ANY E2E test, seed realistic data:**
+
+```typescript
+// Reference: tests/e2e/s9-sl-federation/_test-data.ts
+import { seedFederationData, TEST_PRESETS } from './_test-data';
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('/foundation/federation');
+  await seedFederationData(page, 'registeredGrove');
+  await page.reload();
+  await page.waitForTimeout(1000);
+});
+```
+
+**Test Preset Reference (from USER_STORIES.md):**
+- `registeredGrove` - Grove with registration complete, credentials
+- `connectedGroves` - Multiple connected groves with trust scores
+- `tierMappings` - Pre-configured tier mappings
+- `pendingRequests` - Knowledge exchange requests in queue
+
+### REVIEW.html Template
+
+Create `docs/sprints/s9-sl-federation-v1/REVIEW.html` with:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S9-SL-Federation-v1 | Visual Review</title>
+  <style>
+    body { font-family: system-ui; max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    h1 { border-bottom: 2px solid #2F5C3B; padding-bottom: 0.5rem; }
+    .story { margin: 2rem 0; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; }
+    .story h3 { color: #2F5C3B; margin-top: 0; }
+    .screenshots { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1rem; }
+    .screenshot { background: #f5f5f5; padding: 0.5rem; border-radius: 4px; }
+    .screenshot img { width: 100%; border: 1px solid #ccc; }
+    .screenshot figcaption { font-size: 0.875rem; color: #666; margin-top: 0.5rem; }
+    .status { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: bold; }
+    .pass { background: #d4edda; color: #155724; }
+    .fail { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>S9-SL-Federation-v1 | Visual Review</h1>
+  <p><strong>Sprint:</strong> Federation Protocol Implementation</p>
+  <p><strong>Date:</strong> [COMPLETION DATE]</p>
+  <p><strong>Overall Status:</strong> <span class="status pass">PASS</span></p>
+
+  <h2>User Story Evidence</h2>
+
+  <div class="story">
+    <h3>US-001: Grove Registration</h3>
+    <p><strong>Acceptance:</strong> Complete registration wizard with tier system</p>
+    <div class="screenshots">
+      <figure class="screenshot">
+        <img src="screenshots/e2e/us001-registration-wizard.png" alt="Registration wizard">
+        <figcaption>Registration wizard with tier system configuration</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="screenshots/e2e/us001-registration-complete.png" alt="Registration complete">
+        <figcaption>Registration confirmation with credentials</figcaption>
+      </figure>
+    </div>
+    <p><strong>Status:</strong> <span class="status pass">PASS</span></p>
+  </div>
+
+  <!-- Repeat for US-002 through US-008 -->
+
+  <h2>Console Clean State</h2>
+  <figure class="screenshot">
+    <img src="screenshots/manual/console-clean-state.png" alt="Console clean">
+    <figcaption>Zero console errors after full test suite</figcaption>
+  </figure>
+
+  <h2>Test Results Summary</h2>
+  <ul>
+    <li>Unit Tests: XX/XX passed</li>
+    <li>Integration Tests: XX/XX passed</li>
+    <li>E2E Tests: XX/XX passed</li>
+    <li>Screenshots Captured: XX</li>
+    <li>Console Errors: 0</li>
+  </ul>
+
+</body>
+</html>
+```
+
+### Visual Verification Checklist
+
+Before marking any phase complete:
+
+- [ ] All E2E tests capture screenshots to `screenshots/e2e/`
+- [ ] Screenshots named with user story prefix (e.g., `us001-*.png`)
+- [ ] Console state captured (must show zero errors)
+- [ ] REVIEW.html updated with new screenshots
+- [ ] Visual regression baseline established (if new components)
+
+---
+
 ## Key Files to Create
 
 ### Core Infrastructure (Phase 1)

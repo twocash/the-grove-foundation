@@ -242,6 +242,58 @@ npm audit --audit-level moderate
 
 ---
 
+## Verification Commands
+
+**MANDATORY**: Run these commands to verify artifacts exist before marking phases complete.
+
+### Pre-Development Verification
+```bash
+# Verify sprint folder exists with required artifacts
+ls -la docs/sprints/s9-sl-federation-v1/
+
+# Verify required artifacts are present
+test -f docs/sprints/s9-sl-federation-v1/USER_STORIES.md && echo "✅ USER_STORIES.md" || echo "❌ USER_STORIES.md missing"
+test -f docs/sprints/s9-sl-federation-v1/DESIGN_SPEC.md && echo "✅ DESIGN_SPEC.md" || echo "❌ DESIGN_SPEC.md missing"
+test -f docs/sprints/s9-sl-federation-v1/GROVE_EXECUTION_CONTRACT.md && echo "✅ Contract" || echo "❌ Contract missing"
+```
+
+### Phase Completion Verification
+```bash
+# Phase 1: Core Infrastructure
+test -f src/core/federation/schema.ts && echo "✅ Schema created" || echo "❌ Schema missing"
+test -f src/core/federation/registry.ts && echo "✅ Registry created" || echo "❌ Registry missing"
+npm run type-check && echo "✅ Types pass" || echo "❌ Type errors"
+
+# Phase 2: UI Components
+test -f src/bedrock/consoles/FederationConsole.tsx && echo "✅ Console created" || echo "❌ Console missing"
+npx playwright test --grep="federation" && echo "✅ E2E tests pass" || echo "❌ E2E failures"
+
+# Phase 3: Protocol Integration
+curl -s http://localhost:3000/api/federation/discover | grep -q "groves" && echo "✅ API responding" || echo "❌ API error"
+
+# Phase 4: Final Verification
+npm test && npm run build && npx playwright test && echo "✅ All gates pass" || echo "❌ Gate failures"
+```
+
+### Screenshot Evidence Verification
+```bash
+# Verify screenshot directory exists and has content
+mkdir -p docs/sprints/s9-sl-federation-v1/screenshots/e2e
+ls -la docs/sprints/s9-sl-federation-v1/screenshots/e2e/ | wc -l
+
+# Count screenshots (minimum 50 for Sprint-tier)
+find docs/sprints/s9-sl-federation-v1/screenshots -name "*.png" | wc -l
+```
+
+### REVIEW.html Verification
+```bash
+# Verify REVIEW.html exists with screenshot evidence
+test -f docs/sprints/s9-sl-federation-v1/REVIEW.html && echo "✅ REVIEW.html exists" || echo "❌ REVIEW.html missing"
+grep -c "<img" docs/sprints/s9-sl-federation-v1/REVIEW.html
+```
+
+---
+
 ## Key Files to Create
 
 ### Core Infrastructure (Phase 1)
