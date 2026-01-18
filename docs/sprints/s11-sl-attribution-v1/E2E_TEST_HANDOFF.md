@@ -2,7 +2,42 @@
 
 **Sprint**: S11-SL-Attribution (Knowledge Economy & Rewards)
 **Created**: 2026-01-18
+**Updated**: 2026-01-18
 **Purpose**: Mandatory E2E testing and visual verification per Developer SOP v2.0
+
+---
+
+## ⚠️ CRITICAL: WHAT VISUAL VERIFICATION ACTUALLY MEANS
+
+**Screenshots are EVIDENCE that acceptance criteria passed.**
+
+### ❌ WRONG (Going Through Motions)
+- Navigate to `/bedrock/experience`
+- Take screenshot of whatever loads
+- Screenshot shows generic page, no attribution data visible
+- Move on to next test
+
+### ✅ RIGHT (Meaningful Visual Verification)
+- Navigate to attribution feature
+- **Perform the user action** (create attribution, trigger tier advancement, etc.)
+- **Wait for state change** (data appears, UI updates)
+- Screenshot captures **THE SPECIFIC STATE** proving the feature works
+- Example: Attribution chain showing `Grove-A → Grove-B → Grove-C` with token percentages
+
+---
+
+## SCREENSHOTS MUST SHOW:
+
+| What to Capture | Example |
+|-----------------|---------|
+| **Feature UI loaded with data** | Attribution chain with 3 nodes, not empty page |
+| **User interaction result** | After clicking "View Attribution", the chain diagram appears |
+| **State changes** | Token balance BEFORE (100) and AFTER (150) reward |
+| **Calculated values** | Quality multiplier showing "2.0x" next to score "95" |
+| **Visual indicators** | Reputation badge showing purple "Legendary" tier |
+| **Error states** | Empty state message when no attribution exists |
+
+**If your screenshot could be taken on ANY page, it's NOT valid evidence.**
 
 ---
 
@@ -11,12 +46,116 @@
 **Before marking this sprint complete, you MUST:**
 
 1. ✅ Write ALL E2E tests specified below
-2. ✅ Capture ALL screenshots at specified visual verification points
-3. ✅ **OPEN AND VIEW** each screenshot - verify correct UI state
+2. ✅ Capture screenshots showing **ACTUAL FEATURE STATES** (not generic pages)
+3. ✅ **OPEN AND VIEW** each screenshot - verify it proves the acceptance criteria
 4. ✅ Debug console errors until **ZERO errors**
 5. ✅ Complete REVIEW.html with verified evidence
 
-**CRITICAL**: Screenshots must be VIEWED, not just checked for existence. A blank screenshot or error screenshot is a failure.
+**CRITICAL**: A screenshot of `/bedrock/experience` with no attribution data visible is NOT evidence. You must show the FEATURE WORKING.
+
+---
+
+## 🔧 Test Data Seeding (MANDATORY)
+
+**CRITICAL:** Seed localStorage with realistic, non-zero values BEFORE navigating to features.
+
+Tests should NOT rely on empty/default state. Before each test suite:
+
+### Standard Test Data Setup Pattern
+
+```typescript
+test.beforeEach(async ({ page }) => {
+  // Seed localStorage BEFORE navigating
+  await page.addInitScript(() => {
+    // Token balance - specific non-zero value (NOT 0, NOT 100)
+    localStorage.setItem('grove-token-balance', JSON.stringify({
+      balance: 125,
+      pending: 15,
+      lastUpdated: new Date().toISOString()
+    }));
+
+    // User tier - mid-progression, NOT default
+    localStorage.setItem('grove-user-tier', JSON.stringify({
+      current: 'developing',
+      progress: 0.67,
+      nextTier: 'flourishing'
+    }));
+
+    // Badges - include 2-3 earned badges (NOT empty array)
+    localStorage.setItem('grove-badges', JSON.stringify([
+      { id: 'early-adopter', earnedAt: '2026-01-10' },
+      { id: 'first-contribution', earnedAt: '2026-01-12' },
+      { id: 'streak-7', earnedAt: '2026-01-15' }
+    ]));
+
+    // Attribution data - include some attribution events
+    localStorage.setItem('grove-attribution-events', JSON.stringify([
+      {
+        id: 'attr-001',
+        sourceGrove: 'grove-alpha',
+        targetGrove: 'grove-beta',
+        tokens: 50,
+        tier: 'sapling',
+        qualityMultiplier: 1.8,
+        networkBonus: 1.2,
+        timestamp: '2026-01-15T10:30:00Z'
+      },
+      {
+        id: 'attr-002',
+        sourceGrove: 'grove-beta',
+        targetGrove: 'grove-gamma',
+        tokens: 25,
+        tier: 'sprout',
+        qualityMultiplier: 1.5,
+        networkBonus: 1.0,
+        timestamp: '2026-01-16T14:20:00Z'
+      }
+    ]));
+
+    // Reputation data
+    localStorage.setItem('grove-reputation', JSON.stringify({
+      score: 72,
+      level: 'expert',
+      breakdown: {
+        tier: 28.8,     // 40% weight
+        quality: 28.8,  // 40% weight
+        network: 14.4   // 20% weight
+      }
+    }));
+
+    // Engagement metrics
+    localStorage.setItem('grove-engagement-state', JSON.stringify({
+      exchanges: 42,
+      reveals: 8,
+      domainsExplored: ['sovereignty', 'provenance', 'scalability'],
+      streakDays: 7
+    }));
+  });
+});
+```
+
+### Data Values Checklist
+
+| ❌ BAD | ✅ GOOD | Why |
+|--------|---------|-----|
+| `balance: 0` | `balance: 125` | Zero looks uninitialized |
+| `balance: 100` | `balance: 1,847` | Round numbers look fake |
+| `tier: "seedling"` | `tier: "developing"` | Default tier proves nothing |
+| `badges: []` | `badges: [{...}, {...}]` | Empty = no verification |
+| `progress: 0` | `progress: 0.67` | Shows mid-journey |
+| `attribution: []` | `attribution: [{...}, {...}]` | Need data to show chains |
+
+### S11-Specific Test Data
+
+For this sprint, ensure these values are seeded:
+
+| Data | Key | Example Value |
+|------|-----|---------------|
+| Token Balance | `grove-token-balance` | `{ balance: 125, pending: 15 }` |
+| Attribution Events | `grove-attribution-events` | `[{ sourceGrove, targetGrove, tokens: 50, qualityMultiplier: 1.8 }]` |
+| Reputation | `grove-reputation` | `{ score: 72, level: 'expert', breakdown: {...} }` |
+| Network Rank | `grove-network-rank` | `{ rank: 7, total: 142, percentile: 95 }` |
+| Transaction History | `grove-transactions` | `[{ type: 'reward', tokens: 50, source: 'tier-up' }]` |
 
 ---
 
@@ -63,6 +202,15 @@ docs/sprints/s11-sl-attribution-v1/screenshots/e2e/
 // tests/e2e/s11-sl-attribution/attribution-tracking.spec.ts
 // Sprint: S11-SL-Attribution v1
 // Protocol: E2E Testing with Visual Verification per Developer SOP v2.0
+//
+// ⚠️ CRITICAL: Tests must capture MEANINGFUL screenshots showing:
+//   - Feature UI with actual data (not empty pages)
+//   - State changes (before/after user actions)
+//   - Calculated values proving formulas work
+//   - User interaction results
+//
+// A screenshot of a generic page is NOT evidence. Navigate to the ATTRIBUTION
+// features, create/view attribution data, then capture the SPECIFIC state.
 
 import { test, expect } from '@playwright/test';
 import { setupConsoleCapture, getCriticalErrors, type ConsoleCapture } from '../_test-utils';
@@ -74,6 +222,47 @@ test.describe('Epic A: Attribution Tracking', () => {
 
   test.beforeEach(async ({ page }) => {
     capture = setupConsoleCapture(page);
+
+    // 🔧 MANDATORY: Seed localStorage with realistic test data
+    await page.addInitScript(() => {
+      // Token balance - specific non-zero value
+      localStorage.setItem('grove-token-balance', JSON.stringify({
+        balance: 125, pending: 15
+      }));
+
+      // Attribution events - need populated data for chain visualization
+      localStorage.setItem('grove-attribution-events', JSON.stringify([
+        {
+          id: 'attr-001',
+          sourceGrove: 'Grove Alpha',
+          targetGrove: 'Grove Beta',
+          tokens: 50,
+          tier: 'sapling',
+          qualityMultiplier: 1.8,
+          networkBonus: 1.2,
+          percentages: { level1: 60, level2: 40 },
+          timestamp: '2026-01-15T10:30:00Z'
+        },
+        {
+          id: 'attr-002',
+          sourceGrove: 'Grove Beta',
+          targetGrove: 'Grove Gamma',
+          tokens: 25,
+          tier: 'sprout',
+          qualityMultiplier: 1.5,
+          networkBonus: 1.0,
+          percentages: { level1: 100 },
+          timestamp: '2026-01-16T14:20:00Z'
+        }
+      ]));
+
+      // Attribution config - show non-default values
+      localStorage.setItem('grove-attribution-config', JSON.stringify({
+        decayRate: 0.5,
+        qualityWeightEnabled: true,
+        crossGroveBonus: 1.2
+      }));
+    });
   });
 
   test.afterEach(async () => {
@@ -88,25 +277,44 @@ test.describe('Epic A: Attribution Tracking', () => {
   /**
    * US-A001: Track Tier Advancement Attribution
    * Tests: Single grove tier advancement, attribution event recording
+   *
+   * ⚠️ SCREENSHOT MUST SHOW: Attribution event with source_grove_id,
+   *    target_grove_id, tier_level, base_tokens, and final_tokens visible
    */
   test('US-A001: Single grove tier advancement creates attribution event', async ({ page }) => {
-    // Navigate to bedrock experience console
-    await page.goto('/bedrock/experience');
+    // 1. NAVIGATE to the attribution feature (NOT just /bedrock/experience)
+    //    Go to wherever attribution events are displayed/created
+    await page.goto('/bedrock/attribution'); // or correct route
     await page.waitForTimeout(3000);
 
-    // Screenshot: Initial state
+    // 2. SET UP: Create or ensure test data exists
+    //    - Either seed attribution data via API, or
+    //    - Trigger a tier advancement through the UI
+    //    DO NOT skip this step - empty pages are not evidence
+
+    // Example: Trigger tier advancement
+    // await page.click('[data-testid="trigger-advancement"]');
+    // await page.waitForSelector('[data-testid="attribution-event"]');
+
+    // 3. VERIFY: Data is visible before screenshot
+    //    Screenshot should show attribution event with actual values
+    const attributionVisible = await page.locator('[data-testid="attribution-event"]').isVisible();
+    console.log(`Attribution event visible: ${attributionVisible}`);
+
+    // 4. SCREENSHOT: Capture the POPULATED state
+    //    This must show: source grove, target grove, tier, tokens
     await page.screenshot({
       path: `${SCREENSHOT_DIR}/attribution-chain-initial.png`,
       fullPage: true
     });
 
-    // TODO: Trigger a tier advancement and verify attribution event
+    // 5. ASSERT: Verify the data matches expectations
     // Verify attribution event contains:
-    // - source_grove_id
-    // - target_grove_id
-    // - tier_level
-    // - base_tokens
-    // - final_tokens
+    // - source_grove_id visible in UI
+    // - target_grove_id visible in UI
+    // - tier_level (1, 2, or 3)
+    // - base_tokens (10, 50, or 250)
+    // - final_tokens (calculated with multipliers)
 
     // Verify zero console errors
     expect(getCriticalErrors(capture.errors)).toHaveLength(0);
@@ -233,6 +441,35 @@ test.describe('Epic B: Token Economy', () => {
 
   test.beforeEach(async ({ page }) => {
     capture = setupConsoleCapture(page);
+
+    // 🔧 MANDATORY: Seed localStorage with realistic test data
+    await page.addInitScript(() => {
+      // BEFORE state for token balance - will capture this, then trigger reward
+      localStorage.setItem('grove-token-balance', JSON.stringify({
+        balance: 100,  // Starting balance - screenshot this BEFORE reward
+        pending: 0,
+        history: [
+          { type: 'initial', amount: 100, timestamp: '2026-01-10T00:00:00Z' }
+        ]
+      }));
+
+      // Quality scores for multiplier tests
+      localStorage.setItem('grove-quality-scores', JSON.stringify({
+        currentScore: 95,  // High quality = 2.0x multiplier
+        history: [
+          { score: 85, date: '2026-01-12' },
+          { score: 90, date: '2026-01-14' },
+          { score: 95, date: '2026-01-16' }
+        ]
+      }));
+
+      // Network influence data
+      localStorage.setItem('grove-network-influence', JSON.stringify({
+        grovesInfluenced: ['grove-beta', 'grove-gamma'],
+        influenceCount: 2,
+        networkBonus: 1.2  // 2 groves = 1.2x bonus
+      }));
+    });
   });
 
   /**
@@ -378,6 +615,48 @@ test.describe('Epic C: Reputation System', () => {
 
   test.beforeEach(async ({ page }) => {
     capture = setupConsoleCapture(page);
+
+    // 🔧 MANDATORY: Seed localStorage with realistic test data
+    await page.addInitScript(() => {
+      // Current grove reputation - expert level for testing
+      localStorage.setItem('grove-reputation', JSON.stringify({
+        score: 72,
+        level: 'expert',
+        color: 'blue',
+        breakdown: {
+          tier: 28.8,     // 40% of total
+          quality: 28.8,  // 40% of total
+          network: 14.4   // 20% of total
+        }
+      }));
+
+      // Leaderboard data - need sorted list with multiple groves
+      localStorage.setItem('grove-leaderboard', JSON.stringify([
+        { rank: 1, name: 'Grove Phoenix', score: 94, level: 'legendary', color: 'purple' },
+        { rank: 2, name: 'Grove Atlas', score: 87, level: 'expert', color: 'blue' },
+        { rank: 3, name: 'Grove Nexus', score: 82, level: 'expert', color: 'blue' },
+        { rank: 4, name: 'Grove Ember', score: 75, level: 'expert', color: 'blue' },
+        { rank: 5, name: 'Grove Vista', score: 68, level: 'competent', color: 'green' },
+        { rank: 6, name: 'Grove Pulse', score: 55, level: 'competent', color: 'green' },
+        { rank: 7, name: 'Your Grove', score: 72, level: 'expert', color: 'blue' },
+        { rank: 8, name: 'Grove Nova', score: 45, level: 'developing', color: 'amber' },
+        { rank: 9, name: 'Grove Dawn', score: 32, level: 'developing', color: 'amber' },
+        { rank: 10, name: 'Grove Seed', score: 18, level: 'novice', color: 'gray' }
+      ]));
+
+      // Reputation config
+      localStorage.setItem('grove-reputation-config', JSON.stringify({
+        weights: { tier: 0.4, quality: 0.4, network: 0.2 },
+        decayRate: 0.05,
+        levelThresholds: {
+          legendary: 90,
+          expert: 70,
+          competent: 50,
+          developing: 30,
+          novice: 0
+        }
+      }));
+    });
   });
 
   /**
@@ -486,6 +765,51 @@ test.describe('Epic D: Economic Dashboard', () => {
 
   test.beforeEach(async ({ page }) => {
     capture = setupConsoleCapture(page);
+
+    // 🔧 MANDATORY: Seed localStorage with realistic test data
+    await page.addInitScript(() => {
+      // Dashboard metrics - specific non-zero values
+      localStorage.setItem('grove-dashboard-metrics', JSON.stringify({
+        totalTokens: 1847,
+        activeEvents: 23,
+        totalGroves: 142,
+        velocity: 12.5,  // tokens per day
+        trends: {
+          tokens: '+15%',
+          events: '+8%',
+          groves: '+3%',
+          velocity: '+22%'
+        }
+      }));
+
+      // Attribution flow data for pie charts
+      localStorage.setItem('grove-attribution-flows', JSON.stringify({
+        inflow: {
+          total: 450,
+          sources: [
+            { name: 'Tier Advancements', value: 250, percentage: 55.6 },
+            { name: 'Quality Bonuses', value: 120, percentage: 26.7 },
+            { name: 'Network Effects', value: 80, percentage: 17.8 }
+          ]
+        },
+        outflow: {
+          total: 125,
+          destinations: [
+            { name: 'Attributed to Others', value: 75, percentage: 60 },
+            { name: 'Decay', value: 50, percentage: 40 }
+          ]
+        }
+      }));
+
+      // Transaction history
+      localStorage.setItem('grove-transactions', JSON.stringify([
+        { id: 'tx-001', type: 'reward', tokens: 50, source: 'Tier: Sapling', tier: 'sapling', timestamp: '2026-01-17T14:30:00Z' },
+        { id: 'tx-002', type: 'bonus', tokens: 15, source: 'Quality: 95 (2.0x)', timestamp: '2026-01-17T14:30:00Z' },
+        { id: 'tx-003', type: 'network', tokens: 12, source: 'Network: 2 groves (1.2x)', timestamp: '2026-01-17T14:30:00Z' },
+        { id: 'tx-004', type: 'attribution', tokens: -25, source: 'To: Grove Beta', timestamp: '2026-01-16T10:15:00Z' },
+        { id: 'tx-005', type: 'reward', tokens: 10, source: 'Tier: Sprout', tier: 'sprout', timestamp: '2026-01-15T09:00:00Z' }
+      ]));
+    });
   });
 
   /**
@@ -582,33 +906,45 @@ test.describe('Epic D: Economic Dashboard', () => {
 
 **YOU MUST COMPLETE THIS CHECKLIST BEFORE MARKING SPRINT COMPLETE**
 
+### ⚠️ READ THIS FIRST
+
+Each screenshot must show **SPECIFIC EVIDENCE** that the feature works:
+- **Data visible**: Not empty states (unless testing empty state)
+- **Calculated values**: Actual numbers showing formulas worked
+- **State changes**: Before/after comparisons
+- **User action results**: What happened after clicking/interacting
+
+**If a screenshot could be taken without the feature existing, it's NOT VALID.**
+
 ### Screenshot Verification (OPEN AND VIEW EACH)
 
-| # | Screenshot | Expected Content | ✓ Verified |
-|---|------------|------------------|------------|
-| 1 | `attribution-chain-initial.png` | Page loads, no errors visible | [ ] |
-| 2 | `attribution-chain-populated.png` | Chain diagram with nodes, percentages | [ ] |
-| 3 | `attribution-chain-expanded.png` | All 3 levels visible, distinct styling | [ ] |
-| 4 | `attribution-config-panel.png` | Config form with decay rate, weights | [ ] |
-| 5 | `token-balance-initial.png` | Token display before reward | [ ] |
-| 6 | `token-balance-after-reward.png` | Token display updated with new amount | [ ] |
-| 7 | `quality-multiplier-display.png` | Multiplier value shown (e.g., "2.0x") | [ ] |
-| 8 | `network-bonus-breakdown.png` | Breakdown: base, quality, network, total | [ ] |
-| 9 | `reputation-badge-novice.png` | Gray badge, correct icon | [ ] |
-| 10 | `reputation-badge-expert.png` | Blue badge, correct icon | [ ] |
-| 11 | `reputation-badge-legendary.png` | Purple badge, correct icon | [ ] |
-| 12 | `reputation-leaderboard.png` | Top 10 list, sorted by score | [ ] |
-| 13 | `dashboard-overview.png` | 4 metric cards, all populated | [ ] |
-| 14 | `dashboard-metrics-loaded.png` | Same as above, confirms load | [ ] |
-| 15 | `attribution-flow-chart.png` | Pie chart or flow visualization | [ ] |
-| 16 | `transaction-history.png` | 5 recent transactions with details | [ ] |
+| # | Screenshot | SPECIFIC Evidence Required (not just "page loaded") | ✓ |
+|---|------------|-----------------------------------------------------|---|
+| 1 | `attribution-chain-initial.png` | Attribution section visible, ready for data (or showing existing attribution if present) | [ ] |
+| 2 | `attribution-chain-populated.png` | **Chain diagram showing nodes**: Grove-A → Grove-B with percentage labels like "60%" and "40%" | [ ] |
+| 3 | `attribution-chain-expanded.png` | **3 levels visible**: Level 1, Level 2, Level 3 nodes with distinct visual styling and decay values | [ ] |
+| 4 | `attribution-config-panel.png` | **Config form fields**: Decay rate input (showing value like "50%"), quality weight slider, cross-grove bonus input | [ ] |
+| 5 | `token-balance-initial.png` | **Token balance with specific number**: e.g., "Balance: 100 tokens" (BEFORE earning reward) | [ ] |
+| 6 | `token-balance-after-reward.png` | **DIFFERENT number than #5**: e.g., "Balance: 150 tokens" showing the +50 increase | [ ] |
+| 7 | `quality-multiplier-display.png` | **Multiplier AND score visible**: e.g., "Quality: 95 → 2.0x multiplier" | [ ] |
+| 8 | `network-bonus-breakdown.png` | **Full calculation breakdown**: Base (50) × Quality (1.8x) × Network (1.2x) = Final (108) | [ ] |
+| 9 | `reputation-badge-novice.png` | **Gray badge** with "Novice" or score 0-29, correct icon visible | [ ] |
+| 10 | `reputation-badge-expert.png` | **Blue badge** with "Expert" or score 70-89, visually distinct from gray | [ ] |
+| 11 | `reputation-badge-legendary.png` | **Purple badge** with "Legendary" or score 90+, crown/star icon | [ ] |
+| 12 | `reputation-leaderboard.png` | **Sorted list with data**: At least 3 groves with names, scores, and badges, #1 at top | [ ] |
+| 13 | `dashboard-overview.png` | **4 metric cards with numbers**: Total Tokens (e.g., "1,234"), Active Events, Groves, Velocity | [ ] |
+| 14 | `dashboard-metrics-loaded.png` | **Same metrics populated** (not loading spinners), trend arrows visible | [ ] |
+| 15 | `attribution-flow-chart.png` | **Chart with data segments**: Pie/flow showing inflow sources with percentages | [ ] |
+| 16 | `transaction-history.png` | **5 transaction rows**: Each with timestamp, tokens earned, source grove, tier level | [ ] |
 
-**How to verify:**
+### Verification Process
+
 1. Run: `npx playwright test tests/e2e/s11-sl-attribution/`
 2. Open: `docs/sprints/s11-sl-attribution-v1/screenshots/e2e/`
 3. **OPEN EACH IMAGE** in an image viewer
-4. Check against "Expected Content" column
-5. Mark verified only if content is CORRECT (not blank, not error)
+4. **ASK YOURSELF**: "Does this prove the acceptance criteria passed?"
+5. If screenshot shows generic page without feature-specific data → **RE-RUN TEST WITH PROPER DATA SETUP**
+6. Mark verified ONLY if evidence is SPECIFIC and CORRECT
 
 ---
 

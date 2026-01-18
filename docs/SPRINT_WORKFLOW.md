@@ -116,10 +116,17 @@
 **Output:** `NOTION_ENTRY.md`
 
 **Contents:**
+- **MANDATORY:** Developer execution prompt at TOP in formatted code block
 - Pre-formatted Notion page content
 - All artifacts linked
 - Status: "🎯 ready"
 - Developer handoff instructions
+
+**Requirements:**
+- Execution prompt MUST be at the very top in a code block
+- Format: Pre-formatted with clear copy-paste instructions
+- Include: Sprint name, responsibilities, execution path, status update location
+- See S8-SL-MultiModel example for correct format
 
 **Deliverable:** User can copy-paste into Notion when ready
 
@@ -168,6 +175,7 @@
 - [ ] USER_STORIES.md complete
 - [ ] GROVE_EXECUTION_CONTRACT.md complete
 - [ ] NOTION_ENTRY.md formatted
+- [ ] **MANDATORY:** Developer execution prompt at TOP in code block
 - [ ] All artifacts linked
 
 ---
@@ -239,6 +247,51 @@
 ## Component Specifications
 {List of components}
 
+## json-render Components (if applicable)
+**Required for:** Analytics dashboards, status displays, read-only information UIs
+
+### Catalog Components
+| Component | Props | Purpose |
+|-----------|-------|---------|
+| {ComponentName} | {prop list} | {what it displays} |
+
+### Render Tree Structure
+```
+root
+├── HeaderComponent (title, subtitle)
+├── MetricRow (metrics[])
+│   ├── MetricCard (label, value, color)
+│   └── MetricCard (label, value, color)
+└── StatusSection (status, timestamp)
+```
+
+### Reused from Existing Catalogs
+- [ ] SignalsCatalog: MetricCard, MetricRow, QualityGauge
+- [ ] ResearchCatalog: ResearchHeader, AnalysisBlock
+- [ ] JobStatusCatalog: JobPhaseIndicator, JobProgressBar
+
+### New Components Required
+{List any new catalog components needed}
+
+## Factory Pattern Compliance (if building console/object UI)
+
+### GroveObject Compliance
+- [ ] Object follows meta+payload structure
+- [ ] Meta includes: id, type, title, status, timestamps
+- [ ] Status uses standard values: active, draft, archived, pending
+
+### Console Factory Compliance
+- [ ] Layout follows standard: Header → Metrics → Toolbar → Collection → Inspector
+- [ ] Cards implement ObjectCardProps (selected, isFavorite, onClick, onFavoriteToggle)
+- [ ] Editor implements ObjectEditorProps (object, onEdit, hasChanges, singletonOps)
+- [ ] Metrics use MetricCard/MetricRow patterns
+
+### Cross-Screen Consistency
+- [ ] Card shows: icon, title, status badge, truncated description
+- [ ] Editor has: title field, description field, status actions
+- [ ] Inspector panel matches existing consoles
+- [ ] Toolbar follows: Search | Filters | Favorites | Sort | View Mode
+
 ## Interaction Patterns
 {How users interact}
 
@@ -306,21 +359,81 @@
 ### USER_STORIES.md Template
 
 ```markdown
-# User Stories: {Sprint Name}
+# User Stories & E2E Tests: {Sprint Name}
 
 ## Story Format
 ```
-Given-When-Then
+Given-When-Then (Gherkin)
 ```
 
 ## Test Coverage
 - Unit tests
 - Integration tests
-- E2E tests
-- Visual tests
+- E2E tests with visual verification (MANDATORY)
+- Visual regression tests
+
+## E2E Test Specification (MANDATORY)
+
+Every user story MUST include:
+
+1. **Playwright Test Skeleton**
+   - Test file path: `tests/e2e/{sprint-name}/{epic}.spec.ts`
+   - Test for happy path, empty state, error state
+
+2. **Visual Verification Points**
+   | State | Screenshot | Description |
+   |-------|------------|-------------|
+   | Initial | `{feature}-initial.png` | First render |
+   | Populated | `{feature}-populated.png` | With data |
+   | Empty | `{feature}-empty.png` | No data |
+   | Error | `{feature}-error.png` | Error state |
+
+3. **Test Data Seeding (MANDATORY)**
+
+   **CRITICAL:** Seed localStorage with realistic, non-zero values BEFORE navigating.
+
+   | Data Type | localStorage Key | Example Values |
+   |-----------|------------------|----------------|
+   | Tokens | `grove-token-balance` | `{ balance: 125, pending: 15 }` |
+   | Tier | `grove-user-tier` | `{ current: 'developing', progress: 0.67 }` |
+   | Badges | `grove-badges` | `[{ id: 'early-adopter', earnedAt: '2026-01-10' }]` |
+   | Streak | `grove-streak-data` | `{ current: 7, longest: 14 }` |
+   | Metrics | `grove-engagement-state` | `{ exchanges: 42, reveals: 8 }` |
+
+   **Setup Pattern:**
+   ```typescript
+   test.beforeEach(async ({ page }) => {
+     await page.addInitScript(() => {
+       localStorage.setItem('grove-token-balance', JSON.stringify({ balance: 125 }));
+       localStorage.setItem('grove-user-tier', JSON.stringify({ current: 'developing' }));
+     });
+   });
+   ```
+
+   **Rules:**
+   - NO zeros or empty arrays (unless testing empty state)
+   - Use realistic values (not round numbers like 100, 1000)
+   - Include multiple items in lists (2-3 badges, not 1)
+   - Show mid-journey progression (67%, not 0% or 100%)
+
+4. **Test Data Requirements**
+   | Test | Data Needed | Setup Method |
+   |------|-------------|--------------|
+   | Happy path | Seeded localStorage | beforeEach hook |
+   | Empty state | Cleared localStorage | Clear before test |
+
+## Screenshots Are EVIDENCE
+
+⚠️ **Screenshots must prove the feature works.** Ask: "Could this be taken without the feature existing?"
+
+| ❌ INVALID | ✅ VALID |
+|------------|----------|
+| Generic page load | Dashboard showing "125 tokens", "developing tier" |
+| Empty state | Attribution chain: Grove-A → Grove-B with 60%/40% |
+| Navigation screenshot | BEFORE (100) and AFTER (150) token screenshots |
 
 ## Acceptance Criteria
-{Detailed criteria per story}
+{Detailed criteria per story in Gherkin format}
 ```
 
 ### GROVE_EXECUTION_CONTRACT.md Template
@@ -360,7 +473,9 @@ npm run build && npm test && npx playwright test
 - [ ] All QA gates passed
 - [ ] Cross-browser testing (Chrome, mobile)
 - [ ] Accessibility audit (keyboard nav)
-- [ ] Visual regression tests pass
+- [ ] Visual regression tests pass (Playwright screenshots)
+- [ ] E2E tests with visual verification pass
+- [ ] All screenshot baselines captured and verified
 - [ ] Performance check (Lighthouse > 90)
 
 ## Console Error Policy
@@ -397,12 +512,39 @@ See:
 ### NOTION_ENTRY.md Template
 
 ```markdown
+<code>
+🚀 DEVELOPER HANDOFF PROMPT
+
+Copy and paste this into a new terminal for the developer:
+
+---
+You are acting as DEVELOPER for sprint: {Sprint Name}.
+
+Your responsibilities:
+- Execute sprint phases per EXECUTION_PROMPT
+- Implement code changes per specification
+- Write status updates to .agent/status/current/
+- Capture screenshots for visual verification
+- Complete REVIEW.html with acceptance criteria evidence
+- Run tests and fix failures
+
+Execute per: docs/sprints/{sprint-folder}/GROVE_EXECUTION_CONTRACT.md
+Write status to: .agent/status/current/{NNN}-{timestamp}-developer.md
+Template: .agent/status/ENTRY_TEMPLATE.md
+Reference: .agent/roles/developer.md
+
+On completion: Write COMPLETE entry with test results.
+You do NOT update Notion directly - Sprintmaster handles that.
+---
+</code>
+
 # {Sprint Name}: {Title}
 
 ## Sprint Status
 **Status:** 🎯 ready
 **Planning Complete:** {date}
 **Artifacts:** {list}
+**Phase:** Ready for Developer Handoff
 
 ## Goal
 {2-3 sentences}
@@ -429,13 +571,13 @@ See:
 2. {step 2}
 
 ## Artifacts
-- [SPEC_v1.md]
-- [REQUIREMENTS.md]
-- [DESIGN_SPEC.md]
-- [UI_REVIEW.md]
-- [UX_STRATEGIC_REVIEW.md]
-- [USER_STORIES.md]
-- [GROVE_EXECUTION_CONTRACT.md]
+- [SPEC_v1.md](docs/sprints/{sprint-folder}/SPEC_v1.md)
+- [REQUIREMENTS.md](docs/sprints/{sprint-folder}/REQUIREMENTS.md)
+- [DESIGN_SPEC.md](docs/sprints/{sprint-folder}/DESIGN_SPEC.md)
+- [UI_REVIEW.md](docs/sprints/{sprint-folder}/UI_REVIEW.md)
+- [UX_STRATEGIC_REVIEW.md](docs/sprints/{sprint-folder}/UX_STRATEGIC_REVIEW.md)
+- [USER_STORIES.md](docs/sprints/{sprint-folder}/USER_STORIES.md)
+- [GROVE_EXECUTION_CONTRACT.md](docs/sprints/{sprint-folder}/GROVE_EXECUTION_CONTRACT.md)
 
 ## Next Steps
 1. Assign developer
@@ -533,6 +675,57 @@ User copies, pastes into Notion, assigns developer, done! ✅
 
 ---
 
+---
+
+## Stage 8: Status Sync (NEW - 2026-01-18)
+
+**Owner:** Developer / Sprintmaster
+**Trigger:** Any Notion status change
+**Duration:** 5 minutes
+**Output:** Updated `STATUS.md`
+
+**When to Sync:**
+- Sprint moves to 🚀 in-progress
+- Sprint moves to ✅ complete
+- Sprint moves to 📦 archived
+- Any blocking issue occurs
+
+**Actions:**
+1. Update local `STATUS.md` with new status and date
+2. Update Notion page content if it differs from database property
+3. Add completion notes (PR number, key achievements)
+4. Update DEVLOG.md with milestone entry
+
+**STATUS.md Template:**
+```markdown
+# Sprint Status: {Sprint Name}
+
+## Current Status
+**Status:** {emoji} {status}
+**Last Synced:** {ISO date}
+**Notion Page:** {URL}
+
+## Timeline
+| Stage | Date | Notes |
+|-------|------|-------|
+| Created | {date} | {notes} |
+| Ready | {date} | {notes} |
+| In Progress | {date} | {notes} |
+| Complete | {date} | {notes} |
+
+## Completion Summary (if complete)
+- **PR:** #{number} merged to {branch}
+- **Key Achievements:** {list}
+```
+
+**Why This Matters:**
+- Local visibility without Notion query
+- Git history of state changes
+- Prevents working on wrong sprints
+- Audit trail for project management
+
+---
+
 **Document Owner:** Product Manager
 **Review Frequency:** After each sprint
-**Last Updated:** 2026-01-16T18:30:00Z
+**Last Updated:** 2026-01-18T10:00:00Z

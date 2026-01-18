@@ -432,6 +432,56 @@ export {
   AttributionChainSchema
 } from './attribution';
 
+// Quality Score types (Sprint: S10.1-SL-AICuration v2)
+// AI-curated quality assessment for sprouts
+export {
+  // Dimensions
+  type QualityDimensions,
+  type DimensionConfig,
+  QualityDimensionsSchema,
+  DIMENSION_CONFIGS,
+  // Grades
+  type QualityGrade,
+  type QualityGradeConfig,
+  QUALITY_GRADES,
+  QUALITY_GRADE_CONFIGS,
+  getQualityGrade,
+  getQualityGradeConfig,
+  // Thresholds
+  type QualityThresholds,
+  QualityThresholdsSchema,
+  DEFAULT_QUALITY_THRESHOLDS,
+  getQualityGradeWithThresholds,
+  // Quality Score
+  type QualityStatus,
+  type QualityScore,
+  QualityStatusSchema,
+  QualityScoreSchema,
+  // Sprout Integration
+  type SproutQualityMeta,
+  SproutQualityMetaSchema,
+  // Filters
+  type QualityFilterState,
+  type QualityFilterPreset,
+  QualityFilterStateSchema,
+  QUALITY_FILTER_PRESETS,
+  // Federated Learning
+  type FederatedConsentLevel,
+  type FederatedLearningConfig,
+  FederatedLearningConfigSchema,
+  DEFAULT_FEDERATED_CONFIG,
+  // Utilities
+  calculateOverallScore,
+  passesQualityFilter,
+  parseQualityFilterFromURL,
+  serializeQualityFilterToURL,
+  // Type Guards
+  isQualityScore,
+  isQualityDimensions,
+  isSproutQualityMeta,
+  isQualityFilterState,
+} from './quality';
+
 // Badge System types (Sprint: S11-SL-Attribution v1 - Phase 3)
 // Reputation badges and achievement system
 export {

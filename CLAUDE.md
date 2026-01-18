@@ -94,6 +94,28 @@ The codebase follows a three-layer architecture:
 | AI | Multi-model (Gemini, Claude, local) | 2.0-flash / 2.5-flash |
 | Language | TypeScript | 5.8.2 |
 
+### json-render Pattern (Mandatory)
+
+**Reference:** `docs/JSON_RENDER_PATTERN_GUIDE.md`
+
+> **"Read = json-render. Write = React."**
+
+| UI Purpose | Pattern |
+|------------|---------|
+| Displays data | json-render (dashboards, status, analytics, reports) |
+| Edits data | React (forms, editors, wizards, inputs) |
+
+**No exceptions. No debates.**
+
+**Established Catalogs:**
+| Catalog | Location | Purpose |
+|---------|----------|---------|
+| SignalsCatalog | `src/bedrock/consoles/ExperienceConsole/json-render/` | Analytics dashboards |
+| ResearchCatalog | `src/surface/components/modals/SproutFinishingRoom/json-render/` | AI-generated documents |
+| JobStatusCatalog | Same as SignalsCatalog | Job execution status |
+
+**Pattern:** Catalog (Zod schemas) → Registry (React components) → Transform (domain → render tree)
+
 ---
 
 ## Routes
@@ -581,9 +603,9 @@ Search: "Parent Spec: Sprout Finishing Room v1" + Status != complete
 The Product Pod is a collaborative team of three skills for new product initiatives:
 
 **Members:**
-- **Product Manager** - Drafts briefs, DEX compliance, Advisory Council integration
+- **User Experience Chief** - DEX guardian, takes first draft, approval authority
+- **Product Manager** - Reviews for details, UX elegance, roadmap fit
 - **UI/UX Designer** - Wireframes, pattern documentation, accessibility
-- **User Experience Chief** - DEX guardian, approval authority, cross-functional alignment
 
 **Workflow:**
 ```
@@ -591,13 +613,13 @@ Initiative triggered
        │
        ▼
 ┌─────────────────┐
-│ Product Manager │ ◄─── Drafts Product Brief
+│   UX Chief      │ ◄─── Drafts Product Brief
+│                 │      Consults Advisory Council
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│   UX Chief      │ ◄─── Reviews DEX alignment
-│                 │      Consults Advisory Council
+│ Product Manager │ ◄─── Reviews for details, UX elegance, roadmap fit
 └────────┬────────┘
          │
          ▼

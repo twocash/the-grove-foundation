@@ -3,6 +3,443 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "f35ab0f8-0cd7-41b9-8051-7b73e1566579",
+      "timestamp": "2026-01-17T13:50:15.065Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ma-001-view-comprehensive-model-performance-dashboard",
+              "name": "US-MA-001: View comprehensive model performance dashboard",
+              "status": "pass",
+              "message": "Passed",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 120502
+            },
+            {
+              "id": "us-ml-001-create-new-lifecycle-model-via-experienceconsole",
+              "name": "US-ML-001: Create new lifecycle model via ExperienceConsole",
+              "status": "pass",
+              "message": "Passed",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 133068
+            },
+            {
+              "id": "us-ab-001-create-a-b-test-model-variants",
+              "name": "US-AB-001: Create A/B test model variants",
+              "status": "pass",
+              "message": "Passed",
+              "file": "ab-testing.spec.ts",
+              "duration": 231233
+            },
+            {
+              "id": "us-ma-002-export-analytics-data",
+              "name": "US-MA-002: Export analytics data",
+              "status": "pass",
+              "message": "Passed",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 119485
+            },
+            {
+              "id": "us-ml-002-assign-sprout-to-specific-lifecycle-model",
+              "name": "US-ML-002: Assign sprout to specific lifecycle model",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('textarea, input[type=\"text\"]').first()\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('textarea, input[type=\"text\"]').first()\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 111132
+            },
+            {
+              "id": "us-ma-003-compare-multiple-models-side-by-side",
+              "name": "US-MA-003: Compare multiple models side-by-side",
+              "status": "pass",
+              "message": "Passed",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 117152
+            },
+            {
+              "id": "us-ab-002-monitor-variant-performance-metrics",
+              "name": "US-AB-002: Monitor variant performance metrics",
+              "status": "pass",
+              "message": "Passed",
+              "file": "ab-testing.spec.ts",
+              "duration": 125916
+            },
+            {
+              "id": "us-ml-003-track-sprout-tier-advancement",
+              "name": "US-ML-003: Track sprout tier advancement",
+              "status": "pass",
+              "message": "Passed",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 195430
+            },
+            {
+              "id": "us-ab-003-verify-variant-assignment-consistency",
+              "name": "US-AB-003: Verify variant assignment consistency",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m",
+              "file": "ab-testing.spec.ts",
+              "duration": 300282
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 9,
+        "passed": 7,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T13:50:15.077Z"
+      }
+    },
+    {
+      "id": "8c0226a6-6b71-478d-a398-13014e1f0d13",
+      "timestamp": "2026-01-17T13:33:46.853Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ml-001-create-new-lifecycle-model-via-experienceconsole",
+              "name": "US-ML-001: Create new lifecycle model via ExperienceConsole",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 66715
+            },
+            {
+              "id": "us-ml-002-assign-sprout-to-specific-lifecycle-model",
+              "name": "US-ML-002: Assign sprout to specific lifecycle model",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 62552
+            },
+            {
+              "id": "us-ml-003-track-sprout-tier-advancement",
+              "name": "US-ML-003: Track sprout tier advancement",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 65647
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T13:33:46.939Z"
+      }
+    },
+    {
+      "id": "f677567d-d4e0-4cd2-a44e-f53497011c85",
+      "timestamp": "2026-01-17T05:52:28.291Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ma-001-view-comprehensive-model-performance-dashboard",
+              "name": "US-MA-001: View comprehensive model performance dashboard",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 65395
+            },
+            {
+              "id": "us-ma-002-export-analytics-data",
+              "name": "US-MA-002: Export analytics data",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 65383
+            },
+            {
+              "id": "us-ma-003-compare-multiple-models-side-by-side",
+              "name": "US-MA-003: Compare multiple models side-by-side",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "model-analytics-dashboard.spec.ts",
+              "duration": 65388
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T05:52:28.307Z"
+      }
+    },
+    {
+      "id": "4c6df429-38ae-42f2-8d78-ccd7aec3f81c",
+      "timestamp": "2026-01-17T05:47:33.069Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ab-001-create-a-b-test-model-variants",
+              "name": "US-AB-001: Create A/B test model variants",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "ab-testing.spec.ts",
+              "duration": 65391
+            },
+            {
+              "id": "us-ab-002-monitor-variant-performance-metrics",
+              "name": "US-AB-002: Monitor variant performance metrics",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "ab-testing.spec.ts",
+              "duration": 65450
+            },
+            {
+              "id": "us-ab-003-verify-variant-assignment-consistency",
+              "name": "US-AB-003: Verify variant assignment consistency",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "ab-testing.spec.ts",
+              "duration": 65398
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T05:47:33.083Z"
+      }
+    },
+    {
+      "id": "209c2690-4a35-4a60-8302-1ed931cc7d44",
+      "timestamp": "2026-01-17T05:37:13.770Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ml-001-create-new-lifecycle-model-via-experienceconsole",
+              "name": "US-ML-001: Create new lifecycle model via ExperienceConsole",
+              "status": "pass",
+              "message": "Passed",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 69681
+            },
+            {
+              "id": "us-ml-002-assign-sprout-to-specific-lifecycle-model",
+              "name": "US-ML-002: Assign sprout to specific lifecycle model",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 65288
+            },
+            {
+              "id": "us-ml-003-track-sprout-tier-advancement",
+              "name": "US-ML-003: Track sprout tier advancement",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 65402
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 1,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T05:37:13.779Z"
+      }
+    },
+    {
+      "id": "06585045-5205-4fe4-ab94-d19fdac5a1d0",
+      "timestamp": "2026-01-17T05:30:28.650Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-ml-001-create-new-lifecycle-model-via-experienceconsole",
+              "name": "US-ML-001: Create new lifecycle model via ExperienceConsole",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/bedrock/experience\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 65621
+            },
+            {
+              "id": "us-ml-002-assign-sprout-to-specific-lifecycle-model",
+              "name": "US-ML-002: Assign sprout to specific lifecycle model",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 65411
+            },
+            {
+              "id": "us-ml-003-track-sprout-tier-advancement",
+              "name": "US-ML-003: Track sprout tier advancement",
+              "status": "fail",
+              "message": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/explore\", waiting until \"load\"\u001b[22m\n",
+              "file": "multimodel-lifecycle.spec.ts",
+              "duration": 60857
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 0,
+        "failed": 3,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T05:30:28.734Z"
+      }
+    },
+    {
+      "id": "e89e168e-1b40-4bcf-8fc7-a8d972d58fbf",
+      "timestamp": "2026-01-17T02:25:00.543Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-m001-experience-console-loads-with-model-analytics-catalog",
+              "name": "US-M001: Experience Console loads with model-analytics catalog",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "model-analytics.spec.ts",
+              "duration": 30275
+            },
+            {
+              "id": "us-m002-experience-console-type-registry-includes-model-analytics",
+              "name": "US-M002: Experience Console type registry includes model-analytics",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "model-analytics.spec.ts",
+              "duration": 30416
+            },
+            {
+              "id": "us-m003-bedrock-dashboard-loads-without-model-analytics-errors",
+              "name": "US-M003: Bedrock dashboard loads without model-analytics errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "model-analytics.spec.ts",
+              "duration": 22333
+            },
+            {
+              "id": "us-m004-model-analytics-registry-loads-without-errors",
+              "name": "US-M004: Model analytics registry loads without errors",
+              "status": "fail",
+              "message": "TypeError: Cannot read properties of undefined (reading 'includes')",
+              "file": "model-analytics.spec.ts",
+              "duration": 15198
+            },
+            {
+              "id": "us-m005-navigation-between-bedrock-routes-works",
+              "name": "US-M005: Navigation between bedrock routes works",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+              "file": "model-analytics.spec.ts",
+              "duration": 30407
+            },
+            {
+              "id": "us-m006-json-render-catalog-loads-without-errors",
+              "name": "US-M006: Json-render catalog loads without errors",
+              "status": "fail",
+              "message": "TypeError: Cannot read properties of undefined (reading 'includes')",
+              "file": "model-analytics.spec.ts",
+              "duration": 21921
+            },
+            {
+              "id": "us-m007-multiple-component-types-load-without-conflicts",
+              "name": "US-M007: Multiple component types load without conflicts",
+              "status": "fail",
+              "message": "TypeError: Cannot read properties of undefined (reading 'includes')",
+              "file": "model-analytics.spec.ts",
+              "duration": 24405
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "passed": 1,
+        "failed": 6,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-17T02:25:00.561Z"
+      }
+    },
+    {
       "id": "c94dc244-ce29-4d22-ac4b-fdab3016e910",
       "timestamp": "2026-01-15T21:11:46.026Z",
       "configVersion": "external",

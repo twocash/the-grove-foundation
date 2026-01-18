@@ -1,11 +1,12 @@
 // src/bedrock/consoles/NurseryConsole/SproutCard.tsx
 // Sprout card component for Nursery Console
-// Sprint: nursery-v1 (Course Correction)
+// Sprint: S10.1-SL-AICuration v2 (Quality Badge Integration)
 
 import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { SproutPayload } from './useNurseryData';
 import { NURSERY_STATUS_CONFIG, type NurseryDisplayStatus } from './NurseryConsole.config';
+import { QualityScoreBadge, QualityPendingBadge } from '../../primitives/QualityScoreBadge';
 
 // =============================================================================
 // Helper Functions
@@ -36,6 +37,42 @@ function formatTimeSince(dateString: string): string {
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 7) return `${diffDays}d ago`;
   return date.toLocaleDateString();
+}
+
+// =============================================================================
+// Quality Badge Renderer
+// =============================================================================
+
+interface QualityBadgeRendererProps {
+  qualityStatus: SproutPayload['qualityStatus'];
+  qualityScore?: SproutPayload['qualityScore'];
+}
+
+/**
+ * Renders the appropriate quality badge based on status
+ */
+function QualityBadgeRenderer({ qualityStatus, qualityScore }: QualityBadgeRendererProps) {
+  switch (qualityStatus) {
+    case 'scored':
+      if (!qualityScore) return null;
+      return (
+        <QualityScoreBadge
+          score={qualityScore.overall}
+          dimensions={qualityScore.dimensions}
+          size="sm"
+          showPercentage
+        />
+      );
+
+    case 'pending':
+      return <QualityPendingBadge size="sm" />;
+
+    case 'error':
+    case 'not-assessed':
+    default:
+      // Hide badge gracefully for error/not-assessed states
+      return null;
+  }
 }
 
 // =============================================================================
@@ -84,28 +121,37 @@ export function SproutCard({
       {/* Status color bar at top */}
       <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${colors.bar}`} />
 
-      {/* Favorite button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onFavoriteToggle();
-        }}
-        className={`
-          absolute top-3 right-3 p-1 rounded-lg transition-colors
-          ${isFavorite
-            ? 'text-[var(--neon-amber)]'
-            : 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-secondary)]'
-          }
-        `}
-        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-      >
-        <span className="material-symbols-outlined text-lg">
-          {isFavorite ? 'star' : 'star_outline'}
-        </span>
-      </button>
+      {/* Top right: Quality Badge + Favorite */}
+      <div className="absolute top-3 right-3 flex items-center gap-2">
+        {/* Quality badge */}
+        <QualityBadgeRenderer
+          qualityStatus={sprout.payload.qualityStatus}
+          qualityScore={sprout.payload.qualityScore}
+        />
+
+        {/* Favorite button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onFavoriteToggle();
+          }}
+          className={`
+            p-1 rounded-lg transition-colors
+            ${isFavorite
+              ? 'text-[var(--neon-amber)]'
+              : 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-secondary)]'
+            }
+          `}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <span className="material-symbols-outlined text-lg">
+            {isFavorite ? 'star' : 'star_outline'}
+          </span>
+        </button>
+      </div>
 
       {/* Title and spark */}
-      <div className="mt-2 pr-8">
+      <div className="mt-2 pr-20">
         <h3 className="font-medium text-[var(--glass-text-primary)] truncate mb-1">
           {sprout.meta.title}
         </h3>

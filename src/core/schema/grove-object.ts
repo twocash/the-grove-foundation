@@ -133,5 +133,6 @@ export type GroveObjectPayloadMap = {
   'node': unknown;
   'card': unknown;
   'lifecycle-model': unknown;
+  'quality-threshold': unknown;  // Sprint: S10-SL-AICuration v1
   [key: string]: unknown;
 };
