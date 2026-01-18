@@ -19,7 +19,7 @@ This document serves as shared context for all agents working on Grove Foundatio
 - **Gemini** (via API) - Planning and analysis
 - **Local models** (Kimik2, etc.) - Specialized tasks
 
-All agents share this context. Model-specific behaviors live in skill files (`~/.claude/skills/`), not here.
+All agents share this context. Model-specific behaviors live in skill files (`.agent/skills/` in repo, synced to `~/.claude/skills/`), not here.
 
 ---
 
@@ -591,12 +591,27 @@ Search: "Parent Spec: Sprout Finishing Room v1" + Status != complete
 
 | Location | Purpose | Git |
 |----------|---------|-----|
-| `~/.claude/skills/` | Skill definitions | Local |
+| `.agent/skills/` | Skill definitions (source of truth) | **Tracked** |
+| `~/.claude/skills/` | Skill runtime (synced from repo) | Local |
 | `.agent/roles/` | Role definitions | Tracked |
 | `.agent/config/` | Coordination config | Tracked |
 | `.agent/status/current/` | Active entries | **Gitignored** |
 | `.agent/status/archive/` | Historical entries | Tracked |
 | `~/.claude/notes/grove-runbook.md` | Central agent reference | Local |
+
+### Skills Sync
+
+Skills are version-controlled in `.agent/skills/` and synced to local:
+
+```bash
+# After clone or pull
+./scripts/sync-skills.sh
+
+# After local development
+./scripts/sync-skills.sh --reverse
+```
+
+**Documentation:** `docs/SKILLS_SYNC.md` | **Authoring guide:** `.agent/skills/README.md`
 
 ### Product Pod Workflow
 
