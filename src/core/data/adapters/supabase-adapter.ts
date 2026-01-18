@@ -39,6 +39,11 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   'job-config': 'job_configs', // Sprint: S7.5-SL-JobConfigSystem v1
   'lifecycle-model': 'lifecycle_models', // Sprint: EPIC4-SL-MultiModel v1
   'advancement-rule': 'advancement_rules', // Sprint: S7-SL-AutoAdvancement v1
+  // Sprint: S9-SL-Federation v1 - Cross-Grove Federation
+  'federated-grove': 'federated_groves',
+  'tier-mapping': 'tier_mappings',
+  'federation-exchange': 'federation_exchanges',
+  'trust-relationship': 'trust_relationships',
 };
 
 /**
@@ -55,6 +60,11 @@ const JSONB_META_TYPES = new Set<GroveObjectType>([
   'job-config', // Sprint: S7.5-SL-JobConfigSystem v1
   'lifecycle-model', // Sprint: EPIC4-SL-MultiModel v1
   'advancement-rule', // Sprint: S7-SL-AutoAdvancement v1
+  // Sprint: S9-SL-Federation v1 - Cross-Grove Federation
+  'federated-grove',
+  'tier-mapping',
+  'federation-exchange',
+  'trust-relationship',
 ]);
 
 /**

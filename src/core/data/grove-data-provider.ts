@@ -34,7 +34,12 @@ export type GroveObjectType =
   | 'reputation-score'      // Sprint: S11-SL-Attribution v1
   | 'network-influence'     // Sprint: S11-SL-Attribution v1
   | 'economic-setting'      // Sprint: S11-SL-Attribution v1
-  | 'attribution-chain';    // Sprint: S11-SL-Attribution v1
+  | 'attribution-chain'     // Sprint: S11-SL-Attribution v1
+  // Sprint: S9-SL-Federation v1 - Cross-Grove Federation
+  | 'federated-grove'
+  | 'tier-mapping'
+  | 'federation-exchange'
+  | 'trust-relationship';
 
 /**
  * Options for listing objects.

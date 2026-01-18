@@ -23,6 +23,10 @@ export type GroveObjectType =
   | 'attribution-event'     // Sprint: S11-SL-Attribution v1
   | 'economic-setting'      // Sprint: S11-SL-Attribution v1
   | 'quality-threshold'     // Sprint: S10-SL-AICuration v1
+  | 'federated-grove'       // Sprint: S9-SL-Federation v1
+  | 'tier-mapping'          // Sprint: S9-SL-Federation v1
+  | 'federation-exchange'   // Sprint: S9-SL-Federation v1
+  | 'trust-relationship'    // Sprint: S9-SL-Federation v1
   | string;
 
 /**
@@ -134,5 +138,9 @@ export type GroveObjectPayloadMap = {
   'card': unknown;
   'lifecycle-model': unknown;
   'quality-threshold': unknown;  // Sprint: S10-SL-AICuration v1
+  'federated-grove': unknown;    // Sprint: S9-SL-Federation v1
+  'tier-mapping': unknown;       // Sprint: S9-SL-Federation v1
+  'federation-exchange': unknown; // Sprint: S9-SL-Federation v1
+  'trust-relationship': unknown; // Sprint: S9-SL-Federation v1
   [key: string]: unknown;
 };

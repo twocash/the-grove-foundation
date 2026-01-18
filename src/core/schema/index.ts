@@ -514,3 +514,64 @@ export {
   isBadgeDefinition,
   isEarnedBadge
 } from './badges';
+
+// Grove-Level Federation types (Sprint: S9-SL-Federation v1)
+// Cross-grove federation for external communities
+export {
+  // Tier System
+  type TierDefinition as FederationTierDefinition,
+  type TierSystemDefinition,
+  TierDefinitionSchema,
+  TierSystemDefinitionSchema,
+  // Status Types
+  type GroveStatus,
+  type ConnectionStatus,
+  type TrustLevel,
+  GroveStatusSchema,
+  ConnectionStatusSchema,
+  TrustLevelSchema,
+  // Trust Configuration
+  TRUST_THRESHOLDS,
+  TRUST_LEVEL_CONFIGS,
+  type TrustLevelConfig,
+  // Federated Grove
+  type FederatedGrovePayload,
+  type FederatedGrove,
+  FederatedGrovePayloadSchema,
+  // Tier Mapping
+  type EquivalenceType,
+  type MappingStatus,
+  type TierEquivalence,
+  type TierMappingPayload,
+  type TierMapping,
+  EquivalenceTypeSchema,
+  MappingStatusSchema,
+  TierEquivalenceSchema,
+  TierMappingPayloadSchema,
+  // Federation Exchange
+  type ExchangeType,
+  type ExchangeContentType,
+  type ExchangeStatus,
+  type FederationExchangePayload,
+  type FederationExchange,
+  ExchangeTypeSchema,
+  ExchangeContentTypeSchema,
+  ExchangeStatusSchema,
+  FederationExchangePayloadSchema,
+  // Trust Relationship
+  type TrustComponents,
+  type TrustRelationshipPayload,
+  type TrustRelationship,
+  TrustComponentsSchema,
+  TrustRelationshipPayloadSchema,
+  // Type Guards
+  isFederatedGrove,
+  isTierMapping,
+  isFederationExchange,
+  isTrustRelationship,
+  // Utilities
+  getTrustLevel,
+  getTrustMultiplier,
+  calculateTrustScore,
+  orderGroveIds
+} from './federation';

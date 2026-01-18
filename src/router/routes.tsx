@@ -49,6 +49,10 @@ const ExperienceConsole = lazy(() => import('../bedrock/consoles/ExperienceConso
 // Attribution Dashboard (Sprint: S11-SL-Attribution v1 - Phase 4)
 const AttributionDashboard = lazy(() => import('../bedrock/consoles/AttributionDashboard'));
 
+// Federation Console (Sprint: S9-SL-Federation v1)
+// Cross-Grove Federation Management - federated groves, tier mappings, exchanges, trust
+const FederationConsole = lazy(() => import('../bedrock/consoles/FederationConsole'));
+
 // Console Factory v2 Demo (Sprint: console-factory-v2)
 const SchemaConsoleDemo = lazy(() => import('../bedrock/consoles/SchemaConsoleDemo'));
 
@@ -299,6 +303,16 @@ export const routes: RouteObject[] = [
             element: (
               <Suspense fallback={<ConsoleLoadingFallback />}>
                 <AttributionDashboard showDetails />
+              </Suspense>
+            ),
+          },
+          // Federation Console (Cross-Grove Federation)
+          // Sprint: S9-SL-Federation v1 - federated groves, tier mappings, exchanges, trust
+          {
+            path: 'federation',
+            element: (
+              <Suspense fallback={<ConsoleLoadingFallback />}>
+                <FederationConsole />
               </Suspense>
             ),
           },
