@@ -2,8 +2,8 @@
 // Editor component for Trust Relationship
 // Sprint: S9-SL-Federation v1
 
-import React from 'react';
-import type { ObjectEditorProps } from '../../patterns/console-factory.types';
+import React, { useCallback } from 'react';
+import type { ObjectEditorProps, PatchOperation } from '../../patterns/console-factory.types';
 import type { TrustRelationshipPayload, TrustLevel, TrustComponents } from '@core/schema/federation';
 import { TRUST_LEVEL_CONFIGS } from '@core/schema/federation';
 
@@ -48,18 +48,28 @@ function getScoreColor(score: number): string {
  */
 export function TrustEditor({
   object: relationship,
-  onChange,
+  onEdit,
+  onSave,
+  onDelete,
+  onDuplicate,
+  loading,
+  hasChanges,
   className = '',
 }: ObjectEditorProps<TrustRelationshipPayload>) {
   const { payload } = relationship;
 
-  const updatePayload = (updates: Partial<TrustRelationshipPayload>) => {
-    onChange({
-      ...relationship,
-      payload: { ...payload, ...updates },
-      meta: { ...relationship.meta, updatedAt: new Date().toISOString() },
-    });
-  };
+  // Helper for payload updates using patch operations
+  const updatePayload = useCallback(
+    (updates: Partial<TrustRelationshipPayload>) => {
+      const ops: PatchOperation[] = Object.entries(updates).map(([key, value]) => ({
+        op: 'replace' as const,
+        path: `/payload/${key}`,
+        value,
+      }));
+      onEdit(ops);
+    },
+    [onEdit]
+  );
 
   const updateComponent = (key: keyof TrustComponents, value: number) => {
     const newComponents = { ...payload.components, [key]: value };

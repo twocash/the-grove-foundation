@@ -2,8 +2,8 @@
 // Editor component for Federation Exchange
 // Sprint: S9-SL-Federation v1
 
-import React from 'react';
-import type { ObjectEditorProps } from '../../patterns/console-factory.types';
+import React, { useCallback } from 'react';
+import type { ObjectEditorProps, PatchOperation } from '../../patterns/console-factory.types';
 import type {
   FederationExchangePayload,
   ExchangeType,
@@ -17,18 +17,28 @@ import { EXCHANGE_STATUS_CONFIG, CONTENT_TYPE_CONFIG } from './FederationConsole
  */
 export function ExchangeEditor({
   object: exchange,
-  onChange,
+  onEdit,
+  onSave,
+  onDelete,
+  onDuplicate,
+  loading,
+  hasChanges,
   className = '',
 }: ObjectEditorProps<FederationExchangePayload>) {
   const { payload } = exchange;
 
-  const updatePayload = (updates: Partial<FederationExchangePayload>) => {
-    onChange({
-      ...exchange,
-      payload: { ...payload, ...updates },
-      meta: { ...exchange.meta, updatedAt: new Date().toISOString() },
-    });
-  };
+  // Helper for payload updates using patch operations
+  const updatePayload = useCallback(
+    (updates: Partial<FederationExchangePayload>) => {
+      const ops: PatchOperation[] = Object.entries(updates).map(([key, value]) => ({
+        op: 'replace' as const,
+        path: `/payload/${key}`,
+        value,
+      }));
+      onEdit(ops);
+    },
+    [onEdit]
+  );
 
   const contentConfig = CONTENT_TYPE_CONFIG[payload.contentType];
   const statusConfig = EXCHANGE_STATUS_CONFIG[payload.status];

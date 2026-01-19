@@ -2,8 +2,8 @@
 // Editor component for Federated Grove
 // Sprint: S9-SL-Federation v1
 
-import React, { useState } from 'react';
-import type { ObjectEditorProps } from '../../patterns/console-factory.types';
+import React, { useState, useCallback } from 'react';
+import type { ObjectEditorProps, PatchOperation } from '../../patterns/console-factory.types';
 import type { FederatedGrovePayload, TierDefinition, GroveStatus, ConnectionStatus, TrustLevel } from '@core/schema/federation';
 import { TRUST_LEVEL_CONFIGS } from '@core/schema/federation';
 import { CONNECTION_STATUS_CONFIG } from './FederationConsole.config';
@@ -13,20 +13,41 @@ import { CONNECTION_STATUS_CONFIG } from './FederationConsole.config';
  */
 export function GroveEditor({
   object: grove,
-  onChange,
+  onEdit,
+  onSave,
+  onDelete,
+  onDuplicate,
+  loading,
+  hasChanges,
   className = '',
 }: ObjectEditorProps<FederatedGrovePayload>) {
   const { payload } = grove;
   const [newCapability, setNewCapability] = useState('');
   const [editingTier, setEditingTier] = useState<string | null>(null);
 
-  const updatePayload = (updates: Partial<FederatedGrovePayload>) => {
-    onChange({
-      ...grove,
-      payload: { ...payload, ...updates },
-      meta: { ...grove.meta, updatedAt: new Date().toISOString() },
-    });
-  };
+  // Helper to generate patch operations for payload fields
+  const patchPayload = useCallback(
+    (field: string, value: unknown) => {
+      const ops: PatchOperation[] = [
+        { op: 'replace', path: `/payload/${field}`, value },
+      ];
+      onEdit(ops);
+    },
+    [onEdit]
+  );
+
+  // Helper for nested payload updates (e.g., tierSystem)
+  const updatePayload = useCallback(
+    (updates: Partial<FederatedGrovePayload>) => {
+      const ops: PatchOperation[] = Object.entries(updates).map(([key, value]) => ({
+        op: 'replace' as const,
+        path: `/payload/${key}`,
+        value,
+      }));
+      onEdit(ops);
+    },
+    [onEdit]
+  );
 
   const addCapability = () => {
     if (newCapability.trim() && !payload.capabilities.includes(newCapability.trim())) {

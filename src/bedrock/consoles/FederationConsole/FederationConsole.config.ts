@@ -20,6 +20,7 @@ import {
 /**
  * Generate filter options from registry
  * Includes common filters plus type-specific filters
+ * Deduplicates by field and merges options
  */
 function generateFilterOptions(): Array<{
   field: string;
@@ -37,15 +38,28 @@ function generateFilterOptions(): Array<{
     options: types.map((t) => t.type),
   };
 
-  // Collect type-specific filters
-  const typeSpecificFilters: FederationFilterDefinition[] = [];
+  // Collect type-specific filters and deduplicate by field
+  const filtersByField = new Map<string, FederationFilterDefinition>();
+
   for (const typeDef of types) {
     if (typeDef.filters) {
-      typeSpecificFilters.push(...typeDef.filters);
+      for (const filter of typeDef.filters) {
+        const existing = filtersByField.get(filter.field);
+        if (existing) {
+          // Merge options, deduplicating
+          const mergedOptions = new Set([...(existing.options || []), ...(filter.options || [])]);
+          filtersByField.set(filter.field, {
+            ...existing,
+            options: Array.from(mergedOptions),
+          });
+        } else {
+          filtersByField.set(filter.field, { ...filter });
+        }
+      }
     }
   }
 
-  return [typeFilter, ...typeSpecificFilters];
+  return [typeFilter, ...Array.from(filtersByField.values())];
 }
 
 /**

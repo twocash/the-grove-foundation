@@ -2,8 +2,8 @@
 // Editor component for Tier Mapping
 // Sprint: S9-SL-Federation v1
 
-import React, { useState } from 'react';
-import type { ObjectEditorProps } from '../../patterns/console-factory.types';
+import React, { useState, useCallback } from 'react';
+import type { ObjectEditorProps, PatchOperation } from '../../patterns/console-factory.types';
 import type { TierMappingPayload, TierEquivalence, EquivalenceType, MappingStatus } from '@core/schema/federation';
 
 /**
@@ -31,7 +31,12 @@ const STATUS_OPTIONS: Array<{ value: MappingStatus; label: string }> = [
  */
 export function TierMappingEditor({
   object: mapping,
-  onChange,
+  onEdit,
+  onSave,
+  onDelete,
+  onDuplicate,
+  loading,
+  hasChanges,
   className = '',
 }: ObjectEditorProps<TierMappingPayload>) {
   const { payload } = mapping;
@@ -42,13 +47,18 @@ export function TierMappingEditor({
     equivalenceType: 'approximate',
   });
 
-  const updatePayload = (updates: Partial<TierMappingPayload>) => {
-    onChange({
-      ...mapping,
-      payload: { ...payload, ...updates },
-      meta: { ...mapping.meta, updatedAt: new Date().toISOString() },
-    });
-  };
+  // Helper for payload updates using patch operations
+  const updatePayload = useCallback(
+    (updates: Partial<TierMappingPayload>) => {
+      const ops: PatchOperation[] = Object.entries(updates).map(([key, value]) => ({
+        op: 'replace' as const,
+        path: `/payload/${key}`,
+        value,
+      }));
+      onEdit(ops);
+    },
+    [onEdit]
+  );
 
   const addMapping = () => {
     if (newMapping.sourceTierId && newMapping.targetTierId) {
