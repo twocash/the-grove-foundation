@@ -3,6 +3,41 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "132a23cd-a914-47f6-a3f2-b388016ee140",
+      "timestamp": "2026-01-18T21:23:04.445Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "us-f001-federation-console-loads-with-seeded-data",
+              "name": "US-F001: Federation Console loads with seeded data",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('heading', { name: /federation/i })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('heading', { name: /federation/i })\u001b[22m\n",
+              "file": "federation-console-v1.spec.ts",
+              "duration": 35972
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-18T21:23:04.480Z"
+      }
+    },
+    {
       "id": "f35ab0f8-0cd7-41b9-8051-7b73e1566579",
       "timestamp": "2026-01-17T13:50:15.065Z",
       "configVersion": "external",
