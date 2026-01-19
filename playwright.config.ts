@@ -13,9 +13,10 @@ export default defineConfig({
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
   },
   webServer: {
-    command: 'npm run dev',
+    // Use --mode test to load .env.test.local (disables Supabase for localStorage seeding)
+    command: 'npm run dev -- --mode test',
     port: 3000,
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI, // Fresh server in CI, reuse locally if compatible
   },
   projects: [
     {
