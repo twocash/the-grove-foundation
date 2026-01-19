@@ -3,6 +3,491 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "a1b12e94-d376-4a6b-ac07-14c338e7acb2",
+      "timestamp": "2026-01-19T05:25:23.552Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 19675
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:25:23.556Z"
+      }
+    },
+    {
+      "id": "454c98f1-50a7-4534-adbe-896ae7e7cea1",
+      "timestamp": "2026-01-19T05:23:48.055Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5521
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5700
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5316
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 19869
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 20483
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5436
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 4,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:23:48.066Z"
+      }
+    },
+    {
+      "id": "1d9e206d-1aa4-48d3-a606-c76463f2f7eb",
+      "timestamp": "2026-01-19T05:21:06.690Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9720
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9912
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9916
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 24684
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 24931
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9857
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 4,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:21:06.695Z"
+      }
+    },
+    {
+      "id": "1c8267d2-e38a-43a0-abd1-b6b11270ba02",
+      "timestamp": "2026-01-19T05:17:14.564Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5325
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5091
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5219
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 19675
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 20552
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5154
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 4,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:17:14.574Z"
+      }
+    },
+    {
+      "id": "8ca8ebd7-086e-4dc5-8a04-eb3156f83fc8",
+      "timestamp": "2026-01-19T05:11:32.851Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]').locator('input#grove-name')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]').locator('input#grove-name')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 12313
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tier Equivalences')\nExpected: visible\nError: strict mode violation: getByText('Tier Equivalences') resolved to 2 elements:\n    1) <h4 class=\"glass-section-header\">Tier Equivalences</h4> aka getByRole('heading', { name: 'Tier Equivalences' })\n    2) <p class=\"text-sm text-[var(--glass-text-muted)]\">No tier equivalences defined</p> aka getByText('No tier equivalences defined')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tier Equivalences')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 7539
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Exchange Parties')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Exchange Parties')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 12743
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 20790
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 21730
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 7728
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 1,
+        "failed": 5,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:11:32.856Z"
+      }
+    },
+    {
+      "id": "f55dd549-f9ab-4332-b7cb-350ec8f3339a",
+      "timestamp": "2026-01-19T05:07:41.686Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]').locator('input#grove-name')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]').locator('input#grove-name')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9972
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tier Equivalences')\nExpected: visible\nError: strict mode violation: getByText('Tier Equivalences') resolved to 2 elements:\n    1) <h4 class=\"glass-section-header\">Tier Equivalences</h4> aka getByRole('heading', { name: 'Tier Equivalences' })\n    2) <p class=\"text-sm text-[var(--glass-text-muted)]\">No tier equivalences defined</p> aka getByText('No tier equivalences defined')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tier Equivalences')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 4816
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Exchange Parties')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Exchange Parties')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 10213
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 19395
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 20538
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5049
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 1,
+        "failed": 5,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:07:41.693Z"
+      }
+    },
+    {
+      "id": "4f4e5662-34cc-405d-bdf9-542a9a0d1b3a",
+      "timestamp": "2026-01-19T05:02:40.360Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "01-groveeditor-with-populated-content",
+              "name": "01 - GroveEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/85%/).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/85%/).first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 10613
+            },
+            {
+              "id": "02-tiermappingeditor-with-populated-content",
+              "name": "02 - TierMappingEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/grove-foundation|anthropic/i).first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/grove-foundation|anthropic/i).first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9912
+            },
+            {
+              "id": "03-exchangeeditor-with-populated-content",
+              "name": "03 - ExchangeEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText(/150/)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText(/150/)\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 9826
+            },
+            {
+              "id": "04-trusteditor-with-populated-content",
+              "name": "04 - TrustEditor with populated content",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"trust-card\"]').first()\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"trust-card\"]').first()\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 19429
+            },
+            {
+              "id": "05-mobile-layout-at-360px",
+              "name": "05 - Mobile layout at 360px",
+              "status": "fail",
+              "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('[data-testid=\"grove-editor\"]')\nExpected: visible\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for locator('[data-testid=\"grove-editor\"]')\u001b[22m\n",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 20601
+            },
+            {
+              "id": "06-footer-actions-visible",
+              "name": "06 - Footer actions visible",
+              "status": "pass",
+              "message": "Passed",
+              "file": "s15-federation-editors-screenshots.spec.ts",
+              "duration": 5477
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 1,
+        "failed": 5,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-19T05:02:40.373Z"
+      }
+    },
+    {
       "id": "132a23cd-a914-47f6-a3f2-b388016ee140",
       "timestamp": "2026-01-18T21:23:04.445Z",
       "configVersion": "external",

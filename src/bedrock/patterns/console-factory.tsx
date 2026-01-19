@@ -297,17 +297,13 @@ export function createBedrockConsole<T>(
 
     // Sprint: experience-console-cleanup-v1 - Typed create for polymorphic consoles
     const handleCreateTyped = useCallback(async (type: string) => {
-      try {
-        if (createTyped) {
-          const newObject = await createTyped(type);
-          setSelectedId(newObject.meta.id);
-        } else {
-          // Fallback to default create if createTyped not available
-          const newObject = await create();
-          setSelectedId(newObject.meta.id);
-        }
-      } catch (err) {
-        console.error('[Console] handleCreateTyped error:', err);
+      if (createTyped) {
+        const newObject = await createTyped(type);
+        setSelectedId(newObject.meta.id);
+      } else {
+        // Fallback to default create if createTyped not available
+        const newObject = await create();
+        setSelectedId(newObject.meta.id);
       }
     }, [create, createTyped]);
 
