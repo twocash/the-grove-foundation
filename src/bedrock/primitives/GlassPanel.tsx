@@ -1,8 +1,12 @@
 // src/bedrock/primitives/GlassPanel.tsx
 // Quantum Glass panel primitive for Bedrock consoles
-// Sprint: kinetic-pipeline-v1 (Story 6.0)
+// Sprint: kinetic-pipeline-v1 (Story 6.0), S0-SKIN-QuantumAudit (density prop)
 
 import React, { type ReactNode } from 'react';
+import {
+  type DensityToken,
+  DEFAULT_DENSITY,
+} from '../../theme/mappings/quantum-glass.map';
 
 // =============================================================================
 // Types
@@ -16,6 +20,14 @@ interface GlassPanelProps {
   tier?: GlassTier;
   /** Optional neon accent border */
   accent?: NeonAccent;
+  /**
+   * Content density - affects padding/spacing
+   * - 'compact': Reduced spacing (0.75x) for data-dense views
+   * - 'comfortable': Default spacing (1x) - current behavior
+   * - 'spacious': Increased spacing (1.25x) for focus/presentation
+   * @default 'comfortable'
+   */
+  density?: DensityToken;
   /** Panel header content */
   header?: ReactNode;
   /** Panel title (alternative to full header) */
@@ -61,6 +73,26 @@ const iconAccentColors: Record<NeonAccent, string> = {
   none: 'text-[var(--glass-text-secondary)]',
 };
 
+/**
+ * Density-based padding styles for content area
+ * These maintain the current 'comfortable' as default (p-4 = 1rem)
+ */
+const densityContentPadding: Record<DensityToken, string> = {
+  compact: 'p-3',      // 0.75rem
+  comfortable: 'p-4',  // 1rem (default - unchanged behavior)
+  spacious: 'p-5',     // 1.25rem
+};
+
+/**
+ * Density-based header padding styles
+ * These maintain the current 'comfortable' as default (px-4 py-3)
+ */
+const densityHeaderPadding: Record<DensityToken, string> = {
+  compact: 'px-3 py-2',
+  comfortable: 'px-4 py-3',  // default - unchanged behavior
+  spacious: 'px-5 py-4',
+};
+
 // =============================================================================
 // Component
 // =============================================================================
@@ -68,6 +100,7 @@ const iconAccentColors: Record<NeonAccent, string> = {
 export function GlassPanel({
   tier = 'panel',
   accent = 'none',
+  density = DEFAULT_DENSITY,
   header,
   title,
   icon,
@@ -112,11 +145,11 @@ export function GlassPanel({
   const content = (
     <>
       {hasHeader && (
-        <div className="px-4 py-3 border-b border-white/5">
+        <div className={`${densityHeaderPadding[density]} border-b border-white/5`}>
           {headerContent}
         </div>
       )}
-      <div className={padded ? 'p-4' : ''}>
+      <div className={padded ? densityContentPadding[density] : ''}>
         {children}
       </div>
     </>

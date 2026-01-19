@@ -565,6 +565,22 @@ body {
 /* ============================================
    QUANTUM GLASS DESIGN SYSTEM
    Sprint: quantum-glass-v1
+   Audited: S0-SKIN-QuantumAudit (2026-01-19)
+
+   CORE TOKENS (mapped in quantum-glass.map.ts):
+   - Backgrounds: 4 variables (void, panel, solid, elevated)
+   - Borders: 4 variables (default, hover, active, selected)
+   - Neon accents: 4 variables (green, cyan, amber, violet)
+   - Text scale: 6 variables (primary → faint)
+   - Glows: 3 variables (green, cyan, ambient)
+   - Motion: 4 variables (ease-out-expo, fast, normal, slow)
+
+   TODO (S1-S4 expansion candidates):
+   - Chat text tokens (--chat-text, --chat-highlight) - feature-specific
+   - Additional easings (motion-ease-*) - consider consolidation
+   - Streaming tokens - feature-specific
+   - Tray tokens - feature-specific
+   - Glass intensity variants (light/medium/heavy) - consider mapping
    ============================================ */
 
 :root {
