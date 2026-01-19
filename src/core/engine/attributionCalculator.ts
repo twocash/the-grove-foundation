@@ -269,9 +269,11 @@ export function addEventToChain(
   }
 
   // Calculate average quality if available
+  // chain.chainDepth = number of events currently in chain (before adding this one)
+  // chain.averageQuality = average of those chainDepth events
   if (event.qualityScore !== undefined) {
-    totalQuality = (chain.averageQuality || 0) * (chain.chainDepth - 1) + event.qualityScore;
-    qualityCount = chain.chainDepth;
+    totalQuality = (chain.averageQuality || 0) * chain.chainDepth + event.qualityScore;
+    qualityCount = chain.chainDepth + 1;
   }
 
   return {

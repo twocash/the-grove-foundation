@@ -1,9 +1,9 @@
 # Bedrock Sprint Contract
 
-**Version:** 1.3
+**Version:** 1.4
 **Status:** BINDING FOR ALL BEDROCK DEVELOPMENT
-**Amended:** January 13, 2026 (Added agent coordination protocol)  
-**Effective:** December 30, 2025  
+**Amended:** January 18, 2026 (Added inspector/editor design requirements)
+**Effective:** December 30, 2025
 **Branch:** `bedrock`
 
 ---
@@ -401,6 +401,7 @@ Before any PR merges to `bedrock`:
 - [ ] All objects use GroveObject schema (Article IV)
 - [ ] No imports from src/foundation/ (Article V)
 - [ ] Feature parity status updated (Article V)
+- [ ] Editor implementation checklist complete (Article XI) — if editors modified
 - [ ] Tests pass (Foundation Loop requirement)
 - [ ] Visual baselines updated if applicable
 ```
@@ -680,16 +681,192 @@ Reference: .agent/roles/qa-reviewer.md
 
 ---
 
+## Article XI: Inspector/Editor Design Requirements
+
+**Added:** January 18, 2026 (Post S9-SL-Federation retrospective)
+
+### Section 11.1: Inspector/Editor Mandate
+
+Every Bedrock console with editable objects MUST implement inspector/editor panels using the established factory pattern. **No custom editor layouts.** Ad-hoc editors fragment the design language and create UX debt.
+
+**Rationale:** S9-SL-Federation shipped with functional but unusable inspector panels (no padding, no section structure, no visual grouping). This pattern must be mechanized to prevent recurrence.
+
+### Section 11.2: Required Layout Primitives
+
+Every inspector/editor MUST use these shared layout components:
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `InspectorPanel` | `src/shared/layout` | Outer shell with header/footer |
+| `InspectorSection` | `src/shared/layout` | Field groupings with titles |
+| `InspectorDivider` | `src/shared/layout` | Visual separation between sections |
+| `UniversalInspector` | `src/bedrock/components/` | Schema-driven editor (preferred) |
+| `BedrockInspector` | `src/bedrock/primitives/` | Inspector primitive wrapper |
+
+**Prohibited:**
+- Raw `<section>` tags without `InspectorSection` wrapper
+- Direct padding via inline styles (use layout primitives)
+- Custom field renderers without registration in factory
+
+### Section 11.3: Standard Section Structure
+
+Every editor MUST organize fields into these standard sections:
+
+| Section | Required | Purpose | Default Expanded |
+|---------|----------|---------|------------------|
+| Identity | ✅ Yes | Name, ID, type, description | Yes |
+| Configuration | ✅ Yes | Domain-specific settings | Yes |
+| Status/Connection | ⚡ If applicable | State, connection, workflow | Yes |
+| Metadata | ⚡ If applicable | Timestamps, provenance, readonly | No (collapsible) |
+
+**Section Guidelines:**
+- Maximum 6 fields per section before splitting
+- Related fields grouped logically (e.g., all trust fields together)
+- Read-only fields use distinct styling (muted, no focus ring)
+
+### Section 11.4: Field Display Requirements
+
+Every field in an editor MUST have:
+
+| Element | Required | Example |
+|---------|----------|---------|
+| Label | ✅ Yes | "Grove Name" (not "name") |
+| Required indicator | ⚡ If required | Red asterisk (*) |
+| Placeholder | ✅ Yes | "My Grove Community" |
+| Help text | ⚡ If complex | "Unique identifier, cannot change after creation" |
+| Validation state | ⚡ If validation | Red border + error message |
+
+**Prohibited:**
+- Unlabeled fields
+- Placeholder-only identification (no visible label)
+- Field IDs as labels ("groveId" instead of "Grove ID")
+
+### Section 11.5: Complex Data Display
+
+For non-primitive data types, use these patterns:
+
+| Data Type | Pattern | Example |
+|-----------|---------|---------|
+| String arrays | Pill/tag layout | Capabilities: `[knowledge-exchange] [tier-mapping]` |
+| Confidence scores | Progress bar + numeric | `████████░░ 85%` |
+| Status enums | Badge with color | `● Connected` (green) |
+| Trust levels | Icon + label | `🛡️ Trusted` |
+| Nested objects | Collapsible sub-section | Tier System → [expand to show tiers] |
+| Timestamps | Formatted + relative | "Jan 18, 2026 (2 hours ago)" |
+
+### Section 11.6: Responsive Requirements
+
+Every editor MUST be usable at these breakpoints:
+
+| Breakpoint | Behavior |
+|------------|----------|
+| Desktop (>1024px) | Full 360px inspector column |
+| Tablet (768-1024px) | 320px inspector, smaller fields |
+| Mobile (<768px) | Full-width overlay or sheet |
+
+**Critical:** No horizontal overflow. All fields must wrap or truncate gracefully.
+
+### Section 11.7: Editor Implementation Checklist
+
+Every sprint creating or modifying editors MUST complete this checklist in SPEC.md:
+
+```markdown
+## Editor Implementation Checklist
+
+### Layout Compliance
+- [ ] Uses `InspectorPanel` as outer shell
+- [ ] Uses `InspectorSection` for all field groups
+- [ ] Uses `InspectorDivider` between sections
+- [ ] Standard padding applied (p-6 or via layout primitive)
+- [ ] No inline style overrides for spacing
+
+### Section Structure
+- [ ] Identity section with name/ID/description
+- [ ] Configuration section with domain fields
+- [ ] Metadata section (collapsed by default)
+- [ ] Maximum 6 fields per section
+
+### Field Quality
+- [ ] All fields have visible labels
+- [ ] Required fields marked with indicator
+- [ ] Complex data uses appropriate pattern (pills, badges, bars)
+- [ ] Timestamps formatted for readability
+
+### Responsive
+- [ ] Tested at 360px width (inspector column)
+- [ ] No horizontal overflow
+- [ ] Mobile layout renders correctly
+
+### Actions
+- [ ] Save button visible when changes exist
+- [ ] Delete action with confirmation
+- [ ] Duplicate action (if applicable)
+```
+
+### Section 11.8: Schema-Driven Editors (Preferred)
+
+When possible, editors SHOULD be schema-driven using `UniversalInspector`:
+
+```typescript
+// ConsoleSchema.inspector defines fields declaratively
+inspector: {
+  titleField: 'meta.title',
+  sections: {
+    identity: { title: 'Identity', defaultExpanded: true },
+    config: { title: 'Configuration', defaultExpanded: true },
+    metadata: { title: 'Metadata', defaultExpanded: false },
+  },
+  fields: [
+    { id: 'name', label: 'Grove Name', type: 'text', section: 'identity', required: true },
+    { id: 'status', label: 'Status', type: 'select', section: 'config', options: [...] },
+    // ...
+  ],
+}
+```
+
+**When to use custom editors:** Only when schema-driven approach cannot express required UX (e.g., complex nested tier systems with drag-and-drop reordering).
+
+### Section 11.9: Post-Sprint Editor Audit
+
+Before marking any sprint COMPLETE, verify all new/modified editors against Section 11.7 checklist. **Editors that fail any checkbox block sprint completion.**
+
+Non-compliant editors discovered post-sprint:
+1. Document in `POST_SPRINT_UX_DEBT.md`
+2. Create follow-up sprint for remediation
+3. Notify UX Chief for vision document if substantial rework needed
+
+---
+
 ## Signatures
 
 By commencing work on the `bedrock` branch, contributors agree to this contract.
 
 **Effective Date:** December 30, 2025
-**Version:** 1.2
+**Version:** 1.4
 
 ---
 
 ## Changelog
+
+### v1.4 (January 18, 2026)
+
+**Article XI: Inspector/Editor Design Requirements (NEW)**
+
+1. **Section 11.1:** Inspector/Editor Mandate — No custom editor layouts, must use factory pattern
+2. **Section 11.2:** Required Layout Primitives — InspectorPanel, InspectorSection, InspectorDivider
+3. **Section 11.3:** Standard Section Structure — Identity, Configuration, Status, Metadata
+4. **Section 11.4:** Field Display Requirements — Labels, required indicators, placeholders, help text
+5. **Section 11.5:** Complex Data Display — Patterns for arrays, scores, statuses, nested objects
+6. **Section 11.6:** Responsive Requirements — Must work at 360px inspector width
+7. **Section 11.7:** Editor Implementation Checklist — Binding gate for sprint completion
+8. **Section 11.8:** Schema-Driven Editors — UniversalInspector as preferred approach
+9. **Section 11.9:** Post-Sprint Editor Audit — Non-compliant editors block completion
+
+**Section 7.1 (AMENDED):** Pre-Merge Checklist — Added editor implementation checklist item
+
+**Rationale:** S9-SL-Federation delivered 4 editor panels that function correctly (35/35 E2E tests pass) but fail basic UX standards — no padding, no section structure, inconsistent field labeling. This UX debt was documented in `POST_SPRINT_UX_DEBT.md` and requires a dedicated remediation sprint. Article XI mechanizes editor design requirements to prevent similar debt in future sprints. Editors are now a first-class concern with explicit gate criteria.
+
+---
 
 ### v1.3 (January 13, 2026)
 
