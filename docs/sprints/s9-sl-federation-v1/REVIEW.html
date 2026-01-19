@@ -118,7 +118,7 @@
                 <div class="label">E2E Tests</div>
             </div>
             <div class="metric">
-                <div class="value">34</div>
+                <div class="value">38</div>
                 <div class="label">Screenshots</div>
             </div>
             <div class="metric">
@@ -257,7 +257,7 @@
     <h2>Visual Evidence</h2>
 
     <div class="card">
-        <h3>Federation Console Screenshots (34 captured)</h3>
+        <h3>Federation Console Screenshots (38 captured)</h3>
         <div class="screenshot-grid">
             <div class="screenshot">
                 <img src="screenshots/e2e/01-federation-console-loaded.png" alt="Console loaded">
@@ -272,6 +272,10 @@
                 <div class="caption">04 - Grove card with connection status</div>
             </div>
             <div class="screenshot">
+                <img src="screenshots/e2e/05-grove-editor-modal.png" alt="Grove editor">
+                <div class="caption">05 - Grove editor modal open</div>
+            </div>
+            <div class="screenshot">
                 <img src="screenshots/e2e/07-tier-mapping-confidence.png" alt="Tier mapping">
                 <div class="caption">07 - Tier mapping with confidence score</div>
             </div>
@@ -280,16 +284,36 @@
                 <div class="caption">08 - Federation exchanges view</div>
             </div>
             <div class="screenshot">
+                <img src="screenshots/e2e/09-exchange-token-cost.png" alt="Token cost">
+                <div class="caption">09 - Exchange token cost display</div>
+            </div>
+            <div class="screenshot">
                 <img src="screenshots/e2e/11-trust-relationships-view.png" alt="Trust">
                 <div class="caption">11 - Trust relationships view</div>
+            </div>
+            <div class="screenshot">
+                <img src="screenshots/e2e/17-type-filter.png" alt="Type filter">
+                <div class="caption">17 - Entity type filtering</div>
             </div>
             <div class="screenshot">
                 <img src="screenshots/e2e/20-federation-copilot.png" alt="Copilot">
                 <div class="caption">20 - Federation Copilot panel</div>
             </div>
             <div class="screenshot">
+                <img src="screenshots/e2e/22-editor-first-type.png" alt="Editor type">
+                <div class="caption">22 - Editor resolves correct component</div>
+            </div>
+            <div class="screenshot">
                 <img src="screenshots/e2e/28-dark-mode.png" alt="Dark mode">
                 <div class="caption">28 - Console in dark mode</div>
+            </div>
+            <div class="screenshot">
+                <img src="screenshots/e2e/30-navigated-to-federation.png" alt="Navigation">
+                <div class="caption">30 - Navigation from Bedrock dashboard</div>
+            </div>
+            <div class="screenshot">
+                <img src="screenshots/e2e/38-final-state.png" alt="Final state">
+                <div class="caption">38 - Console final state after workflow</div>
             </div>
         </div>
     </div>
@@ -405,7 +429,8 @@ Running 35 tests using 1 worker
 ✓  US-F034: Full workflow - create, view, filter
 ✓  US-F035: Console final state after interactions
 
-35/35 passed (4.9m) | Console load time: 2522ms
+35/35 passed (5.2m) | 38 screenshots captured | Console load time: 2522ms
+Last verified: 2026-01-18 | Commit: 5cad8d3
         </pre>
     </div>
 
@@ -440,7 +465,14 @@ Running 35 tests using 1 worker
     <h2>Known Issues & Follow-up</h2>
 
     <div class="card">
-        <h3>Issues</h3>
+        <h3>Issues (Resolved)</h3>
+        <ul>
+            <li><strong>✅ E2E Tests Fixed:</strong> All 35 tests now pass with proper localStorage seeding via <code>.env.test</code> (disables Supabase for LocalStorageAdapter)</li>
+            <li><strong>✅ Test Data Schemas:</strong> All payloads updated to match TypeScript interfaces with required fields</li>
+            <li><strong>✅ Assertions:</strong> Tests verify seeded data visibility before screenshots (not just "page loaded")</li>
+        </ul>
+
+        <h3>Remaining Notes</h3>
         <ul>
             <li><strong>Dev Server Performance:</strong> Vite dev server occasionally times out on first load (90s timeout configured)</li>
             <li><strong>Supabase Migration:</strong> Migration 029_federation_groves.sql exists but tables need verification</li>
@@ -482,7 +514,7 @@ Running 35 tests using 1 worker
     </div>
 
     <footer style="margin-top: 40px; padding: 20px; text-align: center; color: #6b7280; border-top: 1px solid #e5e7eb;">
-        <p>Sprint S9-SL-Federation-v1 | Grove Foundation | Generated 2026-01-18</p>
+        <p>Sprint S9-SL-Federation-v1 | Grove Foundation | Generated 2026-01-18 | Updated with E2E fixes (38 screenshots)</p>
     </footer>
 </body>
 </html>
