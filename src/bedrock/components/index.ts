@@ -27,3 +27,6 @@ export {
 export { ObjectCard, type ObjectCardProps } from './ObjectCard';
 export { ObjectGrid, type ObjectGridProps } from './ObjectGrid';
 export { ObjectList, type ObjectListColumn, type ObjectListProps } from './ObjectList';
+
+// Debug tools (S3-SKIN-StranglerMigration)
+export { DebugDensityToggle } from './DebugDensityToggle';

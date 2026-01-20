@@ -1,6 +1,6 @@
 // src/surface/pages/ExplorePage.tsx
 // Route handler for /explore
-// Sprint: kinetic-experience-v1, kinetic-context-v1, sprout-research-v1, S1-SKIN-HybridEngine
+// Sprint: kinetic-experience-v1, kinetic-context-v1, sprout-research-v1, S1-SKIN-HybridEngine, S3-SKIN-StranglerMigration
 
 import React from 'react';
 import { ExploreShell } from '../components/KineticStream';
@@ -9,6 +9,7 @@ import { ResearchSproutProvider } from '../../explore/context/ResearchSproutCont
 import { ResearchExecutionProvider } from '../../explore/context/ResearchExecutionContext';
 import { ToastProvider } from '../../explore/context/ToastContext';
 import { BedrockUIProvider } from '../../bedrock/context/BedrockUIContext';
+import { DebugDensityToggle } from '../../bedrock/components/DebugDensityToggle';
 
 // Default grove ID for MVP (public explore experience without accounts)
 // TODO: Replace with actual grove ID from user session when Grove ID system is implemented
@@ -23,6 +24,8 @@ const ExplorePage: React.FC = () => {
             <ToastProvider>
               <div className="min-h-screen bg-[var(--glass-void)]">
                 <ExploreShell />
+                {/* S3-SKIN: Debug density toggle for testing skin system */}
+                <DebugDensityToggle position="bottom-right" />
               </div>
             </ToastProvider>
           </ResearchExecutionProvider>
