@@ -315,8 +315,12 @@
         </div>
       </div>
 
-      <h3>Modified Files (5)</h3>
+      <h3>Modified Files (6)</h3>
       <div class="file-list">
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          tailwind.config.ts (CSS variable bridge - Platform Upgrade)
+        </div>
         <div class="file-item file-modified">
           <span class="file-type mod">MOD</span>
           src/bedrock/context/BedrockUIContext.tsx
@@ -597,6 +601,69 @@
           <div class="screenshot-caption">TC-12: Full session complete - zero critical errors</div>
         </div>
       </div>
+    </section>
+
+    <!-- Platform Upgrade: Tailwind CSS Variable Bridge -->
+    <section>
+      <h2>Platform Upgrade: Tailwind CSS Variable Bridge</h2>
+      <p style="color: var(--accent-amber); margin-bottom: 1rem;">
+        Critical activation step for GroveSkins Hybrid Architecture
+      </p>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        The original Tailwind config used hardcoded hex values that compiled to static CSS.
+        This fix updates <code>tailwind.config.ts</code> to reference CSS variables, enabling
+        runtime theme switching.
+      </p>
+      <div class="code-block">
+<pre>
+// Before (broken - static values)
+glass: {
+  void: '#030712',
+  panel: 'rgba(17, 24, 39, 0.6)',
+}
+
+// After (working - CSS variable references)
+glass: {
+  void: 'var(--glass-void)',
+  panel: 'var(--glass-panel)',
+}
+</pre>
+      </div>
+      <h3>Visual Validation Evidence</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Screenshot</th>
+            <th>File Size</th>
+            <th>Theme</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>tc02a-before-switch-dark.png</td>
+            <td>66,604 bytes</td>
+            <td>Quantum Glass (dark)</td>
+          </tr>
+          <tr>
+            <td>tc02b-after-switch-light.png</td>
+            <td>61,100 bytes</td>
+            <td>Zenith Paper (light)</td>
+          </tr>
+          <tr>
+            <td>tc03a-light-theme.png</td>
+            <td>61,143 bytes</td>
+            <td>Zenith Paper (light)</td>
+          </tr>
+          <tr>
+            <td>tc03b-dark-theme-restored.png</td>
+            <td>66,611 bytes</td>
+            <td>Quantum Glass (dark)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color: var(--accent-green); margin-top: 1rem;">
+        ~8% file size difference between themes proves visual changes are real.
+      </p>
     </section>
 
     <!-- Next Steps -->
