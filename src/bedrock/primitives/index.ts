@@ -21,6 +21,13 @@ export { StatCard } from './StatCard';
 export { MetricsRow, ResponsiveMetricsRow } from './MetricsRow';
 
 // =============================================================================
+// Density-Aware Foundation Primitives (S2-SKIN-DeclarativeDensity)
+// =============================================================================
+
+export { FoundationText } from './FoundationText';
+export { MetricCard } from './MetricCard';
+
+// =============================================================================
 // Quantum Glass Primitives (Story 6.0)
 // =============================================================================
 

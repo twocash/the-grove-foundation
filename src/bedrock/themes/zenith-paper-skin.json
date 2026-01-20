@@ -1,0 +1,34 @@
+{
+  "id": "zenith-paper-v1",
+  "name": "Zenith Paper (Light)",
+  "colorScheme": "light",
+  "provenance": {
+    "authorId": "system",
+    "authorType": "system",
+    "createdAt": "2026-01-19T00:00:00Z",
+    "source": "zenith-paper-v1",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "void": "#FBFBF9",
+      "panel": "rgba(255, 255, 255, 0.85)",
+      "solid": "#FFFFFF",
+      "elevated": "rgba(255, 255, 255, 0.95)",
+      "border": "#E5E5E5",
+      "foreground": "#1C1C1C",
+      "muted": "#575757",
+      "accent": "#2F5C3B",
+      "primary": "#1C1C1C"
+    },
+    "effects": {
+      "blur": "12px",
+      "radius": "6px",
+      "glow": "0 4px 16px rgba(0, 0, 0, 0.08)"
+    }
+  },
+  "layout": {
+    "density": "comfortable",
+    "spacingScale": 1.0
+  }
+}

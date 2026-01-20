@@ -1,0 +1,186 @@
+{
+  "$schema": "../../theme/schema/groveskin.schema.json",
+  "id": "quantum-glass",
+  "name": "Quantum Glass",
+  "version": "1.0.0",
+  "description": "The foundational Bedrock design system featuring dark glass panels with neon accent colors, optimized for console and dashboard interfaces.",
+  "provenance": {
+    "createdAt": "2026-01-19T00:00:00Z",
+    "createdBy": "grove-foundation-system",
+    "source": "styles/globals.css",
+    "sourceLines": "566-632",
+    "extractedBy": "S0-SKIN-QuantumAudit",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "backgrounds": {
+        "void": {
+          "cssVar": "--glass-void",
+          "value": "#030712",
+          "description": "Deepest background, used for page body"
+        },
+        "panel": {
+          "cssVar": "--glass-panel",
+          "value": "rgba(17, 24, 39, 0.6)",
+          "description": "Semi-transparent panel background"
+        },
+        "solid": {
+          "cssVar": "--glass-solid",
+          "value": "#111827",
+          "description": "Opaque panel background"
+        },
+        "elevated": {
+          "cssVar": "--glass-elevated",
+          "value": "rgba(30, 41, 59, 0.4)",
+          "description": "Elevated surface, cards, dropdowns"
+        }
+      },
+      "borders": {
+        "default": {
+          "cssVar": "--glass-border",
+          "value": "#1e293b",
+          "description": "Default border color"
+        },
+        "hover": {
+          "cssVar": "--glass-border-hover",
+          "value": "#334155",
+          "description": "Border on hover state"
+        },
+        "active": {
+          "cssVar": "--glass-border-active",
+          "value": "rgba(16, 185, 129, 0.5)",
+          "description": "Border on active/focus state (green tint)"
+        },
+        "selected": {
+          "cssVar": "--glass-border-selected",
+          "value": "rgba(6, 182, 212, 0.5)",
+          "description": "Border on selected state (cyan tint)"
+        }
+      },
+      "neon": {
+        "green": {
+          "cssVar": "--neon-green",
+          "value": "#10b981",
+          "description": "Primary accent - success, active states"
+        },
+        "cyan": {
+          "cssVar": "--neon-cyan",
+          "value": "#06b6d4",
+          "description": "Secondary accent - links, selection"
+        },
+        "amber": {
+          "cssVar": "--neon-amber",
+          "value": "#f59e0b",
+          "description": "Warning accent"
+        },
+        "violet": {
+          "cssVar": "--neon-violet",
+          "value": "#8b5cf6",
+          "description": "Tertiary accent - special states"
+        }
+      },
+      "text": {
+        "primary": {
+          "cssVar": "--glass-text-primary",
+          "value": "#ffffff",
+          "description": "Highest contrast text - headings"
+        },
+        "secondary": {
+          "cssVar": "--glass-text-secondary",
+          "value": "#e2e8f0",
+          "description": "High contrast text - subheadings"
+        },
+        "body": {
+          "cssVar": "--glass-text-body",
+          "value": "#cbd5e1",
+          "description": "Body text"
+        },
+        "muted": {
+          "cssVar": "--glass-text-muted",
+          "value": "#94a3b8",
+          "description": "De-emphasized text"
+        },
+        "subtle": {
+          "cssVar": "--glass-text-subtle",
+          "value": "#64748b",
+          "description": "Subtle text - timestamps, metadata"
+        },
+        "faint": {
+          "cssVar": "--glass-text-faint",
+          "value": "#475569",
+          "description": "Faintest text - placeholders"
+        }
+      },
+      "glows": {
+        "green": {
+          "cssVar": "--glow-green",
+          "value": "0 0 20px -5px rgba(16, 185, 129, 0.4)",
+          "description": "Green glow for active states"
+        },
+        "cyan": {
+          "cssVar": "--glow-cyan",
+          "value": "0 0 20px -5px rgba(6, 182, 212, 0.4)",
+          "description": "Cyan glow for selection"
+        },
+        "ambient": {
+          "cssVar": "--glow-ambient",
+          "value": "0 8px 32px rgba(0, 0, 0, 0.4)",
+          "description": "Ambient shadow for depth"
+        }
+      }
+    },
+    "motion": {
+      "easing": {
+        "outExpo": {
+          "cssVar": "--ease-out-expo",
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+          "description": "Primary easing - smooth deceleration"
+        }
+      },
+      "durations": {
+        "fast": {
+          "cssVar": "--duration-fast",
+          "value": "150ms",
+          "description": "Quick micro-interactions"
+        },
+        "normal": {
+          "cssVar": "--duration-normal",
+          "value": "300ms",
+          "description": "Standard transitions"
+        },
+        "slow": {
+          "cssVar": "--duration-slow",
+          "value": "500ms",
+          "description": "Deliberate, noticeable transitions"
+        }
+      }
+    }
+  },
+  "layout": {
+    "density": {
+      "compact": {
+        "multiplier": 0.75,
+        "description": "Reduced spacing for data-dense views"
+      },
+      "comfortable": {
+        "multiplier": 1.0,
+        "description": "Default spacing - balanced readability"
+      },
+      "spacious": {
+        "multiplier": 1.25,
+        "description": "Increased spacing for focus/presentation"
+      }
+    },
+    "defaultDensity": "comfortable"
+  },
+  "metadata": {
+    "category": "system",
+    "tags": ["dark", "glass", "neon", "console", "bedrock"],
+    "compatibleWith": ["bedrock", "explore"],
+    "accessibility": {
+      "contrastRatio": "WCAG AA",
+      "notes": "Text colors verified against void/panel backgrounds"
+    }
+  }
+}

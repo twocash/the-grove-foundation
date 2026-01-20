@@ -9,7 +9,9 @@ export { BedrockWorkspace } from './BedrockWorkspace';
 export {
   BedrockUIProvider,
   useBedrockUI,
-  type SelectedItem,
+  useSkin,
+  THEME_REGISTRY,
+  type GroveSkin,
 } from './context/BedrockUIContext';
 
 export {

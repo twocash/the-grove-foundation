@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GroveSkins Epic (S0-S4) - Sprint Review</title>
+  <style>
+    :root {
+      --bg-void: #030712;
+      --bg-panel: rgba(17, 24, 39, 0.8);
+      --bg-card: rgba(30, 41, 59, 0.6);
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-void);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .metric-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .metric-value.success { color: var(--accent-green); }
+
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    section {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      margin: 1.5rem 0 0.75rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-complete {
+      background: rgba(34, 197, 94, 0.2);
+      color: var(--accent-green);
+    }
+
+    .file-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-card);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .file-new { border-left: 3px solid var(--accent-green); }
+    .file-modified { border-left: 3px solid var(--accent-amber); }
+
+    .file-type {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+    }
+
+    .file-type.new { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    .file-type.mod { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-list li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent-green);
+    }
+
+    .code-block {
+      background: var(--bg-void);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>GroveSkins Epic (S0-S4)</h1>
+      <p class="subtitle">Declarative Theming Architecture • Sprint Review</p>
+    </header>
+
+    <!-- Summary Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value success">5/5</div>
+        <div class="metric-label">Sprints Complete</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value success">12/12</div>
+        <div class="metric-label">E2E Tests Pass</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">19</div>
+        <div class="metric-label">Screenshots</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value success">0</div>
+        <div class="metric-label">Critical Errors</div>
+      </div>
+    </div>
+
+    <!-- Sprint Progress -->
+    <section>
+      <h2>Sprint Progress</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Sprint</th>
+            <th>Name</th>
+            <th>Deliverables</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>S0</td>
+            <td>QuantumAudit</td>
+            <td>CSS variable baseline (pre-existing)</td>
+            <td><span class="status-badge status-complete">✓ Complete</span></td>
+          </tr>
+          <tr>
+            <td>S1</td>
+            <td>HybridEngine</td>
+            <td>GroveSkin type, SKIN_CSS_MAP, CSS injection, useSkin hook</td>
+            <td><span class="status-badge status-complete">✓ Complete</span></td>
+          </tr>
+          <tr>
+            <td>S2</td>
+            <td>DeclarativeDensity</td>
+            <td>FoundationText, MetricCard, GlassPanel density</td>
+            <td><span class="status-badge status-complete">✓ Complete</span></td>
+          </tr>
+          <tr>
+            <td>S3</td>
+            <td>StranglerMigration</td>
+            <td>DebugDensityToggle, /explore integration</td>
+            <td><span class="status-badge status-complete">✓ Complete</span></td>
+          </tr>
+          <tr>
+            <td>S4</td>
+            <td>ZenithPaper</td>
+            <td>Light theme JSON, ThemeSwitcher component</td>
+            <td><span class="status-badge status-complete">✓ Complete</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Files Changed -->
+    <section>
+      <h2>Files Changed</h2>
+
+      <h3>New Files (7)</h3>
+      <div class="file-list">
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/types/GroveSkin.ts
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/themes/quantum-glass-skin.json
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/themes/zenith-paper-skin.json
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/primitives/FoundationText.tsx
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/primitives/MetricCard.tsx
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/components/DebugDensityToggle.tsx
+        </div>
+        <div class="file-item file-new">
+          <span class="file-type new">NEW</span>
+          src/bedrock/components/ThemeSwitcher.tsx
+        </div>
+      </div>
+
+      <h3>Modified Files (6)</h3>
+      <div class="file-list">
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          tailwind.config.ts (CSS variable bridge - Platform Upgrade)
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/context/BedrockUIContext.tsx
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/context/index.ts
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/index.ts
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/primitives/GlassPanel.tsx
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/primitives/index.ts
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/bedrock/components/index.ts
+        </div>
+        <div class="file-item file-modified">
+          <span class="file-type mod">MOD</span>
+          src/surface/pages/ExplorePage.tsx
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features -->
+    <section>
+      <h2>Key Features Delivered</h2>
+      <ul class="feature-list">
+        <li><strong>GroveSkin Type System</strong> - Declarative theme definitions with tokens, layout, and provenance</li>
+        <li><strong>CSS Variable Injection</strong> - Runtime theme application via document.documentElement</li>
+        <li><strong>Density Tiers</strong> - Compact, comfortable, spacious spacing scales</li>
+        <li><strong>useSkin() Hook</strong> - Easy access to skin state from any component</li>
+        <li><strong>THEME_REGISTRY</strong> - Extensible theme registry pattern</li>
+        <li><strong>FoundationText Primitive</strong> - Density-aware text with 6 variants</li>
+        <li><strong>MetricCard Primitive</strong> - Density-aware metrics with trends and colors</li>
+        <li><strong>DebugDensityToggle</strong> - Runtime density testing tool</li>
+        <li><strong>ThemeSwitcher Component</strong> - UI for theme selection (compact & full variants)</li>
+        <li><strong>Zenith Paper Theme</strong> - Light theme with paper/ink color scheme</li>
+      </ul>
+    </section>
+
+    <!-- Architecture -->
+    <section>
+      <h2>Architecture Pattern</h2>
+      <div class="code-block">
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│                    GroveSkin JSON                           │
+│  { id, name, provenance, tokens: { colors, effects },      │
+│    layout: { density, spacingScale } }                      │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 BedrockUIContext                            │
+│  - THEME_REGISTRY (maps ID → GroveSkin)                     │
+│  - CSS variable injection (useEffect → root.style)          │
+│  - localStorage persistence                                 │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  useSkin() Hook                             │
+│  Returns: { skin, setSkin, loadTheme, availableThemes }     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Density-Aware Primitives                       │
+│  GlassPanel, FoundationText, MetricCard                     │
+│  const density = densityProp ?? skin.layout.density         │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+      </div>
+    </section>
+
+    <!-- DEX Compliance -->
+    <section>
+      <h2>DEX Compliance</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Principle</th>
+            <th>Status</th>
+            <th>Implementation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Declarative Sovereignty</td>
+            <td><span class="status-badge status-complete">✓</span></td>
+            <td>Themes are pure JSON configs, no code changes needed</td>
+          </tr>
+          <tr>
+            <td>Capability Agnosticism</td>
+            <td><span class="status-badge status-complete">✓</span></td>
+            <td>No LLM dependencies, pure React/CSS</td>
+          </tr>
+          <tr>
+            <td>Provenance as Infrastructure</td>
+            <td><span class="status-badge status-complete">✓</span></td>
+            <td>SkinProvenance tracks author, source, version</td>
+          </tr>
+          <tr>
+            <td>Organic Scalability</td>
+            <td><span class="status-badge status-complete">✓</span></td>
+            <td>Registry pattern supports unlimited themes</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- E2E Test Results -->
+    <section>
+      <h2>E2E Test Results (Protocol v1.5 Constraint 11)</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        Console monitoring enabled via <code>setupConsoleCapture()</code> + <code>getCriticalErrors()</code>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Test Case</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TC-01</td>
+            <td>Default Theme Load (Quantum Glass)</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-02</td>
+            <td>Theme Switching - Quantum Glass to Zenith Paper</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-03</td>
+            <td>Theme Switching - Zenith Paper to Quantum Glass</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-04</td>
+            <td>Density Toggle - Compact</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-05</td>
+            <td>Density Toggle - Spacious</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-06</td>
+            <td>Theme Persistence (localStorage)</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-07</td>
+            <td>Bedrock Route Theme Integration</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-08</td>
+            <td>CSS Variable Injection Verification</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-09</td>
+            <td>FoundationText Primitive Rendering</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-10</td>
+            <td>MetricCard Primitive Rendering</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-11</td>
+            <td>ThemeSwitcher Component</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-12</td>
+            <td>Console Error Baseline - Full Session</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Screenshot Gallery -->
+    <section>
+      <h2>Visual Verification Screenshots</h2>
+      <style>
+        .screenshot-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+        .screenshot-item {
+          background: var(--bg-card);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .screenshot-item img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        .screenshot-caption {
+          padding: 0.75rem;
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+        }
+      </style>
+
+      <h3>Theme Switching</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc01-default-theme-load.png" alt="Default dark theme">
+          <div class="screenshot-caption">TC-01: Default Quantum Glass theme on /explore</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc02b-after-switch-light.png" alt="Light theme">
+          <div class="screenshot-caption">TC-02: Zenith Paper light theme applied</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc03b-dark-theme-restored.png" alt="Dark theme restored">
+          <div class="screenshot-caption">TC-03: Quantum Glass theme restored</div>
+        </div>
+      </div>
+
+      <h3>Density Tiers</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc04a-density-default.png" alt="Default density">
+          <div class="screenshot-caption">TC-04a: Default (comfortable) density</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc04b-density-compact.png" alt="Compact density">
+          <div class="screenshot-caption">TC-04b: Compact density applied</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc05b-density-spacious.png" alt="Spacious density">
+          <div class="screenshot-caption">TC-05: Spacious density applied</div>
+        </div>
+      </div>
+
+      <h3>Theme Persistence & Bedrock Integration</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc06b-light-after-reload.png" alt="Theme persisted">
+          <div class="screenshot-caption">TC-06: Light theme persists after page reload</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc07a-bedrock-dark.png" alt="Bedrock dark">
+          <div class="screenshot-caption">TC-07a: Bedrock route with dark theme</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc07b-bedrock-light.png" alt="Bedrock light">
+          <div class="screenshot-caption">TC-07b: Bedrock route with light theme</div>
+        </div>
+      </div>
+
+      <h3>Full Session Test</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc12-full-session-complete.png" alt="Full session">
+          <div class="screenshot-caption">TC-12: Full session complete - zero critical errors</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform Upgrade: Tailwind CSS Variable Bridge -->
+    <section>
+      <h2>Platform Upgrade: Tailwind CSS Variable Bridge</h2>
+      <p style="color: var(--accent-amber); margin-bottom: 1rem;">
+        Critical activation step for GroveSkins Hybrid Architecture
+      </p>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        The original Tailwind config used hardcoded hex values that compiled to static CSS.
+        This fix updates <code>tailwind.config.ts</code> to reference CSS variables, enabling
+        runtime theme switching.
+      </p>
+      <div class="code-block">
+<pre>
+// Before (broken - static values)
+glass: {
+  void: '#030712',
+  panel: 'rgba(17, 24, 39, 0.6)',
+}
+
+// After (working - CSS variable references)
+glass: {
+  void: 'var(--glass-void)',
+  panel: 'var(--glass-panel)',
+}
+</pre>
+      </div>
+      <h3>Visual Validation Evidence</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Screenshot</th>
+            <th>File Size</th>
+            <th>Theme</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>tc02a-before-switch-dark.png</td>
+            <td>66,604 bytes</td>
+            <td>Quantum Glass (dark)</td>
+          </tr>
+          <tr>
+            <td>tc02b-after-switch-light.png</td>
+            <td>61,100 bytes</td>
+            <td>Zenith Paper (light)</td>
+          </tr>
+          <tr>
+            <td>tc03a-light-theme.png</td>
+            <td>61,143 bytes</td>
+            <td>Zenith Paper (light)</td>
+          </tr>
+          <tr>
+            <td>tc03b-dark-theme-restored.png</td>
+            <td>66,611 bytes</td>
+            <td>Quantum Glass (dark)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color: var(--accent-green); margin-top: 1rem;">
+        ~8% file size difference between themes proves visual changes are real.
+      </p>
+    </section>
+
+    <!-- json-render Integration: Tailwind Dark Mode Bridge -->
+    <section>
+      <h2>json-render Integration: Tailwind Dark Mode Bridge</h2>
+      <p style="color: var(--accent-amber); margin-bottom: 1rem;">
+        Architectural integration ensuring json-render components respond to GroveSkins themes
+      </p>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        The Grove uses <strong>json-render</strong> as an architectural mandate for read-only data display.
+        These components use Tailwind's <code>dark:</code> variants (e.g., <code>text-ink dark:text-paper</code>).
+        GroveSkins needed to bridge its CSS variable system with Tailwind's dark mode.
+      </p>
+      <h3>Solution: Explicit ColorScheme Field</h3>
+      <div class="code-block">
+<pre>
+// GroveSkin.ts - Added ColorScheme type
+export type ColorScheme = 'dark' | 'light';
+
+export interface GroveSkin {
+  id: string;
+  name: string;
+  colorScheme: ColorScheme;  // Explicit dark/light declaration
+  // ... tokens, layout, provenance
+}
+
+// BedrockUIContext.tsx - Dark class sync
+useEffect(() => {
+  // CSS variable injection...
+
+  // Sync Tailwind dark mode class with skin's colorScheme
+  if (skin.colorScheme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+}, [skin]);
+</pre>
+      </div>
+      <h3>Architectural Benefits</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Benefit</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Explicit over heuristic</td>
+            <td>Theme declares its color scheme, no guessing from colors</td>
+          </tr>
+          <tr>
+            <td>Future-proof</td>
+            <td>Supports dark themes with light accents, light themes with dark panels</td>
+          </tr>
+          <tr>
+            <td>Two-system bridge</td>
+            <td>CSS variables (GroveSkins) + Tailwind dark: variants (json-render)</td>
+          </tr>
+          <tr>
+            <td>Zero migration debt</td>
+            <td>json-render components work immediately without changes</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color: var(--text-secondary); margin-top: 1rem;">
+        <strong>Philosophy:</strong> "The local grove displaying the object should style it,
+        but objects travel with style defined." The colorScheme field lets themes declare
+        their nature; the rendering context (Bedrock) applies the appropriate class.
+      </p>
+    </section>
+
+    <!-- Next Steps -->
+    <section>
+      <h2>Next Steps</h2>
+      <ul class="feature-list">
+        <li>Merge PR to main branch</li>
+        <li>Deploy to verify themes work in production</li>
+        <li>Add ThemeSwitcher to Bedrock settings panel</li>
+        <li>Migrate more components to density-aware primitives</li>
+        <li>Consider additional themes (high contrast, etc.)</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Generated: 2026-01-19 • GroveSkins Epic (S0-S4) • Grove Foundation</p>
+    </footer>
+  </div>
+</body>
+</html>
