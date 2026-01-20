@@ -5,9 +5,12 @@
 export {
   BedrockUIProvider,
   useBedrockUI,
+  useSkin,
+  THEME_REGISTRY,
   type BedrockUIState,
   type BedrockUIActions,
-  type SelectedItem,
+  type BedrockUIContextValue,
+  type GroveSkin,
 } from './BedrockUIContext';
 
 export {
