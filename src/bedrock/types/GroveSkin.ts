@@ -72,6 +72,13 @@ export interface GroveSkinLayout {
 }
 
 /**
+ * Color scheme determines Tailwind dark mode class.
+ * This bridges GroveSkins CSS variables with Tailwind's dark: variants
+ * used by json-render components.
+ */
+export type ColorScheme = 'dark' | 'light';
+
+/**
  * GroveSkin - The complete skin definition
  *
  * This is the portable, versionable, AI-generatable configuration
@@ -80,6 +87,7 @@ export interface GroveSkinLayout {
 export interface GroveSkin {
   id: string;
   name: string;
+  colorScheme: ColorScheme;  // Explicit dark/light for Tailwind dark mode sync
   provenance: SkinProvenance;
   tokens: GroveSkinTokens;
   layout: GroveSkinLayout;

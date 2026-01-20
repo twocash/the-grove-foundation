@@ -1,6 +1,7 @@
 {
   "id": "quantum-glass-v1",
   "name": "Quantum Glass (Dark)",
+  "colorScheme": "dark",
   "provenance": {
     "authorId": "system",
     "authorType": "system",

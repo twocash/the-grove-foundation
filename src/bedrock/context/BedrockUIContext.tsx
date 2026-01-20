@@ -199,9 +199,18 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
       }
     });
 
+    // Sync Tailwind dark mode class with skin's colorScheme
+    // This bridges GroveSkins CSS variables with Tailwind dark: variants
+    // used by json-render components (architectural mandate)
+    if (skin.colorScheme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+
     // Log for verification in development
     if (process.env.NODE_ENV === 'development') {
-      console.log('[BedrockUI] Skin applied:', skin.id, skin.name);
+      console.log('[BedrockUI] Skin applied:', skin.id, skin.name, `(${skin.colorScheme} mode)`);
     }
   }, [skin]);
 

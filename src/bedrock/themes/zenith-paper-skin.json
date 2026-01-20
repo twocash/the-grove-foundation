@@ -1,6 +1,7 @@
 {
   "id": "zenith-paper-v1",
   "name": "Zenith Paper (Light)",
+  "colorScheme": "light",
   "provenance": {
     "authorId": "system",
     "authorType": "system",

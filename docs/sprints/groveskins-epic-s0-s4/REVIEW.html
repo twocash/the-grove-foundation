@@ -666,6 +666,77 @@ glass: {
       </p>
     </section>
 
+    <!-- json-render Integration: Tailwind Dark Mode Bridge -->
+    <section>
+      <h2>json-render Integration: Tailwind Dark Mode Bridge</h2>
+      <p style="color: var(--accent-amber); margin-bottom: 1rem;">
+        Architectural integration ensuring json-render components respond to GroveSkins themes
+      </p>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        The Grove uses <strong>json-render</strong> as an architectural mandate for read-only data display.
+        These components use Tailwind's <code>dark:</code> variants (e.g., <code>text-ink dark:text-paper</code>).
+        GroveSkins needed to bridge its CSS variable system with Tailwind's dark mode.
+      </p>
+      <h3>Solution: Explicit ColorScheme Field</h3>
+      <div class="code-block">
+<pre>
+// GroveSkin.ts - Added ColorScheme type
+export type ColorScheme = 'dark' | 'light';
+
+export interface GroveSkin {
+  id: string;
+  name: string;
+  colorScheme: ColorScheme;  // Explicit dark/light declaration
+  // ... tokens, layout, provenance
+}
+
+// BedrockUIContext.tsx - Dark class sync
+useEffect(() => {
+  // CSS variable injection...
+
+  // Sync Tailwind dark mode class with skin's colorScheme
+  if (skin.colorScheme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+}, [skin]);
+</pre>
+      </div>
+      <h3>Architectural Benefits</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Benefit</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Explicit over heuristic</td>
+            <td>Theme declares its color scheme, no guessing from colors</td>
+          </tr>
+          <tr>
+            <td>Future-proof</td>
+            <td>Supports dark themes with light accents, light themes with dark panels</td>
+          </tr>
+          <tr>
+            <td>Two-system bridge</td>
+            <td>CSS variables (GroveSkins) + Tailwind dark: variants (json-render)</td>
+          </tr>
+          <tr>
+            <td>Zero migration debt</td>
+            <td>json-render components work immediately without changes</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color: var(--text-secondary); margin-top: 1rem;">
+        <strong>Philosophy:</strong> "The local grove displaying the object should style it,
+        but objects travel with style defined." The colorScheme field lets themes declare
+        their nature; the rendering context (Bedrock) applies the appropriate class.
+      </p>
+    </section>
+
     <!-- Next Steps -->
     <section>
       <h2>Next Steps</h2>
