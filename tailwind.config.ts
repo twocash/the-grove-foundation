@@ -77,28 +77,29 @@ const config: Config = {
         },
 
         // ============================================================
-        // QUANTUM GLASS TOKENS (Explore/Bedrock - Unified dark theme)
-        // These mirror CSS variables for reliable Tailwind compilation
+        // QUANTUM GLASS TOKENS (Explore/Bedrock - Dynamic theming)
+        // Reference CSS variables for runtime skin switching
+        // Fallbacks defined in styles/globals.css :root block
         // ============================================================
         glass: {
-          void: '#030712',
-          panel: 'rgba(17, 24, 39, 0.6)',
-          solid: '#111827',
-          elevated: 'rgba(30, 41, 59, 0.4)',
-          border: 'rgba(255, 255, 255, 0.08)',
+          void: 'var(--glass-void)',
+          panel: 'var(--glass-panel)',
+          solid: 'var(--glass-solid)',
+          elevated: 'var(--glass-elevated)',
+          border: 'var(--glass-border)',
         },
         'glass-text': {
-          primary: '#ffffff',
-          secondary: 'rgba(255, 255, 255, 0.87)',
-          muted: '#94a3b8',
-          body: 'rgba(255, 255, 255, 0.72)',
+          primary: 'var(--glass-text-primary)',
+          secondary: 'var(--glass-text-secondary)',
+          muted: 'var(--glass-text-muted)',
+          body: 'var(--glass-text-body)',
         },
         neon: {
-          cyan: '#22d3ee',
-          violet: '#8b5cf6',
-          green: '#10b981',
-          amber: '#f59e0b',
-          rose: '#f43f5e',
+          cyan: 'var(--neon-cyan)',
+          violet: 'var(--neon-violet)',
+          green: 'var(--neon-green)',
+          amber: 'var(--neon-amber)',
+          rose: 'var(--neon-rose)',
         },
         holo: {
           cyan: '#00D4FF',         // Primary accent
