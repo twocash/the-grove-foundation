@@ -219,16 +219,16 @@
         <div class="metric-label">Sprints Complete</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value">4</div>
-        <div class="metric-label">Commits</div>
+        <div class="metric-value success">12/12</div>
+        <div class="metric-label">E2E Tests Pass</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value">12</div>
-        <div class="metric-label">Files Changed</div>
+        <div class="metric-value">19</div>
+        <div class="metric-label">Screenshots</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value success">✓</div>
-        <div class="metric-label">Build Passing</div>
+        <div class="metric-value success">0</div>
+        <div class="metric-label">Critical Errors</div>
       </div>
     </div>
 
@@ -434,6 +434,169 @@
           </tr>
         </tbody>
       </table>
+    </section>
+
+    <!-- E2E Test Results -->
+    <section>
+      <h2>E2E Test Results (Protocol v1.5 Constraint 11)</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        Console monitoring enabled via <code>setupConsoleCapture()</code> + <code>getCriticalErrors()</code>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Test Case</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TC-01</td>
+            <td>Default Theme Load (Quantum Glass)</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-02</td>
+            <td>Theme Switching - Quantum Glass to Zenith Paper</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-03</td>
+            <td>Theme Switching - Zenith Paper to Quantum Glass</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-04</td>
+            <td>Density Toggle - Compact</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-05</td>
+            <td>Density Toggle - Spacious</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-06</td>
+            <td>Theme Persistence (localStorage)</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-07</td>
+            <td>Bedrock Route Theme Integration</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-08</td>
+            <td>CSS Variable Injection Verification</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-09</td>
+            <td>FoundationText Primitive Rendering</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-10</td>
+            <td>MetricCard Primitive Rendering</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-11</td>
+            <td>ThemeSwitcher Component</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>TC-12</td>
+            <td>Console Error Baseline - Full Session</td>
+            <td><span class="status-badge status-complete">✓ Pass</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Screenshot Gallery -->
+    <section>
+      <h2>Visual Verification Screenshots</h2>
+      <style>
+        .screenshot-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+        .screenshot-item {
+          background: var(--bg-card);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .screenshot-item img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        .screenshot-caption {
+          padding: 0.75rem;
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+        }
+      </style>
+
+      <h3>Theme Switching</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc01-default-theme-load.png" alt="Default dark theme">
+          <div class="screenshot-caption">TC-01: Default Quantum Glass theme on /explore</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc02b-after-switch-light.png" alt="Light theme">
+          <div class="screenshot-caption">TC-02: Zenith Paper light theme applied</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc03b-dark-theme-restored.png" alt="Dark theme restored">
+          <div class="screenshot-caption">TC-03: Quantum Glass theme restored</div>
+        </div>
+      </div>
+
+      <h3>Density Tiers</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc04a-density-default.png" alt="Default density">
+          <div class="screenshot-caption">TC-04a: Default (comfortable) density</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc04b-density-compact.png" alt="Compact density">
+          <div class="screenshot-caption">TC-04b: Compact density applied</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc05b-density-spacious.png" alt="Spacious density">
+          <div class="screenshot-caption">TC-05: Spacious density applied</div>
+        </div>
+      </div>
+
+      <h3>Theme Persistence & Bedrock Integration</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc06b-light-after-reload.png" alt="Theme persisted">
+          <div class="screenshot-caption">TC-06: Light theme persists after page reload</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc07a-bedrock-dark.png" alt="Bedrock dark">
+          <div class="screenshot-caption">TC-07a: Bedrock route with dark theme</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="screenshots/tc07b-bedrock-light.png" alt="Bedrock light">
+          <div class="screenshot-caption">TC-07b: Bedrock route with light theme</div>
+        </div>
+      </div>
+
+      <h3>Full Session Test</h3>
+      <div class="screenshot-grid">
+        <div class="screenshot-item">
+          <img src="screenshots/tc12-full-session-complete.png" alt="Full session">
+          <div class="screenshot-caption">TC-12: Full session complete - zero critical errors</div>
+        </div>
+      </div>
     </section>
 
     <!-- Next Steps -->
