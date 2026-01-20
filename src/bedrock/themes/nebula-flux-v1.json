@@ -1,0 +1,80 @@
+{
+  "id": "nebula-flux-v1",
+  "name": "Nebula Flux (Liquid)",
+  "colorScheme": "dark",
+  "provenance": {
+    "authorId": "grove-design-system",
+    "authorType": "system",
+    "createdAt": "2026-01-20T00:00:00Z",
+    "source": "S17-SKIN-LivingGlass",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "void": "#0F0518",
+      "panel": "rgba(35, 15, 60, 0.45)",
+      "solid": "#1E0B36",
+      "elevated": "rgba(50, 20, 90, 0.6)",
+      "border": "rgba(216, 180, 254, 0.15)",
+      "foreground": "#F3E8FF",
+      "muted": "#9F8EA3",
+      "accent": "#E879F9",
+      "primary": "#F3E8FF",
+      "canvas": "#FAF5FF",
+      "semantic": {
+        "success": "#4ADE80",
+        "successBg": "rgba(74, 222, 128, 0.1)",
+        "successBorder": "rgba(74, 222, 128, 0.3)",
+        "warning": "#FCD34D",
+        "warningBg": "rgba(252, 211, 77, 0.1)",
+        "warningBorder": "rgba(252, 211, 77, 0.3)",
+        "error": "#F87171",
+        "errorBg": "rgba(248, 113, 113, 0.1)",
+        "errorBorder": "rgba(248, 113, 113, 0.3)",
+        "info": "#67E8F9",
+        "infoBg": "rgba(103, 232, 249, 0.1)",
+        "infoBorder": "rgba(103, 232, 249, 0.3)",
+        "accentSecondary": "#C4B5FD",
+        "accentSecondaryBg": "rgba(196, 181, 253, 0.1)",
+        "accentSecondaryBorder": "rgba(196, 181, 253, 0.3)"
+      }
+    },
+    "effects": {
+      "blur": "40px",
+      "radius": "24px",
+      "glow": "0 0 60px rgba(232, 121, 249, 0.2)"
+    },
+    "typography": {
+      "display": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "800",
+        "tracking": "-0.04em"
+      },
+      "heading": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "600",
+        "tracking": "-0.025em"
+      },
+      "body": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "400",
+        "tracking": "0"
+      },
+      "mono": {
+        "family": "Geist Mono, JetBrains Mono, monospace",
+        "weight": "500",
+        "tracking": "-0.015em"
+      },
+      "ui": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "600",
+        "tracking": "0.06em",
+        "transform": "uppercase"
+      }
+    }
+  },
+  "layout": {
+    "density": "spacious",
+    "spacingScale": 1.25
+  }
+}

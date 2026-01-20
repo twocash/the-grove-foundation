@@ -19,7 +19,24 @@
       "foreground": "#1C1C1C",
       "muted": "#575757",
       "accent": "#2F5C3B",
-      "primary": "#1C1C1C"
+      "primary": "#1C1C1C",
+      "semantic": {
+        "success": "#059669",
+        "successBg": "rgba(5, 150, 105, 0.1)",
+        "successBorder": "rgba(5, 150, 105, 0.3)",
+        "warning": "#D97706",
+        "warningBg": "rgba(217, 119, 6, 0.1)",
+        "warningBorder": "rgba(217, 119, 6, 0.3)",
+        "error": "#DC2626",
+        "errorBg": "rgba(220, 38, 38, 0.1)",
+        "errorBorder": "rgba(220, 38, 38, 0.3)",
+        "info": "#0891B2",
+        "infoBg": "rgba(8, 145, 178, 0.1)",
+        "infoBorder": "rgba(8, 145, 178, 0.3)",
+        "accentSecondary": "#7C3AED",
+        "accentSecondaryBg": "rgba(124, 58, 237, 0.1)",
+        "accentSecondaryBorder": "rgba(124, 58, 237, 0.3)"
+      }
     },
     "effects": {
       "blur": "12px",

@@ -31,9 +31,67 @@ export interface ColorToken {
 }
 
 /**
+ * Typography settings for rich font control
+ * S17-SKIN-LivingGlass: High-end typography support
+ */
+export interface TypographySettings {
+  family: string;
+  weight?: string;
+  tracking?: string;  // letter-spacing
+  transform?: string; // text-transform
+}
+
+/**
+ * Typography value can be a simple font stack or rich settings
+ */
+export type TypographyValue = string | TypographySettings;
+
+/**
+ * Typography tokens for font control across the UI
+ */
+export interface TypographyTokens {
+  display?: TypographyValue;  // Hero/display text
+  heading?: TypographyValue;  // Section headings
+  body?: TypographyValue;     // Body text
+  mono?: TypographyValue;     // Code/monospace
+  ui?: TypographyValue;       // UI labels/buttons
+}
+
+/**
  * GroveSkin tokens structure
  * Maps to CSS variables for runtime injection
  */
+/**
+ * Semantic color tokens for status/state colors
+ * S17-SKIN-LivingGlass: Theme-aware state colors
+ */
+export interface SemanticColorTokens {
+  // Success colors (enabled, active, confirmed)
+  success: string;        // Primary success text/border
+  successBg: string;      // Success background (subtle)
+  successBorder: string;  // Success border
+
+  // Warning colors (unsaved, caution, pending)
+  warning: string;        // Primary warning text/border
+  warningBg: string;      // Warning background (subtle)
+  warningBorder: string;  // Warning border
+
+  // Error colors (delete, failed, required)
+  error: string;          // Primary error text/border
+  errorBg: string;        // Error background (subtle)
+  errorBorder: string;    // Error border
+
+  // Info colors (highlights, focus, informational)
+  info: string;           // Primary info text/border
+  infoBg: string;         // Info background (subtle)
+  infoBorder: string;     // Info border
+
+  // Secondary accent (special features, premium)
+  accentSecondary: string;
+  accentSecondaryBg: string;
+  accentSecondaryBorder: string;
+}
+
 export interface GroveSkinTokens {
   colors: {
     // Semantic surface colors
@@ -55,12 +113,17 @@ export interface GroveSkinTokens {
 
     // Semantic states (optional)
     canvas?: string;    // Light mode page background
+
+    // S17-SKIN-LivingGlass: Semantic state colors (optional for backward compat)
+    semantic?: SemanticColorTokens;
   };
   effects: {
     blur: string;       // Backdrop blur amount
     radius: string;     // Border radius
     glow: string;       // Glow/shadow effect
   };
+  // S17-SKIN-LivingGlass: Typography tokens
+  typography?: TypographyTokens;
 }
 
 /**
@@ -110,11 +173,44 @@ export const SKIN_CSS_MAP = {
       accent: '--neon-cyan',
       primary: '--glass-text-primary',
       canvas: '--glass-canvas',
+      // S17-SKIN-LivingGlass: Semantic state color CSS variables
+      semantic: {
+        success: '--semantic-success',
+        successBg: '--semantic-success-bg',
+        successBorder: '--semantic-success-border',
+        warning: '--semantic-warning',
+        warningBg: '--semantic-warning-bg',
+        warningBorder: '--semantic-warning-border',
+        error: '--semantic-error',
+        errorBg: '--semantic-error-bg',
+        errorBorder: '--semantic-error-border',
+        info: '--semantic-info',
+        infoBg: '--semantic-info-bg',
+        infoBorder: '--semantic-info-border',
+        accentSecondary: '--semantic-accent-secondary',
+        accentSecondaryBg: '--semantic-accent-secondary-bg',
+        accentSecondaryBorder: '--semantic-accent-secondary-border',
+      },
     },
     effects: {
       blur: '--glass-blur',
       radius: '--radius-panel',
       glow: '--glow-ambient',
+    },
+    // S17-SKIN-LivingGlass: Typography CSS variables
+    typography: {
+      display: '--font-display',
+      heading: '--font-heading',
+      body: '--font-body',
+      mono: '--font-mono',
+      ui: '--font-ui',
+    },
+    typographyExtended: {
+      display: { weight: '--font-display-weight', tracking: '--font-display-tracking', transform: '--font-display-transform' },
+      heading: { weight: '--font-heading-weight', tracking: '--font-heading-tracking', transform: '--font-heading-transform' },
+      body: { weight: '--font-body-weight', tracking: '--font-body-tracking', transform: '--font-body-transform' },
+      mono: { weight: '--font-mono-weight', tracking: '--font-mono-tracking', transform: '--font-mono-transform' },
+      ui: { weight: '--font-ui-weight', tracking: '--font-ui-tracking', transform: '--font-ui-transform' },
     },
   },
 } as const;

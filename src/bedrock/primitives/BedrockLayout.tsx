@@ -55,7 +55,7 @@ export function BedrockLayout({
   inspectorWidth = 360,
 }: BedrockLayoutProps) {
   return (
-    <div className="flex flex-col h-screen" data-console-id={consoleId}>
+    <div className="bedrock-app flex flex-col h-screen" data-console-id={consoleId}>
       {/* Console Header */}
       <header className="h-14 px-6 flex items-center justify-between border-b border-[var(--glass-border)] bg-[var(--glass-solid)] flex-shrink-0">
         <div className="flex items-center gap-4">

@@ -22,7 +22,7 @@ const ExplorePage: React.FC = () => {
         <ResearchSproutProvider initialGroveId={DEFAULT_GROVE_ID}>
           <ResearchExecutionProvider>
             <ToastProvider>
-              <div className="min-h-screen bg-[var(--glass-void)]">
+              <div className="bedrock-app min-h-screen bg-[var(--glass-void)]">
                 <ExploreShell />
                 {/* S3-SKIN: Debug density toggle for testing skin system */}
                 <DebugDensityToggle position="bottom-right" />

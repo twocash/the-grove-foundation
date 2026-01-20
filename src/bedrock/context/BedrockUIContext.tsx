@@ -12,10 +12,12 @@ import React, {
   type ReactNode,
 } from 'react';
 import type { InspectorConfig } from '../patterns/console-factory.types';
-import type { GroveSkin } from '../types/GroveSkin';
+import type { GroveSkin, TypographyValue } from '../types/GroveSkin';
 import { SKIN_CSS_MAP } from '../types/GroveSkin';
 import defaultTheme from '../themes/quantum-glass-skin.json';
 import zenithPaperTheme from '../themes/zenith-paper-skin.json';
+import livingGlassV2Theme from '../themes/living-glass-v2.json';
+import nebulaFluxTheme from '../themes/nebula-flux-v1.json';
 
 // =============================================================================
 // Types
@@ -96,6 +98,8 @@ const BedrockUIContext = createContext<BedrockUIContextValue | null>(null);
 const THEME_REGISTRY: Record<string, GroveSkin> = {
   'quantum-glass-v1': defaultTheme as unknown as GroveSkin,
   'zenith-paper-v1': zenithPaperTheme as unknown as GroveSkin,
+  'living-glass-v2': livingGlassV2Theme as unknown as GroveSkin,
+  'nebula-flux-v1': nebulaFluxTheme as unknown as GroveSkin,
 };
 
 // =============================================================================
@@ -198,6 +202,39 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
         root.style.setProperty(cssVar, value);
       }
     });
+
+    // S17-SKIN-LivingGlass: Inject semantic color tokens
+    if (skin.tokens.colors.semantic) {
+      const semanticMap = SKIN_CSS_MAP.tokens.colors.semantic;
+      Object.entries(skin.tokens.colors.semantic).forEach(([key, value]) => {
+        const cssVar = semanticMap[key as keyof typeof semanticMap];
+        if (cssVar && value) {
+          root.style.setProperty(cssVar, value);
+        }
+      });
+    }
+
+    // S17-SKIN-LivingGlass: Inject typography tokens
+    if (skin.tokens.typography) {
+      Object.entries(skin.tokens.typography).forEach(([key, value]) => {
+        const typedKey = key as keyof typeof SKIN_CSS_MAP.tokens.typography;
+        const familyVar = SKIN_CSS_MAP.tokens.typography[typedKey];
+        const extendedVars = SKIN_CSS_MAP.tokens.typographyExtended[typedKey];
+
+        if (!familyVar || !extendedVars) return;
+
+        // Handle both string and object typography values
+        if (typeof value === 'string') {
+          root.style.setProperty(familyVar, value);
+        } else if (typeof value === 'object' && value !== null) {
+          const typedValue = value as { family: string; weight?: string; tracking?: string; transform?: string };
+          root.style.setProperty(familyVar, typedValue.family);
+          if (typedValue.weight) root.style.setProperty(extendedVars.weight, typedValue.weight);
+          if (typedValue.tracking) root.style.setProperty(extendedVars.tracking, typedValue.tracking);
+          if (typedValue.transform) root.style.setProperty(extendedVars.transform, typedValue.transform);
+        }
+      });
+    }
 
     // Sync Tailwind dark mode class with skin's colorScheme
     // This bridges GroveSkins CSS variables with Tailwind dark: variants

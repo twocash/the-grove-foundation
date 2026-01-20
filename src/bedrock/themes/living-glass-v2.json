@@ -1,0 +1,79 @@
+{
+  "id": "living-glass-v2",
+  "name": "Living Glass v2",
+  "colorScheme": "dark",
+  "provenance": {
+    "authorId": "grove-design-system",
+    "authorType": "system",
+    "createdAt": "2026-01-17T00:00:00Z",
+    "source": "S17-SKIN-LivingGlass",
+    "version": "2.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "void": "#0A0F14",
+      "panel": "rgba(15, 25, 35, 0.75)",
+      "solid": "#0F1923",
+      "elevated": "rgba(20, 35, 50, 0.85)",
+      "border": "rgba(56, 189, 248, 0.12)",
+      "foreground": "#F1F5F9",
+      "muted": "#64748B",
+      "accent": "#38BDF8",
+      "primary": "#F1F5F9",
+      "canvas": "#F8FAFC",
+      "semantic": {
+        "success": "#4ADE80",
+        "successBg": "rgba(74, 222, 128, 0.1)",
+        "successBorder": "rgba(74, 222, 128, 0.3)",
+        "warning": "#FBBF24",
+        "warningBg": "rgba(251, 191, 36, 0.1)",
+        "warningBorder": "rgba(251, 191, 36, 0.3)",
+        "error": "#F87171",
+        "errorBg": "rgba(248, 113, 113, 0.1)",
+        "errorBorder": "rgba(248, 113, 113, 0.3)",
+        "info": "#38BDF8",
+        "infoBg": "rgba(56, 189, 248, 0.1)",
+        "infoBorder": "rgba(56, 189, 248, 0.3)",
+        "accentSecondary": "#A78BFA",
+        "accentSecondaryBg": "rgba(167, 139, 250, 0.1)",
+        "accentSecondaryBorder": "rgba(167, 139, 250, 0.3)"
+      }
+    },
+    "effects": {
+      "blur": "20px",
+      "radius": "16px",
+      "glow": "0 0 40px rgba(56, 189, 248, 0.15)"
+    },
+    "typography": {
+      "display": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "700",
+        "tracking": "-0.02em"
+      },
+      "heading": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "600",
+        "tracking": "-0.015em"
+      },
+      "body": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "400",
+        "tracking": "0"
+      },
+      "mono": {
+        "family": "Geist Mono, JetBrains Mono, monospace",
+        "weight": "400",
+        "tracking": "0"
+      },
+      "ui": {
+        "family": "Geist Sans, Inter, -apple-system, sans-serif",
+        "weight": "500",
+        "tracking": "0"
+      }
+    }
+  },
+  "layout": {
+    "density": "comfortable",
+    "spacingScale": 1.0
+  }
+}

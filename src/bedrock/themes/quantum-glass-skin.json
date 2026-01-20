@@ -19,7 +19,24 @@
       "foreground": "#ffffff",
       "muted": "#94a3b8",
       "accent": "#06b6d4",
-      "primary": "#ffffff"
+      "primary": "#ffffff",
+      "semantic": {
+        "success": "#34D399",
+        "successBg": "rgba(52, 211, 153, 0.1)",
+        "successBorder": "rgba(52, 211, 153, 0.3)",
+        "warning": "#FBBF24",
+        "warningBg": "rgba(251, 191, 36, 0.1)",
+        "warningBorder": "rgba(251, 191, 36, 0.3)",
+        "error": "#F87171",
+        "errorBg": "rgba(248, 113, 113, 0.1)",
+        "errorBorder": "rgba(248, 113, 113, 0.3)",
+        "info": "#22D3EE",
+        "infoBg": "rgba(34, 211, 238, 0.1)",
+        "infoBorder": "rgba(34, 211, 238, 0.3)",
+        "accentSecondary": "#A78BFA",
+        "accentSecondaryBg": "rgba(167, 139, 250, 0.1)",
+        "accentSecondaryBorder": "rgba(167, 139, 250, 0.3)"
+      }
     },
     "effects": {
       "blur": "20px",
