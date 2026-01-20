@@ -30,3 +30,6 @@ export { ObjectList, type ObjectListColumn, type ObjectListProps } from './Objec
 
 // Debug tools (S3-SKIN-StranglerMigration)
 export { DebugDensityToggle } from './DebugDensityToggle';
+
+// Theme components (S4-SKIN-ZenithPaper)
+export { ThemeSwitcher } from './ThemeSwitcher';

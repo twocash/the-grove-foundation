@@ -15,6 +15,7 @@ import type { InspectorConfig } from '../patterns/console-factory.types';
 import type { GroveSkin } from '../types/GroveSkin';
 import { SKIN_CSS_MAP } from '../types/GroveSkin';
 import defaultTheme from '../themes/quantum-glass-skin.json';
+import zenithPaperTheme from '../themes/zenith-paper-skin.json';
 
 // =============================================================================
 // Types
@@ -94,7 +95,7 @@ const BedrockUIContext = createContext<BedrockUIContextValue | null>(null);
  */
 const THEME_REGISTRY: Record<string, GroveSkin> = {
   'quantum-glass-v1': defaultTheme as unknown as GroveSkin,
-  // zenith-paper-v1 will be added in S4
+  'zenith-paper-v1': zenithPaperTheme as unknown as GroveSkin,
 };
 
 // =============================================================================

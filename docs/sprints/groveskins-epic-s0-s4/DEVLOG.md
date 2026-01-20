@@ -245,12 +245,59 @@ The DebugDensityToggle allows verification that density changes propagate correc
 
 ## S4-SKIN-ZenithPaper
 
-**Status:** ⏳ PENDING
+**Started:** 2026-01-19T13:30:00Z
+**Status:** ✅ COMPLETE
 
-### Planned Work
-- Create zenith-paper.json light theme
-- Create ThemeSwitcher component
-- Add to THEME_REGISTRY
+### Phase 4a: Light Theme
+**Status:** ✅ COMPLETE
+
+Created `src/bedrock/themes/zenith-paper-skin.json`:
+- Paper/ink color scheme (cream background, dark text)
+- Colors aligned with Grove design system (paper: #FBFBF9, ink: #1C1C1C)
+- Accent: Grove forest green (#2F5C3B)
+- Softer shadows instead of glows (0 4px 16px rgba(0,0,0,0.08))
+- Reduced blur (12px vs 20px for dark theme)
+
+### Phase 4b: ThemeSwitcher Component
+**Status:** ✅ COMPLETE
+
+Created `src/bedrock/components/ThemeSwitcher.tsx`:
+- Two variants: `compact` (icon toggles) and `full` (theme cards)
+- Preview swatches showing bg/fg/accent colors
+- Active theme indicator
+- Uses THEME_REGISTRY for available themes
+- Material Symbols icons (dark_mode, light_mode)
+
+### Phase 4c: Registry Integration
+**Status:** ✅ COMPLETE
+
+Modified `src/bedrock/context/BedrockUIContext.tsx`:
+- Imported zenith-paper-skin.json
+- Added 'zenith-paper-v1' to THEME_REGISTRY
+- Both themes now available via loadTheme()
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `src/bedrock/themes/zenith-paper-skin.json` | Light theme definition |
+| `src/bedrock/components/ThemeSwitcher.tsx` | Theme selection UI |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/bedrock/context/BedrockUIContext.tsx` | Import + registry |
+| `src/bedrock/components/index.ts` | Export ThemeSwitcher |
+
+### DEX Compliance
+- **Declarative Sovereignty:** ✅ Theme is JSON config, no code changes needed
+- **Capability Agnosticism:** ✅ No LLM dependencies
+- **Provenance:** ✅ SkinProvenance in theme file
+- **Organic Scalability:** ✅ Registry pattern supports unlimited themes
+
+### Gate: ✅ PASSED
+- Build passes: ✅
+- Light theme in registry: ✅
+- ThemeSwitcher works: ✅
 
 ---
 
