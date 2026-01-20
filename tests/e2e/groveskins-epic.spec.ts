@@ -77,7 +77,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Switch to light theme via localStorage and reload (most reliable method)
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'zenith-paper-v1');
+      localStorage.setItem('bedrock-active-skin', 'zenith-paper-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -106,7 +106,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     // Start with light theme
     await page.goto('/explore');
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'zenith-paper-v1');
+      localStorage.setItem('bedrock-active-skin', 'zenith-paper-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -117,7 +117,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Switch back to dark theme
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'quantum-glass-v1');
+      localStorage.setItem('bedrock-active-skin', 'quantum-glass-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -193,7 +193,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     // Set light theme
     await page.goto('/explore');
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'zenith-paper-v1');
+      localStorage.setItem('bedrock-active-skin', 'zenith-paper-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -204,7 +204,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Verify localStorage value
     const storedTheme = await page.evaluate(() => {
-      return localStorage.getItem('grove-skin-id');
+      return localStorage.getItem('bedrock-active-skin');
     });
     expect(storedTheme).toBe('zenith-paper-v1');
 
@@ -218,7 +218,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Verify theme persisted
     const persistedTheme = await page.evaluate(() => {
-      return localStorage.getItem('grove-skin-id');
+      return localStorage.getItem('bedrock-active-skin');
     });
     expect(persistedTheme).toBe('zenith-paper-v1');
 
@@ -231,7 +231,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     // Reset to dark theme
     await page.goto('/explore');
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'quantum-glass-v1');
+      localStorage.setItem('bedrock-active-skin', 'quantum-glass-v1');
     });
 
     // Navigate to bedrock
@@ -244,7 +244,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Switch to light theme
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'zenith-paper-v1');
+      localStorage.setItem('bedrock-active-skin', 'zenith-paper-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -262,16 +262,16 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     await page.goto('/explore');
     await page.waitForLoadState('networkidle');
 
-    // Check CSS variables are set
+    // Check CSS variables are set (using correct SKIN_CSS_MAP names)
     const cssVars = await page.evaluate(() => {
       const root = document.documentElement;
       const style = getComputedStyle(root);
       return {
-        void: style.getPropertyValue('--grove-void').trim(),
-        foreground: style.getPropertyValue('--grove-foreground').trim(),
-        accent: style.getPropertyValue('--grove-accent').trim(),
-        panelBg: style.getPropertyValue('--grove-panel-bg').trim(),
-        glassGlow: style.getPropertyValue('--grove-glass-glow').trim(),
+        void: style.getPropertyValue('--glass-void').trim(),
+        panel: style.getPropertyValue('--glass-panel').trim(),
+        foreground: style.getPropertyValue('--glass-text-primary').trim(),
+        accent: style.getPropertyValue('--neon-cyan').trim(),
+        border: style.getPropertyValue('--glass-border').trim(),
       };
     });
 
@@ -280,8 +280,9 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     // Screenshot showing CSS vars in effect
     await page.screenshot({ path: `${SCREENSHOT_DIR}/tc08-css-variables.png`, fullPage: true });
 
-    // At least some variables should be set (or we need to check if injection is working)
-    // This is an observational test - the screenshot is the evidence
+    // Verify core CSS variables are injected
+    // --glass-void should be a valid color (not empty)
+    expect(cssVars.void, 'TC-08: --glass-void should be set').toBeTruthy();
 
     // Verify no critical console errors
     const criticalErrors = getCriticalErrors(capture.errors);
@@ -351,7 +352,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
     // Step 1: Start at /explore with dark theme
     await page.goto('/explore');
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'quantum-glass-v1');
+      localStorage.setItem('bedrock-active-skin', 'quantum-glass-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -359,7 +360,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Step 2: Switch to light theme
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'zenith-paper-v1');
+      localStorage.setItem('bedrock-active-skin', 'zenith-paper-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
@@ -367,7 +368,7 @@ test.describe('GroveSkins Epic E2E Verification', () => {
 
     // Step 3: Switch back to dark theme
     await page.evaluate(() => {
-      localStorage.setItem('grove-skin-id', 'quantum-glass-v1');
+      localStorage.setItem('bedrock-active-skin', 'quantum-glass-v1');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
