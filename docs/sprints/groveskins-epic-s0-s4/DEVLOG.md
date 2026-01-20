@@ -112,12 +112,75 @@ Note: /bedrock route already has BedrockUIProvider via BedrockWorkspace.
 
 ## S2-SKIN-DeclarativeDensity
 
-**Status:** 🔄 PENDING
+**Started:** 2026-01-19T12:30:00Z
+**Status:** ✅ COMPLETE
 
-### Planned Work
-- Phase 2a: Update GlassPanel to use useSkin() for density
-- Phase 2b: Create FoundationText primitive
-- Phase 2c: Create MetricCard primitive
+### Phase 2a: GlassPanel Enhancement
+**Status:** ✅ COMPLETE
+
+Modified `src/bedrock/primitives/GlassPanel.tsx`:
+- Added `useSkin()` hook import
+- Changed density prop to `densityProp` to allow optional override
+- Density now sourced from `skin.layout.density` with prop override capability
+- Maintains backward compatibility (explicit density prop still works)
+
+Key change:
+```typescript
+const { skin } = useSkin();
+const density = densityProp ?? (skin.layout?.density as DensityToken) ?? DEFAULT_DENSITY;
+```
+
+### Phase 2b: FoundationText Primitive
+**Status:** ✅ COMPLETE
+
+Created `src/bedrock/primitives/FoundationText.tsx`:
+- Text variants: display, heading, subheading, body, caption, label
+- Color semantics: primary, secondary, muted, accent, inherit
+- Density-responsive sizing (compact: 0.875x, comfortable: 1x, spacious: 1.125x)
+- Proper semantic HTML elements per variant
+- Uses CSS variables for theming
+
+### Phase 2c: MetricCard Primitive
+**Status:** ✅ COMPLETE
+
+Created `src/bedrock/primitives/MetricCard.tsx`:
+- Value, label, trend slots
+- Color accents: green, cyan, amber, violet, default
+- Trend indicators: up, down, neutral
+- Optional icon support (Material Symbols)
+- Density-responsive padding and sizing
+- Composes FoundationText for label/trend
+
+### Barrel Export Update
+**Status:** ✅ COMPLETE
+
+Modified `src/bedrock/primitives/index.ts`:
+- Added FoundationText export
+- Added MetricCard export
+- New "Density-Aware Foundation Primitives" section
+
+### Files Created
+| File | Purpose |
+|------|---------|
+| `src/bedrock/primitives/FoundationText.tsx` | Density-aware text |
+| `src/bedrock/primitives/MetricCard.tsx` | Density-aware metrics |
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `src/bedrock/primitives/GlassPanel.tsx` | useSkin() for density |
+| `src/bedrock/primitives/index.ts` | New exports |
+
+### DEX Compliance
+- **Declarative Sovereignty:** ✅ Density from skin config, no hardcoded values
+- **Capability Agnosticism:** ✅ No LLM dependencies
+- **Provenance:** ✅ N/A for primitives
+- **Organic Scalability:** ✅ New primitives follow pattern
+
+### Gate: ✅ PASSED
+- Build passes: ✅
+- Primitives consume density from context: ✅
+- Backward compatibility maintained: ✅
 
 ---
 

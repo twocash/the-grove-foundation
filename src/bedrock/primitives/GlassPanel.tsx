@@ -1,12 +1,13 @@
 // src/bedrock/primitives/GlassPanel.tsx
 // Quantum Glass panel primitive for Bedrock consoles
-// Sprint: kinetic-pipeline-v1 (Story 6.0), S0-SKIN-QuantumAudit (density prop)
+// Sprint: kinetic-pipeline-v1 (Story 6.0), S0-SKIN-QuantumAudit, S2-SKIN-DeclarativeDensity
 
 import React, { type ReactNode } from 'react';
 import {
   type DensityToken,
   DEFAULT_DENSITY,
 } from '../../theme/mappings/quantum-glass.map';
+import { useSkin } from '../context/BedrockUIContext';
 
 // =============================================================================
 // Types
@@ -100,7 +101,7 @@ const densityHeaderPadding: Record<DensityToken, string> = {
 export function GlassPanel({
   tier = 'panel',
   accent = 'none',
-  density = DEFAULT_DENSITY,
+  density: densityProp,
   header,
   title,
   icon,
@@ -110,6 +111,10 @@ export function GlassPanel({
   padded = true,
   onClick,
 }: GlassPanelProps) {
+  // S2-SKIN-DeclarativeDensity: Get density from skin context, allow prop override
+  const { skin } = useSkin();
+  const density = densityProp ?? (skin.layout?.density as DensityToken) ?? DEFAULT_DENSITY;
+
   const isInteractive = Boolean(onClick);
 
   const baseClasses = `
