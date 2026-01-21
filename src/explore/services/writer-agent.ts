@@ -1,6 +1,6 @@
 // src/explore/services/writer-agent.ts
-// Writer Agent Service - Transforms evidence into research documents
-// Sprint: writer-agent-v1
+// Writer Agent Service - Transforms evidence into research documents via Claude
+// Sprint: writer-agent-v1 → agents-go-live-v1
 //
 // DEX: Capability Agnosticism
 // Service abstracts LLM. Config controls behavior.
@@ -78,9 +78,13 @@ export async function writeResearchDocument(
 
   onProgress?.({ type: 'writing', message: 'Generating research document...' });
 
-  // Call LLM
-  // TODO: Wire to actual Gemini/Claude service
-  const llmOutput = await callLLMForWriting(systemPrompt, userPrompt);
+  // Call Claude API for document writing
+  const voiceConfig = {
+    formality: config.voice.formality,
+    perspective: config.voice.perspective,
+    citationStyle: config.documentStructure.citationStyle,
+  };
+  const llmOutput = await callLLMForWriting(systemPrompt, userPrompt, voiceConfig);
 
   onProgress?.({ type: 'formatting', message: 'Formatting citations...' });
 
@@ -178,39 +182,66 @@ function mapSourcesToCitations(
 // =============================================================================
 
 /**
- * Call LLM for document writing
+ * Call Claude API for document writing
  *
- * TODO: Wire to actual Gemini/Claude service
- * For now, returns placeholder structure
+ * Sprint: agents-go-live-v1
+ * Calls /api/research/write endpoint for voice-styled document generation
  */
 async function callLLMForWriting(
   systemPrompt: string,
-  userPrompt: string
+  userPrompt: string,
+  voiceConfig?: { formality?: string; perspective?: string; citationStyle?: string }
 ): Promise<LLMWriterOutput> {
-  console.log('[WriterAgent] Calling LLM for writing...');
+  console.log('[WriterAgent] Calling Claude for writing...');
   console.log('[WriterAgent] System prompt length:', systemPrompt.length);
   console.log('[WriterAgent] User prompt length:', userPrompt.length);
+  console.log('[WriterAgent] Voice config:', voiceConfig);
 
-  // TODO: Replace with actual LLM call
-  // import { geminiService } from '@/services/gemini';
-  // const response = await geminiService.generate({
-  //   systemPrompt,
-  //   userPrompt,
-  //   responseFormat: 'json',
-  // });
-  // return JSON.parse(response.content);
+  try {
+    const response = await fetch('/api/research/write', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        evidence: userPrompt,
+        query: systemPrompt,
+        voiceConfig,
+      }),
+    });
 
-  console.warn('[WriterAgent] LLM call not yet wired - returning placeholder');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[WriterAgent] API error:', errorData);
+      throw new Error(errorData.message || `API error: ${response.status}`);
+    }
 
-  // Placeholder response indicating real implementation needed
-  return {
-    position: '[Writer Agent LLM integration pending]',
-    analysis: '## Analysis Pending\n\nThe Writer Agent LLM integration is not yet complete. ' +
-      'This placeholder will be replaced with actual generated content once the LLM service is wired.\n\n' +
-      '## Next Steps\n\n1. Wire Gemini/Claude service\n2. Parse JSON response\n3. Validate output structure',
-    limitations: 'LLM integration pending.',
-    citations: [],
-  };
+    const result = await response.json();
+    console.log('[WriterAgent] Claude response received, position:', result.position?.substring(0, 50));
+
+    // Map response to expected format
+    return {
+      position: result.position || '',
+      analysis: result.analysis || '',
+      limitations: result.limitations || '',
+      citations: (result.citations || []).map((c: { index?: number; title?: string; url?: string; snippet?: string; domain?: string }, i: number) => ({
+        index: c.index ?? i + 1,
+        title: c.title || 'Source',
+        url: c.url || '',
+        snippet: c.snippet || '',
+        domain: c.domain || (c.url ? new URL(c.url).hostname : ''),
+      })),
+    };
+
+  } catch (error) {
+    console.error('[WriterAgent] Claude writing failed:', error);
+
+    // Return error state document
+    return {
+      position: 'Document generation failed',
+      analysis: `## Error\n\nThe document could not be generated: ${error instanceof Error ? error.message : 'Unknown error'}\n\nPlease try again or check the ANTHROPIC_API_KEY configuration.`,
+      limitations: 'API call failed',
+      citations: [],
+    };
+  }
 }
 
 // =============================================================================

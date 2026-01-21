@@ -20,6 +20,7 @@ try {
 }
 import { NARRATIVE_ARCHITECT_PROMPT } from './data/prompts.js';
 import { Octokit } from '@octokit/rest';
+import Anthropic from '@anthropic-ai/sdk';
 import {
   loadConfig as loadHealthConfig,
   runChecks,
@@ -97,6 +98,11 @@ console.log('GEMINI_API_KEY configured:', apiKey ? `${apiKey.substring(0, 10)}..
 // Explicitly set vertexai: false to ensure we use API key auth (Gemini API)
 // rather than service account auth (Vertex AI) which requires different scopes
 const genai = new GoogleGenAI({ apiKey, vertexai: false });
+
+// Initialize Anthropic client for Claude API
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+console.log('ANTHROPIC_API_KEY configured:', anthropicApiKey ? `${anthropicApiKey.substring(0, 10)}...` : 'NOT SET');
+const anthropic = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) : null;
 
 // Configure Multer (Memory Storage for immediate processing)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -2411,6 +2417,150 @@ User's responses:
 
     } catch (error) {
         console.error("Lens generation failed:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// =============================================================================
+// Claude Research API - Sprint: agents-go-live-v1
+// =============================================================================
+
+// POST /api/research/deep - Claude Deep Research
+app.post('/api/research/deep', async (req, res) => {
+    try {
+        if (!anthropic) {
+            return res.status(503).json({
+                error: 'Anthropic API not configured',
+                message: 'ANTHROPIC_API_KEY environment variable is required'
+            });
+        }
+
+        const { query, context, maxTokens = 4096 } = req.body;
+
+        if (!query) {
+            return res.status(400).json({ error: 'Missing required field: query' });
+        }
+
+        console.log('[Research Deep] Query:', query.substring(0, 100) + '...');
+
+        // Construct a well-formed research prompt
+        const researchPrompt = `You are a research agent. Conduct thorough research on the following topic.
+
+RESEARCH QUESTION: ${query}
+
+CONTEXT: ${context || 'General research'}
+
+Provide:
+1. Key findings with source attributions
+2. Multiple perspectives where applicable
+3. Confidence levels for each finding (0.0-1.0)
+4. Gaps or areas needing more research
+
+Format your response as JSON:
+{
+  "findings": [{ "claim": "...", "source": "...", "confidence": 0.0-1.0, "sourceType": "academic|practitioner|news|primary" }],
+  "perspectives": ["perspective 1", "perspective 2"],
+  "gaps": ["gap 1", "gap 2"],
+  "summary": "Brief summary of key findings"
+}`;
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: maxTokens,
+            messages: [{ role: 'user', content: researchPrompt }],
+        });
+
+        // Extract text from response
+        const text = response.content[0].text;
+        console.log('[Research Deep] Response received, length:', text.length);
+
+        // Try to parse JSON from response
+        let result;
+        try {
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            result = jsonMatch ? JSON.parse(jsonMatch[0]) : { summary: text, findings: [], perspectives: [], gaps: [] };
+        } catch (parseErr) {
+            console.warn('[Research Deep] JSON parse failed, returning raw text');
+            result = { summary: text, findings: [], perspectives: [], gaps: [] };
+        }
+
+        res.json(result);
+
+    } catch (error) {
+        console.error('[Research Deep] Error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// POST /api/research/write - Voice-styled document generation
+app.post('/api/research/write', async (req, res) => {
+    try {
+        if (!anthropic) {
+            return res.status(503).json({
+                error: 'Anthropic API not configured',
+                message: 'ANTHROPIC_API_KEY environment variable is required'
+            });
+        }
+
+        const { evidence, query, voiceConfig } = req.body;
+
+        if (!evidence || !query) {
+            return res.status(400).json({ error: 'Missing required fields: evidence, query' });
+        }
+
+        console.log('[Research Write] Query:', query.substring(0, 100) + '...');
+        console.log('[Research Write] Voice config:', voiceConfig);
+
+        const writePrompt = `You are a writing agent. Transform research evidence into a polished document.
+
+VOICE STYLE:
+- Formality: ${voiceConfig?.formality || 'professional'}
+- Perspective: ${voiceConfig?.perspective || 'neutral'}
+- Citation style: ${voiceConfig?.citationStyle || 'inline'}
+
+ORIGINAL QUESTION: ${query}
+
+RESEARCH EVIDENCE:
+${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}
+
+Write a cohesive document that:
+1. Opens with a clear position/thesis
+2. Synthesizes the evidence naturally
+3. Uses the specified voice throughout
+4. Includes proper citations with [n] notation
+5. Notes limitations honestly
+
+Format your response as JSON:
+{
+  "position": "1-3 sentence thesis statement",
+  "analysis": "Full markdown document with [n] citations inline",
+  "limitations": "Honest limitations of this analysis",
+  "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
+}`;
+
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            messages: [{ role: 'user', content: writePrompt }],
+        });
+
+        const text = response.content[0].text;
+        console.log('[Research Write] Response received, length:', text.length);
+
+        // Try to parse JSON from response
+        let result;
+        try {
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            result = jsonMatch ? JSON.parse(jsonMatch[0]) : { analysis: text, position: '', limitations: '', citations: [] };
+        } catch (parseErr) {
+            console.warn('[Research Write] JSON parse failed, returning raw text');
+            result = { analysis: text, position: '', limitations: '', citations: [] };
+        }
+
+        res.json(result);
+
+    } catch (error) {
+        console.error('[Research Write] Error:', error.message);
         res.status(500).json({ error: error.message });
     }
 });
