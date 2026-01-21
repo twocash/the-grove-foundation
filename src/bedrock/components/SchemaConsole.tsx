@@ -110,7 +110,10 @@ function UniversalCard<T extends BaseEntity>({
           ${isFavorite ? 'opacity-100' : ''}
         `}
       >
-        <span className={`material-symbols-outlined text-lg ${isFavorite ? 'text-amber-400' : 'text-[var(--glass-text-muted)]'}`}>
+        <span
+          className="material-symbols-outlined text-lg"
+          style={{ color: isFavorite ? 'var(--neon-amber)' : 'var(--glass-text-muted)' }}
+        >
           {isFavorite ? 'star' : 'star_border'}
         </span>
       </button>
@@ -133,13 +136,11 @@ function UniversalCard<T extends BaseEntity>({
         </h3>
         {isActive !== undefined && (
           <span
-            className={`
-              px-2 py-0.5 text-xs rounded-full font-medium shrink-0
-              ${isActive
-                ? 'bg-green-500/20 text-green-400'
-                : 'bg-gray-500/20 text-gray-400'
-              }
-            `}
+            className="px-2 py-0.5 text-xs rounded-full font-medium shrink-0"
+            style={isActive
+              ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+              : { backgroundColor: 'var(--glass-surface)', color: 'var(--glass-text-muted)' }
+            }
           >
             {isActive ? 'Active' : 'Inactive'}
           </span>
@@ -434,8 +435,8 @@ export function SchemaConsole<T extends BaseEntity>({
     return (
       <div className="flex items-center justify-center h-full p-8">
         <div className="text-center">
-          <span className="material-symbols-outlined text-4xl text-red-400 mb-2">error</span>
-          <p className="text-sm text-red-400">{error}</p>
+          <span className="material-symbols-outlined text-4xl mb-2" style={{ color: 'var(--semantic-error)' }}>error</span>
+          <p className="text-sm" style={{ color: 'var(--semantic-error)' }}>{error}</p>
           <button
             onClick={refresh}
             className="mt-4 px-4 py-2 text-sm bg-[var(--glass-elevated)] rounded-lg hover:bg-[var(--glass-panel)]"
@@ -601,7 +602,10 @@ export function SchemaConsole<T extends BaseEntity>({
                   }}
                   className="p-1 rounded hover:bg-[var(--glass-panel)]"
                 >
-                  <span className={`material-symbols-outlined text-sm ${isFavorite(item.id) ? 'text-amber-400' : 'text-[var(--glass-text-muted)]'}`}>
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    style={{ color: isFavorite(item.id) ? 'var(--neon-amber)' : 'var(--glass-text-muted)' }}
+                  >
                     {isFavorite(item.id) ? 'star' : 'star_border'}
                   </span>
                 </button>

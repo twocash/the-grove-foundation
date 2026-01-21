@@ -75,7 +75,7 @@ export function SourceContextSection({
 
         {/* Error state */}
         {error && (
-          <div className="flex items-center gap-2 text-sm text-red-400">
+          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--semantic-error)' }}>
             <span className="material-symbols-outlined text-base">error</span>
             {error}
           </div>
@@ -111,13 +111,14 @@ export function SourceContextSection({
             <div className="flex items-center gap-3 text-xs text-[var(--glass-text-muted)]">
               {/* Confidence badge */}
               <span
-                className={`px-2 py-0.5 rounded ${
+                className="px-2 py-0.5 rounded"
+                style={
                   data.confidence >= 0.8
-                    ? 'bg-green-500/20 text-green-400'
+                    ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
                     : data.confidence >= 0.6
-                    ? 'bg-amber-500/20 text-amber-400'
-                    : 'bg-red-500/20 text-red-400'
-                }`}
+                    ? { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+                    : { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+                }
               >
                 {formatConfidence(data.confidence)} confidence
               </span>

@@ -18,6 +18,7 @@ import defaultTheme from '../themes/quantum-glass-skin.json';
 import zenithPaperTheme from '../themes/zenith-paper-skin.json';
 import livingGlassV2Theme from '../themes/living-glass-v2.json';
 import nebulaFluxTheme from '../themes/nebula-flux-v1.json';
+import quantumGroveTheme from '../themes/quantum-grove-v1.json';
 
 // =============================================================================
 // Types
@@ -100,6 +101,7 @@ const THEME_REGISTRY: Record<string, GroveSkin> = {
   'zenith-paper-v1': zenithPaperTheme as unknown as GroveSkin,
   'living-glass-v2': livingGlassV2Theme as unknown as GroveSkin,
   'nebula-flux-v1': nebulaFluxTheme as unknown as GroveSkin,
+  'quantum-grove-v1': quantumGroveTheme as unknown as GroveSkin,
 };
 
 // =============================================================================

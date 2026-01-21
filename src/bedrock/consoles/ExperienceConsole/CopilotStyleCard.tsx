@@ -106,11 +106,11 @@ export function CopilotStyleCard({
 
       {/* Settings preview */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-500/20 text-slate-400">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-[var(--glass-panel)] text-[var(--glass-text-muted)]">
           <span className="material-symbols-outlined text-xs">text_fields</span>
           {style.payload.typography.fontSize}px
         </span>
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-500/20 text-slate-400">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-[var(--glass-panel)] text-[var(--glass-text-muted)]">
           <span className="material-symbols-outlined text-xs">history</span>
           {style.payload.maxDisplayMessages} msgs
         </span>
@@ -119,13 +119,11 @@ export function CopilotStyleCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isActive
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-slate-500/20 text-slate-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isActive
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+          }
         >
           {isActive ? 'Active' : 'Draft'}
         </span>

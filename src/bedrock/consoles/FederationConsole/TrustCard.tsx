@@ -22,10 +22,10 @@ const COMPONENT_CONFIG: Record<string, { label: string; icon: string }> = {
  * Get color for a score value
  */
 function getScoreColor(score: number): string {
-  if (score >= 75) return '#4ade80';
-  if (score >= 50) return '#60a5fa';
-  if (score >= 25) return '#f59e0b';
-  return '#ef4444';
+  if (score >= 75) return 'var(--semantic-success)';
+  if (score >= 50) return 'var(--semantic-info)';
+  if (score >= 25) return 'var(--semantic-warning)';
+  return 'var(--semantic-error)';
 }
 
 /**
@@ -174,7 +174,10 @@ export function TrustCard({
         )}
 
         {/* Multiplier badge */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-400">
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={{ backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }}
+        >
           <span className="material-symbols-outlined text-xs">token</span>
           {trustConfig.multiplier}x
         </span>

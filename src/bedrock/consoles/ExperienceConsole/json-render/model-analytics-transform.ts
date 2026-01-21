@@ -42,12 +42,12 @@ const DEFAULT_OPTIONS: ModelAnalyticsTransformOptions = {
  */
 function getModelTypeColor(modelType: string): string {
   const colors: Record<string, string> = {
-    botanical: '#10b981', // emerald-500
-    academic: '#3b82f6',  // blue-500
-    research: '#8b5cf6',  // violet-500
-    creative: '#f59e0b',  // amber-500
+    botanical: 'var(--semantic-success)',
+    academic: 'var(--semantic-info)',
+    research: 'var(--neon-violet)',
+    creative: 'var(--neon-amber)',
   };
-  return colors[modelType] || '#6b7280'; // gray-500
+  return colors[modelType] || 'var(--glass-text-muted)';
 }
 
 /**

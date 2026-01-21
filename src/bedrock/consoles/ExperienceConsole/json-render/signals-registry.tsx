@@ -37,14 +37,14 @@ const PERIOD_LABELS: Record<string, string> = {
  * Event type display names and colors
  */
 const EVENT_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  sprout_viewed: { label: 'Views', color: 'bg-blue-500' },
-  sprout_retrieved: { label: 'Retrievals', color: 'bg-purple-500' },
-  sprout_referenced: { label: 'References', color: 'bg-indigo-500' },
-  sprout_searched: { label: 'Searches', color: 'bg-cyan-500' },
-  sprout_rated: { label: 'Ratings', color: 'bg-amber-500' },
-  sprout_exported: { label: 'Exports', color: 'bg-green-500' },
-  sprout_promoted: { label: 'Promotions', color: 'bg-emerald-500' },
-  sprout_refined: { label: 'Refinements', color: 'bg-teal-500' },
+  sprout_viewed: { label: 'Views', color: 'var(--semantic-info)' },
+  sprout_retrieved: { label: 'Retrievals', color: 'rgb(168, 85, 247)' }, // purple-500
+  sprout_referenced: { label: 'References', color: 'rgb(99, 102, 241)' }, // indigo-500
+  sprout_searched: { label: 'Searches', color: 'var(--neon-cyan)' },
+  sprout_rated: { label: 'Ratings', color: 'var(--semantic-warning)' },
+  sprout_exported: { label: 'Exports', color: 'var(--semantic-success)' },
+  sprout_promoted: { label: 'Promotions', color: 'var(--semantic-success)' },
+  sprout_refined: { label: 'Refinements', color: 'var(--semantic-info)' },
 };
 
 /**
@@ -81,12 +81,12 @@ export const SignalsRegistry: SignalsComponentRegistry = {
 
   MetricCard: ({ element }) => {
     const props = element.props as MetricCardProps;
-    const colorClasses = {
-      default: 'border-ink/10 dark:border-white/10',
-      green: 'border-grove-forest/30 bg-grove-forest/5',
-      red: 'border-red-500/30 bg-red-500/5',
-      amber: 'border-amber-500/30 bg-amber-500/5',
-      blue: 'border-blue-500/30 bg-blue-500/5',
+    const colorStyles: Record<string, React.CSSProperties> = {
+      default: { borderColor: 'var(--glass-border)' },
+      green: { borderColor: 'var(--semantic-success-border)', backgroundColor: 'var(--semantic-success-bg)' },
+      red: { borderColor: 'var(--semantic-error-border)', backgroundColor: 'var(--semantic-error-bg)' },
+      amber: { borderColor: 'var(--semantic-warning-border)', backgroundColor: 'var(--semantic-warning-bg)' },
+      blue: { borderColor: 'var(--semantic-info-border)', backgroundColor: 'var(--semantic-info-bg)' },
     };
 
     const formatValue = (val: number): string => {
@@ -101,7 +101,7 @@ export const SignalsRegistry: SignalsComponentRegistry = {
     };
 
     return (
-      <div className={`p-3 rounded border ${colorClasses[props.color || 'default']}`}>
+      <div className="p-3 rounded border" style={colorStyles[props.color || 'default']}>
         <p className="text-xs text-ink-muted dark:text-paper/60 uppercase font-mono mb-1">
           {props.label}
         </p>
@@ -109,10 +109,13 @@ export const SignalsRegistry: SignalsComponentRegistry = {
           {formatValue(props.value)}
         </p>
         {props.trend && (
-          <p className={`text-xs mt-1 ${
-            props.trend.direction === 'up' ? 'text-grove-forest' :
-            props.trend.direction === 'down' ? 'text-red-500' : 'text-ink-muted'
-          }`}>
+          <p
+            className="text-xs mt-1"
+            style={{
+              color: props.trend.direction === 'up' ? 'var(--semantic-success)' :
+                     props.trend.direction === 'down' ? 'var(--semantic-error)' : 'var(--glass-text-muted)'
+            }}
+          >
             {props.trend.direction === 'up' ? '↑' : props.trend.direction === 'down' ? '↓' : '→'}
             {props.trend.delta !== undefined && ` ${props.trend.delta > 0 ? '+' : ''}${props.trend.delta}`}
             {props.trend.period && ` (${props.trend.period})`}
@@ -148,17 +151,21 @@ export const SignalsRegistry: SignalsComponentRegistry = {
     const thresholds = props.thresholds || { low: 0.3, medium: 0.6, high: 0.8 };
     const percentage = Math.round(props.score * 100);
 
-    let colorClass = 'bg-red-500';
+    let barColor = 'var(--semantic-error)';
     let statusLabel = 'Low';
+    let badgeStyle: React.CSSProperties = { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' };
     if (props.score >= thresholds.high) {
-      colorClass = 'bg-grove-forest';
+      barColor = 'var(--semantic-success)';
       statusLabel = 'Excellent';
+      badgeStyle = { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' };
     } else if (props.score >= thresholds.medium) {
-      colorClass = 'bg-amber-500';
+      barColor = 'var(--semantic-warning)';
       statusLabel = 'Good';
+      badgeStyle = { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' };
     } else if (props.score >= thresholds.low) {
-      colorClass = 'bg-orange-500';
+      barColor = 'var(--neon-amber)';
       statusLabel = 'Fair';
+      badgeStyle = { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--neon-amber)' };
     }
 
     return (
@@ -167,18 +174,14 @@ export const SignalsRegistry: SignalsComponentRegistry = {
           <span className="text-sm font-medium text-ink dark:text-paper">
             {props.label}
           </span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded ${
-            props.score >= thresholds.high ? 'bg-grove-forest/20 text-grove-forest' :
-            props.score >= thresholds.medium ? 'bg-amber-500/20 text-amber-600' :
-            'bg-red-500/20 text-red-600'
-          }`}>
+          <span className="text-xs font-mono px-2 py-0.5 rounded" style={badgeStyle}>
             {statusLabel}
           </span>
         </div>
         <div className="h-3 bg-ink/10 dark:bg-white/10 rounded-full overflow-hidden">
           <div
-            className={`h-full ${colorClass} transition-all duration-500`}
-            style={{ width: `${percentage}%` }}
+            className="h-full transition-all duration-500"
+            style={{ width: `${percentage}%`, backgroundColor: barColor }}
           />
         </div>
         <p className="mt-1 text-right text-sm font-bold text-ink dark:text-paper">
@@ -198,7 +201,7 @@ export const SignalsRegistry: SignalsComponentRegistry = {
           <span className="text-sm font-medium text-ink dark:text-paper">
             Diversity Index
           </span>
-          <span className="text-lg font-bold text-grove-forest">
+          <span className="text-lg font-bold" style={{ color: 'var(--semantic-success)' }}>
             {percentage}%
           </span>
         </div>
@@ -241,7 +244,7 @@ export const SignalsRegistry: SignalsComponentRegistry = {
         </div>
         <div className="space-y-2">
           {props.events.map((event) => {
-            const config = EVENT_TYPE_CONFIG[event.type] || { label: event.type, color: 'bg-gray-500' };
+            const config = EVENT_TYPE_CONFIG[event.type] || { label: event.type, color: 'var(--glass-text-muted)' };
             const pct = props.total > 0 ? (event.count / props.total) * 100 : 0;
 
             return (
@@ -251,8 +254,8 @@ export const SignalsRegistry: SignalsComponentRegistry = {
                 </div>
                 <div className="flex-1 h-2 bg-ink/10 dark:bg-white/10 rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${config.color}`}
-                    style={{ width: `${pct}%` }}
+                    className="h-full"
+                    style={{ width: `${pct}%`, backgroundColor: config.color }}
                   />
                 </div>
                 <span className="w-12 text-right text-xs font-mono text-ink dark:text-paper">
@@ -289,8 +292,8 @@ export const SignalsRegistry: SignalsComponentRegistry = {
                   </div>
                   <div className="flex-1 h-6 bg-ink/5 dark:bg-white/5 rounded overflow-hidden relative">
                     <div
-                      className="h-full bg-grove-forest/60 flex items-center justify-end pr-2"
-                      style={{ width: `${stage.percentage}%` }}
+                      className="h-full flex items-center justify-end pr-2"
+                      style={{ width: `${stage.percentage}%`, backgroundColor: 'color-mix(in srgb, var(--semantic-success) 60%, transparent)' }}
                     >
                       <span className="text-xs font-mono text-white drop-shadow">
                         {stage.count.toLocaleString()}
@@ -329,10 +332,10 @@ export const SignalsRegistry: SignalsComponentRegistry = {
         ) : (
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {props.events.slice(0, props.limit).map((event, i) => {
-              const config = EVENT_TYPE_CONFIG[event.type] || { label: event.type, color: 'bg-gray-500' };
+              const config = EVENT_TYPE_CONFIG[event.type] || { label: event.type, color: 'var(--glass-text-muted)' };
               return (
                 <div key={i} className="flex items-center gap-2 text-xs">
-                  <div className={`w-2 h-2 rounded-full ${config.color}`} />
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
                   <span className="text-ink dark:text-paper">{config.label}</span>
                   <span className="text-ink-muted dark:text-paper/50 flex-1 truncate">
                     {new Date(event.timestamp).toLocaleString()}
@@ -350,39 +353,43 @@ export const SignalsRegistry: SignalsComponentRegistry = {
     const props = element.props as AdvancementIndicatorProps;
 
     return (
-      <div className={`mb-4 p-4 rounded border ${
-        props.eligible
-          ? 'border-grove-forest/50 bg-grove-forest/5'
-          : 'border-ink/10 dark:border-white/10'
-      }`}>
+      <div
+        className="mb-4 p-4 rounded border"
+        style={props.eligible
+          ? { borderColor: 'var(--semantic-success-border)', backgroundColor: 'var(--semantic-success-bg)' }
+          : {}
+        }
+      >
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium text-ink dark:text-paper">
             Advancement Status
           </span>
-          <span className={`px-2 py-0.5 rounded text-xs font-mono ${
-            props.eligible
-              ? 'bg-grove-forest/20 text-grove-forest'
-              : 'bg-amber-500/20 text-amber-600'
-          }`}>
+          <span
+            className="px-2 py-0.5 rounded text-xs font-mono"
+            style={props.eligible
+              ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+              : { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+            }
+          >
             {props.eligible ? 'Eligible' : 'Not Yet Eligible'}
           </span>
         </div>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
-            <span className={props.criteria.viewCountMet ? 'text-grove-forest' : 'text-ink-muted'}>
+            <span style={{ color: props.criteria.viewCountMet ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}>
               {props.criteria.viewCountMet ? '✓' : '○'}
             </span>
             <span className="text-ink dark:text-paper">View count threshold</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className={props.criteria.qualityScoreMet ? 'text-grove-forest' : 'text-ink-muted'}>
+            <span style={{ color: props.criteria.qualityScoreMet ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}>
               {props.criteria.qualityScoreMet ? '✓' : '○'}
             </span>
             <span className="text-ink dark:text-paper">Quality score threshold</span>
           </div>
           {props.criteria.diversityMet !== undefined && (
             <div className="flex items-center gap-2">
-              <span className={props.criteria.diversityMet ? 'text-grove-forest' : 'text-ink-muted'}>
+              <span style={{ color: props.criteria.diversityMet ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}>
                 {props.criteria.diversityMet ? '✓' : '○'}
               </span>
               <span className="text-ink dark:text-paper">Diversity requirement</span>
@@ -390,7 +397,7 @@ export const SignalsRegistry: SignalsComponentRegistry = {
           )}
           {props.criteria.daysActiveMet !== undefined && (
             <div className="flex items-center gap-2">
-              <span className={props.criteria.daysActiveMet ? 'text-grove-forest' : 'text-ink-muted'}>
+              <span style={{ color: props.criteria.daysActiveMet ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}>
                 {props.criteria.daysActiveMet ? '✓' : '○'}
               </span>
               <span className="text-ink dark:text-paper">Activity duration</span>
@@ -399,7 +406,7 @@ export const SignalsRegistry: SignalsComponentRegistry = {
         </div>
         {props.nextTier && (
           <p className="mt-2 text-xs text-ink-muted dark:text-paper/50">
-            Next tier: <span className="font-mono text-grove-forest">{props.nextTier}</span>
+            Next tier: <span className="font-mono" style={{ color: 'var(--semantic-success)' }}>{props.nextTier}</span>
           </p>
         )}
       </div>

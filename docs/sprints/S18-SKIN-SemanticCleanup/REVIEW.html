@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S18-SKIN-SemanticCleanup Sprint Review</title>
+  <style>
+    :root {
+      --bg-primary: #0d0d0d;
+      --bg-secondary: #1a1a1a;
+      --bg-elevated: #252525;
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666;
+      --accent-cyan: #00d4ff;
+      --accent-green: #00ff88;
+      --accent-amber: #ffaa00;
+      --accent-red: #ff4444;
+      --border: #333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent-cyan);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin: 1.5rem 0 0.75rem;
+      color: var(--text-primary);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    .status-complete {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .phase-list {
+      list-style: none;
+    }
+
+    .phase-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .phase-item:last-child { border-bottom: none; }
+
+    .phase-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .phase-name { flex: 1; }
+    .phase-files { color: var(--text-muted); font-size: 0.875rem; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+    }
+
+    .code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-elevated);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: var(--accent-amber);
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .screenshot-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .screenshot-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .screenshot-caption {
+      padding: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .color-sample {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.25rem 0;
+    }
+
+    .color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+    }
+
+    .conversion-example {
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+
+    .conversion-before { color: var(--accent-red); }
+    .conversion-after { color: var(--accent-green); }
+    .conversion-arrow { color: var(--text-muted); margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>S18-SKIN-SemanticCleanup</h1>
+      <p class="subtitle">Semantic Color Variable Migration in src/bedrock/</p>
+      <span class="status-badge status-complete">
+        <span>&#10003;</span> Sprint Complete
+      </span>
+    </header>
+
+    <section>
+      <h2>Summary Metrics</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-value">7</div>
+          <div class="metric-label">Phases Complete</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">25+</div>
+          <div class="metric-label">Files Modified</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">100+</div>
+          <div class="metric-label">Patterns Converted</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value">10</div>
+          <div class="metric-label">E2E Tests</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase Completion</h2>
+      <div class="card">
+        <ul class="phase-list">
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 1: Success Colors (green/emerald/teal)</span>
+            <span class="phase-files">Sprout status badges, tier colors, success states</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 2: Warning Colors (amber/yellow/orange)</span>
+            <span class="phase-files">Warning states, pending indicators, highlights</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 3: Error Colors (red/rose)</span>
+            <span class="phase-files">Error states, failed badges, destructive actions</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 4: Info Colors (blue/cyan/sky)</span>
+            <span class="phase-files">Info badges, developing tier, chart colors</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 5: Neutral Colors (gray/slate)</span>
+            <span class="phase-files">Panel backgrounds, muted text, borders</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 6: CSS Workaround Removal</span>
+            <span class="phase-files">~180 lines of Tailwind remapping rules removed from globals.css</span>
+          </li>
+          <li class="phase-item">
+            <span class="phase-check">&#10003;</span>
+            <span class="phase-name">Phase 7: E2E Verification</span>
+            <span class="phase-files">10/10 E2E tests passing, screenshots captured</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Key File Conversions</h2>
+
+      <h3>Card Components</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Patterns Converted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="code">AchievementBadge.tsx</code></td>
+            <td>Rarity color mapping (common tier converted to glass variables)</td>
+          </tr>
+          <tr>
+            <td><code class="code">FeatureFlagCard.tsx</code></td>
+            <td>Icon container background, status indicators</td>
+          </tr>
+          <tr>
+            <td><code class="code">JobConfigCard.tsx</code></td>
+            <td>Run button, icon container, status bar conditional styles</td>
+          </tr>
+          <tr>
+            <td><code class="code">CopilotStyleCard.tsx</code></td>
+            <td>Settings badges (batch replace_all for gray patterns)</td>
+          </tr>
+          <tr>
+            <td><code class="code">ModelCard.tsx</code></td>
+            <td>Tier count badge styling</td>
+          </tr>
+          <tr>
+            <td><code class="code">TierMappingCard.tsx</code></td>
+            <td>STATUS_CONFIG, EQUIVALENCE_TYPE_CONFIG, confidence bar</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Registry & Transform Files</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Patterns Converted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="code">attribution-registry.tsx</code></td>
+            <td>tierColorMap (novice tier), rarityStyles (common rarity)</td>
+          </tr>
+          <tr>
+            <td><code class="code">ReputationTierBadge.tsx</code></td>
+            <td>TIER_STYLES (developing, novice tiers)</td>
+          </tr>
+          <tr>
+            <td><code class="code">model-analytics-transform.ts</code></td>
+            <td>getModelTypeColor function (hex to CSS variables)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Editor Components</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Patterns Converted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="code">ResearchAgentConfigCard.tsx</code></td>
+            <td>Status bar, status badge conditional styling</td>
+          </tr>
+          <tr>
+            <td><code class="code">ResearchAgentConfigEditor.tsx</code></td>
+            <td>Archived banner background and text</td>
+          </tr>
+          <tr>
+            <td><code class="code">WriterAgentConfigCard.tsx</code></td>
+            <td>Limitations text color</td>
+          </tr>
+          <tr>
+            <td><code class="code">WriterAgentConfigEditor.tsx</code></td>
+            <td>Archived banner styling</td>
+          </tr>
+          <tr>
+            <td><code class="code">SproutEditor.tsx</code></td>
+            <td>Syntax fix (missing closing bracket)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Conversion Pattern Examples</h2>
+
+      <h3>Config Object Conversion (TierMappingCard.tsx)</h3>
+      <div class="conversion-example">
+        <div class="conversion-before">// BEFORE - Hardcoded Tailwind colors</div>
+        <pre>const STATUS_CONFIG = {
+  draft: { label: 'Draft', color: 'text-gray-400', icon: 'edit_note' },
+  proposed: { label: 'Proposed', color: 'text-amber-400', icon: 'pending' },
+  accepted: { label: 'Accepted', color: 'text-emerald-400', icon: 'check_circle' },
+};</pre>
+        <div class="conversion-arrow">&#8595;</div>
+        <div class="conversion-after">// AFTER - Semantic CSS variables</div>
+        <pre>const STATUS_CONFIG = {
+  draft: { label: 'Draft', color: 'var(--glass-text-muted)', icon: 'edit_note' },
+  proposed: { label: 'Proposed', color: 'var(--semantic-warning)', icon: 'pending' },
+  accepted: { label: 'Accepted', color: 'var(--semantic-success)', icon: 'check_circle' },
+};</pre>
+      </div>
+
+      <h3>Tailwind Class to Style Prop (JobConfigCard.tsx)</h3>
+      <div class="conversion-example">
+        <div class="conversion-before">// BEFORE - Tailwind conditional classes</div>
+        <pre>&lt;div className={`... ${isEnabled ? 'bg-blue-500/20' : 'bg-slate-500/20'}`}&gt;</pre>
+        <div class="conversion-arrow">&#8595;</div>
+        <div class="conversion-after">// AFTER - Style prop with CSS variables</div>
+        <pre>&lt;div
+  className="..."
+  style={{ backgroundColor: isEnabled ? 'var(--semantic-info-bg)' : 'var(--glass-panel)' }}
+&gt;</pre>
+      </div>
+
+      <h3>Hex Color to CSS Variable (model-analytics-transform.ts)</h3>
+      <div class="conversion-example">
+        <div class="conversion-before">// BEFORE - Hardcoded hex colors</div>
+        <pre>botanical: '#10b981',
+academic: '#3b82f6',</pre>
+        <div class="conversion-arrow">&#8595;</div>
+        <div class="conversion-after">// AFTER - CSS variables</div>
+        <pre>botanical: 'var(--semantic-success)',
+academic: 'var(--semantic-info)',</pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>Semantic Color Variables Used</h2>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Usage</th>
+              <th>Replaces</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="code">--semantic-success</code></td>
+              <td>Success states, active status, accepted</td>
+              <td>green-*, emerald-*, teal-*</td>
+            </tr>
+            <tr>
+              <td><code class="code">--semantic-warning</code></td>
+              <td>Warning states, pending, proposed</td>
+              <td>amber-*, yellow-*, orange-*</td>
+            </tr>
+            <tr>
+              <td><code class="code">--semantic-error</code></td>
+              <td>Error states, failed, rejected</td>
+              <td>red-*, rose-*</td>
+            </tr>
+            <tr>
+              <td><code class="code">--semantic-info</code></td>
+              <td>Info states, developing tier, API badges</td>
+              <td>blue-*, cyan-*, sky-*</td>
+            </tr>
+            <tr>
+              <td><code class="code">--glass-panel</code></td>
+              <td>Panel backgrounds, disabled states</td>
+              <td>gray-*/20, slate-*/20</td>
+            </tr>
+            <tr>
+              <td><code class="code">--glass-text-muted</code></td>
+              <td>Muted text, draft status, novice tier</td>
+              <td>gray-400, slate-400</td>
+            </tr>
+            <tr>
+              <td><code class="code">--glass-border</code></td>
+              <td>Border colors</td>
+              <td>gray-*/30, slate-*/30</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Visual Verification Screenshots</h2>
+      <div class="screenshot-grid">
+        <div class="screenshot-card">
+          <img src="screenshots/01-experience-console.png" alt="Experience Console">
+          <div class="screenshot-caption">
+            <strong>Experience Console</strong> - Shows card components with semantic colors applied to status badges, category indicators, and tier displays.
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/02-nursery-console.png" alt="Nursery Console">
+          <div class="screenshot-caption">
+            <strong>Nursery Console</strong> - Demonstrates sprout status badges using semantic success/warning/error colors.
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/03-federation-console.png" alt="Federation Console">
+          <div class="screenshot-caption">
+            <strong>Federation Console</strong> - Shows reputation tier badges with semantic color variables.
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <img src="screenshots/04-bedrock-main.png" alt="Bedrock Main">
+          <div class="screenshot-caption">
+            <strong>Bedrock Main Page</strong> - Overall Bedrock navigation with consistent theming.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>E2E Test Results</h2>
+      <div class="card">
+        <p><strong>Test File:</strong> <code class="code">tests/e2e/s18-semantic-cleanup.spec.ts</code></p>
+        <p><strong>Status:</strong> <span style="color: var(--accent-green);">&#10003; 10/10 Passed</span></p>
+        <p><strong>Duration:</strong> 2.4 minutes</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Test Case</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>TC-01: Experience Console loads with semantic colors</td><td style="color: var(--accent-green);">&#10003;</td><td>52.8s</td></tr>
+            <tr><td>TC-02: Nursery Console sprout status colors</td><td style="color: var(--accent-green);">&#10003;</td><td>6.5s</td></tr>
+            <tr><td>TC-03: Federation Console tier badge colors</td><td style="color: var(--accent-green);">&#10003;</td><td>6.9s</td></tr>
+            <tr><td>TC-04: Glass panel variables render correctly</td><td style="color: var(--accent-green);">&#10003;</td><td>7.4s</td></tr>
+            <tr><td>TC-05: No Tailwind color class warnings</td><td style="color: var(--accent-green);">&#10003;</td><td>17.0s</td></tr>
+            <tr><td>TC-06: Error state colors render correctly</td><td style="color: var(--accent-green);">&#10003;</td><td>7.0s</td></tr>
+            <tr><td>TC-07: Semantic variables defined in root</td><td style="color: var(--accent-green);">&#10003;</td><td>5.1s</td></tr>
+            <tr><td>TC-08: Card components render without hardcoded colors</td><td style="color: var(--accent-green);">&#10003;</td><td>7.7s</td></tr>
+            <tr><td>TC-09: Status badges use semantic colors</td><td style="color: var(--accent-green);">&#10003;</td><td>8.1s</td></tr>
+            <tr><td>TC-10: Full Bedrock navigation without errors</td><td style="color: var(--accent-green);">&#10003;</td><td>19.4s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Build Verification</h2>
+      <div class="card">
+        <p><strong>Build Status:</strong> <span style="color: var(--accent-green);">&#10003; Passed</span></p>
+        <p><strong>Build Time:</strong> 53.28s</p>
+        <p><strong>Modules Transformed:</strong> 98</p>
+        <p><strong>Syntax Errors Fixed:</strong> 1 (SproutEditor.tsx missing bracket)</p>
+        <p><strong>CSS Workaround Removed:</strong> ~180 lines from globals.css</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Strangler Fig Compliance</h2>
+      <div class="card">
+        <p><strong>Zone:</strong> <span style="color: var(--accent-green);">&#10003; ACTIVE BUILD ZONE</span></p>
+        <p>All modifications confined to <code class="code">src/bedrock/</code></p>
+        <p>No changes to frozen zones:</p>
+        <ul style="margin-left: 1.5rem; color: var(--text-secondary);">
+          <li>/terminal route</li>
+          <li>/foundation route</li>
+          <li>src/surface/components/Terminal/*</li>
+          <li>src/workspace/*</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--text-muted); text-align: center;">
+      <p>Sprint S18-SKIN-SemanticCleanup | Grove Execution Protocol v1.5</p>
+      <p>Generated: 2026-01-20</p>
+    </footer>
+  </div>
+</body>
+</html>

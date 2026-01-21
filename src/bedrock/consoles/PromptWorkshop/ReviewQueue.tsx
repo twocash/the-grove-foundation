@@ -118,13 +118,19 @@ export const ReviewQueue: React.FC<ReviewQueueProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--glass-border)] bg-amber-500/5">
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b border-[var(--glass-border)]"
+        style={{ backgroundColor: 'var(--semantic-warning-bg)' }}
+      >
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-amber-400">pending_actions</span>
-          <span className="text-sm font-medium text-amber-400">
+          <span className="material-symbols-outlined" style={{ color: 'var(--semantic-warning)' }}>pending_actions</span>
+          <span className="text-sm font-medium" style={{ color: 'var(--semantic-warning)' }}>
             Review Queue
           </span>
-          <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full">
+          <span
+            className="px-2 py-0.5 text-xs rounded-full"
+            style={{ backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }}
+          >
             {prompts.length}
           </span>
         </div>
@@ -142,12 +148,12 @@ export const ReviewQueue: React.FC<ReviewQueueProps> = ({
               key={prompt.meta.id}
               className={`
                 p-3 rounded-lg cursor-pointer transition-all
-                ${isSelected
-                  ? 'bg-amber-500/20 border border-amber-500/40'
-                  : 'bg-[var(--glass-panel)] hover:bg-[var(--glass-hover)] border border-transparent'
-                }
                 ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
               `}
+              style={isSelected
+                ? { backgroundColor: 'var(--semantic-warning-bg)', border: '1px solid var(--semantic-warning-border)' }
+                : { backgroundColor: 'var(--glass-panel)', border: '1px solid transparent' }
+              }
               onClick={() => onSelect(prompt)}
             >
               <div className="flex items-start justify-between gap-2">
@@ -164,13 +170,14 @@ export const ReviewQueue: React.FC<ReviewQueueProps> = ({
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     {/* Confidence Badge */}
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded ${
+                      className="text-xs px-1.5 py-0.5 rounded"
+                      style={
                         confidence >= 0.8
-                          ? 'bg-green-500/20 text-green-400'
+                          ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
                           : confidence >= 0.6
-                          ? 'bg-amber-500/20 text-amber-400'
-                          : 'bg-red-500/20 text-red-400'
-                      }`}
+                          ? { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+                          : { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+                      }
                     >
                       {Math.round(confidence * 100)}% confidence
                     </span>
@@ -199,7 +206,10 @@ export const ReviewQueue: React.FC<ReviewQueueProps> = ({
                   <button
                     onClick={(e) => handleApprove(prompt, e)}
                     disabled={loading || isProcessing}
-                    className="p-1.5 hover:bg-green-500/20 rounded-lg text-green-400 transition-colors"
+                    className="p-1.5 rounded-lg transition-colors"
+                    style={{ color: 'var(--semantic-success)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-success-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     title="Approve - Add to curated prompts"
                   >
                     <span className="material-symbols-outlined text-lg">check_circle</span>
@@ -207,7 +217,10 @@ export const ReviewQueue: React.FC<ReviewQueueProps> = ({
                   <button
                     onClick={(e) => handleReject(prompt, e)}
                     disabled={loading || isProcessing}
-                    className="p-1.5 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors"
+                    className="p-1.5 rounded-lg transition-colors"
+                    style={{ color: 'var(--semantic-error)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     title="Reject - Archive this prompt"
                   >
                     <span className="material-symbols-outlined text-lg">cancel</span>

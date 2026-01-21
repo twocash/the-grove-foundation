@@ -247,27 +247,36 @@ export function CopilotStyleEditor({
     <div className="flex flex-col h-full">
       {/* === ACTIVE STATUS BANNER === */}
       {isActive && (
-        <div className={`
-          flex items-center gap-3 px-4 py-3 border-b transition-colors
-          ${hasChanges
-            ? 'bg-amber-500/10 border-amber-500/30'
-            : 'bg-green-500/10 border-green-500/20'
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b transition-colors"
+          style={hasChanges
+            ? { backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning-border)' }
+            : { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)' }
           }
-        `}>
+        >
           <span className="relative flex h-3 w-3">
             {!hasChanges && (
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span
+                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                style={{ backgroundColor: 'var(--semantic-success)' }}
+              />
             )}
-            <span className={`
-              relative inline-flex rounded-full h-3 w-3
-              ${hasChanges ? 'bg-amber-500' : 'bg-green-500'}
-            `} />
+            <span
+              className="relative inline-flex rounded-full h-3 w-3"
+              style={{ backgroundColor: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)' }}
+            />
           </span>
           <div className="flex-1">
-            <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-green-300'}`}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)' }}
+            >
               {hasChanges ? 'Active Style (editing...)' : 'Active Style'}
             </span>
-            <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-green-400/70'}`}>
+            <p
+              className="text-xs opacity-70"
+              style={{ color: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)' }}
+            >
               {hasChanges
                 ? 'Changes pending — save or discard below'
                 : 'Applied to all inspector copilots'
@@ -279,9 +288,12 @@ export function CopilotStyleEditor({
 
       {/* === DRAFT BANNER === */}
       {isDraft && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
-          <span className="material-symbols-outlined text-amber-400 text-base">edit_note</span>
-          <span className="text-sm text-amber-300">
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b"
+          style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning-border)' }}
+        >
+          <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-warning)' }}>edit_note</span>
+          <span className="text-sm" style={{ color: 'var(--semantic-warning)' }}>
             Draft — {activeStyle
               ? `Active: "${activeStyle.meta.title}" (${activeStyle.meta.id.slice(0, 8)}...)`
               : 'No active style set'}
@@ -291,9 +303,12 @@ export function CopilotStyleEditor({
 
       {/* === ARCHIVED BANNER === */}
       {isArchived && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/10 border-b border-gray-500/20">
-          <span className="material-symbols-outlined text-gray-400 text-base">archive</span>
-          <span className="text-sm text-gray-300">
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b"
+          style={{ backgroundColor: 'var(--glass-panel)', borderColor: 'var(--glass-border)' }}
+        >
+          <span className="material-symbols-outlined text-base" style={{ color: 'var(--glass-text-muted)' }}>archive</span>
+          <span className="text-sm" style={{ color: 'var(--glass-text-secondary)' }}>
             Archived — no longer in use
           </span>
         </div>
@@ -634,7 +649,7 @@ export function CopilotStyleEditor({
                   variant="ghost"
                   size="sm"
                   disabled={loading || discarding || saving}
-                  className="border border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                  style={{ borderColor: 'var(--semantic-warning-border)', color: 'var(--semantic-warning)' }}
                 >
                   <span className="material-symbols-outlined text-lg mr-1">undo</span>
                   {discarding ? 'Discarding...' : 'Discard'}
@@ -644,7 +659,8 @@ export function CopilotStyleEditor({
                   variant="primary"
                   size="sm"
                   disabled={loading || saving || discarding}
-                  className="flex-1 bg-green-600 hover:bg-green-500"
+                  className="flex-1"
+                  style={{ backgroundColor: 'var(--semantic-success)' }}
                 >
                   <span className="material-symbols-outlined text-lg mr-1">
                     {saving ? 'hourglass_empty' : 'cloud_upload'}
@@ -655,8 +671,9 @@ export function CopilotStyleEditor({
             ) : (
               // Saved mode: Show "Active Style" status button
               <div
-                className="w-full px-4 py-2.5 rounded-lg bg-green-600/90 text-white text-center
+                className="w-full px-4 py-2.5 rounded-lg text-white text-center
                            flex items-center justify-center gap-2 cursor-default"
+                style={{ backgroundColor: 'var(--semantic-success)' }}
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
@@ -674,7 +691,8 @@ export function CopilotStyleEditor({
               variant="primary"
               size="sm"
               disabled={loading || activating || hasChanges}
-              className="w-full bg-green-600 hover:bg-green-500"
+              className="w-full"
+              style={{ backgroundColor: 'var(--semantic-success)' }}
               title={hasChanges ? 'Save changes before activating' : 'Make this the active style'}
             >
               <span className="material-symbols-outlined text-lg mr-2">
@@ -710,7 +728,7 @@ export function CopilotStyleEditor({
                 variant="ghost"
                 size="sm"
                 disabled={loading}
-                className="text-red-400 hover:text-red-300"
+                style={{ color: 'var(--semantic-error)' }}
                 title="Delete"
               >
                 <span className="material-symbols-outlined text-lg">delete</span>
@@ -753,7 +771,7 @@ export function CopilotStyleEditor({
                 variant="ghost"
                 size="sm"
                 disabled={loading}
-                className="text-red-400 hover:text-red-300"
+                style={{ color: 'var(--semantic-error)' }}
                 title="Delete permanently"
               >
                 <span className="material-symbols-outlined text-lg">delete</span>

@@ -33,26 +33,26 @@ export interface QualityScoreBadgeProps {
 // Color Mapping (based on grade)
 // =============================================================================
 
-const GRADE_COLOR_MAP: Record<QualityGrade, { bg: string; text: string; border: string }> = {
+const GRADE_COLOR_MAP: Record<QualityGrade, React.CSSProperties> = {
   excellent: {
-    bg: 'bg-[var(--neon-green)]/20',
-    text: 'text-[var(--neon-green)]',
-    border: 'border-[var(--neon-green)]/50',
+    backgroundColor: 'var(--semantic-success-bg)',
+    color: 'var(--semantic-success)',
+    borderColor: 'var(--semantic-success-border)',
   },
   good: {
-    bg: 'bg-[var(--neon-amber)]/20',
-    text: 'text-[var(--neon-amber)]',
-    border: 'border-[var(--neon-amber)]/50',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    color: 'var(--semantic-warning)',
+    borderColor: 'var(--semantic-warning-border)',
   },
   fair: {
-    bg: 'bg-orange-500/20',
-    text: 'text-orange-400',
-    border: 'border-orange-500/50',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    color: 'var(--semantic-warning)',
+    borderColor: 'var(--semantic-warning-border)',
   },
   'needs-improvement': {
-    bg: 'bg-red-500/20',
-    text: 'text-red-400',
-    border: 'border-red-500/50',
+    backgroundColor: 'var(--semantic-error-bg)',
+    color: 'var(--semantic-error)',
+    borderColor: 'var(--semantic-error-border)',
   },
 };
 
@@ -104,10 +104,10 @@ export function QualityScoreBadge({
     <div
       className={`
         inline-flex items-center gap-1 rounded-lg font-medium border
-        ${colors.bg} ${colors.text} ${colors.border}
         ${sizes.badge}
         ${className}
       `}
+      style={colors}
       title={showTooltip ? tooltipContent : undefined}
       data-testid="quality-score-badge"
     >
@@ -138,7 +138,8 @@ export function QualityScoreIndicator({ score, className = '' }: QualityScoreInd
 
   return (
     <div
-      className={`w-2 h-2 rounded-full ${colors.bg.replace('/20', '')} ${className}`}
+      className={`w-2 h-2 rounded-full ${className}`}
+      style={{ backgroundColor: colors.color }}
       title={`Quality: ${Math.round(score)}%`}
       data-testid="quality-score-indicator"
     />
@@ -164,11 +165,15 @@ export function QualityPendingBadge({ size = 'md', className = '' }: QualityPend
     <div
       className={`
         inline-flex items-center gap-1 rounded-lg font-medium border
-        bg-gray-500/20 text-gray-400 border-gray-500/50
         animate-pulse
         ${sizes.badge}
         ${className}
       `}
+      style={{
+        backgroundColor: 'var(--glass-surface)',
+        color: 'var(--glass-text-muted)',
+        borderColor: 'var(--glass-border)',
+      }}
       title="Quality assessment pending"
       data-testid="quality-pending-badge"
     >
@@ -210,10 +215,8 @@ export function QualityDimensionBar({ dimensions, className = '' }: QualityDimen
         return (
           <div
             key={key}
-            className={`
-              flex items-center justify-center w-6 h-6 rounded text-xs font-medium
-              ${colors.bg} ${colors.text}
-            `}
+            className="flex items-center justify-center w-6 h-6 rounded text-xs font-medium"
+            style={{ backgroundColor: colors.backgroundColor, color: colors.color }}
             title={`${config.label}: ${Math.round(value)}%`}
           >
             {config.label.charAt(0)}

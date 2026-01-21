@@ -127,13 +127,13 @@ export function GroveCard({
 
         {/* Sprout count */}
         <div className="flex items-center gap-1">
-          <span className="material-symbols-outlined text-sm text-green-400">eco</span>
+          <span className="material-symbols-outlined text-sm" style={{ color: 'var(--semantic-success)' }}>eco</span>
           <span>{payload.sproutCount}</span>
         </div>
 
         {/* Exchange count */}
         <div className="flex items-center gap-1">
-          <span className="material-symbols-outlined text-sm text-amber-400">swap_horiz</span>
+          <span className="material-symbols-outlined text-sm" style={{ color: 'var(--semantic-warning)' }}>swap_horiz</span>
           <span>{payload.exchangeCount}</span>
         </div>
       </div>
@@ -176,17 +176,16 @@ export function GroveCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${payload.status === 'active'
-              ? 'bg-green-500/20 text-green-400'
+          className="px-2 py-0.5 rounded-full"
+          style={
+            payload.status === 'active'
+              ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
               : payload.status === 'degraded'
-              ? 'bg-amber-500/20 text-amber-400'
+              ? { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
               : payload.status === 'blocked'
-              ? 'bg-red-500/20 text-red-400'
-              : 'bg-slate-500/20 text-slate-400'
-            }
-          `}
+              ? { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+              : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+          }
         >
           {payload.status.charAt(0).toUpperCase() + payload.status.slice(1)}
         </span>

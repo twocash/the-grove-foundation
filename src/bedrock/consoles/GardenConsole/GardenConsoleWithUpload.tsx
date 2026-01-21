@@ -191,9 +191,12 @@ export function GardenConsoleWithUpload() {
 
       {/* Job progress indicator */}
       {activeJob && activeJob.status === 'running' && (
-        <div className="mx-6 mt-4 px-4 py-3 rounded-lg border bg-cyan-500/10 border-cyan-500/30">
+        <div
+          className="mx-6 mt-4 px-4 py-3 rounded-lg border"
+          style={{ backgroundColor: 'var(--neon-cyan-bg)', borderColor: 'var(--neon-cyan-border)' }}
+        >
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2 text-cyan-400">
+            <div className="flex items-center gap-2" style={{ color: 'var(--neon-cyan)' }}>
               <span className="material-symbols-rounded animate-pulse">
                 {activeJob.progress.stage === 'embedding' ? 'cloud_upload' :
                  activeJob.progress.stage === 'extracting' ? 'auto_awesome' :
@@ -201,30 +204,30 @@ export function GardenConsoleWithUpload() {
               </span>
               <span className="text-sm font-medium capitalize">{activeJob.progress.stage}</span>
             </div>
-            <span className="text-sm text-cyan-400/70">{progressPercent}%</span>
+            <span className="text-sm opacity-70" style={{ color: 'var(--neon-cyan)' }}>{progressPercent}%</span>
           </div>
           {/* Progress bar */}
-          <div className="h-1.5 bg-cyan-500/20 rounded-full overflow-hidden">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--neon-cyan-bg)' }}>
             <div
-              className="h-full bg-cyan-500 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${progressPercent}%`, backgroundColor: 'var(--neon-cyan)' }}
             />
           </div>
           {activeJob.progress.detail && (
-            <p className="text-xs text-cyan-400/60 mt-2">{activeJob.progress.detail}</p>
+            <p className="text-xs mt-2 opacity-60" style={{ color: 'var(--neon-cyan)' }}>{activeJob.progress.detail}</p>
           )}
         </div>
       )}
 
       {/* Extraction result notification with dismiss */}
       {extractionResult && (
-        <div className={`
-          mx-6 mt-4 px-4 py-3 rounded-lg border flex items-center justify-between
-          ${extractionResult.errors > 0
-            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+        <div
+          className="mx-6 mt-4 px-4 py-3 rounded-lg border flex items-center justify-between"
+          style={extractionResult.errors > 0
+            ? { backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning-border)', color: 'var(--semantic-warning)' }
+            : { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)', color: 'var(--semantic-success)' }
           }
-        `}>
+        >
           <div className="flex items-center gap-3">
             <span className="material-symbols-rounded text-xl">
               {extractionResult.errors > 0 ? 'warning' : 'check_circle'}

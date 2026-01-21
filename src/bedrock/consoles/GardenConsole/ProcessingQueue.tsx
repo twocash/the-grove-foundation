@@ -176,7 +176,7 @@ export function ProcessingQueue({ onProcess }: ProcessingQueueProps) {
                 size="sm"
                 badge={<GlassStatusBadge status="error" size="sm">Failed</GlassStatusBadge>}
               >
-                <p className="text-xs text-red-400 mt-1">
+                <p className="text-xs mt-1" style={{ color: 'var(--semantic-error)' }}>
                   {doc.embedding_error || 'Unknown error'}
                 </p>
               </GlassCard>

@@ -159,13 +159,17 @@ export function PromptEditor({
     <div className="flex flex-col h-full">
       {/* Read-only banner for library prompts (Sprint: prompt-library-readonly-v1) */}
       {isLibraryPrompt && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border-b border-blue-500/20">
-          <span className="material-symbols-outlined text-blue-400 text-base">lock</span>
-          <span className="text-sm text-blue-300">
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b"
+          style={{ backgroundColor: 'var(--semantic-info-bg)', borderColor: 'var(--semantic-info-border)' }}
+        >
+          <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-info)' }}>lock</span>
+          <span className="text-sm" style={{ color: 'var(--semantic-info)' }}>
             Library Prompt — shipped with Grove
           </span>
           <span
-            className="material-symbols-outlined text-blue-400/60 text-base cursor-help"
+            className="material-symbols-outlined text-base cursor-help opacity-60"
+            style={{ color: 'var(--semantic-info)' }}
             title="Library prompts are version-controlled configuration. Duplicate to create your own customized version."
           >
             info
@@ -220,7 +224,8 @@ export function PromptEditor({
                 <span className="text-sm text-[var(--glass-text-secondary)]">Active</span>
                 {isLibraryPrompt && (
                   <span
-                    className="material-symbols-outlined text-xs text-blue-400 cursor-help"
+                    className="material-symbols-outlined text-xs cursor-help"
+                    style={{ color: 'var(--semantic-info)' }}
                     title="Library prompt status is stored locally. Toggle to exclude from suggestions."
                   >
                     info
@@ -281,11 +286,16 @@ export function PromptEditor({
                 <span className="material-symbols-outlined text-base text-[var(--glass-text-muted)]">
                   {sourceConfig?.icon || 'source'}
                 </span>
-                <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                  prompt.payload.source === 'library' ? 'bg-blue-500/20 text-blue-300' :
-                  prompt.payload.source === 'generated' ? 'bg-purple-500/20 text-purple-300' :
-                  'bg-green-500/20 text-green-300'
-                }`}>
+                <span
+                  className="inline-flex px-2 py-1 text-xs rounded-full"
+                  style={
+                    prompt.payload.source === 'library'
+                      ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }
+                      : prompt.payload.source === 'generated'
+                        ? { backgroundColor: 'rgba(168, 85, 247, 0.2)', color: 'rgb(192, 132, 252)' }
+                        : { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+                  }
+                >
                   {sourceConfig?.label || prompt.payload.source}
                 </span>
               </div>
@@ -441,7 +451,10 @@ export function PromptEditor({
 
         {/* Fix message toast */}
         {fixMessage && (
-          <div className="mx-4 my-2 p-3 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-sm text-cyan-300 animate-pulse">
+          <div
+          className="mx-4 my-2 p-3 rounded-lg border text-sm animate-pulse"
+          style={{ backgroundColor: 'var(--neon-cyan-bg)', borderColor: 'var(--neon-cyan-border)', color: 'var(--neon-cyan)' }}
+        >
             {fixMessage}
           </div>
         )}
@@ -588,7 +601,7 @@ export function PromptEditor({
               variant="ghost"
               size="sm"
               disabled={loading}
-              className="text-red-400 hover:text-red-300"
+              style={{ color: 'var(--semantic-error)' }}
               title="Delete"
             >
               <span className="material-symbols-outlined text-lg">delete</span>

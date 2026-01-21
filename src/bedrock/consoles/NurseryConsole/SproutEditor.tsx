@@ -135,14 +135,17 @@ function StatusBadge({ status }: { status: string }) {
   const displayStatus = getDisplayStatus(status);
   const config = NURSERY_STATUS_CONFIG[displayStatus];
 
-  const colorClasses = {
-    ready: 'bg-green-500/20 text-green-400 border-green-500/30',
-    failed: 'bg-red-500/20 text-red-400 border-red-500/30',
-    archived: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+  const colorStyles = {
+    ready: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)', borderColor: 'var(--semantic-success-border)' },
+    failed: { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)', borderColor: 'var(--semantic-error-border)' },
+    archived: { backgroundColor: 'var(--glass-surface)', color: 'var(--glass-text-muted)', borderColor: 'var(--glass-border)' },
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm border ${colorClasses[displayStatus]}`}>
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm border"
+      style={colorStyles[displayStatus]}
+    >
       <span className="material-symbols-outlined text-base">{config.icon}</span>
       {config.label}
     </span>
@@ -242,7 +245,10 @@ export function SproutEditor({
             <div className="flex items-center justify-between">
               <StatusBadge status={sprout.payload.status} />
               {sprout.payload.requiresReview && !sprout.payload.reviewed && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs">
+                <span
+                  className="flex items-center gap-1 px-2 py-1 rounded-full text-xs"
+                  style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+                >
                   <span className="material-symbols-outlined text-sm">rate_review</span>
                   Needs Review
                 </span>
@@ -537,7 +543,7 @@ export function SproutEditor({
             variant="ghost"
             size="sm"
             disabled={loading}
-            className="text-red-400 hover:text-red-300"
+            style={{ color: 'var(--semantic-error)' }}
             title="Delete"
           >
             <span className="material-symbols-outlined text-lg">delete</span>

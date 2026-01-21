@@ -29,8 +29,8 @@ export interface AttributionComponentRegistry {
 // ============================================================================
 
 const tierColorMap: Record<string, { bg: string; text: string; border: string }> = {
-  novice: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30' },
-  developing: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
+  novice: { bg: 'bg-[var(--glass-panel)]', text: 'text-[var(--glass-text-muted)]', border: 'border-[var(--glass-border)]' },
+  developing: { bg: 'bg-[var(--semantic-info)]/10', text: 'text-[var(--semantic-info)]', border: 'border-[var(--semantic-info)]/30' },
   competent: { bg: 'bg-[var(--neon-green)]/10', text: 'text-[var(--neon-green)]', border: 'border-[var(--neon-green)]/30' },
   expert: { bg: 'bg-[var(--neon-violet)]/10', text: 'text-[var(--neon-violet)]', border: 'border-[var(--neon-violet)]/30' },
   legendary: { bg: 'bg-[var(--neon-amber)]/15', text: 'text-[var(--neon-amber)]', border: 'border-[var(--neon-amber)]/40' },
@@ -45,7 +45,7 @@ const accentColorMap: Record<string, { bg: string; text: string; border: string 
 };
 
 const rarityColorMap: Record<string, { bg: string; border: string; glow: string }> = {
-  common: { bg: 'bg-gray-500/10', border: 'border-gray-500/30', glow: '' },
+  common: { bg: 'bg-[var(--glass-panel)]', border: 'border-[var(--glass-border)]', glow: '' },
   uncommon: { bg: 'bg-[var(--neon-green)]/10', border: 'border-[var(--neon-green)]/30', glow: 'shadow-sm' },
   rare: { bg: 'bg-[var(--neon-violet)]/10', border: 'border-[var(--neon-violet)]/30', glow: 'shadow-[0_0_8px_var(--neon-violet)/20]' },
   legendary: { bg: 'bg-[var(--neon-amber)]/15', border: 'border-[var(--neon-amber)]/40', glow: 'shadow-[0_0_12px_var(--neon-amber)/30]' },

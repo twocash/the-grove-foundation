@@ -126,30 +126,39 @@ export function JobConfigEditor({
   return (
     <div className="flex flex-col h-full">
       {/* Status Banner - high contrast for visibility */}
-      <div className={`
-        flex items-center gap-3 px-4 py-3 border-b-2 transition-colors
-        ${isEnabled
-          ? 'bg-emerald-500/15 border-emerald-500/40'
-          : 'bg-slate-500/15 border-slate-500/40'
+      <div
+        className="flex items-center gap-3 px-4 py-3 border-b-2 transition-colors"
+        style={isEnabled
+          ? { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)' }
+          : { backgroundColor: 'var(--glass-panel)', borderColor: 'var(--glass-border)' }
         }
-      `}>
+      >
         {/* Status dot with pulse animation when enabled */}
         <span className="relative flex h-3 w-3">
           {isEnabled && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style={{ backgroundColor: 'var(--semantic-success)' }}
+            />
           )}
-          <span className={`
-            relative inline-flex rounded-full h-3 w-3
-            ${isEnabled ? 'bg-emerald-500' : 'bg-slate-500'}
-          `} />
+          <span
+            className="relative inline-flex rounded-full h-3 w-3"
+            style={{ backgroundColor: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          />
         </span>
 
         {/* Status text */}
         <div className="flex-1">
-          <span className={`text-sm font-semibold ${isEnabled ? 'text-emerald-300' : 'text-slate-300'}`}>
+          <span
+            className="text-sm font-semibold"
+            style={{ color: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          >
             {isEnabled ? 'Enabled' : 'Disabled'}
           </span>
-          <p className={`text-xs ${isEnabled ? 'text-emerald-400/80' : 'text-slate-400/80'}`}>
+          <p
+            className="text-xs opacity-80"
+            style={{ color: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          >
             {isEnabled ? 'Job can be executed' : 'Job is paused and will not execute'}
           </p>
         </div>
@@ -193,13 +202,16 @@ export function JobConfigEditor({
             </div>
           </div>
           {/* Trigger type indicator */}
-          <div className={`
-            flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-            ${triggerType === 'schedule' ? 'bg-blue-500/20 text-blue-400' : ''}
-            ${triggerType === 'webhook' ? 'bg-purple-500/20 text-purple-400' : ''}
-            ${triggerType === 'manual' ? 'bg-amber-500/20 text-amber-400' : ''}
-            ${triggerType === 'dependency' ? 'bg-pink-500/20 text-pink-400' : ''}
-          `}>
+          <div
+            className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
+            style={
+              triggerType === 'schedule' ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' } :
+              triggerType === 'webhook' ? { backgroundColor: 'var(--neon-purple-bg)', color: 'var(--neon-purple)' } :
+              triggerType === 'manual' ? { backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' } :
+              triggerType === 'dependency' ? { backgroundColor: 'var(--neon-pink-bg)', color: 'var(--neon-pink)' } :
+              {}
+            }
+          >
             <span className="material-symbols-outlined text-sm">
               {triggerType === 'schedule' && 'schedule'}
               {triggerType === 'webhook' && 'http'}
@@ -535,13 +547,15 @@ export function JobConfigEditor({
                     className="flex items-center justify-between p-3 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-surface)]"
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`
-                        material-symbols-outlined text-sm
-                        ${record.status === 'success' ? 'text-green-400' : ''}
-                        ${record.status === 'failure' ? 'text-red-400' : ''}
-                        ${record.status === 'timeout' ? 'text-amber-400' : ''}
-                        ${record.status === 'cancelled' ? 'text-slate-400' : ''}
-                      `}>
+                      <span
+                        className="material-symbols-outlined text-sm"
+                        style={{
+                          color: record.status === 'success' ? 'var(--semantic-success)'
+                            : record.status === 'failure' ? 'var(--semantic-error)'
+                            : record.status === 'timeout' ? 'var(--semantic-warning)'
+                            : 'var(--glass-text-muted)'
+                        }}
+                      >
                         {record.status === 'success' && 'check_circle'}
                         {record.status === 'failure' && 'error'}
                         {record.status === 'timeout' && 'timer_off'}

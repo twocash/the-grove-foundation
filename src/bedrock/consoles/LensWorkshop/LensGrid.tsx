@@ -78,11 +78,17 @@ const listColumns: ObjectListColumn<Lens['payload']>[] = [
     width: '10%',
     render: (lens) => (
       lens.payload.isActive ? (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
+        <span
+          className="px-2 py-0.5 text-xs rounded-full"
+          style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
+        >
           Active
         </span>
       ) : (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-400">
+        <span
+          className="px-2 py-0.5 text-xs rounded-full"
+          style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+        >
           Draft
         </span>
       )

@@ -55,9 +55,9 @@ const accentStyles: Record<AccentColor, { icon: string; glow: string; bg: string
     bg: 'bg-[var(--neon-green)]/10',
   },
   red: {
-    icon: 'text-red-400',
-    glow: 'shadow-[0_0_20px_rgba(248,113,113,0.1)]',
-    bg: 'bg-red-400/10',
+    icon: 'text-[var(--semantic-error)]',
+    glow: 'shadow-[0_0_20px_var(--semantic-error-glow)]',
+    bg: 'bg-[var(--semantic-error-bg)]',
   },
 };
 

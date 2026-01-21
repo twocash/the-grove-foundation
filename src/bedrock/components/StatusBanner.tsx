@@ -56,9 +56,9 @@ const STATUS_CONFIG: Record<StatusBannerStatus, {
     defaultLabel: 'Pending',
   },
   failed: {
-    bgColor: 'bg-red-500/10',
-    dotColor: 'bg-red-500',
-    textColor: 'text-red-400',
+    bgColor: 'bg-[var(--semantic-error-bg)]',
+    dotColor: 'bg-[var(--semantic-error)]',
+    textColor: 'text-[var(--semantic-error)]',
     icon: 'error',
     defaultLabel: 'Failed',
   },

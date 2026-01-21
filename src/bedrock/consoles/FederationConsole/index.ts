@@ -37,9 +37,11 @@ const PolymorphicCard: React.FC<ObjectCardProps<UnifiedFederationPayload>> = (pr
   if (!typeDef) {
     console.error(`[PolymorphicCard] Unknown federation type: ${objectType}`);
     return React.createElement('div', {
-      className: 'p-4 border border-red-500 rounded bg-red-500/10',
+      className: 'p-4 border rounded',
+      style: { borderColor: 'var(--semantic-error-border)', backgroundColor: 'var(--semantic-error-bg)' },
     }, React.createElement('p', {
-      className: 'text-red-400 text-sm',
+      className: 'text-sm',
+      style: { color: 'var(--semantic-error)' },
     }, `Unknown type: ${objectType}`));
   }
 
@@ -69,7 +71,7 @@ const PolymorphicEditor: React.FC<ObjectEditorProps<UnifiedFederationPayload>> =
     return React.createElement('div', {
       className: 'p-4',
     }, React.createElement('p', {
-      className: 'text-red-400',
+      style: { color: 'var(--semantic-error)' },
     }, `Cannot edit unknown type: ${objectType}`));
   }
 

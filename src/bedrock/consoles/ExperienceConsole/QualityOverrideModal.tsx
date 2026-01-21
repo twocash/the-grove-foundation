@@ -68,7 +68,11 @@ interface ScoreSliderProps {
 
 function ScoreSlider({ value, originalScore, onChange }: ScoreSliderProps) {
   const delta = value - originalScore;
-  const deltaColor = delta > 0 ? 'text-grove-forest' : delta < 0 ? 'text-red-500' : 'text-ink-muted dark:text-paper/50';
+  const deltaStyle = delta > 0
+    ? { color: 'var(--semantic-success)' }
+    : delta < 0
+    ? { color: 'var(--semantic-error)' }
+    : {};
 
   return (
     <div className="space-y-3">
@@ -80,7 +84,7 @@ function ScoreSlider({ value, originalScore, onChange }: ScoreSliderProps) {
           </span>
           <span className="text-lg text-ink-muted dark:text-paper/50">/100</span>
           {delta !== 0 && (
-            <span className={`text-sm font-mono ${deltaColor}`} data-testid="score-delta">
+            <span className="text-sm font-mono text-ink-muted dark:text-paper/50" style={deltaStyle} data-testid="score-delta">
               ({delta > 0 ? '+' : ''}{delta})
             </span>
           )}
@@ -92,8 +96,8 @@ function ScoreSlider({ value, originalScore, onChange }: ScoreSliderProps) {
         <div className="h-2 bg-ink/10 dark:bg-white/10 rounded-full">
           {/* Original score marker */}
           <div
-            className="absolute h-4 w-0.5 bg-amber-500 -top-1 z-10"
-            style={{ left: `${originalScore}%` }}
+            className="absolute h-4 w-0.5 -top-1 z-10"
+            style={{ left: `${originalScore}%`, backgroundColor: 'var(--neon-amber)' }}
             title={`Original: ${originalScore}`}
           />
           {/* Filled portion */}
@@ -117,7 +121,7 @@ function ScoreSlider({ value, originalScore, onChange }: ScoreSliderProps) {
 
       <div className="flex justify-between text-xs text-ink-muted dark:text-paper/50">
         <span>0</span>
-        <span className="text-amber-500">Original: {originalScore}</span>
+        <span style={{ color: 'var(--neon-amber)' }}>Original: {originalScore}</span>
         <span>100</span>
       </div>
     </div>
@@ -315,22 +319,17 @@ export function QualityOverrideModal({
               onChange={(e) => setExplanation(e.target.value)}
               placeholder="Provide a detailed explanation for this override request..."
               rows={4}
-              className={`
-                w-full px-4 py-3 rounded-lg
-                bg-ink/5 dark:bg-white/5 border
-                ${explanation.length > 0 && explanation.length < MIN_EXPLANATION_LENGTH
-                  ? 'border-amber-500'
-                  : 'border-ink/10 dark:border-white/10'
-                }
-                text-ink dark:text-paper placeholder-ink-muted dark:placeholder-paper/50
-                focus:outline-none focus:ring-2 focus:ring-grove-forest focus:border-transparent
-                resize-none text-sm
-              `}
+              className="w-full px-4 py-3 rounded-lg bg-ink/5 dark:bg-white/5 border text-ink dark:text-paper placeholder-ink-muted dark:placeholder-paper/50 focus:outline-none focus:ring-2 focus:ring-grove-forest focus:border-transparent resize-none text-sm"
+              style={{
+                borderColor: explanation.length > 0 && explanation.length < MIN_EXPLANATION_LENGTH
+                  ? 'var(--semantic-warning)'
+                  : undefined
+              }}
               data-testid="explanation-input"
             />
             <div className="flex justify-between mt-1 text-xs text-ink-muted dark:text-paper/50">
               <span>This will be recorded in the audit trail</span>
-              <span className={explanation.length < MIN_EXPLANATION_LENGTH ? 'text-amber-500' : ''}>
+              <span style={explanation.length < MIN_EXPLANATION_LENGTH ? { color: 'var(--semantic-warning)' } : {}}>
                 {explanation.length}/{MIN_EXPLANATION_LENGTH}+
               </span>
             </div>
@@ -362,18 +361,25 @@ export function QualityOverrideModal({
 
           {/* Error display */}
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm" data-testid="error-message">
+            <div
+              className="flex items-center gap-2 p-3 rounded-lg text-sm"
+              style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
+              data-testid="error-message"
+            >
               <span>!</span>
               {error}
             </div>
           )}
 
           {/* Info box */}
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm">
+          <div
+            className="flex items-start gap-2 p-3 rounded-lg text-sm"
+            style={{ backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }}
+          >
             <span className="text-base">i</span>
             <div>
               <div className="font-medium">About Override Requests</div>
-              <div className="text-blue-600/80 dark:text-blue-400/80 mt-1">
+              <div className="opacity-80 mt-1">
                 Override requests are reviewed by curators. Your request will be logged with full provenance
                 for audit purposes.
               </div>

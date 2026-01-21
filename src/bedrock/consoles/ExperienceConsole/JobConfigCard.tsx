@@ -6,12 +6,12 @@ import React, { useState } from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { JobConfigPayload, JobTriggerType } from '@core/schema/job-config';
 
-// Color mapping for trigger types
-const TRIGGER_COLORS: Record<JobTriggerType, { bg: string; text: string; label: string }> = {
-  schedule: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Scheduled' },
-  webhook: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Webhook' },
-  manual: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Manual' },
-  dependency: { bg: 'bg-pink-500/20', text: 'text-pink-400', label: 'Dependency' },
+// Color mapping for trigger types (using semantic CSS variables)
+const TRIGGER_STYLES: Record<JobTriggerType, { style: React.CSSProperties; label: string }> = {
+  schedule: { style: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }, label: 'Scheduled' },
+  webhook: { style: { backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }, label: 'Webhook' },
+  manual: { style: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }, label: 'Manual' },
+  dependency: { style: { backgroundColor: 'var(--semantic-accent-primary-bg)', color: 'var(--semantic-accent-primary)' }, label: 'Dependency' },
 };
 
 /**
@@ -28,7 +28,7 @@ export function JobConfigCard({
   const [isRunning, setIsRunning] = useState(false);
   const isEnabled = job.payload.enabled;
   const triggerType = job.payload.triggerType;
-  const triggerConfig = TRIGGER_COLORS[triggerType] || TRIGGER_COLORS.manual;
+  const triggerConfig = TRIGGER_STYLES[triggerType] || TRIGGER_STYLES.manual;
   const priority = job.payload.priority;
   const timeoutMs = job.payload.timeoutMs;
   const retryConfig = job.payload.retryConfig;
@@ -68,9 +68,8 @@ export function JobConfigCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isEnabled ? 'bg-green-500' : 'bg-red-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isEnabled ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
       />
 
       {/* Favorite button */}
@@ -95,12 +94,14 @@ export function JobConfigCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-          isEnabled ? 'bg-[#2196F3]/20' : 'bg-slate-500/20'
-        }`}>
-          <span className={`material-symbols-outlined text-xl ${
-            isEnabled ? 'text-[#2196F3]' : 'text-slate-400'
-          }`}>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: isEnabled ? 'var(--semantic-info-bg)' : 'var(--glass-panel)' }}
+        >
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: isEnabled ? 'var(--semantic-info)' : 'var(--glass-text-muted)' }}
+          >
             schedule
           </span>
         </div>
@@ -124,13 +125,13 @@ export function JobConfigCard({
       {/* State indicators */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         {/* Enabled state */}
-        <span className={`
-          flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
-          ${isEnabled
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-slate-500/20 text-slate-400'
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={isEnabled
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
           }
-        `}>
+        >
           <span className="material-symbols-outlined text-xs">
             {isEnabled ? 'check_circle' : 'radio_button_unchecked'}
           </span>
@@ -138,7 +139,7 @@ export function JobConfigCard({
         </span>
 
         {/* Trigger type */}
-        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${triggerConfig.bg} ${triggerConfig.text}`}>
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs" style={triggerConfig.style}>
           <span className="material-symbols-outlined text-xs">
             {triggerType === 'schedule' && 'schedule'}
             {triggerType === 'webhook' && 'http'}
@@ -149,20 +150,25 @@ export function JobConfigCard({
         </span>
 
         {/* Priority */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-500/20 text-slate-400">
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={{ backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }}
+        >
           <span className="material-symbols-outlined text-xs">priority_high</span>
           Priority {priority}
         </span>
 
         {/* Last run status */}
         {lastRunStatus && (
-          <span className={`
-            flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
-            ${lastRunStatus === 'success' ? 'bg-green-500/20 text-green-400' : ''}
-            ${lastRunStatus === 'failure' ? 'bg-red-500/20 text-red-400' : ''}
-            ${lastRunStatus === 'timeout' ? 'bg-amber-500/20 text-amber-400' : ''}
-            ${lastRunStatus === 'cancelled' ? 'bg-slate-500/20 text-slate-400' : ''}
-          `}>
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+            style={
+              lastRunStatus === 'success' ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+              : lastRunStatus === 'failure' ? { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+              : lastRunStatus === 'timeout' ? { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+              : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+            }
+          >
             <span className="material-symbols-outlined text-xs">
               {lastRunStatus === 'success' && 'check_circle'}
               {lastRunStatus === 'failure' && 'error'}
@@ -195,13 +201,11 @@ export function JobConfigCard({
       <div className="flex items-center justify-between">
         {/* Status */}
         <span
-          className={`
-            px-2 py-0.5 rounded-full text-xs
-            ${isEnabled
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-red-500/20 text-red-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full text-xs"
+          style={isEnabled
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+          }
         >
           {isEnabled ? 'Active' : 'Inactive'}
         </span>
@@ -210,13 +214,11 @@ export function JobConfigCard({
         <button
           onClick={handleRunNow}
           disabled={!isEnabled || isRunning}
-          className={`
-            flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-colors
-            ${isEnabled && !isRunning
-              ? 'bg-[#2196F3]/20 text-[#2196F3] hover:bg-[#2196F3]/30'
-              : 'bg-slate-500/20 text-slate-400 cursor-not-allowed'
-            }
-          `}
+          className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+          style={isEnabled && !isRunning
+            ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)', cursor: 'not-allowed' }
+          }
         >
           <span className="material-symbols-outlined text-xs">
             {isRunning ? 'hourglass_top' : 'play_arrow'}

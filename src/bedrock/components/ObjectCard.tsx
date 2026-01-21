@@ -64,11 +64,11 @@ export function ObjectCard<T = unknown>({
 }: ObjectCardProps<T>) {
   const meta = object.meta;
 
-  const statusColors = {
-    active: 'bg-green-500/20 text-green-400',
-    draft: 'bg-amber-500/20 text-amber-400',
-    archived: 'bg-gray-500/20 text-gray-400',
-    default: 'bg-[var(--glass-panel)] text-[var(--glass-text-muted)]',
+  const statusStyles: Record<string, React.CSSProperties> = {
+    active: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+    draft: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' },
+    archived: { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' },
+    default: { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' },
   };
 
   return (
@@ -118,7 +118,10 @@ export function ObjectCard<T = unknown>({
             {title}
           </h3>
           {status && (
-            <span className={`px-2 py-0.5 text-xs rounded-full font-medium shrink-0 ${statusColors[status.variant]}`}>
+            <span
+              className="px-2 py-0.5 text-xs rounded-full font-medium shrink-0"
+              style={statusStyles[status.variant]}
+            >
               {status.label}
             </span>
           )}

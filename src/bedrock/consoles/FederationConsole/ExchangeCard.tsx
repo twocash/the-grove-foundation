@@ -65,14 +65,16 @@ export function ExchangeCard({
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
         <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-            isRequest ? 'bg-amber-500/20' : 'bg-blue-500/20'
-          }`}
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{
+            backgroundColor: isRequest ? 'var(--semantic-warning-bg)' : 'var(--semantic-info-bg)'
+          }}
         >
           <span
-            className={`material-symbols-outlined text-xl ${
-              isRequest ? 'text-amber-400' : 'text-blue-400'
-            }`}
+            className="material-symbols-outlined text-xl"
+            style={{
+              color: isRequest ? 'var(--semantic-warning)' : 'var(--semantic-info)'
+            }}
           >
             {isRequest ? 'call_received' : 'call_made'}
           </span>
@@ -95,7 +97,10 @@ export function ExchangeCard({
           </span>
           {payload.requestingGroveId}
         </div>
-        <span className="material-symbols-outlined text-amber-400">
+        <span
+          className="material-symbols-outlined"
+          style={{ color: 'var(--neon-amber)' }}
+        >
           {isRequest ? 'arrow_back' : 'arrow_forward'}
         </span>
         <div className="flex-1 px-2 py-1 rounded bg-[var(--glass-bg)] text-[var(--glass-text-secondary)] truncate">
@@ -109,14 +114,20 @@ export function ExchangeCard({
       {/* Content info */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         {/* Content type badge */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-400">
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
+        >
           <span className="material-symbols-outlined text-xs">{contentConfig.icon}</span>
           {contentConfig.label}
         </span>
 
         {/* Token value */}
         {payload.tokenValue !== undefined && (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/20 text-amber-400">
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+            style={{ backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }}
+          >
             <span className="material-symbols-outlined text-xs">token</span>
             {payload.tokenValue} tokens
           </span>
@@ -124,9 +135,11 @@ export function ExchangeCard({
 
         {/* Type badge */}
         <span
-          className={`px-2 py-0.5 rounded-full text-xs ${
-            isRequest ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'
-          }`}
+          className="px-2 py-0.5 rounded-full text-xs"
+          style={{
+            backgroundColor: isRequest ? 'var(--semantic-warning-bg)' : 'var(--semantic-info-bg)',
+            color: isRequest ? 'var(--semantic-warning)' : 'var(--semantic-info)'
+          }}
         >
           {isRequest ? 'Request' : 'Offer'}
         </span>

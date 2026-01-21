@@ -158,7 +158,8 @@ export function UploadModal({ open, onClose, onUploadComplete }: UploadModalProp
               type="checkbox"
               checked={true}
               disabled
-              className="rounded bg-white/10 border-white/20 cursor-not-allowed accent-emerald-500"
+              className="rounded bg-white/10 border-white/20 cursor-not-allowed"
+              style={{ accentColor: 'var(--semantic-success)' }}
             />
             <span>Embed for search</span>
             <span className="text-white/40 text-xs">(required)</span>
@@ -169,7 +170,8 @@ export function UploadModal({ open, onClose, onUploadComplete }: UploadModalProp
               type="checkbox"
               checked={extractPrompts}
               onChange={(e) => setExtractPrompts(e.target.checked)}
-              className="rounded bg-white/10 border-white/20 cursor-pointer accent-emerald-500"
+              className="rounded bg-white/10 border-white/20 cursor-pointer"
+              style={{ accentColor: 'var(--semantic-success)' }}
             />
             <span>Extract exploration prompts</span>
           </label>
@@ -180,7 +182,8 @@ export function UploadModal({ open, onClose, onUploadComplete }: UploadModalProp
                 type="checkbox"
                 checked={autoEnrich}
                 onChange={(e) => setAutoEnrich(e.target.checked)}
-                className="rounded bg-white/10 border-white/20 cursor-pointer accent-emerald-500"
+                className="rounded bg-white/10 border-white/20 cursor-pointer"
+                style={{ accentColor: 'var(--semantic-success)' }}
               />
               <span>Auto-enrich with Grove context</span>
             </label>

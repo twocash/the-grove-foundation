@@ -161,7 +161,10 @@ export function SproutSignalsPanel({
 
         {/* Error state */}
         {error && (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm text-red-400">
+          <div
+            className="p-3 rounded-lg border text-sm"
+            style={{ backgroundColor: 'var(--semantic-error-bg)', borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+          >
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-base">error</span>
               {error}

@@ -6,12 +6,12 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { LifecycleModelPayload } from '@core/schema/lifecycle-model';
 
-// Color mapping for model types
-const MODEL_TYPE_COLORS: Record<LifecycleModelPayload['modelType'], { bg: string; text: string; label: string; icon: string }> = {
-  botanical: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Botanical', icon: 'nature' },
-  academic: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Academic', icon: 'school' },
-  research: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Research', icon: 'science' },
-  creative: { bg: 'bg-pink-500/20', text: 'text-pink-400', label: 'Creative', icon: 'palette' },
+// Style mapping for model types (using semantic CSS variables)
+const MODEL_TYPE_STYLES: Record<LifecycleModelPayload['modelType'], { style: React.CSSProperties; label: string; icon: string }> = {
+  botanical: { style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }, label: 'Botanical', icon: 'nature' },
+  academic: { style: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }, label: 'Academic', icon: 'school' },
+  research: { style: { backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }, label: 'Research', icon: 'science' },
+  creative: { style: { backgroundColor: 'var(--semantic-accent-primary-bg)', color: 'var(--semantic-accent-primary)' }, label: 'Creative', icon: 'palette' },
 };
 
 /**
@@ -26,7 +26,7 @@ export function ModelCard({
   className = '',
 }: ObjectCardProps<LifecycleModelPayload>) {
   const modelType = model.payload.modelType;
-  const modelTypeConfig = MODEL_TYPE_COLORS[modelType] || MODEL_TYPE_COLORS.botanical;
+  const modelTypeConfig = MODEL_TYPE_STYLES[modelType] || MODEL_TYPE_STYLES.botanical;
   const tierCount = model.payload.tiers.length;
   const version = model.payload.version;
 
@@ -44,7 +44,10 @@ export function ModelCard({
       data-testid="lifecycle-model-card"
     >
       {/* Status bar at top */}
-      <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${modelTypeConfig.bg.replace('/20', '')}`} />
+      <div
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: modelTypeConfig.style.color }}
+      />
 
       {/* Favorite button */}
       <button
@@ -68,8 +71,11 @@ export function ModelCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${modelTypeConfig.bg}`}>
-          <span className={`material-symbols-outlined text-xl ${modelTypeConfig.text}`}>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={modelTypeConfig.style}
+        >
+          <span className="material-symbols-outlined text-xl">
             {modelTypeConfig.icon}
           </span>
         </div>
@@ -93,13 +99,16 @@ export function ModelCard({
       {/* Model info */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         {/* Model type */}
-        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${modelTypeConfig.bg} ${modelTypeConfig.text}`}>
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={modelTypeConfig.style}
+        >
           <span className="material-symbols-outlined text-xs">{modelTypeConfig.icon}</span>
           {modelTypeConfig.label}
         </span>
 
         {/* Tier count */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-500/20 text-slate-400">
+        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }}>
           <span className="material-symbols-outlined text-xs">view_list</span>
           {tierCount} {tierCount === 1 ? 'tier' : 'tiers'}
         </span>
@@ -131,7 +140,7 @@ export function ModelCard({
         <span className="text-[var(--glass-text-muted)]">
           {new Date(model.meta.createdAt).toLocaleDateString()}
         </span>
-        <span className={`px-2 py-0.5 rounded-full ${modelTypeConfig.bg} ${modelTypeConfig.text}`}>
+        <span className="px-2 py-0.5 rounded-full" style={modelTypeConfig.style}>
           {modelTypeConfig.label}
         </span>
       </div>

@@ -24,8 +24,8 @@ export interface ScoreAttributionComponentRegistry {
  * Confidence level colors
  */
 const CONFIDENCE_COLORS = {
-  Low: 'text-amber-600 bg-amber-500/10',
-  Medium: 'text-blue-600 bg-blue-500/10',
+  Low: 'text-[var(--semantic-warning)] bg-[var(--semantic-warning-bg)]',
+  Medium: 'text-[var(--semantic-info)] bg-[var(--semantic-info-bg)]',
   High: 'text-grove-forest bg-grove-forest/10',
 };
 
@@ -57,7 +57,8 @@ const StarRatingComponent: React.FC<{ value: number; size?: 'sm' | 'md' | 'lg' }
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
-          className={star <= value ? 'text-amber-400' : 'text-ink/20 dark:text-white/20'}
+          style={{ color: star <= value ? 'var(--neon-amber)' : undefined }}
+          className={star <= value ? '' : 'text-ink/20 dark:text-white/20'}
         >
           ★
         </span>
@@ -160,7 +161,10 @@ export const ScoreAttributionRegistry: ScoreAttributionComponentRegistry = {
 
         {/* Improvement suggestion - constructive, not critical */}
         {props.suggestion && (
-          <div className="text-sm text-amber-600 dark:text-amber-400 flex items-start gap-1.5 bg-amber-500/5 p-2 rounded">
+          <div
+            className="text-sm flex items-start gap-1.5 p-2 rounded"
+            style={{ color: 'var(--semantic-warning)', backgroundColor: 'var(--semantic-warning-bg)' }}
+          >
             <span className="text-base">💡</span>
             <span>
               <span className="font-medium">To improve:</span> {props.suggestion}

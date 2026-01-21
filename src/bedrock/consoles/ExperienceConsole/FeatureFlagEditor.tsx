@@ -76,30 +76,39 @@ export function FeatureFlagEditor({
   return (
     <div className="flex flex-col h-full">
       {/* Availability Status Banner (matches SystemPromptEditor pattern) */}
-      <div className={`
-        flex items-center gap-3 px-4 py-3 border-b transition-colors
-        ${isAvailable
-          ? 'bg-green-500/10 border-green-500/20'
-          : 'bg-red-500/10 border-red-500/20'
+      <div
+        className="flex items-center gap-3 px-4 py-3 border-b transition-colors"
+        style={isAvailable
+          ? { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)' }
+          : { backgroundColor: 'var(--semantic-error-bg)', borderColor: 'var(--semantic-error-border)' }
         }
-      `}>
+      >
         {/* Status dot with pulse animation when available */}
         <span className="relative flex h-3 w-3">
           {isAvailable && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style={{ backgroundColor: 'var(--semantic-success)' }}
+            />
           )}
-          <span className={`
-            relative inline-flex rounded-full h-3 w-3
-            ${isAvailable ? 'bg-green-500' : 'bg-red-500'}
-          `} />
+          <span
+            className="relative inline-flex rounded-full h-3 w-3"
+            style={{ backgroundColor: isAvailable ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+          />
         </span>
 
         {/* Status text */}
         <div className="flex-1">
-          <span className={`text-sm font-medium ${isAvailable ? 'text-green-300' : 'text-red-300'}`}>
+          <span
+            className="text-sm font-medium"
+            style={{ color: isAvailable ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+          >
             {isAvailable ? 'Available' : 'Disabled (Admin Kill Switch)'}
           </span>
-          <p className={`text-xs ${isAvailable ? 'text-green-400/70' : 'text-red-400/70'}`}>
+          <p
+            className="text-xs opacity-70"
+            style={{ color: isAvailable ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+          >
             {isAvailable ? 'Flag is active and can be toggled by users' : 'Flag is disabled for all users'}
           </p>
         </div>
@@ -134,13 +143,13 @@ export function FeatureFlagEditor({
             </div>
           </div>
           {/* Default state indicator */}
-          <div className={`
-            flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-            ${isDefaultEnabled
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-gray-500/20 text-gray-400'
+          <div
+            className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
+            style={isDefaultEnabled
+              ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+              : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
             }
-          `}>
+          >
             <span className="material-symbols-outlined text-sm">
               {isDefaultEnabled ? 'check_circle' : 'cancel'}
             </span>
@@ -440,13 +449,14 @@ export function FeatureFlagEditor({
                   key={idx}
                   className="flex items-start gap-2 text-xs text-[var(--glass-text-muted)] bg-[var(--glass-solid)] rounded p-2"
                 >
-                  <span className={`material-symbols-outlined text-sm ${
-                    entry.newValue ? 'text-green-400' : 'text-red-400'
-                  }`}>
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    style={{ color: entry.newValue ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+                  >
                     {entry.newValue ? 'toggle_on' : 'toggle_off'}
                   </span>
                   <div>
-                    <span className={entry.newValue ? 'text-green-400' : 'text-red-400'}>
+                    <span style={{ color: entry.newValue ? 'var(--semantic-success)' : 'var(--semantic-error)' }}>
                       {entry.newValue ? 'Enabled' : 'Disabled'}
                     </span>
                     <span className="text-[var(--glass-text-muted)]">

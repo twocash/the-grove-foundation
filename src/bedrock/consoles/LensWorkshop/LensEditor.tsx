@@ -444,7 +444,7 @@ export function LensEditor({
             variant="ghost"
             size="sm"
             disabled={loading}
-            className="text-red-400 hover:text-red-300"
+            style={{ color: 'var(--semantic-error)' }}
             title="Delete"
           >
             <span className="material-symbols-outlined text-lg">delete</span>

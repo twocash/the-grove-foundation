@@ -61,26 +61,26 @@ const DEFAULT_AUTO_ACTION_THRESHOLDS = {
 // Grade Color Mapping
 // =============================================================================
 
-const GRADE_COLORS: Record<QualityGrade, { text: string; bg: string; border: string }> = {
+const GRADE_COLORS: Record<QualityGrade, { color: string; backgroundColor: string; borderColor: string }> = {
   excellent: {
-    text: 'text-[var(--neon-green)]',
-    bg: 'bg-[var(--neon-green)]/20',
-    border: 'border-[var(--neon-green)]/50',
+    color: 'var(--semantic-success)',
+    backgroundColor: 'var(--semantic-success-bg)',
+    borderColor: 'var(--semantic-success-border)',
   },
   good: {
-    text: 'text-[var(--neon-amber)]',
-    bg: 'bg-[var(--neon-amber)]/20',
-    border: 'border-[var(--neon-amber)]/50',
+    color: 'var(--semantic-warning)',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    borderColor: 'var(--semantic-warning-border)',
   },
   fair: {
-    text: 'text-orange-400',
-    bg: 'bg-orange-500/20',
-    border: 'border-orange-500/50',
+    color: 'var(--semantic-warning)',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    borderColor: 'var(--semantic-warning-border)',
   },
   'needs-improvement': {
-    text: 'text-red-400',
-    bg: 'bg-red-500/20',
-    border: 'border-red-500/50',
+    color: 'var(--semantic-error)',
+    backgroundColor: 'var(--semantic-error-bg)',
+    borderColor: 'var(--semantic-error-border)',
   },
 };
 
@@ -103,11 +103,14 @@ function ThresholdInput({ grade, value, onChange, min = 0, max = 100 }: Threshol
   return (
     <div className="flex items-center gap-4">
       {/* Grade badge */}
-      <div className={`flex items-center gap-2 w-32 px-3 py-2 rounded-lg ${colors.bg} ${colors.border} border`}>
-        <span className={`material-symbols-outlined text-lg ${colors.text}`}>
+      <div
+        className="flex items-center gap-2 w-32 px-3 py-2 rounded-lg border"
+        style={{ backgroundColor: colors.backgroundColor, borderColor: colors.borderColor }}
+      >
+        <span className="material-symbols-outlined text-lg" style={{ color: colors.color }}>
           {gradeConfig.icon}
         </span>
-        <span className={`text-sm font-medium ${colors.text}`}>
+        <span className="text-sm font-medium" style={{ color: colors.color }}>
           {gradeConfig.label}
         </span>
       </div>
@@ -329,11 +332,14 @@ export function QualityThresholdSettings({
             max={value.good - 1}
           />
           <div className="flex items-center gap-4 opacity-50">
-            <div className={`flex items-center gap-2 w-32 px-3 py-2 rounded-lg ${GRADE_COLORS['needs-improvement'].bg} ${GRADE_COLORS['needs-improvement'].border} border`}>
-              <span className={`material-symbols-outlined text-lg ${GRADE_COLORS['needs-improvement'].text}`}>
+            <div
+              className="flex items-center gap-2 w-32 px-3 py-2 rounded-lg border"
+              style={{ backgroundColor: GRADE_COLORS['needs-improvement'].backgroundColor, borderColor: GRADE_COLORS['needs-improvement'].borderColor }}
+            >
+              <span className="material-symbols-outlined text-lg" style={{ color: GRADE_COLORS['needs-improvement'].color }}>
                 {QUALITY_GRADE_CONFIGS['needs-improvement'].icon}
               </span>
-              <span className={`text-sm font-medium ${GRADE_COLORS['needs-improvement'].text}`}>
+              <span className="text-sm font-medium" style={{ color: GRADE_COLORS['needs-improvement'].color }}>
                 Needs Work
               </span>
             </div>
@@ -345,7 +351,7 @@ export function QualityThresholdSettings({
         <div className="mt-4 p-3 rounded-lg bg-[var(--glass-elevated)] border border-[var(--glass-border)]">
           <span className="text-xs text-[var(--glass-text-muted)]">Preview: </span>
           <span className="text-sm text-[var(--glass-text-primary)]">Score {previewScore} = </span>
-          <span className={`text-sm font-medium ${GRADE_COLORS[previewGrade].text}`}>
+          <span className="text-sm font-medium" style={{ color: GRADE_COLORS[previewGrade].color }}>
             {QUALITY_GRADE_CONFIGS[previewGrade].label}
           </span>
         </div>
@@ -448,7 +454,7 @@ export function QualityThresholdSettings({
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 w-40">
-              <span className="material-symbols-outlined text-base text-red-400">
+              <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-error)' }}>
                 flag
               </span>
               <span className="text-sm text-[var(--glass-text-secondary)]">Auto-Flag</span>

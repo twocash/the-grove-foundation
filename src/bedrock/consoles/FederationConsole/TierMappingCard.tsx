@@ -10,20 +10,20 @@ import type { TierMappingPayload } from '@core/schema/federation';
  * Status display config for tier mappings
  */
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  draft: { label: 'Draft', color: '#94a3b8', icon: 'edit_note' },
-  proposed: { label: 'Proposed', color: '#f59e0b', icon: 'pending' },
-  accepted: { label: 'Accepted', color: '#4ade80', icon: 'check_circle' },
-  rejected: { label: 'Rejected', color: '#ef4444', icon: 'cancel' },
+  draft: { label: 'Draft', color: 'var(--glass-text-muted)', icon: 'edit_note' },
+  proposed: { label: 'Proposed', color: 'var(--semantic-warning)', icon: 'pending' },
+  accepted: { label: 'Accepted', color: 'var(--semantic-success)', icon: 'check_circle' },
+  rejected: { label: 'Rejected', color: 'var(--semantic-error)', icon: 'cancel' },
 };
 
 /**
  * Equivalence type display config
  */
 const EQUIVALENCE_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  exact: { label: 'Exact', color: '#4ade80' },
-  approximate: { label: 'Approx', color: '#60a5fa' },
-  subset: { label: 'Subset', color: '#f59e0b' },
-  superset: { label: 'Superset', color: '#a78bfa' },
+  exact: { label: 'Exact', color: 'var(--semantic-success)' },
+  approximate: { label: 'Approx', color: 'var(--semantic-info)' },
+  subset: { label: 'Subset', color: 'var(--semantic-warning)' },
+  superset: { label: 'Superset', color: 'var(--neon-purple)' },
 };
 
 /**
@@ -94,8 +94,8 @@ export function TierMappingCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/20">
-          <span className="material-symbols-outlined text-xl text-blue-400">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--semantic-info-bg)' }}>
+          <span className="material-symbols-outlined text-xl" style={{ color: 'var(--semantic-info)' }}>
             compare_arrows
           </span>
         </div>
@@ -115,7 +115,7 @@ export function TierMappingCard({
           <span className="material-symbols-outlined text-xs mr-1 align-middle">forest</span>
           {payload.sourceGroveId}
         </div>
-        <span className="material-symbols-outlined text-blue-400">arrow_forward</span>
+        <span className="material-symbols-outlined" style={{ color: 'var(--semantic-info)' }}>arrow_forward</span>
         <div className="flex-1 px-2 py-1 rounded bg-[var(--glass-bg)] text-[var(--glass-text-secondary)] truncate">
           <span className="material-symbols-outlined text-xs mr-1 align-middle">forest</span>
           {payload.targetGroveId}
@@ -133,9 +133,9 @@ export function TierMappingCard({
             className="h-full rounded-full transition-all"
             style={{
               width: `${confidencePercent}%`,
-              backgroundColor: confidencePercent >= 75 ? '#4ade80' :
-                              confidencePercent >= 50 ? '#60a5fa' :
-                              confidencePercent >= 25 ? '#f59e0b' : '#ef4444',
+              backgroundColor: confidencePercent >= 75 ? 'var(--semantic-success)' :
+                              confidencePercent >= 50 ? 'var(--semantic-info)' :
+                              confidencePercent >= 25 ? 'var(--semantic-warning)' : 'var(--semantic-error)',
             }}
           />
         </div>

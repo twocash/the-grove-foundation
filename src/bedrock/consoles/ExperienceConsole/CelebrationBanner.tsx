@@ -32,49 +32,55 @@ export interface CelebrationBannerProps {
 
 const TIER_CONFIG: Record<TierName, {
   label: string;
-  color: string;
-  bgColor: string;
-  borderColor: string;
+  colorStyle: React.CSSProperties;
+  bgStyle: React.CSSProperties;
+  borderStyle: React.CSSProperties;
+  progressColor: string;
   icon: string;
   message: string;
 }> = {
   seed: {
     label: 'Seed',
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/10',
-    borderColor: 'border-amber-500/30',
+    colorStyle: { color: 'var(--semantic-warning)' },
+    bgStyle: { backgroundColor: 'var(--semantic-warning-bg)' },
+    borderStyle: { borderColor: 'var(--semantic-warning-border)' },
+    progressColor: 'var(--semantic-warning)',
     icon: '.',
     message: 'Your idea has been planted!',
   },
   sprout: {
     label: 'Sprout',
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'border-emerald-500/30',
+    colorStyle: { color: 'var(--semantic-success)' },
+    bgStyle: { backgroundColor: 'var(--semantic-success-bg)' },
+    borderStyle: { borderColor: 'var(--semantic-success-border)' },
+    progressColor: 'var(--semantic-success)',
     icon: '*',
     message: 'Your research is taking root!',
   },
   sapling: {
     label: 'Sapling',
-    color: 'text-green-400',
-    bgColor: 'bg-green-500/10',
-    borderColor: 'border-green-500/30',
+    colorStyle: { color: 'var(--semantic-success)' },
+    bgStyle: { backgroundColor: 'var(--semantic-success-bg)' },
+    borderStyle: { borderColor: 'var(--semantic-success-border)' },
+    progressColor: 'var(--semantic-success)',
     icon: '|',
     message: 'Growing stronger every day!',
   },
   tree: {
     label: 'Tree',
-    color: 'text-teal-400',
-    bgColor: 'bg-teal-500/10',
-    borderColor: 'border-teal-500/30',
+    colorStyle: { color: 'var(--semantic-success)' },
+    bgStyle: { backgroundColor: 'var(--semantic-success-bg)' },
+    borderStyle: { borderColor: 'var(--semantic-success-border)' },
+    progressColor: 'var(--semantic-success)',
     icon: 'Y',
     message: 'Mature and thriving!',
   },
   grove: {
     label: 'Grove',
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/10',
-    borderColor: 'border-cyan-500/30',
+    colorStyle: { color: 'var(--semantic-info)' },
+    bgStyle: { backgroundColor: 'var(--semantic-info-bg)' },
+    borderStyle: { borderColor: 'var(--semantic-info-border)' },
+    progressColor: 'var(--semantic-info)',
     icon: 'W',
     message: 'A flourishing ecosystem!',
   },
@@ -189,12 +195,8 @@ export function CelebrationBanner({
       aria-live="polite"
     >
       <div
-        className={`
-          relative overflow-hidden
-          ${config.bgColor} ${config.borderColor}
-          border rounded-xl shadow-lg
-          backdrop-blur-sm
-        `}
+        className="relative overflow-hidden border rounded-xl shadow-lg backdrop-blur-sm"
+        style={{ ...config.bgStyle, ...config.borderStyle }}
       >
         {/* Confetti effect */}
         <Confetti />
@@ -203,8 +205,8 @@ export function CelebrationBanner({
         <div className="relative p-4">
           <div className="flex items-start gap-4">
             {/* Tier icon */}
-            <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${config.bgColor} flex items-center justify-center`}>
-              <span className={`text-2xl font-bold ${config.color}`}>
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={config.bgStyle}>
+              <span className="text-2xl font-bold" style={config.colorStyle}>
                 {config.icon}
               </span>
             </div>
@@ -213,7 +215,7 @@ export function CelebrationBanner({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-lg">!</span>
-                <h3 className={`font-bold ${config.color}`}>
+                <h3 className="font-bold" style={config.colorStyle}>
                   Achieved: {config.label}!
                 </h3>
               </div>
@@ -255,8 +257,9 @@ export function CelebrationBanner({
           {autoDismissMs > 0 && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-ink/10 dark:bg-white/10">
               <div
-                className={`h-full ${config.color.replace('text-', 'bg-')}`}
+                className="h-full"
                 style={{
+                  backgroundColor: config.progressColor,
                   animation: `shrink-progress ${autoDismissMs}ms linear forwards`,
                 }}
               />

@@ -156,13 +156,11 @@ export function PromptCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isActive
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-amber-500/20 text-amber-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isActive
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+          }
         >
           {isActive ? 'Active' : 'Draft'}
         </span>

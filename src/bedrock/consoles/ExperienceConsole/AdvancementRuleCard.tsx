@@ -8,20 +8,20 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { AdvancementRulePayload } from '@core/schema/advancement';
 
-// Tier color mapping for visual hierarchy
-const TIER_COLORS: Record<string, { bg: string; text: string }> = {
-  seed: { bg: 'bg-amber-500/20', text: 'text-amber-400' },
-  sprout: { bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
-  sapling: { bg: 'bg-green-500/20', text: 'text-green-400' },
-  tree: { bg: 'bg-teal-500/20', text: 'text-teal-400' },
-  grove: { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+// Tier style mapping for visual hierarchy (semantic CSS variables)
+const TIER_STYLES: Record<string, React.CSSProperties> = {
+  seed: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' },
+  sprout: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  sapling: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  tree: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  grove: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' },
 };
 
 /**
- * Get tier colors with fallback for unknown tiers
+ * Get tier styles with fallback for unknown tiers
  */
-function getTierColor(tier: string): { bg: string; text: string } {
-  return TIER_COLORS[tier] || { bg: 'bg-slate-500/20', text: 'text-slate-400' };
+function getTierStyle(tier: string): React.CSSProperties {
+  return TIER_STYLES[tier] || { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' };
 }
 
 /**
@@ -41,8 +41,8 @@ export function AdvancementRuleCard({
   const criteriaCount = rule.payload.criteria.length;
   const logicOperator = rule.payload.logicOperator;
 
-  const fromColor = getTierColor(fromTier);
-  const toColor = getTierColor(toTier);
+  const fromStyle = getTierStyle(fromTier);
+  const toStyle = getTierStyle(toTier);
 
   return (
     <div
@@ -59,9 +59,8 @@ export function AdvancementRuleCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isEnabled ? 'bg-green-500' : 'bg-slate-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
       />
 
       {/* Favorite button */}
@@ -86,12 +85,14 @@ export function AdvancementRuleCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-          isEnabled ? 'bg-[#4CAF50]/20' : 'bg-slate-500/20'
-        }`}>
-          <span className={`material-symbols-outlined text-xl ${
-            isEnabled ? 'text-[#4CAF50]' : 'text-slate-400'
-          }`}>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: isEnabled ? 'var(--semantic-success-bg)' : 'var(--glass-panel)' }}
+        >
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          >
             trending_up
           </span>
         </div>
@@ -101,13 +102,13 @@ export function AdvancementRuleCard({
           </h3>
           {/* Tier transition visualization */}
           <div className="flex items-center gap-2 mt-1">
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${fromColor.bg} ${fromColor.text}`}>
+            <span className="px-2 py-0.5 rounded text-xs font-medium" style={fromStyle}>
               {fromTier}
             </span>
             <span className="material-symbols-outlined text-sm text-[var(--glass-text-muted)]">
               arrow_forward
             </span>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${toColor.bg} ${toColor.text}`}>
+            <span className="px-2 py-0.5 rounded text-xs font-medium" style={toStyle}>
               {toTier}
             </span>
           </div>
@@ -123,25 +124,25 @@ export function AdvancementRuleCard({
 
       {/* Criteria indicator */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className={`
-          flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
-          ${criteriaCount > 0
-            ? 'bg-blue-500/20 text-blue-400'
-            : 'bg-slate-500/20 text-slate-400'
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={criteriaCount > 0
+            ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
           }
-        `}>
+        >
           <span className="material-symbols-outlined text-xs">checklist</span>
           {criteriaCount} {criteriaCount === 1 ? 'criterion' : 'criteria'}
         </span>
 
         {criteriaCount > 1 && (
-          <span className={`
-            flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
-            ${logicOperator === 'AND'
-              ? 'bg-purple-500/20 text-purple-400'
-              : 'bg-amber-500/20 text-amber-400'
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+            style={logicOperator === 'AND'
+              ? { backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }
+              : { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
             }
-          `}>
+          >
             {logicOperator}
           </span>
         )}
@@ -150,13 +151,11 @@ export function AdvancementRuleCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isEnabled
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-slate-500/20 text-slate-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isEnabled
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+          }
         >
           {isEnabled ? 'Enabled' : 'Disabled'}
         </span>

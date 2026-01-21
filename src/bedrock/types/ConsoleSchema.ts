@@ -159,7 +159,7 @@ export interface ConsoleSchema {
     subtitle?: string;
     /** Lucide icon component */
     icon: LucideIcon;
-    /** Accent color class (e.g., 'text-emerald-500') */
+    /** Accent color as CSS variable (e.g., 'var(--semantic-success)') */
     color: string;
   };
 

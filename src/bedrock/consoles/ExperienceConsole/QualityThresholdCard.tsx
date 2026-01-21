@@ -9,13 +9,13 @@ import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { QualityThresholdPayload } from '@core/quality/schema';
 
 /**
- * Get color class for quality value
+ * Get style for quality value
  */
-function getValueColor(value: number): string {
-  if (value >= 0.8) return 'text-green-400';
-  if (value >= 0.6) return 'text-yellow-400';
-  if (value >= 0.4) return 'text-amber-400';
-  return 'text-red-400';
+function getValueStyle(value: number): React.CSSProperties {
+  if (value >= 0.8) return { color: 'var(--semantic-success)' };
+  if (value >= 0.6) return { color: 'var(--semantic-warning)' };
+  if (value >= 0.4) return { color: 'var(--semantic-warning)' };
+  return { color: 'var(--semantic-error)' };
 }
 
 /**
@@ -32,11 +32,11 @@ function DimensionDisplay({ label, minimum, target }: DimensionDisplayProps) {
     <div className="flex items-center justify-between text-xs">
       <span className="text-[var(--glass-text-secondary)] capitalize">{label}</span>
       <div className="flex items-center gap-2">
-        <span className={`${getValueColor(minimum)}`}>
+        <span style={getValueStyle(minimum)}>
           min: {(minimum * 100).toFixed(0)}%
         </span>
         <span className="text-[var(--glass-text-muted)]">→</span>
-        <span className={`${getValueColor(target)}`}>
+        <span style={getValueStyle(target)}>
           target: {(target * 100).toFixed(0)}%
         </span>
       </div>
@@ -72,9 +72,8 @@ export function QualityThresholdCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isActive ? 'bg-green-500' : 'bg-slate-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isActive ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
       />
 
       {/* Favorite button */}
@@ -99,12 +98,14 @@ export function QualityThresholdCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-          isActive ? 'bg-[#4CAF50]/20' : 'bg-slate-500/20'
-        }`}>
-          <span className={`material-symbols-outlined text-xl ${
-            isActive ? 'text-[#4CAF50]' : 'text-slate-400'
-          }`}>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: isActive ? 'var(--semantic-success-bg)' : 'var(--glass-panel)' }}
+        >
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: isActive ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          >
             tune
           </span>
         </div>
@@ -153,15 +154,15 @@ export function QualityThresholdCard({
       <div className="flex items-center gap-2 mb-3">
         <span className="text-xs text-[var(--glass-text-muted)]">Composite:</span>
         <div className="flex items-center gap-1">
-          <span className={`text-xs ${getValueColor(composite.minimum)}`}>
+          <span className="text-xs" style={getValueStyle(composite.minimum)}>
             {(composite.minimum * 100).toFixed(0)}%
           </span>
           <span className="text-xs text-[var(--glass-text-muted)]">/</span>
-          <span className={`text-xs ${getValueColor(composite.target)}`}>
+          <span className="text-xs" style={getValueStyle(composite.target)}>
             {(composite.target * 100).toFixed(0)}%
           </span>
           <span className="text-xs text-[var(--glass-text-muted)]">/</span>
-          <span className={`text-xs ${getValueColor(composite.excellent)}`}>
+          <span className="text-xs" style={getValueStyle(composite.excellent)}>
             {(composite.excellent * 100).toFixed(0)}%
           </span>
         </div>
@@ -169,13 +170,13 @@ export function QualityThresholdCard({
 
       {/* Features badges */}
       <div className="flex flex-wrap gap-2 mb-3">
-        <span className={`
-          px-2 py-0.5 rounded-full text-xs
-          ${autoFilterEnabled
-            ? 'bg-blue-500/20 text-blue-400'
-            : 'bg-slate-500/20 text-slate-400'
+        <span
+          className="px-2 py-0.5 rounded-full text-xs"
+          style={autoFilterEnabled
+            ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
           }
-        `}>
+        >
           <span className="material-symbols-outlined text-xs align-middle mr-0.5">
             {autoFilterEnabled ? 'filter_alt' : 'filter_alt_off'}
           </span>
@@ -190,13 +191,11 @@ export function QualityThresholdCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isActive
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-slate-500/20 text-slate-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isActive
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+          }
         >
           {isActive ? 'Active' : 'Inactive'}
         </span>

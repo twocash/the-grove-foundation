@@ -35,14 +35,14 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
   ModelAnalyticsHeader: ({ element }) => {
     const props = element.props as ModelAnalyticsHeaderProps;
 
-    const getModelTypeColor = (type?: string) => {
+    const getModelTypeColor = (type?: string): string => {
       const colors: Record<string, string> = {
-        botanical: 'text-emerald-400',
-        academic: 'text-blue-400',
-        research: 'text-violet-400',
-        creative: 'text-amber-400',
+        botanical: 'var(--semantic-success)',
+        academic: 'var(--semantic-info)',
+        research: 'rgb(167, 139, 250)', // violet-400
+        creative: 'var(--semantic-warning)',
       };
-      return colors[type || ''] || 'text-gray-400';
+      return colors[type || ''] || 'var(--glass-text-muted)';
     };
 
     return (
@@ -59,7 +59,10 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
             )}
             <div className="flex items-center gap-3 text-xs text-[var(--glass-text-muted)]">
               {props.modelType && (
-                <span className={`px-2 py-1 rounded-full bg-[var(--glass-elevated)] ${getModelTypeColor(props.modelType)}`}>
+                <span
+                  className="px-2 py-1 rounded-full bg-[var(--glass-elevated)]"
+                  style={{ color: getModelTypeColor(props.modelType) }}
+                >
                   {props.modelType}
                 </span>
               )}
@@ -106,31 +109,34 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
       }
     };
 
-    const getTrendColor = (direction?: string) => {
+    const getTrendColor = (direction?: string): string => {
       switch (direction) {
         case 'up':
-          return 'text-green-400';
+          return 'var(--semantic-success)';
         case 'down':
-          return 'text-red-400';
+          return 'var(--semantic-error)';
         default:
-          return 'text-gray-400';
+          return 'var(--glass-text-muted)';
       }
     };
 
-    const getCardColor = (color?: string) => {
-      const colors: Record<string, string> = {
-        green: 'border-emerald-500/30 bg-emerald-500/5',
-        red: 'border-red-500/30 bg-red-500/5',
-        amber: 'border-amber-500/30 bg-amber-500/5',
-        blue: 'border-blue-500/30 bg-blue-500/5',
-        purple: 'border-purple-500/30 bg-purple-500/5',
-        default: 'border-[var(--glass-border)] bg-[var(--glass-elevated)]',
+    const getCardStyle = (color?: string): React.CSSProperties => {
+      const styles: Record<string, React.CSSProperties> = {
+        green: { borderColor: 'var(--semantic-success-border)', backgroundColor: 'var(--semantic-success-bg)' },
+        red: { borderColor: 'var(--semantic-error-border)', backgroundColor: 'var(--semantic-error-bg)' },
+        amber: { borderColor: 'var(--semantic-warning-border)', backgroundColor: 'var(--semantic-warning-bg)' },
+        blue: { borderColor: 'var(--semantic-info-border)', backgroundColor: 'var(--semantic-info-bg)' },
+        purple: { borderColor: 'rgba(168, 85, 247, 0.3)', backgroundColor: 'rgba(168, 85, 247, 0.05)' },
+        default: { borderColor: 'var(--glass-border)', backgroundColor: 'var(--glass-elevated)' },
       };
-      return colors[color || 'default'] || colors.default;
+      return styles[color || 'default'] || styles.default;
     };
 
     return (
-      <div className={`p-4 rounded-lg border ${getCardColor(props.color)} transition-all hover:border-[var(--glass-border-bright)]`}>
+      <div
+        className="p-4 rounded-lg border transition-all hover:border-[var(--glass-border-bright)]"
+        style={getCardStyle(props.color)}
+      >
         <div className="flex items-start justify-between mb-2">
           <span className="text-[var(--glass-text-secondary)] text-sm font-medium">
             {props.label}
@@ -148,10 +154,10 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
         </div>
         {props.trend && (
           <div className="flex items-center gap-1 text-xs">
-            <span className={`material-symbols-outlined text-sm ${getTrendColor(props.trend.direction)}`}>
+            <span className="material-symbols-outlined text-sm" style={{ color: getTrendColor(props.trend.direction) }}>
               {getTrendIcon(props.trend.direction)}
             </span>
-            <span className={getTrendColor(props.trend.direction)}>
+            <span style={{ color: getTrendColor(props.trend.direction) }}>
               {props.trend.deltaPercent ? `${props.trend.deltaPercent.toFixed(1)}%` : ''}
             </span>
             {props.trend.period && (
@@ -450,14 +456,14 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
   ModelSummary: ({ element }) => {
     const props = element.props as ModelSummaryProps;
 
-    const getModelTypeColor = (type: string) => {
+    const getModelTypeColor = (type: string): string => {
       const colors: Record<string, string> = {
-        botanical: 'text-emerald-400',
-        academic: 'text-blue-400',
-        research: 'text-violet-400',
-        creative: 'text-amber-400',
+        botanical: 'var(--semantic-success)',
+        academic: 'var(--semantic-info)',
+        research: 'rgb(167, 139, 250)', // violet-400
+        creative: 'var(--semantic-warning)',
       };
-      return colors[type] || 'text-gray-400';
+      return colors[type] || 'var(--glass-text-muted)';
     };
 
     return (
@@ -468,7 +474,7 @@ export const ModelAnalyticsRegistry: ComponentRegistry = {
               {props.name}
             </h3>
             <div className="flex items-center gap-2 text-sm">
-              <span className={`${getModelTypeColor(props.modelType)}`}>
+              <span style={{ color: getModelTypeColor(props.modelType) }}>
                 {props.modelType}
               </span>
               <span className="text-[var(--glass-text-muted)]">•</span>

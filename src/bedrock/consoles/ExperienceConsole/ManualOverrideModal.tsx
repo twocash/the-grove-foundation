@@ -24,12 +24,12 @@ interface ManualOverrideModalProps {
 // Constants
 // =============================================================================
 
-const TIERS = [
-  { value: 'seed', label: 'Seed', color: 'text-amber-400', bg: 'bg-amber-500/20' },
-  { value: 'sprout', label: 'Sprout', color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-  { value: 'sapling', label: 'Sapling', color: 'text-green-400', bg: 'bg-green-500/20' },
-  { value: 'tree', label: 'Tree', color: 'text-teal-400', bg: 'bg-teal-500/20' },
-  { value: 'grove', label: 'Grove', color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
+const TIERS: Array<{ value: string; label: string; style: React.CSSProperties }> = [
+  { value: 'seed', label: 'Seed', style: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' } },
+  { value: 'sprout', label: 'Sprout', style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' } },
+  { value: 'sapling', label: 'Sapling', style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' } },
+  { value: 'tree', label: 'Tree', style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' } },
+  { value: 'grove', label: 'Grove', style: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' } },
 ];
 
 // =============================================================================
@@ -90,8 +90,11 @@ export function ManualOverrideModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-blue-400">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'var(--semantic-info-bg)' }}
+            >
+              <span className="material-symbols-outlined" style={{ color: 'var(--semantic-info)' }}>
                 swap_vert
               </span>
             </div>
@@ -121,8 +124,11 @@ export function ManualOverrideModal({
             <label className="block text-sm font-medium text-[var(--glass-text-secondary)] mb-2">
               Current Tier
             </label>
-            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg ${currentTierConfig?.bg || 'bg-slate-500/20'}`}>
-              <span className={`text-sm font-medium ${currentTierConfig?.color || 'text-slate-400'}`}>
+            <div
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg"
+              style={currentTierConfig?.style || { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }}
+            >
+              <span className="text-sm font-medium">
                 {currentTierConfig?.label || currentTier}
               </span>
             </div>
@@ -144,12 +150,13 @@ export function ManualOverrideModal({
                     ${tier.value === currentTier
                       ? 'opacity-30 cursor-not-allowed'
                       : selectedTier === tier.value
-                        ? `${tier.bg} ring-2 ring-offset-2 ring-offset-[var(--glass-solid)] ring-[var(--neon-cyan)]`
-                        : `${tier.bg} hover:ring-1 hover:ring-[var(--glass-border-bright)]`
+                        ? 'ring-2 ring-offset-2 ring-offset-[var(--glass-solid)] ring-[var(--neon-cyan)]'
+                        : 'hover:ring-1 hover:ring-[var(--glass-border-bright)]'
                     }
                   `}
+                  style={tier.style}
                 >
-                  <span className={`text-xs font-medium ${tier.color}`}>
+                  <span className="text-xs font-medium">
                     {tier.label}
                   </span>
                 </button>
@@ -160,13 +167,13 @@ export function ManualOverrideModal({
           {/* Tier Change Visualization */}
           {selectedTier && selectedTier !== currentTier && (
             <div className="flex items-center justify-center gap-4 py-4 px-4 rounded-lg bg-[var(--glass-elevated)]">
-              <div className={`px-3 py-1.5 rounded ${currentTierConfig?.bg} ${currentTierConfig?.color}`}>
+              <div className="px-3 py-1.5 rounded" style={currentTierConfig?.style}>
                 {currentTierConfig?.label}
               </div>
               <span className="material-symbols-outlined text-[var(--glass-text-muted)]">
                 arrow_forward
               </span>
-              <div className={`px-3 py-1.5 rounded ${selectedTierConfig?.bg} ${selectedTierConfig?.color}`}>
+              <div className="px-3 py-1.5 rounded" style={selectedTierConfig?.style}>
                 {selectedTierConfig?.label}
               </div>
             </div>
@@ -197,18 +204,24 @@ export function ManualOverrideModal({
 
           {/* Error Display */}
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
+            <div
+              className="flex items-center gap-2 p-3 rounded-lg text-sm"
+              style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
+            >
               <span className="material-symbols-outlined text-sm">error</span>
               {error}
             </div>
           )}
 
           {/* Warning */}
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-orange-500/10 text-orange-400 text-sm">
+          <div
+            className="flex items-start gap-2 p-3 rounded-lg text-sm"
+            style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+          >
             <span className="material-symbols-outlined text-sm mt-0.5">warning</span>
             <div>
               <div className="font-medium">Manual Override Warning</div>
-              <div className="text-orange-400/80 mt-1">
+              <div className="mt-1" style={{ opacity: 0.8 }}>
                 This action bypasses automatic advancement rules. The override will be logged with your operator ID.
               </div>
             </div>

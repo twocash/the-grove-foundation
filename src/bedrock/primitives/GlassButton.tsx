@@ -101,14 +101,14 @@ export function GlassButton({
       border-transparent
     `,
     danger: `
-      bg-red-500/10 hover:bg-red-500/20
-      text-red-400 border-red-500/30
-      shadow-[0_0_15px_rgba(239,68,68,0.15)]
+      bg-[var(--semantic-error-bg)] hover:bg-[var(--semantic-error-bg)]
+      text-[var(--semantic-error)] border-[var(--semantic-error-border)]
+      shadow-[0_0_15px_var(--semantic-error-glow)]
     `,
     success: `
-      bg-emerald-500/20 hover:bg-emerald-500/30
-      text-emerald-400 border-emerald-500/40
-      shadow-[0_0_15px_rgba(16,185,129,0.2)]
+      bg-[var(--semantic-success-bg)] hover:bg-[var(--semantic-success-bg)]
+      text-[var(--semantic-success)] border-[var(--semantic-success-border)]
+      shadow-[0_0_15px_var(--semantic-success-glow)]
     `,
   };
 

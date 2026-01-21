@@ -25,7 +25,7 @@ const STATUS_OPTIONS: Array<{ value: MappingStatus; label: string; color: string
   { value: 'draft', label: 'Draft', color: 'text-[var(--glass-text-muted)]' },
   { value: 'proposed', label: 'Proposed', color: 'text-[var(--neon-amber)]' },
   { value: 'accepted', label: 'Accepted', color: 'text-[var(--neon-green)]' },
-  { value: 'rejected', label: 'Rejected', color: 'text-red-400' },
+  { value: 'rejected', label: 'Rejected', color: 'text-[var(--semantic-error)]' },
 ];
 
 // Shared CSS classes for inputs
@@ -56,7 +56,7 @@ function StatusBadge({ status }: { status: MappingStatus }) {
     draft: 'bg-[var(--glass-text-muted)]/10',
     proposed: 'bg-[var(--neon-amber)]/10',
     accepted: 'bg-[var(--neon-green)]/10',
-    rejected: 'bg-red-500/10',
+    rejected: 'bg-[var(--semantic-error-bg)]',
   };
 
   return (
@@ -335,7 +335,10 @@ export function TierMappingEditor({
                         </button>
                         <button
                           onClick={() => removeMapping(index)}
-                          className="p-1.5 rounded text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded transition-colors"
+                          style={{ color: 'var(--semantic-error)' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.8'; e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                           aria-label="Delete mapping"
                         >
                           <span className="material-symbols-outlined text-sm">delete</span>
@@ -481,7 +484,10 @@ export function TierMappingEditor({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="flex-1 py-2 px-3 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            className="flex-1 py-2 px-3 rounded-lg border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            style={{ borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <span className="material-symbols-outlined text-sm">delete</span>
             Delete

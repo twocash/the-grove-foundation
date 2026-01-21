@@ -136,26 +136,29 @@ export function QualityErrorState({
       className={`flex flex-col items-center justify-center p-8 text-center ${className}`}
       data-testid="quality-error-state"
     >
-      <div className="p-4 rounded-full bg-red-500/10 mb-4">
-        <span className="material-symbols-outlined text-4xl text-red-400">
+      <div className="p-4 rounded-full mb-4" style={{ backgroundColor: 'var(--semantic-error-bg)' }}>
+        <span className="material-symbols-outlined text-4xl" style={{ color: 'var(--semantic-error)' }}>
           error_outline
         </span>
       </div>
-      <h4 className="text-base font-medium text-red-400 mb-2">
+      <h4 className="text-base font-medium mb-2" style={{ color: 'var(--semantic-error)' }}>
         {title}
       </h4>
       <p className="text-sm text-[var(--glass-text-muted)] max-w-xs mb-2">
         {description}
       </p>
       {errorMessage && (
-        <p className="text-xs text-red-400/70 max-w-xs mb-4 font-mono bg-red-500/5 px-3 py-2 rounded-lg">
+        <p className="text-xs max-w-xs mb-4 font-mono px-3 py-2 rounded-lg" style={{ color: 'var(--semantic-error)', opacity: 0.7, backgroundColor: 'var(--semantic-error-bg)' }}>
           {errorMessage}
         </p>
       )}
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border transition-colors"
+          style={{ borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           <span className="material-symbols-outlined text-base">refresh</span>
           Retry Assessment
@@ -301,16 +304,19 @@ export function QualityErrorInline({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 ${onClick ? 'cursor-pointer hover:bg-red-500/20' : ''} ${className}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      style={{ backgroundColor: 'var(--semantic-error-bg)' }}
       onClick={onClick}
+      onMouseEnter={onClick ? (e) => e.currentTarget.style.opacity = '0.8' : undefined}
+      onMouseLeave={onClick ? (e) => e.currentTarget.style.opacity = '1' : undefined}
       data-testid="quality-error-inline"
     >
-      <span className="material-symbols-outlined text-base text-red-400">
+      <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-error)' }}>
         error_outline
       </span>
-      <span className="text-xs text-red-400">Assessment failed</span>
+      <span className="text-xs" style={{ color: 'var(--semantic-error)' }}>Assessment failed</span>
       {onClick && (
-        <span className="material-symbols-outlined text-sm text-red-400">refresh</span>
+        <span className="material-symbols-outlined text-sm" style={{ color: 'var(--semantic-error)' }}>refresh</span>
       )}
     </div>
   );

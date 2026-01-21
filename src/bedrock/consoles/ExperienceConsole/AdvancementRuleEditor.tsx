@@ -101,7 +101,16 @@ function CriterionRow({ criterion, index, onChange, onRemove, disabled }: Criter
       <button
         onClick={() => onRemove(index)}
         disabled={disabled}
-        className="p-1 rounded text-[var(--glass-text-muted)] hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+        className="p-1 rounded text-[var(--glass-text-muted)] transition-colors disabled:opacity-50"
+        style={{ }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = 'var(--semantic-error)';
+          e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = 'var(--glass-text-muted)';
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
         aria-label="Remove criterion"
       >
         <span className="material-symbols-outlined text-lg">close</span>
@@ -203,30 +212,39 @@ export function AdvancementRuleEditor({
   return (
     <div className="flex flex-col h-full">
       {/* Enabled Status Banner - high contrast for visibility */}
-      <div className={`
-        flex items-center gap-3 px-4 py-3 border-b-2 transition-colors
-        ${isEnabled
-          ? 'bg-emerald-500/15 border-emerald-500/40'
-          : 'bg-slate-500/15 border-slate-500/40'
+      <div
+        className="flex items-center gap-3 px-4 py-3 border-b-2 transition-colors"
+        style={isEnabled
+          ? { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)' }
+          : { backgroundColor: 'var(--glass-panel)', borderColor: 'var(--glass-border)' }
         }
-      `}>
+      >
         {/* Status dot with pulse animation when enabled */}
         <span className="relative flex h-3 w-3">
           {isEnabled && (
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style={{ backgroundColor: 'var(--semantic-success)' }}
+            />
           )}
-          <span className={`
-            relative inline-flex rounded-full h-3 w-3
-            ${isEnabled ? 'bg-emerald-500' : 'bg-slate-500'}
-          `} />
+          <span
+            className="relative inline-flex rounded-full h-3 w-3"
+            style={{ backgroundColor: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          />
         </span>
 
         {/* Status text */}
         <div className="flex-1">
-          <span className={`text-sm font-semibold ${isEnabled ? 'text-emerald-300' : 'text-slate-300'}`}>
+          <span
+            className="text-sm font-semibold"
+            style={{ color: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-secondary)' }}
+          >
             {isEnabled ? 'Enabled' : 'Disabled'}
           </span>
-          <p className={`text-xs ${isEnabled ? 'text-emerald-400/80' : 'text-slate-400/80'}`}>
+          <p
+            className="text-xs opacity-80"
+            style={{ color: isEnabled ? 'var(--semantic-success)' : 'var(--glass-text-muted)' }}
+          >
             {isEnabled ? 'Rule is active for batch evaluation' : 'Rule is not evaluated during batch runs'}
           </p>
         </div>
@@ -254,25 +272,31 @@ export function AdvancementRuleEditor({
             </h1>
             {/* Tier transition */}
             <div className="flex items-center gap-2 mt-1">
-              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-medium">
+              <span
+                className="px-2 py-0.5 rounded text-xs font-medium"
+                style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+              >
                 {rule.payload.fromTier}
               </span>
               <span className="material-symbols-outlined text-sm text-[var(--glass-text-muted)]">
                 arrow_forward
               </span>
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs font-medium">
+              <span
+                className="px-2 py-0.5 rounded text-xs font-medium"
+                style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
+              >
                 {rule.payload.toTier}
               </span>
             </div>
           </div>
           {/* Criteria count indicator */}
-          <div className={`
-            flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium
-            ${criteriaCount > 0
-              ? 'bg-blue-500/20 text-blue-400'
-              : 'bg-slate-500/20 text-slate-400'
+          <div
+            className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium"
+            style={criteriaCount > 0
+              ? { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }
+              : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
             }
-          `}>
+          >
             <span className="material-symbols-outlined text-sm">checklist</span>
             {criteriaCount}
           </div>

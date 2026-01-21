@@ -62,7 +62,7 @@ function TextFieldRenderer({ field, value, onChange, disabled }: FieldRendererPr
     <div className="space-y-1">
       <label className="block text-xs font-medium text-[var(--glass-text-secondary)]">
         {field.label}
-        {field.required && <span className="text-red-400 ml-1">*</span>}
+        {field.required && <span className="ml-1" style={{ color: 'var(--semantic-error)' }}>*</span>}
       </label>
       <input
         type="text"
@@ -87,7 +87,7 @@ function TextareaFieldRenderer({ field, value, onChange, disabled }: FieldRender
     <div className="space-y-1">
       <label className="block text-xs font-medium text-[var(--glass-text-secondary)]">
         {field.label}
-        {field.required && <span className="text-red-400 ml-1">*</span>}
+        {field.required && <span className="ml-1" style={{ color: 'var(--semantic-error)' }}>*</span>}
       </label>
       <textarea
         value={String(value ?? '')}
@@ -112,7 +112,7 @@ function NumberFieldRenderer({ field, value, onChange, disabled }: FieldRenderer
     <div className="space-y-1">
       <label className="block text-xs font-medium text-[var(--glass-text-secondary)]">
         {field.label}
-        {field.required && <span className="text-red-400 ml-1">*</span>}
+        {field.required && <span className="ml-1" style={{ color: 'var(--semantic-error)' }}>*</span>}
       </label>
       <input
         type="number"
@@ -137,7 +137,7 @@ function SelectFieldRenderer({ field, value, onChange, disabled }: FieldRenderer
     <div className="space-y-1">
       <label className="block text-xs font-medium text-[var(--glass-text-secondary)]">
         {field.label}
-        {field.required && <span className="text-red-400 ml-1">*</span>}
+        {field.required && <span className="ml-1" style={{ color: 'var(--semantic-error)' }}>*</span>}
       </label>
       <select
         value={String(value ?? '')}
@@ -255,15 +255,16 @@ interface StatusBannerProps {
 function StatusBanner({ isActive, activeLabel = 'Active', inactiveLabel = 'Inactive' }: StatusBannerProps) {
   return (
     <div
-      className={`
-        px-4 py-2 text-sm font-medium flex items-center gap-2
-        ${isActive
-          ? 'bg-emerald-500/20 text-emerald-400 border-b border-emerald-500/30'
-          : 'bg-red-500/20 text-red-400 border-b border-red-500/30'
-        }
-      `}
+      className="px-4 py-2 text-sm font-medium flex items-center gap-2 border-b"
+      style={isActive
+        ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)', borderColor: 'var(--semantic-success-border)' }
+        : { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)', borderColor: 'var(--semantic-error-border)' }
+      }
     >
-      <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400'}`} />
+      <span
+        className={`w-2 h-2 rounded-full ${isActive ? 'animate-pulse' : ''}`}
+        style={{ backgroundColor: isActive ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+      />
       {isActive ? activeLabel : inactiveLabel}
     </div>
   );
@@ -414,10 +415,10 @@ export function UniversalInspector<T extends BaseEntity>({
         {onDelete && (
           <button
             onClick={onDelete}
-            className="flex-1 px-4 py-2 text-sm text-red-400
-              border border-red-400/30 rounded-lg
-              hover:bg-red-500/20 hover:border-red-400/50 transition-colors
-              flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2 text-sm border rounded-lg transition-colors flex items-center justify-center gap-2"
+            style={{ color: 'var(--semantic-error)', borderColor: 'var(--semantic-error-border)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
             <span className="material-symbols-outlined text-base">delete</span>
             Delete

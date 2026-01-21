@@ -27,24 +27,24 @@ import type {
 
 const GRADE_COLORS = {
   excellent: {
-    text: 'text-[var(--neon-green)]',
-    bg: 'bg-[var(--neon-green)]/20',
-    bar: 'bg-[var(--neon-green)]',
+    color: 'var(--semantic-success)',
+    backgroundColor: 'var(--semantic-success-bg)',
+    barColor: 'var(--semantic-success)',
   },
   good: {
-    text: 'text-[var(--neon-amber)]',
-    bg: 'bg-[var(--neon-amber)]/20',
-    bar: 'bg-[var(--neon-amber)]',
+    color: 'var(--semantic-warning)',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    barColor: 'var(--semantic-warning)',
   },
   fair: {
-    text: 'text-orange-400',
-    bg: 'bg-orange-500/20',
-    bar: 'bg-orange-500',
+    color: 'var(--semantic-warning)',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    barColor: 'var(--semantic-warning)',
   },
   'needs-improvement': {
-    text: 'text-red-400',
-    bg: 'bg-red-500/20',
-    bar: 'bg-red-500',
+    color: 'var(--semantic-error)',
+    backgroundColor: 'var(--semantic-error-bg)',
+    barColor: 'var(--semantic-error)',
   },
 };
 
@@ -71,11 +71,11 @@ function QualityHeaderRenderer({ element }: RegistryComponentProps<QualityHeader
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-3">
-        <span className={`material-symbols-outlined text-3xl ${colors.text}`}>
+        <span className="material-symbols-outlined text-3xl" style={{ color: colors.color }}>
           {gradeIcon}
         </span>
         <div>
-          <div className={`text-3xl font-bold ${colors.text}`}>
+          <div className="text-3xl font-bold" style={{ color: colors.color }}>
             {Math.round(overall)}
           </div>
           <div className="text-xs text-[var(--glass-text-muted)]">
@@ -83,7 +83,10 @@ function QualityHeaderRenderer({ element }: RegistryComponentProps<QualityHeader
           </div>
         </div>
       </div>
-      <div className={`px-3 py-1.5 rounded-lg text-sm font-medium ${colors.bg} ${colors.text}`}>
+      <div
+        className="px-3 py-1.5 rounded-lg text-sm font-medium"
+        style={{ backgroundColor: colors.backgroundColor, color: colors.color }}
+      >
         {gradeLabel}
       </div>
     </div>
@@ -116,13 +119,13 @@ function DimensionBarRenderer({ element }: RegistryComponentProps<DimensionBar>)
       {/* Progress bar */}
       <div className="flex-1 h-2.5 bg-[var(--glass-border)] rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${colors.bar}`}
-          style={{ width: `${roundedValue}%` }}
+          className="h-full rounded-full transition-all"
+          style={{ width: `${roundedValue}%`, backgroundColor: colors.barColor }}
         />
       </div>
 
       {/* Value */}
-      <span className={`w-10 text-sm text-right font-medium ${colors.text}`}>
+      <span className="w-10 text-sm text-right font-medium" style={{ color: colors.color }}>
         {roundedValue}
       </span>
     </div>
@@ -325,10 +328,10 @@ function ErrorStateRenderer({ element }: RegistryComponentProps<ErrorState>) {
 
   return (
     <div className="flex flex-col items-center justify-center py-8 text-center">
-      <span className="material-symbols-outlined text-4xl text-red-400 mb-3">
+      <span className="material-symbols-outlined text-4xl mb-3" style={{ color: 'var(--semantic-error)' }}>
         {icon}
       </span>
-      <h4 className="text-sm font-medium text-red-400 mb-1">
+      <h4 className="text-sm font-medium mb-1" style={{ color: 'var(--semantic-error)' }}>
         {title}
       </h4>
       {message && (

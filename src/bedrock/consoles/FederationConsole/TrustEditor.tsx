@@ -501,7 +501,10 @@ export function TrustEditor({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="flex-1 py-2 px-3 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            className="flex-1 py-2 px-3 rounded-lg border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            style={{ borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
             <span className="material-symbols-outlined text-sm">delete</span>
             Delete

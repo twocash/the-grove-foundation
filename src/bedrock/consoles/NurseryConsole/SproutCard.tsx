@@ -96,14 +96,23 @@ export function SproutCard({
   const confidencePercent = Math.round((sprout.payload.inferenceConfidence ?? 0) * 100);
   const timeSince = formatTimeSince(sprout.meta.updatedAt);
 
-  // Status color mapping
-  const statusColors = {
-    ready: { bar: 'bg-green-500', badge: 'bg-green-500/20 text-green-400' },
-    failed: { bar: 'bg-red-500', badge: 'bg-red-500/20 text-red-400' },
-    archived: { bar: 'bg-gray-500', badge: 'bg-gray-500/20 text-gray-400' },
+  // Status color mapping (using semantic CSS variables)
+  const statusStyles: Record<NurseryDisplayStatus, { bar: React.CSSProperties; badge: React.CSSProperties }> = {
+    ready: {
+      bar: { backgroundColor: 'var(--semantic-success)' },
+      badge: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+    },
+    failed: {
+      bar: { backgroundColor: 'var(--semantic-error)' },
+      badge: { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' },
+    },
+    archived: {
+      bar: { backgroundColor: 'var(--glass-text-muted)' },
+      badge: { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' },
+    },
   };
 
-  const colors = statusColors[displayStatus];
+  const styles = statusStyles[displayStatus];
 
   return (
     <div
@@ -119,7 +128,7 @@ export function SproutCard({
       data-testid="sprout-card"
     >
       {/* Status color bar at top */}
-      <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${colors.bar}`} />
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl" style={styles.bar} />
 
       {/* Top right: Quality Badge + Favorite */}
       <div className="absolute top-3 right-3 flex items-center gap-2">
@@ -183,14 +192,20 @@ export function SproutCard({
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
           {/* Status badge */}
-          <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${colors.badge}`}>
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+            style={styles.badge}
+          >
             <span className="material-symbols-outlined text-sm">{statusConfig.icon}</span>
             {statusConfig.label}
           </span>
 
           {/* Needs review indicator */}
           {sprout.payload.requiresReview && !sprout.payload.reviewed && (
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">
+            <span
+              className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+            >
               <span className="material-symbols-outlined text-sm">rate_review</span>
               Review
             </span>

@@ -42,7 +42,7 @@ const formatRelativeTime = (timestamp: string): string => {
 const formatScoreChange = (before: number, after: number): { text: string; color: string } => {
   const delta = after - before;
   const sign = delta >= 0 ? '+' : '';
-  const color = delta >= 0 ? 'text-grove-forest' : 'text-red-500';
+  const color = delta >= 0 ? 'text-grove-forest' : 'text-[var(--semantic-error)]';
   return {
     text: `${before} → ${after} (${sign}${delta})`,
     color,
@@ -110,7 +110,8 @@ export const OverrideHistoryRegistry: OverrideHistoryComponentRegistry = {
               </span>
               {props.rolledBack && (
                 <span
-                  className="px-1.5 py-0.5 text-xs font-mono bg-red-500/20 text-red-600 dark:text-red-400 rounded"
+                  className="px-1.5 py-0.5 text-xs font-mono rounded"
+                  style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
                   data-testid="rollback-badge"
                 >
                   ROLLED BACK
@@ -119,7 +120,10 @@ export const OverrideHistoryRegistry: OverrideHistoryComponentRegistry = {
             </div>
             {props.canRollback && !props.rolledBack && (
               <button
-                className="text-xs text-ink-muted hover:text-red-500 dark:text-paper/50 dark:hover:text-red-400 transition-colors"
+                className="text-xs text-ink-muted dark:text-paper/50 transition-colors"
+                style={{ }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--semantic-error)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = ''; }}
                 data-testid="rollback-button"
               >
                 Rollback
@@ -149,7 +153,7 @@ export const OverrideHistoryRegistry: OverrideHistoryComponentRegistry = {
 
           {/* Evidence indicator */}
           {props.hasEvidence && (
-            <div className="mt-2 text-xs text-blue-500 flex items-center gap-1">
+            <div className="mt-2 text-xs flex items-center gap-1" style={{ color: 'var(--semantic-info)' }}>
               <span>📎</span>
               <a
                 href={props.evidenceUrl}
@@ -208,7 +212,8 @@ export const OverrideHistoryRegistry: OverrideHistoryComponentRegistry = {
 
     return (
       <span
-        className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono bg-red-500/20 text-red-600 dark:text-red-400 rounded"
+        className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-mono rounded"
+        style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
         data-testid="rollback-badge"
       >
         <span>↩</span>

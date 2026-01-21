@@ -178,7 +178,10 @@ export function GroveEditor({
           connectionStatus === 'connected' ? (
             <button
               onClick={() => updatePayload({ connectionStatus: 'disconnected' })}
-              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30"
+              className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+              style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
               Disconnect
             </button>
@@ -398,7 +401,8 @@ export function GroveEditor({
                         />
                         <button
                           onClick={() => setEditingTier(null)}
-                          className="p-1 text-green-400 hover:text-green-300"
+                          className="p-1 hover:opacity-80"
+                          style={{ color: 'var(--semantic-success)' }}
                           aria-label="Save tier changes"
                         >
                           <span className="material-symbols-outlined text-sm">check</span>
@@ -418,7 +422,10 @@ export function GroveEditor({
                         </button>
                         <button
                           onClick={() => removeTier(tier.id)}
-                          className="p-1 text-red-400 hover:text-red-300"
+                          className="p-1 transition-colors"
+                          style={{ color: 'var(--semantic-error)' }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                           aria-label={`Delete tier ${tier.name}`}
                         >
                           <span className="material-symbols-outlined text-sm">delete</span>
@@ -538,7 +545,10 @@ export function GroveEditor({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="flex-1 px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+            className="flex-1 px-4 py-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-1"
+            style={{ borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <span className="material-symbols-outlined text-sm">delete</span>
             Delete

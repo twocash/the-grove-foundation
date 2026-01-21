@@ -122,7 +122,7 @@ function DimensionRow({
               value={target * 100}
               onChange={(e) => onTargetChange(parseInt(e.target.value) / 100)}
               disabled={disabled}
-              className="flex-1 h-1 accent-green-500"
+              className="flex-1 h-1 accent-[var(--semantic-success)]"
             />
             <span className="text-xs text-[var(--glass-text-secondary)] w-10 text-right">
               {(target * 100).toFixed(0)}%
@@ -306,7 +306,8 @@ export function QualityThresholdEditor({
                     value={composite.minimum * 100}
                     onChange={(e) => handleCompositeChange('minimum', parseInt(e.target.value) / 100)}
                     disabled={saving}
-                    className="flex-1 h-1 accent-red-500"
+                    className="flex-1 h-1"
+                    style={{ accentColor: 'var(--semantic-error)' }}
                   />
                   <span className="text-sm text-[var(--glass-text-secondary)] w-12 text-right">
                     {(composite.minimum * 100).toFixed(0)}%
@@ -325,7 +326,8 @@ export function QualityThresholdEditor({
                     value={composite.target * 100}
                     onChange={(e) => handleCompositeChange('target', parseInt(e.target.value) / 100)}
                     disabled={saving}
-                    className="flex-1 h-1 accent-yellow-500"
+                    className="flex-1 h-1"
+                    style={{ accentColor: 'var(--neon-amber)' }}
                   />
                   <span className="text-sm text-[var(--glass-text-secondary)] w-12 text-right">
                     {(composite.target * 100).toFixed(0)}%
@@ -344,7 +346,7 @@ export function QualityThresholdEditor({
                     value={composite.excellent * 100}
                     onChange={(e) => handleCompositeChange('excellent', parseInt(e.target.value) / 100)}
                     disabled={saving}
-                    className="flex-1 h-1 accent-green-500"
+                    className="flex-1 h-1 accent-[var(--semantic-success)]"
                   />
                   <span className="text-sm text-[var(--glass-text-secondary)] w-12 text-right">
                     {(composite.excellent * 100).toFixed(0)}%
@@ -428,13 +430,8 @@ export function QualityThresholdEditor({
               <button
                 onClick={handleActiveToggle}
                 disabled={saving}
-                className={`
-                  w-12 h-6 rounded-full transition-colors relative
-                  ${isActive
-                    ? 'bg-green-500'
-                    : 'bg-[var(--glass-border)]'
-                  }
-                `}
+                className="w-12 h-6 rounded-full transition-colors relative"
+                style={{ backgroundColor: isActive ? 'var(--semantic-success)' : 'var(--glass-border)' }}
               >
                 <div
                   className={`

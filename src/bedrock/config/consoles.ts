@@ -29,7 +29,7 @@ export const systemPromptSchema: ConsoleSchema = {
     title: 'System Prompts',
     subtitle: 'AI behavior and personality configuration',
     icon: FileText,
-    color: 'text-emerald-500',
+    color: 'var(--semantic-success)',
   },
 
   filters: [
@@ -132,7 +132,7 @@ export const featureFlagSchema: ConsoleSchema = {
     title: 'Feature Flags',
     subtitle: 'Toggle features across the application',
     icon: Flag,
-    color: 'text-orange-500',
+    color: 'var(--semantic-warning)',
   },
 
   filters: [
@@ -253,7 +253,7 @@ export const researchSproutSchema: ConsoleSchema = {
     title: 'Research Sprouts',
     subtitle: 'AI-assisted research threads',
     icon: Sprout,
-    color: 'text-green-500',
+    color: 'var(--semantic-success)',
   },
 
   filters: [
@@ -492,7 +492,7 @@ export const writerAgentConfigSchema: ConsoleSchema = {
     title: 'Writer Agents',
     subtitle: 'Configure document writing behavior',
     icon: Pencil,
-    color: 'text-teal-500',
+    color: 'var(--accent-cyan)',
   },
 
   filters: [

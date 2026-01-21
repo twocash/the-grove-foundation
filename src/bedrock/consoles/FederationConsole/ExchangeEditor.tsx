@@ -52,7 +52,7 @@ function StatusBadge({ status }: { status: ExchangeStatus }) {
     pending: 'bg-[var(--neon-amber)]/10',
     in_progress: 'bg-[var(--neon-cyan)]/10',
     completed: 'bg-[var(--neon-green)]/10',
-    rejected: 'bg-red-500/10',
+    rejected: 'bg-[var(--semantic-error-bg)]',
     expired: 'bg-[var(--glass-text-muted)]/10',
   };
 
@@ -60,7 +60,7 @@ function StatusBadge({ status }: { status: ExchangeStatus }) {
     pending: 'text-[var(--neon-amber)]',
     in_progress: 'text-[var(--neon-cyan)]',
     completed: 'text-[var(--neon-green)]',
-    rejected: 'text-red-400',
+    rejected: 'text-[var(--semantic-error)]',
     expired: 'text-[var(--glass-text-muted)]',
   };
 
@@ -443,7 +443,10 @@ export function ExchangeEditor({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="flex-1 py-2 px-3 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            className="flex-1 py-2 px-3 rounded-lg border transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+            style={{ borderColor: 'var(--semantic-error-border)', color: 'var(--semantic-error)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--semantic-error-bg)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <span className="material-symbols-outlined text-sm">delete</span>
             Delete

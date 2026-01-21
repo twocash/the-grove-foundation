@@ -57,7 +57,10 @@ export function HighlightTriggersEditor({ triggers, onChange, disabled }: Props)
             {!disabled && (
               <button
                 onClick={() => removeTrigger(i)}
-                className="ml-1 hover:text-red-400 transition-colors"
+                className="ml-1 transition-colors"
+                style={{ color: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--semantic-error)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'inherit'}
                 title="Remove trigger"
               >
                 &times;

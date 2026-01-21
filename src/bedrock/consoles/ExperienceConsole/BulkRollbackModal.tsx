@@ -28,18 +28,18 @@ interface RollbackCandidate {
 // Tier Badge
 // =============================================================================
 
-const TIER_COLORS: Record<string, { bg: string; text: string }> = {
-  seed: { bg: 'bg-amber-500/20', text: 'text-amber-400' },
-  sprout: { bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
-  sapling: { bg: 'bg-green-500/20', text: 'text-green-400' },
-  tree: { bg: 'bg-teal-500/20', text: 'text-teal-400' },
-  grove: { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+const TIER_STYLES: Record<string, React.CSSProperties> = {
+  seed: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' },
+  sprout: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  sapling: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  tree: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  grove: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' },
 };
 
 function TierBadge({ tier }: { tier: string }) {
-  const colors = TIER_COLORS[tier] || { bg: 'bg-slate-500/20', text: 'text-slate-400' };
+  const style = TIER_STYLES[tier] || { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' };
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text}`}>
+    <span className="px-2 py-0.5 rounded text-xs font-medium" style={style}>
       {tier}
     </span>
   );
@@ -155,8 +155,11 @@ export function BulkRollbackModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--glass-border)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
-              <span className="material-symbols-outlined text-orange-400">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'var(--semantic-warning-bg)' }}
+            >
+              <span className="material-symbols-outlined" style={{ color: 'var(--semantic-warning)' }}>
                 history
               </span>
             </div>
@@ -249,25 +252,20 @@ export function BulkRollbackModal({
               {candidates.map((candidate, idx) => (
                 <div
                   key={candidate.event.id}
-                  className={`
-                    flex items-center gap-4 px-6 py-3 cursor-pointer transition-colors
-                    ${candidate.selected
-                      ? 'bg-orange-500/10'
-                      : 'hover:bg-[var(--glass-elevated)]'
-                    }
-                  `}
+                  className="flex items-center gap-4 px-6 py-3 cursor-pointer transition-colors hover:bg-[var(--glass-elevated)]"
+                  style={candidate.selected ? { backgroundColor: 'var(--semantic-warning-bg)' } : undefined}
                   onClick={() => toggleCandidate(idx)}
                 >
                   {/* Checkbox */}
-                  <div className={`
-                    w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
-                    ${candidate.selected
-                      ? 'border-orange-400 bg-orange-500/20'
-                      : 'border-[var(--glass-border)]'
+                  <div
+                    className="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
+                    style={candidate.selected
+                      ? { borderColor: 'var(--semantic-warning)', backgroundColor: 'var(--semantic-warning-bg)' }
+                      : { borderColor: 'var(--glass-border)' }
                     }
-                  `}>
+                  >
                     {candidate.selected && (
-                      <span className="material-symbols-outlined text-xs text-orange-400">
+                      <span className="material-symbols-outlined text-xs" style={{ color: 'var(--semantic-warning)' }}>
                         check
                       </span>
                     )}
@@ -321,7 +319,10 @@ export function BulkRollbackModal({
 
         {/* Error Display */}
         {error && (
-          <div className="mx-6 mb-4 flex items-center gap-2 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
+          <div
+            className="mx-6 mb-4 flex items-center gap-2 p-3 rounded-lg text-sm"
+            style={{ backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }}
+          >
             <span className="material-symbols-outlined text-sm">error</span>
             {error}
           </div>
@@ -329,13 +330,16 @@ export function BulkRollbackModal({
 
         {/* Warning Banner */}
         {selectedCount > 0 && (
-          <div className="mx-6 mb-4 flex items-start gap-2 p-3 rounded-lg bg-orange-500/10 text-orange-400 text-sm">
+          <div
+            className="mx-6 mb-4 flex items-start gap-2 p-3 rounded-lg text-sm"
+            style={{ backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }}
+          >
             <span className="material-symbols-outlined text-sm mt-0.5">warning</span>
             <div>
               <div className="font-medium">
                 Rolling back {selectedCount} advancement{selectedCount !== 1 ? 's' : ''}
               </div>
-              <div className="text-orange-400/80 mt-1">
+              <div style={{ opacity: 0.8 }} className="mt-1">
                 Selected sprouts will revert to their previous tier. Each rollback will be logged individually.
               </div>
             </div>

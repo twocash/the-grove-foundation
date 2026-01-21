@@ -44,9 +44,8 @@ export function ResearchAgentConfigCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isActive ? 'bg-purple-500' : 'bg-slate-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isActive ? 'var(--neon-purple)' : 'var(--glass-text-muted)' }}
       />
 
       {/* Favorite button */}
@@ -102,13 +101,19 @@ export function ResearchAgentConfigCard({
         </span>
 
         {/* API limit */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-400">
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={{ backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }}
+        >
           <span className="material-symbols-outlined text-xs">api</span>
           Max: {maxApiCalls}
         </span>
 
         {/* Confidence */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400">
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
+        >
           <span className="material-symbols-outlined text-xs">verified</span>
           {Math.round(confidenceThreshold * 100)}%
         </span>
@@ -122,13 +127,11 @@ export function ResearchAgentConfigCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isActive
-              ? 'bg-purple-500/20 text-purple-400'
-              : 'bg-slate-500/20 text-slate-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isActive
+            ? { backgroundColor: 'rgba(168, 85, 247, 0.2)', color: 'var(--neon-purple)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+          }
         >
           {isActive ? 'Active' : 'Draft'}
         </span>

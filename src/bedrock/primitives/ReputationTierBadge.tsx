@@ -41,16 +41,16 @@ export interface ReputationTierBadgeProps {
 // Map tier config colors to neon variables for glass theme consistency
 const tierColorMap: Record<ReputationTier, { bg: string; text: string; border: string; glow: string }> = {
   novice: {
-    bg: 'bg-gray-500/10',
-    text: 'text-gray-400',
-    border: 'border-gray-500/30',
+    bg: 'bg-[var(--glass-panel)]',
+    text: 'text-[var(--glass-text-muted)]',
+    border: 'border-[var(--glass-border)]',
     glow: '',
   },
   developing: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/30',
-    glow: 'shadow-[0_0_8px_rgba(59,130,246,0.2)]',
+    bg: 'bg-[var(--semantic-info)]/10',
+    text: 'text-[var(--semantic-info)]',
+    border: 'border-[var(--semantic-info)]/30',
+    glow: 'shadow-[0_0_8px_var(--semantic-info-glow)]',
   },
   competent: {
     bg: 'bg-[var(--neon-green)]/10',

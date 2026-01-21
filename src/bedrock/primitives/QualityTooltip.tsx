@@ -29,26 +29,26 @@ export interface QualityTooltipProps {
 // Color Mapping (consistent with QualityScoreBadge)
 // =============================================================================
 
-const GRADE_COLOR_MAP: Record<QualityGrade, { bg: string; text: string; bar: string }> = {
+const GRADE_COLOR_MAP: Record<QualityGrade, { backgroundColor: string; color: string; barColor: string }> = {
   excellent: {
-    bg: 'bg-[var(--neon-green)]/20',
-    text: 'text-[var(--neon-green)]',
-    bar: 'bg-[var(--neon-green)]',
+    backgroundColor: 'var(--semantic-success-bg)',
+    color: 'var(--semantic-success)',
+    barColor: 'var(--semantic-success)',
   },
   good: {
-    bg: 'bg-[var(--neon-amber)]/20',
-    text: 'text-[var(--neon-amber)]',
-    bar: 'bg-[var(--neon-amber)]',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    color: 'var(--semantic-warning)',
+    barColor: 'var(--semantic-warning)',
   },
   fair: {
-    bg: 'bg-orange-500/20',
-    text: 'text-orange-400',
-    bar: 'bg-orange-500',
+    backgroundColor: 'var(--semantic-warning-bg)',
+    color: 'var(--semantic-warning)',
+    barColor: 'var(--semantic-warning)',
   },
   'needs-improvement': {
-    bg: 'bg-red-500/20',
-    text: 'text-red-400',
-    bar: 'bg-red-500',
+    backgroundColor: 'var(--semantic-error-bg)',
+    color: 'var(--semantic-error)',
+    barColor: 'var(--semantic-error)',
   },
 };
 
@@ -83,13 +83,13 @@ function DimensionRow({ dimension, value }: DimensionRowProps) {
       {/* Progress bar */}
       <div className="flex-1 h-2 bg-[var(--glass-border)] rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${colors.bar}`}
-          style={{ width: `${roundedValue}%` }}
+          className="h-full rounded-full transition-all"
+          style={{ width: `${roundedValue}%`, backgroundColor: colors.barColor }}
         />
       </div>
 
       {/* Value */}
-      <span className={`w-8 text-xs text-right font-medium ${colors.text}`}>
+      <span className="w-8 text-xs text-right font-medium" style={{ color: colors.color }}>
         {roundedValue}
       </span>
     </div>
@@ -192,11 +192,11 @@ export function QualityTooltip({
           {/* Header: Overall Score and Grade */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className={`material-symbols-outlined text-2xl ${colors.text}`}>
+              <span className="material-symbols-outlined text-2xl" style={{ color: colors.color }}>
                 {gradeConfig.icon}
               </span>
               <div>
-                <div className={`text-2xl font-bold ${colors.text}`}>
+                <div className="text-2xl font-bold" style={{ color: colors.color }}>
                   {roundedOverall}
                 </div>
                 <div className="text-xs text-[var(--glass-text-muted)]">
@@ -204,7 +204,10 @@ export function QualityTooltip({
                 </div>
               </div>
             </div>
-            <div className={`px-2 py-1 rounded-lg text-xs font-medium ${colors.bg} ${colors.text}`}>
+            <div
+              className="px-2 py-1 rounded-lg text-xs font-medium"
+              style={{ backgroundColor: colors.backgroundColor, color: colors.color }}
+            >
               {gradeConfig.label}
             </div>
           </div>
@@ -304,10 +307,10 @@ export function QualityMiniTooltip({ score, children, className = '' }: QualityM
           data-testid="quality-mini-tooltip-panel"
         >
           <div className="flex items-center gap-2">
-            <span className={`material-symbols-outlined text-lg ${colors.text}`}>
+            <span className="material-symbols-outlined text-lg" style={{ color: colors.color }}>
               {gradeConfig.icon}
             </span>
-            <span className={`font-bold ${colors.text}`}>{roundedScore}</span>
+            <span className="font-bold" style={{ color: colors.color }}>{roundedScore}</span>
             <span className="text-xs text-[var(--glass-text-muted)]">{gradeConfig.label}</span>
           </div>
           {/* Arrow */}

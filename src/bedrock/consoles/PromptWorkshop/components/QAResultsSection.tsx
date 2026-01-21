@@ -46,16 +46,10 @@ function formatDate(isoString?: string): string {
   }
 }
 
-function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-400';
-  if (score >= 60) return 'text-amber-400';
-  return 'text-red-400';
-}
-
-function getScoreBgColor(score: number): string {
-  if (score >= 80) return 'bg-green-500/20';
-  if (score >= 60) return 'bg-amber-500/20';
-  return 'bg-red-500/20';
+function getScoreStyle(score: number): { color: string; backgroundColor: string } {
+  if (score >= 80) return { color: 'var(--semantic-success)', backgroundColor: 'var(--semantic-success-bg)' };
+  if (score >= 60) return { color: 'var(--semantic-warning)', backgroundColor: 'var(--semantic-warning-bg)' };
+  return { color: 'var(--semantic-error)', backgroundColor: 'var(--semantic-error-bg)' };
 }
 
 function getSeverityIcon(severity: QAIssueSeverity): string {
@@ -72,11 +66,11 @@ function getSeverityIcon(severity: QAIssueSeverity): string {
 function getSeverityColor(severity: QAIssueSeverity): string {
   switch (severity) {
     case 'error':
-      return 'text-red-400';
+      return 'var(--semantic-error)';
     case 'warning':
-      return 'text-amber-400';
+      return 'var(--semantic-warning)';
     case 'info':
-      return 'text-blue-400';
+      return 'var(--semantic-info)';
   }
 }
 
@@ -150,14 +144,17 @@ export function QAResultsSection({
     // User-owned prompt with no QA data yet
     return (
       <InspectorSection title="🔍 QA Assessment" collapsible defaultCollapsed={false}>
-        <div className="space-y-3 p-2 rounded-lg border border-cyan-500/30 bg-cyan-500/5">
+        <div className="space-y-3 p-2 rounded-lg border" style={{ borderColor: 'var(--neon-cyan-border)', backgroundColor: 'var(--neon-cyan-bg)' }}>
           <div className="text-sm text-[var(--glass-text-secondary)]">
             Run a QA check to validate this prompt against its source material.
           </div>
           <button
             onClick={onRunQACheck}
             disabled={isChecking}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-cyan-600 text-white hover:bg-cyan-500 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            style={{ backgroundColor: 'var(--neon-cyan)', color: 'white' }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
             data-testid="qa-check-button"
           >
             <span className="material-symbols-outlined text-base">
@@ -184,10 +181,11 @@ export function QAResultsSection({
           <div className="flex items-center gap-3">
             {/* Score badge */}
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${getScoreBgColor(score ?? 0)}`}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+              style={{ backgroundColor: getScoreStyle(score ?? 0).backgroundColor }}
               data-testid="qa-score"
             >
-              <span className={`text-lg font-bold ${getScoreColor(score ?? 0)}`}>
+              <span className="text-lg font-bold" style={{ color: getScoreStyle(score ?? 0).color }}>
                 {score ?? 0}
               </span>
               <span className="text-xs text-[var(--glass-text-muted)]">/ 100</span>
@@ -197,13 +195,13 @@ export function QAResultsSection({
             {(errorCount > 0 || warningCount > 0) && (
               <div className="flex items-center gap-2 text-xs">
                 {errorCount > 0 && (
-                  <span className="flex items-center gap-1 text-red-400">
+                  <span className="flex items-center gap-1" style={{ color: 'var(--semantic-error)' }}>
                     <span className="material-symbols-outlined text-sm">error</span>
                     {errorCount}
                   </span>
                 )}
                 {warningCount > 0 && (
-                  <span className="flex items-center gap-1 text-amber-400">
+                  <span className="flex items-center gap-1" style={{ color: 'var(--semantic-warning)' }}>
                     <span className="material-symbols-outlined text-sm">warning</span>
                     {warningCount}
                   </span>
@@ -230,7 +228,8 @@ export function QAResultsSection({
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`material-symbols-outlined text-base ${getSeverityColor(issue.severity)}`}
+                      className="material-symbols-outlined text-base"
+                      style={{ color: getSeverityColor(issue.severity) }}
                     >
                       {getSeverityIcon(issue.severity)}
                     </span>
@@ -243,7 +242,10 @@ export function QAResultsSection({
                   {issue.autoFixAvailable && onApplyFix && (
                     <button
                       onClick={() => onApplyFix(issue)}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-cyan-600 text-white rounded hover:bg-cyan-500 transition-colors"
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors"
+                      style={{ backgroundColor: 'var(--neon-cyan)', color: 'white' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
                     >
                       <span className="material-symbols-outlined text-sm">edit_note</span>
                       Refine
@@ -269,7 +271,7 @@ export function QAResultsSection({
 
         {/* No issues message */}
         {issues.length === 0 && score !== undefined && score >= 80 && (
-          <div className="flex items-center gap-2 text-sm text-green-400">
+          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--semantic-success)' }}>
             <span className="material-symbols-outlined text-base">check_circle</span>
             No issues found. Prompt looks good!
           </div>

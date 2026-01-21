@@ -29,7 +29,7 @@ export function ProvenanceBadge({ provenance, size = 'sm' }: ProvenanceBadgeProp
         {config.icon} {config.label}
       </span>
       {showReview && (
-        <span className="text-xs text-amber-500">
+        <span className="text-xs" style={{ color: 'var(--semantic-warning)' }}>
           {provenance!.reviewStatus === 'pending' ? '⏳' : '❌'}
         </span>
       )}

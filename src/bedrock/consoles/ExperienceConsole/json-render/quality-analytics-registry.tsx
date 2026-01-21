@@ -36,7 +36,7 @@ const TIME_RANGE_LABELS: Record<string, string> = {
  */
 const TREND_COLORS = {
   up: 'text-grove-forest',
-  down: 'text-red-500',
+  down: 'text-[var(--semantic-error)]',
   neutral: 'text-ink-muted dark:text-paper/50',
 };
 
@@ -46,9 +46,9 @@ const TREND_COLORS = {
 const METRIC_COLORS = {
   default: 'border-ink/10 dark:border-white/10',
   green: 'border-grove-forest/30 bg-grove-forest/5',
-  cyan: 'border-cyan-500/30 bg-cyan-500/5',
-  amber: 'border-amber-500/30 bg-amber-500/5',
-  red: 'border-red-500/30 bg-red-500/5',
+  cyan: 'border-[var(--semantic-info-border)] bg-[var(--semantic-info-bg)]',
+  amber: 'border-[var(--semantic-warning-border)] bg-[var(--semantic-warning-bg)]',
+  red: 'border-[var(--semantic-error-border)] bg-[var(--semantic-error-bg)]',
 };
 
 /**
@@ -155,7 +155,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
                 <span className="text-ink-muted dark:text-paper/60">Your grove</span>
               </span>
               <span className="flex items-center gap-1">
-                <span className="w-3 h-3 border-2 border-dashed border-blue-400 rounded-full" />
+                <span className="w-3 h-3 border-2 border-dashed border-[var(--semantic-info)] rounded-full" />
                 <span className="text-ink-muted dark:text-paper/60">Network average</span>
               </span>
             </div>
@@ -170,7 +170,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
                 <span className="text-ink-muted dark:text-paper/60 font-mono">
                   {dim.score}
                   {dim.networkAvg !== undefined && (
-                    <span className="text-blue-400 ml-2">({dim.networkAvg})</span>
+                    <span className="text-[var(--semantic-info)] ml-2">({dim.networkAvg})</span>
                   )}
                 </span>
               </div>
@@ -178,7 +178,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
                 {/* Network average line (if showing comparison) */}
                 {props.showNetworkComparison && dim.networkAvg !== undefined && (
                   <div
-                    className="absolute h-full w-0.5 bg-blue-400 opacity-60 z-10"
+                    className="absolute h-full w-0.5 bg-[var(--semantic-info)] opacity-60 z-10"
                     style={{ left: `${dim.networkAvg}%` }}
                     data-testid="network-average-line"
                   />
@@ -270,7 +270,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
           </span>
           {props.showNetworkLine && (
             <span className="flex items-center gap-1">
-              <span className="w-4 h-0.5 border-t border-dashed border-blue-400" />
+              <span className="w-4 h-0.5 border-t border-dashed border-[var(--semantic-info)]" />
               <span className="text-ink-muted dark:text-paper/60">Network Average</span>
             </span>
           )}
@@ -349,11 +349,11 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
           </div>
           <div className="flex justify-between">
             <span className="text-ink-muted dark:text-paper/60">Network Avg</span>
-            <span className="font-mono text-blue-400">{props.networkAvg.toFixed(1)}</span>
+            <span className="font-mono text-[var(--semantic-info)]">{props.networkAvg.toFixed(1)}</span>
           </div>
         </div>
         {props.changeFromLast !== undefined && props.changeFromLast !== 0 && (
-          <p className={`text-xs mt-2 ${props.changeFromLast > 0 ? 'text-grove-forest' : 'text-red-500'}`}>
+          <p className={`text-xs mt-2 ${props.changeFromLast > 0 ? 'text-grove-forest' : 'text-[var(--semantic-error)]'}`}>
             {props.changeFromLast > 0 ? '↑' : '↓'} {Math.abs(props.changeFromLast)} percentile points from last period
           </p>
         )}

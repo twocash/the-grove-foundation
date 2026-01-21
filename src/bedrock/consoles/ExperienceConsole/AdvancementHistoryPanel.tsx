@@ -23,18 +23,18 @@ interface AdvancementHistoryPanelProps {
 // Tier Badge Component
 // =============================================================================
 
-const TIER_COLORS: Record<string, { bg: string; text: string }> = {
-  seed: { bg: 'bg-amber-500/20', text: 'text-amber-400' },
-  sprout: { bg: 'bg-emerald-500/20', text: 'text-emerald-400' },
-  sapling: { bg: 'bg-green-500/20', text: 'text-green-400' },
-  tree: { bg: 'bg-teal-500/20', text: 'text-teal-400' },
-  grove: { bg: 'bg-cyan-500/20', text: 'text-cyan-400' },
+const TIER_STYLES: Record<string, React.CSSProperties> = {
+  seed: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' },
+  sprout: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  sapling: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  tree: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' },
+  grove: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' },
 };
 
 function TierBadge({ tier }: { tier: string }) {
-  const colors = TIER_COLORS[tier] || { bg: 'bg-slate-500/20', text: 'text-slate-400' };
+  const style = TIER_STYLES[tier] || { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' };
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text}`}>
+    <span className="px-2 py-0.5 rounded text-xs font-medium" style={style}>
       {tier}
     </span>
   );
@@ -45,14 +45,14 @@ function TierBadge({ tier }: { tier: string }) {
 // =============================================================================
 
 function EventTypeBadge({ type }: { type: string }) {
-  const configs: Record<string, { bg: string; text: string; label: string }> = {
-    'auto-advancement': { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Auto' },
-    'manual-override': { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Manual' },
-    'bulk-rollback': { bg: 'bg-orange-500/20', text: 'text-orange-400', label: 'Rollback' },
+  const configs: Record<string, { style: React.CSSProperties; label: string }> = {
+    'auto-advancement': { style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }, label: 'Auto' },
+    'manual-override': { style: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }, label: 'Manual' },
+    'bulk-rollback': { style: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }, label: 'Rollback' },
   };
-  const config = configs[type] || { bg: 'bg-slate-500/20', text: 'text-slate-400', label: type };
+  const config = configs[type] || { style: { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }, label: type };
   return (
-    <span className={`px-2 py-0.5 rounded text-xs ${config.bg} ${config.text}`}>
+    <span className="px-2 py-0.5 rounded text-xs" style={config.style}>
       {config.label}
     </span>
   );
@@ -103,7 +103,10 @@ function EventRow({ event, onRollback, canRollback }: EventRowProps) {
 
         {/* Rollback indicator */}
         {event.rolledBack && (
-          <span className="text-xs text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded">
+          <span
+            className="text-xs px-2 py-0.5 rounded"
+            style={{ color: 'var(--semantic-warning)', backgroundColor: 'var(--semantic-warning-bg)' }}
+          >
             Rolled back
           </span>
         )}
@@ -115,7 +118,8 @@ function EventRow({ event, onRollback, canRollback }: EventRowProps) {
               e.stopPropagation();
               onRollback();
             }}
-            className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+            className="text-xs transition-colors"
+            style={{ color: 'var(--semantic-warning)' }}
             title="Rollback this advancement"
           >
             <span className="material-symbols-outlined text-sm">undo</span>
@@ -135,7 +139,10 @@ function EventRow({ event, onRollback, canRollback }: EventRowProps) {
               <div className="space-y-1">
                 {event.criteriaMet.map((cr, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-xs">
-                    <span className={`material-symbols-outlined text-sm ${cr.met ? 'text-green-400' : 'text-red-400'}`}>
+                    <span
+                      className="material-symbols-outlined text-sm"
+                      style={{ color: cr.met ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
+                    >
                       {cr.met ? 'check_circle' : 'cancel'}
                     </span>
                     <span className="text-[var(--glass-text-secondary)]">

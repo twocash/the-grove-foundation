@@ -40,9 +40,9 @@ export interface AchievementBadgeProps {
 
 const rarityColorMap: Record<BadgeRarity, { bg: string; text: string; border: string; glow: string }> = {
   common: {
-    bg: 'bg-gray-500/10',
-    text: 'text-gray-400',
-    border: 'border-gray-500/30',
+    bg: 'bg-[var(--glass-panel)]',
+    text: 'text-[var(--glass-text-muted)]',
+    border: 'border-[var(--glass-border)]',
     glow: '',
   },
   uncommon: {

@@ -217,27 +217,36 @@ export function LifecycleConfigEditor({
     <div className="flex flex-col h-full">
       {/* Active Status Indicator */}
       {isActive && (
-        <div className={`
-          flex items-center gap-3 px-4 py-3 border-b transition-colors
-          ${hasChanges
-            ? 'bg-amber-500/10 border-amber-500/30'
-            : 'bg-lime-500/10 border-lime-500/20'
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-b transition-colors"
+          style={hasChanges
+            ? { backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning-border)' }
+            : { backgroundColor: 'var(--semantic-success-bg)', borderColor: 'var(--semantic-success-border)' }
           }
-        `}>
+        >
           <span className="relative flex h-3 w-3">
             {!hasChanges && (
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75" />
+              <span
+                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                style={{ backgroundColor: 'var(--semantic-success)' }}
+              />
             )}
-            <span className={`
-              relative inline-flex rounded-full h-3 w-3
-              ${hasChanges ? 'bg-amber-500' : 'bg-lime-500'}
-            `} />
+            <span
+              className="relative inline-flex rounded-full h-3 w-3"
+              style={{ backgroundColor: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)' }}
+            />
           </span>
           <div className="flex-1">
-            <span className={`text-sm font-medium ${hasChanges ? 'text-amber-300' : 'text-lime-300'}`}>
+            <span
+              className="text-sm font-medium"
+              style={{ color: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)' }}
+            >
               {hasChanges ? 'Active Configuration (editing...)' : 'Active Configuration'}
             </span>
-            <p className={`text-xs ${hasChanges ? 'text-amber-400/70' : 'text-lime-400/70'}`}>
+            <p
+              className="text-xs"
+              style={{ color: hasChanges ? 'var(--semantic-warning)' : 'var(--semantic-success)', opacity: 0.7 }}
+            >
               {hasChanges
                 ? 'Changes pending — save or discard below'
                 : 'SINGLETON: Only one Lifecycle config can be active'
@@ -249,9 +258,12 @@ export function LifecycleConfigEditor({
 
       {/* Draft banner with current active info */}
       {isDraft && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border-b border-amber-500/20">
-          <span className="material-symbols-outlined text-amber-400 text-base">edit_note</span>
-          <span className="text-sm text-amber-300">
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b"
+          style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning-border)' }}
+        >
+          <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-warning)' }}>edit_note</span>
+          <span className="text-sm" style={{ color: 'var(--semantic-warning)' }}>
             Draft — {activeConfig
               ? `Active: "${activeConfig.meta.title}"`
               : 'No active config set'}
@@ -261,9 +273,12 @@ export function LifecycleConfigEditor({
 
       {/* Archived banner */}
       {isArchived && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/10 border-b border-gray-500/20">
-          <span className="material-symbols-outlined text-gray-400 text-base">archive</span>
-          <span className="text-sm text-gray-300">
+        <div
+          className="flex items-center gap-2 px-4 py-2 border-b"
+          style={{ backgroundColor: 'var(--glass-panel)', borderColor: 'var(--glass-border)' }}
+        >
+          <span className="material-symbols-outlined text-base" style={{ color: 'var(--glass-text-muted)' }}>archive</span>
+          <span className="text-sm" style={{ color: 'var(--glass-text-secondary)' }}>
             Archived — no longer in use
           </span>
         </div>
@@ -272,7 +287,7 @@ export function LifecycleConfigEditor({
       {/* Header */}
       <div className="px-4 py-3 border-b border-[var(--glass-border)]">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-2xl text-lime-400">
+          <span className="material-symbols-outlined text-2xl" style={{ color: 'var(--semantic-success)' }}>
             timeline
           </span>
           <div className="flex-1 min-w-0">
@@ -297,7 +312,8 @@ export function LifecycleConfigEditor({
                 value={config.meta.title}
                 onChange={(val) => patchMeta('title', val)}
                 debounceMs={400}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-lime-500/50"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1"
+                style={{ '--tw-ring-color': 'var(--semantic-success-glow)' } as React.CSSProperties}
                 placeholder="Config Title"
                 disabled={loading}
               />
@@ -308,7 +324,8 @@ export function LifecycleConfigEditor({
                 value={config.meta.description || ''}
                 onChange={(val) => patchMeta('description', val)}
                 debounceMs={400}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-lime-500/50 resize-none"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 resize-none"
+                style={{ '--tw-ring-color': 'var(--semantic-success-glow)' } as React.CSSProperties}
                 placeholder="What does this config control?"
                 rows={2}
                 disabled={loading}
@@ -325,7 +342,7 @@ export function LifecycleConfigEditor({
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-1">Current Model</label>
               <div className="flex items-center gap-2 p-3 rounded-lg bg-[var(--glass-surface)]">
-                <span className="material-symbols-outlined text-lime-400">eco</span>
+                <span className="material-symbols-outlined" style={{ color: 'var(--semantic-success)' }}>eco</span>
                 <div className="flex-1">
                   <span className="text-sm text-[var(--glass-text-primary)]">
                     {activeModel?.name || 'Unknown'}
@@ -346,7 +363,8 @@ export function LifecycleConfigEditor({
                 <select
                   value={activeModelId}
                   onChange={(e) => patchPayload('activeModelId', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-lime-500/50"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1"
+                  style={{ '--tw-ring-color': 'var(--semantic-success-glow)' } as React.CSSProperties}
                 >
                   {models.map((model) => (
                     <option key={model.id} value={model.id}>
@@ -501,7 +519,7 @@ export function LifecycleConfigEditor({
                   variant="ghost"
                   size="sm"
                   disabled={loading || discarding || saving}
-                  className="border border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                  style={{ borderColor: 'var(--semantic-warning-border)', color: 'var(--semantic-warning)' }}
                 >
                   <span className="material-symbols-outlined text-lg mr-1">undo</span>
                   {discarding ? 'Discarding...' : 'Discard'}
@@ -511,7 +529,8 @@ export function LifecycleConfigEditor({
                   variant="primary"
                   size="sm"
                   disabled={loading || saving || discarding}
-                  className="flex-1 bg-lime-600 hover:bg-lime-500"
+                  className="flex-1"
+                  style={{ backgroundColor: 'var(--semantic-success)' }}
                 >
                   <span className="material-symbols-outlined text-lg mr-1">
                     {saving ? 'hourglass_empty' : 'cloud_upload'}
@@ -522,8 +541,8 @@ export function LifecycleConfigEditor({
             ) : (
               // Saved mode: Show "Active Configuration" status button
               <div
-                className="w-full px-4 py-2.5 rounded-lg bg-lime-600/90 text-white text-center
-                           flex items-center justify-center gap-2 cursor-default"
+                className="w-full px-4 py-2.5 rounded-lg text-white text-center flex items-center justify-center gap-2 cursor-default"
+                style={{ backgroundColor: 'var(--semantic-success)', opacity: 0.9 }}
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
@@ -541,7 +560,8 @@ export function LifecycleConfigEditor({
               variant="primary"
               size="sm"
               disabled={loading || activating || hasChanges}
-              className="w-full bg-lime-600 hover:bg-lime-500"
+              className="w-full"
+              style={{ backgroundColor: 'var(--semantic-success)' }}
               title={hasChanges ? 'Save changes before activating' : 'Make this the active config'}
             >
               <span className="material-symbols-outlined text-lg mr-2">
@@ -577,7 +597,7 @@ export function LifecycleConfigEditor({
                 variant="ghost"
                 size="sm"
                 disabled={loading}
-                className="text-red-400 hover:text-red-300"
+                style={{ color: 'var(--semantic-error)' }}
                 title="Delete"
               >
                 <span className="material-symbols-outlined text-lg">delete</span>
@@ -620,7 +640,7 @@ export function LifecycleConfigEditor({
                 variant="ghost"
                 size="sm"
                 disabled={loading}
-                className="text-red-400 hover:text-red-300"
+                style={{ color: 'var(--semantic-error)' }}
                 title="Delete permanently"
               >
                 <span className="material-symbols-outlined text-lg">delete</span>

@@ -6,12 +6,12 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { FeatureFlagPayload, FeatureFlagCategory } from '@core/schema/feature-flag';
 
-// Color mapping for categories
-const CATEGORY_COLORS: Record<FeatureFlagCategory, { bg: string; text: string; label: string }> = {
-  experience: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Experience' },
-  research: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Research' },
-  experimental: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Experimental' },
-  internal: { bg: 'bg-slate-500/20', text: 'text-slate-400', label: 'Internal' },
+// Color mapping for categories (using semantic CSS variables)
+const CATEGORY_STYLES: Record<FeatureFlagCategory, { style: React.CSSProperties; label: string }> = {
+  experience: { style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }, label: 'Experience' },
+  research: { style: { backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }, label: 'Research' },
+  experimental: { style: { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }, label: 'Experimental' },
+  internal: { style: { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }, label: 'Internal' },
 };
 
 /**
@@ -29,7 +29,7 @@ export function FeatureFlagCard({
   const isDefaultEnabled = flag.payload.defaultEnabled;
   const showInHeader = flag.payload.showInExploreHeader;
   const category = flag.payload.category;
-  const categoryConfig = CATEGORY_COLORS[category] || CATEGORY_COLORS.experimental;
+  const categoryConfig = CATEGORY_STYLES[category] || CATEGORY_STYLES.experimental;
 
   return (
     <div
@@ -46,9 +46,8 @@ export function FeatureFlagCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isAvailable ? 'bg-green-500' : 'bg-red-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isAvailable ? 'var(--semantic-success)' : 'var(--semantic-error)' }}
       />
 
       {/* Favorite button */}
@@ -73,12 +72,14 @@ export function FeatureFlagCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-          isAvailable ? 'bg-[#D95D39]/20' : 'bg-slate-500/20'
-        }`}>
-          <span className={`material-symbols-outlined text-xl ${
-            isAvailable ? 'text-[#D95D39]' : 'text-slate-400'
-          }`}>
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: isAvailable ? 'var(--semantic-warning-bg)' : 'var(--glass-panel)' }}
+        >
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: isAvailable ? 'var(--semantic-warning)' : 'var(--glass-text-muted)' }}
+          >
             {isAvailable ? 'toggle_on' : 'toggle_off'}
           </span>
         </div>
@@ -102,13 +103,13 @@ export function FeatureFlagCard({
       {/* State indicators */}
       <div className="flex flex-wrap items-center gap-2 mb-3">
         {/* Default enabled state */}
-        <span className={`
-          flex items-center gap-1 px-2 py-0.5 rounded-full text-xs
-          ${isDefaultEnabled
-            ? 'bg-green-500/20 text-green-400'
-            : 'bg-slate-500/20 text-slate-400'
+        <span
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+          style={isDefaultEnabled
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
           }
-        `}>
+        >
           <span className="material-symbols-outlined text-xs">
             {isDefaultEnabled ? 'check_circle' : 'radio_button_unchecked'}
           </span>
@@ -117,7 +118,10 @@ export function FeatureFlagCard({
 
         {/* Header visibility */}
         {showInHeader && (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-blue-400">
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+            style={{ backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }}
+          >
             <span className="material-symbols-outlined text-xs">visibility</span>
             Header
           </span>
@@ -125,7 +129,10 @@ export function FeatureFlagCard({
 
         {/* A/B Testing indicator */}
         {flag.payload.modelVariants && flag.payload.modelVariants.length > 0 && (
-          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400">
+          <span
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
+            style={{ backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }}
+          >
             <span className="material-symbols-outlined text-xs">science</span>
             A/B Test ({flag.payload.modelVariants.length})
           </span>
@@ -135,17 +142,15 @@ export function FeatureFlagCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isAvailable
-              ? 'bg-green-500/20 text-green-400'
-              : 'bg-red-500/20 text-red-400'
-            }
-          `}
+          className="px-2 py-0.5 rounded-full"
+          style={isAvailable
+            ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
+            : { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)' }
+          }
         >
           {isAvailable ? 'Available' : 'Disabled'}
         </span>
-        <span className={`px-2 py-0.5 rounded-full ${categoryConfig.bg} ${categoryConfig.text}`}>
+        <span className="px-2 py-0.5 rounded-full" style={categoryConfig.style}>
           {categoryConfig.label}
         </span>
       </div>

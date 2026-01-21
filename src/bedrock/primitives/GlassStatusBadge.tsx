@@ -44,10 +44,10 @@ const statusStyles: Record<StatusType, { bg: string; text: string; border: strin
     glow: 'shadow-[0_0_10px_var(--neon-amber)/20]',
   },
   error: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
-    border: 'border-red-500/30',
-    glow: 'shadow-[0_0_10px_rgba(239,68,68,0.2)]',
+    bg: 'bg-[var(--semantic-error-bg)]',
+    text: 'text-[var(--semantic-error)]',
+    border: 'border-[var(--semantic-error-border)]',
+    glow: 'shadow-[0_0_10px_var(--semantic-error-glow)]',
   },
   info: {
     bg: 'bg-[var(--neon-cyan)]/10',

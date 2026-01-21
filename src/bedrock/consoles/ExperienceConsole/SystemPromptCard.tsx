@@ -20,13 +20,13 @@ export function SystemPromptCard({
   const isActive = prompt.meta.status === 'active';
   const responseMode = prompt.payload.responseMode || 'architect';
 
-  // Color mapping for response modes
-  const modeColors: Record<string, { bg: string; text: string; label: string }> = {
-    architect: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Architect' },
-    librarian: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Librarian' },
-    contemplative: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Contemplative' },
+  // Color mapping for response modes (using semantic CSS variables)
+  const modeStyles: Record<string, { style: React.CSSProperties; label: string }> = {
+    architect: { style: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }, label: 'Architect' },
+    librarian: { style: { backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }, label: 'Librarian' },
+    contemplative: { style: { backgroundColor: 'var(--semantic-accent-secondary-bg)', color: 'var(--semantic-accent-secondary)' }, label: 'Contemplative' },
   };
-  const modeConfig = modeColors[responseMode] || modeColors.architect;
+  const modeConfig = modeStyles[responseMode] || modeStyles.architect;
 
   return (
     <div
@@ -43,9 +43,8 @@ export function SystemPromptCard({
     >
       {/* Status bar at top */}
       <div
-        className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${
-          isActive ? 'bg-green-500' : 'bg-amber-500'
-        }`}
+        className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
+        style={{ backgroundColor: isActive ? 'var(--semantic-success)' : 'var(--semantic-warning)' }}
       />
 
       {/* Favorite button */}
@@ -95,19 +94,18 @@ export function SystemPromptCard({
       {/* Footer */}
       <div className="flex items-center justify-between text-xs">
         <span
-          className={`
-            px-2 py-0.5 rounded-full
-            ${isActive
-              ? 'bg-green-500/20 text-green-400'
+          className="px-2 py-0.5 rounded-full"
+          style={
+            isActive
+              ? { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }
               : prompt.meta.status === 'archived'
-                ? 'bg-slate-500/20 text-slate-400'
-                : 'bg-amber-500/20 text-amber-400'
-            }
-          `}
+                ? { backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }
+                : { backgroundColor: 'var(--semantic-warning-bg)', color: 'var(--semantic-warning)' }
+          }
         >
           {isActive ? 'Active' : prompt.meta.status === 'archived' ? 'Archived' : 'Draft'}
         </span>
-        <span className={`px-2 py-0.5 rounded-full ${modeConfig.bg} ${modeConfig.text}`}>
+        <span className="px-2 py-0.5 rounded-full" style={modeConfig.style}>
           {modeConfig.label}
         </span>
       </div>
