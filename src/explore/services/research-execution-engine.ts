@@ -1,6 +1,6 @@
 // src/explore/services/research-execution-engine.ts
-// Research Execution Engine - Real web searches via Gemini
-// Sprint: evidence-collection-v1
+// Research Execution Engine - Claude Deep Research integration
+// Sprint: evidence-collection-v1 → agents-go-live-v1
 //
 // DEX: Capability Agnosticism
 // Engine abstracts the search provider. Config controls behavior.
@@ -150,8 +150,8 @@ async function searchBranch(
   for (const query of queriesToRun) {
     onApiCall();
 
-    // Call Gemini with grounding
-    const searchResults = await callGeminiWithGrounding(query);
+    // Call Claude Deep Research API
+    const searchResults = await callClaudeDeepResearch(query);
 
     // Extract sources from grounding metadata
     for (const result of searchResults) {
@@ -183,34 +183,64 @@ async function searchBranch(
 }
 
 /**
- * Call Gemini API with grounding enabled
+ * Call Claude Deep Research API
  *
- * TODO: Wire to actual Gemini service
- * For now, uses placeholder that should be replaced with real API call
+ * Sprint: agents-go-live-v1
+ * Calls /api/research/deep endpoint to get research findings from Claude
  */
-async function callGeminiWithGrounding(query: string): Promise<Array<{
+async function callClaudeDeepResearch(query: string): Promise<Array<{
   url: string;
   title: string;
   snippet: string;
 }>> {
-  // PLACEHOLDER: Replace with actual Gemini grounding call
-  // The real implementation should:
-  // 1. Call Gemini with grounding enabled
-  // 2. Extract grounding metadata from response
-  // 3. Return structured source data
+  console.log(`[ResearchEngine] Executing Claude deep research: "${query}"`);
 
-  console.log(`[ResearchEngine] Executing search: "${query}"`);
+  try {
+    const response = await fetch('/api/research/deep', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
 
-  // TODO: Import and use actual Gemini service
-  // import { geminiService } from '@/services/gemini';
-  // const response = await geminiService.searchWithGrounding(query);
-  // return response.groundingMetadata.sources;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[ResearchEngine] API error:', errorData);
+      throw new Error(errorData.message || `API error: ${response.status}`);
+    }
 
-  // Temporary: Return empty to indicate real implementation needed
-  // This ensures simulation code is fully removed
-  console.warn('[ResearchEngine] Gemini grounding not yet wired - implement callGeminiWithGrounding()');
+    const result = await response.json();
+    console.log('[ResearchEngine] Claude response:', result.summary?.substring(0, 100));
 
-  return [];
+    // Transform Claude findings into source format
+    // Each finding becomes a source with the claim as snippet
+    const sources: Array<{ url: string; title: string; snippet: string }> = [];
+
+    if (result.findings && Array.isArray(result.findings)) {
+      for (const finding of result.findings) {
+        sources.push({
+          url: finding.source || `https://research.grove/${encodeURIComponent(finding.claim?.substring(0, 50) || query)}`,
+          title: finding.source || 'Claude Research Finding',
+          snippet: finding.claim || '',
+        });
+      }
+    }
+
+    // If no structured findings, create a synthetic source from summary
+    if (sources.length === 0 && result.summary) {
+      sources.push({
+        url: `https://research.grove/${encodeURIComponent(query.substring(0, 50))}`,
+        title: 'Claude Research Summary',
+        snippet: result.summary,
+      });
+    }
+
+    return sources;
+
+  } catch (error) {
+    console.error('[ResearchEngine] Claude deep research failed:', error);
+    // Return empty array on error - the branch will be marked as failed
+    return [];
+  }
 }
 
 // =============================================================================
