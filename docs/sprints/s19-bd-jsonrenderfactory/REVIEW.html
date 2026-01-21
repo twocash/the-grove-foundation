@@ -155,11 +155,15 @@
         <div class="metric-label">Phases Complete</div>
       </div>
       <div class="metric-card">
+        <div class="metric-value">8/8</div>
+        <div class="metric-label">E2E Tests Passing</div>
+      </div>
+      <div class="metric-card">
         <div class="metric-value">7/7</div>
         <div class="metric-label">Catalogs Migrated</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value">2</div>
+        <div class="metric-value">4</div>
         <div class="metric-label">Screenshots Captured</div>
       </div>
       <div class="metric-card">
@@ -302,6 +306,7 @@
     <!-- Screenshots -->
     <h2>Visual Evidence</h2>
 
+    <h3>Manual Verification (Phase 13)</h3>
     <div class="media-grid">
       <div class="media-item">
         <img src="screenshots/13a-json-renderer-demo.png" alt="JsonRenderer demo showing all base components">
@@ -310,6 +315,18 @@
       <div class="media-item">
         <img src="screenshots/13b-catalog-browser.png" alt="ComponentCatalogBrowser showing registered catalogs">
         <div class="media-caption">Phase 13b: ComponentCatalogBrowser - 1 catalog, 13 components with metadata</div>
+      </div>
+    </div>
+
+    <h3>E2E Test Screenshots (Playwright)</h3>
+    <div class="media-grid">
+      <div class="media-item">
+        <img src="screenshots/e2e-json-renderer-demo.png" alt="E2E: JsonRenderer demo full page">
+        <div class="media-caption">E2E TC-01: JsonRenderer demo - All base components rendered without errors</div>
+      </div>
+      <div class="media-item">
+        <img src="screenshots/e2e-catalog-browser.png" alt="E2E: ComponentCatalogBrowser full page">
+        <div class="media-caption">E2E TC-05: ComponentCatalogBrowser - Registry display with stats bar</div>
       </div>
     </div>
 
@@ -347,7 +364,68 @@
 
     <!-- Test Results -->
     <h2>Test Results</h2>
-    <p>E2E test results will be added after Phase 13.</p>
+    <p><strong>E2E Tests:</strong> <span class="status-badge status-complete">8/8 Passing</span> (50.9s)</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Test Case</th>
+          <th>Description</th>
+          <th>Duration</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>TC-01</td>
+          <td>JsonRenderer Demo - All Base Components</td>
+          <td>7.2s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-02</td>
+          <td>JsonRenderer Demo - Metrics Components Render</td>
+          <td>5.0s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-03</td>
+          <td>JsonRenderer Demo - Alert Components Render</td>
+          <td>4.6s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-04</td>
+          <td>JsonRenderer Demo - Unknown Component Fallback</td>
+          <td>4.9s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-05</td>
+          <td>ComponentCatalogBrowser - Registry Display</td>
+          <td>4.4s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-06</td>
+          <td>ComponentCatalogBrowser - Base Catalog Components Listed</td>
+          <td>3.9s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-07</td>
+          <td>ComponentCatalogBrowser - Stats Bar</td>
+          <td>3.8s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+        <tr>
+          <td>TC-08</td>
+          <td>Full Session - Both Routes Without Errors</td>
+          <td>8.2s</td>
+          <td><span class="status-badge status-complete">Pass</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 1rem; color: var(--muted);">Console monitoring enabled via <code>setupConsoleCapture()</code> - zero critical errors detected.</p>
 
     <!-- DEX Compliance -->
     <h2>DEX Compliance</h2>
