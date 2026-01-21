@@ -188,16 +188,17 @@ test.describe('S19-BD-JsonRenderFactory E2E Verification', () => {
 
     // Verify some base components are listed
     // These are the 13 base components from the catalog
-    const stackComponent = page.locator('text=Stack');
+    // Use .first() to avoid strict mode violations when text appears multiple times
+    const stackComponent = page.locator('text=Stack').first();
     await expect(stackComponent).toBeVisible();
 
-    const gridComponent = page.locator('text=Grid');
+    const gridComponent = page.locator('text=Grid').first();
     await expect(gridComponent).toBeVisible();
 
-    const metricComponent = page.locator('text=Metric');
+    const metricComponent = page.locator('text=Metric').first();
     await expect(metricComponent).toBeVisible();
 
-    const badgeComponent = page.locator('text=Badge');
+    const badgeComponent = page.locator('text=Badge').first();
     await expect(badgeComponent).toBeVisible();
 
     // Verify no critical console errors
@@ -212,10 +213,11 @@ test.describe('S19-BD-JsonRenderFactory E2E Verification', () => {
 
     // Verify stats bar shows catalog and component counts
     // Should show "1 catalog" and "13 components" (or similar)
-    const catalogCount = page.locator('text=/\\d+\\s*catalog/i');
+    // Use .first() to avoid strict mode violations
+    const catalogCount = page.locator('text=/\\d+\\s*catalog/i').first();
     await expect(catalogCount).toBeVisible();
 
-    const componentCount = page.locator('text=/\\d+\\s*component/i');
+    const componentCount = page.locator('text=/\\d+\\s*component/i').first();
     await expect(componentCount).toBeVisible();
 
     // Verify no critical console errors

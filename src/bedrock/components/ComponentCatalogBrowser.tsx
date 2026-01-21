@@ -334,7 +334,7 @@ export function ComponentCatalogBrowser({
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div data-testid="catalog-browser" className={`space-y-4 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
