@@ -33,3 +33,9 @@ export { DebugDensityToggle } from './DebugDensityToggle';
 
 // Theme components (S4-SKIN-ZenithPaper)
 export { ThemeSwitcher } from './ThemeSwitcher';
+
+// json-render browser (S19-BD-JsonRenderFactory)
+export {
+  ComponentCatalogBrowser,
+  type ComponentCatalogBrowserProps,
+} from './ComponentCatalogBrowser';

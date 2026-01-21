@@ -1,9 +1,10 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/override-history-catalog.ts
-// Sprint: S10.2-SL-AICuration v3 - Analytics + Override Workflows
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S10.2-SL-AICuration v3)
+// Pattern: json-render catalog using factory pattern
 // Defines component vocabulary for Override History Timeline
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * OverrideHistoryCatalog - Defines components for override audit trail
@@ -75,18 +76,45 @@ export const OverrideTimelineSchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const OverrideHistoryCatalog = {
+export const OverrideHistoryCatalog: CatalogDefinition = createCatalog({
+  name: 'override-history',
+  version: '2.0.0',
   components: {
-    OverrideHistoryHeader: { props: OverrideHistoryHeaderSchema },
-    OverrideEntry: { props: OverrideEntrySchema },
-    OriginalScoreEntry: { props: OriginalScoreEntrySchema },
-    RollbackBadge: { props: RollbackBadgeSchema },
-    OverrideTimeline: { props: OverrideTimelineSchema },
+    OverrideHistoryHeader: {
+      props: OverrideHistoryHeaderSchema,
+      category: 'data',
+      description: 'Title with sprout context and override count',
+      agentHint: 'Use at the top of override history panels',
+    },
+    OverrideEntry: {
+      props: OverrideEntrySchema,
+      category: 'data',
+      description: 'Individual override record with full provenance',
+      agentHint: 'Display a single override entry with score change and reasoning',
+    },
+    OriginalScoreEntry: {
+      props: OriginalScoreEntrySchema,
+      category: 'data',
+      description: 'Original assessment anchor for the timeline',
+      agentHint: 'Show the initial AI assessment as timeline baseline',
+    },
+    RollbackBadge: {
+      props: RollbackBadgeSchema,
+      category: 'feedback',
+      description: 'Visual indicator for rolled-back entries',
+      agentHint: 'Mark entries that have been rolled back',
+    },
+    OverrideTimeline: {
+      props: OverrideTimelineSchema,
+      category: 'layout',
+      description: 'Complete timeline with all override entries',
+      agentHint: 'Display full audit trail of score changes',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -112,15 +140,9 @@ export const OVERRIDE_REASON_LABELS: Record<OverrideReasonCode, string> = {
 };
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

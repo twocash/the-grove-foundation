@@ -1,27 +1,13 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/signals-catalog.ts
-// Sprint: S6-SL-ObservableSignals v1
-// Epic 7: json-render Signals Catalog
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S6-SL-ObservableSignals v1)
+// Pattern: json-render catalog using factory pattern
+//
+// MIGRATION NOTE: This file now uses the unified json-render factory pattern.
+// The duplicate RenderElement/RenderTree interfaces have been removed.
+// Import them from '@core/json-render' instead.
 
 import { z } from 'zod';
-
-/**
- * SignalsCatalog - Defines the component vocabulary for signal analytics visualization
- *
- * This catalog constrains what components can render signal data, ensuring predictable,
- * schema-compliant output. Each component has a Zod schema for validation.
- *
- * Components:
- * - SignalHeader: Title and period selector
- * - MetricCard: Single metric with label and optional trend
- * - MetricRow: Horizontal row of metric cards
- * - QualityGauge: Quality score visualization (0-1)
- * - DiversityBadge: Diversity index with breakdown
- * - EventBreakdown: Pie/bar chart of event types
- * - FunnelChart: Stage conversion funnel
- * - ActivityTimeline: Recent event activity (stub)
- * - AdvancementIndicator: Eligibility status
- */
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 // ============================================================================
 // SCHEMA DEFINITIONS
@@ -119,22 +105,86 @@ export const AdvancementIndicatorSchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const SignalsCatalog = {
+/**
+ * SignalsCatalog - Defines the component vocabulary for signal analytics visualization
+ *
+ * This catalog constrains what components can render signal data, ensuring predictable,
+ * schema-compliant output. Each component has a Zod schema for validation.
+ *
+ * Components:
+ * - SignalHeader: Title and period selector
+ * - MetricCard: Single metric with label and optional trend
+ * - MetricRow: Horizontal row of metric cards
+ * - QualityGauge: Quality score visualization (0-1)
+ * - DiversityBadge: Diversity index with breakdown
+ * - EventBreakdown: Pie/bar chart of event types
+ * - FunnelChart: Stage conversion funnel
+ * - ActivityTimeline: Recent event activity
+ * - AdvancementIndicator: Eligibility status
+ */
+export const SignalsCatalog: CatalogDefinition = createCatalog({
+  name: 'signals',
+  version: '2.0.0',
   components: {
-    SignalHeader: { props: SignalHeaderSchema },
-    MetricCard: { props: MetricCardSchema },
-    MetricRow: { props: MetricRowSchema },
-    QualityGauge: { props: QualityGaugeSchema },
-    DiversityBadge: { props: DiversityBadgeSchema },
-    EventBreakdown: { props: EventBreakdownSchema },
-    FunnelChart: { props: FunnelChartSchema },
-    ActivityTimeline: { props: ActivityTimelineSchema },
-    AdvancementIndicator: { props: AdvancementIndicatorSchema },
+    SignalHeader: {
+      props: SignalHeaderSchema,
+      category: 'data',
+      description: 'Title and period selector for signal panels',
+      agentHint: 'Use at the top of signal dashboards to show title and time period',
+    },
+    MetricCard: {
+      props: MetricCardSchema,
+      category: 'data',
+      description: 'Single metric display with label, value, and optional trend',
+      agentHint: 'Display individual KPIs like counts, percentages, or scores',
+    },
+    MetricRow: {
+      props: MetricRowSchema,
+      category: 'layout',
+      description: 'Horizontal row of metric cards in a grid',
+      agentHint: 'Group related metrics in a horizontal layout (2-6 columns)',
+    },
+    QualityGauge: {
+      props: QualityGaugeSchema,
+      category: 'data',
+      description: 'Quality score visualization with color-coded thresholds',
+      agentHint: 'Display quality scores (0-1) with visual gauge and status label',
+    },
+    DiversityBadge: {
+      props: DiversityBadgeSchema,
+      category: 'data',
+      description: 'Diversity index display with breakdown counts',
+      agentHint: 'Show diversity metrics with session/lens/hub breakdown',
+    },
+    EventBreakdown: {
+      props: EventBreakdownSchema,
+      category: 'data',
+      description: 'Event type distribution with bar chart',
+      agentHint: 'Display event type counts as horizontal bars with percentages',
+    },
+    FunnelChart: {
+      props: FunnelChartSchema,
+      category: 'data',
+      description: 'Stage conversion funnel visualization',
+      agentHint: 'Show conversion funnel with stage counts and conversion rates',
+    },
+    ActivityTimeline: {
+      props: ActivityTimelineSchema,
+      category: 'data',
+      description: 'Recent event activity timeline',
+      agentHint: 'Display recent events with timestamps in a scrollable list',
+    },
+    AdvancementIndicator: {
+      props: AdvancementIndicatorSchema,
+      category: 'feedback',
+      description: 'Eligibility status with criteria checklist',
+      agentHint: 'Show advancement eligibility with met/unmet criteria',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -154,15 +204,9 @@ export type ActivityTimelineProps = z.infer<typeof ActivityTimelineSchema>;
 export type AdvancementIndicatorProps = z.infer<typeof AdvancementIndicatorSchema>;
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

@@ -1,11 +1,13 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/signals-registry.tsx
-// Sprint: S6-SL-ObservableSignals v1
-// Epic 7: json-render Signals Registry
+// Sprint: S19-BD-JsonRenderFactory (migrated from S6-SL-ObservableSignals v1)
 // Pattern: json-render registry (maps catalog to React components)
+//
+// MIGRATION NOTE: This file now exports components compatible with the unified
+// json-render registry. Import RenderElement from '@core/json-render'.
 
 import React from 'react';
+import type { RenderElement } from '@core/json-render';
 import type {
-  RenderElement,
   SignalHeaderProps,
   MetricCardProps,
   MetricRowProps,
@@ -18,7 +20,7 @@ import type {
 } from './signals-catalog';
 
 /**
- * Component registry interface
+ * Component registry interface (compatible with global registry pattern)
  */
 export interface SignalsComponentRegistry {
   [key: string]: React.FC<{ element: RenderElement }>;

@@ -1,9 +1,10 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/attribution-catalog.ts
-// Sprint: S11-SL-Attribution v1 - Phase 4
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S11-SL-Attribution v1)
+// Pattern: json-render catalog using factory pattern
 // Defines component vocabulary for Attribution Dashboard visualization
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * AttributionCatalog - Defines the component vocabulary for attribution/economy visualization
@@ -137,21 +138,63 @@ export const MetricsRowSchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const AttributionCatalog = {
+export const AttributionCatalog: CatalogDefinition = createCatalog({
+  name: 'attribution',
+  version: '2.0.0',
   components: {
-    AttributionHeader: { props: AttributionHeaderSchema },
-    TokenBalanceCard: { props: TokenBalanceCardSchema },
-    ReputationCard: { props: ReputationCardSchema },
-    TierProgressBar: { props: TierProgressBarSchema },
-    BadgeGrid: { props: BadgeGridSchema },
-    RecentActivityList: { props: RecentActivityListSchema },
-    BadgeStatsSummary: { props: BadgeStatsSummarySchema },
-    MetricsRow: { props: MetricsRowSchema },
+    AttributionHeader: {
+      props: AttributionHeaderSchema,
+      category: 'data',
+      description: 'Panel title and grove context header',
+      agentHint: 'Use at the top of attribution dashboards',
+    },
+    TokenBalanceCard: {
+      props: TokenBalanceCardSchema,
+      category: 'data',
+      description: 'Current token balance with lifetime statistics',
+      agentHint: 'Display token balance with earned/spent breakdown',
+    },
+    ReputationCard: {
+      props: ReputationCardSchema,
+      category: 'data',
+      description: 'Reputation score with tier display',
+      agentHint: 'Show reputation level and tier multiplier',
+    },
+    TierProgressBar: {
+      props: TierProgressBarSchema,
+      category: 'data',
+      description: 'Visual progress toward next tier',
+      agentHint: 'Display progress bar from current to next tier',
+    },
+    BadgeGrid: {
+      props: BadgeGridSchema,
+      category: 'data',
+      description: 'Collection of earned badges in grid layout',
+      agentHint: 'Display badges with optional unearned placeholders',
+    },
+    RecentActivityList: {
+      props: RecentActivityListSchema,
+      category: 'data',
+      description: 'Recent attribution events list',
+      agentHint: 'Show recent token-earning activities',
+    },
+    BadgeStatsSummary: {
+      props: BadgeStatsSummarySchema,
+      category: 'data',
+      description: 'Badge statistics by category and rarity',
+      agentHint: 'Summarize badge collection progress',
+    },
+    MetricsRow: {
+      props: MetricsRowSchema,
+      category: 'layout',
+      description: 'Row of labeled metrics with icons',
+      agentHint: 'Group related attribution metrics horizontally',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -175,15 +218,9 @@ export type BadgeStatsSummaryProps = z.infer<typeof BadgeStatsSummarySchema>;
 export type MetricsRowProps = z.infer<typeof MetricsRowSchema>;
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

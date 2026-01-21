@@ -17,6 +17,12 @@ const BedrockWorkspace = lazy(() => import('../bedrock/BedrockWorkspace'));
 const StreamDemo = lazy(() => import('../../components/Terminal/StreamDemo'));
 const ResultsDisplayDemo = lazy(() => import('../explore/ResultsDisplayDemo'));
 
+// json-render demo (Sprint: S19-BD-JsonRenderFactory)
+const JsonRendererDemo = lazy(() => import('../bedrock/json-render/__tests__/JsonRenderer.demo'));
+const CatalogBrowserDemo = lazy(() =>
+  import('../bedrock/json-render/__tests__/CatalogBrowser.demo').then((m) => ({ default: m.CatalogBrowserDemo }))
+);
+
 // Kinetic Stream exploration surface
 const ExplorePage = lazy(() => import('../surface/pages/ExplorePage'));
 
@@ -333,6 +339,23 @@ export const routes: RouteObject[] = [
         element: (
           <Suspense fallback={<WorkspaceLoadingFallback />}>
             <ResultsDisplayDemo />
+          </Suspense>
+        ),
+      },
+      // json-render visual verification (Sprint: S19-BD-JsonRenderFactory)
+      {
+        path: '/dev/json-render-demo',
+        element: (
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <JsonRendererDemo />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/dev/catalog-browser',
+        element: (
+          <Suspense fallback={<WorkspaceLoadingFallback />}>
+            <CatalogBrowserDemo />
           </Suspense>
         ),
       },

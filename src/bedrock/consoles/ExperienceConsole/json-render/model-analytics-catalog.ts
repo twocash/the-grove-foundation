@@ -1,9 +1,10 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/model-analytics-catalog.ts
-// Sprint: EPIC4-SL-MultiModel v1
-// Epic 5: json-render Model Analytics Catalog
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from EPIC4-SL-MultiModel v1)
+// Pattern: json-render catalog using factory pattern
+// Model Analytics Catalog for multi-model analytics visualization
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * ModelAnalyticsCatalog - Defines the component vocabulary for model analytics visualization
@@ -146,23 +147,75 @@ export const ModelSummarySchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const ModelAnalyticsCatalog = {
+export const ModelAnalyticsCatalog: CatalogDefinition = createCatalog({
+  name: 'model-analytics',
+  version: '2.0.0',
   components: {
-    ModelAnalyticsHeader: { props: ModelAnalyticsHeaderSchema },
-    ModelMetricCard: { props: ModelMetricCardSchema },
-    ModelMetricRow: { props: ModelMetricRowSchema },
-    ModelComparison: { props: ModelComparisonSchema },
-    TierDistribution: { props: TierDistributionSchema },
-    ConversionFunnel: { props: ConversionFunnelSchema },
-    PerformanceHeatmap: { props: PerformanceHeatmapSchema },
-    ModelVariantComparison: { props: ModelVariantComparisonSchema },
-    TimeSeriesChart: { props: TimeSeriesChartSchema },
-    ModelSummary: { props: ModelSummarySchema },
+    ModelAnalyticsHeader: {
+      props: ModelAnalyticsHeaderSchema,
+      category: 'data',
+      description: 'Title with period selector and model type',
+      agentHint: 'Use at the top of model analytics dashboards',
+    },
+    ModelMetricCard: {
+      props: ModelMetricCardSchema,
+      category: 'data',
+      description: 'Single metric with label, value, and trend',
+      agentHint: 'Display individual model KPIs with optional trend',
+    },
+    ModelMetricRow: {
+      props: ModelMetricRowSchema,
+      category: 'layout',
+      description: 'Horizontal row of model metric cards',
+      agentHint: 'Group related model metrics in a horizontal layout',
+    },
+    ModelComparison: {
+      props: ModelComparisonSchema,
+      category: 'data',
+      description: 'Side-by-side comparison of multiple models',
+      agentHint: 'Compare metrics across different models',
+    },
+    TierDistribution: {
+      props: TierDistributionSchema,
+      category: 'data',
+      description: 'Distribution of items across model tiers',
+      agentHint: 'Show how items are distributed across tiers',
+    },
+    ConversionFunnel: {
+      props: ConversionFunnelSchema,
+      category: 'data',
+      description: 'Model-specific progression funnel',
+      agentHint: 'Display conversion stages with rates',
+    },
+    PerformanceHeatmap: {
+      props: PerformanceHeatmapSchema,
+      category: 'data',
+      description: 'Performance metrics heatmap across models',
+      agentHint: 'Visualize metrics as heatmap grid',
+    },
+    ModelVariantComparison: {
+      props: ModelVariantComparisonSchema,
+      category: 'data',
+      description: 'A/B test variant comparison display',
+      agentHint: 'Compare model variants with traffic and conversion data',
+    },
+    TimeSeriesChart: {
+      props: TimeSeriesChartSchema,
+      category: 'data',
+      description: 'Time-based performance line chart',
+      agentHint: 'Show performance trends over time with multiple series',
+    },
+    ModelSummary: {
+      props: ModelSummarySchema,
+      category: 'data',
+      description: 'Model overview with key statistics',
+      agentHint: 'Display comprehensive model summary card',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -182,15 +235,9 @@ export type TimeSeriesDataPoint = z.infer<typeof TimeSeriesDataPointSchema>;
 export type ModelSummaryProps = z.infer<typeof ModelSummarySchema>;
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

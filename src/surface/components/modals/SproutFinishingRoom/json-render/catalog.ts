@@ -1,8 +1,10 @@
 // src/surface/components/modals/SproutFinishingRoom/json-render/catalog.ts
-// Sprint: S2-SFR-Display - US-C001 ResearchCatalog definition
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S2-SFR-Display)
+// Pattern: json-render catalog using factory pattern
+// ResearchCatalog for AI-generated research documents
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * ResearchCatalog - Defines the component vocabulary for AI-generated research documents
@@ -49,16 +51,46 @@ export const MetadataSchema = z.object({
   wordCount: z.number(),
 });
 
-// Catalog type definition
-export const ResearchCatalog = {
+// ============================================================================
+// CATALOG DEFINITION (using factory pattern)
+// ============================================================================
+
+export const ResearchCatalog: CatalogDefinition = createCatalog({
+  name: 'research',
+  version: '2.0.0',
   components: {
-    ResearchHeader: { props: ResearchHeaderSchema },
-    AnalysisBlock: { props: AnalysisBlockSchema },
-    SourceList: { props: SourceListSchema },
-    LimitationsBlock: { props: LimitationsBlockSchema },
-    Metadata: { props: MetadataSchema },
+    ResearchHeader: {
+      props: ResearchHeaderSchema,
+      category: 'data',
+      description: 'Position statement and query header',
+      agentHint: 'Use at the top of research documents with thesis and query',
+    },
+    AnalysisBlock: {
+      props: AnalysisBlockSchema,
+      category: 'data',
+      description: 'Markdown-formatted analysis content block',
+      agentHint: 'Display main research analysis with markdown support',
+    },
+    SourceList: {
+      props: SourceListSchema,
+      category: 'data',
+      description: 'Citations with links and snippets',
+      agentHint: 'List sources with numbered indices and URLs',
+    },
+    LimitationsBlock: {
+      props: LimitationsBlockSchema,
+      category: 'data',
+      description: 'What could not be determined section',
+      agentHint: 'Display research limitations and knowledge gaps',
+    },
+    Metadata: {
+      props: MetadataSchema,
+      category: 'feedback',
+      description: 'Status, confidence score, and word count',
+      agentHint: 'Show research completion status and metrics',
+    },
   },
-} as const;
+});
 
 // Type exports
 export type ResearchCatalogType = typeof ResearchCatalog;
@@ -68,13 +100,10 @@ export type SourceListProps = z.infer<typeof SourceListSchema>;
 export type LimitationsBlockProps = z.infer<typeof LimitationsBlockSchema>;
 export type MetadataProps = z.infer<typeof MetadataSchema>;
 
-// Element type for renderer
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
+// ============================================================================
+// BACKWARD COMPATIBILITY: Re-export core types
+// ============================================================================
 
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

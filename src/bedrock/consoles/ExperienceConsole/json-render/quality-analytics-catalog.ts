@@ -1,9 +1,10 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/quality-analytics-catalog.ts
-// Sprint: S10.2-SL-AICuration v3 - Analytics + Override Workflows
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S10.2-SL-AICuration v3)
+// Pattern: json-render catalog using factory pattern
 // Defines component vocabulary for Quality Analytics Dashboard visualization
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * QualityAnalyticsCatalog - Defines the component vocabulary for quality analytics
@@ -94,19 +95,51 @@ export const PercentileRankingSchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const QualityAnalyticsCatalog = {
+export const QualityAnalyticsCatalog: CatalogDefinition = createCatalog({
+  name: 'quality-analytics',
+  version: '2.0.0',
   components: {
-    AnalyticsHeader: { props: AnalyticsHeaderSchema },
-    AnalyticsMetricRow: { props: AnalyticsMetricRowSchema },
-    DimensionProfile: { props: DimensionProfileSchema },
-    ScoreDistribution: { props: ScoreDistributionSchema },
-    QualityTrendChart: { props: QualityTrendChartSchema },
-    PercentileRanking: { props: PercentileRankingSchema },
+    AnalyticsHeader: {
+      props: AnalyticsHeaderSchema,
+      category: 'data',
+      description: 'Dashboard title with time range and last updated',
+      agentHint: 'Use at the top of quality analytics dashboards',
+    },
+    AnalyticsMetricRow: {
+      props: AnalyticsMetricRowSchema,
+      category: 'layout',
+      description: 'Horizontal row of metric cards in a grid',
+      agentHint: 'Group related quality metrics in a horizontal layout',
+    },
+    DimensionProfile: {
+      props: DimensionProfileSchema,
+      category: 'data',
+      description: 'Radar chart comparing quality dimensions',
+      agentHint: 'Show dimension scores with optional network comparison',
+    },
+    ScoreDistribution: {
+      props: ScoreDistributionSchema,
+      category: 'data',
+      description: 'Horizontal bar chart of score distribution buckets',
+      agentHint: 'Display score distribution across buckets',
+    },
+    QualityTrendChart: {
+      props: QualityTrendChartSchema,
+      category: 'data',
+      description: 'Line chart of quality scores over time',
+      agentHint: 'Show quality trends with optional network comparison line',
+    },
+    PercentileRanking: {
+      props: PercentileRankingSchema,
+      category: 'data',
+      description: 'Network percentile ranking display',
+      agentHint: 'Show percentile position relative to network average',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -126,15 +159,9 @@ export type QualityTrendChartProps = z.infer<typeof QualityTrendChartSchema>;
 export type PercentileRankingProps = z.infer<typeof PercentileRankingSchema>;
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';

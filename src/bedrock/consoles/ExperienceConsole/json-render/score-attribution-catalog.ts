@@ -1,9 +1,10 @@
 // src/bedrock/consoles/ExperienceConsole/json-render/score-attribution-catalog.ts
-// Sprint: S10.2-SL-AICuration v3 - Analytics + Override Workflows
-// Pattern: json-render catalog (Vercel Labs)
+// Sprint: S19-BD-JsonRenderFactory (migrated from S10.2-SL-AICuration v3)
+// Pattern: json-render catalog using factory pattern
 // Defines component vocabulary for "Why This Score?" Attribution Panel
 
 import { z } from 'zod';
+import { createCatalog, type CatalogDefinition } from '@core/json-render';
 
 /**
  * ScoreAttributionCatalog - Defines components for quality score explanation
@@ -66,18 +67,45 @@ export const AttributionMetadataSchema = z.object({
 });
 
 // ============================================================================
-// CATALOG DEFINITION
+// CATALOG DEFINITION (using factory pattern)
 // ============================================================================
 
-export const ScoreAttributionCatalog = {
+export const ScoreAttributionCatalog: CatalogDefinition = createCatalog({
+  name: 'score-attribution',
+  version: '2.0.0',
   components: {
-    ScoreAttributionHeader: { props: ScoreAttributionHeaderSchema },
-    StarRating: { props: StarRatingSchema },
-    AttributionDimension: { props: AttributionDimensionSchema },
-    AttributionOverrideCta: { props: AttributionOverrideCtaSchema },
-    AttributionMetadata: { props: AttributionMetadataSchema },
+    ScoreAttributionHeader: {
+      props: ScoreAttributionHeaderSchema,
+      category: 'data',
+      description: 'Overall score with confidence and grade display',
+      agentHint: 'Use at the top of score attribution panels to show composite score',
+    },
+    StarRating: {
+      props: StarRatingSchema,
+      category: 'data',
+      description: 'Visual 1-5 star rating display',
+      agentHint: 'Display star ratings for dimension scores',
+    },
+    AttributionDimension: {
+      props: AttributionDimensionSchema,
+      category: 'data',
+      description: 'Individual dimension breakdown with educational narrative',
+      agentHint: 'Show detailed breakdown of a single quality dimension',
+    },
+    AttributionOverrideCta: {
+      props: AttributionOverrideCtaSchema,
+      category: 'action',
+      description: 'Request Override button with sprout context',
+      agentHint: 'Allow operators to request score override',
+    },
+    AttributionMetadata: {
+      props: AttributionMetadataSchema,
+      category: 'data',
+      description: 'Assessment metadata including model and timing',
+      agentHint: 'Display provenance information about the assessment',
+    },
   },
-} as const;
+});
 
 // ============================================================================
 // TYPE EXPORTS
@@ -120,15 +148,9 @@ export const EDUCATIONAL_TONE_GUIDELINES = {
 };
 
 // ============================================================================
-// ELEMENT TYPES (shared with other catalogs)
+// BACKWARD COMPATIBILITY: Re-export core types
 // ============================================================================
 
-export interface RenderElement<T = unknown> {
-  type: string;
-  props: T;
-}
-
-export interface RenderTree {
-  type: 'root';
-  children: RenderElement[];
-}
+// Re-export RenderElement and RenderTree from core for consumers who imported
+// from this file. New code should import directly from '@core/json-render'.
+export type { RenderElement, RenderTree } from '@core/json-render';
