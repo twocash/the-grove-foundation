@@ -60,6 +60,7 @@ export function OutputTemplateEditor({
   loading,
   hasChanges,
   onSelectObject,
+  onRefresh,
 }: ObjectEditorProps<OutputTemplatePayload>) {
   const { fork, activate, archive, publish, objects } = useOutputTemplateData();
 
@@ -88,7 +89,12 @@ export function OutputTemplateEditor({
     try {
       const forked = await fork(template.meta.id);
       console.log('[OutputTemplateEditor] Fork created:', forked.meta.id);
-      // Select the newly forked template
+      // Refresh console data first to ensure the new template is in the list
+      // This syncs the console's state with the editor's state after fork
+      if (onRefresh) {
+        await onRefresh();
+      }
+      // Then select the newly forked template
       if (onSelectObject) {
         onSelectObject(forked.meta.id);
       }
@@ -97,7 +103,7 @@ export function OutputTemplateEditor({
     } finally {
       setForking(false);
     }
-  }, [fork, template.meta.id, onSelectObject]);
+  }, [fork, template.meta.id, onSelectObject, onRefresh]);
 
   const handlePublish = useCallback(async () => {
     setActivating(true);

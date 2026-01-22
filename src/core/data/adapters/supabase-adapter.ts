@@ -44,6 +44,8 @@ const TABLE_MAP: Record<GroveObjectType, string> = {
   'tier-mapping': 'tier_mappings',
   'federation-exchange': 'federation_exchanges',
   'trust-relationship': 'trust_relationships',
+  // Sprint: prompt-template-architecture-v1 - Output templates for Writer/Research agents
+  'output-template': 'output_templates',
 };
 
 /**
@@ -65,6 +67,8 @@ const JSONB_META_TYPES = new Set<GroveObjectType>([
   'tier-mapping',
   'federation-exchange',
   'trust-relationship',
+  // Sprint: prompt-template-architecture-v1 - Output templates
+  'output-template',
 ]);
 
 /**
@@ -272,9 +276,9 @@ export class SupabaseAdapter implements GroveDataProvider {
     const { data, error } = await query;
 
     if (error) {
-      // PGRST204 = No rows found, 42P01 = table doesn't exist
+      // PGRST204 = No rows found, 42P01 = table doesn't exist, PGRST205 = table not in schema cache
       // For missing tables or empty results, fallback to defaults
-      if (error.code === '42P01' || error.code === 'PGRST204' || error.message?.includes('404')) {
+      if (error.code === '42P01' || error.code === 'PGRST204' || error.code === 'PGRST205' || error.message?.includes('404')) {
         console.warn(`[SupabaseAdapter] Table ${table} not found or empty, using defaults for ${type}`);
         return getDefaults<T>(type);
       }
