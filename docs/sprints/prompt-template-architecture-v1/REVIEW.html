@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Output Template Architecture v1 - Sprint Review</title>
+  <style>
+    :root {
+      --bg-primary: #0a0f1a;
+      --bg-secondary: #111827;
+      --border-color: #1f2937;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --accent-green: #00ff9d;
+      --accent-cyan: #00e5ff;
+      --accent-amber: #ffb300;
+      --status-pass: #22c55e;
+      --status-fail: #ef4444;
+      --status-warn: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    h2 { font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--accent-cyan); }
+    h3 { font-size: 1.125rem; margin: 1.5rem 0 0.75rem; color: var(--text-primary); }
+    .subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .status-pass { background: rgba(34, 197, 94, 0.2); color: var(--status-pass); }
+    .status-fail { background: rgba(239, 68, 68, 0.2); color: var(--status-fail); }
+    .status-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    th { color: var(--text-secondary); font-weight: 500; }
+    .check { color: var(--status-pass); }
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .screenshot-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .screenshot-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .screenshot-item figcaption {
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    code {
+      background: rgba(0, 229, 255, 0.1);
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+    }
+    ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.5rem; }
+    .highlight { color: var(--accent-green); }
+    .file-list { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Output Template Architecture v1</h1>
+    <p class="subtitle">Sprint: S20-OT-OutputTemplateArchitecture | Branch: feat/prompt-template-architecture-v1</p>
+
+    <div class="card">
+      <h3>Sprint Summary</h3>
+      <p>Implemented configurable output templates for Writer and Research agents using the fork-to-customize pattern. Templates control how agents transform research into documents via <code>systemPrompt</code> configuration.</p>
+      <p style="margin-top: 1rem;"><span class="status-badge status-pass">✓ COMPLETE</span></p>
+    </div>
+
+    <h2>Test Results</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Test Suite</th>
+            <th>Status</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>E2E Visual Verification</td>
+            <td><span class="check">✓</span> Pass</td>
+            <td>7/7</td>
+          </tr>
+          <tr>
+            <td>TypeScript Build</td>
+            <td><span class="check">✓</span> Pass</td>
+            <td>0 errors</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Acceptance Criteria</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Criteria</th>
+            <th>Status</th>
+            <th>Evidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AC1: Output Template type registered in Experience Console</td>
+            <td><span class="check">✓</span></td>
+            <td>Screenshot 01 - "Output Template" in metrics row</td>
+          </tr>
+          <tr>
+            <td>AC2: +New dropdown includes Output Template</td>
+            <td><span class="check">✓</span></td>
+            <td>Screenshot 05 - Dropdown shows "Output Template" option</td>
+          </tr>
+          <tr>
+            <td>AC3: OutputTemplateEditor with Agent Type selector</td>
+            <td><span class="check">✓</span></td>
+            <td>Screenshot 05 - Editor shows Writer/Research/Code options</td>
+          </tr>
+          <tr>
+            <td>AC4: Supabase adapter handles output-template type</td>
+            <td><span class="check">✓</span></td>
+            <td>TABLE_MAP and JSONB_META_TYPES updated</td>
+          </tr>
+          <tr>
+            <td>AC5: Fork-to-customize pattern implemented</td>
+            <td><span class="check">✓</span></td>
+            <td>OutputTemplateEditor.tsx - read-only for system seeds</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Visual Evidence</h2>
+    <div class="screenshot-grid">
+      <figure class="screenshot-item">
+        <img src="screenshots/01-console-loaded.png" alt="Experience Console loaded">
+        <figcaption><strong>01:</strong> Experience Console loads with Output Template in metrics (showing 0 count)</figcaption>
+      </figure>
+      <figure class="screenshot-item">
+        <img src="screenshots/05-create-dropdown.png" alt="New dropdown with Output Template">
+        <figcaption><strong>05:</strong> +New dropdown shows "Output Template - Configure output format..."</figcaption>
+      </figure>
+      <figure class="screenshot-item">
+        <img src="screenshots/05-new-template-created.png" alt="Output Template Editor">
+        <figcaption><strong>05b:</strong> OutputTemplateEditor with Name, Description, Agent Type (Writer/Research/Code), Publish button</figcaption>
+      </figure>
+      <figure class="screenshot-item">
+        <img src="screenshots/07-explore-page.png" alt="Explore page loads">
+        <figcaption><strong>07:</strong> Explore page loads without errors (template integration point)</figcaption>
+      </figure>
+    </div>
+
+    <h2>Files Modified/Created</h2>
+    <div class="card">
+      <h3>Schema & Type</h3>
+      <ul class="file-list">
+        <li><code>src/core/schema/output-template.ts</code> - Zod schema with OutputTemplatePayload type</li>
+        <li><code>src/core/schema/grove-object.ts</code> - Added 'output-template' to GroveObjectType</li>
+      </ul>
+
+      <h3>Data Layer</h3>
+      <ul class="file-list">
+        <li><code>src/core/data/adapters/supabase-adapter.ts</code> - TABLE_MAP + JSONB_META_TYPES entries</li>
+        <li><code>data/seeds/output-templates.json</code> - 8 system seeds (4 Writer, 4 Research)</li>
+      </ul>
+
+      <h3>Console Components</h3>
+      <ul class="file-list">
+        <li><code>src/bedrock/consoles/ExperienceConsole/OutputTemplateCard.tsx</code></li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/OutputTemplateEditor.tsx</code></li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/useOutputTemplateData.ts</code></li>
+      </ul>
+
+      <h3>Registry Integration</h3>
+      <ul class="file-list">
+        <li><code>src/bedrock/types/experience.types.ts</code> - Type definition added</li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/component-registry.ts</code></li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/hook-registry.ts</code></li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/useUnifiedExperienceData.ts</code></li>
+        <li><code>src/bedrock/consoles/ExperienceConsole/index.ts</code> - Exports</li>
+      </ul>
+
+      <h3>Refinement Room Integration</h3>
+      <ul class="file-list">
+        <li><code>src/surface/components/modals/SproutFinishingRoom/components/ReviseForm.tsx</code> - Template selector</li>
+      </ul>
+
+      <h3>Tests</h3>
+      <ul class="file-list">
+        <li><code>tests/e2e/output-template-architecture.spec.ts</code> - 7 E2E tests</li>
+      </ul>
+    </div>
+
+    <h2>Key Patterns Implemented</h2>
+    <div class="card">
+      <ul>
+        <li><strong class="highlight">Fork-to-Customize:</strong> System seeds are read-only; users fork to create editable copies</li>
+        <li><strong class="highlight">Provenance Tracking:</strong> <code>source</code> field tracks: system-seed, user-created, forked, imported</li>
+        <li><strong class="highlight">DEX Compliance:</strong> Declarative (config-driven), Agnostic (model-independent), Provenance (tracked), Scalable (registry-based)</li>
+        <li><strong class="highlight">Console Factory Pattern:</strong> Polymorphic card/editor via registry lookup</li>
+      </ul>
+    </div>
+
+    <h2>Commit Reference</h2>
+    <div class="card">
+      <p><code>0f01f71</code> feat(S20-OT): Output Template Architecture - fork-to-customize pattern</p>
+    </div>
+
+    <p style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.875rem;">
+      Generated: 2026-01-22 | Sprint: prompt-template-architecture-v1
+    </p>
+  </div>
+</body>
+</html>
