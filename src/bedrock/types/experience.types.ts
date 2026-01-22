@@ -25,6 +25,8 @@ import type { AdvancementRulePayload } from '@core/schema/advancement';
 import { DEFAULT_ADVANCEMENT_RULE_PAYLOAD } from '@core/schema/advancement';
 import type { JobConfigPayload } from '@core/schema/job-config';
 import { createJobConfigPayload } from '@core/schema/job-config';
+import type { OutputTemplatePayload } from '@core/schema/output-template';
+import { DEFAULT_OUTPUT_TEMPLATE_PAYLOAD } from '@core/schema/output-template';
 
 // =============================================================================
 // Console Configuration Types (for polymorphic console)
@@ -389,6 +391,39 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     ],
   } satisfies ExperienceTypeDefinition<JobConfigPayload>,
 
+  // Sprint: prompt-template-architecture-v1 - Output Templates for Writer/Research agents
+  // INSTANCE pattern: Many templates active simultaneously (one default per agent type)
+  'output-template': {
+    type: 'output-template',
+    label: 'Output Template',
+    icon: 'description',
+    description: 'Configure output format, voice, and structure for Writer and Research agents',
+    defaultPayload: DEFAULT_OUTPUT_TEMPLATE_PAYLOAD,
+    wizardId: undefined, // Simple form, no wizard
+    editorComponent: 'OutputTemplateEditor',
+    allowMultipleActive: true, // INSTANCE: Many templates, one default per agent type
+    routePath: '/bedrock/experience',
+    color: '#FF9800', // Orange for templates
+    // Polymorphic console support
+    cardComponent: 'OutputTemplateCard',
+    dataHookName: 'useOutputTemplateData',
+    searchFields: ['meta.title', 'meta.description', 'payload.name', 'payload.systemPrompt'],
+    metrics: [
+      { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: payload.status=active)', typeFilter: 'output-template' },
+      { id: 'drafts', label: 'Drafts', icon: 'edit_note', query: 'count(where: payload.status=draft)', typeFilter: 'output-template' },
+      { id: 'system', label: 'System', icon: 'verified', query: 'count(where: payload.source=system-seed)', typeFilter: 'output-template' },
+    ],
+    filters: [
+      { field: 'payload.status', label: 'Status', type: 'select', options: ['active', 'draft', 'archived'] },
+      { field: 'payload.agentType', label: 'Agent Type', type: 'select', options: ['writer', 'research', 'code'] },
+      { field: 'payload.source', label: 'Source', type: 'select', options: ['system-seed', 'user-created', 'forked', 'imported'] },
+    ],
+    sortOptions: [
+      { field: 'payload.agentType', label: 'Agent Type', direction: 'asc' },
+      { field: 'payload.version', label: 'Version', direction: 'desc' },
+    ],
+  } satisfies ExperienceTypeDefinition<OutputTemplatePayload>,
+
   // Future types (commented templates for reference):
   //
   // 'welcome-config': {
@@ -428,6 +463,7 @@ export interface ExperiencePayloadMap {
   'lifecycle-config': LifecycleConfigPayload; // Sprint: S5-SL-LifecycleEngine v1
   'advancement-rule': AdvancementRulePayload; // Sprint: S7-SL-AutoAdvancement v1
   'job-config': JobConfigPayload; // Sprint: S7.5-SL-JobConfigSystem v1
+  'output-template': OutputTemplatePayload; // Sprint: prompt-template-architecture-v1
 }
 
 /**

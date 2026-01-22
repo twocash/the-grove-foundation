@@ -1,11 +1,13 @@
 // src/surface/components/modals/SproutFinishingRoom/components/ReviseForm.tsx
 // Sprint: S3||SFR-Actions - US-D001 Revise & Resubmit form (stubbed)
+// Sprint: prompt-template-architecture-v1 - Added output template selection
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useOutputTemplateData } from '../../../../../../bedrock/consoles/ExperienceConsole/useOutputTemplateData';
 
 export interface ReviseFormProps {
   sproutId: string;
-  onSubmit: (notes: string) => void;
+  onSubmit: (notes: string, templateId?: string) => void;
 }
 
 /**
@@ -13,16 +15,42 @@ export interface ReviseFormProps {
  *
  * US-D001: Accepts revision instructions for future agent requeue.
  * v1.0: Stubbed - emits event and shows toast, no backend call.
+ *
+ * Sprint: prompt-template-architecture-v1
+ * Added output template selection for writer agent configuration.
  */
 export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) => {
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+
+  // Get writer templates from output template data
+  const { objects: templates, loading: templatesLoading } = useOutputTemplateData();
+
+  // Filter to active writer templates
+  const writerTemplates = useMemo(() => {
+    return templates.filter(
+      (t) => t.payload.agentType === 'writer' && t.payload.status === 'active'
+    );
+  }, [templates]);
+
+  // Get default template
+  const defaultTemplate = useMemo(() => {
+    return writerTemplates.find((t) => t.payload.isDefault);
+  }, [writerTemplates]);
+
+  // Set default selection when templates load
+  React.useEffect(() => {
+    if (!selectedTemplateId && defaultTemplate) {
+      setSelectedTemplateId(defaultTemplate.meta.id);
+    }
+  }, [selectedTemplateId, defaultTemplate]);
 
   const handleSubmit = () => {
     if (!notes.trim()) return;
     setIsSubmitting(true);
-    // v1.0: Stub - just emit event via callback
-    onSubmit(notes);
+    // v1.0: Stub - just emit event via callback with optional templateId
+    onSubmit(notes, selectedTemplateId || undefined);
     setNotes('');
     setIsSubmitting(false);
   };
@@ -36,6 +64,33 @@ export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) =>
           Revise & Resubmit
         </h3>
       </div>
+
+      {/* Template selector - Sprint: prompt-template-architecture-v1 */}
+      {!templatesLoading && writerTemplates.length > 0 && (
+        <div className="mb-3">
+          <label
+            htmlFor="template-select"
+            className="block text-xs text-ink-muted dark:text-paper/60 mb-1"
+          >
+            Output Template
+          </label>
+          <select
+            id="template-select"
+            value={selectedTemplateId}
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            className="w-full p-2 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-grove-forest/50 text-ink dark:text-paper"
+            aria-label="Select output template"
+          >
+            {writerTemplates.map((template) => (
+              <option key={template.meta.id} value={template.meta.id}>
+                {template.payload.name}
+                {template.payload.isDefault ? ' (Default)' : ''}
+                {template.payload.source === 'system-seed' ? ' • System' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <textarea
         value={notes}

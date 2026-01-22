@@ -47,7 +47,8 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   });
 
   // US-D001: Revise & Resubmit (stubbed)
-  const handleRevisionSubmit = (notes: string) => {
+  // Sprint: prompt-template-architecture-v1 - Added templateId parameter
+  const handleRevisionSubmit = (notes: string, templateId?: string) => {
     // S6-SL-ObservableSignals: Emit sprout_refined signal
     signals.emitRefined(
       sprout.id,
@@ -58,6 +59,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     emit.custom('sproutRefinementSubmitted', {
       sproutId: sprout.id,
       revisionNotes: notes,
+      templateId, // Sprint: prompt-template-architecture-v1
     });
     toast.success('Revision submitted for processing!');
   };

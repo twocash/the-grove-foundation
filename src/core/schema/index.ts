@@ -515,6 +515,41 @@ export {
   isEarnedBadge
 } from './badges';
 
+// Output Template types (Sprint: prompt-template-architecture-v1)
+// Configurable templates for Writer and Research agents
+export {
+  // Source Types
+  type OutputTemplateSource,
+  OutputTemplateSourceSchema,
+  // Agent Types
+  type AgentType,
+  AgentTypeSchema,
+  // Status
+  type OutputTemplateStatus,
+  OutputTemplateStatusSchema,
+  // Citation
+  type CitationStyle,
+  CitationStyleSchema,
+  type CitationFormat,
+  CitationFormatSchema,
+  // Config
+  type OutputTemplateConfig,
+  OutputTemplateConfigSchema,
+  // Payload
+  type OutputTemplatePayload,
+  OutputTemplatePayloadSchema,
+  // Defaults
+  DEFAULT_OUTPUT_TEMPLATE_CONFIG,
+  DEFAULT_OUTPUT_TEMPLATE_PAYLOAD,
+  // Factory
+  createOutputTemplatePayload,
+  forkOutputTemplate,
+  // Type Guards
+  isOutputTemplatePayload,
+  isTemplateEditable,
+  isTemplateForkable,
+} from './output-template';
+
 // Grove-Level Federation types (Sprint: S9-SL-Federation v1)
 // Cross-grove federation for external communities
 export {
