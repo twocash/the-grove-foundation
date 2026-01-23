@@ -10,6 +10,9 @@ grove-documents/
 # Serena MCP (local indexes and memories)
 .serena/
 
+# MCP configuration (user-local)
+.mcp.json
+
 # Dependencies
 node_modules
 .pnp
