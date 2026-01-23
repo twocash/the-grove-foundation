@@ -161,6 +161,9 @@ export { WriterAgentConfigEditor } from './WriterAgentConfigEditor';
 // Sprint: inspector-copilot-v1 - Copilot style components
 export { CopilotStyleCard } from './CopilotStyleCard';
 export { CopilotStyleEditor } from './CopilotStyleEditor';
+// Sprint: prompt-template-architecture-v1 - Output template components
+export { OutputTemplateCard } from './OutputTemplateCard';
+export { OutputTemplateEditor } from './OutputTemplateEditor';
 
 // Type-specific data hooks
 export { useExperienceData, createDefaultSystemPrompt } from './useExperienceData';
@@ -175,6 +178,9 @@ export type { WriterAgentConfigDataResult } from './useWriterAgentConfigData';
 // Sprint: inspector-copilot-v1 - Copilot style data hook
 export { useCopilotStyleData, createDefaultCopilotStyle } from './useCopilotStyleData';
 export type { CopilotStyleDataResult } from './useCopilotStyleData';
+// Sprint: prompt-template-architecture-v1 - Output template data hook
+export { useOutputTemplateData, createDefaultOutputTemplate } from './useOutputTemplateData';
+export type { OutputTemplateDataResult } from './useOutputTemplateData';
 
 // Category config for feature flags (preserved for component use)
 export { CATEGORY_CONFIG } from './FeatureFlagConsole.config';

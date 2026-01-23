@@ -1,0 +1,207 @@
+{
+  "$schema": "../schema/output-templates.schema.json",
+  "version": "1.0.0",
+  "description": "System seed templates for Writer and Research agents",
+  "templates": [
+    {
+      "id": "ot-seed-engineering",
+      "meta": {
+        "type": "output-template",
+        "title": "Engineering / Architecture",
+        "description": "Technical analysis with implementation patterns and trade-offs",
+        "icon": "architecture",
+        "status": "active",
+        "tags": ["technical", "writer"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Engineering / Architecture",
+        "description": "Technical analysis with implementation patterns and trade-offs",
+        "agentType": "writer",
+        "systemPrompt": "Transform research into a technical architecture document.\n\nFocus on: implementation patterns, trade-offs, technical constraints.\nVoice: Precise, technical, evidence-based.\nStructure: Problem → Analysis → Architecture → Trade-offs → Recommendations.\nCitations: Chicago style, endnotes with links.\n\nKey guidelines:\n- Lead with the technical problem being solved\n- Present multiple architectural options when applicable\n- Analyze trade-offs explicitly (performance, maintainability, complexity)\n- Include code examples or pseudocode where helpful\n- End with clear, actionable recommendations",
+        "config": {
+          "category": "technical",
+          "citationStyle": "chicago",
+          "citationFormat": "endnotes"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-vision",
+      "meta": {
+        "type": "output-template",
+        "title": "Vision Paper",
+        "description": "Forward-looking strategic perspective on emerging possibilities",
+        "icon": "lightbulb",
+        "status": "active",
+        "tags": ["strategy", "writer"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Vision Paper",
+        "description": "Forward-looking strategic perspective on emerging possibilities",
+        "agentType": "writer",
+        "systemPrompt": "Transform research into a forward-looking vision document.\n\nFocus on: emerging possibilities, strategic implications, transformative potential.\nVoice: Aspirational yet grounded, thought-provoking.\nStructure: Current State → Emerging Signals → Vision → Path Forward.\nCitations: Light touch, inline references for credibility.\n\nKey guidelines:\n- Paint a vivid picture of the possible future\n- Ground vision in observable trends and evidence\n- Acknowledge uncertainty while maintaining conviction\n- Connect dots between disparate developments\n- Inspire action with a clear call to engagement",
+        "config": {
+          "category": "strategy",
+          "citationStyle": "apa",
+          "citationFormat": "inline"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-higher-ed",
+      "meta": {
+        "type": "output-template",
+        "title": "Higher Ed Policy",
+        "description": "Policy analysis for academic and institutional contexts",
+        "icon": "school",
+        "status": "active",
+        "tags": ["policy", "writer"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Higher Ed Policy",
+        "description": "Policy analysis for academic and institutional contexts",
+        "agentType": "writer",
+        "systemPrompt": "Transform research into a higher education policy brief.\n\nFocus on: institutional implications, student outcomes, implementation feasibility.\nVoice: Academic but accessible, balanced perspective.\nStructure: Executive Summary → Context → Analysis → Policy Recommendations → Implementation.\nCitations: APA style, comprehensive reference list.\n\nKey guidelines:\n- Lead with an executive summary for busy administrators\n- Contextualize within higher education landscape\n- Consider multiple stakeholder perspectives (students, faculty, administration)\n- Address implementation challenges realistically\n- Provide phased recommendations with clear success metrics",
+        "config": {
+          "category": "policy",
+          "citationStyle": "apa",
+          "citationFormat": "endnotes"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-blog",
+      "meta": {
+        "type": "output-template",
+        "title": "Blog Post",
+        "description": "Engaging content for general audience with practical takeaways",
+        "icon": "article",
+        "status": "active",
+        "tags": ["content", "writer"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Blog Post",
+        "description": "Engaging content for general audience with practical takeaways",
+        "agentType": "writer",
+        "systemPrompt": "Transform research into an engaging blog post.\n\nFocus on: accessibility, narrative flow, practical takeaways.\nVoice: Conversational but authoritative, engaging.\nStructure: Hook → Story/Context → Key Insights → Actionable Conclusion.\nCitations: Minimal, hyperlinks to sources.\n\nKey guidelines:\n- Open with a hook that creates curiosity or relevance\n- Use concrete examples and relatable analogies\n- Break complex ideas into digestible chunks\n- Include subheadings for scanability\n- End with clear takeaways the reader can act on",
+        "config": {
+          "category": "content",
+          "citationStyle": "mla",
+          "citationFormat": "inline"
+        },
+        "status": "active",
+        "isDefault": true,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-deep-dive",
+      "meta": {
+        "type": "output-template",
+        "title": "Deep Dive",
+        "description": "Exhaustive research exploration with maximum branching depth",
+        "icon": "biotech",
+        "status": "active",
+        "tags": ["research", "thorough"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Deep Dive",
+        "description": "Exhaustive research exploration with maximum branching depth",
+        "agentType": "research",
+        "systemPrompt": "Conduct exhaustive research exploration.\n\nBehavior: Maximum branching depth (5+), explore tangential connections.\nSources: Prioritize primary sources, academic papers, technical documentation.\nQuality: Strict confidence thresholds, flag all uncertainty.\n\nKey guidelines:\n- Follow every promising thread to its conclusion\n- Cross-reference multiple sources for verification\n- Document the research trail for reproducibility\n- Note contradictions and unresolved questions\n- Synthesize findings into a coherent knowledge map",
+        "config": {
+          "category": "research"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-quick-scan",
+      "meta": {
+        "type": "output-template",
+        "title": "Quick Scan",
+        "description": "Rapid research overview with limited depth",
+        "icon": "bolt",
+        "status": "active",
+        "tags": ["research", "fast"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Quick Scan",
+        "description": "Rapid research overview with limited depth",
+        "agentType": "research",
+        "systemPrompt": "Conduct rapid research overview.\n\nBehavior: Limited depth (2-3 branches), focus on top results.\nSources: Balanced mix, prefer recent publications.\nQuality: Lower confidence thresholds acceptable, prioritize speed.\n\nKey guidelines:\n- Focus on the most authoritative sources first\n- Extract key facts and figures quickly\n- Identify major themes without exhaustive detail\n- Flag areas that warrant deeper investigation\n- Deliver actionable summary within time constraints",
+        "config": {
+          "category": "research"
+        },
+        "status": "active",
+        "isDefault": true,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-academic",
+      "meta": {
+        "type": "output-template",
+        "title": "Academic Review",
+        "description": "Scholarly literature review with citation emphasis",
+        "icon": "library_books",
+        "status": "active",
+        "tags": ["research", "academic"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Academic Review",
+        "description": "Scholarly literature review with citation emphasis",
+        "agentType": "research",
+        "systemPrompt": "Conduct scholarly literature review.\n\nBehavior: Moderate depth (3-4), follow citation trails.\nSources: Academic databases, peer-reviewed journals, scholarly books.\nQuality: High confidence required, comprehensive citation tracking.\n\nKey guidelines:\n- Start with seminal works and follow citation networks\n- Identify key researchers and research groups\n- Map the evolution of ideas over time\n- Note methodological approaches and their limitations\n- Synthesize current state of knowledge and gaps",
+        "config": {
+          "category": "research"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    },
+    {
+      "id": "ot-seed-trends",
+      "meta": {
+        "type": "output-template",
+        "title": "Trend Analysis",
+        "description": "Trend-focused research emphasizing temporal patterns",
+        "icon": "trending_up",
+        "status": "active",
+        "tags": ["research", "trends"]
+      },
+      "payload": {
+        "version": 1,
+        "name": "Trend Analysis",
+        "description": "Trend-focused research emphasizing temporal patterns",
+        "agentType": "research",
+        "systemPrompt": "Conduct trend-focused research.\n\nBehavior: Moderate depth, emphasis on temporal patterns.\nSources: News, industry reports, recent publications.\nQuality: Balanced thresholds, highlight emerging patterns.\n\nKey guidelines:\n- Track how topics have evolved over time\n- Identify inflection points and catalysts for change\n- Compare current state to historical baselines\n- Project forward based on observable trajectories\n- Distinguish signal from noise in emerging developments",
+        "config": {
+          "category": "research"
+        },
+        "status": "active",
+        "isDefault": false,
+        "source": "system-seed"
+      }
+    }
+  ]
+}

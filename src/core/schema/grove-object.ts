@@ -27,6 +27,7 @@ export type GroveObjectType =
   | 'tier-mapping'          // Sprint: S9-SL-Federation v1
   | 'federation-exchange'   // Sprint: S9-SL-Federation v1
   | 'trust-relationship'    // Sprint: S9-SL-Federation v1
+  | 'output-template'       // Sprint: prompt-template-architecture-v1
   | string;
 
 /**
@@ -142,5 +143,6 @@ export type GroveObjectPayloadMap = {
   'tier-mapping': unknown;       // Sprint: S9-SL-Federation v1
   'federation-exchange': unknown; // Sprint: S9-SL-Federation v1
   'trust-relationship': unknown; // Sprint: S9-SL-Federation v1
+  'output-template': unknown;    // Sprint: prompt-template-architecture-v1
   [key: string]: unknown;
 };

@@ -109,6 +109,7 @@ export function createBedrockConsole<T>(
 
     // Data layer
     // Sprint: experience-console-cleanup-v1 - added createTyped for polymorphic consoles
+    // Sprint: prompt-template-architecture-v1 - added refetch for fork flow sync
     const {
       objects,
       loading,
@@ -118,6 +119,7 @@ export function createBedrockConsole<T>(
       remove,
       duplicate,
       createTyped,
+      refetch,
     } = useData();
 
     // Collection view state
@@ -440,6 +442,7 @@ export function createBedrockConsole<T>(
               onSetCopilotInput={setCopilotInput}
               onSelectObject={setSelectedId}
               singletonOps={singletonOps}
+              onRefresh={refetch}
             />
           ),
           copilot: config.copilot.enabled ? (
@@ -512,6 +515,7 @@ export function createBedrockConsole<T>(
                 onSetCopilotInput={(input) => setCopilotInputRef.current(input)}
                 onSelectObject={setSelectedId}
                 singletonOps={singletonOps}
+                onRefresh={refetch}
               />
             ),
             copilot: config.copilot.enabled ? (

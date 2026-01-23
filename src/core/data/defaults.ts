@@ -9,12 +9,15 @@ import type { Persona } from '@/data/narratives-schema';
 import type { PromptPayload } from '@core/schema/prompt';
 import type { PromptProvenance, PromptSurface, HighlightTrigger } from '@core/context-fields/types';
 import { DEFAULT_LIFECYCLE_CONFIG_PAYLOAD, type LifecycleConfigPayload } from '@core/schema/lifecycle-config';
+import type { OutputTemplatePayload } from '@core/schema/output-template';
 
 // Import prompt data files
 import basePrompts from '@data/prompts/base.prompts.json';
 import drChiangPrompts from '@data/prompts/dr-chiang.prompts.json';
 import wayneTurnerPrompts from '@data/prompts/wayne-turner.prompts.json';
 import highlightPrompts from '@data/prompts/highlights.prompts.json'; // Sprint: kinetic-highlights-v1
+// Sprint: prompt-template-architecture-v1 - Output template seeds
+import outputTemplateSeeds from '../../../data/seeds/output-templates.json';
 
 const EMPTY_DEFAULTS: GroveObject<unknown>[] = [];
 
@@ -141,6 +144,46 @@ function promptToGroveObject(legacy: LegacyPrompt): GroveObject<PromptPayload> {
   };
 }
 
+// =============================================================================
+// Output Template Seed Type (from JSON file)
+// Sprint: prompt-template-architecture-v1
+// =============================================================================
+
+interface OutputTemplateSeed {
+  id: string;
+  meta: {
+    type: string;
+    title: string;
+    description?: string;
+    icon?: string;
+    status: string;
+    tags?: string[];
+  };
+  payload: OutputTemplatePayload;
+}
+
+/**
+ * Transform an output template seed to GroveObject format.
+ * Sprint: prompt-template-architecture-v1
+ */
+function outputTemplateSeedToGroveObject(seed: OutputTemplateSeed): GroveObject<OutputTemplatePayload> {
+  const now = new Date().toISOString();
+  return {
+    meta: {
+      id: seed.id,
+      type: 'output-template',
+      title: seed.meta.title,
+      description: seed.meta.description,
+      icon: seed.meta.icon,
+      status: (seed.meta.status as 'active' | 'draft' | 'archived') || 'active',
+      tags: seed.meta.tags,
+      createdAt: now,
+      updatedAt: now,
+    },
+    payload: seed.payload,
+  };
+}
+
 /**
  * Get default objects for a type.
  * Called when localStorage is empty and Supabase is unreachable.
@@ -180,6 +223,11 @@ export function getDefaults<T>(type: GroveObjectType): GroveObject<T>[] {
         payload: DEFAULT_LIFECYCLE_CONFIG_PAYLOAD,
       };
       return [defaultConfig] as GroveObject<T>[];
+    }
+    // Sprint: prompt-template-architecture-v1 - Output template seeds
+    case 'output-template': {
+      const seeds = (outputTemplateSeeds as { templates: OutputTemplateSeed[] }).templates;
+      return seeds.map(outputTemplateSeedToGroveObject) as GroveObject<T>[];
     }
     default:
       return EMPTY_DEFAULTS as GroveObject<T>[];
