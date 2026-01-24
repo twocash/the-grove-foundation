@@ -82,6 +82,18 @@ export interface PipelineResult {
   evidence?: EvidenceBundle;
 
   /**
+   * S22-WP: Raw research branches with evidence for storage
+   * These go directly to ResearchSprout.branches for DocumentViewer display
+   */
+  branches?: ResearchBranch[];
+
+  /**
+   * S22-WP: Aggregated evidence array for storage
+   * These go directly to ResearchSprout.evidence for flat access
+   */
+  rawEvidence?: Evidence[];
+
+  /**
    * Template provenance (Sprint: research-template-wiring-v1)
    * Present when templateId was provided or default was used.
    */
@@ -295,6 +307,9 @@ export async function executeResearchPipeline(
   let writingDuration = 0;
   let evidenceBundle: EvidenceBundle | undefined;
   let document: ResearchDocument | undefined;
+  // S22-WP: Store research results for both success and error returns
+  let researchBranches: ResearchBranch[] | undefined;
+  let researchEvidence: Evidence[] | undefined;
 
   try {
     // =========================================================================
@@ -343,6 +358,10 @@ export async function executeResearchPipeline(
     // Build evidence bundle from research result
     evidenceBundle = buildEvidenceBundle(sprout.id, researchResult);
     console.log(`[Pipeline] Evidence bundle created: ${evidenceBundle.totalSources} sources`);
+
+    // S22-WP: Capture raw research data for storage (available in catch block too)
+    researchBranches = researchResult.branches;
+    researchEvidence = researchResult.evidence;
 
     // =========================================================================
     // Phase 2: Writing
@@ -393,10 +412,14 @@ export async function executeResearchPipeline(
     console.log(`[Pipeline] Pipeline completed successfully in ${totalDuration}ms`);
 
     // Sprint: research-template-wiring-v1 - Build result with template provenance
+    // S22-WP: Include branches and rawEvidence for storage
     const result: PipelineResult = {
       success: true,
       document,
       evidence: evidenceBundle,
+      // S22-WP: Raw branches/evidence from research agent for direct storage
+      branches: researchBranches,
+      rawEvidence: researchEvidence,
       execution: {
         startedAt,
         completedAt,
@@ -442,10 +465,14 @@ export async function executeResearchPipeline(
     const completedAt = new Date().toISOString();
 
     // Sprint: research-template-wiring-v1 - Include template provenance even on error
+    // S22-WP: Include branches/evidence for partial success (research OK, writing failed)
     const errorResult: PipelineResult = {
       success: false,
       document: undefined,
       evidence: evidenceBundle, // Return partial results if available
+      // S22-WP: If research succeeded, preserve branches/evidence even if writing failed
+      branches: researchBranches,
+      rawEvidence: researchEvidence,
       error: {
         phase,
         message: errorMessage,

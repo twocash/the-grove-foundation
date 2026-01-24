@@ -1,6 +1,7 @@
 // src/surface/components/modals/SproutFinishingRoom/json-render/index.ts
 // Sprint: S2-SFR-Display - US-C001 json-render module exports
 // Updated: S13-BD-LayoutDensity-v1 - Added layout density exports
+// Updated: S22-WP research-writer-panel-v1 - Added evidence catalog/registry
 // Pattern: json-render (Vercel Labs pattern for AI-generated component trees)
 
 // Catalog - component vocabulary with Zod schemas
@@ -29,8 +30,31 @@ export type {
 export { ResearchRegistry } from './registry';
 export type { ComponentRegistry } from './registry';
 
+// Evidence Catalog & Registry (S22-WP) - for RAW research display
+export {
+  EvidenceCatalog,
+  EvidenceHeaderSchema,
+  BranchHeaderSchema,
+  SourceCardSchema,
+  FindingsListSchema,
+  EvidenceSummarySchema,
+} from './evidence-catalog';
+export type {
+  EvidenceCatalogType,
+  EvidenceHeaderProps,
+  BranchHeaderProps,
+  SourceCardProps,
+  FindingsListProps,
+  EvidenceSummaryProps,
+} from './evidence-catalog';
+export { EvidenceRegistry } from './evidence-registry';
+
 // Transform - converts domain models to render trees
 export { researchDocumentToRenderTree } from './transform';
+export {
+  evidenceBundleToRenderTree,
+  sproutResearchToRenderTree,
+} from './evidence-transform';
 
 // Renderer - renders trees using registry
 export { Renderer, useLayoutContext } from './Renderer';

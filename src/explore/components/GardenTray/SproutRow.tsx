@@ -33,8 +33,12 @@ interface SproutRowProps {
 export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false, onSelect }: SproutRowProps) {
   const [isResultsExpanded, setIsResultsExpanded] = useState(false);
 
-  // Can show results only for completed sprouts with synthesis
-  const hasResults = sprout.status === 'completed' && sprout.synthesis;
+  // S22-WP: Allow viewing results for:
+  // 1. Completed sprouts with synthesis (full success)
+  // 2. Blocked sprouts with branches/evidence (partial success - research OK, writing failed)
+  const hasResults =
+    (sprout.status === 'completed' && sprout.synthesis) ||
+    (sprout.status === 'blocked' && (sprout.branches?.length ?? 0) > 0);
 
   const handleClick = () => {
     if (hasResults && isExpanded) {

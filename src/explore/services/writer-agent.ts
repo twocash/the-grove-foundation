@@ -104,60 +104,11 @@ export async function writeResearchDocument(
 
   onProgress?.({ type: 'preparing', message: 'Preparing evidence for writing...' });
 
-  // S21-RL: Check if evidence is from web search (already high quality)
-  // If evidence content is already rich (>3000 chars), pass through directly
-  // This preserves Claude's full web search results without re-summarizing
-  const allEvidenceContent = evidenceBundle.branches
-    .flatMap(b => b.sources.map(s => s.snippet || ''))
-    .join('\n');
-  const isWebSearchEvidence = allEvidenceContent.length > 3000 ||
-    evidenceBundle.branches.some(b =>
-      b.sources.some(s => s.url && s.url.includes('http'))
-    );
-
-  if (isWebSearchEvidence) {
-    console.log('[WriterAgent] Web search evidence detected - using pass-through mode');
-    console.log('[WriterAgent] Evidence content length:', allEvidenceContent.length);
-
-    onProgress?.({ type: 'formatting', message: 'Formatting web search results...' });
-
-    // Extract citations from sources
-    // S21-RL: Safe URL parsing - source.url may be "claude-web-search" not a real URL
-    const citations: Citation[] = evidenceBundle.branches.flatMap((branch, branchIndex) =>
-      branch.sources.map((source, sourceIndex) => ({
-        index: branchIndex * 100 + sourceIndex + 1,
-        title: source.title || 'Source',
-        url: source.url || '',
-        snippet: source.snippet || '',
-        domain: extractDomain(source.url),
-        accessedAt: source.accessedAt || new Date().toISOString(),
-      }))
-    );
-
-    // Build position from first branch evidence
-    const firstBranchContent = evidenceBundle.branches[0]?.sources[0]?.snippet || '';
-    const position = firstBranchContent.slice(0, 500) + (firstBranchContent.length > 500 ? '...' : '');
-
-    // Build analysis from all evidence (full content!)
-    const analysis = evidenceBundle.branches
-      .flatMap(b => b.sources.map(s => s.snippet || ''))
-      .join('\n\n');
-
-    onProgress?.({ type: 'complete' });
-
-    return createResearchDocument(
-      documentId,
-      evidenceBundle.sproutId,
-      query,
-      position,
-      analysis,  // Full content, not summarized!
-      citations,
-      evidenceBundle.confidenceScore,
-      'Results from Claude web search. Sources verified via live search.'
-    );
-  }
-
-  // Standard path: Use LLM to write document from evidence
+  // S22-WP: Pass-through hack REMOVED. Writer ALWAYS uses LLM transformation.
+  // Raw evidence is now displayed in center panel via EvidenceRegistry.
+  // Writer produces a reasoned, cited synthesis based on user's selected template.
+  //
+  // Use LLM to write document from evidence
   // Sprint: research-template-wiring-v1 - Use systemPrompt override if provided
   // This enables Writer Templates (blog, engineering, vision) to control output style
   const systemPrompt = options?.systemPromptOverride || buildWriterSystemPrompt(config);

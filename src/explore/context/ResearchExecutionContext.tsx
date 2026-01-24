@@ -96,7 +96,11 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
         await transitionStatus(sprout.id, 'completed', 'Research pipeline completed', 'system');
 
         // Update with results - including the full ResearchDocument for display
+        // S22-WP: Include branches and evidence for DocumentViewer display
         await updateResults(sprout.id, {
+          // S22-WP: Raw research data for evidence display in center panel
+          branches: result.branches,
+          evidence: result.rawEvidence,
           synthesis: {
             documentId: result.document.id,
             model: result.document.metadata?.modelId || 'unknown',
@@ -122,7 +126,10 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
           'system'
         );
 
+        // S22-WP: Preserve research data even if writing failed (partial success)
         await updateResults(sprout.id, {
+          branches: result.branches,
+          evidence: result.rawEvidence,
           execution: {
             startedAt: result.execution.startedAt,
             completedAt: result.execution.completedAt,

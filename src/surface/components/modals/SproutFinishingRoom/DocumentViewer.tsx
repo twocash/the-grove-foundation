@@ -1,5 +1,6 @@
 // src/surface/components/modals/SproutFinishingRoom/DocumentViewer.tsx
-// Sprint: S2-SFR-Display - US-C002 Render ResearchDocument via json-render
+// Sprint: S22-WP research-writer-panel-v1 (updated from S2-SFR-Display)
+// Displays RAW research via EvidenceRegistry, OR styled document via ResearchRegistry
 
 import React, { useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
@@ -8,6 +9,8 @@ import {
   ResearchRegistry,
   researchDocumentToRenderTree,
 } from './json-render';
+import { EvidenceRegistry } from './json-render/evidence-registry';
+import { sproutResearchToRenderTree } from './json-render/evidence-transform';
 
 export interface DocumentViewerProps {
   sprout: Sprout;
@@ -16,8 +19,10 @@ export interface DocumentViewerProps {
 /**
  * DocumentViewer - Center column (flex: 1)
  *
- * US-C002: Renders ResearchDocument via json-render when present.
- * Falls back to raw response display for non-research sprouts.
+ * S22-WP: Display hierarchy (priority order):
+ * 1. Raw research evidence via EvidenceRegistry (user SEES all their research)
+ * 2. Styled document via ResearchRegistry (Writer output)
+ * 3. Fallback: raw response text
  *
  * US-C003: Raw JSON toggle (implemented here)
  */
@@ -25,21 +30,46 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
   // US-C003: Toggle between rendered and raw JSON view
   const [showRawJson, setShowRawJson] = useState(false);
 
-  // Check if we have structured research data
+  // Check what structured data we have
+  const hasResearchEvidence =
+    !!sprout.researchBranches?.length ||
+    !!sprout.researchEvidence?.length ||
+    !!sprout.researchSynthesis;
   const hasResearchDocument = !!sprout.researchDocument;
 
-  // Build render tree if we have research document
-  const renderTree = hasResearchDocument
+  // Build render tree based on available data
+  // Priority: Evidence (raw research) > Document (Writer output)
+  const evidenceTree = hasResearchEvidence
+    ? sproutResearchToRenderTree(sprout)
+    : null;
+  const documentTree = hasResearchDocument
     ? researchDocumentToRenderTree(sprout.researchDocument!)
     : null;
+
+  // Determine which mode to display
+  const displayMode: 'evidence' | 'document' | 'fallback' = evidenceTree
+    ? 'evidence'
+    : documentTree
+      ? 'document'
+      : 'fallback';
+
+  const hasStructuredData = displayMode !== 'fallback';
+
+  // Determine label for the header
+  const modeLabel =
+    displayMode === 'evidence'
+      ? 'Research Evidence'
+      : displayMode === 'document'
+        ? 'Styled Document'
+        : 'Response';
 
   return (
     <main className="flex-1 overflow-y-auto bg-paper dark:bg-ink flex flex-col">
       {/* US-C003: View toggle (only show if we have structured data) */}
-      {hasResearchDocument && (
+      {hasStructuredData && (
         <div className="flex-shrink-0 px-6 py-3 border-b border-ink/10 dark:border-white/10 flex items-center justify-between">
           <span className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase">
-            Research Document
+            {modeLabel}
           </span>
           <button
             onClick={() => setShowRawJson(!showRawJson)}
@@ -53,15 +83,33 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
 
       {/* Main content area */}
       <div className="flex-1 overflow-y-auto p-6">
-        {hasResearchDocument ? (
+        {displayMode === 'evidence' ? (
           showRawJson ? (
-            // US-C003: Raw JSON view
+            // Raw JSON view of evidence data
+            <pre className="text-xs font-mono text-ink dark:text-paper/80 whitespace-pre-wrap bg-ink/5 dark:bg-white/5 p-4 rounded overflow-x-auto">
+              {JSON.stringify(
+                {
+                  researchBranches: sprout.researchBranches,
+                  researchEvidence: sprout.researchEvidence,
+                  researchSynthesis: sprout.researchSynthesis,
+                },
+                null,
+                2
+              )}
+            </pre>
+          ) : (
+            // S22-WP: Evidence display via EvidenceRegistry
+            <Renderer tree={evidenceTree!} registry={EvidenceRegistry} />
+          )
+        ) : displayMode === 'document' ? (
+          showRawJson ? (
+            // Raw JSON view of document
             <pre className="text-xs font-mono text-ink dark:text-paper/80 whitespace-pre-wrap bg-ink/5 dark:bg-white/5 p-4 rounded overflow-x-auto">
               {JSON.stringify(sprout.researchDocument, null, 2)}
             </pre>
           ) : (
-            // US-C002: json-render view
-            <Renderer tree={renderTree!} registry={ResearchRegistry} />
+            // Styled document via ResearchRegistry
+            <Renderer tree={documentTree!} registry={ResearchRegistry} />
           )
         ) : (
           // Fallback: Raw response display for non-research sprouts
