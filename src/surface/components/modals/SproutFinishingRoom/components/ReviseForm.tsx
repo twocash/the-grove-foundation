@@ -3,7 +3,7 @@
 // Sprint: prompt-template-architecture-v1 - Added output template selection
 
 import React, { useState, useMemo } from 'react';
-import { useOutputTemplateData } from '../../../../../../bedrock/consoles/ExperienceConsole/useOutputTemplateData';
+import { useOutputTemplateData } from '@bedrock/consoles/ExperienceConsole/useOutputTemplateData';
 
 export interface ReviseFormProps {
   sproutId: string;

@@ -164,6 +164,19 @@ export interface ResearchSprout {
   updatedAt: string;
 
   // ─────────────────────────────────────────────────────────────
+  // Template Selection (Sprint: research-template-wiring-v1)
+  // ─────────────────────────────────────────────────────────────
+
+  /**
+   * Output template ID for research execution.
+   * Links to output_templates table for provenance tracking.
+   * Template's systemPrompt shapes the research agent's behavior.
+   *
+   * DEX Pillar III: Provenance as Infrastructure
+   */
+  templateId?: string;
+
+  // ─────────────────────────────────────────────────────────────
   // Research Configuration
   // ─────────────────────────────────────────────────────────────
 
@@ -357,6 +370,12 @@ export interface CreateResearchSproutInput {
   /** Parent sprout ID if child spawn */
   parentSproutId?: string;
 
+  /**
+   * Output template ID for research execution.
+   * Sprint: research-template-wiring-v1
+   */
+  templateId?: string;
+
   /** Inferred strategy (from grove config) */
   strategy: ResearchStrategy;
 
@@ -413,6 +432,9 @@ export function createResearchSprout(
     sessionId: input.sessionId,
     createdAt: now,
     updatedAt: now,
+
+    // Template selection (Sprint: research-template-wiring-v1)
+    templateId: input.templateId,
 
     strategy: input.strategy,
     branches: input.branches,

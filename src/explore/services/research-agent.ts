@@ -42,6 +42,13 @@ export interface ResearchAgentConfig {
 
   /** Simulated delay per query in ms (default: 500) */
   simulatedQueryDelay?: number;
+
+  /**
+   * System prompt from output template.
+   * Sprint: research-template-wiring-v1
+   * Passed to Claude API to shape research behavior.
+   */
+  systemPrompt?: string;
 }
 
 /**
@@ -108,6 +115,7 @@ const DEFAULT_CONFIG: Required<ResearchAgentConfig> = {
   maxApiCalls: 10,
   simulationMode: false, // evidence-collection-v1: Real execution by default
   simulatedQueryDelay: 500,
+  systemPrompt: '', // Uses API default if empty - template override via config
 };
 
 // =============================================================================
@@ -184,6 +192,10 @@ export function createResearchAgent(
     console.log(`[ResearchAgent] Starting research for sprout: ${sprout.id}`);
     console.log(`[ResearchAgent] Branches to process: ${sprout.branches.length}`);
     console.log(`[ResearchAgent] Simulation mode: ${cfg.simulationMode}`);
+    // Sprint: research-template-wiring-v1 - Log template systemPrompt presence
+    if (cfg.systemPrompt) {
+      console.log(`[ResearchAgent] Template systemPrompt configured (${cfg.systemPrompt.length} chars)`);
+    }
 
     const startedAt = new Date().toISOString();
     let apiCallCount = 0;
@@ -229,13 +241,22 @@ export function createResearchAgent(
             break;
           }
 
-          const query = branch.queries[i];
+          // Sprint: S21-RL - Use notes as primary research query if provided
+          // Notes contain user's detailed research prompt from the modal
+          // For first query in first branch, prioritize notes over auto-generated queries
+          const isFirstQuery = i === 0 && sprout.branches.indexOf(branch) === 0;
+          const query = (isFirstQuery && sprout.notes) ? sprout.notes : branch.queries[i];
+
+          // For progress display, show a truncated version if using long notes
+          const displayQuery = query.length > 100
+            ? query.slice(0, 100) + '...'
+            : query;
 
           // Emit query executing
           onProgress?.({
             type: 'query-executing',
             branchId: branch.id,
-            query,
+            query: displayQuery,  // Show truncated in UI
             index: i,
           });
 
@@ -249,32 +270,98 @@ export function createResearchAgent(
             evidence = generateSimulatedEvidence(branch.id, query, i);
             tokenCount += 150 + Math.floor(Math.random() * 100);
           } else {
-            // Real execution mode via ResearchExecutionEngine
-            // Note: Full engine integration at sprout level coming in future refactor
-            // For now, generate placeholder evidence with real execution logging
-            const engineConfig: ResearchAgentConfigPayload = {
-              ...DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD,
-              maxApiCalls: cfg.maxApiCalls,
-              branchDelay: cfg.branchDelay,
-            };
+            // Real execution mode - call Claude Deep Research API
+            // Sprint: research-template-wiring-v1 - API integration
+            console.log(`[ResearchAgent] Real execution mode - query: "${displayQuery}" (${query.length} chars)`);
+            if (sprout.notes && isFirstQuery) {
+              console.log(`[ResearchAgent] Using user notes as research query`);
+            }
+            if (cfg.systemPrompt) {
+              console.log(`[ResearchAgent] Using template systemPrompt (${cfg.systemPrompt.length} chars)`);
+            }
 
-            console.log(`[ResearchAgent] Real execution mode - query: "${query}"`);
-            console.log(`[ResearchAgent] Engine config:`, engineConfig);
+            try {
+              const response = await fetch('/api/research/deep', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  query,
+                  context: branch.label,
+                  systemPrompt: cfg.systemPrompt,  // From template!
+                }),
+              });
 
-            // Placeholder evidence with real execution marker
-            evidence = {
-              id: `ev-${branch.id}-${i}-${Date.now().toString(36)}`,
-              source: `https://search.grove/real/${encodeURIComponent(query.slice(0, 20))}`,
-              sourceType: 'practitioner',
-              content: `[Real search pending for: "${query}"]\n\n` +
-                `Gemini grounding integration required.\n` +
-                `Branch: ${branch.label}\n` +
-                `Query ${i + 1}/${branch.queries.length}`,
-              relevance: 0.5,
-              confidence: 0.5,
-              collectedAt: new Date().toISOString(),
-            };
-            tokenCount += 100; // Placeholder token count
+              if (!response.ok) {
+                throw new Error(`API error: ${response.status} ${response.statusText}`);
+              }
+
+              const result = await response.json();
+              console.log(`[ResearchAgent] API response received:`, {
+                findingsCount: result.findings?.length || 0,
+                hasSummary: !!result.summary,
+              });
+
+              // Convert API result to Evidence format
+              // Include the FULL research summary with ALL citations
+              // S21-RL: Return complete research, not just first finding
+              console.log(`[ResearchAgent] Full response: ${result.findings?.length || 0} findings, ${result.summary?.length || 0} chars`);
+
+              // Build comprehensive content with all citations
+              let fullContent = result.summary || '';
+
+              // Append all findings as citations
+              if (result.findings && result.findings.length > 0) {
+                fullContent += '\n\n## Sources\n';
+                for (const finding of result.findings) {
+                  if (finding.source && finding.source !== 'claude-research') {
+                    fullContent += `\n- [${finding.sourceTitle || 'Source'}](${finding.source})`;
+                    if (finding.claim) {
+                      fullContent += `\n  > ${finding.claim}`;
+                    }
+                  }
+                }
+              }
+
+              // Also include webCitations if present
+              if (result.webCitations && result.webCitations.length > 0) {
+                if (!fullContent.includes('## Sources')) {
+                  fullContent += '\n\n## Sources\n';
+                }
+                for (const cit of result.webCitations) {
+                  fullContent += `\n- [${cit.title || 'Source'}](${cit.url})`;
+                  if (cit.cited_text) {
+                    fullContent += `\n  > ${cit.cited_text}`;
+                  }
+                }
+              }
+
+              evidence = {
+                id: `ev-${branch.id}-${i}-${Date.now().toString(36)}`,
+                source: 'claude-web-search',
+                sourceType: 'practitioner',
+                content: fullContent,
+                relevance: 0.9,
+                confidence: 0.9,
+                collectedAt: new Date().toISOString(),
+              };
+
+              console.log(`[ResearchAgent] Evidence content length: ${fullContent.length} chars`);
+
+              tokenCount += 500; // Approximate tokens for API call
+
+            } catch (error) {
+              console.error('[ResearchAgent] API call failed:', error);
+              // Fallback evidence on error
+              evidence = {
+                id: `ev-${branch.id}-${i}-${Date.now().toString(36)}`,
+                source: 'error',
+                sourceType: 'practitioner',
+                content: `Research failed: ${error instanceof Error ? error.message : String(error)}`,
+                relevance: 0,
+                confidence: 0,
+                collectedAt: new Date().toISOString(),
+              };
+            }
           }
 
           apiCallCount++;

@@ -9,7 +9,9 @@
 // 3. Pulsing badge indicators for pending/blocked items
 // 4. Results display for completed sprouts
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+// Sprint: research-template-wiring-v1 - Import template data hook
+import { useOutputTemplateData } from '../bedrock/consoles/ExperienceConsole/useOutputTemplateData';
 import type { EditableManifest, PromptArchitectState } from './hooks/usePromptArchitect';
 import type { ResearchBranch, ResearchStrategy } from '@core/schema/research-strategy';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
@@ -87,6 +89,39 @@ export function GardenInspector({
   // Filter preset for list view
   const [filterPreset, setFilterPreset] = useState<FilterPresetId>('active');
 
+  // Sprint: research-template-wiring-v1 - Template selection state
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+
+  // Get templates to find default for initialization
+  const { getDefault } = useOutputTemplateData();
+
+  // Handler for template changes - updates both local state and manifest
+  const handleTemplateChange = useCallback((templateId: string) => {
+    setSelectedTemplateId(templateId);
+    // Sync to manifest for sprout creation
+    onManifestUpdate({ templateId });
+  }, [onManifestUpdate]);
+
+  // Initialize template selection with default when entering confirmation mode
+  useEffect(() => {
+    if (architectState === 'confirming' && !selectedTemplateId) {
+      const defaultTemplate = getDefault('research');
+      if (defaultTemplate) {
+        const templateId = defaultTemplate.meta.id;
+        setSelectedTemplateId(templateId);
+        // Also sync default to manifest
+        onManifestUpdate({ templateId });
+      }
+    }
+  }, [architectState, selectedTemplateId, getDefault, onManifestUpdate]);
+
+  // Reset template selection when leaving confirmation mode
+  useEffect(() => {
+    if (architectState !== 'confirming') {
+      setSelectedTemplateId('');
+    }
+  }, [architectState]);
+
   // Progress state for active sprouts (Sprint: progress-streaming-ui-v1)
   const { progressState, resetProgress } = useResearchExecution();
 
@@ -138,6 +173,8 @@ export function GardenInspector({
             onManifestUpdate={onManifestUpdate}
             onAddBranch={onAddBranch}
             onRemoveBranch={onRemoveBranch}
+            selectedTemplateId={selectedTemplateId}
+            onTemplateChange={handleTemplateChange}
           />
         )}
 
@@ -298,6 +335,10 @@ interface ConfirmationViewProps {
   onManifestUpdate: (updates: Partial<EditableManifest>) => void;
   onAddBranch: (branch: ResearchBranch) => void;
   onRemoveBranch: (branchId: string) => void;
+  /** Sprint: research-template-wiring-v1 - Selected template ID for research style */
+  selectedTemplateId: string;
+  /** Sprint: research-template-wiring-v1 - Handler for template selection change */
+  onTemplateChange: (templateId: string) => void;
 }
 
 function ConfirmationView({
@@ -307,9 +348,26 @@ function ConfirmationView({
   onManifestUpdate,
   onAddBranch: _onAddBranch,
   onRemoveBranch: _onRemoveBranch,
+  selectedTemplateId,
+  onTemplateChange,
 }: ConfirmationViewProps) {
   // MVP: Simplified to title + prompt only
   // TODO: Restore branches, strategy, tags when prompt patterns validated
+
+  // Sprint: research-template-wiring-v1 - Get research templates
+  const { objects: templates, loading: templatesLoading } = useOutputTemplateData();
+
+  // Filter to active research templates
+  const researchTemplates = useMemo(() => {
+    return templates.filter(
+      (t) => t.payload.agentType === 'research' && t.payload.status === 'active'
+    );
+  }, [templates]);
+
+  // Get selected template for description hint
+  const selectedTemplate = useMemo(() => {
+    return researchTemplates.find((t) => t.meta.id === selectedTemplateId);
+  }, [researchTemplates, selectedTemplateId]);
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onManifestUpdate({ title: e.target.value });
@@ -387,6 +445,44 @@ function ConfirmationView({
                      transition-colors"
         />
       </div>
+
+      {/* Sprint: research-template-wiring-v1 - Research Style selector */}
+      {!templatesLoading && researchTemplates.length > 0 && (
+        <div>
+          <label
+            htmlFor="research-style-select"
+            className="block text-xs font-medium text-[var(--glass-text-muted)] mb-1.5"
+          >
+            Research Style
+          </label>
+          <select
+            id="research-style-select"
+            value={selectedTemplateId}
+            onChange={(e) => onTemplateChange(e.target.value)}
+            disabled={isProcessing}
+            className="w-full px-3 py-2 text-sm bg-[var(--glass-solid)]
+                       text-[var(--glass-text-primary)]
+                       border border-[var(--glass-border)] rounded-lg
+                       focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 focus:border-[var(--neon-cyan)]/50
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transition-colors cursor-pointer"
+            aria-label="Select research style"
+          >
+            {researchTemplates.map((template) => (
+              <option key={template.meta.id} value={template.meta.id}>
+                {template.payload.name}
+                {template.payload.isDefault ? ' (Default)' : ''}
+              </option>
+            ))}
+          </select>
+          {/* Description hint - updates on selection (Progressive Disclosure) */}
+          {selectedTemplate && (
+            <p className="mt-1.5 text-xs text-[var(--glass-text-muted)]">
+              {selectedTemplate.payload.description || 'Research template for AI-guided investigation.'}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Prompt / Instructions (MVP: maps to notes field, will become system prompt) */}
       <div>

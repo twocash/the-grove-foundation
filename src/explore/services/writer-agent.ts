@@ -40,8 +40,42 @@ interface LLMWriterOutput {
 }
 
 // =============================================================================
+// Utilities
+// =============================================================================
+
+/**
+ * Safely extract domain from URL string.
+ * S21-RL: Source may be "claude-web-search" instead of a real URL.
+ */
+function extractDomain(url: string | undefined): string {
+  if (!url) return 'unknown';
+  try {
+    return new URL(url).hostname;
+  } catch {
+    // Not a valid URL - return the source identifier or 'unknown'
+    return url.includes('.') ? url : 'claude-research';
+  }
+}
+
+// =============================================================================
 // Service
 // =============================================================================
+
+/**
+ * Writer options for advanced configuration
+ * Sprint: research-template-wiring-v1
+ */
+export interface WriterOptions {
+  /**
+   * Direct systemPrompt override from Output Template.
+   * When provided, bypasses buildWriterSystemPrompt(config) entirely.
+   * This enables user-selected Writer Templates (blog, engineering, vision, etc.)
+   *
+   * DEX Pillar I: Declarative Sovereignty
+   * Template defines behavior, not hardcoded prompt builder.
+   */
+  systemPromptOverride?: string;
+}
 
 /**
  * Transform an EvidenceBundle into a ResearchDocument
@@ -50,13 +84,15 @@ interface LLMWriterOutput {
  * @param query - The original research query
  * @param config - Writer configuration
  * @param onProgress - Optional progress callback
+ * @param options - Optional writer options (Sprint: research-template-wiring-v1)
  * @returns ResearchDocument
  */
 export async function writeResearchDocument(
   evidenceBundle: EvidenceBundle,
   query: string,
   config: WriterAgentConfigPayload,
-  onProgress?: OnWriterProgressFn
+  onProgress?: OnWriterProgressFn,
+  options?: WriterOptions
 ): Promise<ResearchDocument> {
   const documentId = `doc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
@@ -68,10 +104,72 @@ export async function writeResearchDocument(
 
   onProgress?.({ type: 'preparing', message: 'Preparing evidence for writing...' });
 
-  // Build prompts
-  const systemPrompt = buildWriterSystemPrompt(config);
+  // S21-RL: Check if evidence is from web search (already high quality)
+  // If evidence content is already rich (>3000 chars), pass through directly
+  // This preserves Claude's full web search results without re-summarizing
+  const allEvidenceContent = evidenceBundle.branches
+    .flatMap(b => b.sources.map(s => s.snippet || ''))
+    .join('\n');
+  const isWebSearchEvidence = allEvidenceContent.length > 3000 ||
+    evidenceBundle.branches.some(b =>
+      b.sources.some(s => s.url && s.url.includes('http'))
+    );
+
+  if (isWebSearchEvidence) {
+    console.log('[WriterAgent] Web search evidence detected - using pass-through mode');
+    console.log('[WriterAgent] Evidence content length:', allEvidenceContent.length);
+
+    onProgress?.({ type: 'formatting', message: 'Formatting web search results...' });
+
+    // Extract citations from sources
+    // S21-RL: Safe URL parsing - source.url may be "claude-web-search" not a real URL
+    const citations: Citation[] = evidenceBundle.branches.flatMap((branch, branchIndex) =>
+      branch.sources.map((source, sourceIndex) => ({
+        index: branchIndex * 100 + sourceIndex + 1,
+        title: source.title || 'Source',
+        url: source.url || '',
+        snippet: source.snippet || '',
+        domain: extractDomain(source.url),
+        accessedAt: source.accessedAt || new Date().toISOString(),
+      }))
+    );
+
+    // Build position from first branch evidence
+    const firstBranchContent = evidenceBundle.branches[0]?.sources[0]?.snippet || '';
+    const position = firstBranchContent.slice(0, 500) + (firstBranchContent.length > 500 ? '...' : '');
+
+    // Build analysis from all evidence (full content!)
+    const analysis = evidenceBundle.branches
+      .flatMap(b => b.sources.map(s => s.snippet || ''))
+      .join('\n\n');
+
+    onProgress?.({ type: 'complete' });
+
+    return createResearchDocument(
+      documentId,
+      evidenceBundle.sproutId,
+      query,
+      position,
+      analysis,  // Full content, not summarized!
+      citations,
+      evidenceBundle.confidenceScore,
+      'Results from Claude web search. Sources verified via live search.'
+    );
+  }
+
+  // Standard path: Use LLM to write document from evidence
+  // Sprint: research-template-wiring-v1 - Use systemPrompt override if provided
+  // This enables Writer Templates (blog, engineering, vision) to control output style
+  const systemPrompt = options?.systemPromptOverride || buildWriterSystemPrompt(config);
   const evidenceText = formatEvidenceForPrompt(evidenceBundle, config);
   const userPrompt = buildEvidencePrompt(query, evidenceText);
+
+  // Log which prompt source is being used
+  if (options?.systemPromptOverride) {
+    console.log('[WriterAgent] Using template systemPrompt override');
+  } else {
+    console.log('[WriterAgent] Using built systemPrompt from config');
+  }
 
   console.log('[WriterAgent] System prompt built');
   console.log('[WriterAgent] Evidence formatted:', evidenceBundle.totalSources, 'sources');
@@ -171,7 +269,7 @@ function mapSourcesToCitations(
       title: c.title,
       url: c.url,
       snippet: c.snippet,
-      domain: c.domain || new URL(c.url).hostname,
+      domain: c.domain || extractDomain(c.url),
       accessedAt: matchingSource?.accessedAt || new Date().toISOString(),
     };
   });
@@ -227,17 +325,20 @@ async function callLLMForWriting(
         title: c.title || 'Source',
         url: c.url || '',
         snippet: c.snippet || '',
-        domain: c.domain || (c.url ? new URL(c.url).hostname : ''),
+        domain: c.domain || extractDomain(c.url),
       })),
     };
 
   } catch (error) {
     console.error('[WriterAgent] Claude writing failed:', error);
 
-    // Return error state document
+    // Extract detailed error info
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+
+    // Return error state document with more details
     return {
       position: 'Document generation failed',
-      analysis: `## Error\n\nThe document could not be generated: ${error instanceof Error ? error.message : 'Unknown error'}\n\nPlease try again or check the ANTHROPIC_API_KEY configuration.`,
+      analysis: `## Error\n\nThe document could not be generated: ${errorMsg}\n\nPlease check the server logs for more details.\n\n**Troubleshooting:**\n1. Verify ANTHROPIC_API_KEY is set in .env or .env.local\n2. Restart the server after setting the key\n3. Ensure the API key is valid and has available credits`,
       limitations: 'API call failed',
       citations: [],
     };
@@ -248,4 +349,4 @@ async function callLLMForWriting(
 // Exports
 // =============================================================================
 
-export type { ResearchDocument, Citation };
+export type { ResearchDocument, Citation, WriterOptions };

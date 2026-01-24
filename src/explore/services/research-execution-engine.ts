@@ -39,12 +39,14 @@ export type OnProgressFn = (progress: ExecutionProgress) => void;
  * @param sprout - The research sprout to process
  * @param config - Research configuration (from Experience Console)
  * @param onProgress - Optional progress callback
+ * @param systemPrompt - Optional systemPrompt from output template (Sprint: research-template-wiring-v1)
  * @returns EvidenceBundle with real sources
  */
 export async function executeResearch(
   sprout: ResearchSprout,
   config: ResearchAgentConfigPayload,
-  onProgress?: OnProgressFn
+  onProgress?: OnProgressFn,
+  systemPrompt?: string
 ): Promise<EvidenceBundle> {
   const startTime = Date.now();
   let apiCallsUsed = 0;
@@ -74,6 +76,7 @@ export async function executeResearch(
 
     try {
       // Execute search for this branch
+      // Sprint: research-template-wiring-v1 - Pass systemPrompt to searchBranch
       const branchEvidence = await searchBranch(
         branch.label,
         branch.queries || [branch.label],
@@ -85,7 +88,8 @@ export async function executeResearch(
             branchIndex: i,
             branchQuery: branch.label,
           });
-        }
+        },
+        systemPrompt
       );
 
       branchResults.push(branchEvidence);
@@ -134,12 +138,16 @@ export async function executeResearch(
 
 /**
  * Search for evidence on a single branch
+ *
+ * Sprint: research-template-wiring-v1
+ * Added systemPrompt parameter to pass to Claude API
  */
 async function searchBranch(
   branchLabel: string,
   queries: string[],
   config: ResearchAgentConfigPayload,
-  onApiCall: () => void
+  onApiCall: () => void,
+  systemPrompt?: string
 ): Promise<BranchEvidence> {
   const sources: Source[] = [];
   const findings: string[] = [];
@@ -150,8 +158,8 @@ async function searchBranch(
   for (const query of queriesToRun) {
     onApiCall();
 
-    // Call Claude Deep Research API
-    const searchResults = await callClaudeDeepResearch(query);
+    // Call Claude Deep Research API with optional systemPrompt
+    const searchResults = await callClaudeDeepResearch(query, systemPrompt);
 
     // Extract sources from grounding metadata
     for (const result of searchResults) {
@@ -187,19 +195,32 @@ async function searchBranch(
  *
  * Sprint: agents-go-live-v1
  * Calls /api/research/deep endpoint to get research findings from Claude
+ *
+ * Sprint: research-template-wiring-v1
+ * Added systemPrompt parameter - passed to Claude as system message
  */
-async function callClaudeDeepResearch(query: string): Promise<Array<{
+async function callClaudeDeepResearch(
+  query: string,
+  systemPrompt?: string
+): Promise<Array<{
   url: string;
   title: string;
   snippet: string;
 }>> {
   console.log(`[ResearchEngine] Executing Claude deep research: "${query}"`);
+  if (systemPrompt) {
+    console.log(`[ResearchEngine] Using template systemPrompt (${systemPrompt.length} chars)`);
+  }
 
   try {
     const response = await fetch('/api/research/deep', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({
+        query,
+        // Sprint: research-template-wiring-v1 - Pass template's systemPrompt
+        ...(systemPrompt && { systemPrompt }),
+      }),
     });
 
     if (!response.ok) {

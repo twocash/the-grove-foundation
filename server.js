@@ -2182,6 +2182,41 @@ app.get('/api/jobs', (req, res) => {
   res.json({ jobs });
 });
 
+// GET /api/health/anthropic - Test Anthropic API configuration
+// Sprint: research-template-wiring-v1
+app.get('/api/health/anthropic', async (req, res) => {
+    const result = {
+        configured: !!anthropic,
+        apiKeySet: !!process.env.ANTHROPIC_API_KEY,
+        apiKeyPrefix: process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.substring(0, 8) + '...' : null,
+        testResult: null,
+        error: null,
+    };
+
+    if (!anthropic) {
+        result.error = 'Anthropic client not initialized. Set ANTHROPIC_API_KEY and restart server.';
+        return res.json(result);
+    }
+
+    // Try a minimal API call to verify the key works
+    try {
+        const response = await anthropic.messages.create({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 10,
+            messages: [{ role: 'user', content: 'Say "OK"' }],
+        });
+        result.testResult = 'success';
+        result.response = response.content[0]?.text || 'No response';
+    } catch (error) {
+        result.testResult = 'failed';
+        result.error = error.message;
+        result.errorStatus = error.status;
+        result.errorType = error.name;
+    }
+
+    res.json(result);
+});
+
 // GET /api/health/config - Configuration for UI
 app.get('/api/health/config', (req, res) => {
     try {
@@ -2423,6 +2458,7 @@ User's responses:
 
 // =============================================================================
 // Claude Research API - Sprint: agents-go-live-v1
+// Updated: Sprint research-template-wiring-v1 - Added systemPrompt parameter
 // =============================================================================
 
 // POST /api/research/deep - Claude Deep Research
@@ -2435,53 +2471,142 @@ app.post('/api/research/deep', async (req, res) => {
             });
         }
 
-        const { query, context, maxTokens = 4096 } = req.body;
+        // Sprint: research-template-wiring-v1 - Added systemPrompt parameter
+        const { query, context, systemPrompt, maxTokens = 4096 } = req.body;
 
         if (!query) {
             return res.status(400).json({ error: 'Missing required field: query' });
         }
 
         console.log('[Research Deep] Query:', query.substring(0, 100) + '...');
+        if (systemPrompt) {
+            console.log('[Research Deep] Using custom systemPrompt from template');
+        }
 
-        // Construct a well-formed research prompt
-        const researchPrompt = `You are a research agent. Conduct thorough research on the following topic.
-
-RESEARCH QUESTION: ${query}
-
-CONTEXT: ${context || 'General research'}
+        // Use systemPrompt from template if provided, otherwise use default
+        // Sprint: research-template-wiring-v1 - DEX Declarative Sovereignty
+        const defaultSystemPrompt = `You are a research agent. Conduct thorough research on the following topic.
 
 Provide:
 1. Key findings with source attributions
 2. Multiple perspectives where applicable
 3. Confidence levels for each finding (0.0-1.0)
-4. Gaps or areas needing more research
+4. Gaps or areas needing more research`;
 
-Format your response as JSON:
-{
-  "findings": [{ "claim": "...", "source": "...", "confidence": 0.0-1.0, "sourceType": "academic|practitioner|news|primary" }],
-  "perspectives": ["perspective 1", "perspective 2"],
-  "gaps": ["gap 1", "gap 2"],
-  "summary": "Brief summary of key findings"
-}`;
+        const effectiveSystemPrompt = systemPrompt || defaultSystemPrompt;
 
+        // Construct the user prompt with query and context
+        // S21-RL: Request prose with inline citations, NOT JSON
+        // Web search returns rich citations that should be preserved as readable content
+        const userPrompt = `RESEARCH QUESTION: ${query}
+
+CONTEXT: ${context || 'General research'}
+
+Provide your findings as a well-structured research summary in prose format (NOT JSON):
+
+1. Start with a brief executive summary (2-3 sentences)
+2. Present key findings with inline source citations [1], [2], etc.
+3. Include multiple perspectives where applicable
+4. Note any gaps or areas needing further research
+5. End with confidence assessment
+
+Use markdown formatting for clarity (headers, bullet points, bold for emphasis).
+Cite sources inline and list them at the end.`;
+
+        // Sprint: S21-RL - Enable Claude web search for real citations
+        // Uses Anthropic's web_search tool (Brave Search under the hood)
+        // Pricing: $10 per 1,000 searches
+        // Supported: claude-sonnet-4, claude-sonnet-4-5, claude-opus-4, etc.
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: maxTokens,
-            messages: [{ role: 'user', content: researchPrompt }],
+            system: effectiveSystemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+            tools: [{
+                type: 'web_search_20250305',
+                name: 'web_search',
+                max_uses: 5,  // Allow up to 5 iterative searches
+            }],
         });
 
-        // Extract text from response
-        const text = response.content[0].text;
-        console.log('[Research Deep] Response received, length:', text.length);
+        console.log('[Research Deep] Response received, stop_reason:', response.stop_reason);
 
-        // Try to parse JSON from response
-        let result;
-        try {
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            result = jsonMatch ? JSON.parse(jsonMatch[0]) : { summary: text, findings: [], perspectives: [], gaps: [] };
-        } catch (parseErr) {
-            console.warn('[Research Deep] JSON parse failed, returning raw text');
-            result = { summary: text, findings: [], perspectives: [], gaps: [] };
+        // Process response - may include web search results and text with citations
+        let textContent = '';
+        const webSearchResults = [];
+        const citations = [];
+
+        for (const block of response.content) {
+            if (block.type === 'text') {
+                textContent += block.text;
+                // Extract inline citations from text blocks
+                if (block.citations && Array.isArray(block.citations)) {
+                    for (const citation of block.citations) {
+                        if (citation.type === 'web_search_result_location') {
+                            citations.push({
+                                url: citation.url,
+                                title: citation.title,
+                                cited_text: citation.cited_text,
+                            });
+                        }
+                    }
+                }
+            } else if (block.type === 'web_search_tool_result') {
+                // Extract actual web search results
+                console.log('[Research Deep] Web search results found');
+                if (block.content && Array.isArray(block.content)) {
+                    for (const result of block.content) {
+                        if (result.type === 'web_search_result') {
+                            webSearchResults.push({
+                                url: result.url,
+                                title: result.title,
+                                page_age: result.page_age,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        console.log('[Research Deep] Text length:', textContent.length, 'Citations:', citations.length, 'Search results:', webSearchResults.length);
+
+        // Debug: Log first few search results
+        if (webSearchResults.length > 0) {
+            console.log('[Research Deep] Sample search results:', JSON.stringify(webSearchResults.slice(0, 3), null, 2));
+        }
+
+        // Return the response - Claude's text already includes inline citations
+        // Don't force JSON parsing - web search naturally returns prose with citations
+        const result = {
+            summary: textContent,
+            findings: [],
+            perspectives: [],
+            gaps: [],
+        };
+
+        // Include real web citations (inline citations from text blocks)
+        if (citations.length > 0) {
+            result.webCitations = citations;
+            // Convert citations to findings format
+            result.findings = citations.map((cit, i) => ({
+                claim: cit.cited_text || `Source ${i + 1}`,
+                source: cit.url,
+                sourceTitle: cit.title,
+                confidence: 0.9,
+                sourceType: 'practitioner',
+            }));
+        }
+
+        // Also include raw search results as backup
+        if (webSearchResults.length > 0 && citations.length === 0) {
+            result.webCitations = webSearchResults;
+            result.findings = webSearchResults.map((sr, i) => ({
+                claim: sr.title || `Source ${i + 1}`,
+                source: sr.url,
+                sourceTitle: sr.title,
+                confidence: 0.9,
+                sourceType: 'practitioner',
+            }));
         }
 
         res.json(result);
@@ -2561,7 +2686,24 @@ Format your response as JSON:
 
     } catch (error) {
         console.error('[Research Write] Error:', error.message);
-        res.status(500).json({ error: error.message });
+        console.error('[Research Write] Full error:', error);
+
+        // Extract Anthropic API error details if available
+        const errorDetails = {
+            error: error.message,
+            type: error.name || 'Unknown',
+            status: error.status || 500,
+        };
+
+        // Anthropic SDK provides these on API errors
+        if (error.status) {
+            errorDetails.apiStatus = error.status;
+        }
+        if (error.error) {
+            errorDetails.apiError = error.error;
+        }
+
+        res.status(error.status || 500).json(errorDetails);
     }
 });
 

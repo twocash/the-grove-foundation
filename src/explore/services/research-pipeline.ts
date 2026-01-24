@@ -30,6 +30,7 @@ import {
   loadResearchAgentConfig,
   loadWriterAgentConfig,
 } from './config-loader';
+import { loadResearchTemplate } from './template-loader';
 
 // =============================================================================
 // Types
@@ -50,6 +51,24 @@ export interface PipelineConfig {
 }
 
 /**
+ * Template provenance for pipeline results
+ * Sprint: research-template-wiring-v1
+ *
+ * DEX Pillar III: Provenance as Infrastructure
+ * Records which template shaped the research execution.
+ */
+export interface PipelineTemplateProvenance {
+  /** Template UUID */
+  id: string;
+  /** Human-readable name */
+  name: string;
+  /** Template version */
+  version: number;
+  /** Template source */
+  source: 'system-seed' | 'user-created' | 'forked' | 'imported';
+}
+
+/**
  * Pipeline execution result
  */
 export interface PipelineResult {
@@ -61,6 +80,12 @@ export interface PipelineResult {
 
   /** Collected evidence bundle (even on partial failure) */
   evidence?: EvidenceBundle;
+
+  /**
+   * Template provenance (Sprint: research-template-wiring-v1)
+   * Present when templateId was provided or default was used.
+   */
+  template?: PipelineTemplateProvenance;
 
   /** Error details if pipeline failed */
   error?: {
@@ -111,10 +136,13 @@ function buildEvidenceBundle(
   // Convert ResearchBranch[] to BranchEvidence[]
   const branchEvidence: BranchEvidence[] = researchResult.branches.map(branch => {
     // Convert Evidence[] to Source[]
+    // S21-RL: Preserve FULL content for web search pass-through mode
+    // The writer-agent detects web search evidence by checking content length >3000 chars
+    // Truncating here was destroying the full research results from Claude web search
     const sources: Source[] = (branch.evidence || []).map(ev => ({
       url: ev.source,
       title: extractTitleFromEvidence(ev),
-      snippet: ev.content.slice(0, 500), // Truncate for snippet
+      snippet: ev.content, // Full content - writer handles formatting
       accessedAt: ev.collectedAt,
       sourceType: ev.sourceType,
     }));
@@ -239,6 +267,14 @@ export async function executeResearchPipeline(
   console.log(`[Pipeline] Starting pipeline for sprout: ${sprout.id}`);
   console.log(`[Pipeline] Timeout: ${timeout}ms`);
 
+  // Sprint: research-template-wiring-v1 - Load template for systemPrompt
+  const template = loadResearchTemplate(sprout.templateId);
+  if (template) {
+    console.log(`[Pipeline] Using template: ${template.name} (${template.id})`);
+  } else {
+    console.log('[Pipeline] No template loaded, using default research behavior');
+  }
+
   // Load configs
   const [researchConfig, writerConfig] = await Promise.all([
     loadResearchAgentConfig(sprout.groveId),
@@ -270,10 +306,12 @@ export async function executeResearchPipeline(
     console.log('[Pipeline] Starting research phase...');
 
     // Create agent with config
+    // Sprint: research-template-wiring-v1 - Pass template systemPrompt
     const agent = createResearchAgent({
       branchDelay: finalResearchConfig.branchDelay,
       maxApiCalls: finalResearchConfig.maxApiCalls,
       simulationMode: false,
+      systemPrompt: template?.systemPrompt,
     });
 
     // Execute research with timeout
@@ -324,7 +362,7 @@ export async function executeResearchPipeline(
     document = await withTimeout(
       writeResearchDocument(
         evidenceBundle,
-        sprout.spark, // Use the original question
+        sprout.spark, // Use the original question for document display (notes already sent to API)
         finalWriterConfig,
         (event) => {
           // Forward writer agent events
@@ -354,7 +392,8 @@ export async function executeResearchPipeline(
 
     console.log(`[Pipeline] Pipeline completed successfully in ${totalDuration}ms`);
 
-    return {
+    // Sprint: research-template-wiring-v1 - Build result with template provenance
+    const result: PipelineResult = {
       success: true,
       document,
       evidence: evidenceBundle,
@@ -365,6 +404,18 @@ export async function executeResearchPipeline(
         writingDuration,
       },
     };
+
+    // Add template provenance if template was loaded
+    if (template) {
+      result.template = {
+        id: template.id,
+        name: template.name,
+        version: template.version,
+        source: template.source,
+      };
+    }
+
+    return result;
 
   } catch (error) {
     // =========================================================================
@@ -390,7 +441,8 @@ export async function executeResearchPipeline(
 
     const completedAt = new Date().toISOString();
 
-    return {
+    // Sprint: research-template-wiring-v1 - Include template provenance even on error
+    const errorResult: PipelineResult = {
       success: false,
       document: undefined,
       evidence: evidenceBundle, // Return partial results if available
@@ -405,6 +457,18 @@ export async function executeResearchPipeline(
         writingDuration,
       },
     };
+
+    // Add template provenance if template was loaded
+    if (template) {
+      errorResult.template = {
+        id: template.id,
+        name: template.name,
+        version: template.version,
+        source: template.source,
+      };
+    }
+
+    return errorResult;
   }
 }
 

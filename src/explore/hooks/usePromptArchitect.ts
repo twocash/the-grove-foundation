@@ -51,6 +51,13 @@ export interface EditableManifest {
 
   /** User's optional tags */
   tags: string[];
+
+  /**
+   * Output template ID for research execution.
+   * Sprint: research-template-wiring-v1
+   * Links to output_templates table for provenance tracking.
+   */
+  templateId?: string;
 }
 
 /**
@@ -364,6 +371,9 @@ function createEditableManifest(inferred: InferredManifest): EditableManifest {
 
 /**
  * Build the CreateResearchSproutInput from manifest data
+ *
+ * Sprint: research-template-wiring-v1
+ * Added templateId pass-through for research style selection.
  */
 function buildSproutInput(
   original: InferredManifest,
@@ -385,6 +395,8 @@ function buildSproutInput(
     sessionId,
     tags: edited.tags,
     notes: edited.notes || undefined,
+    // Sprint: research-template-wiring-v1 - Pass template selection to sprout
+    templateId: edited.templateId,
   };
 }
 

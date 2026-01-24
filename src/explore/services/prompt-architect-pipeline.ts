@@ -254,13 +254,42 @@ function buildInferredManifest(
   inference: InferenceOutput
 ): InferredManifest {
   // Convert BranchTemplates to ResearchBranches
-  const branches: ResearchBranch[] = inference.branches.map(template => ({
+  let branches: ResearchBranch[] = inference.branches.map(template => ({
     id: template.id,
     label: template.label,
     queries: template.queries,
     priority: template.priority,
     status: 'pending',
   }));
+
+  // Sprint: research-template-wiring-v1
+  // If no branches were inferred and no default branches exist,
+  // generate a fallback "main" branch from the user's spark.
+  // This ensures research always has at least one branch to process.
+  if (branches.length === 0) {
+    // First, try to use config's defaultBranches
+    if (config.defaultBranches && config.defaultBranches.length > 0) {
+      branches = config.defaultBranches.map(template => ({
+        id: template.id,
+        label: template.label,
+        queries: template.queries,
+        priority: template.priority,
+        status: 'pending',
+      }));
+      console.log('[PromptArchitect] Using default branches from config:', branches.length);
+    } else {
+      // Generate a single "main" branch from the spark
+      const mainBranch: ResearchBranch = {
+        id: `branch-main-${Date.now()}`,
+        label: 'Main Research',
+        queries: [spark], // Use the spark itself as the research query
+        priority: 'primary',
+        status: 'pending',
+      };
+      branches = [mainBranch];
+      console.log('[PromptArchitect] Generated fallback main branch from spark');
+    }
+  }
 
   // Use inferred strategy or fall back to config default
   const strategy: ResearchStrategy = inference.depth
