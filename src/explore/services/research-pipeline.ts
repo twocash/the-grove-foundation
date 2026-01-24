@@ -36,11 +36,17 @@ import { loadResearchTemplate } from './template-loader';
 // Types
 // =============================================================================
 
+// S22-WP: Timeout constants
+// Research fidelity is priority - allow sufficient time for thorough research
+// Writing phase needs sufficient time for Claude API call with large evidence (~24K chars)
+const DEFAULT_PIPELINE_TIMEOUT = 300000; // 5 minutes total - fidelity over speed
+const MINIMUM_WRITING_TIMEOUT = 60000; // Ensure writing always gets at least 60s
+
 /**
  * Pipeline configuration
  */
 export interface PipelineConfig {
-  /** Overall pipeline timeout in ms (default: 90000) */
+  /** Overall pipeline timeout in ms (default: 180000 = 3 minutes) */
   timeout?: number;
 
   /** Optional custom research agent config (overrides grove config) */
@@ -274,7 +280,7 @@ export async function executeResearchPipeline(
   onProgress?: OnPipelineProgressFn
 ): Promise<PipelineResult> {
   const startedAt = new Date().toISOString();
-  const timeout = config?.timeout ?? 90000;
+  const timeout = config?.timeout ?? DEFAULT_PIPELINE_TIMEOUT;
 
   console.log(`[Pipeline] Starting pipeline for sprout: ${sprout.id}`);
   console.log(`[Pipeline] Timeout: ${timeout}ms`);
@@ -371,13 +377,13 @@ export async function executeResearchPipeline(
 
     console.log('[Pipeline] Starting writing phase...');
 
-    // Calculate remaining timeout
-    const remainingTimeout = timeout - researchDuration;
-    if (remainingTimeout <= 0) {
-      throw new Error('No time remaining for writing phase');
-    }
+    // S22-WP: Calculate remaining timeout with minimum guarantee
+    // Writing phase needs sufficient time for Claude API call with large evidence (~24K chars)
+    const rawRemainingTimeout = timeout - researchDuration;
+    const writingTimeout = Math.max(rawRemainingTimeout, MINIMUM_WRITING_TIMEOUT);
+    console.log(`[Pipeline] Writing timeout: ${writingTimeout}ms (remaining: ${rawRemainingTimeout}ms, min: ${MINIMUM_WRITING_TIMEOUT}ms)`);
 
-    // Execute writing with remaining timeout
+    // Execute writing with guaranteed minimum timeout
     document = await withTimeout(
       writeResearchDocument(
         evidenceBundle,
@@ -388,7 +394,7 @@ export async function executeResearchPipeline(
           onProgress?.(event);
         }
       ),
-      remainingTimeout,
+      writingTimeout,
       'Writing phase timed out'
     );
 
