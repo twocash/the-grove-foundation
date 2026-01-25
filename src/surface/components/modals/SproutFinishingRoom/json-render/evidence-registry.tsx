@@ -391,13 +391,13 @@ export const EvidenceRegistry: ComponentRegistry = {
     }
 
     return (
-      <div className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
-        <h4 className="text-xs font-mono text-amber-700 dark:text-amber-400 uppercase mb-2 font-semibold">
+      <div className="mb-4 p-4 rounded-lg border" style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning)' }}>
+        <h4 className="text-xs font-mono uppercase mb-2 font-semibold" style={{ color: 'var(--semantic-warning)' }}>
           Research Limitations
         </h4>
         <ul className="space-y-1">
           {limitations.map((limitation, idx) => (
-            <li key={idx} className="flex gap-2 text-sm text-amber-800 dark:text-amber-300">
+            <li key={idx} className="flex gap-2 text-sm" style={{ color: 'var(--semantic-warning)' }}>
               <span className="flex-shrink-0">⚠️</span>
               <span>{typeof limitation === 'string' ? limitation : String(limitation)}</span>
             </li>

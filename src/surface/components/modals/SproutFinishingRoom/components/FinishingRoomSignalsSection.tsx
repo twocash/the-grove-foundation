@@ -85,7 +85,7 @@ export function FinishingRoomSignalsSection({
 function LoadingState(): React.ReactElement {
   return (
     <div className="flex items-center justify-center py-4">
-      <span className="text-ink-muted dark:text-paper/50 text-sm">
+      <span className="text-[var(--glass-text-muted)] text-sm">
         Loading signals...
       </span>
     </div>
