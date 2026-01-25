@@ -1,16 +1,16 @@
 // src/surface/components/modals/SproutFinishingRoom/ActionPanel.tsx
-// Sprint: S3||SFR-Actions - Complete Action Panel with engagement integration
+// Sprint: S22-WP research-writer-panel-v1
+// Refactored to use WriterPanel as primary workflow
 
 import React, { useState, useCallback } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import type { ResearchDocument } from '@core/schema/research-document';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
 import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
 import { useSproutSignals } from '../../../hooks/useSproutSignals';
 import { useToast } from '@explore/context/ToastContext';
-import { ReviseForm } from './components/ReviseForm';
-import { GenerateDocumentForm } from './components/GenerateDocumentForm';
-import { PromotionChecklist } from './components/PromotionChecklist';
-import { TertiaryActions, type TertiaryAction } from './components/TertiaryActions';
+import { WriterPanel } from './components/WriterPanel';
+import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 
 /**
  * Extract a human-readable title from a URL or reference string
@@ -41,22 +41,27 @@ function extractTitleFromSource(source: string): string {
 
 export interface ActionPanelProps {
   sprout: Sprout;
-  onClose: () => void;
+  onClose?: () => void; // Optional - kept for interface compatibility
   onSproutUpdate?: (sprout: Sprout) => void;
 }
 
 /**
  * ActionPanel - Right column (320px fixed)
  *
- * Integrates all action components with engagement bus and sprout storage.
- * Three sections:
- * - Primary: Revise & Resubmit (green accent)
- * - Secondary: Add to Field / Promotion (cyan accent)
- * - Tertiary: Archive, Note, Export (neutral)
+ * Sprint: S22-WP - Simplified for v1.0 release
+ *
+ * Primary workflow via WriterPanel:
+ * 1. User selects Writer template from visual grid
+ * 2. User adds optional notes for context
+ * 3. User clicks Generate → Writer Agent runs
+ * 4. Preview shows generated document
+ * 5. User can Save to Nursery
+ *
+ * Secondary action:
+ * - Export to Markdown
  */
 export const ActionPanel: React.FC<ActionPanelProps> = ({
   sprout,
-  onClose,
   onSproutUpdate,
 }) => {
   const emit = useEngagementEmit();
@@ -75,27 +80,8 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     hubName: sprout.provenance?.hub?.name,
   });
 
-  // US-D001: Revise & Resubmit (stubbed)
-  // Sprint: prompt-template-architecture-v1 - Added templateId parameter
-  const handleRevisionSubmit = (notes: string, templateId?: string) => {
-    // S6-SL-ObservableSignals: Emit sprout_refined signal
-    signals.emitRefined(
-      sprout.id,
-      { refinementType: 'revise', charsDelta: notes.length },
-      buildProvenance()
-    );
-
-    emit.custom('sproutRefinementSubmitted', {
-      sproutId: sprout.id,
-      revisionNotes: notes,
-      templateId, // Sprint: prompt-template-architecture-v1
-    });
-    toast.success('Revision submitted for processing!');
-  };
-
-  // US-RL006: Generate Document with Writer Template
-  // Sprint: research-template-wiring-v1
-  const handleGenerateDocument = useCallback(async (templateId?: string) => {
+  // S22-WP: Generate Document with Writer Template and user notes
+  const handleGenerateDocument = useCallback(async (templateId: string, userNotes: string) => {
     setIsGenerating(true);
 
     try {
@@ -230,125 +216,110 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     }
   }, [sprout.id, sprout.query, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, buildProvenance]);
 
-  // US-D005: Promote to RAG - S4-SL-TierProgression: Also update stage
-  const handlePromote = async (content: string, selectedItems: string[]) => {
-    const previousStage = sprout.stage || 'seed';
+  // S22-WP: Export to markdown - simplified for v1.0
+  const handleExport = useCallback(() => {
+    const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
 
+    // Build markdown content with provenance header
+    const content = `# ${sprout.query}
+
+---
+**Generated:** ${new Date(sprout.capturedAt).toLocaleDateString()}
+**Lens:** ${sprout.provenance?.lens?.name || 'Default'}
+**Cognitive Path:** ${cognitiveRouting.path}
+---
+
+${sprout.response}
+`;
+
+    // Create and trigger download
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sprout-${sprout.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // S6-SL-ObservableSignals: Emit sprout_exported signal
+    signals.emitExported(
+      sprout.id,
+      { format: 'markdown' },
+      buildProvenance()
+    );
+
+    emit.custom('sproutExported', { sproutId: sprout.id, format: 'markdown' });
+    toast.success('Document exported');
+  }, [sprout.id, sprout.query, sprout.capturedAt, sprout.provenance, sprout.response, signals, emit, toast, buildProvenance]);
+
+  // S22-WP: Save to Nursery handler
+  const handleSaveToNursery = useCallback(async (document: ResearchDocument) => {
     try {
-      const response = await fetch('/api/knowledge/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: sprout.query,
-          content,
-          tier: 'sprout', // Valid tier string: seed, sprout, sapling, tree, grove
-          sourceType: 'sprout',
-          sourceUrl: `sprout://${sprout.id}`,
-        }),
+      // Save document to sprout
+      updateSprout(sprout.id, {
+        researchDocument: document,
+        stage: 'captured'
       });
 
-      if (!response.ok) throw new Error('Upload failed');
-
-      // S4-SL-TierProgression: Update stage to 'established' with timestamp
-      try {
-        updateSprout(sprout.id, {
-          stage: 'established',
-          promotedAt: new Date().toISOString(),
-        });
-
-        // Notify parent of update
-        if (onSproutUpdate) {
-          const updated = getSprout(sprout.id);
-          if (updated) onSproutUpdate(updated);
-        }
-      } catch (stageError) {
-        console.error('Stage update failed:', stageError);
-        toast.warning('Content saved, but tier update failed.');
+      // Notify parent of update
+      if (onSproutUpdate) {
+        const updated = getSprout(sprout.id);
+        if (updated) onSproutUpdate(updated);
       }
 
-      // S6-SL-ObservableSignals: Emit sprout_promoted signal
-      signals.emitPromoted(
+      // Emit signal
+      signals.emitRefined(
         sprout.id,
-        { fromTier: previousStage, toTier: 'established' },
+        { refinementType: 'save-to-nursery', charsDelta: document.analysis?.length || 0 },
         buildProvenance()
       );
 
-      emit.custom('sproutPromotedToRag', { sproutId: sprout.id, selectedItems });
-      toast.success('Promoted to Sapling! Added to Knowledge Commons.');
+      emit.custom('sproutSavedToNursery', {
+        sproutId: sprout.id,
+        documentTitle: document.title,
+      });
+
+      toast.success('Saved to Nursery!');
     } catch (error) {
-      toast.error('Failed to promote content');
+      const message = error instanceof Error ? error.message : 'Save failed';
+      toast.error(message);
     }
-  };
-
-  // US-D002, D003, D004: Tertiary actions
-  const handleTertiaryAction = (action: TertiaryAction, payload?: unknown) => {
-    switch (action) {
-      case 'archive':
-        // Update sprout stage to dormant (archived)
-        updateSprout(sprout.id, { stage: 'dormant' });
-        emit.custom('sproutArchived', { sproutId: sprout.id });
-        toast.success('Sprout archived to your garden');
-        // Notify parent of update
-        if (onSproutUpdate) {
-          const updated = getSprout(sprout.id);
-          if (updated) onSproutUpdate(updated);
-        }
-        onClose();
-        break;
-
-      case 'annotate':
-        const note = payload as string;
-        updateSprout(sprout.id, { notes: note });
-
-        // S6-SL-ObservableSignals: Emit sprout_refined signal for annotations
-        signals.emitRefined(
-          sprout.id,
-          { refinementType: 'annotate', charsDelta: note.length },
-          buildProvenance()
-        );
-
-        emit.custom('sproutAnnotated', { sproutId: sprout.id, note });
-        toast.success('Note saved');
-        // Notify parent of update
-        if (onSproutUpdate) {
-          const updated = getSprout(sprout.id);
-          if (updated) onSproutUpdate(updated);
-        }
-        break;
-
-      case 'export':
-        // S6-SL-ObservableSignals: Emit sprout_exported signal
-        signals.emitExported(
-          sprout.id,
-          { format: 'markdown' },
-          buildProvenance()
-        );
-
-        emit.custom('sproutExported', { sproutId: sprout.id, format: 'markdown' });
-        toast.success('Document exported');
-        break;
-    }
-  };
+  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, buildProvenance]);
 
   return (
-    <aside className="w-[320px] flex-shrink-0 border-l border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto flex flex-col">
-      {/* US-D001: Primary Action - Revise & Resubmit */}
-      <ReviseForm sproutId={sprout.id} onSubmit={handleRevisionSubmit} />
-
-      {/* US-RL006: Generate Document - Sprint: research-template-wiring-v1 */}
-      <GenerateDocumentForm
-        sproutId={sprout.id}
-        hasEvidence={!!sprout.response}
-        hasDocument={!!sprout.researchDocument}
+    <aside className="w-[320px] flex-shrink-0 border-l border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto overflow-x-hidden flex flex-col">
+      {/* S22-WP: Primary Workflow - Writer Panel */}
+      <WriterPanel
+        sprout={sprout}
         onGenerate={handleGenerateDocument}
+        onSaveToNursery={handleSaveToNursery}
         isGenerating={isGenerating}
+        generatedDocument={sprout.researchDocument}
       />
 
-      {/* US-D005: Secondary Action - Promote to Field */}
-      <PromotionChecklist sprout={sprout} onPromote={handlePromote} />
+      {/* S22-WP: Export actions - simplified for v1.0 */}
+      <div className="p-4 mt-auto border-t border-ink/10 dark:border-white/10 space-y-2">
+        <button
+          onClick={handleExport}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-ink/5 dark:bg-white/5 hover:bg-ink/10 dark:hover:bg-white/10 text-ink dark:text-paper rounded-lg font-medium text-sm transition-colors"
+        >
+          <span className="text-lg" role="img" aria-label="Export">
+            📤
+          </span>
+          Export to Markdown
+        </button>
 
-      {/* US-D002, D003, D004: Tertiary Actions */}
-      <TertiaryActions sprout={sprout} onAction={handleTertiaryAction} />
+        {/* S22-WP: Save to Notion stub - requires API key integration */}
+        <button
+          onClick={() => toast.info('Notion integration coming soon! Configure API key in settings.')}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-ink/5 dark:bg-white/5 hover:bg-ink/10 dark:hover:bg-white/10 text-ink dark:text-paper rounded-lg font-medium text-sm transition-colors opacity-70"
+        >
+          <span className="text-lg" role="img" aria-label="Notion">
+            📓
+          </span>
+          Save to Notion
+        </button>
+      </div>
     </aside>
   );
 };

@@ -6,6 +6,8 @@
 // Grove design system: paper/ink colors, serif typography, forest/clay accents.
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import type { RenderElement } from '@core/json-render';
 import type {
   EvidenceHeaderProps,
@@ -13,6 +15,9 @@ import type {
   SourceCardProps,
   FindingsListProps,
   EvidenceSummaryProps,
+  SynthesisBlockProps,
+  ConfidenceNoteProps,
+  LimitationsListProps,
 } from './evidence-catalog';
 
 /**
@@ -204,10 +209,10 @@ export const EvidenceRegistry: ComponentRegistry = {
           )}
         </div>
 
-        {/* Snippet */}
-        <blockquote className="text-sm text-ink/80 dark:text-paper/80 italic border-l-2 border-grove-forest/30 pl-3 ml-8">
-          {props.snippet}
-        </blockquote>
+        {/* Snippet - S22-WP: Show FULL content with proper markdown rendering */}
+        <div className="text-sm text-ink/80 dark:text-paper/80 border-l-2 border-grove-forest/30 pl-3 ml-8 prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 prose-blockquote:my-2 prose-blockquote:border-grove-forest/50 prose-a:text-grove-forest prose-a:no-underline hover:prose-a:underline">
+          <ReactMarkdown>{props.snippet}</ReactMarkdown>
+        </div>
 
         {/* Access timestamp */}
         <p className="text-xs text-ink-muted dark:text-paper/40 mt-2 ml-8">
@@ -264,6 +269,156 @@ export const EvidenceRegistry: ComponentRegistry = {
           {props.apiCallsUsed} API calls
         </span>
       </footer>
+    );
+  },
+
+  /**
+   * S22-WP: Synthesis Block - Main research narrative with inline citations
+   * Displays the full research synthesis as formatted prose
+   * Handles <cite index="..."> tags for INLINE citation rendering (not blockquotes)
+   *
+   * Design principle: Citations should be small superscript numbers, NOT italicized blockquotes.
+   * Content should read like a normal research report with proper headings and body text.
+   */
+  SynthesisBlock: ({ element }) => {
+    const props = element.props as SynthesisBlockProps;
+    const confidencePercent = Math.round(props.confidence * 100);
+
+    // Custom component to render <cite> tags as INLINE citation numbers
+    // NOT as italicized blockquotes - that makes content unreadable
+    const CitationRenderer = ({ index, children }: { index?: string; children?: React.ReactNode }) => {
+      // Parse index like "20-3,20-4,20-5" into source references
+      const indices = index?.split(',').map(i => i.trim().split('-')[0]).filter(Boolean) || [];
+      const uniqueIndices = [...new Set(indices)];
+
+      // Render the content as normal text with a small superscript citation number
+      return (
+        <span className="citation-inline">
+          {/* Content rendered as normal text - NO italics, NO blockquote styling */}
+          <span className="text-ink dark:text-paper">{children}</span>
+          {/* Citation number as small superscript */}
+          {uniqueIndices.length > 0 && (
+            <sup className="text-[10px] text-grove-forest font-mono ml-0.5 cursor-help" title={`Source: ${uniqueIndices.join(', ')}`}>
+              [{uniqueIndices.join(',')}]
+            </sup>
+          )}
+        </span>
+      );
+    };
+
+    return (
+      <article className="mb-6">
+        {/* Research content - proper document styling with CLEAR heading hierarchy */}
+        <div className="prose dark:prose-invert max-w-none
+          text-ink dark:text-paper text-[15px] leading-relaxed
+          prose-p:my-4 prose-p:text-ink dark:prose-p:text-paper/90
+          prose-ul:my-4 prose-ul:text-ink dark:prose-ul:text-paper/90
+          prose-ol:my-4
+          prose-li:my-1
+          prose-strong:text-ink dark:prose-strong:text-paper prose-strong:font-semibold
+          prose-em:text-ink dark:prose-em:text-paper/90
+          prose-blockquote:border-l-4 prose-blockquote:border-grove-forest/50
+          prose-blockquote:bg-grove-forest/5 dark:prose-blockquote:bg-grove-forest/10
+          prose-blockquote:pl-4 prose-blockquote:py-3 prose-blockquote:my-6 prose-blockquote:rounded-r
+          prose-blockquote:text-ink/90 dark:prose-blockquote:text-paper/80
+          prose-a:text-grove-forest hover:prose-a:underline
+          prose-code:text-sm prose-code:bg-ink/5 dark:prose-code:bg-white/10 prose-code:px-1 prose-code:rounded">
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              // Handle custom <cite> tags as inline citations
+              cite: ({ node, ...props }) => {
+                const indexAttr = (node?.properties?.index as string) || '';
+                return <CitationRenderer index={indexAttr}>{props.children}</CitationRenderer>;
+              },
+              // S22-WP: Custom heading components for CLEAR visual hierarchy
+              h1: ({ children }) => (
+                <h1 className="text-2xl font-serif font-bold text-ink dark:text-paper mt-8 mb-4 pb-3 border-b-2 border-grove-forest/30">
+                  {children}
+                </h1>
+              ),
+              h2: ({ children }) => (
+                <h2 className="text-xl font-serif font-semibold text-ink dark:text-paper mt-8 mb-3 pb-2 border-b border-ink/10 dark:border-white/10">
+                  {children}
+                </h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-lg font-serif font-semibold text-grove-forest dark:text-grove-forest mt-6 mb-2">
+                  {children}
+                </h3>
+              ),
+              h4: ({ children }) => (
+                <h4 className="text-base font-sans font-semibold text-ink dark:text-paper mt-4 mb-2">
+                  {children}
+                </h4>
+              ),
+            }}
+          >
+            {props.content}
+          </ReactMarkdown>
+        </div>
+      </article>
+    );
+  },
+
+  /**
+   * S22-WP: Confidence Note - Displays AI confidence assessment with rationale
+   * Shows the model's confidence level and explanation
+   */
+  ConfidenceNote: ({ element }) => {
+    const props = element.props as ConfidenceNoteProps;
+
+    const levelColors = {
+      high: 'bg-grove-forest/10 text-grove-forest dark:bg-grove-forest/20 border-grove-forest/30',
+      medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-300',
+      low: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-300',
+    };
+
+    const levelLabels = {
+      high: 'High Confidence',
+      medium: 'Moderate Confidence',
+      low: 'Low Confidence',
+    };
+
+    return (
+      <div className={`mb-4 p-3 rounded-lg border ${levelColors[props.level]}`}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-mono font-semibold uppercase">
+            {levelLabels[props.level]}
+          </span>
+        </div>
+        <p className="text-sm opacity-90">
+          {props.rationale}
+        </p>
+      </div>
+    );
+  },
+
+  /**
+   * S22-WP: Limitations List - Research limitations acknowledgment
+   * Shows known caveats or limitations of the research
+   */
+  LimitationsList: ({ element }) => {
+    const props = element.props as LimitationsListProps;
+
+    if (!props.limitations || props.limitations.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+        <h4 className="text-xs font-mono text-amber-700 dark:text-amber-400 uppercase mb-2 font-semibold">
+          Research Limitations
+        </h4>
+        <ul className="space-y-1">
+          {props.limitations.map((limitation, idx) => (
+            <li key={idx} className="flex gap-2 text-sm text-amber-800 dark:text-amber-300">
+              <span className="flex-shrink-0">⚠️</span>
+              <span>{limitation}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   },
 };

@@ -66,7 +66,7 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
 
   // Main execution function
   const startResearch = useCallback(async (sprout: ResearchSprout): Promise<PipelineResult> => {
-    console.log(`[ResearchExecution] Starting research for sprout: ${sprout.id}`);
+    console.log(`[ResearchExecution] Starting research for sprout: ${sprout.id} with ${sprout.branches?.length || 0} branches`);
 
     // Reset progress for new execution
     resetProgress();
@@ -91,32 +91,33 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
       console.log(`[ResearchExecution] Pipeline completed:`, result.success ? 'SUCCESS' : 'FAILED');
 
       // Update sprout with results
-      if (result.success && result.document) {
-        // Transition to completed
-        await transitionStatus(sprout.id, 'completed', 'Research pipeline completed', 'system');
+      // S22-WP: Pipeline now returns evidence-only (no document)
+      // Document generation is user-triggered from right panel
+      if (result.success) {
+        // Transition to completed - research is done, user can now trigger Writer
+        await transitionStatus(sprout.id, 'completed', 'Research completed - ready for writing', 'system');
 
-        // Update with results - including the full ResearchDocument for display
-        // S22-WP: Include branches and evidence for DocumentViewer display
+        // S22-WP: Store evidence-only results + canonical research
+        // Document will be added later when user triggers Writer from right panel
         await updateResults(sprout.id, {
-          // S22-WP: Raw research data for evidence display in center panel
+          // Raw research data for evidence display in center panel
           branches: result.branches,
           evidence: result.rawEvidence,
-          synthesis: {
-            documentId: result.document.id,
-            model: result.document.metadata?.modelId || 'unknown',
-            generatedAt: result.document.metadata?.generatedAt || new Date().toISOString(),
-            wordCount: result.document.metadata?.wordCount || 0,
-            status: 'complete',
-          },
+          // S22-WP: 100% lossless canonical research for full-fidelity display
+          canonicalResearch: result.canonicalResearch,
+          // No synthesis yet - Writer is user-triggered
           execution: {
             startedAt: result.execution.startedAt,
             completedAt: result.execution.completedAt,
-            apiCallCount: 0, // Not tracked in pipeline result
+            apiCallCount: 0,
             errorMessage: undefined,
           },
-          // Store full document for direct display (results-wiring-v1)
-          researchDocument: result.document,
+          // researchDocument will be set when user triggers Writer
         });
+
+        console.log(`[ResearchExecution] Evidence saved: ${result.rawEvidence?.length || 0} items`);
+        console.log(`[ResearchExecution] Canonical research saved: ${result.canonicalResearch?.title || 'none'}`);
+        console.log(`[ResearchExecution] User can now trigger Writer from right panel`);
       } else if (result.error) {
         // Transition to blocked on error
         await transitionStatus(
@@ -130,6 +131,8 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
         await updateResults(sprout.id, {
           branches: result.branches,
           evidence: result.rawEvidence,
+          // S22-WP: Include canonical research on partial failure
+          canonicalResearch: result.canonicalResearch,
           execution: {
             startedAt: result.execution.startedAt,
             completedAt: result.execution.completedAt,

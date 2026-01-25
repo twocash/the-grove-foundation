@@ -16,19 +16,21 @@ import { createEvidenceBundle } from '@core/schema/evidence-bundle';
 import type { ResearchDocument } from '@core/schema/research-document';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
+// S22-WP: Import CanonicalResearch for lossless structured output
+import type { CanonicalResearch } from '@core/schema/sprout';
 
 import {
   createResearchAgent,
   type ResearchExecutionResult,
   type ResearchProgressEvent,
 } from './research-agent';
-import {
-  writeResearchDocument,
-  type WriterProgress,
-} from './writer-agent';
+// S22-WP: Writer imports removed - Writer is now user-triggered from right panel
+// import { writeResearchDocument, type WriterProgress } from './writer-agent';
+import type { WriterProgress } from './writer-agent';
 import {
   loadResearchAgentConfig,
-  loadWriterAgentConfig,
+  // S22-WP: Writer config loading removed - Writer is user-triggered
+  // loadWriterAgentConfig,
 } from './config-loader';
 import { loadResearchTemplate } from './template-loader';
 
@@ -38,9 +40,7 @@ import { loadResearchTemplate } from './template-loader';
 
 // S22-WP: Timeout constants
 // Research fidelity is priority - allow sufficient time for thorough research
-// Writing phase needs sufficient time for Claude API call with large evidence (~24K chars)
-const DEFAULT_PIPELINE_TIMEOUT = 300000; // 5 minutes total - fidelity over speed
-const MINIMUM_WRITING_TIMEOUT = 60000; // Ensure writing always gets at least 60s
+const DEFAULT_PIPELINE_TIMEOUT = 300000; // 5 minutes - research only (Writer is user-triggered)
 
 /**
  * Pipeline configuration
@@ -98,6 +98,14 @@ export interface PipelineResult {
    * These go directly to ResearchSprout.evidence for flat access
    */
   rawEvidence?: Evidence[];
+
+  /**
+   * S22-WP: Canonical research output from structured API
+   * 100% lossless - exactly what the provider returned.
+   * Single source of truth for full-fidelity research display.
+   * Atomic components (sections, sources, findings) enable exploration.
+   */
+  canonicalResearch?: CanonicalResearch;
 
   /**
    * Template provenance (Sprint: research-template-wiring-v1)
@@ -284,6 +292,8 @@ export async function executeResearchPipeline(
 
   console.log(`[Pipeline] Starting pipeline for sprout: ${sprout.id}`);
   console.log(`[Pipeline] Timeout: ${timeout}ms`);
+  // S22-WP: TRACE - Log sprout.templateId BEFORE loading template
+  console.log(`[Pipeline] sprout.templateId = "${sprout.templateId ?? 'undefined'}"`);
 
   // Sprint: research-template-wiring-v1 - Load template for systemPrompt
   const template = loadResearchTemplate(sprout.templateId);
@@ -293,29 +303,24 @@ export async function executeResearchPipeline(
     console.log('[Pipeline] No template loaded, using default research behavior');
   }
 
-  // Load configs
-  const [researchConfig, writerConfig] = await Promise.all([
-    loadResearchAgentConfig(sprout.groveId),
-    loadWriterAgentConfig(sprout.groveId),
-  ]);
+  // Load research config only - Writer config loaded when user triggers writing
+  const researchConfig = await loadResearchAgentConfig(sprout.groveId);
 
   // Apply config overrides
   const finalResearchConfig = {
     ...researchConfig,
     ...config?.researchConfig,
   };
-  const finalWriterConfig = {
-    ...writerConfig,
-    ...config?.writerConfig,
-  };
+  // S22-WP: Writer config removed - user triggers Writer from right panel
 
   let researchDuration = 0;
-  let writingDuration = 0;
   let evidenceBundle: EvidenceBundle | undefined;
-  let document: ResearchDocument | undefined;
   // S22-WP: Store research results for both success and error returns
+  // (document removed - Writer is user-triggered, not automatic)
   let researchBranches: ResearchBranch[] | undefined;
   let researchEvidence: Evidence[] | undefined;
+  // S22-WP: 100% lossless canonical research from structured API
+  let canonicalResearch: CanonicalResearch | undefined;
 
   try {
     // =========================================================================
@@ -368,69 +373,50 @@ export async function executeResearchPipeline(
     // S22-WP: Capture raw research data for storage (available in catch block too)
     researchBranches = researchResult.branches;
     researchEvidence = researchResult.evidence;
+    // S22-WP: Capture 100% lossless canonical research from structured API
+    canonicalResearch = researchResult.canonicalResearch;
 
     // =========================================================================
-    // Phase 2: Writing
+    // S22-WP: Research Complete - Return Evidence Only
     // =========================================================================
-    onProgress?.({ type: 'phase-started', phase: 'writing' });
-    const writingStartTime = Date.now();
-
-    console.log('[Pipeline] Starting writing phase...');
-
-    // S22-WP: Calculate remaining timeout with minimum guarantee
-    // Writing phase needs sufficient time for Claude API call with large evidence (~24K chars)
-    const rawRemainingTimeout = timeout - researchDuration;
-    const writingTimeout = Math.max(rawRemainingTimeout, MINIMUM_WRITING_TIMEOUT);
-    console.log(`[Pipeline] Writing timeout: ${writingTimeout}ms (remaining: ${rawRemainingTimeout}ms, min: ${MINIMUM_WRITING_TIMEOUT}ms)`);
-
-    // Execute writing with guaranteed minimum timeout
-    document = await withTimeout(
-      writeResearchDocument(
-        evidenceBundle,
-        sprout.spark, // Use the original question for document display (notes already sent to API)
-        finalWriterConfig,
-        (event) => {
-          // Forward writer agent events
-          onProgress?.(event);
-        }
-      ),
-      writingTimeout,
-      'Writing phase timed out'
-    );
-
-    writingDuration = Date.now() - writingStartTime;
-    console.log(`[Pipeline] Writing phase completed in ${writingDuration}ms`);
-
-    onProgress?.({
-      type: 'phase-completed',
-      phase: 'writing',
-      duration: writingDuration,
-    });
-
+    // Phase 2 (Writing) has been REMOVED per S22-WP plan.
+    // The Writer Agent is now USER-TRIGGERED from the right panel,
+    // NOT automatically chained after research.
+    //
+    // The pipeline returns:
+    // - evidence: Full EvidenceBundle for json-render display
+    // - branches: Raw ResearchBranch[] for storage
+    // - rawEvidence: Flat Evidence[] for storage
+    //
+    // NO document is generated here. The user selects a Writer template
+    // in the right panel and explicitly triggers document generation.
     // =========================================================================
-    // Success
-    // =========================================================================
+
     const completedAt = new Date().toISOString();
-    const totalDuration = researchDuration + writingDuration;
+    const totalDuration = researchDuration;
 
     onProgress?.({ type: 'pipeline-complete', totalDuration });
 
-    console.log(`[Pipeline] Pipeline completed successfully in ${totalDuration}ms`);
+    console.log(`[Pipeline] Research completed successfully in ${totalDuration}ms`);
+    console.log(`[Pipeline] Evidence bundle: ${evidenceBundle.totalSources} sources`);
+    console.log(`[Pipeline] S22-WP: Returning evidence-only (NO automatic Writer)`);
 
-    // Sprint: research-template-wiring-v1 - Build result with template provenance
-    // S22-WP: Include branches and rawEvidence for storage
+    // S22-WP: Return evidence-only result - NO document
+    // Document generation is now user-triggered from the right panel
     const result: PipelineResult = {
       success: true,
-      document,
+      // document: undefined - Writer is user-triggered, not automatic
       evidence: evidenceBundle,
       // S22-WP: Raw branches/evidence from research agent for direct storage
       branches: researchBranches,
       rawEvidence: researchEvidence,
+      // S22-WP: 100% lossless canonical research for full-fidelity display
+      canonicalResearch,
       execution: {
         startedAt,
         completedAt,
         researchDuration,
-        writingDuration,
+        writingDuration: 0, // No writing phase - user triggers Writer separately
       },
     };
 
@@ -471,14 +457,15 @@ export async function executeResearchPipeline(
     const completedAt = new Date().toISOString();
 
     // Sprint: research-template-wiring-v1 - Include template provenance even on error
-    // S22-WP: Include branches/evidence for partial success (research OK, writing failed)
+    // S22-WP: Include branches/evidence/canonicalResearch for partial success
     const errorResult: PipelineResult = {
       success: false,
-      document: undefined,
+      // document: undefined - Writer is user-triggered
       evidence: evidenceBundle, // Return partial results if available
-      // S22-WP: If research succeeded, preserve branches/evidence even if writing failed
       branches: researchBranches,
       rawEvidence: researchEvidence,
+      // S22-WP: Include canonical research even on partial failure
+      canonicalResearch,
       error: {
         phase,
         message: errorMessage,
@@ -487,7 +474,7 @@ export async function executeResearchPipeline(
         startedAt,
         completedAt,
         researchDuration,
-        writingDuration,
+        writingDuration: 0, // Writing is user-triggered
       },
     };
 

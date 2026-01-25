@@ -54,6 +54,9 @@ export { researchDocumentToRenderTree } from './transform';
 export {
   evidenceBundleToRenderTree,
   sproutResearchToRenderTree,
+  sproutSynthesisToRenderTree,
+  sproutFullReportToRenderTree,
+  sproutSourcesToRenderTree,
 } from './evidence-transform';
 
 // Renderer - renders trees using registry

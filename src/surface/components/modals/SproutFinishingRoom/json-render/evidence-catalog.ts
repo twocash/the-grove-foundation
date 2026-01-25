@@ -62,6 +62,32 @@ export const EvidenceSummarySchema = z.object({
   apiCallsUsed: z.number().describe('API calls consumed'),
 });
 
+/**
+ * S22-WP: Synthesis Block - Main research synthesis content
+ * Displays the full research narrative with inline citations
+ */
+export const SynthesisBlockSchema = z.object({
+  content: z.string().describe('Full research synthesis with citations'),
+  confidence: z.number().min(0).max(1).describe('Overall confidence 0-1'),
+});
+
+/**
+ * S22-WP: Confidence Note - Displays confidence assessment with rationale
+ * Shows the AI's confidence level and reasoning
+ */
+export const ConfidenceNoteSchema = z.object({
+  level: z.enum(['high', 'medium', 'low']).describe('Confidence level'),
+  rationale: z.string().describe('Explanation of confidence assessment'),
+});
+
+/**
+ * S22-WP: Limitations List - Research limitations acknowledgment
+ * Shows known limitations or caveats of the research
+ */
+export const LimitationsListSchema = z.object({
+  limitations: z.array(z.string()).describe('Array of limitation statements'),
+});
+
 // =============================================================================
 // Catalog Definition
 // =============================================================================
@@ -100,6 +126,24 @@ export const EvidenceCatalog: CatalogDefinition = createCatalog({
       description: 'Research execution summary metrics',
       agentHint: 'Footer with branch count, findings count, API usage',
     },
+    SynthesisBlock: {
+      props: SynthesisBlockSchema,
+      category: 'content',
+      description: 'S22-WP: Main research synthesis narrative',
+      agentHint: 'Display full research narrative with markdown formatting',
+    },
+    ConfidenceNote: {
+      props: ConfidenceNoteSchema,
+      category: 'feedback',
+      description: 'S22-WP: Confidence assessment with rationale',
+      agentHint: 'Display confidence level badge with explanation',
+    },
+    LimitationsList: {
+      props: LimitationsListSchema,
+      category: 'feedback',
+      description: 'S22-WP: Research limitations acknowledgment',
+      agentHint: 'Display list of known research limitations',
+    },
   },
 });
 
@@ -113,3 +157,6 @@ export type BranchHeaderProps = z.infer<typeof BranchHeaderSchema>;
 export type SourceCardProps = z.infer<typeof SourceCardSchema>;
 export type FindingsListProps = z.infer<typeof FindingsListSchema>;
 export type EvidenceSummaryProps = z.infer<typeof EvidenceSummarySchema>;
+export type SynthesisBlockProps = z.infer<typeof SynthesisBlockSchema>;
+export type ConfidenceNoteProps = z.infer<typeof ConfidenceNoteSchema>;
+export type LimitationsListProps = z.infer<typeof LimitationsListSchema>;

@@ -22,6 +22,8 @@ import type {
 } from '@core/schema/research-strategy';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 import { DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD } from '@core/schema/research-agent-config';
+// S22-WP: Import CanonicalResearch type for structured output capture
+import type { CanonicalResearch } from '@core/schema/sprout';
 
 // =============================================================================
 // Types
@@ -78,6 +80,13 @@ export interface ResearchExecutionResult {
 
   /** All collected evidence */
   evidence: Evidence[];
+
+  /**
+   * S22-WP: Canonical research output from structured API
+   * Contains 100% of what Claude returned via deliver_research_results tool.
+   * This is the single source of truth - DO NOT subset.
+   */
+  canonicalResearch?: CanonicalResearch;
 
   /** Execution metadata */
   execution: {
@@ -203,6 +212,8 @@ export function createResearchAgent(
     const allEvidence: Evidence[] = [];
     const updatedBranches: ResearchBranch[] = [];
     let errorMessage: string | undefined;
+    // S22-WP: Capture canonical research from structured API output
+    let capturedCanonicalResearch: CanonicalResearch | undefined;
 
     try {
       // Process each branch
@@ -299,53 +310,101 @@ export function createResearchAgent(
               console.log(`[ResearchAgent] API response received:`, {
                 findingsCount: result.findings?.length || 0,
                 hasSummary: !!result.summary,
+                hasCanonicalResearch: !!result.canonicalResearch,
               });
 
-              // Convert API result to Evidence format
-              // Include the FULL research summary with ALL citations
-              // S21-RL: Return complete research, not just first finding
+              // S22-WP: Capture the FULL canonical research object
+              // User requirement: "capture 100% of what is returned from deep research"
+              if (result.canonicalResearch) {
+                capturedCanonicalResearch = result.canonicalResearch as CanonicalResearch;
+                console.log(`[ResearchAgent] Captured canonical research: ${result.canonicalResearch.title}`);
+              }
+
+              // S22-WP: Convert API result to Evidence format
+              // Create INDIVIDUAL Evidence objects per finding with REAL URLs
+              // This enables DocumentViewer to show proper SourceCards with clickable links
               console.log(`[ResearchAgent] Full response: ${result.findings?.length || 0} findings, ${result.summary?.length || 0} chars`);
 
-              // Build comprehensive content with all citations
-              let fullContent = result.summary || '';
+              const now = new Date().toISOString();
+              const collectedEvidence: Evidence[] = [];
 
-              // Append all findings as citations
+              // 1. Create main synthesis evidence with the full summary
+              if (result.summary) {
+                collectedEvidence.push({
+                  id: `ev-${branch.id}-${i}-summary-${Date.now().toString(36)}`,
+                  source: 'research-synthesis',  // Special marker for synthesis
+                  sourceType: 'practitioner',
+                  content: result.summary,
+                  relevance: 1.0,  // Synthesis is most relevant
+                  confidence: 0.9,
+                  collectedAt: now,
+                });
+              }
+
+              // 2. Create individual Evidence objects per finding with REAL URLs
               if (result.findings && result.findings.length > 0) {
-                fullContent += '\n\n## Sources\n';
-                for (const finding of result.findings) {
+                for (let findingIdx = 0; findingIdx < result.findings.length; findingIdx++) {
+                  const finding = result.findings[findingIdx];
                   if (finding.source && finding.source !== 'claude-research') {
-                    fullContent += `\n- [${finding.sourceTitle || 'Source'}](${finding.source})`;
-                    if (finding.claim) {
-                      fullContent += `\n  > ${finding.claim}`;
-                    }
+                    collectedEvidence.push({
+                      id: `ev-${branch.id}-${i}-f${findingIdx}-${Date.now().toString(36)}`,
+                      source: finding.source,  // REAL URL!
+                      sourceType: finding.sourceType || 'practitioner',
+                      content: finding.claim || finding.sourceTitle || 'Source citation',
+                      relevance: finding.confidence || 0.8,
+                      confidence: finding.confidence || 0.8,
+                      collectedAt: now,
+                      // S22-WP: Store title separately for display
+                      metadata: {
+                        title: finding.sourceTitle || extractTitleFromUrl(finding.source),
+                      },
+                    } as Evidence);
                   }
                 }
               }
 
-              // Also include webCitations if present
-              if (result.webCitations && result.webCitations.length > 0) {
-                if (!fullContent.includes('## Sources')) {
-                  fullContent += '\n\n## Sources\n';
-                }
-                for (const cit of result.webCitations) {
-                  fullContent += `\n- [${cit.title || 'Source'}](${cit.url})`;
-                  if (cit.cited_text) {
-                    fullContent += `\n  > ${cit.cited_text}`;
+              // 3. Fallback: if no findings, also check webCitations
+              if (collectedEvidence.length <= 1 && result.webCitations && result.webCitations.length > 0) {
+                for (let citIdx = 0; citIdx < result.webCitations.length; citIdx++) {
+                  const cit = result.webCitations[citIdx];
+                  if (cit.url) {
+                    collectedEvidence.push({
+                      id: `ev-${branch.id}-${i}-c${citIdx}-${Date.now().toString(36)}`,
+                      source: cit.url,  // REAL URL!
+                      sourceType: 'practitioner',
+                      content: cit.cited_text || cit.title || 'Web citation',
+                      relevance: 0.8,
+                      confidence: 0.8,
+                      collectedAt: now,
+                      metadata: {
+                        title: cit.title || extractTitleFromUrl(cit.url),
+                      },
+                    } as Evidence);
                   }
                 }
               }
 
-              evidence = {
-                id: `ev-${branch.id}-${i}-${Date.now().toString(36)}`,
-                source: 'claude-web-search',
+              // Use first evidence as the "main" one for branch tracking
+              // All collected evidence will be added to allEvidence array
+              evidence = collectedEvidence[0] || {
+                id: `ev-${branch.id}-${i}-empty-${Date.now().toString(36)}`,
+                source: 'no-results',
                 sourceType: 'practitioner',
-                content: fullContent,
-                relevance: 0.9,
-                confidence: 0.9,
-                collectedAt: new Date().toISOString(),
+                content: 'No research results found',
+                relevance: 0,
+                confidence: 0,
+                collectedAt: now,
               };
 
-              console.log(`[ResearchAgent] Evidence content length: ${fullContent.length} chars`);
+              // Add additional evidence items to branch and allEvidence
+              if (collectedEvidence.length > 1) {
+                for (let k = 1; k < collectedEvidence.length; k++) {
+                  activeBranch.evidence!.push(collectedEvidence[k]);
+                  allEvidence.push(collectedEvidence[k]);
+                }
+              }
+
+              console.log(`[ResearchAgent] Created ${collectedEvidence.length} evidence items (1 synthesis + ${collectedEvidence.length - 1} sources)`);
 
               tokenCount += 500; // Approximate tokens for API call
 
@@ -411,6 +470,8 @@ export function createResearchAgent(
       success: !errorMessage && !cancelRequested,
       branches: updatedBranches,
       evidence: allEvidence,
+      // S22-WP: Include canonical research from structured API output
+      canonicalResearch: capturedCanonicalResearch,
       execution: {
         startedAt,
         completedAt,
@@ -449,6 +510,34 @@ export function createResearchAgent(
  */
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * S22-WP: Extract a human-readable title from a URL
+ * Used when API doesn't provide a title for a source
+ */
+function extractTitleFromUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Use hostname as base
+    let title = parsed.hostname.replace('www.', '');
+    // If there's a meaningful path, add it
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    if (pathParts.length > 0) {
+      const lastPart = pathParts[pathParts.length - 1];
+      // Clean up the path segment
+      const cleanedPart = decodeURIComponent(lastPart)
+        .replace(/[-_]/g, ' ')
+        .replace(/\.\w+$/, '') // Remove extension
+        .slice(0, 50);
+      if (cleanedPart.length > 3) {
+        title = `${title}: ${cleanedPart}`;
+      }
+    }
+    return title;
+  } catch {
+    return 'External Source';
+  }
 }
 
 // =============================================================================

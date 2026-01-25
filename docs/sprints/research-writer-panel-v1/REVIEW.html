@@ -215,11 +215,11 @@
       <div class="metric-label">Phases Complete</div>
     </div>
     <div class="metric-card">
-      <div class="metric-value success">7/7</div>
+      <div class="metric-value success">8/8</div>
       <div class="metric-label">E2E Tests Passing</div>
     </div>
     <div class="metric-card">
-      <div class="metric-value">7</div>
+      <div class="metric-value">12</div>
       <div class="metric-label">Screenshots Captured</div>
     </div>
     <div class="metric-card">
@@ -362,6 +362,22 @@
       <img src="screenshots/blocked-sprout-01-modal.png" alt="Blocked sprout modal">
       <div class="media-caption">10: Blocked sprout with evidence opens in SproutFinishingRoom</div>
     </div>
+    <div class="media-item">
+      <img src="screenshots/blocked-sprout-02-evidence-display.png" alt="Evidence display with markdown rendering">
+      <div class="media-caption">FINAL: Evidence displays with proper markdown rendering (ReactMarkdown)</div>
+    </div>
+    <div class="media-item">
+      <img src="screenshots/three-tab-interface.png" alt="Three-tab interface: Summary, Full Report, Sources">
+      <div class="media-caption">S22-WP: Three-tab layout - Summary, Full Report (default), Sources</div>
+    </div>
+    <div class="media-item">
+      <img src="screenshots/real-research-04-instructions-filled.png" alt="GardenInspector form with instructions">
+      <div class="media-caption">E2E: GardenInspector form - Research Spark, Title, Style, Instructions filled</div>
+    </div>
+    <div class="media-item">
+      <img src="screenshots/real-research-07-final.png" alt="Complete research results with 43 sources">
+      <div class="media-caption">E2E: Complete research results - 43 sources, 90% confidence, HARDENED status</div>
+    </div>
   </div>
 
   <!-- Test Results -->
@@ -418,9 +434,15 @@
         <td>5.2s</td>
         <td><span class="status-badge status-pass">Pass</span></td>
       </tr>
+      <tr>
+        <td>REAL</td>
+        <td>Full research pipeline: sprout: command → GardenInspector → research complete</td>
+        <td>4.5m</td>
+        <td><span class="status-badge status-pass">Pass</span></td>
+      </tr>
     </tbody>
   </table>
-  <p style="margin-top: 0.5rem; color: var(--ink-muted);">Total: 7 passed (52.5s) | Zero critical console errors</p>
+  <p style="margin-top: 0.5rem; color: var(--ink-muted);">Total: 8 passed (5.3m) | Zero critical console errors</p>
 
   <!-- Files Changed -->
   <h2>Files Changed</h2>
@@ -431,6 +453,7 @@
     <li class="file-new">+ src/.../json-render/evidence-registry.tsx</li>
     <li class="file-new">+ src/.../json-render/evidence-transform.ts</li>
     <li class="file-new">+ tests/e2e/research-writer-panel.spec.ts</li>
+    <li class="file-new">+ tests/e2e/real-research-display.spec.ts</li>
   </ul>
 
   <h3>Modified Files</h3>
@@ -451,6 +474,12 @@
     <li>Partial success preserved: Research data saved even if writing fails</li>
     <li>E2E test suite: Console monitoring per Grove Execution Protocol v1.5</li>
     <li>Nursery table migration: Schema ready for future sprint</li>
+    <li>Markdown rendering: Evidence content renders properly via ReactMarkdown (bold, lists, links)</li>
+    <li>WriterPanel: Template selector, user notes, generate button, save to nursery</li>
+    <li><strong>Three-Tab Layout:</strong> Summary (executive), Full Report (ALL content), Sources (citations)</li>
+    <li><strong>Synthesis Readability:</strong> Fixed dark-on-dark styling - proper contrast in dark mode</li>
+    <li><strong>Full Report Default:</strong> User sees ALL research data by default, tabs for focus</li>
+    <li><strong>E2E Test Infrastructure:</strong> Correct flow: <code>sprout:</code> command → GardenInspector → form fill → Start Research</li>
   </ul>
 
   <!-- Architecture Fix -->

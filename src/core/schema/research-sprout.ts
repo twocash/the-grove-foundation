@@ -16,6 +16,8 @@
 import type { ResearchStrategy, ResearchBranch, Evidence } from './research-strategy';
 import type { ConfirmationMode } from './prompt-architect-config';
 import type { ResearchDocument } from './research-document';
+// S22-WP: Import canonical research for 100% lossless structured output storage
+import type { CanonicalResearch } from './sprout';
 
 // =============================================================================
 // Status Lifecycle
@@ -291,6 +293,16 @@ export interface ResearchSprout {
   researchDocument?: ResearchDocument;
 
   /**
+   * S22-WP: 100% lossless canonical research from structured API output.
+   * Contains the FULL structured output from `deliver_research_results` tool.
+   * Single source of truth for research results - refinement happens in Writer.
+   *
+   * DEX Pillar III: Provenance as Infrastructure
+   * @see CanonicalResearch type in sprout.ts for full structure
+   */
+  canonicalResearch?: CanonicalResearch;
+
+  /**
    * IDs of child sprouts spawned during research
    * For tree navigation in Garden Inspector
    */
@@ -414,12 +426,37 @@ export interface CreateResearchSproutInput {
 }
 
 /**
+ * Create a fallback branch when none provided
+ * S22-WP: Defensive guard against zero API calls
+ */
+function createFallbackBranch(spark: string): ResearchBranch {
+  return {
+    id: `main-${Date.now()}`,
+    label: 'Main Research',
+    queries: [spark],
+    status: 'pending',
+    priority: 1,
+    evidence: [],
+  };
+}
+
+/**
  * Create a new ResearchSprout with defaults
  */
 export function createResearchSprout(
   input: CreateResearchSproutInput
 ): Omit<ResearchSprout, 'id'> {
   const now = new Date().toISOString();
+
+  // S22-WP: CRITICAL - Ensure branches is NEVER empty
+  // Zero branches = zero API calls = tiny useless stubs
+  const branches = input.branches && input.branches.length > 0
+    ? input.branches
+    : [createFallbackBranch(input.spark)];
+
+  if (!input.branches?.length) {
+    console.warn(`[createResearchSprout] ⚠️ No branches provided, using fallback for: "${input.spark.slice(0, 50)}..."`);
+  }
 
   return {
     groveId: input.groveId,
@@ -437,7 +474,7 @@ export function createResearchSprout(
     templateId: input.templateId,
 
     strategy: input.strategy,
-    branches: input.branches,
+    branches,
     appliedRuleIds: input.appliedRuleIds,
     inferenceConfidence: input.inferenceConfidence,
 

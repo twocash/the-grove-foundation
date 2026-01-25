@@ -34,10 +34,11 @@ export function SproutRow({ sprout, emoji, isExpanded, isNewlyReady = false, onS
   const [isResultsExpanded, setIsResultsExpanded] = useState(false);
 
   // S22-WP: Allow viewing results for:
-  // 1. Completed sprouts with synthesis (full success)
+  // 1. Completed sprouts with synthesis OR canonicalResearch (full success)
   // 2. Blocked sprouts with branches/evidence (partial success - research OK, writing failed)
+  // Note: canonicalResearch is the 100% lossless structured output from deep research API
   const hasResults =
-    (sprout.status === 'completed' && sprout.synthesis) ||
+    (sprout.status === 'completed' && (sprout.synthesis || sprout.canonicalResearch)) ||
     (sprout.status === 'blocked' && (sprout.branches?.length ?? 0) > 0);
 
   const handleClick = () => {

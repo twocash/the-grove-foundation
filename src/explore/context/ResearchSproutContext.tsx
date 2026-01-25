@@ -23,6 +23,8 @@ import type {
   StatusTransition,
 } from '@core/schema/research-sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
+// S22-WP: Import for 100% lossless structured output storage
+import type { CanonicalResearch } from '@core/schema/sprout';
 import {
   createResearchSprout,
   canTransitionTo,
@@ -59,18 +61,39 @@ function getSupabaseClient(): SupabaseClient | null {
  * Transform database row to ResearchSprout
  */
 function rowToSprout(row: Record<string, unknown>): ResearchSprout {
+  const spark = row.spark as string;
+
+  // S22-WP: CRITICAL - Ensure branches is NEVER empty
+  // If Supabase returns null/empty, create a fallback branch with the spark query
+  let branches = row.branches as ResearchSprout['branches'];
+  if (!branches || branches.length === 0) {
+    console.warn(`[rowToSprout] ⚠️ Supabase returned no branches, creating fallback for: "${spark?.slice(0, 50)}..."`);
+    branches = [{
+      id: `main-${Date.now()}`,
+      label: 'Main Research',
+      queries: [spark],
+      status: 'pending',
+      priority: 1,
+      evidence: [],
+    }];
+  }
+
   return {
     id: row.id as string,
-    spark: row.spark as string,
+    spark,
     title: row.title as string,
     groveId: row.grove_id as string,
     status: row.status as ResearchSproutStatus,
+    // S22-WP: templateId must be mapped for research template selection to work
+    templateId: row.template_id as string | undefined,
     strategy: row.strategy as ResearchSprout['strategy'],
-    branches: (row.branches as ResearchSprout['branches']) || [],
+    branches,
     evidence: (row.evidence as ResearchSprout['evidence']) || [],
     synthesis: row.synthesis as ResearchSprout['synthesis'] | null,
     execution: row.execution as ResearchSprout['execution'] | null,
     researchDocument: row.research_document as ResearchDocument | undefined,
+    // S22-WP: 100% lossless canonical research from structured API
+    canonicalResearch: row.canonical_research as CanonicalResearch | undefined,
     statusHistory: (row.status_history as ResearchSprout['statusHistory']) || [],
     appliedRuleIds: (row.applied_rule_ids as string[]) || [],
     inferenceConfidence: row.inference_confidence as number | null,
@@ -101,12 +124,16 @@ function sproutToRow(sprout: Partial<ResearchSprout> & { groveId: string }): Rec
   if (sprout.title !== undefined) row.title = sprout.title;
   if (sprout.groveId !== undefined) row.grove_id = sprout.groveId;
   if (sprout.status !== undefined) row.status = sprout.status;
+  // S22-WP: templateId must be mapped for research template selection to work
+  if (sprout.templateId !== undefined) row.template_id = sprout.templateId;
   if (sprout.strategy !== undefined) row.strategy = sprout.strategy;
   if (sprout.branches !== undefined) row.branches = sprout.branches;
   if (sprout.evidence !== undefined) row.evidence = sprout.evidence;
   if (sprout.synthesis !== undefined) row.synthesis = sprout.synthesis;
   if (sprout.execution !== undefined) row.execution = sprout.execution;
   if (sprout.researchDocument !== undefined) row.research_document = sprout.researchDocument;
+  // S22-WP: 100% lossless canonical research from structured API
+  if (sprout.canonicalResearch !== undefined) row.canonical_research = sprout.canonicalResearch;
   if (sprout.statusHistory !== undefined) row.status_history = sprout.statusHistory;
   if (sprout.appliedRuleIds !== undefined) row.applied_rule_ids = sprout.appliedRuleIds;
   if (sprout.inferenceConfidence !== undefined) row.inference_confidence = sprout.inferenceConfidence;
@@ -221,10 +248,10 @@ interface ResearchSproutActions {
     updates: Partial<Pick<ResearchSprout, 'tags' | 'notes' | 'rating' | 'reviewed'>>
   ) => Promise<ResearchSprout>;
 
-  /** Update sprout with research results (branches, evidence, synthesis, execution, researchDocument) */
+  /** Update sprout with research results (branches, evidence, synthesis, execution, researchDocument, canonicalResearch) */
   updateResults: (
     id: string,
-    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument'>>
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument' | 'canonicalResearch'>>
   ) => Promise<ResearchSprout>;
 
   /** Add a child sprout ID to parent's childSproutIds array (Sprint: sprout-research-v1, Phase 5d) */
@@ -475,6 +502,19 @@ export function ResearchSproutProvider({
       const row = sproutToRow(sproutData);
       delete row.id; // Let Supabase generate the UUID
 
+      // S22-WP DEBUG: Log EXACTLY what we're sending to Supabase with byte counts
+      const rowJson = JSON.stringify(row);
+      const branchesJson = row.branches ? JSON.stringify(row.branches) : 'null';
+      console.log(`[ResearchSproutContext] INSERT DEBUG:`, {
+        sproutDataBranches: sproutData.branches?.length || 0,
+        rowHasBranches: 'branches' in row,
+        rowBranchesLength: Array.isArray(row.branches) ? row.branches.length : 'NOT_ARRAY',
+        rowBranchesValue: row.branches,
+        payloadBytes: rowJson.length,
+        branchesBytes: branchesJson.length,
+        branchesPreview: branchesJson.substring(0, 200),
+      });
+
       const { data, error } = await client
         .from(RESEARCH_SPROUTS_TABLE)
         .insert(row)
@@ -486,8 +526,19 @@ export function ResearchSproutProvider({
         throw new Error(`Failed to save sprout: ${error.message}`);
       }
 
+      // S22-WP DEBUG: Log what Supabase returned with byte counts
+      const returnedJson = JSON.stringify(data);
+      const returnedBranchesJson = data?.branches ? JSON.stringify(data.branches) : 'null';
+      console.log(`[ResearchSproutContext] RETURNED FROM SUPABASE:`, {
+        dataBranches: data?.branches,
+        dataBranchesLength: Array.isArray(data?.branches) ? data.branches.length : 'NOT_ARRAY',
+        responseBytes: returnedJson.length,
+        branchesBytes: returnedBranchesJson.length,
+        branchesPreview: returnedBranchesJson.substring(0, 200),
+      });
+
       const newSprout = rowToSprout(data);
-      console.log(`[ResearchSproutContext] Created sprout ${newSprout.id}: "${newSprout.title}"`);
+      console.log(`[ResearchSproutContext] Created sprout ${newSprout.id} with ${newSprout.branches?.length || 0} branches`);
 
       // Update ref IMMEDIATELY (before setSprouts) - critical for subsequent operations
       sproutsRef.current = [newSprout, ...sproutsRef.current];
@@ -643,9 +694,10 @@ export function ResearchSproutProvider({
   }, [getOrFetchById]);
 
   // Update sprout with research results (with Supabase fallback lookup and persistence)
+  // S22-WP: Added canonicalResearch for 100% lossless structured output storage
   const updateResults = useCallback(async (
     id: string,
-    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument'>>
+    updates: Partial<Pick<ResearchSprout, 'branches' | 'evidence' | 'synthesis' | 'execution' | 'requiresReview' | 'researchDocument' | 'canonicalResearch'>>
   ): Promise<ResearchSprout> => {
     // Use getOrFetchById to handle race conditions
     const sprout = await getOrFetchById(id);

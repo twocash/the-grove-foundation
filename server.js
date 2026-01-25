@@ -2462,6 +2462,38 @@ User's responses:
 // =============================================================================
 
 // POST /api/research/deep - Claude Deep Research
+//
+// ============================================================================
+// TECH DEBT: S22-WP HACKS (2026-01-24)
+// ============================================================================
+//
+// These values should be PARAMETER-DRIVEN by the research-agent.ts, which
+// loads them from the Output Template. Server.js should be a thin passthrough.
+//
+// CURRENT HACKS (all in server.js, should be in research-agent + template):
+// 1. maxTokens = 16384       ← Should come from research-agent via template
+// 2. max_uses = 15           ← Should come from research-agent via template
+// 3. defaultSystemPrompt     ← Should NEVER exist; research-agent always provides
+// 4. userPrompt structure    ← Should come from research-agent via template
+//
+// PROPER FIX (future sprint S23-PT: Prompt Template Architecture):
+//
+// 1. Extend Output Template schema with researchConfig:
+//    { maxTokens, maxSearches, userPromptTemplate, model }
+//
+// 2. research-agent.ts loads template, extracts ALL params:
+//    const { systemPrompt, researchConfig } = loadResearchTemplate(templateId);
+//    await fetch('/api/research/deep', { body: {
+//      query, context, systemPrompt,
+//      maxTokens: researchConfig.maxTokens,
+//      maxSearches: researchConfig.maxSearches,
+//      userPromptTemplate: researchConfig.userPromptTemplate
+//    }});
+//
+// 3. server.js becomes thin passthrough - no defaults, no fallbacks
+//
+// DEX Declarative Sovereignty: research-agent owns behavior, server executes.
+// ============================================================================
 app.post('/api/research/deep', async (req, res) => {
     try {
         if (!anthropic) {
@@ -2472,7 +2504,8 @@ app.post('/api/research/deep', async (req, res) => {
         }
 
         // Sprint: research-template-wiring-v1 - Added systemPrompt parameter
-        const { query, context, systemPrompt, maxTokens = 4096 } = req.body;
+        // S22-WP: Increased maxTokens from 4096 to 16384 for professional research depth
+        const { query, context, systemPrompt, maxTokens = 16384 } = req.body;
 
         if (!query) {
             return res.status(400).json({ error: 'Missing required field: query' });
@@ -2485,74 +2518,165 @@ app.post('/api/research/deep', async (req, res) => {
 
         // Use systemPrompt from template if provided, otherwise use default
         // Sprint: research-template-wiring-v1 - DEX Declarative Sovereignty
-        const defaultSystemPrompt = `You are a research agent. Conduct thorough research on the following topic.
+        // S22-WP: Strengthened default prompt for professional research depth
+        const defaultSystemPrompt = `You are a SENIOR RESEARCH ANALYST conducting professional-grade investigation.
 
-Provide:
-1. Key findings with source attributions
-2. Multiple perspectives where applicable
-3. Confidence levels for each finding (0.0-1.0)
-4. Gaps or areas needing more research`;
+Your research must be:
+- EXHAUSTIVE: Explore every relevant angle, follow citation chains, verify claims across sources
+- RIGOROUS: Distinguish between primary sources, expert analysis, and speculation
+- NUANCED: Present conflicting evidence, methodological debates, and uncertainty
+- ACTIONABLE: Connect findings to practical implications and next steps
+
+For each major claim:
+1. Cite the source with full attribution
+2. Assess source credibility (academic, industry, journalistic, etc.)
+3. Note corroborating or contradicting evidence
+4. Assign confidence level (0.0-1.0) with justification
+
+DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
+Your audience expects comprehensive, professional-grade research output.`;
 
         const effectiveSystemPrompt = systemPrompt || defaultSystemPrompt;
 
-        // Construct the user prompt with query and context
-        // S21-RL: Request prose with inline citations, NOT JSON
-        // Web search returns rich citations that should be preserved as readable content
+        // ============================================================
+        // S22-WP: STRUCTURED OUTPUT VIA TOOL USE
+        // Instead of asking for prose and cleaning with regex (brittle!),
+        // we define a tool schema that enforces the output structure.
+        // Claude searches, then delivers results via structured tool call.
+        // ============================================================
+
+        // Define the structured output schema as a tool
+        const deliverResearchResultsTool = {
+            name: 'deliver_research_results',
+            description: 'Deliver the final research findings in a structured format. You MUST call this tool to deliver your research results after completing your web searches.',
+            input_schema: {
+                type: 'object',
+                properties: {
+                    title: {
+                        type: 'string',
+                        description: 'A compelling title for the research findings'
+                    },
+                    executive_summary: {
+                        type: 'string',
+                        description: '2-4 sentence overview of the key findings and their significance. Use markdown for emphasis.'
+                    },
+                    sections: {
+                        type: 'array',
+                        description: 'Main content sections with findings. Each section should be substantial.',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                heading: { type: 'string', description: 'Section heading (e.g., "Key Technical Findings")' },
+                                content: { type: 'string', description: 'Detailed content in markdown. Include specific data, quotes, analysis. Use **bold**, bullet points, > blockquotes.' },
+                                citation_indices: {
+                                    type: 'array',
+                                    items: { type: 'integer' },
+                                    description: 'Indices (1-based) of sources cited in this section'
+                                }
+                            },
+                            required: ['heading', 'content']
+                        }
+                    },
+                    key_findings: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: '3-5 bullet point key takeaways. Each should be a complete, insightful statement.'
+                    },
+                    confidence_assessment: {
+                        type: 'object',
+                        description: 'Overall confidence in the research findings',
+                        properties: {
+                            level: { type: 'string', enum: ['high', 'medium', 'low'] },
+                            score: { type: 'number', description: '0.0 to 1.0' },
+                            rationale: { type: 'string', description: 'Why this confidence level' }
+                        },
+                        required: ['level', 'score', 'rationale']
+                    },
+                    limitations: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: 'Research gaps, areas of uncertainty, or conflicting evidence'
+                    },
+                    sources: {
+                        type: 'array',
+                        description: 'All sources cited in the research, in order of citation',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                index: { type: 'integer', description: '1-based citation index' },
+                                title: { type: 'string' },
+                                url: { type: 'string' },
+                                domain: { type: 'string', description: 'e.g., nvidia.com, reuters.com' },
+                                credibility: { type: 'string', enum: ['academic', 'industry', 'journalistic', 'official', 'other'] },
+                                snippet: { type: 'string', description: 'Key quote or finding from this source' }
+                            },
+                            required: ['index', 'title', 'url']
+                        }
+                    }
+                },
+                required: ['title', 'executive_summary', 'sections', 'key_findings', 'sources']
+            }
+        };
+
+        // Construct the user prompt - instructs structured delivery
         const userPrompt = `RESEARCH QUESTION: ${query}
 
 CONTEXT: ${context || 'General research'}
 
-Provide your findings as a well-structured research summary in prose format (NOT JSON):
+INSTRUCTIONS:
+1. Use web_search extensively to gather comprehensive information (use all 15 searches if needed)
+2. For each major claim, find multiple corroborating sources
+3. After completing your research, you MUST call the deliver_research_results tool with your structured findings
 
-1. Start with a brief executive summary (2-3 sentences)
-2. Present key findings with inline source citations [1], [2], etc.
-3. Include multiple perspectives where applicable
-4. Note any gaps or areas needing further research
-5. End with confidence assessment
-
-Use markdown formatting for clarity (headers, bullet points, bold for emphasis).
-Cite sources inline and list them at the end.`;
+RESEARCH REQUIREMENTS:
+- Be COMPREHENSIVE and IN-DEPTH - depth and rigor over brevity
+- Include specific data points, statistics, and direct quotes
+- Assess source credibility (academic, industry, journalistic, official)
+- Note any conflicting evidence or areas of uncertainty
+- Use markdown formatting in content fields (## headers, **bold**, bullet points, > blockquotes)`;
 
         // Sprint: S21-RL - Enable Claude web search for real citations
         // Uses Anthropic's web_search tool (Brave Search under the hood)
         // Pricing: $10 per 1,000 searches
         // Supported: claude-sonnet-4, claude-sonnet-4-5, claude-opus-4, etc.
+        //
+        // S22-WP: Added deliver_research_results tool for STRUCTURED OUTPUT
+        // This enforces schema at API level - no regex cleanup needed!
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: maxTokens,
             system: effectiveSystemPrompt,
             messages: [{ role: 'user', content: userPrompt }],
-            tools: [{
-                type: 'web_search_20250305',
-                name: 'web_search',
-                max_uses: 5,  // Allow up to 5 iterative searches
-            }],
+            tools: [
+                {
+                    type: 'web_search_20250305',
+                    name: 'web_search',
+                    // S22-WP: Increased from 5 to 15 for professional research depth
+                    max_uses: 15,
+                },
+                deliverResearchResultsTool,
+            ],
+            // Force the model to eventually call our structured output tool
+            tool_choice: { type: 'any' },
         });
 
         console.log('[Research Deep] Response received, stop_reason:', response.stop_reason);
 
-        // Process response - may include web search results and text with citations
-        let textContent = '';
+        // ============================================================
+        // S22-WP: STRUCTURED OUTPUT PARSING
+        // Look for deliver_research_results tool call - no regex needed!
+        // ============================================================
+
+        let structuredResult = null;
         const webSearchResults = [];
-        const citations = [];
 
         for (const block of response.content) {
-            if (block.type === 'text') {
-                textContent += block.text;
-                // Extract inline citations from text blocks
-                if (block.citations && Array.isArray(block.citations)) {
-                    for (const citation of block.citations) {
-                        if (citation.type === 'web_search_result_location') {
-                            citations.push({
-                                url: citation.url,
-                                title: citation.title,
-                                cited_text: citation.cited_text,
-                            });
-                        }
-                    }
-                }
+            if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
+                // Found our structured output!
+                structuredResult = block.input;
+                console.log('[Research Deep] Structured output received:', structuredResult.title);
             } else if (block.type === 'web_search_tool_result') {
-                // Extract actual web search results
+                // Collect web search results for reference
                 console.log('[Research Deep] Web search results found');
                 if (block.content && Array.isArray(block.content)) {
                     for (const result of block.content) {
@@ -2568,48 +2692,105 @@ Cite sources inline and list them at the end.`;
             }
         }
 
-        console.log('[Research Deep] Text length:', textContent.length, 'Citations:', citations.length, 'Search results:', webSearchResults.length);
+        // Build result from structured output
+        if (structuredResult) {
+            // S22-WP: Validate that sections and sources are arrays
+            // The API sometimes returns malformed data (string instead of array)
+            const sectionsArray = Array.isArray(structuredResult.sections) ? structuredResult.sections : [];
+            const sourcesArray = Array.isArray(structuredResult.sources) ? structuredResult.sources : [];
 
-        // Debug: Log first few search results
-        if (webSearchResults.length > 0) {
-            console.log('[Research Deep] Sample search results:', JSON.stringify(webSearchResults.slice(0, 3), null, 2));
+            console.log('[Research Deep] Using structured output - sections:', sectionsArray.length, 'sources:', sourcesArray.length);
+
+            // Log a warning if we had to fix malformed data
+            if (!Array.isArray(structuredResult.sections)) {
+                console.warn('[Research Deep] WARNING: sections was not an array, type:', typeof structuredResult.sections);
+            }
+            if (!Array.isArray(structuredResult.sources)) {
+                console.warn('[Research Deep] WARNING: sources was not an array, type:', typeof structuredResult.sources);
+            }
+
+            // S22-WP: CANONICAL STORAGE - Store 100% of what Claude returned
+            // User requirement: "capture and cache 100% of what is returned from deep research"
+            // The refinement step (Writer agent) is where we consolidate research into knowledge.
+            // DO NOT subset this data - store the full canonical object.
+            const result = {
+                // ================================================================
+                // CANONICAL RESEARCH OBJECT - 100% of structured output
+                // This is the single source of truth for research results.
+                // Frontend and Writer should read from this field.
+                // ================================================================
+                canonicalResearch: {
+                    ...structuredResult,
+                    // Ensure sections and sources are arrays in the canonical object
+                    sections: sectionsArray,
+                    sources: sourcesArray,
+                    // Add metadata about the response
+                    _meta: {
+                        capturedAt: new Date().toISOString(),
+                        toolName: 'deliver_research_results',
+                        webSearchResultCount: webSearchResults.length,
+                    }
+                },
+
+                // Flag indicating structured output was received
+                structured: true,
+
+                // ================================================================
+                // LEGACY COMPATIBILITY FIELDS
+                // These exist only for backward compatibility with older code.
+                // New code should read from canonicalResearch.
+                // ================================================================
+                summary: (structuredResult.executive_summary || '') + '\n\n' +
+                    sectionsArray.map(s => `## ${s.heading}\n\n${s.content}`).join('\n\n'),
+                findings: sourcesArray.map((src, i) => ({
+                    claim: src.snippet || src.title,
+                    source: src.url,
+                    sourceTitle: src.title,
+                    confidence: structuredResult.confidence_assessment?.score || 0.8,
+                    sourceType: src.credibility || 'practitioner',
+                })),
+                perspectives: [],
+                gaps: structuredResult.limitations || [],
+
+                // Raw web search results for provenance
+                webCitations: webSearchResults,
+            };
+
+            console.log('[Research Deep] Canonical research captured:', {
+                title: structuredResult.title,
+                sectionCount: sectionsArray.length,
+                sourceCount: sourcesArray.length,
+                findingCount: Array.isArray(structuredResult.key_findings) ? structuredResult.key_findings.length : 0,
+            });
+
+            res.json(result);
+        } else {
+            // Fallback: No structured output received (shouldn't happen, but safety first)
+            console.warn('[Research Deep] WARNING: No structured tool call received, falling back to raw text');
+
+            // Collect any text content
+            let textContent = '';
+            for (const block of response.content) {
+                if (block.type === 'text') {
+                    textContent += block.text;
+                }
+            }
+
+            res.json({
+                structured: false,
+                summary: textContent || 'No research results received',
+                findings: webSearchResults.map((sr, i) => ({
+                    claim: sr.title || `Source ${i + 1}`,
+                    source: sr.url,
+                    sourceTitle: sr.title,
+                    confidence: 0.7,
+                    sourceType: 'practitioner',
+                })),
+                perspectives: [],
+                gaps: ['Warning: Research did not return structured output'],
+                webCitations: webSearchResults,
+            });
         }
-
-        // Return the response - Claude's text already includes inline citations
-        // Don't force JSON parsing - web search naturally returns prose with citations
-        const result = {
-            summary: textContent,
-            findings: [],
-            perspectives: [],
-            gaps: [],
-        };
-
-        // Include real web citations (inline citations from text blocks)
-        if (citations.length > 0) {
-            result.webCitations = citations;
-            // Convert citations to findings format
-            result.findings = citations.map((cit, i) => ({
-                claim: cit.cited_text || `Source ${i + 1}`,
-                source: cit.url,
-                sourceTitle: cit.title,
-                confidence: 0.9,
-                sourceType: 'practitioner',
-            }));
-        }
-
-        // Also include raw search results as backup
-        if (webSearchResults.length > 0 && citations.length === 0) {
-            result.webCitations = webSearchResults;
-            result.findings = webSearchResults.map((sr, i) => ({
-                claim: sr.title || `Source ${i + 1}`,
-                source: sr.url,
-                sourceTitle: sr.title,
-                confidence: 0.9,
-                sourceType: 'practitioner',
-            }));
-        }
-
-        res.json(result);
 
     } catch (error) {
         console.error('[Research Deep] Error:', error.message);

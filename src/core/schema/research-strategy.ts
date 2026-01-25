@@ -74,6 +74,15 @@ export interface Evidence {
 
   /** When this evidence was collected */
   collectedAt: string;
+
+  /**
+   * S22-WP: Optional metadata for display purposes
+   * Stores additional info like source title that may not fit in main fields
+   */
+  metadata?: {
+    title?: string;
+    [key: string]: unknown;
+  };
 }
 
 /**

@@ -3,8 +3,100 @@
 // Sprout data model for capturing LLM responses with full provenance
 // v3: Adds 8-stage botanical lifecycle and ResearchManifest support
 // v3.1: Adds optional ResearchDocument for structured research display (S2-SFR-Display)
+// v3.2: Adds CanonicalResearch for 100% structured output capture (S22-WP)
 
 import type { ResearchDocument } from './research-document';
+import type { ResearchBranch, Evidence } from './research-strategy';
+
+// ─────────────────────────────────────────────────────────────
+// Canonical Research (S22-WP: Structured Output Architecture)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Source citation from deep research
+ */
+export interface CanonicalSource {
+  /** Citation index (1-based) */
+  index: number;
+  /** Source title */
+  title: string;
+  /** Source URL */
+  url: string;
+  /** Domain extracted from URL */
+  domain?: string;
+  /** Credibility assessment */
+  credibility?: string;
+  /** Relevant snippet from source */
+  snippet?: string;
+}
+
+/**
+ * Research section with citations
+ */
+export interface CanonicalSection {
+  /** Section heading */
+  heading: string;
+  /** Section content (markdown) */
+  content: string;
+  /** Indices of sources cited in this section */
+  citation_indices?: number[];
+}
+
+/**
+ * Confidence assessment for research results
+ */
+export interface CanonicalConfidence {
+  /** Confidence level (high/medium/low) */
+  level?: string;
+  /** Numeric confidence score (0-1) */
+  score?: number;
+  /** Rationale for confidence assessment */
+  rationale?: string;
+}
+
+/**
+ * Canonical Research - 100% of structured output from deep research API
+ *
+ * S22-WP: User requirement: "capture and cache 100% of what is returned from
+ * the deep research as a canonical object... not a subset. The refinement step
+ * is where we consolidate research into knowledge."
+ *
+ * This is the single source of truth for research results.
+ * Frontend and Writer agent should read from this field.
+ * DO NOT transform or subset this data for storage.
+ */
+export interface CanonicalResearch {
+  /** Research report title */
+  title: string;
+
+  /** Executive summary of findings */
+  executive_summary: string;
+
+  /** Research sections with content and citations */
+  sections: CanonicalSection[];
+
+  /** Key findings extracted from research */
+  key_findings: string[];
+
+  /** Confidence assessment of the research */
+  confidence_assessment?: CanonicalConfidence;
+
+  /** Acknowledged limitations of the research */
+  limitations?: string[];
+
+  /** Source citations with metadata */
+  sources: CanonicalSource[];
+
+  /** Capture metadata (added by backend) */
+  _meta?: {
+    /** ISO timestamp when captured */
+    capturedAt: string;
+    /** Tool that produced this output */
+    toolName: string;
+    /** Number of web search results processed */
+    webSearchResultCount?: number;
+  };
+}
 
 /**
  * Provenance - Human-readable lineage of an insight
@@ -106,6 +198,39 @@ export interface Sprout {
 
   /** Structured research document for json-render display (S2-SFR-Display) */
   researchDocument?: ResearchDocument;
+
+  // ─────────────────────────────────────────────────────────────
+  // Canonical Research (S22-WP: Structured Output Architecture)
+  // 100% of what the deep research API returns - DO NOT SUBSET
+  // ─────────────────────────────────────────────────────────────
+
+  /**
+   * Canonical research output from deep research API.
+   * Contains 100% of the structured output from `deliver_research_results` tool.
+   * This is the single source of truth - refinement happens in Writer agent.
+   * @see CanonicalResearch type definition for full structure
+   */
+  canonicalResearch?: CanonicalResearch;
+
+  // ─────────────────────────────────────────────────────────────
+  // Research Evidence (Sprint: research-template-wiring-v1)
+  // Bridged from ResearchSprout when opening SproutFinishingRoom
+  // LEGACY: Prefer canonicalResearch for deep research results
+  // ─────────────────────────────────────────────────────────────
+
+  /** @deprecated Use canonicalResearch - Research branches with evidence (from ResearchSprout) */
+  researchBranches?: ResearchBranch[];
+
+  /** @deprecated Use canonicalResearch - Collected evidence from research process (from ResearchSprout) */
+  researchEvidence?: Evidence[];
+
+  /** @deprecated Use canonicalResearch - Synthesis summary from research process (from ResearchSprout) */
+  researchSynthesis?: {
+    summary: string;
+    insights: string[];
+    confidence: number;
+    synthesizedAt: string;
+  };
 
   /** User-assigned tags for categorization */
   tags: string[];
