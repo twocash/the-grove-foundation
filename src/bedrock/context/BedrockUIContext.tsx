@@ -14,7 +14,11 @@ import React, {
 import type { InspectorConfig } from '../patterns/console-factory.types';
 import type { GroveSkin, TypographyValue } from '../types/GroveSkin';
 import { SKIN_CSS_MAP } from '../types/GroveSkin';
-import defaultTheme from '../themes/quantum-glass-skin.json';
+// S24-EMT: Elegant Modern themes (new defaults for v1.0 routes)
+import elegantModernTheme from '../themes/elegant-modern-skin.json';
+import elegantDarkTheme from '../themes/elegant-dark-skin.json';
+// Legacy themes (keep for frozen zones and user preference)
+import quantumGlassTheme from '../themes/quantum-glass-skin.json';
 import zenithPaperTheme from '../themes/zenith-paper-skin.json';
 import livingGlassV2Theme from '../themes/living-glass-v2.json';
 import nebulaFluxTheme from '../themes/nebula-flux-v1.json';
@@ -95,9 +99,14 @@ const BedrockUIContext = createContext<BedrockUIContextValue | null>(null);
 /**
  * Theme registry - maps theme IDs to GroveSkin configurations.
  * New themes can be added here without code changes to consumers.
+ * S24-EMT: Elegant themes listed first as new defaults for v1.0 routes.
  */
 const THEME_REGISTRY: Record<string, GroveSkin> = {
-  'quantum-glass-v1': defaultTheme as unknown as GroveSkin,
+  // S24-EMT: New v1.0 default themes
+  'elegant-modern-v1': elegantModernTheme as unknown as GroveSkin,
+  'elegant-dark-v1': elegantDarkTheme as unknown as GroveSkin,
+  // Legacy themes (frozen zones + user preference)
+  'quantum-glass-v1': quantumGlassTheme as unknown as GroveSkin,
   'zenith-paper-v1': zenithPaperTheme as unknown as GroveSkin,
   'living-glass-v2': livingGlassV2Theme as unknown as GroveSkin,
   'nebula-flux-v1': nebulaFluxTheme as unknown as GroveSkin,
@@ -150,9 +159,9 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
   // Skin state (S1-SKIN-HybridEngine)
   // ==========================================================================
 
-  // Initialize skin from localStorage or default
+  // S24-EMT: Initialize skin from localStorage or route-aware default
   const [skin, setSkinState] = useState<GroveSkin>(() => {
-    if (typeof window === 'undefined') return defaultTheme as unknown as GroveSkin;
+    if (typeof window === 'undefined') return elegantModernTheme as unknown as GroveSkin;
     try {
       const storedId = localStorage.getItem(SKIN_STORAGE_KEY);
       if (storedId && THEME_REGISTRY[storedId]) {
@@ -161,7 +170,8 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
     } catch {
       // Ignore localStorage errors
     }
-    return defaultTheme as unknown as GroveSkin;
+    // S24-EMT: Default to Elegant Modern for v1.0 routes
+    return elegantModernTheme as unknown as GroveSkin;
   });
 
   // Available themes from registry
@@ -238,13 +248,27 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
       });
     }
 
-    // Sync Tailwind dark mode class with skin's colorScheme
-    // This bridges GroveSkins CSS variables with Tailwind dark: variants
-    // used by json-render components (architectural mandate)
-    if (skin.colorScheme === 'dark') {
+    // S24-EMT: FROZEN ZONE PROTECTION
+    // Never remove dark class on frozen routes (/foundation, /terminal)
+    // These routes depend on dark: variants and must stay dark regardless of theme
+    const isFrozenZone =
+      window.location.pathname.startsWith('/foundation') ||
+      window.location.pathname.startsWith('/terminal');
+
+    if (isFrozenZone) {
+      // Force dark class for frozen zones regardless of theme selection
       root.classList.add('dark');
+      // Still inject CSS variables so theming works, just skip dark class toggle
     } else {
-      root.classList.remove('dark');
+      // V1.0 routes (/explore, /bedrock): Normal theme-based toggle
+      // Sync Tailwind dark mode class with skin's colorScheme
+      // This bridges GroveSkins CSS variables with Tailwind dark: variants
+      // used by json-render components (architectural mandate)
+      if (skin.colorScheme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
     }
 
     // Log for verification in development

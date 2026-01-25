@@ -127,33 +127,44 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
     sessionId: typeof window !== 'undefined' ? localStorage.getItem('grove-session-id') || 'anonymous' : 'anonymous',
     onSproutReady: async (input) => {
       try {
+        console.log('[ExploreShell] onSproutReady: Creating sprout...');
         const newSprout = await createSprout(input);
+        console.log('[ExploreShell] onSproutReady: Sprout created:', newSprout.id);
+
         // Sprint: progress-streaming-ui-v1 - Auto-start research execution
         toast.success('Research sprout created', {
           description: `"${newSprout.title}" - Starting research execution...`,
         });
 
-        // Select the sprout so progress view shows
-        selectSprout(newSprout.id);
+        // Sprint: research-template-wiring-v1 - REMOVED immediate selectSprout
+        // The SproutFinishingRoom should only open AFTER research completes,
+        // not immediately when sprout is created. This prevents the "fake lifecycle"
+        // where the modal appears with no research results.
 
         // Start research pipeline execution
-        // This runs async - progress will stream to GardenInspector
+        console.log('[ExploreShell] onSproutReady: Starting research pipeline...');
         startResearch(newSprout).then((result) => {
+          console.log('[ExploreShell] onSproutReady: Research completed, success:', result.success);
           if (result.success) {
             toast.success('Research complete', {
               description: `"${newSprout.title}" has finished. View results in the Garden.`,
             });
+            // Sprint: research-template-wiring-v1 - Open SproutFinishingRoom AFTER research completes
+            console.log('[ExploreShell] onSproutReady: Opening SproutFinishingRoom NOW');
+            selectSprout(newSprout.id);
           } else if (result.error) {
             toast.error('Research failed', {
               description: result.error.message,
             });
           }
         }).catch((err) => {
+          console.error('[ExploreShell] onSproutReady: Research execution error:', err);
           toast.error('Research execution error', {
             description: err instanceof Error ? err.message : 'Unknown error',
           });
         });
       } catch (error) {
+        console.error('[ExploreShell] onSproutReady: Create sprout error:', error);
         toast.error('Failed to create sprout', {
           description: error instanceof Error ? error.message : 'Unknown error',
         });

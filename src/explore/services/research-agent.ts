@@ -317,6 +317,14 @@ export function createResearchAgent(
               // User requirement: "capture 100% of what is returned from deep research"
               if (result.canonicalResearch) {
                 capturedCanonicalResearch = result.canonicalResearch as CanonicalResearch;
+
+                // S23-SFR Phase 0b: Defensive validation - ensure sections is array
+                // Claude API occasionally returns sections as string instead of array
+                if (capturedCanonicalResearch.sections && !Array.isArray(capturedCanonicalResearch.sections)) {
+                  console.warn('[ResearchAgent] sections is not array, wrapping in array');
+                  capturedCanonicalResearch.sections = [capturedCanonicalResearch.sections as unknown as typeof capturedCanonicalResearch.sections[0]];
+                }
+
                 console.log(`[ResearchAgent] Captured canonical research: ${result.canonicalResearch.title}`);
               }
 

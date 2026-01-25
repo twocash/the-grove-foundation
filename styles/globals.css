@@ -1,6 +1,9 @@
 /* Tailwind CSS v4 Entry Point */
 @import "tailwindcss";
 
+/* S24-EMT: Theme-configurable fonts (Inter, Playfair Display, Fira Code) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Fira+Code:wght@400;500&display=swap');
+
 /* ============================================================
    GEIST FONTS (Self-hosted, S17-SKIN-LivingGlass)
    Commercial-grade font delivery without CDN dependencies

@@ -14,13 +14,8 @@ import type { Sprout, CanonicalResearch } from '@core/schema/sprout';
 import type { RenderTree, RenderElement } from '@core/json-render';
 import type { Evidence } from '@core/schema/research-strategy';
 
-// S22-WP: Extended Evidence type with optional metadata
-interface EvidenceWithMetadata extends Evidence {
-  metadata?: {
-    title?: string;
-    [key: string]: unknown;
-  };
-}
+// S23-SFR Phase 0d: Evidence removed - metadata now in core Evidence schema
+// Legacy comment preserved for traceability
 
 /**
  * Transforms an EvidenceBundle into a json-render tree for professional display.
@@ -120,6 +115,10 @@ export function evidenceBundleToRenderTree(
 }
 
 /**
+ * @deprecated Use canonicalResearchToRenderTree() instead.
+ * This function handles legacy sprouts without canonicalResearch.
+ * Will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
+ *
  * Transforms a Sprout's research data into a json-render tree.
  *
  * This handles the flatter data structure on Sprout:
@@ -130,6 +129,10 @@ export function evidenceBundleToRenderTree(
  * @param sprout - The sprout with research data
  */
 export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
+  // S23-SFR Phase 0d: Deprecation warning
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutResearchToRenderTree called. Sprout should have canonicalResearch.');
+  }
   // No research data? Return null to signal fallback
   const hasResearchData =
     sprout.researchBranches?.length ||
@@ -203,7 +206,7 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
           }
 
           // S22-WP: Use metadata.title when available from API
-          const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+          const title = (evidence as Evidence).metadata?.title ||
             extractTitle(evidence.source, evidence.content);
 
           children.push({
@@ -252,7 +255,7 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
 
       for (const evidence of sources) {
         // S22-WP: Use metadata.title when available from API
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({
@@ -634,11 +637,19 @@ function extractExecutiveSummary(markdown: string): string {
  * The Full Report tab shows the complete analysis.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge).
  */
 export function sproutSynthesisToRenderTree(sprout: Sprout): RenderTree | null {
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
   if (hasCanonicalResearch(sprout)) {
     return canonicalSummaryToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutSynthesisToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -726,11 +737,19 @@ export function sproutSynthesisToRenderTree(sprout: Sprout): RenderTree | null {
  * This is the main content the user waited for - NOT the source cards.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
  */
 export function sproutFullReportToRenderTree(sprout: Sprout): RenderTree | null {
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
   if (hasCanonicalResearch(sprout)) {
     return canonicalFullReportToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutFullReportToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -834,11 +853,19 @@ export function sproutFullReportToRenderTree(sprout: Sprout): RenderTree | null 
  * For the "Sources" tab - shows just the citation cards without synthesis.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
  */
 export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
   if (hasCanonicalResearch(sprout)) {
     return canonicalSourcesToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutSourcesToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -905,7 +932,7 @@ export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
 
       // Source cards
       for (const evidence of branchSources) {
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({
@@ -938,7 +965,7 @@ export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
       });
 
       for (const evidence of sources) {
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({

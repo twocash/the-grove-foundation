@@ -3,6 +3,299 @@
   "maxEntries": 100,
   "entries": [
     {
+      "id": "aca49b6e-445d-4909-99dd-1ff5ee2277c1",
+      "timestamp": "2026-01-24T05:43:45.101Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "full-research-pipeline-displays-complete-results",
+              "name": "Full research pipeline displays complete results",
+              "status": "pass",
+              "message": "Passed",
+              "file": "real-research-display.spec.ts",
+              "duration": 278031
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T05:43:45.112Z"
+      }
+    },
+    {
+      "id": "850e09ec-d702-4764-9ce6-c4d4d816c8af",
+      "timestamp": "2026-01-24T05:11:59.009Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "full-research-pipeline-displays-complete-results",
+              "name": "Full research pipeline displays complete results",
+              "status": "pass",
+              "message": "Passed",
+              "file": "real-research-display.spec.ts",
+              "duration": 260229
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T05:11:59.019Z"
+      }
+    },
+    {
+      "id": "27fb89dd-28dd-432c-9b1f-01fa5141ff4f",
+      "timestamp": "2026-01-24T05:08:42.033Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "full-research-pipeline-displays-complete-results",
+              "name": "Full research pipeline displays complete results",
+              "status": "pass",
+              "message": "Passed",
+              "file": "real-research-display.spec.ts",
+              "duration": 261544
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T05:08:42.038Z"
+      }
+    },
+    {
+      "id": "45722429-5332-4ccd-af64-1ca4d72fc032",
+      "timestamp": "2026-01-24T04:52:35.633Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "full-research-pipeline-displays-complete-results",
+              "name": "Full research pipeline displays complete results",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m",
+              "file": "real-research-display.spec.ts",
+              "duration": 300075
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T04:52:35.639Z"
+      }
+    },
+    {
+      "id": "9bd854ed-4bc7-485a-b183-e3985e7b223d",
+      "timestamp": "2026-01-24T04:45:41.011Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "full-research-pipeline-displays-complete-results",
+              "name": "Full research pipeline displays complete results",
+              "status": "fail",
+              "message": "\u001b[31mTest timeout of 300000ms exceeded.\u001b[39m",
+              "file": "real-research-display.spec.ts",
+              "duration": 300095
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 0,
+        "failed": 1,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T04:45:41.019Z"
+      }
+    },
+    {
+      "id": "a01a3ea5-0549-4c82-8d33-8db2e39a76e5",
+      "timestamp": "2026-01-24T02:27:49.845Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "01-explore-page-loads-without-critical-errors",
+              "name": "01 - Explore page loads without critical errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 7840
+            },
+            {
+              "id": "02-evidence-catalog-and-registry-are-importable",
+              "name": "02 - Evidence catalog and registry are importable",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 7075
+            },
+            {
+              "id": "03-sproutfinishingroom-modal-structure-exists",
+              "name": "03 - SproutFinishingRoom modal structure exists",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 8245
+            },
+            {
+              "id": "04-research-pipeline-returns-branches-and-evidence",
+              "name": "04 - Research pipeline returns branches and evidence",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 5757
+            },
+            {
+              "id": "05-no-pass-through-hack-console-messages",
+              "name": "05 - No pass-through hack console messages",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 8331
+            },
+            {
+              "id": "final-full-exploration-flow-without-critical-errors",
+              "name": "FINAL - Full exploration flow without critical errors",
+              "status": "pass",
+              "message": "Passed",
+              "file": "research-writer-panel.spec.ts",
+              "duration": 8039
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-24T02:27:49.854Z"
+      }
+    },
+    {
+      "id": "90d219fc-fbd4-47a0-97d4-b8d1d09fd4ab",
+      "timestamp": "2026-01-23T23:44:49.770Z",
+      "configVersion": "external",
+      "engineVersion": "0.0.0",
+      "categories": [
+        {
+          "id": "e2e-tests",
+          "name": "E2E Tests",
+          "status": "fail",
+          "checks": [
+            {
+              "id": "full-research-lifecycle-create-research-complete-view-results",
+              "name": "Full research lifecycle: create → research → complete → view results",
+              "status": "fail",
+              "message": "Error: browserType.launch: Executable doesn't exist at C:\\Users\\jim\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1208\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+              "file": "research-lifecycle-e2e.spec.ts",
+              "duration": 10
+            },
+            {
+              "id": "sproutrow-expansion-verify-synthesis-field-safety",
+              "name": "SproutRow expansion: verify synthesis field safety",
+              "status": "fail",
+              "message": "Error: browserType.launch: Executable doesn't exist at C:\\Users\\jim\\AppData\\Local\\ms-playwright\\chromium_headless_shell-1208\\chrome-headless-shell-win64\\chrome-headless-shell.exe\n╔═════════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just installed or updated. ║\n║ Please run the following command to download new browsers:              ║\n║                                                                         ║\n║     npx playwright install                                              ║\n║                                                                         ║\n║ <3 Playwright Team                                                      ║\n╚═════════════════════════════════════════════════════════════════════════╝",
+              "file": "research-lifecycle-e2e.spec.ts",
+              "duration": 9
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 2,
+        "warnings": 0
+      },
+      "attribution": {
+        "triggeredBy": "playwright",
+        "userId": null,
+        "sessionId": null,
+        "timestamp": "2026-01-23T23:44:49.783Z"
+      }
+    },
+    {
       "id": "a1b12e94-d376-4a6b-ac07-14c338e7acb2",
       "timestamp": "2026-01-19T05:25:23.552Z",
       "configVersion": "external",

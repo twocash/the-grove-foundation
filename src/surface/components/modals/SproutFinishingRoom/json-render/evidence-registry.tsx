@@ -86,9 +86,9 @@ export const EvidenceRegistry: ComponentRegistry = {
     const confidencePercent = Math.round(props.confidenceScore * 100);
 
     return (
-      <header className="mb-6 pb-4 border-b border-ink/10 dark:border-white/10">
+      <header className="mb-6 pb-4 border-b border-[var(--border)]">
         {/* Query */}
-        <h1 className="text-lg font-serif font-semibold text-ink dark:text-paper mb-3">
+        <h1 className="text-lg font-serif font-semibold text-[var(--foreground)] mb-3">
           {props.query}
         </h1>
 
@@ -115,17 +115,17 @@ export const EvidenceRegistry: ComponentRegistry = {
           </span>
 
           {/* Sources count */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span className="text-[var(--muted)]">
             {props.totalSources} sources
           </span>
 
           {/* Duration */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span className="text-[var(--muted)]">
             {formatDuration(props.executionTime)}
           </span>
 
           {/* Timestamp */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span className="text-[var(--muted)]">
             {formatDate(props.createdAt)}
           </span>
         </div>
@@ -148,16 +148,16 @@ export const EvidenceRegistry: ComponentRegistry = {
     };
 
     return (
-      <div className="mt-6 mb-4 pb-2 border-b border-ink/5 dark:border-white/5">
+      <div className="mt-6 mb-4 pb-2 border-b border-[var(--border)]/50">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-mono text-ink dark:text-paper font-medium">
+          <h2 className="text-sm font-mono text-[var(--foreground)] font-medium">
             {props.branchQuery}
           </h2>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-ink-muted dark:text-paper/50">
+            <span className="text-[var(--muted)]">
               {props.sourceCount} sources
             </span>
-            <span className="text-ink-muted dark:text-paper/50">
+            <span className="text-[var(--muted)]">
               {relevancePercent}% relevant
             </span>
             <span className={`font-mono uppercase ${statusColors[props.status]}`}>
@@ -177,7 +177,7 @@ export const EvidenceRegistry: ComponentRegistry = {
     const badge = getSourceTypeBadge(props.sourceType);
 
     return (
-      <div className="mb-4 p-3 rounded-lg bg-paper dark:bg-ink/50 border border-ink/5 dark:border-white/10">
+      <div className="mb-4 p-3 rounded-lg bg-[var(--panel)] border border-[var(--border)]">
         {/* Header row */}
         <div className="flex items-start gap-2 mb-2">
           {/* Citation index */}
@@ -196,7 +196,7 @@ export const EvidenceRegistry: ComponentRegistry = {
             >
               {props.title}
             </a>
-            <p className="text-xs text-ink-muted dark:text-paper/50 truncate">
+            <p className="text-xs text-[var(--muted)] truncate">
               {props.url}
             </p>
           </div>
@@ -210,12 +210,13 @@ export const EvidenceRegistry: ComponentRegistry = {
         </div>
 
         {/* Snippet - S22-WP: Show FULL content with proper markdown rendering */}
-        <div className="text-sm text-ink/80 dark:text-paper/80 border-l-2 border-grove-forest/30 pl-3 ml-8 prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 prose-blockquote:my-2 prose-blockquote:border-grove-forest/50 prose-a:text-grove-forest prose-a:no-underline hover:prose-a:underline">
+        {/* S23-SFR Phase 0c: Refactored to GroveSkin CSS variables */}
+        <div className="text-sm text-[var(--foreground)]/80 border-l-2 border-[var(--accent)]/30 pl-3 ml-8 prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 prose-blockquote:my-2 prose-blockquote:border-[var(--accent)]/50 prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline">
           <ReactMarkdown>{props.snippet}</ReactMarkdown>
         </div>
 
         {/* Access timestamp */}
-        <p className="text-xs text-ink-muted dark:text-paper/40 mt-2 ml-8">
+        <p className="text-xs text-[var(--muted)]/70 mt-2 ml-8">
           Accessed {formatDate(props.accessedAt)}
         </p>
       </div>
@@ -234,13 +235,13 @@ export const EvidenceRegistry: ComponentRegistry = {
 
     return (
       <div className="mb-4 ml-8">
-        <h4 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-2">
+        <h4 className="text-xs font-mono text-[var(--muted)] uppercase mb-2">
           Key Findings
         </h4>
         <ul className="space-y-1">
           {props.findings.map((finding, idx) => (
-            <li key={idx} className="flex gap-2 text-sm text-ink dark:text-paper">
-              <span className="text-grove-forest flex-shrink-0">•</span>
+            <li key={idx} className="flex gap-2 text-sm text-[var(--foreground)]">
+              <span className="text-[var(--accent)] flex-shrink-0">•</span>
               <span>{finding}</span>
             </li>
           ))}
@@ -256,13 +257,13 @@ export const EvidenceRegistry: ComponentRegistry = {
     const props = element.props as EvidenceSummaryProps;
 
     return (
-      <footer className="mt-6 pt-4 border-t border-ink/10 dark:border-white/10 flex items-center justify-between text-xs text-ink-muted dark:text-paper/50">
+      <footer className="mt-6 pt-4 border-t border-[var(--border)] flex items-center justify-between text-xs text-[var(--muted)]">
         <div className="flex items-center gap-4">
           <span>
-            <strong className="text-ink dark:text-paper">{props.branchCount}</strong> research branches
+            <strong className="text-[var(--foreground)]">{props.branchCount}</strong> research branches
           </span>
           <span>
-            <strong className="text-ink dark:text-paper">{props.totalFindings}</strong> findings
+            <strong className="text-[var(--foreground)]">{props.totalFindings}</strong> findings
           </span>
         </div>
         <span className="font-mono">
@@ -292,13 +293,14 @@ export const EvidenceRegistry: ComponentRegistry = {
       const uniqueIndices = [...new Set(indices)];
 
       // Render the content as normal text with a small superscript citation number
+      // S23-SFR Phase 0c: Refactored to GroveSkin CSS variables
       return (
         <span className="citation-inline">
           {/* Content rendered as normal text - NO italics, NO blockquote styling */}
-          <span className="text-ink dark:text-paper">{children}</span>
+          <span className="text-[var(--foreground)]">{children}</span>
           {/* Citation number as small superscript */}
           {uniqueIndices.length > 0 && (
-            <sup className="text-[10px] text-grove-forest font-mono ml-0.5 cursor-help" title={`Source: ${uniqueIndices.join(', ')}`}>
+            <sup className="text-[10px] text-[var(--accent)] font-mono ml-0.5 cursor-help" title={`Source: ${uniqueIndices.join(', ')}`}>
               [{uniqueIndices.join(',')}]
             </sup>
           )}
@@ -309,20 +311,21 @@ export const EvidenceRegistry: ComponentRegistry = {
     return (
       <article className="mb-6">
         {/* Research content - proper document styling with CLEAR heading hierarchy */}
-        <div className="prose dark:prose-invert max-w-none
-          text-ink dark:text-paper text-[15px] leading-relaxed
-          prose-p:my-4 prose-p:text-ink dark:prose-p:text-paper/90
-          prose-ul:my-4 prose-ul:text-ink dark:prose-ul:text-paper/90
+        {/* S23-SFR Phase 0c: Refactored to GroveSkin CSS variables */}
+        <div className="prose max-w-none
+          text-[var(--foreground)] text-[15px] leading-relaxed
+          prose-p:my-4 prose-p:text-[var(--foreground)]/90
+          prose-ul:my-4 prose-ul:text-[var(--foreground)]/90
           prose-ol:my-4
           prose-li:my-1
-          prose-strong:text-ink dark:prose-strong:text-paper prose-strong:font-semibold
-          prose-em:text-ink dark:prose-em:text-paper/90
-          prose-blockquote:border-l-4 prose-blockquote:border-grove-forest/50
-          prose-blockquote:bg-grove-forest/5 dark:prose-blockquote:bg-grove-forest/10
+          prose-strong:text-[var(--foreground)] prose-strong:font-semibold
+          prose-em:text-[var(--foreground)]/90
+          prose-blockquote:border-l-4 prose-blockquote:border-[var(--accent)]/50
+          prose-blockquote:bg-[var(--accent)]/5
           prose-blockquote:pl-4 prose-blockquote:py-3 prose-blockquote:my-6 prose-blockquote:rounded-r
-          prose-blockquote:text-ink/90 dark:prose-blockquote:text-paper/80
-          prose-a:text-grove-forest hover:prose-a:underline
-          prose-code:text-sm prose-code:bg-ink/5 dark:prose-code:bg-white/10 prose-code:px-1 prose-code:rounded">
+          prose-blockquote:text-[var(--foreground)]/90
+          prose-a:text-[var(--accent)] hover:prose-a:underline
+          prose-code:text-sm prose-code:bg-[var(--foreground)]/5 prose-code:px-1 prose-code:rounded">
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
             components={{
@@ -332,23 +335,24 @@ export const EvidenceRegistry: ComponentRegistry = {
                 return <CitationRenderer index={indexAttr}>{props.children}</CitationRenderer>;
               },
               // S22-WP: Custom heading components for CLEAR visual hierarchy
+              // S23-SFR Phase 0c: Refactored to GroveSkin CSS variables
               h1: ({ children }) => (
-                <h1 className="text-2xl font-serif font-bold text-ink dark:text-paper mt-8 mb-4 pb-3 border-b-2 border-grove-forest/30">
+                <h1 className="text-2xl font-serif font-bold text-[var(--foreground)] mt-8 mb-4 pb-3 border-b-2 border-[var(--accent)]/30">
                   {children}
                 </h1>
               ),
               h2: ({ children }) => (
-                <h2 className="text-xl font-serif font-semibold text-ink dark:text-paper mt-8 mb-3 pb-2 border-b border-ink/10 dark:border-white/10">
+                <h2 className="text-xl font-serif font-semibold text-[var(--foreground)] mt-8 mb-3 pb-2 border-b border-[var(--border)]">
                   {children}
                 </h2>
               ),
               h3: ({ children }) => (
-                <h3 className="text-lg font-serif font-semibold text-grove-forest dark:text-grove-forest mt-6 mb-2">
+                <h3 className="text-lg font-serif font-semibold text-[var(--accent)] mt-6 mb-2">
                   {children}
                 </h3>
               ),
               h4: ({ children }) => (
-                <h4 className="text-base font-sans font-semibold text-ink dark:text-paper mt-4 mb-2">
+                <h4 className="text-base font-sans font-semibold text-[var(--foreground)] mt-4 mb-2">
                   {children}
                 </h4>
               ),

@@ -92,6 +92,10 @@ function researchSproutToSprout(rs: ResearchSprout): Sprout {
     status: 'sprout', // Legacy field
     stage: mapStatusToStage(rs.status),
     researchDocument: rs.researchDocument,
+    // Sprint: research-template-wiring-v1 - Bridge research data for document generation
+    researchBranches: rs.branches,
+    researchEvidence: rs.evidence,
+    researchSynthesis: rs.synthesis,
     tags: rs.tags || [],
     notes: rs.notes,
     sessionId: rs.sessionId || 'unknown',
