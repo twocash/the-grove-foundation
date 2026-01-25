@@ -93,7 +93,21 @@ function rowToSprout(row: Record<string, unknown>): ResearchSprout {
     execution: row.execution as ResearchSprout['execution'] | null,
     researchDocument: row.research_document as ResearchDocument | undefined,
     // S22-WP: 100% lossless canonical research from structured API
-    canonicalResearch: row.canonical_research as CanonicalResearch | undefined,
+    // S23-SFR DEBUG: Log what we're reading from Supabase
+    canonicalResearch: (() => {
+      const cr = row.canonical_research as CanonicalResearch | undefined;
+      console.log('[rowToSprout] Reading canonical_research from Supabase:', {
+        hasCanonical: !!cr,
+        rawType: typeof row.canonical_research,
+        title: cr?.title?.slice(0, 50),
+        sectionsCount: cr?.sections?.length || 0,
+        sourcesCount: cr?.sources?.length || 0,
+        execSummaryLength: cr?.executive_summary?.length || 0,
+        firstSectionTitle: cr?.sections?.[0]?.title || '(no sections)',
+        rawKeys: cr ? Object.keys(cr) : [],
+      });
+      return cr;
+    })(),
     statusHistory: (row.status_history as ResearchSprout['statusHistory']) || [],
     appliedRuleIds: (row.applied_rule_ids as string[]) || [],
     inferenceConfidence: row.inference_confidence as number | null,
@@ -133,7 +147,18 @@ function sproutToRow(sprout: Partial<ResearchSprout> & { groveId: string }): Rec
   if (sprout.execution !== undefined) row.execution = sprout.execution;
   if (sprout.researchDocument !== undefined) row.research_document = sprout.researchDocument;
   // S22-WP: 100% lossless canonical research from structured API
-  if (sprout.canonicalResearch !== undefined) row.canonical_research = sprout.canonicalResearch;
+  if (sprout.canonicalResearch !== undefined) {
+    row.canonical_research = sprout.canonicalResearch;
+    // S23-SFR DEBUG: Log what we're saving to Supabase
+    console.log('[sproutToRow] Saving canonical_research:', {
+      hasCanonical: !!sprout.canonicalResearch,
+      title: sprout.canonicalResearch?.title?.slice(0, 50),
+      sectionsCount: sprout.canonicalResearch?.sections?.length || 0,
+      sourcesCount: sprout.canonicalResearch?.sources?.length || 0,
+      execSummaryLength: sprout.canonicalResearch?.executive_summary?.length || 0,
+      firstSectionTitle: sprout.canonicalResearch?.sections?.[0]?.title || '(no sections)',
+    });
+  }
   if (sprout.statusHistory !== undefined) row.status_history = sprout.statusHistory;
   if (sprout.appliedRuleIds !== undefined) row.applied_rule_ids = sprout.appliedRuleIds;
   if (sprout.inferenceConfidence !== undefined) row.inference_confidence = sprout.inferenceConfidence;
@@ -313,6 +338,19 @@ async function fetchSproutsFromSupabase(groveId: string): Promise<ResearchSprout
       throw new Error(error.message);
     }
 
+    // S23-SFR DEBUG: Log raw canonical_research from Supabase BEFORE rowToSprout conversion
+    if (data && data.length > 0) {
+      console.log('[ResearchSproutContext] RAW Supabase response - first row canonical_research:', {
+        rowCount: data.length,
+        firstRowId: data[0]?.id?.slice(0, 8),
+        hasCanonicalResearch: !!data[0]?.canonical_research,
+        canonicalResearchType: typeof data[0]?.canonical_research,
+        canonicalResearchKeys: data[0]?.canonical_research ? Object.keys(data[0].canonical_research) : [],
+        sectionsCount: data[0]?.canonical_research?.sections?.length || 0,
+        sourcesCount: data[0]?.canonical_research?.sources?.length || 0,
+      });
+    }
+
     return (data || []).map(rowToSprout);
   } catch (e) {
     console.error('[ResearchSproutContext] Failed to fetch sprouts:', e);
@@ -345,6 +383,19 @@ async function fetchSproutById(id: string): Promise<ResearchSprout | null> {
       }
       console.error('[ResearchSproutContext] Single fetch error:', error.message);
       return null;
+    }
+
+    // S23-SFR DEBUG: Log raw canonical_research from Supabase BEFORE rowToSprout conversion
+    if (data) {
+      console.log('[ResearchSproutContext] RAW Supabase response - fetchSproutById:', {
+        id: data.id?.slice(0, 8),
+        hasCanonicalResearch: !!data.canonical_research,
+        canonicalResearchType: typeof data.canonical_research,
+        canonicalResearchKeys: data.canonical_research ? Object.keys(data.canonical_research) : [],
+        sectionsCount: data.canonical_research?.sections?.length || 0,
+        sourcesCount: data.canonical_research?.sources?.length || 0,
+        execSummaryLength: data.canonical_research?.executive_summary?.length || 0,
+      });
     }
 
     return data ? rowToSprout(data) : null;
@@ -769,9 +820,26 @@ export function ResearchSproutProvider({
     // Sprint: sprout-finishing-room-v1, US-E001
     // Dispatch event to open Sprout Finishing Room
     if (id) {
-      console.log('[ResearchSproutContext] Opening Sprout Finishing Room for:', id);
+      // S23-SFR-Fix: Get the full sprout data from local state to avoid re-fetching
+      const sproutData = sproutsRef.current.find(s => s.id === id);
+
+      // S23-SFR DEBUG: Log canonical research in sproutsRef.current
+      console.log('[ResearchSproutContext] selectSprout - sproutData.canonicalResearch:', {
+        id: id.slice(0, 8),
+        hasData: !!sproutData,
+        hasCanonicalResearch: !!sproutData?.canonicalResearch,
+        canonicalResearchKeys: sproutData?.canonicalResearch ? Object.keys(sproutData.canonicalResearch) : [],
+        sectionsCount: sproutData?.canonicalResearch?.sections?.length || 0,
+        sourcesCount: sproutData?.canonicalResearch?.sources?.length || 0,
+        execSummaryLength: sproutData?.canonicalResearch?.executive_summary?.length || 0,
+      });
+
       window.dispatchEvent(new CustomEvent('open-finishing-room', {
-        detail: { sproutId: id },
+        detail: {
+          sproutId: id,
+          // S23-SFR-Fix: Include sprout data to avoid 406 errors from Supabase refetch
+          researchSprout: sproutData,
+        },
         bubbles: true
       }));
     }

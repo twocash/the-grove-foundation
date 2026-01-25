@@ -10,7 +10,7 @@ import { ThemeProvider } from '../theme';
 import { GroveDataProviderComponent, SupabaseAdapter } from '@core/data';
 import { SproutFinishingRoom } from '@surface/components/modals/SproutFinishingRoom';
 import { ToastProvider } from '../explore/context/ToastContext';
-import type { Sprout, SproutStage, SproutProvenance } from '@core/schema/sprout';
+import type { Sprout, SproutStage, SproutProvenance, CanonicalResearch } from '@core/schema/sprout';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
 import { RESEARCH_SPROUTS_TABLE } from '@core/schema/research-sprout-registry';
 
@@ -92,6 +92,8 @@ function researchSproutToSprout(rs: ResearchSprout): Sprout {
     status: 'sprout', // Legacy field
     stage: mapStatusToStage(rs.status),
     researchDocument: rs.researchDocument,
+    // S22-WP: 100% lossless canonical research from structured API
+    canonicalResearch: rs.canonicalResearch,
     // Sprint: research-template-wiring-v1 - Bridge research data for document generation
     researchBranches: rs.branches,
     researchEvidence: rs.evidence,
@@ -120,6 +122,8 @@ function rowToResearchSprout(row: Record<string, unknown>): ResearchSprout {
     synthesis: row.synthesis as ResearchSprout['synthesis'] | undefined,
     execution: row.execution as ResearchSprout['execution'] | undefined,
     researchDocument: row.research_document as ResearchSprout['researchDocument'],
+    // S22-WP: 100% lossless canonical research from structured API
+    canonicalResearch: row.canonical_research as CanonicalResearch | undefined,
     statusHistory: (row.status_history as ResearchSprout['statusHistory']) || [],
     appliedRuleIds: (row.applied_rule_ids as string[]) || [],
     inferenceConfidence: (row.inference_confidence as number) || 0,
@@ -135,6 +139,8 @@ function rowToResearchSprout(row: Record<string, unknown>): ResearchSprout {
     reviewed: (row.reviewed as boolean) || false,
     requiresReview: (row.requires_review as boolean) || false,
     rating: row.rating as number | undefined,
+    // S23-SFR: Add gateDecisions to fix TypeScript error
+    gateDecisions: (row.gate_decisions as ResearchSprout['gateDecisions']) || [],
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -146,15 +152,31 @@ function rowToResearchSprout(row: Record<string, unknown>): ResearchSprout {
 async function fetchSproutFromSupabase(id: string): Promise<Sprout | null> {
   const client = getFinishingRoomSupabaseClient();
   if (!client) {
+    console.warn('[FinishingRoomGlobal] No Supabase client available');
     return null;
   }
 
+  console.log('[FinishingRoomGlobal] Fetching sprout from Supabase:', id);
+  console.log('[FinishingRoomGlobal] Table:', RESEARCH_SPROUTS_TABLE);
+
   try {
-    const { data, error } = await client
+    const { data, error, status, statusText } = await client
       .from(RESEARCH_SPROUTS_TABLE)
       .select('*')
       .eq('id', id)
       .single();
+
+    // Log full response details for debugging
+    console.log('[FinishingRoomGlobal] Supabase response:', {
+      status,
+      statusText,
+      hasData: !!data,
+      hasError: !!error,
+      errorCode: error?.code,
+      errorMessage: error?.message,
+      errorDetails: error?.details,
+      errorHint: error?.hint,
+    });
 
     if (error) {
       // PGRST116 = no rows found (not an error condition)
@@ -162,12 +184,22 @@ async function fetchSproutFromSupabase(id: string): Promise<Sprout | null> {
         console.log('[FinishingRoomGlobal] Sprout not found in Supabase:', id);
         return null;
       }
-      console.error('[FinishingRoomGlobal] Supabase fetch error:', error.message);
+      console.error('[FinishingRoomGlobal] Supabase fetch error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        status,
+      });
       return null;
     }
 
-    if (!data) return null;
+    if (!data) {
+      console.log('[FinishingRoomGlobal] No data returned (but no error)');
+      return null;
+    }
 
+    console.log('[FinishingRoomGlobal] Successfully fetched sprout data');
     // Convert to ResearchSprout then to Sprout
     const researchSprout = rowToResearchSprout(data);
     return researchSproutToSprout(researchSprout);
@@ -187,34 +219,60 @@ interface RootLayoutProps {
  * Enables the Finishing Room to be opened from anywhere via custom event.
  * Used by E2E tests and can be used for future integrations.
  *
- * Listens for: `open-finishing-room` CustomEvent with { sproutId } detail
+ * Listens for: `open-finishing-room` CustomEvent with { sproutId, researchSprout? } detail
+ * S23-SFR-Fix: Now accepts researchSprout data directly to avoid re-fetching
  */
 function FinishingRoomGlobal() {
   const [isOpen, setIsOpen] = useState(false);
   const [sprout, setSprout] = useState<Sprout | null>(null);
 
   // Handle opening the finishing room
-  const handleOpen = useCallback(async (event: CustomEvent<{ sproutId: string }>) => {
-    const { sproutId } = event.detail;
-    console.log('[FinishingRoomGlobal] Event received, sproutId:', sproutId);
+  const handleOpen = useCallback(async (event: CustomEvent<{ sproutId: string; researchSprout?: ResearchSprout }>) => {
+    const { sproutId, researchSprout } = event.detail;
+    console.log('[FinishingRoomGlobal] Event received, sproutId:', sproutId, 'hasResearchSprout:', !!researchSprout);
 
     let foundSprout: Sprout | null = null;
 
+    // S23-SFR-Fix: Priority 0 - Use sprout data from event if available (avoids 406 errors)
+    // This is the new preferred path when clicking from GardenTray/ResearchSproutContext
+    if (researchSprout) {
+      // S23-SFR DEBUG: Log incoming ResearchSprout canonical data
+      console.log('[FinishingRoomGlobal] Incoming researchSprout.canonicalResearch:', {
+        hasCanonical: !!researchSprout.canonicalResearch,
+        title: researchSprout.canonicalResearch?.title,
+        sectionsCount: researchSprout.canonicalResearch?.sections?.length || 0,
+        sourcesCount: researchSprout.canonicalResearch?.sources?.length || 0,
+        execSummaryLength: researchSprout.canonicalResearch?.executive_summary?.length || 0,
+      });
+      foundSprout = researchSproutToSprout(researchSprout);
+      // S23-SFR DEBUG: Log converted Sprout canonical data
+      console.log('[FinishingRoomGlobal] Converted sprout.canonicalResearch:', {
+        hasCanonical: !!foundSprout.canonicalResearch,
+        title: foundSprout.canonicalResearch?.title,
+        sectionsCount: foundSprout.canonicalResearch?.sections?.length || 0,
+        sourcesCount: foundSprout.canonicalResearch?.sources?.length || 0,
+        execSummaryLength: foundSprout.canonicalResearch?.executive_summary?.length || 0,
+      });
+      console.log('[FinishingRoomGlobal] Using sprout data from event (no network request needed)');
+    }
+
     // 1. First check test sprout (used by E2E tests) - localStorage takes priority for tests
-    const testSproutJson = localStorage.getItem('grove-test-sprout');
-    if (testSproutJson) {
-      try {
-        const testSprout = JSON.parse(testSproutJson);
-        if (testSprout.id === sproutId) {
-          foundSprout = testSprout;
-          console.log('[FinishingRoomGlobal] Found in test sprout localStorage');
+    if (!foundSprout) {
+      const testSproutJson = localStorage.getItem('grove-test-sprout');
+      if (testSproutJson) {
+        try {
+          const testSprout = JSON.parse(testSproutJson);
+          if (testSprout.id === sproutId) {
+            foundSprout = testSprout;
+            console.log('[FinishingRoomGlobal] Found in test sprout localStorage');
+          }
+        } catch (e) {
+          console.warn('[FinishingRoomGlobal] Failed to parse test sprout:', e);
         }
-      } catch (e) {
-        console.warn('[FinishingRoomGlobal] Failed to parse test sprout:', e);
       }
     }
 
-    // 2. Try Supabase (primary source for production)
+    // 2. Try Supabase (fallback for cases where event data isn't available)
     if (!foundSprout) {
       console.log('[FinishingRoomGlobal] Fetching from Supabase...');
       foundSprout = await fetchSproutFromSupabase(sproutId);

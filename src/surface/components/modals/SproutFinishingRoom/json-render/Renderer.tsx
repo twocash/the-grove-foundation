@@ -119,12 +119,25 @@ export const Renderer: React.FC<RendererProps> = ({
     return null;
   }
 
+  // S23-SFR DEBUG: Log what we're rendering
+  console.log('[Renderer] Rendering tree:', {
+    childrenCount: tree.children.length,
+    childTypes: tree.children.map(c => c.type),
+  });
+
   return (
     <LayoutContext.Provider value={resolvedLayout}>
       <div className={`json-render-root ${resolvedLayout.containerPadding}`}>
         <div className={resolvedLayout.sectionGap}>
           {tree.children.map((element, index) => {
             const Component = registry[element.type] || fallback;
+            const isRegistered = !!registry[element.type];
+            console.log('[Renderer] Rendering element:', {
+              type: element.type,
+              index,
+              isRegistered,
+              propsKeys: Object.keys(element.props || {}),
+            });
             return <Component key={`${element.type}-${index}`} element={element} />;
           })}
         </div>

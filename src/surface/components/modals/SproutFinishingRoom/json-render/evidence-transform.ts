@@ -309,6 +309,105 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
 // CanonicalResearch is the single source of truth when available.
 
 /**
+ * S22-WP Data Sanitization: Parse key_findings which may be malformed.
+ *
+ * The deep research API sometimes returns key_findings as a string containing
+ * an XML-like parameter wrapper:
+ *   "<parameter name=\"key_findings\">[\"Finding 1\", \"Finding 2\"]"
+ *
+ * This function extracts and parses the actual array from such malformed data.
+ */
+function parseKeyFindings(keyFindings: unknown): string[] {
+  // Already an array? Return it
+  if (Array.isArray(keyFindings)) {
+    return keyFindings.filter((f): f is string => typeof f === 'string');
+  }
+
+  // String that might contain the array
+  if (typeof keyFindings === 'string') {
+    // Check for XML parameter wrapper pattern
+    const parameterMatch = keyFindings.match(/<parameter[^>]*>\s*(\[[\s\S]*\])\s*$/);
+    if (parameterMatch && parameterMatch[1]) {
+      try {
+        const parsed = JSON.parse(parameterMatch[1]);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((f): f is string => typeof f === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse key_findings from parameter wrapper:', e);
+      }
+    }
+
+    // Try direct JSON parse if it looks like an array
+    if (keyFindings.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(keyFindings);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((f): f is string => typeof f === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse key_findings as JSON array:', e);
+      }
+    }
+
+    // Single string finding - wrap in array
+    if (keyFindings.trim().length > 0) {
+      return [keyFindings];
+    }
+  }
+
+  // Fallback: empty array
+  return [];
+}
+
+/**
+ * S22-WP Data Sanitization: Parse limitations which may be malformed.
+ * Same pattern as key_findings.
+ */
+function parseLimitations(limitations: unknown): string[] {
+  // Already an array? Return it
+  if (Array.isArray(limitations)) {
+    return limitations.filter((l): l is string => typeof l === 'string');
+  }
+
+  // String that might contain the array
+  if (typeof limitations === 'string') {
+    // Check for XML parameter wrapper pattern
+    const parameterMatch = limitations.match(/<parameter[^>]*>\s*(\[[\s\S]*\])\s*$/);
+    if (parameterMatch && parameterMatch[1]) {
+      try {
+        const parsed = JSON.parse(parameterMatch[1]);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((l): l is string => typeof l === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse limitations from parameter wrapper:', e);
+      }
+    }
+
+    // Try direct JSON parse if it looks like an array
+    if (limitations.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(limitations);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((l): l is string => typeof l === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse limitations as JSON array:', e);
+      }
+    }
+
+    // Single string limitation - wrap in array
+    if (limitations.trim().length > 0) {
+      return [limitations];
+    }
+  }
+
+  // Fallback: empty array
+  return [];
+}
+
+/**
  * Check if a sprout has canonical research data.
  * S22-WP: Prefer canonicalResearch over legacy fields for display.
  */
@@ -357,12 +456,13 @@ export function canonicalSummaryToRenderTree(canonical: CanonicalResearch, query
     },
   });
 
-  // Key findings
-  if (canonical.key_findings?.length) {
+  // Key findings - use sanitized parser to handle malformed data
+  const parsedKeyFindings = parseKeyFindings(canonical.key_findings);
+  if (parsedKeyFindings.length > 0) {
     children.push({
       type: 'FindingsList',
       props: {
-        findings: canonical.key_findings,
+        findings: parsedKeyFindings,
       },
     });
   }
@@ -392,6 +492,18 @@ export function canonicalSummaryToRenderTree(canonical: CanonicalResearch, query
 export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, query: string): RenderTree {
   const children: RenderElement[] = [];
   const now = new Date().toISOString();
+
+  // S23-SFR DEBUG: Log canonical research structure to identify missing content
+  console.log('[canonicalFullReportToRenderTree] Input:', {
+    hasCanonical: !!canonical,
+    title: canonical?.title,
+    hasExecutiveSummary: !!canonical?.executive_summary,
+    executiveSummaryLength: canonical?.executive_summary?.length || 0,
+    sectionsCount: canonical?.sections?.length || 0,
+    sectionsIsArray: Array.isArray(canonical?.sections),
+    sourcesCount: canonical?.sources?.length || 0,
+    confidenceScore: canonical?.confidence_assessment?.score,
+  });
 
   // Header with query and metadata
   children.push({
@@ -427,37 +539,54 @@ export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, qu
   });
 
   // All research sections with their full content
-  for (const section of canonical.sections) {
+  // S23-SFR: Defensive check - ensure sections is an array
+  const sections = Array.isArray(canonical.sections) ? canonical.sections : [];
+  console.log('[canonicalFullReportToRenderTree] Processing sections:', {
+    originalSectionsType: typeof canonical.sections,
+    isArray: Array.isArray(canonical.sections),
+    processingSectionCount: sections.length,
+  });
+
+  for (const section of sections) {
     // Build citation references for this section
     const citationRefs = section.citation_indices?.length
       ? ` [${section.citation_indices.join(', ')}]`
       : '';
 
+    const sectionContent = `## ${section.heading}${citationRefs}\n\n${section.content}`;
+    console.log('[canonicalFullReportToRenderTree] Adding section:', {
+      heading: section.heading,
+      contentLength: section.content?.length || 0,
+      hasContent: !!section.content,
+    });
+
     children.push({
       type: 'SynthesisBlock',
       props: {
-        content: `## ${section.heading}${citationRefs}\n\n${section.content}`,
+        content: sectionContent,
         confidence: canonical.confidence_assessment?.score ?? 0.7,
       },
     });
   }
 
-  // Key findings section
-  if (canonical.key_findings?.length) {
+  // Key findings section - use sanitized parser to handle malformed data
+  const parsedKeyFindingsForReport = parseKeyFindings(canonical.key_findings);
+  if (parsedKeyFindingsForReport.length > 0) {
     children.push({
       type: 'FindingsList',
       props: {
-        findings: canonical.key_findings,
+        findings: parsedKeyFindingsForReport,
       },
     });
   }
 
-  // Limitations section
-  if (canonical.limitations?.length) {
+  // Limitations section - use sanitized parser to handle malformed data
+  const parsedLimitations = parseLimitations(canonical.limitations);
+  if (parsedLimitations.length > 0) {
     children.push({
       type: 'LimitationsList',
       props: {
-        limitations: canonical.limitations,
+        limitations: parsedLimitations,
       },
     });
   }
@@ -466,8 +595,8 @@ export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, qu
   children.push({
     type: 'EvidenceSummary',
     props: {
-      branchCount: canonical.sections.length,
-      totalFindings: canonical.key_findings?.length || 0,
+      branchCount: sections.length,
+      totalFindings: parsedKeyFindingsForReport.length,
       apiCallsUsed: canonical._meta?.webSearchResultCount || 0,
     },
   });
@@ -742,8 +871,23 @@ export function sproutSynthesisToRenderTree(sprout: Sprout): RenderTree | null {
  * Legacy path will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
  */
 export function sproutFullReportToRenderTree(sprout: Sprout): RenderTree | null {
+  // S23-SFR DEBUG: Log entry point with all relevant data
+  const hasCanonical = hasCanonicalResearch(sprout);
+  console.log('[sproutFullReportToRenderTree] ENTRY:', {
+    sproutId: sprout.id,
+    hasCanonicalResearch: hasCanonical,
+    canonicalTitle: sprout.canonicalResearch?.title?.slice(0, 50),
+    canonicalSectionsCount: sprout.canonicalResearch?.sections?.length || 0,
+    canonicalSourcesCount: sprout.canonicalResearch?.sources?.length || 0,
+    canonicalExecSummaryLength: sprout.canonicalResearch?.executive_summary?.length || 0,
+    legacyBranchesCount: sprout.researchBranches?.length || 0,
+    legacyEvidenceCount: sprout.researchEvidence?.length || 0,
+    hasSynthesis: !!sprout.researchSynthesis,
+    path: hasCanonical ? 'CANONICAL' : 'LEGACY',
+  });
+
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
-  if (hasCanonicalResearch(sprout)) {
+  if (hasCanonical) {
     return canonicalFullReportToRenderTree(sprout.canonicalResearch!, sprout.query);
   }
 
