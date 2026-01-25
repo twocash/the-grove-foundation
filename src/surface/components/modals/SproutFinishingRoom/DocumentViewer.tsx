@@ -46,6 +46,26 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
   // Check what structured data we have
   // S22-WP: Prefer canonicalResearch (100% lossless) when available
   const hasCanonicalResearch = !!sprout.canonicalResearch?.title && !!sprout.canonicalResearch?.sources?.length;
+
+  // S23-SFR: Detect corrupted canonical research (title exists but no content)
+  // This happens when sprouts were saved during development before capture was working
+  const hasCorruptedCanonicalResearch =
+    !!sprout.canonicalResearch?.title &&
+    (!sprout.canonicalResearch?.sections?.length || !sprout.canonicalResearch?.sources?.length);
+
+  // S23-SFR DEBUG: Log sprout structure to identify missing data
+  console.log('[DocumentViewer] Sprout received:', {
+    id: sprout.id,
+    query: sprout.query?.substring(0, 50),
+    hasCanonicalResearch,
+    hasCorruptedCanonicalResearch,
+    canonicalResearchKeys: sprout.canonicalResearch ? Object.keys(sprout.canonicalResearch) : [],
+    canonicalTitle: sprout.canonicalResearch?.title,
+    canonicalSectionsCount: sprout.canonicalResearch?.sections?.length || 0,
+    canonicalSourcesCount: sprout.canonicalResearch?.sources?.length || 0,
+    canonicalExecSummaryLength: sprout.canonicalResearch?.executive_summary?.length || 0,
+  });
+
   const hasLegacyResearch =
     !!sprout.researchBranches?.length ||
     !!sprout.researchEvidence?.length ||
@@ -61,7 +81,14 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
 
   // Full Report: The COMPLETE research synthesis/analysis (main content user waited for)
   const fullReportTree = useMemo(() => {
-    return hasResearchEvidence ? sproutFullReportToRenderTree(sprout) : null;
+    const tree = hasResearchEvidence ? sproutFullReportToRenderTree(sprout) : null;
+    // S23-SFR DEBUG: Log render tree structure
+    console.log('[DocumentViewer] fullReportTree:', {
+      hasTree: !!tree,
+      childrenCount: tree?.children?.length || 0,
+      childTypes: tree?.children?.map(c => c.type) || [],
+    });
+    return tree;
   }, [sprout, hasResearchEvidence]);
 
   // Sources: Just the citation cards
@@ -81,6 +108,19 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
         ? 'document'
         : 'fallback';
 
+  // S23-SFR DEBUG: Log display mode decision
+  console.log('[DocumentViewer] Display mode decision:', {
+    displayMode,
+    hasSummaryTree: !!summaryTree,
+    hasFullReportTree: !!fullReportTree,
+    hasSourcesTree: !!sourcesTree,
+    hasDocumentTree: !!documentTree,
+    hasResearchEvidence,
+    hasCanonicalResearch,
+    hasLegacyResearch,
+    hasCorruptedCanonicalResearch,
+  });
+
   const hasStructuredData = displayMode !== 'fallback';
 
   // Check if tabs should be shown
@@ -94,10 +134,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
   };
 
   return (
-    <main className="flex-1 overflow-y-auto bg-paper dark:bg-ink flex flex-col">
+    <main className="flex-1 overflow-y-auto flex flex-col" style={{ backgroundColor: 'var(--glass-panel, transparent)' }}>
       {/* S22-WP: Header with three tabs and view toggle */}
       {hasStructuredData && (
-        <div className="flex-shrink-0 px-6 py-3 border-b border-ink/10 dark:border-white/10 flex items-center justify-between">
+        <div className="flex-shrink-0 px-6 py-3 border-b border-[var(--glass-border)] flex items-center justify-between">
           {/* Tab buttons (for research mode) */}
           {showTabs ? (
             <div className="flex items-center gap-1">
@@ -105,8 +145,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
                 onClick={() => setActiveTab('summary')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === 'summary'
-                    ? 'bg-grove-forest text-paper'
-                    : 'text-ink-muted dark:text-paper/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                    ? 'bg-[var(--glass-elevated)] text-[var(--glass-text-primary)]'
+                    : 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-body)]'
                 }`}
               >
                 Summary
@@ -115,8 +155,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
                 onClick={() => setActiveTab('report')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === 'report'
-                    ? 'bg-grove-forest text-paper'
-                    : 'text-ink-muted dark:text-paper/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                    ? 'bg-[var(--glass-elevated)] text-[var(--glass-text-primary)]'
+                    : 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-body)]'
                 }`}
               >
                 Full Report
@@ -125,15 +165,15 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
                 onClick={() => setActiveTab('sources')}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === 'sources'
-                    ? 'bg-grove-forest text-paper'
-                    : 'text-ink-muted dark:text-paper/50 hover:bg-ink/5 dark:hover:bg-white/10'
+                    ? 'bg-[var(--glass-elevated)] text-[var(--glass-text-primary)]'
+                    : 'text-[var(--glass-text-muted)] hover:text-[var(--glass-text-body)]'
                 }`}
               >
                 Sources
               </button>
             </div>
           ) : (
-            <span className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase">
+            <span className="text-xs font-mono text-[var(--glass-text-muted)] uppercase">
               {displayMode === 'document' ? 'Styled Document' : 'Response'}
             </span>
           )}
@@ -141,7 +181,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
           {/* JSON toggle */}
           <button
             onClick={() => setShowRawJson(!showRawJson)}
-            className="text-xs font-mono px-2 py-1 rounded bg-ink/5 dark:bg-white/5 text-ink-muted dark:text-paper/50 hover:bg-ink/10 dark:hover:bg-white/10 transition-colors"
+            className="text-xs font-mono px-2 py-1 rounded bg-[var(--glass-elevated)] text-[var(--glass-text-muted)] hover:text-[var(--glass-text-body)] transition-colors"
             aria-pressed={showRawJson}
           >
             {showRawJson ? '📄 Rendered' : '{ } JSON'}
@@ -196,6 +236,28 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
             // Styled document via ResearchRegistry
             <Renderer tree={documentTree!} registry={ResearchRegistry} />
           )
+        ) : hasCorruptedCanonicalResearch ? (
+          // S23-SFR: Corrupted canonical research - title exists but no content
+          // This happens with sprouts saved before the capture was fully working
+          <div className="flex flex-col items-center justify-center min-h-[300px] text-center px-8">
+            <div className="w-16 h-16 rounded-full bg-grove-clay/10 flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-grove-clay" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-ink dark:text-paper mb-2">
+              Research Data Incomplete
+            </h3>
+            <p className="text-sm text-ink-muted dark:text-paper/60 max-w-md mb-4">
+              This sprout was saved with incomplete research data. The title exists but the full research content (sections and sources) was not captured.
+            </p>
+            <p className="text-xs text-ink-muted/60 dark:text-paper/40 font-mono mb-4">
+              Title: "{sprout.canonicalResearch?.title?.slice(0, 60)}..."
+            </p>
+            <p className="text-xs text-ink-muted dark:text-paper/50">
+              Re-run research on this query to capture the complete results.
+            </p>
+          </div>
         ) : (
           // Fallback: Raw response display for non-research sprouts
           <article className="prose prose-sm max-w-none text-ink dark:text-paper">

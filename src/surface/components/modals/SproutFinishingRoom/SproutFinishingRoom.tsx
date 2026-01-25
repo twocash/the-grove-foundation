@@ -171,7 +171,8 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={headerId}
-        className="relative flex flex-col w-[95vw] max-w-[1400px] h-[90vh] bg-paper dark:bg-ink rounded-lg shadow-2xl overflow-hidden"
+        className="bedrock-app relative flex flex-col w-[95vw] max-w-[1400px] h-[90vh] rounded-lg shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--glass-solid, var(--glass-void, #111827))' }}
       >
         {/* Header */}
         <FinishingRoomHeader

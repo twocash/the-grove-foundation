@@ -137,6 +137,115 @@
 }
 
 /* ============================================================
+   GROVESKINS BASE + PROSE CONTENT STYLING (S23-SFR)
+   Theme-aware rules for ALL content within .bedrock-app containers
+
+   WHY THIS EXISTS:
+   1. <body> has `text-ink` which cascades dark/green text everywhere
+   2. Tailwind v4 prose modifiers (prose-h1:text-white) don't compile
+   3. Modals render outside ExplorePage but need GroveSkins theming
+
+   CRITICAL ARCHITECTURE NOTE:
+   The SproutFinishingRoom modal renders via FinishingRoomGlobal
+   in RootLayout.tsx - OUTSIDE the ExplorePage .bedrock-app container.
+   The modal's own container has .bedrock-app class to opt into these rules.
+   See Serena memory: groveskins-modal-architecture-critical
+
+   DESIGN PRINCIPLE:
+   No hardcoded colors. All values come from CSS variables so
+   content adapts to theme changes automatically.
+   ============================================================ */
+
+/* Base: Override inherited text-ink from <body> for all bedrock-app containers */
+.bedrock-app {
+  color: var(--glass-text-body);
+}
+
+/* Prose headings - use theme's primary text color */
+.bedrock-app .prose h1,
+.bedrock-app .prose h2 {
+  color: var(--glass-text-primary) !important;
+  font-family: var(--font-display) !important;
+  font-weight: var(--font-display-weight, 600) !important;
+}
+
+.bedrock-app .prose h3,
+.bedrock-app .prose h4,
+.bedrock-app .prose h5,
+.bedrock-app .prose h6 {
+  color: var(--glass-text-secondary, var(--glass-text-primary)) !important;
+  font-family: var(--font-heading) !important;
+  font-weight: var(--font-heading-weight, 600) !important;
+}
+
+/* Prose body text - use theme's body color */
+.bedrock-app .prose p,
+.bedrock-app .prose li,
+.bedrock-app .prose td,
+.bedrock-app .prose th {
+  color: var(--glass-text-body) !important;
+}
+
+/* Prose strong/bold - use primary for emphasis */
+.bedrock-app .prose strong,
+.bedrock-app .prose b {
+  color: var(--glass-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Prose emphasis/italic - slightly lighter */
+.bedrock-app .prose em,
+.bedrock-app .prose i {
+  color: var(--glass-text-body) !important;
+}
+
+/* Prose links - use accent color */
+.bedrock-app .prose a {
+  color: var(--neon-cyan) !important;
+  text-decoration: none;
+}
+.bedrock-app .prose a:hover {
+  text-decoration: underline;
+}
+
+/* Prose blockquotes - accent border with muted text */
+.bedrock-app .prose blockquote {
+  border-left: 4px solid var(--neon-cyan);
+  background: var(--glass-elevated, rgba(30, 41, 59, 0.4));
+  color: var(--glass-text-secondary) !important;
+  padding: 0.75rem 1rem;
+  margin: 1.5rem 0;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+/* Prose code - subtle background */
+.bedrock-app .prose code {
+  color: var(--glass-text-secondary) !important;
+  background: var(--glass-elevated, rgba(30, 41, 59, 0.4));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Prose pre blocks */
+.bedrock-app .prose pre {
+  background: var(--glass-panel) !important;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+}
+
+/* Prose horizontal rules */
+.bedrock-app .prose hr {
+  border-color: var(--glass-border);
+}
+
+/* Prose lists - bullet color */
+.bedrock-app .prose ul > li::marker,
+.bedrock-app .prose ol > li::marker {
+  color: var(--neon-cyan);
+}
+
+/* ============================================================
    GROVESKINS SEMANTIC COLORS (S17-SKIN-LivingGlass)
    Theme-aware state colors that remap Tailwind utilities
    ============================================================ */

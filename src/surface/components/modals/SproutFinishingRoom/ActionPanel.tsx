@@ -287,7 +287,7 @@ ${sprout.response}
   }, [sprout.id, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, buildProvenance]);
 
   return (
-    <aside className="w-[320px] flex-shrink-0 border-l border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto overflow-x-hidden flex flex-col">
+    <aside className="w-[320px] flex-shrink-0 border-l border-[var(--glass-border)] overflow-y-auto overflow-x-hidden flex flex-col" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>
       {/* S22-WP: Primary Workflow - Writer Panel */}
       <WriterPanel
         sprout={sprout}
@@ -298,10 +298,10 @@ ${sprout.response}
       />
 
       {/* S22-WP: Export actions - simplified for v1.0 */}
-      <div className="p-4 mt-auto border-t border-ink/10 dark:border-white/10 space-y-2">
+      <div className="p-4 mt-auto border-t border-[var(--glass-border)] space-y-2">
         <button
           onClick={handleExport}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-ink/5 dark:bg-white/5 hover:bg-ink/10 dark:hover:bg-white/10 text-ink dark:text-paper rounded-lg font-medium text-sm transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[var(--glass-panel)] hover:bg-[var(--glass-elevated)] text-[var(--glass-text-body)] rounded-lg font-medium text-sm transition-colors"
         >
           <span className="text-lg" role="img" aria-label="Export">
             📤
@@ -312,7 +312,7 @@ ${sprout.response}
         {/* S22-WP: Save to Notion stub - requires API key integration */}
         <button
           onClick={() => toast.info('Notion integration coming soon! Configure API key in settings.')}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-ink/5 dark:bg-white/5 hover:bg-ink/10 dark:hover:bg-white/10 text-ink dark:text-paper rounded-lg font-medium text-sm transition-colors opacity-70"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[var(--glass-panel)] hover:bg-[var(--glass-elevated)] text-[var(--glass-text-body)] rounded-lg font-medium text-sm transition-colors opacity-70"
         >
           <span className="text-lg" role="img" aria-label="Notion">
             📓
