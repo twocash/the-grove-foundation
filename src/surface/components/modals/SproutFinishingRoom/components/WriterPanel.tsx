@@ -102,11 +102,11 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
       <div className="flex-1 flex flex-col p-4">
         <div className="flex items-center gap-2 mb-4">
           <span className="w-1 h-4 bg-amber-500 rounded-full" />
-          <h3 className="text-sm font-medium text-ink dark:text-paper">
+          <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
             Waiting for Research
           </h3>
         </div>
-        <p className="text-sm text-ink-muted dark:text-paper/60">
+        <p className="text-sm text-[var(--glass-text-muted)]">
           Research evidence will appear in the center panel. Once complete, you can
           generate a styled document here.
         </p>
@@ -117,16 +117,16 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       {/* Section: Writer Template Selection */}
-      <div className="p-4 border-b border-ink/10 dark:border-white/10">
+      <div className="p-4 border-b border-[var(--glass-border)]">
         <div className="flex items-center gap-2 mb-3">
-          <span className="w-1 h-4 bg-grove-forest rounded-full" />
-          <h3 className="text-sm font-medium text-ink dark:text-paper">
+          <span className="w-1 h-4 bg-[var(--neon-cyan)] rounded-full" />
+          <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
             Output Style
           </h3>
         </div>
 
         {templatesLoading ? (
-          <div className="text-sm text-ink-muted dark:text-paper/60">
+          <div className="text-sm text-[var(--glass-text-muted)]">
             Loading styles...
           </div>
         ) : (
@@ -138,22 +138,22 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
                 disabled={isGenerating}
                 className={`w-full p-3 rounded-lg border text-left transition-all ${
                   selectedTemplateId === template.meta.id
-                    ? 'border-grove-forest bg-grove-forest/10 dark:bg-grove-forest/20'
-                    : 'border-ink/10 dark:border-white/10 hover:border-grove-forest/50'
+                    ? 'border-[var(--neon-cyan)] bg-[var(--glass-elevated)]'
+                    : 'border-[var(--glass-border)] hover:border-[var(--neon-cyan)]/50'
                 } ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-ink dark:text-paper">
+                  <span className="text-sm font-medium text-[var(--glass-text-primary)]">
                     {template.payload.name}
                   </span>
                   {template.payload.isDefault && (
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-grove-forest/10 text-grove-forest">
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--glass-elevated)] text-[var(--neon-cyan)]">
                       Default
                     </span>
                   )}
                 </div>
                 {template.payload.description && (
-                  <p className="mt-1 text-xs text-ink-muted dark:text-paper/60 line-clamp-2">
+                  <p className="mt-1 text-xs text-[var(--glass-text-muted)] line-clamp-2">
                     {template.payload.description}
                   </p>
                 )}
@@ -164,10 +164,10 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
       </div>
 
       {/* Section: User Notes */}
-      <div className="p-4 border-b border-ink/10 dark:border-white/10">
+      <div className="p-4 border-b border-[var(--glass-border)]">
         <div className="flex items-center gap-2 mb-3">
           <span className="w-1 h-4 bg-blue-500 rounded-full" />
-          <h3 className="text-sm font-medium text-ink dark:text-paper">
+          <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
             Additional Context
           </h3>
         </div>
@@ -176,21 +176,22 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
           onChange={(e) => setUserNotes(e.target.value)}
           placeholder="Optional: Add notes for the writer (audience, focus areas, tone preferences...)"
           disabled={isGenerating}
-          className="w-full h-20 p-3 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-ink dark:text-paper placeholder:text-ink-muted dark:placeholder:text-paper/50 disabled:opacity-50"
+          className="w-full h-20 p-3 text-sm border border-[var(--glass-border)] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)] disabled:opacity-50"
+          style={{ backgroundColor: 'var(--glass-panel)' }}
           aria-label="Additional context for writer"
         />
       </div>
 
       {/* Section: Generate Action */}
-      <div className="p-4 border-b border-ink/10 dark:border-white/10">
+      <div className="p-4 border-b border-[var(--glass-border)]">
         <button
           onClick={handleGenerate}
           disabled={isGenerating || !selectedTemplateId}
-          className="w-full py-3 px-4 bg-grove-forest text-paper rounded-lg font-medium text-sm hover:bg-grove-forest/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 px-4 bg-[var(--neon-cyan)] text-white rounded-lg font-medium text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isGenerating ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Generating Artifact...
             </span>
           ) : generatedDocument ? (
@@ -201,7 +202,7 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
         </button>
 
         {selectedTemplate && (
-          <p className="mt-2 text-xs text-ink-muted dark:text-paper/50 text-center">
+          <p className="mt-2 text-xs text-[var(--glass-text-muted)] text-center">
             Using: {selectedTemplate.payload.name}
           </p>
         )}
@@ -209,20 +210,20 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
 
       {/* Section: Generated Document Preview (if exists) */}
       {generatedDocument && (
-        <div className="p-4 border-b border-ink/10 dark:border-white/10">
+        <div className="p-4 border-b border-[var(--glass-border)]">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-1 h-4 bg-cyan-500 rounded-full" />
-            <h3 className="text-sm font-medium text-ink dark:text-paper">
+            <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
               Document Generated
             </h3>
           </div>
 
           <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 mb-3">
-            <p className="text-sm text-ink dark:text-paper font-medium">
+            <p className="text-sm text-[var(--glass-text-primary)] font-medium">
               {generatedDocument.title || 'Research Document'}
             </p>
             {generatedDocument.positionStatement && (
-              <p className="mt-1 text-xs text-ink-muted dark:text-paper/60 line-clamp-3">
+              <p className="mt-1 text-xs text-[var(--glass-text-muted)] line-clamp-3">
                 {generatedDocument.positionStatement}
               </p>
             )}
@@ -242,7 +243,7 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
 
       {/* Section: Metadata */}
       <div className="p-4 mt-auto">
-        <div className="text-xs text-ink-muted dark:text-paper/40 space-y-1">
+        <div className="text-xs text-[var(--glass-text-muted)] space-y-1">
           <p>
             <strong>Query:</strong>{' '}
             <span className="truncate block">{sprout.query}</span>
