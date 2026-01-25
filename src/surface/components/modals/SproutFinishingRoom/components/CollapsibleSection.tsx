@@ -55,21 +55,21 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   const sectionId = `section-${storageKey || title.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
-    <section className="border-b border-ink/10 dark:border-white/10 last:border-b-0">
+    <section className="border-b border-[var(--glass-border)] last:border-b-0">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between text-left group hover:bg-ink/5 dark:hover:bg-white/5 transition-colors"
+        className="w-full p-4 flex items-center justify-between text-left group hover:bg-[var(--glass-elevated)] transition-colors"
         aria-expanded={expanded}
         aria-controls={sectionId}
       >
-        <h3 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase flex items-center gap-2">
+        <h3 className="text-xs font-mono text-[var(--glass-text-muted)] uppercase flex items-center gap-2">
           <span role="img" aria-label={iconLabel}>
             {icon}
           </span>
           {title}
         </h3>
         <span
-          className={`text-ink-muted dark:text-paper/50 transition-transform duration-200 text-xs ${
+          className={`text-[var(--glass-text-muted)] transition-transform duration-200 text-xs ${
             expanded ? 'rotate-180' : ''
           }`}
         >

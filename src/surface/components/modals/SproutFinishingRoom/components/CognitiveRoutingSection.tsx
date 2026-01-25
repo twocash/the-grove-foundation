@@ -20,7 +20,7 @@ export const CognitiveRoutingSection: React.FC<CognitiveRoutingSectionProps> = (
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="p-4 border-b border-ink/10 dark:border-white/10">
+    <section className="p-4 border-b border-[var(--glass-border)]">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between text-left group"
@@ -32,16 +32,16 @@ export const CognitiveRoutingSection: React.FC<CognitiveRoutingSectionProps> = (
             🧠
           </span>
           <div>
-            <span className="text-sm font-medium text-ink dark:text-paper">
+            <span className="text-sm font-medium text-[var(--glass-text-primary)]">
               Cognitive Routing
             </span>
-            <p className="text-xs text-ink-muted dark:text-paper/50 font-mono">
+            <p className="text-xs text-[var(--glass-text-muted)] font-mono">
               {routing.path}
             </p>
           </div>
         </div>
         <span
-          className={`text-ink-muted dark:text-paper/50 transition-transform duration-200 ${
+          className={`text-[var(--glass-text-muted)] transition-transform duration-200 ${
             expanded ? 'rotate-180' : ''
           }`}
         >
@@ -55,29 +55,29 @@ export const CognitiveRoutingSection: React.FC<CognitiveRoutingSectionProps> = (
           className="mt-3 ml-7 space-y-2 text-sm"
         >
           <div>
-            <dt className="text-ink-muted dark:text-paper/50 text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
               Path
             </dt>
-            <dd className="font-mono text-ink dark:text-paper">{routing.path}</dd>
+            <dd className="font-mono text-[var(--glass-text-primary)]">{routing.path}</dd>
           </div>
           <div>
-            <dt className="text-ink-muted dark:text-paper/50 text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
               Prompt
             </dt>
-            <dd className="text-ink dark:text-paper">{routing.prompt}</dd>
+            <dd className="text-[var(--glass-text-primary)]">{routing.prompt}</dd>
           </div>
           <div>
-            <dt className="text-ink-muted dark:text-paper/50 text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
               Inspiration
             </dt>
-            <dd className="text-ink dark:text-paper">{routing.inspiration}</dd>
+            <dd className="text-[var(--glass-text-primary)]">{routing.inspiration}</dd>
           </div>
           {routing.domain && (
             <div>
-              <dt className="text-ink-muted dark:text-paper/50 text-xs uppercase">
+              <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
                 Domain
               </dt>
-              <dd className="text-ink dark:text-paper">{routing.domain}</dd>
+              <dd className="text-[var(--glass-text-primary)]">{routing.domain}</dd>
             </div>
           )}
         </dl>

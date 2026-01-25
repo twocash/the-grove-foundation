@@ -53,19 +53,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
     !!sprout.canonicalResearch?.title &&
     (!sprout.canonicalResearch?.sections?.length || !sprout.canonicalResearch?.sources?.length);
 
-  // S23-SFR DEBUG: Log sprout structure to identify missing data
-  console.log('[DocumentViewer] Sprout received:', {
-    id: sprout.id,
-    query: sprout.query?.substring(0, 50),
-    hasCanonicalResearch,
-    hasCorruptedCanonicalResearch,
-    canonicalResearchKeys: sprout.canonicalResearch ? Object.keys(sprout.canonicalResearch) : [],
-    canonicalTitle: sprout.canonicalResearch?.title,
-    canonicalSectionsCount: sprout.canonicalResearch?.sections?.length || 0,
-    canonicalSourcesCount: sprout.canonicalResearch?.sources?.length || 0,
-    canonicalExecSummaryLength: sprout.canonicalResearch?.executive_summary?.length || 0,
-  });
-
   const hasLegacyResearch =
     !!sprout.researchBranches?.length ||
     !!sprout.researchEvidence?.length ||
@@ -81,14 +68,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
 
   // Full Report: The COMPLETE research synthesis/analysis (main content user waited for)
   const fullReportTree = useMemo(() => {
-    const tree = hasResearchEvidence ? sproutFullReportToRenderTree(sprout) : null;
-    // S23-SFR DEBUG: Log render tree structure
-    console.log('[DocumentViewer] fullReportTree:', {
-      hasTree: !!tree,
-      childrenCount: tree?.children?.length || 0,
-      childTypes: tree?.children?.map(c => c.type) || [],
-    });
-    return tree;
+    return hasResearchEvidence ? sproutFullReportToRenderTree(sprout) : null;
   }, [sprout, hasResearchEvidence]);
 
   // Sources: Just the citation cards
@@ -107,19 +87,6 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
       : documentTree
         ? 'document'
         : 'fallback';
-
-  // S23-SFR DEBUG: Log display mode decision
-  console.log('[DocumentViewer] Display mode decision:', {
-    displayMode,
-    hasSummaryTree: !!summaryTree,
-    hasFullReportTree: !!fullReportTree,
-    hasSourcesTree: !!sourcesTree,
-    hasDocumentTree: !!documentTree,
-    hasResearchEvidence,
-    hasCanonicalResearch,
-    hasLegacyResearch,
-    hasCorruptedCanonicalResearch,
-  });
 
   const hasStructuredData = displayMode !== 'fallback';
 
@@ -195,7 +162,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
           showRawJson ? (
             // Raw JSON view of evidence data
             // S22-WP: Show canonicalResearch when available (100% lossless), otherwise legacy fields
-            <pre className="text-xs font-mono text-ink dark:text-paper/80 whitespace-pre-wrap bg-ink/5 dark:bg-white/5 p-4 rounded overflow-x-auto">
+            <pre className="text-xs font-mono text-[var(--glass-text-body)] whitespace-pre-wrap p-4 rounded overflow-x-auto" style={{ backgroundColor: 'var(--glass-elevated)' }}>
               {JSON.stringify(
                 hasCanonicalResearch
                   ? { canonicalResearch: sprout.canonicalResearch }
@@ -222,14 +189,14 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
             <Renderer tree={fullReportTree} registry={EvidenceRegistry} />
           ) : (
             // Should not reach here but handle gracefully
-            <div className="text-ink-muted dark:text-paper/50 text-sm">
+            <div className="text-[var(--glass-text-muted)] text-sm">
               No research data available
             </div>
           )
         ) : displayMode === 'document' ? (
           showRawJson ? (
             // Raw JSON view of document
-            <pre className="text-xs font-mono text-ink dark:text-paper/80 whitespace-pre-wrap bg-ink/5 dark:bg-white/5 p-4 rounded overflow-x-auto">
+            <pre className="text-xs font-mono text-[var(--glass-text-body)] whitespace-pre-wrap p-4 rounded overflow-x-auto" style={{ backgroundColor: 'var(--glass-elevated)' }}>
               {JSON.stringify(sprout.researchDocument, null, 2)}
             </pre>
           ) : (
@@ -240,30 +207,30 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ sprout }) => {
           // S23-SFR: Corrupted canonical research - title exists but no content
           // This happens with sprouts saved before the capture was fully working
           <div className="flex flex-col items-center justify-center min-h-[300px] text-center px-8">
-            <div className="w-16 h-16 rounded-full bg-grove-clay/10 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-grove-clay" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'var(--semantic-warning-bg)' }}>
+              <svg className="w-8 h-8" style={{ color: 'var(--semantic-warning)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-ink dark:text-paper mb-2">
+            <h3 className="text-lg font-medium text-[var(--glass-text-primary)] mb-2">
               Research Data Incomplete
             </h3>
-            <p className="text-sm text-ink-muted dark:text-paper/60 max-w-md mb-4">
+            <p className="text-sm text-[var(--glass-text-muted)] max-w-md mb-4">
               This sprout was saved with incomplete research data. The title exists but the full research content (sections and sources) was not captured.
             </p>
-            <p className="text-xs text-ink-muted/60 dark:text-paper/40 font-mono mb-4">
-              Title: "{sprout.canonicalResearch?.title?.slice(0, 60)}..."
+            <p className="text-xs text-[var(--glass-text-muted)] font-mono mb-4">
+              Title: &ldquo;{sprout.canonicalResearch?.title?.slice(0, 60)}...&rdquo;
             </p>
-            <p className="text-xs text-ink-muted dark:text-paper/50">
+            <p className="text-xs text-[var(--glass-text-muted)]">
               Re-run research on this query to capture the complete results.
             </p>
           </div>
         ) : (
           // Fallback: Raw response display for non-research sprouts
-          <article className="prose prose-sm max-w-none text-ink dark:text-paper">
+          <article className="prose prose-sm max-w-none text-[var(--glass-text-body)]">
             {/* Query header */}
-            <div className="mb-6 pb-4 border-b border-ink/10 dark:border-white/10">
-              <p className="text-sm text-ink-muted dark:text-paper/60">
+            <div className="mb-6 pb-4 border-b border-[var(--glass-border)]">
+              <p className="text-sm text-[var(--glass-text-muted)]">
                 <span className="font-mono text-xs uppercase mr-2">Query:</span>
                 {sprout.query}
               </p>
