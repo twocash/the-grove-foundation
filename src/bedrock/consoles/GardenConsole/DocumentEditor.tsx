@@ -7,13 +7,14 @@
 // @see src/bedrock/primitives/BufferedInput.tsx
 // @see docs/hotfixes/HOTFIX-002-inspector-input-race.md
 
-import React from 'react';
+import { useState } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider, GlassButton } from '../../primitives';
 import { TagArray, GroupedChips, UtilityBar, GlassStatusBadge } from '../../primitives';
 import { DOCUMENT_STATUSES } from './pipeline.config';
 import { CANONICAL_TIERS, capitalize, type DocumentPayload, type DocumentTier } from './types';
+import { DocumentContentModal } from './DocumentContentModal';
 
 // =============================================================================
 // Component
@@ -40,6 +41,8 @@ export function DocumentEditor({
   };
 
   const statusConfig = DOCUMENT_STATUSES[object.payload.embedding_status] || DOCUMENT_STATUSES.pending;
+
+  const [showContent, setShowContent] = useState(false);
 
   return (
     <div className="flex flex-col h-full">
@@ -86,6 +89,18 @@ export function DocumentEditor({
                 {statusConfig.label}
               </GlassStatusBadge>
             </div>
+
+            {/* View Content (only when content exists) */}
+            {object.payload.content && (
+              <GlassButton
+                onClick={() => setShowContent(true)}
+                variant="secondary"
+                size="sm"
+              >
+                <span className="material-symbols-outlined text-sm mr-1">article</span>
+                View Content ({object.payload.content.length.toLocaleString()} chars)
+              </GlassButton>
+            )}
           </div>
         </InspectorSection>
 
@@ -255,8 +270,17 @@ export function DocumentEditor({
           </GlassButton>
         </div>
       </div>
+
+      {/* Document content viewer modal */}
+      {showContent && object.payload.content && (
+        <DocumentContentModal
+          title={object.meta.title}
+          content={object.payload.content}
+          tier={object.payload.tier}
+          createdAt={object.meta.createdAt}
+          onClose={() => setShowContent(false)}
+        />
+      )}
     </div>
   );
 }
-
-export default DocumentEditor;
