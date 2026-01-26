@@ -1,15 +1,18 @@
-// Sprint: S22-WP → S23-SFR v1.0
+// Sprint: S22-WP → S24-SFR sfr-garden-bridge-v1
 // Tabbed viewer: RAW research via EvidenceRegistry, styled documents via ResearchRegistry,
-// and generated artifact version tabs
+// generated artifact version tabs, and Garden promotion display
 
 import React, { useState, useMemo } from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
 import type { GeneratedArtifact } from './SproutFinishingRoom';
+import type { PromotionResult } from './garden-bridge';
 import {
   Renderer,
   ResearchRegistry,
+  PromotionRegistry,
   researchDocumentToRenderTree,
+  promotionResultToRenderTree,
 } from './json-render';
 import { EvidenceRegistry } from './json-render/evidence-registry';
 import {
@@ -26,8 +29,12 @@ export interface DocumentViewerProps {
   activeArtifactIndex?: number | null;
   /** S23-SFR v1.0: Callback when user selects an artifact tab (null = back to research) */
   onArtifactSelect?: (index: number | null) => void;
-  /** S23-SFR v1.0: Save current artifact to nursery */
-  onSaveArtifact?: (document: ResearchDocument) => void;
+  /** S24-SFR: Promote current artifact to Garden (seed tier) */
+  onPromoteToGarden?: (document: ResearchDocument) => void;
+  /** S24-SFR: Whether promotion API call is in flight */
+  isPromoting?: boolean;
+  /** S24-SFR: Result of successful promotion (null = not yet promoted) */
+  promotionResult?: PromotionResult | null;
 }
 
 /**
@@ -49,7 +56,9 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   generatedArtifacts = [],
   activeArtifactIndex = null,
   onArtifactSelect,
-  onSaveArtifact,
+  onPromoteToGarden,
+  isPromoting = false,
+  promotionResult = null,
 }) => {
   // US-C003: Toggle between rendered and raw JSON view
   const [showRawJson, setShowRawJson] = useState(false);
@@ -103,6 +112,12 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
     if (!activeArtifact) return null;
     return researchDocumentToRenderTree(activeArtifact.document);
   }, [activeArtifact]);
+
+  // S24-SFR: Build render tree for promotion confirmation card
+  const promotionTree = useMemo(() => {
+    if (!promotionResult) return null;
+    return promotionResultToRenderTree(promotionResult);
+  }, [promotionResult]);
 
   // Determine which mode to display
   const displayMode: 'research' | 'document' | 'fallback' = (() => {
@@ -302,17 +317,29 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         {renderMainContent()}
       </div>
 
-      {/* S23-SFR v1.0: Save to Nursery action bar - visible when viewing artifact */}
-      {isViewingArtifact && activeArtifact && onSaveArtifact && (
+      {/* S24-SFR: Promotion result card - shown after successful Garden promotion */}
+      {isViewingArtifact && promotionResult && promotionTree && (
+        <div className="flex-shrink-0 px-6 py-4 border-t border-[var(--glass-border)]" style={{ backgroundColor: 'var(--glass-elevated)' }}>
+          <Renderer tree={promotionTree} registry={PromotionRegistry} />
+        </div>
+      )}
+
+      {/* S24-SFR: Promote to Garden action bar - visible when viewing artifact, before promotion */}
+      {isViewingArtifact && activeArtifact && onPromoteToGarden && !promotionResult && (
         <div className="flex-shrink-0 px-6 py-3 border-t border-[var(--glass-border)] flex items-center justify-between" style={{ backgroundColor: 'var(--glass-elevated)' }}>
           <span className="text-sm text-[var(--glass-text-muted)]">
             V{(activeArtifactIndex ?? 0) + 1}: {activeArtifact.templateName}
           </span>
           <button
-            onClick={() => onSaveArtifact(activeArtifact.document)}
-            className="py-2 px-6 bg-[var(--neon-cyan)] text-white rounded-lg font-medium text-sm hover:opacity-90 transition-colors"
+            onClick={() => onPromoteToGarden(activeArtifact.document)}
+            disabled={isPromoting}
+            className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+            style={{
+              backgroundColor: isPromoting ? 'var(--glass-elevated)' : '#10b981',
+              color: isPromoting ? 'var(--glass-text-muted)' : '#ffffff',
+            }}
           >
-            Save to Nursery
+            {isPromoting ? 'Promoting...' : 'Promote to Garden'}
           </button>
         </div>
       )}

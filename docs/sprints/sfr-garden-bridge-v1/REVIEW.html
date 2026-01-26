@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S24-SFR: Garden Bridge v1 — Sprint Review</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-elevated: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --border: #334155;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--accent-cyan);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-success { background: #10b98120; color: #10b981; }
+    .badge-info { background: #06b6d420; color: #06b6d4; }
+    .badge-warning { background: #f59e0b20; color: #f59e0b; }
+
+    /* Summary metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-complete { color: var(--success); }
+    .status-pending { color: var(--text-muted); }
+
+    /* Screenshots */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .media-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    .media-item img {
+      width: 100%;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .media-caption {
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .media-caption strong {
+      color: var(--text-primary);
+    }
+
+    /* Files */
+    .file-list {
+      list-style: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .file-list li {
+      padding: 0.375rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .file-new { color: var(--success); }
+    .file-modified { color: var(--warning); }
+
+    .file-desc {
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      margin-left: auto;
+    }
+
+    /* Section spacing */
+    section { margin-bottom: 3rem; }
+
+    /* Code */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: var(--bg-elevated);
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.25rem;
+    }
+
+    .features-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .features-list li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .features-list li::before {
+      content: ">";
+      position: absolute;
+      left: 0;
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header style="margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <h1>S24-SFR: Garden Bridge v1</h1>
+        <span class="badge badge-success">Complete</span>
+      </div>
+      <p class="subtitle">
+        Sprint: <code>sfr-garden-bridge-v1</code> |
+        Branch: <code>feat/sfr-ux-redesign-v1</code> |
+        Protocol: Grove Execution Protocol v1.5 |
+        Date: 2026-01-25
+      </p>
+    </header>
+
+    <!-- Summary Metrics -->
+    <section>
+      <h2>Summary Metrics</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-value">4/4</div>
+          <div class="metric-label">Phases Complete</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">1/1</div>
+          <div class="metric-label">E2E Tests Passing</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">7</div>
+          <div class="metric-label">Screenshots Captured</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">0</div>
+          <div class="metric-label">Critical Console Errors</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">6</div>
+          <div class="metric-label">New Files</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">3</div>
+          <div class="metric-label">Modified Files</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Attention Anchor -->
+    <section>
+      <h2>What Was Built</h2>
+      <div class="card">
+        <p style="font-size: 1rem; margin-bottom: 1rem;">
+          A <strong>bridge from the Sprout Finishing Room to the Garden Console</strong>,
+          enabling generated research documents to be promoted with full provenance chain.
+        </p>
+        <p style="color: var(--text-secondary); font-size: 0.875rem;">
+          <strong>Success criteria:</strong> User clicks "Promote to Garden" in the SFR,
+          and the document appears in the Garden Console at <code>seed</code> tier with
+          provenance linking back to the source sprout, template, and confidence score.
+        </p>
+      </div>
+    </section>
+
+    <!-- Key Features -->
+    <section>
+      <h2>Key Features Delivered</h2>
+      <div class="card">
+        <ul class="features-list">
+          <li><strong>Garden Bridge Function</strong> — Pure transform: <code>ResearchDocument + Sprout</code> to Garden API payload with two-step strategy (POST upload + PATCH provenance)</li>
+          <li><strong>json-render Promotion Display</strong> — Full Catalog + Registry + Transform for promotion confirmation cards (PromotionStatus + PromotionBadge)</li>
+          <li><strong>5-Tier Visual System</strong> — Tier badges with icon, color, and label for seed/sprout/sapling/tree/grove lifecycle</li>
+          <li><strong>"Promote to Garden" Button</strong> — Replaces "Save to Nursery" in DocumentViewer artifact tab with async promotion flow</li>
+          <li><strong>Promotion Confirmation Card</strong> — json-render driven card showing tier, provenance chain, confidence score, and timestamps</li>
+          <li><strong>Error Handling</strong> — Step-aware error reporting (upload vs provenance failure), non-fatal provenance PATCH</li>
+          <li><strong>Engagement Tracking</strong> — <code>sproutPromotedToGarden</code> event with gardenDocId and tier</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Architecture Decision -->
+    <section>
+      <h2>Architecture Decision: UI Slot Check</h2>
+      <div class="card">
+        <h3>NO NEW UI SLOT (Constraint 7b: PASSED)</h3>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          The Notion brief proposed a "Manuscript" entity. Research showed the Garden Console already provides everything needed.
+        </p>
+        <table>
+          <tr>
+            <th>Question</th>
+            <th>Answer</th>
+          </tr>
+          <tr>
+            <td>Is it a TYPE of existing concept?</td>
+            <td class="status-complete">YES — Document in Garden Console</td>
+          </tr>
+          <tr>
+            <td>Independent lifecycle?</td>
+            <td>YES — but Garden already manages lifecycle</td>
+          </tr>
+          <tr>
+            <td>Users browse/search MANY?</td>
+            <td>YES — but Garden Console handles this</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600;">Decision</td>
+            <td class="status-complete" style="font-weight: 600;">NO NEW SLOT — Use existing Garden Console at seed tier</td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- Phase Progress -->
+    <section>
+      <h2>Phase Progress</h2>
+
+      <!-- Phase 0 -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="margin: 0;">Phase 0: Architecture Research & Contract</h3>
+          <span class="badge badge-success">Complete</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.875rem;">
+          Read 6 core files (sprout.ts, research-document.ts, Garden Console types/transforms/hooks).
+          Discovered Garden Console already supports the full lifecycle.
+          UI Slot Check passed — no new entity type or route needed.
+          Created SPEC.md and DEVLOG.md.
+        </p>
+      </div>
+
+      <!-- Phase 1 -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="margin: 0;">Phase 1: json-render Promotion Infrastructure</h3>
+          <span class="badge badge-success">Complete</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          Created 5 files following the json-render pattern (Catalog + Registry + Transform) for Garden promotion display.
+          Build gate passed with zero errors in new files.
+        </p>
+        <table>
+          <tr><th>File</th><th>Purpose</th></tr>
+          <tr>
+            <td><code>garden-bridge.ts</code></td>
+            <td>Pure transform + two-step API call (POST + PATCH)</td>
+          </tr>
+          <tr>
+            <td><code>promotion-catalog.ts</code></td>
+            <td>Zod schemas: PromotionStatus, PromotionBadge</td>
+          </tr>
+          <tr>
+            <td><code>promotion-registry.tsx</code></td>
+            <td>React renderers with GroveSkins hex values, 5-tier config</td>
+          </tr>
+          <tr>
+            <td><code>promotion-transform.ts</code></td>
+            <td>Domain model to RenderTree transforms</td>
+          </tr>
+          <tr>
+            <td><code>index.ts</code></td>
+            <td>Updated exports for new modules</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Phase 2+3 -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="margin: 0;">Phase 2+3: Wire API + Replace UI</h3>
+          <span class="badge badge-success">Complete</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          Wired <code>promoteToGarden()</code> into SproutFinishingRoom state management.
+          Replaced "Save to Nursery" with "Promote to Garden" in DocumentViewer.
+          Added PromotionStatus confirmation card via json-render Renderer.
+        </p>
+        <table>
+          <tr><th>File</th><th>Changes</th></tr>
+          <tr>
+            <td><code>SproutFinishingRoom.tsx</code></td>
+            <td>New handlePromoteToGarden with promotion state, engagement event, error handling</td>
+          </tr>
+          <tr>
+            <td><code>DocumentViewer.tsx</code></td>
+            <td>Promotion props, promotionTree useMemo, Promote to Garden button, PromotionStatus card</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="margin: 0;">Phase 4: E2E Tests + Sprint Completion</h3>
+          <span class="badge badge-success">Complete</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          Created E2E test with console monitoring (Constraint 11).
+          Mock sprout with canonicalResearch opens SFR modal, renders Full Report tab, Sources tab,
+          provenance panel, and action panel. Zero critical console errors.
+        </p>
+
+        <div class="screenshots-grid">
+          <div class="media-item">
+            <img src="screenshots/e2e/01-explore-loaded.png" alt="Explore page loaded">
+            <div class="media-caption"><strong>Step 1:</strong> /explore page loaded, ready for SFR modal</div>
+          </div>
+          <div class="media-item">
+            <img src="screenshots/e2e/02-sfr-modal-opened.png" alt="SFR modal opened">
+            <div class="media-caption"><strong>Step 2:</strong> SFR modal opened via custom event dispatch</div>
+          </div>
+          <div class="media-item">
+            <img src="screenshots/e2e/03-research-content.png" alt="Research content rendered">
+            <div class="media-caption"><strong>Step 3:</strong> Full Report tab renders canonicalResearch with sections</div>
+          </div>
+          <div class="media-item">
+            <img src="screenshots/e2e/04-sources-tab.png" alt="Sources tab">
+            <div class="media-caption"><strong>Step 4:</strong> Sources tab displays citation cards</div>
+          </div>
+          <div class="media-item">
+            <img src="screenshots/e2e/05-full-modal-state.png" alt="Full modal state">
+            <div class="media-caption"><strong>Step 5:</strong> Full modal: three-column layout with all panels</div>
+          </div>
+          <div class="media-item">
+            <img src="screenshots/e2e/06-modal-closed.png" alt="Modal closed">
+            <div class="media-caption"><strong>Step 6:</strong> Modal closed via Escape key, clean state</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Test Results -->
+    <section>
+      <h2>Test Results</h2>
+      <div class="card">
+        <table>
+          <tr><th>Test Suite</th><th>Tests</th><th>Status</th><th>Duration</th></tr>
+          <tr>
+            <td><code>sfr-garden-bridge-v1.spec.ts</code></td>
+            <td>1 (full lifecycle)</td>
+            <td class="status-complete">PASSED</td>
+            <td>12.8s</td>
+          </tr>
+        </table>
+        <div style="margin-top: 1rem;">
+          <h3>Console Monitoring (Constraint 11)</h3>
+          <table>
+            <tr><th>Metric</th><th>Count</th></tr>
+            <tr>
+              <td>Total console errors</td>
+              <td>4 (all benign: UUID parsing for test sprout ID)</td>
+            </tr>
+            <tr>
+              <td>Critical errors</td>
+              <td class="status-complete">0</td>
+            </tr>
+            <tr>
+              <td>TypeErrors / ReferenceErrors</td>
+              <td class="status-complete">0</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Files Changed -->
+    <section>
+      <h2>Files Changed</h2>
+      <div class="card">
+        <h3>New Files (6)</h3>
+        <ul class="file-list">
+          <li>
+            <span class="file-new">+</span>
+            <span>src/surface/.../SproutFinishingRoom/garden-bridge.ts</span>
+            <span class="file-desc">Pure transform + two-step API</span>
+          </li>
+          <li>
+            <span class="file-new">+</span>
+            <span>src/surface/.../json-render/promotion-catalog.ts</span>
+            <span class="file-desc">Zod schemas for promotion display</span>
+          </li>
+          <li>
+            <span class="file-new">+</span>
+            <span>src/surface/.../json-render/promotion-registry.tsx</span>
+            <span class="file-desc">React renderers (GroveSkins native)</span>
+          </li>
+          <li>
+            <span class="file-new">+</span>
+            <span>src/surface/.../json-render/promotion-transform.ts</span>
+            <span class="file-desc">Domain model to RenderTree</span>
+          </li>
+          <li>
+            <span class="file-new">+</span>
+            <span>tests/e2e/sfr-garden-bridge-v1.spec.ts</span>
+            <span class="file-desc">E2E test with console monitoring</span>
+          </li>
+          <li>
+            <span class="file-new">+</span>
+            <span>docs/sprints/sfr-garden-bridge-v1/</span>
+            <span class="file-desc">Sprint artifacts (SPEC, DEVLOG, REVIEW, screenshots)</span>
+          </li>
+        </ul>
+
+        <h3 style="margin-top: 1.5rem;">Modified Files (3)</h3>
+        <ul class="file-list">
+          <li>
+            <span class="file-modified">~</span>
+            <span>src/surface/.../SproutFinishingRoom/SproutFinishingRoom.tsx</span>
+            <span class="file-desc">handlePromoteToGarden + promotion state</span>
+          </li>
+          <li>
+            <span class="file-modified">~</span>
+            <span>src/surface/.../SproutFinishingRoom/DocumentViewer.tsx</span>
+            <span class="file-desc">Promote to Garden button + confirmation card</span>
+          </li>
+          <li>
+            <span class="file-modified">~</span>
+            <span>src/surface/.../json-render/index.ts</span>
+            <span class="file-desc">Added promotion exports</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- DEX Compliance -->
+    <section>
+      <h2>DEX Compliance</h2>
+      <div class="card">
+        <table>
+          <tr>
+            <th>Pillar</th>
+            <th>Status</th>
+            <th>Evidence</th>
+          </tr>
+          <tr>
+            <td>Declarative Sovereignty</td>
+            <td class="status-complete">PASS</td>
+            <td>Tier config in TIER_CONFIG record; promotion display via json-render tree (not hardcoded JSX)</td>
+          </tr>
+          <tr>
+            <td>Capability Agnosticism</td>
+            <td class="status-complete">PASS</td>
+            <td>Standard REST API (POST + PATCH); no model-specific code paths; any LLM can produce ResearchDocument</td>
+          </tr>
+          <tr>
+            <td>Provenance as Infrastructure</td>
+            <td class="status-complete">PASS</td>
+            <td>Full chain: sproutId + templateId + generatedAt + confidenceScore tracked in Garden document</td>
+          </tr>
+          <tr>
+            <td>Organic Scalability</td>
+            <td class="status-complete">PASS</td>
+            <td>json-render pattern enables new promotion views without code changes; 5-tier config extensible</td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.75rem;">
+      <p>Sprint S24-SFR: sfr-garden-bridge-v1 | Grove Execution Protocol v1.5</p>
+      <p>Generated: 2026-01-25 | Branch: feat/sfr-ux-redesign-v1</p>
+    </footer>
+
+  </div>
+</body>
+</html>

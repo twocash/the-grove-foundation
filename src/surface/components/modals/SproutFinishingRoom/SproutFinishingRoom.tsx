@@ -1,4 +1,4 @@
-// Sprint: S1-SFR-Shell → S23-SFR v1.0
+// Sprint: S1-SFR-Shell → S24-SFR sfr-garden-bridge-v1
 // Three-column modal workspace for inspecting and refining research artifacts
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
@@ -13,6 +13,8 @@ import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';
 import { DocumentViewer } from './DocumentViewer';
 import { ActionPanel } from './ActionPanel';
+import { promoteToGarden } from './garden-bridge';
+import type { PromotionResult, PromotionError } from './garden-bridge';
 
 /**
  * S23-SFR v1.0: Generated artifact tracked in local state
@@ -59,6 +61,9 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
   // null = show research, number = show that artifact's version tab
   const [activeArtifactIndex, setActiveArtifactIndex] = useState<number | null>(null);
+  // S24-SFR: Garden promotion state
+  const [promotionResult, setPromotionResult] = useState<PromotionResult | null>(null);
+  const [isPromoting, setIsPromoting] = useState(false);
 
   // S23-SFR v1.0: Called when ActionPanel generates a new document
   const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
@@ -76,27 +81,52 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
     });
   }, []);
 
-  // S23-SFR v1.0: Save artifact document to nursery (from center column button)
-  const handleSaveArtifact = useCallback((document: ResearchDocument) => {
+  // S24-SFR: Promote artifact to Garden (two-step: upload + provenance patch)
+  const handlePromoteToGarden = useCallback(async (document: ResearchDocument) => {
+    // Look up template info from the currently active artifact
+    const artifact = activeArtifactIndex !== null ? artifacts[activeArtifactIndex] : null;
+    if (!artifact) {
+      toast.error('No artifact selected for promotion');
+      return;
+    }
+
+    setIsPromoting(true);
     try {
-      updateSprout(sprout.id, {
-        researchDocument: document,
+      const result = await promoteToGarden(document, sprout, {
+        templateId: artifact.templateId,
+        templateName: artifact.templateName,
+        generatedAt: artifact.generatedAt,
       });
 
+      if (!result.success) {
+        const err = result as PromotionError;
+        toast.error(`Promotion failed (${err.step}): ${err.error}`);
+        return;
+      }
+
+      setPromotionResult(result);
+
+      // Also save the document locally to the sprout
+      updateSprout(sprout.id, { researchDocument: document });
       if (onSproutUpdate) {
         const updated = getSprout(sprout.id);
         if (updated) onSproutUpdate(updated);
       }
 
-      emit.custom('sproutSavedToNursery', {
+      emit.custom('sproutPromotedToGarden', {
         sproutId: sprout.id,
+        gardenDocId: result.gardenDocId,
+        tier: result.tier,
       });
 
-      toast.success('Saved to Nursery!');
-    } catch {
-      toast.error('Save failed');
+      toast.success('Promoted to Garden!');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Promotion failed';
+      toast.error(message);
+    } finally {
+      setIsPromoting(false);
     }
-  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, emit, toast]);
+  }, [activeArtifactIndex, artifacts, sprout, updateSprout, getSprout, onSproutUpdate, emit, toast]);
 
   // Track view start time for duration calculation
   const viewStartRef = useRef<number>(0);
@@ -252,7 +282,9 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
             generatedArtifacts={artifacts}
             activeArtifactIndex={activeArtifactIndex}
             onArtifactSelect={setActiveArtifactIndex}
-            onSaveArtifact={handleSaveArtifact}
+            onPromoteToGarden={handlePromoteToGarden}
+            isPromoting={isPromoting}
+            promotionResult={promotionResult}
           />
 
           {/* Right column - Action Panel (320px fixed) */}
