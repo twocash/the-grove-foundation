@@ -1,8 +1,7 @@
-// src/surface/components/modals/SproutFinishingRoom/ActionPanel.tsx
-// Sprint: S22-WP research-writer-panel-v1
-// Refactored to use WriterPanel as primary workflow
+// Sprint: S22-WP → S23-SFR v1.0
+// Right column: WriterPanel workflow + export actions
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
@@ -13,20 +12,18 @@ import { WriterPanel } from './components/WriterPanel';
 import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
 
 /**
- * Extract a human-readable title from a URL or reference string
+ * Extract a human-readable title from a URL or reference string.
  * Sprint: research-template-wiring-v1
  */
 function extractTitleFromSource(source: string): string {
   if (!source) return 'Unknown Source';
 
   try {
-    // If it's a URL, extract domain and path
     const url = new URL(source);
     const domain = url.hostname.replace('www.', '');
     const pathParts = url.pathname.split('/').filter(Boolean);
 
     if (pathParts.length > 0) {
-      // Take the last meaningful path segment
       const lastPart = pathParts[pathParts.length - 1]
         .replace(/[-_]/g, ' ')
         .replace(/\.(html?|php|aspx?)$/i, '');
@@ -34,15 +31,27 @@ function extractTitleFromSource(source: string): string {
     }
     return domain;
   } catch {
-    // Not a URL, return as-is or truncate
     return source.length > 50 ? source.slice(0, 47) + '...' : source;
   }
+}
+
+/** Map a single evidence item to the source format expected by EvidenceBundle */
+function evidenceToSource(ev: { source: string; content: string; collectedAt?: string; sourceType?: string }) {
+  return {
+    url: ev.source || '',
+    title: extractTitleFromSource(ev.source),
+    snippet: ev.content,
+    accessedAt: ev.collectedAt || new Date().toISOString(),
+    sourceType: ev.sourceType as 'academic' | 'practitioner' | 'news' | 'primary' | undefined,
+  };
 }
 
 export interface ActionPanelProps {
   sprout: Sprout;
   onClose?: () => void; // Optional - kept for interface compatibility
   onSproutUpdate?: (sprout: Sprout) => void;
+  /** S23-SFR v1.0: Route generated document to center column as artifact tab */
+  onDocumentGenerated?: (document: ResearchDocument, templateId: string, templateName: string) => void;
 }
 
 /**
@@ -63,6 +72,7 @@ export interface ActionPanelProps {
 export const ActionPanel: React.FC<ActionPanelProps> = ({
   sprout,
   onSproutUpdate,
+  onDocumentGenerated,
 }) => {
   const emit = useEngagementEmit();
   const { updateSprout, getSprout } = useSproutStorage();
@@ -70,15 +80,15 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
   const toast = useToast();
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // S6-SL-ObservableSignals: Build provenance from sprout
-  const buildProvenance = () => ({
+  // S6-SL-ObservableSignals: Stable provenance object from sprout
+  const provenance = useMemo(() => ({
     lensId: sprout.provenance?.lens?.id,
     lensName: sprout.provenance?.lens?.name,
     journeyId: sprout.provenance?.journey?.id,
     journeyName: sprout.provenance?.journey?.name,
     hubId: sprout.provenance?.hub?.id,
     hubName: sprout.provenance?.hub?.name,
-  });
+  }), [sprout.provenance]);
 
   // S22-WP: Generate Document with Writer Template and user notes
   const handleGenerateDocument = useCallback(async (templateId: string, userNotes: string) => {
@@ -108,17 +118,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         // Use branch-level evidence (preferred)
         branches = researchBranches.map(branch => {
           const branchEvidence = branch.evidence || [];
-          const sources = branchEvidence.map(ev => ({
-            url: ev.source || '',
-            title: extractTitleFromSource(ev.source),
-            snippet: ev.content,
-            accessedAt: ev.collectedAt || new Date().toISOString(),
-            sourceType: ev.sourceType as 'academic' | 'practitioner' | 'news' | 'primary' | undefined,
-          }));
-
           return {
             branchQuery: branch.queries?.[0] || branch.label,
-            sources,
+            sources: branchEvidence.map(evidenceToSource),
             findings: [],
             relevanceScore: branchEvidence.length > 0
               ? branchEvidence.reduce((sum, ev) => sum + (ev.relevance || 0), 0) / branchEvidence.length
@@ -130,13 +132,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         // Use aggregated evidence - create a single branch containing all sources
         branches = [{
           branchQuery: sprout.query,
-          sources: aggregatedEvidence.map(ev => ({
-            url: ev.source || '',
-            title: extractTitleFromSource(ev.source),
-            snippet: ev.content,
-            accessedAt: ev.collectedAt || new Date().toISOString(),
-            sourceType: ev.sourceType as 'academic' | 'practitioner' | 'news' | 'primary' | undefined,
-          })),
+          sources: aggregatedEvidence.map(evidenceToSource),
           findings: sprout.researchSynthesis?.insights || [],
           relevanceScore: aggregatedEvidence.reduce((sum, ev) => sum + (ev.relevance || 0), 0) / aggregatedEvidence.length,
           status: 'complete' as const,
@@ -198,7 +194,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       signals.emitRefined(
         sprout.id,
         { refinementType: 'generate-document', charsDelta: result.document?.analysis?.length || 0 },
-        buildProvenance()
+        provenance
       );
 
       emit.custom('sproutDocumentGenerated', {
@@ -207,6 +203,14 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         templateUsed: result.templateUsed,
       });
 
+      // S23-SFR v1.0: Route generated document to center column as artifact tab
+      if (onDocumentGenerated && result.document) {
+        const templateName = typeof result.templateUsed === 'string'
+          ? result.templateUsed
+          : result.templateUsed?.name || templateId;
+        onDocumentGenerated(result.document, templateId, templateName);
+      }
+
       toast.success('Document generated successfully!');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Generation failed';
@@ -214,7 +218,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [sprout.id, sprout.query, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, buildProvenance]);
+  }, [sprout.id, sprout.query, updateSprout, getSprout, onSproutUpdate, onDocumentGenerated, signals, emit, toast, provenance]);
 
   // S22-WP: Export to markdown - simplified for v1.0
   const handleExport = useCallback(() => {
@@ -245,12 +249,12 @@ ${sprout.response}
     signals.emitExported(
       sprout.id,
       { format: 'markdown' },
-      buildProvenance()
+      provenance
     );
 
     emit.custom('sproutExported', { sproutId: sprout.id, format: 'markdown' });
     toast.success('Document exported');
-  }, [sprout.id, sprout.query, sprout.capturedAt, sprout.provenance, sprout.response, signals, emit, toast, buildProvenance]);
+  }, [sprout.id, sprout.query, sprout.capturedAt, sprout.provenance, sprout.response, signals, emit, toast, provenance]);
 
   // S22-WP: Save to Nursery handler
   const handleSaveToNursery = useCallback(async (document: ResearchDocument) => {
@@ -271,7 +275,7 @@ ${sprout.response}
       signals.emitRefined(
         sprout.id,
         { refinementType: 'save-to-nursery', charsDelta: document.analysis?.length || 0 },
-        buildProvenance()
+        provenance
       );
 
       emit.custom('sproutSavedToNursery', {
@@ -284,7 +288,7 @@ ${sprout.response}
       const message = error instanceof Error ? error.message : 'Save failed';
       toast.error(message);
     }
-  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, buildProvenance]);
+  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, provenance]);
 
   return (
     <aside className="w-[320px] flex-shrink-0 border-l border-[var(--glass-border)] overflow-y-auto overflow-x-hidden flex flex-col" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>

@@ -1,16 +1,29 @@
-// src/surface/components/modals/SproutFinishingRoom/SproutFinishingRoom.tsx
-// Sprint: S1-SFR-Shell → S3||SFR-Actions
+// Sprint: S1-SFR-Shell → S23-SFR v1.0
 // Three-column modal workspace for inspecting and refining research artifacts
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import type { ResearchDocument } from '@core/schema/research-document';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
+import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
 import { useSproutSignals } from '../../../hooks/useSproutSignals';
+import { useToast } from '@explore/context/ToastContext';
 import { FinishingRoomHeader } from './FinishingRoomHeader';
 import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';
 import { DocumentViewer } from './DocumentViewer';
 import { ActionPanel } from './ActionPanel';
+
+/**
+ * S23-SFR v1.0: Generated artifact tracked in local state
+ * Each generation creates a new version tab in DocumentViewer
+ */
+export interface GeneratedArtifact {
+  document: ResearchDocument;
+  templateId: string;
+  templateName: string;
+  generatedAt: string;
+}
 
 export interface SproutFinishingRoomProps {
   sprout: Sprout;
@@ -38,7 +51,52 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const emit = useEngagementEmit();
+  const { updateSprout, getSprout } = useSproutStorage();
   const signals = useSproutSignals();
+  const toast = useToast();
+
+  // S23-SFR v1.0: Track generated artifacts for version tabs
+  const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
+  // null = show research, number = show that artifact's version tab
+  const [activeArtifactIndex, setActiveArtifactIndex] = useState<number | null>(null);
+
+  // S23-SFR v1.0: Called when ActionPanel generates a new document
+  const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
+    const artifact: GeneratedArtifact = {
+      document,
+      templateId,
+      templateName,
+      generatedAt: new Date().toISOString(),
+    };
+    setArtifacts(prev => {
+      const next = [...prev, artifact];
+      // Auto-switch to the newly generated version tab
+      setActiveArtifactIndex(next.length - 1);
+      return next;
+    });
+  }, []);
+
+  // S23-SFR v1.0: Save artifact document to nursery (from center column button)
+  const handleSaveArtifact = useCallback((document: ResearchDocument) => {
+    try {
+      updateSprout(sprout.id, {
+        researchDocument: document,
+      });
+
+      if (onSproutUpdate) {
+        const updated = getSprout(sprout.id);
+        if (updated) onSproutUpdate(updated);
+      }
+
+      emit.custom('sproutSavedToNursery', {
+        sproutId: sprout.id,
+      });
+
+      toast.success('Saved to Nursery!');
+    } catch {
+      toast.error('Save failed');
+    }
+  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, emit, toast]);
 
   // Track view start time for duration calculation
   const viewStartRef = useRef<number>(0);
@@ -150,10 +208,11 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   };
 
   // US-E001: Wrap onClose to emit event
-  const handleClose = useCallback(() => {
+  // Plain function (not useCallback) because this runs after the early return guard
+  const handleClose = () => {
     emit.custom('finishingRoomClosed', { sproutId: sprout.id });
     onClose();
-  }, [emit, sprout.id, onClose]);
+  };
 
   const headerId = 'finishing-room-title';
 
@@ -188,13 +247,20 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
           <ProvenancePanel sprout={sprout} />
 
           {/* Center column - Document Viewer (flex: 1) */}
-          <DocumentViewer sprout={sprout} />
+          <DocumentViewer
+            sprout={sprout}
+            generatedArtifacts={artifacts}
+            activeArtifactIndex={activeArtifactIndex}
+            onArtifactSelect={setActiveArtifactIndex}
+            onSaveArtifact={handleSaveArtifact}
+          />
 
           {/* Right column - Action Panel (320px fixed) */}
           <ActionPanel
             sprout={sprout}
             onClose={handleClose}
             onSproutUpdate={onSproutUpdate}
+            onDocumentGenerated={handleDocumentGenerated}
           />
         </div>
 
