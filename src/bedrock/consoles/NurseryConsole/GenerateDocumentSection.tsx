@@ -30,6 +30,9 @@ export interface GenerateDocumentSectionProps {
   /** Callback when user clicks Generate */
   onGenerate: (templateId: string) => Promise<void>;
 
+  /** S25-SFR: Callback to view the generated document in a modal */
+  onViewDocument?: () => void;
+
   /** Whether console is in loading state */
   disabled?: boolean;
 }
@@ -54,6 +57,7 @@ export function GenerateDocumentSection({
   hasResearchResults,
   hasDocument,
   onGenerate,
+  onViewDocument,
   disabled = false,
 }: GenerateDocumentSectionProps) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
@@ -116,6 +120,17 @@ export function GenerateDocumentSection({
           <span className="material-symbols-outlined text-base">check_circle</span>
           Document generated
         </div>
+        {onViewDocument && (
+          <GlassButton
+            variant="ghost"
+            size="sm"
+            onClick={onViewDocument}
+            className="mt-3 w-full"
+          >
+            <span className="material-symbols-outlined text-base mr-1">description</span>
+            View Document
+          </GlassButton>
+        )}
         <p className="mt-2 text-xs text-[var(--glass-text-muted)]">
           Use "Promote to Garden" to publish this research.
         </p>

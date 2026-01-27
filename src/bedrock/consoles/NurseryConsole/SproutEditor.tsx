@@ -19,6 +19,7 @@ import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInsp
 import { GlassButton } from '../../primitives/GlassButton';
 import { SproutSignalsPanel } from './SproutSignalsPanel';
 import { GenerateDocumentSection } from './GenerateDocumentSection';
+import { DocumentContentModal } from '../GardenConsole/DocumentContentModal';
 
 // =============================================================================
 // Helper Components
@@ -167,6 +168,7 @@ export function SproutEditor({
   hasChanges,
 }: ObjectEditorProps<SproutPayload>) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
 
@@ -505,6 +507,7 @@ export function SproutEditor({
           hasResearchResults={!!sprout.payload.synthesis}
           hasDocument={!!sprout.payload.researchDocument}
           onGenerate={handleGenerateDocument}
+          onViewDocument={sprout.payload.researchDocument ? () => setShowDocumentModal(true) : undefined}
           disabled={loading || actionLoading}
         />
 
@@ -622,6 +625,17 @@ export function SproutEditor({
         onConfirm={handleArchive}
         loading={actionLoading}
       />
+
+      {/* S25-SFR: Document content modal */}
+      {showDocumentModal && sprout.payload.researchDocument && (
+        <DocumentContentModal
+          title={sprout.payload.researchDocument.position || sprout.meta.title}
+          content={sprout.payload.researchDocument.analysis}
+          tier={sprout.payload.researchDocument.status || 'complete'}
+          createdAt={sprout.payload.researchDocument.createdAt}
+          onClose={() => setShowDocumentModal(false)}
+        />
+      )}
     </div>
   );
 }

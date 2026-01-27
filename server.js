@@ -2742,6 +2742,17 @@ RESEARCH REQUIREMENTS:
                 if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
                     structuredResult = block.input;
                     console.log('[Research Deep] Structured output received:', structuredResult.title);
+                    // S25-SFR: Diagnostic logging - capture actual types to debug string-vs-array issues
+                    console.log('[Research Deep] Structured output field types:', {
+                        title: typeof structuredResult.title,
+                        executive_summary: typeof structuredResult.executive_summary,
+                        sections: Array.isArray(structuredResult.sections) ? `array[${structuredResult.sections.length}]` : typeof structuredResult.sections,
+                        sources: Array.isArray(structuredResult.sources) ? `array[${structuredResult.sources.length}]` : typeof structuredResult.sources,
+                        key_findings: Array.isArray(structuredResult.key_findings) ? `array[${structuredResult.key_findings.length}]` : typeof structuredResult.key_findings,
+                        limitations: Array.isArray(structuredResult.limitations) ? `array[${structuredResult.limitations.length}]` : typeof structuredResult.limitations,
+                        sectionsLength: typeof structuredResult.sections === 'string' ? structuredResult.sections.length : 'N/A',
+                        sourcesLength: typeof structuredResult.sources === 'string' ? structuredResult.sources.length : 'N/A',
+                    });
                 } else if (block.type === 'web_search_tool_result') {
                     console.log('[Research Deep] Web search results found');
                     if (block.content && Array.isArray(block.content)) {
@@ -2763,21 +2774,58 @@ RESEARCH REQUIREMENTS:
         if (structuredResult) {
             // S22-WP: Validate that sections and sources are arrays
             // S25-SFR: Claude sometimes returns strings instead of arrays.
-            // Try JSON.parse recovery before falling back to empty array.
+            // Try JSON.parse recovery, then content-aware wrapping, before falling back.
             const recoverArray = (value, fieldName) => {
                 if (Array.isArray(value)) return value;
-                if (typeof value === 'string') {
+                if (typeof value === 'string' && value.trim().length > 0) {
+                    // Attempt 1: Try JSON.parse (stringified JSON array)
                     try {
                         const parsed = JSON.parse(value);
                         if (Array.isArray(parsed)) {
                             console.log(`[Research Deep] Recovered ${fieldName} from JSON string (${parsed.length} items)`);
                             return parsed;
                         }
+                        // Parsed as object (not array) — wrap it
+                        if (parsed && typeof parsed === 'object') {
+                            console.log(`[Research Deep] Recovered ${fieldName} from JSON object, wrapping in array`);
+                            return [parsed];
+                        }
                     } catch (e) {
-                        // Not valid JSON — fall through
+                        // Not valid JSON — try content-aware recovery
                     }
-                    console.warn(`[Research Deep] WARNING: ${fieldName} was a non-JSON string, type:`, typeof value);
-                } else if (value != null) {
+
+                    // Attempt 2: Content-aware wrapping for sections
+                    // Claude sometimes dumps markdown content as a flat string instead of [{heading, content}]
+                    if (fieldName === 'sections') {
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} was plain string (${value.length} chars), wrapping as single section`);
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} preview:`, value.substring(0, 200));
+                        return [{
+                            heading: 'Research Findings',
+                            content: value,
+                        }];
+                    }
+
+                    // Attempt 3: Content-aware wrapping for sources
+                    // Claude sometimes returns sources as descriptive text
+                    if (fieldName === 'sources') {
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} was plain string (${value.length} chars), attempting URL extraction`);
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} preview:`, value.substring(0, 200));
+                        // Try to extract URLs from the string
+                        const urlMatches = value.match(/https?:\/\/[^\s,)}\]"']+/g);
+                        if (urlMatches && urlMatches.length > 0) {
+                            console.log(`[Research Deep] RECOVERY: Extracted ${urlMatches.length} URLs from ${fieldName} string`);
+                            return urlMatches.map((url, idx) => ({
+                                index: idx + 1,
+                                title: url.split('/').pop()?.replace(/[-_]/g, ' ')?.slice(0, 60) || 'Source',
+                                url: url,
+                            }));
+                        }
+                        // No URLs found - return empty
+                        return [];
+                    }
+
+                    console.warn(`[Research Deep] WARNING: ${fieldName} was a non-JSON string (${value.length} chars), preview:`, value.substring(0, 200));
+                } else if (value != null && typeof value !== 'string') {
                     console.warn(`[Research Deep] WARNING: ${fieldName} was unexpected type:`, typeof value);
                 }
                 return [];
