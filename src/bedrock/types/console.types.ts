@@ -55,6 +55,10 @@ export interface FilterOption {
   falseLabel?: string;          // For 'boolean' type
   min?: number;                 // For 'number-range' type
   max?: number;                 // For 'number-range' type
+  /** Custom match function for complex filter logic (e.g., OR across multiple fields).
+   *  When provided, used instead of standard field-path matching.
+   *  Sprint: experience-console-cleanup-v1 */
+  matchFn?: (obj: unknown, filterValue: string) => boolean;
 }
 
 // =============================================================================

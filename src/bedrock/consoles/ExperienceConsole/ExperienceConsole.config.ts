@@ -4,11 +4,10 @@
 //
 // DEX: Declarative Sovereignty - config generated from registry, not hardcoded
 
-import type { ConsoleConfig } from '../../types/console.types';
+import type { ConsoleConfig, FilterOption } from '../../types/console.types';
 import {
   getAllExperienceTypes,
   type MetricDefinition,
-  type FilterDefinition,
   type SortDefinition,
 } from '../../types/experience.types';
 
@@ -26,43 +25,84 @@ function getUnifiedConsoleTypes() {
   );
 }
 
+// =============================================================================
+// Status Filter: OR Logic for Active/Enabled
+// Sprint: experience-console-cleanup-v1
+// =============================================================================
+
 /**
- * Generate filter options from registry
- * Includes type filter plus type-specific filters
+ * Type-specific enabled field lookup.
+ * Maps experience type → payload field that controls "enabled" state.
+ * Types not listed here have no separate enabled boolean.
  */
-function generateFilterOptions(): Array<{
-  field: string;
-  label: string;
-  type: 'select' | 'boolean';
-  options?: string[];
-}> {
+const ENABLED_FIELD_MAP: Record<string, string> = {
+  'feature-flag': 'payload.available',
+  'advancement-rule': 'payload.isEnabled',
+  'job-config': 'payload.enabled',
+};
+
+/** Simple dot-path resolver for matchFn (avoids importing React hook utilities) */
+function resolvePath(obj: unknown, path: string): unknown {
+  let current: unknown = obj;
+  for (const key of path.split('.')) {
+    if (current == null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[key];
+  }
+  return current;
+}
+
+/**
+ * Generate filter options — trimmed to 3 cross-cutting filters.
+ * Removes all type-specific filter stubs.
+ * Sprint: experience-console-cleanup-v1
+ */
+function generateFilterOptions(): FilterOption[] {
   const types = getUnifiedConsoleTypes();
 
-  // Status filter (common to all)
-  const statusFilter = {
-    field: 'meta.status',
-    label: 'State',
-    type: 'select' as const,
-    options: ['active', 'draft', 'archived'],
+  // Status filter with OR logic: "Active" = meta.status=active OR type-specific enabled=true
+  const statusFilter: FilterOption = {
+    field: 'status',
+    label: 'Status',
+    type: 'select',
+    options: ['Active', 'Draft', 'Archived', 'Disabled'],
+    matchFn: (obj: unknown, filterValue: string) => {
+      const o = obj as { meta: { status: string; type: string } };
+      const enabledPath = ENABLED_FIELD_MAP[o.meta.type];
+      switch (filterValue) {
+        case 'Active':
+          if (o.meta.status === 'active') return true;
+          if (enabledPath) return resolvePath(obj, enabledPath) === true;
+          return false;
+        case 'Disabled':
+          if (!enabledPath) return false;
+          return resolvePath(obj, enabledPath) === false;
+        case 'Draft':
+          return o.meta.status === 'draft';
+        case 'Archived':
+          return o.meta.status === 'archived';
+        default:
+          return false;
+      }
+    },
   };
 
   // Type filter (dynamic from registry)
-  const typeFilter = {
+  const typeFilter: FilterOption = {
     field: 'meta.type',
     label: 'Type',
-    type: 'select' as const,
+    type: 'select',
     options: types.map((t) => t.type),
   };
 
-  // Collect type-specific filters
-  const typeSpecificFilters: FilterDefinition[] = [];
-  for (const typeDef of types) {
-    if (typeDef.filters) {
-      typeSpecificFilters.push(...typeDef.filters);
-    }
-  }
+  // Trigger filter (for job-config and advancement-rule types)
+  const triggerFilter: FilterOption = {
+    field: 'payload.triggerType',
+    label: 'Trigger',
+    type: 'select',
+    options: ['schedule', 'webhook', 'manual', 'dependency'],
+  };
 
-  return [statusFilter, typeFilter, ...typeSpecificFilters];
+  return [statusFilter, typeFilter, triggerFilter];
 }
 
 /**
@@ -95,34 +135,17 @@ function generateSortOptions(): Array<{
 }
 
 /**
- * Generate metrics from registry
- * Includes total count plus type-specific metrics
+ * Generate metrics — trimmed to 4 cross-cutting cards (one row).
+ * Removes per-type count stubs that show 0 for most types.
+ * Sprint: experience-console-cleanup-v1
  */
-function generateMetrics(): Array<{
-  id: string;
-  label: string;
-  icon: string;
-  query: string;
-}> {
-  const types = getUnifiedConsoleTypes();
-
-  // Total across all types
-  const totalMetric: MetricDefinition = {
-    id: 'total',
-    label: 'Total',
-    icon: 'category',
-    query: 'count(*)',
-  };
-
-  // Per-type count metrics
-  const typeCountMetrics: MetricDefinition[] = types.map((t) => ({
-    id: `count-${t.type}`,
-    label: t.label,
-    icon: t.icon,
-    query: `count(where: meta.type=${t.type})`,
-  }));
-
-  return [totalMetric, ...typeCountMetrics];
+function generateMetrics(): MetricDefinition[] {
+  return [
+    { id: 'total', label: 'Total', icon: 'category', query: 'count(*)' },
+    { id: 'active', label: 'Active', icon: 'check_circle', query: 'count(where: meta.status=active)' },
+    { id: 'draft', label: 'Draft', icon: 'edit_note', query: 'count(where: meta.status=draft)' },
+    { id: 'last-updated', label: 'Last Updated', icon: 'schedule', query: 'max(updatedAt)' },
+  ];
 }
 
 /**
@@ -168,7 +191,7 @@ export const experienceConsoleConfig: ConsoleConfig = {
     filterOptions: generateFilterOptions(),
     sortOptions: generateSortOptions(),
     defaultSort: { field: 'meta.updatedAt', label: 'Recently Updated', direction: 'desc' },
-    defaultFilters: { 'meta.status': 'active' },
+    defaultFilters: { 'status': 'Active' },
     defaultViewMode: 'grid',
     viewModes: ['grid', 'list'],
     favoritesKey: 'grove-experience-favorites',

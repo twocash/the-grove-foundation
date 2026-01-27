@@ -5,16 +5,28 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { GroveObject } from '../../core/schema/grove-object';
 import type {
-  CollectionViewConfig,
   CollectionViewState,
   SortDirection,
 } from './collection-view.types';
 
 // =============================================================================
-// Extended Config with External Filters
+// Hook Config — only the fields the hook actually consumes
+// Sprint: experience-console-cleanup-v1 (decoupled from full CollectionViewConfig)
 // =============================================================================
 
-export interface CollectionViewOptions extends CollectionViewConfig {
+export interface CollectionViewOptions {
+  /** Fields to search across (supports dot notation) */
+  searchFields: string[];
+
+  /** Default sort configuration */
+  defaultSort: { field: string; direction: SortDirection };
+
+  /** Default filter values applied on initial load */
+  defaultFilters?: Record<string, string | string[]>;
+
+  /** localStorage key for favorites persistence */
+  favoritesStorageKey: string;
+
   /**
    * External filters that override internal state.
    * When set, these filters are applied in addition to user-selected filters.
@@ -22,6 +34,13 @@ export interface CollectionViewOptions extends CollectionViewConfig {
    * Sprint: extraction-pipeline-integration-v1
    */
   externalFilters?: Record<string, string | string[]>;
+
+  /**
+   * Custom filter match functions keyed by filter field name.
+   * When a filter key has a custom function, it's used instead of standard field-path matching.
+   * Sprint: experience-console-cleanup-v1
+   */
+  customFilterFns?: Record<string, (obj: unknown, filterValue: string) => boolean>;
 }
 
 // =============================================================================
@@ -156,6 +175,14 @@ export function useCollectionView<T extends GroveObject>(
 
     // Field filters
     for (const [key, value] of Object.entries(mergedFilters)) {
+      // Custom match function for complex filter logic (e.g., Status OR across multiple fields)
+      // Sprint: experience-console-cleanup-v1
+      const customFn = config.customFilterFns?.[key];
+      if (customFn && typeof value === 'string') {
+        filtered = filtered.filter(obj => customFn(obj, value));
+        continue;
+      }
+
       filtered = filtered.filter(obj => {
         const objValue = getNestedValue(obj, key);
 
