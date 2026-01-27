@@ -85,17 +85,17 @@ export const GenerateDocumentForm: React.FC<GenerateDocumentFormProps> = ({
   }
 
   return (
-    <div className="p-4 border-b border-ink/10 dark:border-white/10">
+    <div className="p-4 border-b border-[var(--glass-border)]">
       {/* Section header with blue accent */}
       <div className="flex items-center gap-2 mb-3">
         <span className="w-1 h-4 bg-blue-500 rounded-full" />
-        <h3 className="text-sm font-medium text-ink dark:text-paper">
+        <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
           Generate Document
         </h3>
       </div>
 
       {/* Explanation text */}
-      <p className="text-xs text-ink-muted dark:text-paper/60 mb-3">
+      <p className="text-xs text-[var(--glass-text-muted)] mb-3">
         Research evidence is ready. Select a writing style and generate your document.
       </p>
 
@@ -104,7 +104,7 @@ export const GenerateDocumentForm: React.FC<GenerateDocumentFormProps> = ({
         <div className="mb-3">
           <label
             htmlFor="writer-template-select"
-            className="block text-xs text-ink-muted dark:text-paper/60 mb-1"
+            className="block text-xs text-[var(--glass-text-muted)] mb-1"
           >
             Writing Style
           </label>
@@ -113,7 +113,8 @@ export const GenerateDocumentForm: React.FC<GenerateDocumentFormProps> = ({
             value={selectedTemplateId}
             onChange={(e) => setSelectedTemplateId(e.target.value)}
             disabled={isGenerating}
-            className="w-full p-2 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-ink dark:text-paper disabled:opacity-50"
+            className="w-full p-2 text-sm border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-[var(--glass-text-primary)] disabled:opacity-50"
+            style={{ backgroundColor: 'var(--glass-panel)' }}
             aria-label="Select writing style"
           >
             {writerTemplates.map((template) => (
@@ -127,7 +128,7 @@ export const GenerateDocumentForm: React.FC<GenerateDocumentFormProps> = ({
 
           {/* Template description hint */}
           {selectedTemplateId && (
-            <p className="mt-1 text-xs text-ink-muted dark:text-paper/50 italic">
+            <p className="mt-1 text-xs text-[var(--glass-text-muted)] italic">
               {writerTemplates.find(t => t.meta.id === selectedTemplateId)?.payload.description ||
                'Transforms research into a formatted document.'}
             </p>
@@ -137,7 +138,7 @@ export const GenerateDocumentForm: React.FC<GenerateDocumentFormProps> = ({
 
       {/* Loading state */}
       {templatesLoading && (
-        <div className="mb-3 text-xs text-ink-muted dark:text-paper/50">
+        <div className="mb-3 text-xs text-[var(--glass-text-muted)]">
           Loading writing styles...
         </div>
       )}

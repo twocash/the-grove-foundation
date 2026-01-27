@@ -69,8 +69,8 @@ export interface RendererProps {
  * Default fallback component for unknown types
  */
 const DefaultFallback: React.FC<{ element: RenderElement }> = ({ element }) => (
-  <div className="p-2 border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-800 rounded text-sm">
-    <span className="font-mono text-red-600 dark:text-red-400">
+  <div className="p-2 border border-red-500/30 rounded text-sm" style={{ backgroundColor: 'var(--glass-elevated)' }}>
+    <span className="font-mono text-red-500">
       Unknown component type: {element.type}
     </span>
   </div>
@@ -119,12 +119,25 @@ export const Renderer: React.FC<RendererProps> = ({
     return null;
   }
 
+  // S23-SFR DEBUG: Log what we're rendering
+  console.log('[Renderer] Rendering tree:', {
+    childrenCount: tree.children.length,
+    childTypes: tree.children.map(c => c.type),
+  });
+
   return (
     <LayoutContext.Provider value={resolvedLayout}>
       <div className={`json-render-root ${resolvedLayout.containerPadding}`}>
         <div className={resolvedLayout.sectionGap}>
           {tree.children.map((element, index) => {
             const Component = registry[element.type] || fallback;
+            const isRegistered = !!registry[element.type];
+            console.log('[Renderer] Rendering element:', {
+              type: element.type,
+              index,
+              isRegistered,
+              propsKeys: Object.keys(element.props || {}),
+            });
             return <Component key={`${element.type}-${index}`} element={element} />;
           })}
         </div>

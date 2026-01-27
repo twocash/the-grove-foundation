@@ -1,0 +1,75 @@
+{
+  "id": "elegant-dark-v1",
+  "name": "Elegant Dark",
+  "colorScheme": "dark",
+  "provenance": {
+    "authorId": "system",
+    "authorType": "system",
+    "createdAt": "2026-01-24T00:00:00Z",
+    "source": "S24-EMT",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "void": "#191A1C",
+      "panel": "#232426",
+      "solid": "#2C2D30",
+      "elevated": "#353639",
+      "border": "rgba(255, 255, 255, 0.1)",
+      "foreground": "#EDEDED",
+      "muted": "#A1A1AA",
+      "accent": "#E09F3E",
+      "primary": "#81B29A",
+      "semantic": {
+        "success": "#81C784",
+        "successBg": "rgba(129, 199, 132, 0.1)",
+        "successBorder": "rgba(129, 199, 132, 0.2)",
+        "warning": "#FFD54F",
+        "warningBg": "rgba(255, 213, 79, 0.1)",
+        "warningBorder": "rgba(255, 213, 79, 0.2)",
+        "error": "#E57373",
+        "errorBg": "rgba(229, 115, 115, 0.1)",
+        "errorBorder": "rgba(229, 115, 115, 0.2)",
+        "info": "#64B5F6",
+        "infoBg": "rgba(100, 181, 246, 0.1)",
+        "infoBorder": "rgba(100, 181, 246, 0.2)",
+        "accentSecondary": "#E09F3E",
+        "accentSecondaryBg": "rgba(224, 159, 62, 0.1)",
+        "accentSecondaryBorder": "rgba(224, 159, 62, 0.2)"
+      }
+    },
+    "effects": {
+      "blur": "12px",
+      "radius": "8px",
+      "glow": "0 4px 12px rgba(0, 0, 0, 0.3)"
+    },
+    "typography": {
+      "display": {
+        "family": "'Playfair Display', Georgia, serif",
+        "weight": "700",
+        "tracking": "-0.02em"
+      },
+      "heading": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "600",
+        "tracking": "-0.01em"
+      },
+      "body": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "400"
+      },
+      "mono": {
+        "family": "'Fira Code', monospace",
+        "weight": "400"
+      },
+      "ui": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "500"
+      }
+    }
+  },
+  "layout": {
+    "density": "comfortable",
+    "spacingScale": 1.0
+  }
+}

@@ -303,7 +303,12 @@ export function createResearchAgent(
               });
 
               if (!response.ok) {
-                throw new Error(`API error: ${response.status} ${response.statusText}`);
+                let serverMsg = response.statusText;
+                try {
+                  const errBody = await response.json();
+                  if (errBody?.error) serverMsg = errBody.error;
+                } catch { /* ignore parse failures */ }
+                throw new Error(`API error: ${response.status} — ${serverMsg}`);
               }
 
               const result = await response.json();
@@ -317,7 +322,34 @@ export function createResearchAgent(
               // User requirement: "capture 100% of what is returned from deep research"
               if (result.canonicalResearch) {
                 capturedCanonicalResearch = result.canonicalResearch as CanonicalResearch;
-                console.log(`[ResearchAgent] Captured canonical research: ${result.canonicalResearch.title}`);
+
+                // S23-SFR DEBUG: Log FULL canonical research details from API response
+                console.log(`[ResearchAgent] Canonical research from API BEFORE processing:`, {
+                  title: result.canonicalResearch.title?.slice(0, 50),
+                  sectionsCount: result.canonicalResearch.sections?.length || 0,
+                  sourcesCount: result.canonicalResearch.sources?.length || 0,
+                  findingsCount: result.canonicalResearch.key_findings?.length || 0,
+                  execSummaryLength: result.canonicalResearch.executive_summary?.length || 0,
+                  rawKeys: Object.keys(result.canonicalResearch || {}),
+                  sectionsIsArray: Array.isArray(result.canonicalResearch.sections),
+                  sourcesIsArray: Array.isArray(result.canonicalResearch.sources),
+                });
+
+                // S23-SFR Phase 0b: Defensive validation - ensure sections is array
+                // Claude API occasionally returns sections as string instead of array
+                if (capturedCanonicalResearch.sections && !Array.isArray(capturedCanonicalResearch.sections)) {
+                  console.warn('[ResearchAgent] sections is not array, wrapping in array');
+                  capturedCanonicalResearch.sections = [capturedCanonicalResearch.sections as unknown as typeof capturedCanonicalResearch.sections[0]];
+                }
+
+                // S23-SFR DEBUG: Log captured canonical research AFTER processing
+                console.log(`[ResearchAgent] Captured canonical research AFTER processing:`, {
+                  title: capturedCanonicalResearch.title?.slice(0, 50),
+                  sectionsCount: capturedCanonicalResearch.sections?.length || 0,
+                  sourcesCount: capturedCanonicalResearch.sources?.length || 0,
+                  findingsCount: capturedCanonicalResearch.key_findings?.length || 0,
+                  execSummaryLength: capturedCanonicalResearch.executive_summary?.length || 0,
+                });
               }
 
               // S22-WP: Convert API result to Evidence format

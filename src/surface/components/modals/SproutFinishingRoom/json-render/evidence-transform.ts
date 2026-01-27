@@ -14,13 +14,8 @@ import type { Sprout, CanonicalResearch } from '@core/schema/sprout';
 import type { RenderTree, RenderElement } from '@core/json-render';
 import type { Evidence } from '@core/schema/research-strategy';
 
-// S22-WP: Extended Evidence type with optional metadata
-interface EvidenceWithMetadata extends Evidence {
-  metadata?: {
-    title?: string;
-    [key: string]: unknown;
-  };
-}
+// S23-SFR Phase 0d: Evidence removed - metadata now in core Evidence schema
+// Legacy comment preserved for traceability
 
 /**
  * Transforms an EvidenceBundle into a json-render tree for professional display.
@@ -120,6 +115,10 @@ export function evidenceBundleToRenderTree(
 }
 
 /**
+ * @deprecated Use canonicalResearchToRenderTree() instead.
+ * This function handles legacy sprouts without canonicalResearch.
+ * Will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
+ *
  * Transforms a Sprout's research data into a json-render tree.
  *
  * This handles the flatter data structure on Sprout:
@@ -130,6 +129,10 @@ export function evidenceBundleToRenderTree(
  * @param sprout - The sprout with research data
  */
 export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
+  // S23-SFR Phase 0d: Deprecation warning
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutResearchToRenderTree called. Sprout should have canonicalResearch.');
+  }
   // No research data? Return null to signal fallback
   const hasResearchData =
     sprout.researchBranches?.length ||
@@ -203,7 +206,7 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
           }
 
           // S22-WP: Use metadata.title when available from API
-          const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+          const title = (evidence as Evidence).metadata?.title ||
             extractTitle(evidence.source, evidence.content);
 
           children.push({
@@ -252,7 +255,7 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
 
       for (const evidence of sources) {
         // S22-WP: Use metadata.title when available from API
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({
@@ -306,6 +309,105 @@ export function sproutResearchToRenderTree(sprout: Sprout): RenderTree | null {
 // CanonicalResearch is the single source of truth when available.
 
 /**
+ * S22-WP Data Sanitization: Parse key_findings which may be malformed.
+ *
+ * The deep research API sometimes returns key_findings as a string containing
+ * an XML-like parameter wrapper:
+ *   "<parameter name=\"key_findings\">[\"Finding 1\", \"Finding 2\"]"
+ *
+ * This function extracts and parses the actual array from such malformed data.
+ */
+function parseKeyFindings(keyFindings: unknown): string[] {
+  // Already an array? Return it
+  if (Array.isArray(keyFindings)) {
+    return keyFindings.filter((f): f is string => typeof f === 'string');
+  }
+
+  // String that might contain the array
+  if (typeof keyFindings === 'string') {
+    // Check for XML parameter wrapper pattern
+    const parameterMatch = keyFindings.match(/<parameter[^>]*>\s*(\[[\s\S]*\])\s*$/);
+    if (parameterMatch && parameterMatch[1]) {
+      try {
+        const parsed = JSON.parse(parameterMatch[1]);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((f): f is string => typeof f === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse key_findings from parameter wrapper:', e);
+      }
+    }
+
+    // Try direct JSON parse if it looks like an array
+    if (keyFindings.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(keyFindings);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((f): f is string => typeof f === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse key_findings as JSON array:', e);
+      }
+    }
+
+    // Single string finding - wrap in array
+    if (keyFindings.trim().length > 0) {
+      return [keyFindings];
+    }
+  }
+
+  // Fallback: empty array
+  return [];
+}
+
+/**
+ * S22-WP Data Sanitization: Parse limitations which may be malformed.
+ * Same pattern as key_findings.
+ */
+function parseLimitations(limitations: unknown): string[] {
+  // Already an array? Return it
+  if (Array.isArray(limitations)) {
+    return limitations.filter((l): l is string => typeof l === 'string');
+  }
+
+  // String that might contain the array
+  if (typeof limitations === 'string') {
+    // Check for XML parameter wrapper pattern
+    const parameterMatch = limitations.match(/<parameter[^>]*>\s*(\[[\s\S]*\])\s*$/);
+    if (parameterMatch && parameterMatch[1]) {
+      try {
+        const parsed = JSON.parse(parameterMatch[1]);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((l): l is string => typeof l === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse limitations from parameter wrapper:', e);
+      }
+    }
+
+    // Try direct JSON parse if it looks like an array
+    if (limitations.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(limitations);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((l): l is string => typeof l === 'string');
+        }
+      } catch (e) {
+        console.warn('[evidence-transform] Failed to parse limitations as JSON array:', e);
+      }
+    }
+
+    // Single string limitation - wrap in array
+    if (limitations.trim().length > 0) {
+      return [limitations];
+    }
+  }
+
+  // Fallback: empty array
+  return [];
+}
+
+/**
  * Check if a sprout has canonical research data.
  * S22-WP: Prefer canonicalResearch over legacy fields for display.
  */
@@ -354,12 +456,13 @@ export function canonicalSummaryToRenderTree(canonical: CanonicalResearch, query
     },
   });
 
-  // Key findings
-  if (canonical.key_findings?.length) {
+  // Key findings - use sanitized parser to handle malformed data
+  const parsedKeyFindings = parseKeyFindings(canonical.key_findings);
+  if (parsedKeyFindings.length > 0) {
     children.push({
       type: 'FindingsList',
       props: {
-        findings: canonical.key_findings,
+        findings: parsedKeyFindings,
       },
     });
   }
@@ -389,6 +492,18 @@ export function canonicalSummaryToRenderTree(canonical: CanonicalResearch, query
 export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, query: string): RenderTree {
   const children: RenderElement[] = [];
   const now = new Date().toISOString();
+
+  // S23-SFR DEBUG: Log canonical research structure to identify missing content
+  console.log('[canonicalFullReportToRenderTree] Input:', {
+    hasCanonical: !!canonical,
+    title: canonical?.title,
+    hasExecutiveSummary: !!canonical?.executive_summary,
+    executiveSummaryLength: canonical?.executive_summary?.length || 0,
+    sectionsCount: canonical?.sections?.length || 0,
+    sectionsIsArray: Array.isArray(canonical?.sections),
+    sourcesCount: canonical?.sources?.length || 0,
+    confidenceScore: canonical?.confidence_assessment?.score,
+  });
 
   // Header with query and metadata
   children.push({
@@ -424,37 +539,54 @@ export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, qu
   });
 
   // All research sections with their full content
-  for (const section of canonical.sections) {
+  // S23-SFR: Defensive check - ensure sections is an array
+  const sections = Array.isArray(canonical.sections) ? canonical.sections : [];
+  console.log('[canonicalFullReportToRenderTree] Processing sections:', {
+    originalSectionsType: typeof canonical.sections,
+    isArray: Array.isArray(canonical.sections),
+    processingSectionCount: sections.length,
+  });
+
+  for (const section of sections) {
     // Build citation references for this section
     const citationRefs = section.citation_indices?.length
       ? ` [${section.citation_indices.join(', ')}]`
       : '';
 
+    const sectionContent = `## ${section.heading}${citationRefs}\n\n${section.content}`;
+    console.log('[canonicalFullReportToRenderTree] Adding section:', {
+      heading: section.heading,
+      contentLength: section.content?.length || 0,
+      hasContent: !!section.content,
+    });
+
     children.push({
       type: 'SynthesisBlock',
       props: {
-        content: `## ${section.heading}${citationRefs}\n\n${section.content}`,
+        content: sectionContent,
         confidence: canonical.confidence_assessment?.score ?? 0.7,
       },
     });
   }
 
-  // Key findings section
-  if (canonical.key_findings?.length) {
+  // Key findings section - use sanitized parser to handle malformed data
+  const parsedKeyFindingsForReport = parseKeyFindings(canonical.key_findings);
+  if (parsedKeyFindingsForReport.length > 0) {
     children.push({
       type: 'FindingsList',
       props: {
-        findings: canonical.key_findings,
+        findings: parsedKeyFindingsForReport,
       },
     });
   }
 
-  // Limitations section
-  if (canonical.limitations?.length) {
+  // Limitations section - use sanitized parser to handle malformed data
+  const parsedLimitations = parseLimitations(canonical.limitations);
+  if (parsedLimitations.length > 0) {
     children.push({
       type: 'LimitationsList',
       props: {
-        limitations: canonical.limitations,
+        limitations: parsedLimitations,
       },
     });
   }
@@ -463,8 +595,8 @@ export function canonicalFullReportToRenderTree(canonical: CanonicalResearch, qu
   children.push({
     type: 'EvidenceSummary',
     props: {
-      branchCount: canonical.sections.length,
-      totalFindings: canonical.key_findings?.length || 0,
+      branchCount: sections.length,
+      totalFindings: parsedKeyFindingsForReport.length,
       apiCallsUsed: canonical._meta?.webSearchResultCount || 0,
     },
   });
@@ -634,11 +766,19 @@ function extractExecutiveSummary(markdown: string): string {
  * The Full Report tab shows the complete analysis.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge).
  */
 export function sproutSynthesisToRenderTree(sprout: Sprout): RenderTree | null {
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
   if (hasCanonicalResearch(sprout)) {
     return canonicalSummaryToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutSynthesisToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -726,11 +866,34 @@ export function sproutSynthesisToRenderTree(sprout: Sprout): RenderTree | null {
  * This is the main content the user waited for - NOT the source cards.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
  */
 export function sproutFullReportToRenderTree(sprout: Sprout): RenderTree | null {
+  // S23-SFR DEBUG: Log entry point with all relevant data
+  const hasCanonical = hasCanonicalResearch(sprout);
+  console.log('[sproutFullReportToRenderTree] ENTRY:', {
+    sproutId: sprout.id,
+    hasCanonicalResearch: hasCanonical,
+    canonicalTitle: sprout.canonicalResearch?.title?.slice(0, 50),
+    canonicalSectionsCount: sprout.canonicalResearch?.sections?.length || 0,
+    canonicalSourcesCount: sprout.canonicalResearch?.sources?.length || 0,
+    canonicalExecSummaryLength: sprout.canonicalResearch?.executive_summary?.length || 0,
+    legacyBranchesCount: sprout.researchBranches?.length || 0,
+    legacyEvidenceCount: sprout.researchEvidence?.length || 0,
+    hasSynthesis: !!sprout.researchSynthesis,
+    path: hasCanonical ? 'CANONICAL' : 'LEGACY',
+  });
+
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
-  if (hasCanonicalResearch(sprout)) {
+  if (hasCanonical) {
     return canonicalFullReportToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutFullReportToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -834,11 +997,19 @@ export function sproutFullReportToRenderTree(sprout: Sprout): RenderTree | null 
  * For the "Sources" tab - shows just the citation cards without synthesis.
  *
  * Priority: canonicalResearch (100% lossless) > legacy fields
+ *
+ * @deprecated Legacy fallback path. New sprouts should use canonicalResearch.
+ * Legacy path will be removed after migration period (30 days from S22-WP merge on 2026-01-24).
  */
 export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
   // S22-WP: Prefer canonicalResearch when available (100% lossless)
   if (hasCanonicalResearch(sprout)) {
     return canonicalSourcesToRenderTree(sprout.canonicalResearch!, sprout.query);
+  }
+
+  // S23-SFR Phase 0d: Deprecation warning for legacy path
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('[evidence-transform] DEPRECATED: sproutSourcesToRenderTree using legacy path. Sprout should have canonicalResearch.');
   }
 
   // Legacy fallback for older sprouts without canonicalResearch
@@ -905,7 +1076,7 @@ export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
 
       // Source cards
       for (const evidence of branchSources) {
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({
@@ -938,7 +1109,7 @@ export function sproutSourcesToRenderTree(sprout: Sprout): RenderTree | null {
       });
 
       for (const evidence of sources) {
-        const title = (evidence as EvidenceWithMetadata).metadata?.title ||
+        const title = (evidence as Evidence).metadata?.title ||
           extractTitle(evidence.source, evidence.content);
 
         children.push({

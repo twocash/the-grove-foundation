@@ -1,16 +1,31 @@
-// src/surface/components/modals/SproutFinishingRoom/SproutFinishingRoom.tsx
-// Sprint: S1-SFR-Shell → S3||SFR-Actions
+// Sprint: S1-SFR-Shell → S24-SFR sfr-garden-bridge-v1
 // Three-column modal workspace for inspecting and refining research artifacts
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
+import type { ResearchDocument } from '@core/schema/research-document';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
+import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
 import { useSproutSignals } from '../../../hooks/useSproutSignals';
+import { useToast } from '@explore/context/ToastContext';
 import { FinishingRoomHeader } from './FinishingRoomHeader';
 import { FinishingRoomStatus } from './FinishingRoomStatus';
 import { ProvenancePanel } from './ProvenancePanel';
 import { DocumentViewer } from './DocumentViewer';
 import { ActionPanel } from './ActionPanel';
+import { promoteToGarden } from './garden-bridge';
+import type { PromotionResult, PromotionError } from './garden-bridge';
+
+/**
+ * S23-SFR v1.0: Generated artifact tracked in local state
+ * Each generation creates a new version tab in DocumentViewer
+ */
+export interface GeneratedArtifact {
+  document: ResearchDocument;
+  templateId: string;
+  templateName: string;
+  generatedAt: string;
+}
 
 export interface SproutFinishingRoomProps {
   sprout: Sprout;
@@ -38,7 +53,80 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const emit = useEngagementEmit();
+  const { updateSprout, getSprout } = useSproutStorage();
   const signals = useSproutSignals();
+  const toast = useToast();
+
+  // S23-SFR v1.0: Track generated artifacts for version tabs
+  const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
+  // null = show research, number = show that artifact's version tab
+  const [activeArtifactIndex, setActiveArtifactIndex] = useState<number | null>(null);
+  // S24-SFR: Garden promotion state
+  const [promotionResult, setPromotionResult] = useState<PromotionResult | null>(null);
+  const [isPromoting, setIsPromoting] = useState(false);
+
+  // S23-SFR v1.0: Called when ActionPanel generates a new document
+  const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
+    const artifact: GeneratedArtifact = {
+      document,
+      templateId,
+      templateName,
+      generatedAt: new Date().toISOString(),
+    };
+    setArtifacts(prev => {
+      const next = [...prev, artifact];
+      // Auto-switch to the newly generated version tab
+      setActiveArtifactIndex(next.length - 1);
+      return next;
+    });
+  }, []);
+
+  // S24-SFR: Promote artifact to Garden (two-step: upload + provenance patch)
+  const handlePromoteToGarden = useCallback(async (document: ResearchDocument) => {
+    // Look up template info from the currently active artifact
+    const artifact = activeArtifactIndex !== null ? artifacts[activeArtifactIndex] : null;
+    if (!artifact) {
+      toast.error('No artifact selected for promotion');
+      return;
+    }
+
+    setIsPromoting(true);
+    try {
+      const result = await promoteToGarden(document, sprout, {
+        templateId: artifact.templateId,
+        templateName: artifact.templateName,
+        generatedAt: artifact.generatedAt,
+      });
+
+      if (!result.success) {
+        const err = result as PromotionError;
+        toast.error(`Promotion failed (${err.step}): ${err.error}`);
+        return;
+      }
+
+      setPromotionResult(result);
+
+      // Also save the document locally to the sprout
+      updateSprout(sprout.id, { researchDocument: document });
+      if (onSproutUpdate) {
+        const updated = getSprout(sprout.id);
+        if (updated) onSproutUpdate(updated);
+      }
+
+      emit.custom('sproutPromotedToGarden', {
+        sproutId: sprout.id,
+        gardenDocId: result.gardenDocId,
+        tier: result.tier,
+      });
+
+      toast.success('Promoted to Garden!');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Promotion failed';
+      toast.error(message);
+    } finally {
+      setIsPromoting(false);
+    }
+  }, [activeArtifactIndex, artifacts, sprout, updateSprout, getSprout, onSproutUpdate, emit, toast]);
 
   // Track view start time for duration calculation
   const viewStartRef = useRef<number>(0);
@@ -150,10 +238,11 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   };
 
   // US-E001: Wrap onClose to emit event
-  const handleClose = useCallback(() => {
+  // Plain function (not useCallback) because this runs after the early return guard
+  const handleClose = () => {
     emit.custom('finishingRoomClosed', { sproutId: sprout.id });
     onClose();
-  }, [emit, sprout.id, onClose]);
+  };
 
   const headerId = 'finishing-room-title';
 
@@ -171,7 +260,8 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={headerId}
-        className="relative flex flex-col w-[95vw] max-w-[1400px] h-[90vh] bg-paper dark:bg-ink rounded-lg shadow-2xl overflow-hidden"
+        className="bedrock-app relative flex flex-col w-[95vw] max-w-[1400px] h-[90vh] rounded-lg shadow-2xl overflow-hidden"
+        style={{ backgroundColor: 'var(--glass-solid, var(--glass-void, #111827))' }}
       >
         {/* Header */}
         <FinishingRoomHeader
@@ -187,13 +277,22 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
           <ProvenancePanel sprout={sprout} />
 
           {/* Center column - Document Viewer (flex: 1) */}
-          <DocumentViewer sprout={sprout} />
+          <DocumentViewer
+            sprout={sprout}
+            generatedArtifacts={artifacts}
+            activeArtifactIndex={activeArtifactIndex}
+            onArtifactSelect={setActiveArtifactIndex}
+            onPromoteToGarden={handlePromoteToGarden}
+            isPromoting={isPromoting}
+            promotionResult={promotionResult}
+          />
 
           {/* Right column - Action Panel (320px fixed) */}
           <ActionPanel
             sprout={sprout}
             onClose={handleClose}
             onSproutUpdate={onSproutUpdate}
+            onDocumentGenerated={handleDocumentGenerated}
           />
         </div>
 

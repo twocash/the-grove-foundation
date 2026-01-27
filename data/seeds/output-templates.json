@@ -127,7 +127,7 @@
           "category": "research"
         },
         "status": "active",
-        "isDefault": false,
+        "isDefault": true,
         "source": "system-seed"
       }
     },

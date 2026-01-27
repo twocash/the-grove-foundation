@@ -401,6 +401,16 @@ export async function executeResearchPipeline(
     console.log(`[Pipeline] Evidence bundle: ${evidenceBundle.totalSources} sources`);
     console.log(`[Pipeline] S22-WP: Returning evidence-only (NO automatic Writer)`);
 
+    // S23-SFR DEBUG: Log canonical research BEFORE building result
+    console.log(`[Pipeline] Canonical research BEFORE result build:`, {
+      hasCanonical: !!canonicalResearch,
+      title: canonicalResearch?.title?.slice(0, 50),
+      sectionsCount: canonicalResearch?.sections?.length || 0,
+      sourcesCount: canonicalResearch?.sources?.length || 0,
+      findingsCount: canonicalResearch?.key_findings?.length || 0,
+      execSummaryLength: canonicalResearch?.executive_summary?.length || 0,
+    });
+
     // S22-WP: Return evidence-only result - NO document
     // Document generation is now user-triggered from the right panel
     const result: PipelineResult = {
@@ -419,6 +429,14 @@ export async function executeResearchPipeline(
         writingDuration: 0, // No writing phase - user triggers Writer separately
       },
     };
+
+    // S23-SFR DEBUG: Log canonical research AFTER result build
+    console.log(`[Pipeline] Canonical research AFTER result build:`, {
+      hasCanonical: !!result.canonicalResearch,
+      title: result.canonicalResearch?.title?.slice(0, 50),
+      sectionsCount: result.canonicalResearch?.sections?.length || 0,
+      sourcesCount: result.canonicalResearch?.sources?.length || 0,
+    });
 
     // Add template provenance if template was loaded
     if (template) {

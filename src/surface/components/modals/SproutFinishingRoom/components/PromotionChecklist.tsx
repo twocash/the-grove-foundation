@@ -93,16 +93,16 @@ export const PromotionChecklist: React.FC<PromotionChecklistProps> = ({
   const hasSelection = Object.values(selected).some((v) => v);
 
   return (
-    <div className="p-4 border-b border-ink/10 dark:border-white/10">
+    <div className="p-4 border-b border-[var(--glass-border)]">
       {/* Section header with cyan accent */}
       <div className="flex items-center gap-2 mb-3">
         <span className="w-1 h-4 bg-cyan-500 rounded-full" />
-        <h3 className="text-sm font-medium text-ink dark:text-paper">
+        <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
           Add to Field
         </h3>
       </div>
 
-      <p className="text-xs text-ink-muted dark:text-paper/60 mb-3">
+      <p className="text-xs text-[var(--glass-text-muted)] mb-3">
         Select content to promote to Knowledge Commons
       </p>
 
@@ -114,16 +114,16 @@ export const PromotionChecklist: React.FC<PromotionChecklistProps> = ({
             className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
               selected[item.id]
                 ? 'bg-cyan-500/10 border border-cyan-500/30'
-                : 'hover:bg-ink/5 dark:hover:bg-white/5 border border-transparent'
+                : 'hover:bg-[var(--glass-elevated)] border border-transparent'
             }`}
           >
             <input
               type="checkbox"
               checked={selected[item.id]}
               onChange={() => toggleItem(item.id)}
-              className="w-4 h-4 rounded border-ink/20 text-cyan-500 focus:ring-cyan-500/50"
+              className="w-4 h-4 rounded border-[var(--glass-border)] text-cyan-500 focus:ring-cyan-500/50"
             />
-            <span className="text-sm text-ink dark:text-paper">{item.label}</span>
+            <span className="text-sm text-[var(--glass-text-primary)]">{item.label}</span>
           </label>
         ))}
       </div>

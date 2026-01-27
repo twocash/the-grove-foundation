@@ -49,6 +49,19 @@ export type {
 } from './evidence-catalog';
 export { EvidenceRegistry } from './evidence-registry';
 
+// Promotion Catalog & Registry (S24-SFR) - for Garden promotion display
+export {
+  PromotionCatalog,
+  PromotionStatusSchema,
+  PromotionBadgeSchema,
+} from './promotion-catalog';
+export type {
+  PromotionCatalogType,
+  PromotionStatusProps,
+  PromotionBadgeProps,
+} from './promotion-catalog';
+export { PromotionRegistry } from './promotion-registry';
+
 // Transform - converts domain models to render trees
 export { researchDocumentToRenderTree } from './transform';
 export {
@@ -58,6 +71,10 @@ export {
   sproutFullReportToRenderTree,
   sproutSourcesToRenderTree,
 } from './evidence-transform';
+export {
+  promotionResultToRenderTree,
+  promotionBadgeToRenderTree,
+} from './promotion-transform';
 
 // Renderer - renders trees using registry
 export { Renderer, useLayoutContext } from './Renderer';

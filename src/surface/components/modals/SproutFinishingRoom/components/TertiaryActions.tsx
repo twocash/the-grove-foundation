@@ -73,7 +73,7 @@ ${sprout.response}
   return (
     <div className="p-4 mt-auto">
       {/* Section header */}
-      <h3 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-3">
+      <h3 className="text-xs font-mono text-[var(--glass-text-muted)] uppercase mb-3">
         More Actions
       </h3>
 
@@ -81,16 +81,16 @@ ${sprout.response}
         {/* US-D002: Archive to Garden */}
         <button
           onClick={() => onAction('archive')}
-          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ink/5 dark:hover:bg-white/5 transition-colors text-left"
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--glass-elevated)] transition-colors text-left"
         >
           <span className="text-lg" role="img" aria-label="Archive">
             📁
           </span>
           <div>
-            <span className="text-sm font-medium text-ink dark:text-paper">
+            <span className="text-sm font-medium text-[var(--glass-text-primary)]">
               Archive to Garden
             </span>
-            <p className="text-xs text-ink-muted dark:text-paper/50">
+            <p className="text-xs text-[var(--glass-text-muted)]">
               Save for later reference
             </p>
           </div>
@@ -100,35 +100,36 @@ ${sprout.response}
         {!showNoteInput ? (
           <button
             onClick={() => setShowNoteInput(true)}
-            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ink/5 dark:hover:bg-white/5 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--glass-elevated)] transition-colors text-left"
           >
             <span className="text-lg" role="img" aria-label="Note">
               📝
             </span>
             <div>
-              <span className="text-sm font-medium text-ink dark:text-paper">
+              <span className="text-sm font-medium text-[var(--glass-text-primary)]">
                 {sprout.notes ? 'Edit Note' : 'Add Private Note'}
               </span>
-              <p className="text-xs text-ink-muted dark:text-paper/50">
+              <p className="text-xs text-[var(--glass-text-muted)]">
                 {sprout.notes ? 'Modify your annotation' : 'Personal annotation'}
               </p>
             </div>
           </button>
         ) : (
-          <div className="p-3 bg-ink/5 dark:bg-white/5 rounded-lg">
+          <div className="p-3 bg-[var(--glass-elevated)] rounded-lg">
             <textarea
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Add your private note..."
-              className="w-full h-20 p-2 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded resize-none focus:outline-none focus:ring-2 focus:ring-grove-forest/50 text-ink dark:text-paper placeholder:text-ink-muted dark:placeholder:text-paper/50"
+              className="w-full h-20 p-2 text-sm border border-[var(--glass-border)] rounded resize-none focus:outline-none focus:ring-2 focus:ring-[var(--neon-cyan)]/50 text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)]"
+              style={{ backgroundColor: 'var(--glass-panel)' }}
               autoFocus
             />
             <div className="flex gap-2 mt-2">
               <button
                 onClick={handleSaveNote}
                 disabled={!noteText.trim()}
-                className="flex-1 py-1.5 px-3 bg-grove-forest text-paper rounded text-sm font-medium hover:bg-grove-forest/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 py-1.5 px-3 bg-[var(--neon-cyan)] text-white rounded text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Save Note
               </button>
@@ -137,7 +138,7 @@ ${sprout.response}
                   setShowNoteInput(false);
                   setNoteText(sprout.notes || '');
                 }}
-                className="py-1.5 px-3 text-sm text-ink-muted dark:text-paper/50 hover:bg-ink/10 dark:hover:bg-white/10 rounded transition-colors"
+                className="py-1.5 px-3 text-sm text-[var(--glass-text-muted)] hover:bg-[var(--glass-elevated)] rounded transition-colors"
               >
                 Cancel
               </button>
@@ -148,16 +149,16 @@ ${sprout.response}
         {/* US-D004: Export Document */}
         <button
           onClick={handleExport}
-          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ink/5 dark:hover:bg-white/5 transition-colors text-left"
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--glass-elevated)] transition-colors text-left"
         >
           <span className="text-lg" role="img" aria-label="Export">
             📤
           </span>
           <div>
-            <span className="text-sm font-medium text-ink dark:text-paper">
+            <span className="text-sm font-medium text-[var(--glass-text-primary)]">
               Export Document
             </span>
-            <p className="text-xs text-ink-muted dark:text-paper/50">
+            <p className="text-xs text-[var(--glass-text-muted)]">
               Download as Markdown
             </p>
           </div>

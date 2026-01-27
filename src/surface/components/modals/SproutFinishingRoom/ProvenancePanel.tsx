@@ -34,7 +34,7 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
   const knowledgeFiles = sprout.provenance?.knowledgeFiles || [];
 
   return (
-    <aside className="w-[280px] flex-shrink-0 border-r border-ink/10 dark:border-white/10 bg-paper/20 dark:bg-ink/20 overflow-y-auto">
+    <aside className="w-[280px] flex-shrink-0 border-r border-[var(--glass-border)] overflow-y-auto" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>
       {/* US-B001 + US-B004: Origin Section (collapsible) */}
       <CollapsibleSection
         title="Origin"
@@ -44,7 +44,7 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
         defaultExpanded={true}
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-ink dark:text-paper">
+          <span className="text-sm font-medium text-[var(--glass-text-primary)]">
             {lensName}
           </span>
         </div>
@@ -66,15 +66,15 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
             {knowledgeFiles.map((file, idx) => (
               <li
                 key={idx}
-                className="text-sm text-ink-muted dark:text-paper/70 flex items-center gap-2"
+                className="text-sm text-[var(--glass-text-muted)] flex items-center gap-2"
               >
-                <span className="text-ink/30 dark:text-paper/30">•</span>
+                <span className="text-[var(--glass-text-muted)] opacity-30">•</span>
                 <span className="font-mono text-xs truncate">{file}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-ink-muted dark:text-paper/50 italic">
+          <p className="text-sm text-[var(--glass-text-muted)] italic">
             No sources referenced
           </p>
         )}
@@ -92,7 +92,7 @@ export const ProvenancePanel: React.FC<ProvenancePanelProps> = ({ sprout }) => {
           <TierBadge tier={stageToTier(sprout.stage)} size="md" showLabel />
         </div>
         {sprout.promotedAt && (
-          <p className="text-xs text-ink-muted dark:text-paper/50 mt-2">
+          <p className="text-xs text-[var(--glass-text-muted)] mt-2">
             Promoted {new Date(sprout.promotedAt).toLocaleDateString()}
           </p>
         )}

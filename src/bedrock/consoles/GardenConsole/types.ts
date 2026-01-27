@@ -120,6 +120,7 @@ export interface Document {
 export interface DocumentPayload {
   // Core
   tier: DocumentTier;
+  content?: string;
   source_url?: string;
   file_type?: string;
   content_length?: number;

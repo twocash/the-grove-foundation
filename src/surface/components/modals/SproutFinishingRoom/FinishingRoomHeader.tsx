@@ -31,7 +31,7 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
     : sprout.query;
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-ink/10 dark:border-white/10 bg-paper/50 dark:bg-ink/50">
+    <header className="flex items-center justify-between px-4 py-3 border-b border-[var(--glass-border)]" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>
       {/* Left: Icon and title - S4-SL-TierProgression: Dynamic TierBadge */}
       <div className="flex items-center gap-3">
         <TierBadge
@@ -42,7 +42,7 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
         />
         <h1
           id={headerId}
-          className="text-sm font-mono font-semibold text-ink dark:text-paper uppercase tracking-wider"
+          className="text-sm font-mono font-semibold text-[var(--glass-text-primary)] uppercase tracking-wider"
         >
           Sprout Finishing Room
         </h1>
@@ -50,7 +50,7 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
 
       {/* Center: Sprout query/title */}
       <div className="flex-1 mx-4 text-center">
-        <span className="text-sm text-ink-muted dark:text-paper/70 font-serif italic truncate block">
+        <span className="text-sm text-[var(--glass-text-muted)] font-serif italic truncate block">
           {displayTitle}
         </span>
       </div>
@@ -60,7 +60,7 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
         ref={closeButtonRef}
         onClick={onClose}
         aria-label="Close"
-        className="flex items-center justify-center w-8 h-8 rounded-md text-ink-muted dark:text-paper/70 hover:text-ink dark:hover:text-paper hover:bg-ink/5 dark:hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-grove-forest/50"
+        className="flex items-center justify-center w-8 h-8 rounded-md text-[var(--glass-text-muted)] hover:text-[var(--glass-text-primary)] hover:bg-[var(--glass-elevated)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--neon-cyan)]/50"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

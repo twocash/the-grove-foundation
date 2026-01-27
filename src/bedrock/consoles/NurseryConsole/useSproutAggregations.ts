@@ -74,20 +74,24 @@ export function useSproutAggregations(
     setError(null);
 
     try {
+      // S23-SFR-Fix: Use maybeSingle() instead of single() to avoid 406 HTTP errors
+      // when no aggregation exists yet. maybeSingle() returns null data without HTTP error
+      // when 0 rows found (vs single() which returns 406 PGRST116).
       const { data, error: fetchError } = await client
         .from('document_signal_aggregations')
         .select('*')
         .eq('document_id', sproutId)
         .eq('period', period)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
-        // If no aggregation exists yet, create an empty one
-        if (fetchError.code === 'PGRST116') {
-          setAggregation(createEmptyAggregation(sproutId, period));
-          return;
-        }
         throw fetchError;
+      }
+
+      // If no aggregation exists yet, create an empty one
+      if (!data) {
+        setAggregation(createEmptyAggregation(sproutId, period));
+        return;
       }
 
       // Transform snake_case to camelCase

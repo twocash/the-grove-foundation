@@ -99,6 +99,18 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
 
         // S22-WP: Store evidence-only results + canonical research
         // Document will be added later when user triggers Writer from right panel
+
+        // S23-SFR DEBUG: Log canonical research BEFORE calling updateResults
+        console.log(`[ResearchExecution] BEFORE updateResults - canonical research:`, {
+          hasCanonical: !!result.canonicalResearch,
+          title: result.canonicalResearch?.title?.slice(0, 50),
+          sectionsCount: result.canonicalResearch?.sections?.length || 0,
+          sourcesCount: result.canonicalResearch?.sources?.length || 0,
+          findingsCount: result.canonicalResearch?.key_findings?.length || 0,
+          execSummaryLength: result.canonicalResearch?.executive_summary?.length || 0,
+          rawKeys: result.canonicalResearch ? Object.keys(result.canonicalResearch) : [],
+        });
+
         await updateResults(sprout.id, {
           // Raw research data for evidence display in center panel
           branches: result.branches,
@@ -115,8 +127,8 @@ export function ResearchExecutionProvider({ children }: ResearchExecutionProvide
           // researchDocument will be set when user triggers Writer
         });
 
-        console.log(`[ResearchExecution] Evidence saved: ${result.rawEvidence?.length || 0} items`);
-        console.log(`[ResearchExecution] Canonical research saved: ${result.canonicalResearch?.title || 'none'}`);
+        console.log(`[ResearchExecution] AFTER updateResults - Evidence saved: ${result.rawEvidence?.length || 0} items`);
+        console.log(`[ResearchExecution] AFTER updateResults - Canonical research saved: ${result.canonicalResearch?.title || 'none'}`);
         console.log(`[ResearchExecution] User can now trigger Writer from right panel`);
       } else if (result.error) {
         // Transition to blocked on error

@@ -33,6 +33,30 @@ interface ThemeInfo {
 }
 
 const THEME_INFO: Record<string, ThemeInfo> = {
+  // S24-EMT: New v1.0 default themes
+  'elegant-modern-v1': {
+    id: 'elegant-modern-v1',
+    name: 'Elegant Modern',
+    description: 'Light theme with high contrast',
+    icon: 'light_mode',
+    preview: {
+      bg: '#F9F8F6',
+      fg: '#111111',
+      accent: '#C66B3D',
+    },
+  },
+  'elegant-dark-v1': {
+    id: 'elegant-dark-v1',
+    name: 'Elegant Dark',
+    description: 'Warm charcoal night mode',
+    icon: 'dark_mode',
+    preview: {
+      bg: '#191A1C',
+      fg: '#EDEDED',
+      accent: '#E09F3E',
+    },
+  },
+  // Legacy themes
   'quantum-glass-v1': {
     id: 'quantum-glass-v1',
     name: 'Quantum Glass',

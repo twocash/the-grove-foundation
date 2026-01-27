@@ -102,6 +102,8 @@ export interface SupabaseClientLike {
   from(table: string): {
     select(columns?: string): {
       eq(column: string, value: unknown): {
+        // S23-SFR-Fix: Use maybeSingle() to avoid 406 errors when no rows exist
+        maybeSingle(): Promise<{ data: SignalAggregationRow | null; error: unknown }>;
         single(): Promise<{ data: SignalAggregationRow | null; error: unknown }>;
       };
       in(column: string, values: unknown[]): Promise<{ data: SignalAggregationRow[] | null; error: unknown }>;
@@ -129,15 +131,22 @@ export async function fetchSignalsForSprout(
   const period = options.period ?? 'all_time';
 
   try {
+    // S23-SFR-Fix: Use maybeSingle() instead of single() to avoid 406 HTTP errors
+    // when no aggregation exists. maybeSingle() returns null without HTTP error.
     const { data, error } = await supabase
       .from('document_signal_aggregations')
       .select('*')
       .eq('document_id', documentId)
       .eq('period', period)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
-      console.warn(`No signals found for document ${documentId}, using defaults`);
+    if (error) {
+      console.warn(`Error fetching signals for document ${documentId}:`, error);
+      return { ...DEFAULT_SIGNALS };
+    }
+
+    if (!data) {
+      // No aggregation exists yet - this is expected for new sprouts
       return { ...DEFAULT_SIGNALS };
     }
 
@@ -243,14 +252,21 @@ export async function fetchExtendedSignals(
   const period = options.period ?? 'all_time';
 
   try {
+    // S23-SFR-Fix: Use maybeSingle() instead of single() to avoid 406 HTTP errors
     const { data, error } = await supabase
       .from('document_signal_aggregations')
       .select('*')
       .eq('document_id', documentId)
       .eq('period', period)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      console.warn(`Error fetching extended signals for document ${documentId}:`, error);
+      return { ...DEFAULT_SIGNALS };
+    }
+
+    if (!data) {
+      // No aggregation exists yet - return defaults
       return { ...DEFAULT_SIGNALS };
     }
 

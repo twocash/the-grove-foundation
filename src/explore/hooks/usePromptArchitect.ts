@@ -15,6 +15,8 @@ import {
   type InferredManifest,
   type PipelineOptions,
 } from '../services/prompt-architect-pipeline';
+// S22-WP: Import template loader to get default templateId for sprout creation
+import { loadDefaultTemplate } from '../services/template-loader';
 
 // =============================================================================
 // Types
@@ -201,9 +203,12 @@ export function usePromptArchitect(
             setManifest(createEditableManifest(result.manifest));
             // Auto-confirm
             setState('creating');
+            // S22-WP: CRITICAL - must include default templateId for auto-confirm path
+            // Without this, sprouts created via auto-confirm have no template
+            const defaultTemplate = loadDefaultTemplate('research');
             const sproutInput = buildSproutInput(
               result.manifest,
-              { notes: '', tags: [] },
+              { notes: '', tags: [], templateId: defaultTemplate?.id },
               groveId,
               sessionId,
               creatorId
@@ -359,6 +364,9 @@ export function usePromptArchitect(
  * Create an editable manifest from the inferred manifest
  */
 function createEditableManifest(inferred: InferredManifest): EditableManifest {
+  // S22-WP: Initialize with default research template - CRITICAL for template dropdown to work
+  // The templateId MUST be set here so it's available when sprout is created
+  const defaultTemplate = loadDefaultTemplate('research');
   return {
     spark: inferred.spark,
     title: inferred.title,
@@ -366,6 +374,8 @@ function createEditableManifest(inferred: InferredManifest): EditableManifest {
     strategy: { ...inferred.strategy },
     notes: '',
     tags: [],
+    // S22-WP: Set default templateId - user can override via dropdown in confirmation dialog
+    templateId: defaultTemplate?.id,
   };
 }
 
@@ -382,11 +392,30 @@ function buildSproutInput(
   sessionId: string,
   creatorId?: string
 ): CreateResearchSproutInput {
+  // S22-WP: CRITICAL - Ensure branches is NEVER undefined
+  // Use edited branches if available, fall back to original, create fallback if both empty
+  const branches = (edited.branches && edited.branches.length > 0)
+    ? edited.branches
+    : (original.branches && original.branches.length > 0)
+      ? original.branches
+      : [{
+          id: `main-${Date.now()}`,
+          label: 'Main Research',
+          queries: [original.spark],
+          status: 'pending' as const,
+          priority: 1 as const,
+          evidence: [],
+        }];
+
+  if (!edited.branches?.length && !original.branches?.length) {
+    console.warn(`[buildSproutInput] ⚠️ No branches from manifest, using fallback for: "${original.spark.slice(0, 50)}..."`);
+  }
+
   return {
     spark: original.spark,
     groveId,
     strategy: edited.strategy ?? original.strategy,
-    branches: edited.branches ?? original.branches,
+    branches,
     appliedRuleIds: original.appliedRuleIds,
     inferenceConfidence: original.confidence,
     groveConfigSnapshot: original.groveConfigSnapshot,

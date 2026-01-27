@@ -56,11 +56,11 @@ export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) =>
   };
 
   return (
-    <div className="p-4 border-b border-ink/10 dark:border-white/10">
+    <div className="p-4 border-b border-[var(--glass-border)]">
       {/* Section header with green accent */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="w-1 h-4 bg-grove-forest rounded-full" />
-        <h3 className="text-sm font-medium text-ink dark:text-paper">
+        <span className="w-1 h-4 bg-[var(--neon-cyan)] rounded-full" />
+        <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
           Revise & Resubmit
         </h3>
       </div>
@@ -70,7 +70,7 @@ export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) =>
         <div className="mb-3">
           <label
             htmlFor="template-select"
-            className="block text-xs text-ink-muted dark:text-paper/60 mb-1"
+            className="block text-xs text-[var(--glass-text-muted)] mb-1"
           >
             Output Template
           </label>
@@ -78,7 +78,8 @@ export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) =>
             id="template-select"
             value={selectedTemplateId}
             onChange={(e) => setSelectedTemplateId(e.target.value)}
-            className="w-full p-2 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-grove-forest/50 text-ink dark:text-paper"
+            className="w-full p-2 text-sm border border-[var(--glass-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-cyan)]/50 text-[var(--glass-text-primary)]"
+            style={{ backgroundColor: 'var(--glass-panel)' }}
             aria-label="Select output template"
           >
             {writerTemplates.map((template) => (
@@ -96,14 +97,15 @@ export const ReviseForm: React.FC<ReviseFormProps> = ({ sproutId, onSubmit }) =>
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="What should the next version address differently?"
-        className="w-full h-24 p-3 text-sm bg-paper dark:bg-ink border border-ink/10 dark:border-white/10 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-grove-forest/50 text-ink dark:text-paper placeholder:text-ink-muted dark:placeholder:text-paper/50"
+        className="w-full h-24 p-3 text-sm border border-[var(--glass-border)] rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[var(--neon-cyan)]/50 text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)]"
+        style={{ backgroundColor: 'var(--glass-panel)' }}
         aria-label="Revision instructions"
       />
 
       <button
         onClick={handleSubmit}
         disabled={!notes.trim() || isSubmitting}
-        className="mt-3 w-full py-2 px-4 bg-grove-forest text-paper rounded-lg font-medium text-sm hover:bg-grove-forest/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="mt-3 w-full py-2 px-4 bg-[var(--neon-cyan)] text-white rounded-lg font-medium text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isSubmitting ? 'Submitting...' : 'Submit for Revision'}
       </button>

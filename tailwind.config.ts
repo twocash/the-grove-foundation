@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   darkMode: 'class',
@@ -196,9 +197,112 @@ const config: Config = {
         'holo-hover': 'rgba(0, 212, 255, 0.4)',
         'holo-active': '#00D4FF',
       },
+
+      // ============================================================
+      // TYPOGRAPHY (S22-WP: json-render prose styling)
+      // GroveSkins integration - paper/ink colors, serif fonts
+      // ============================================================
+      typography: ({ theme }: { theme: (path: string) => string }) => ({
+        DEFAULT: {
+          css: {
+            // Base text color (ink)
+            '--tw-prose-body': theme('colors.ink.DEFAULT'),
+            '--tw-prose-headings': theme('colors.ink.DEFAULT'),
+            '--tw-prose-lead': theme('colors.ink.muted'),
+            '--tw-prose-links': theme('colors.grove.forest'),
+            '--tw-prose-bold': theme('colors.ink.DEFAULT'),
+            '--tw-prose-counters': theme('colors.ink.muted'),
+            '--tw-prose-bullets': theme('colors.grove.forest'),
+            '--tw-prose-hr': theme('colors.ink.border'),
+            '--tw-prose-quotes': theme('colors.ink.DEFAULT'),
+            '--tw-prose-quote-borders': theme('colors.grove.forest'),
+            '--tw-prose-captions': theme('colors.ink.muted'),
+            '--tw-prose-code': theme('colors.grove.forest'),
+            '--tw-prose-pre-code': theme('colors.paper.DEFAULT'),
+            '--tw-prose-pre-bg': theme('colors.ink.DEFAULT'),
+            '--tw-prose-th-borders': theme('colors.ink.border'),
+            '--tw-prose-td-borders': theme('colors.ink.border'),
+            // Dark mode (inverted for dark bg)
+            '--tw-prose-invert-body': theme('colors.paper.DEFAULT'),
+            '--tw-prose-invert-headings': theme('colors.paper.DEFAULT'),
+            '--tw-prose-invert-lead': 'rgba(249, 248, 244, 0.7)',
+            '--tw-prose-invert-links': theme('colors.grove.forest'),
+            '--tw-prose-invert-bold': theme('colors.paper.DEFAULT'),
+            '--tw-prose-invert-counters': 'rgba(249, 248, 244, 0.6)',
+            '--tw-prose-invert-bullets': theme('colors.grove.forest'),
+            '--tw-prose-invert-hr': 'rgba(249, 248, 244, 0.2)',
+            '--tw-prose-invert-quotes': theme('colors.paper.DEFAULT'),
+            '--tw-prose-invert-quote-borders': theme('colors.grove.forest'),
+            '--tw-prose-invert-captions': 'rgba(249, 248, 244, 0.6)',
+            '--tw-prose-invert-code': theme('colors.grove.forest'),
+            '--tw-prose-invert-pre-code': theme('colors.paper.DEFAULT'),
+            '--tw-prose-invert-pre-bg': 'rgba(0, 0, 0, 0.5)',
+            '--tw-prose-invert-th-borders': 'rgba(249, 248, 244, 0.2)',
+            '--tw-prose-invert-td-borders': 'rgba(249, 248, 244, 0.1)',
+            // Font styling
+            fontFamily: theme('fontFamily.serif'),
+            lineHeight: '1.75',
+            // Heading sizes
+            h1: {
+              fontSize: theme('fontSize.2xl'),
+              fontWeight: '700',
+              lineHeight: '1.2',
+              marginTop: '1.5em',
+              marginBottom: '0.75em',
+            },
+            h2: {
+              fontSize: theme('fontSize.xl'),
+              fontWeight: '600',
+              lineHeight: '1.25',
+              marginTop: '1.25em',
+              marginBottom: '0.5em',
+            },
+            h3: {
+              fontSize: theme('fontSize.lg'),
+              fontWeight: '600',
+              lineHeight: '1.3',
+              marginTop: '1em',
+              marginBottom: '0.5em',
+            },
+            // Links with grove-forest color
+            a: {
+              color: theme('colors.grove.forest'),
+              textDecoration: 'none',
+              '&:hover': {
+                textDecoration: 'underline',
+              },
+            },
+            // Blockquotes with grove accent
+            blockquote: {
+              borderLeftColor: theme('colors.grove.forest'),
+              fontStyle: 'italic',
+            },
+            // Code styling
+            code: {
+              color: theme('colors.grove.forest'),
+              fontWeight: '500',
+              '&::before': { content: 'none' },
+              '&::after': { content: 'none' },
+            },
+            // Lists with grove bullets
+            'ul > li::marker': {
+              color: theme('colors.grove.forest'),
+            },
+            'ol > li::marker': {
+              color: theme('colors.ink.muted'),
+            },
+          },
+        },
+      }),
     },
   },
-  plugins: [],
+  plugins: [
+    // S22-WP: Typography plugin for json-render prose styling
+    // Integrates with GroveSkins (paper/ink colors, serif fonts, grove-forest accents)
+    typography({
+      className: 'prose',
+    }),
+  ],
 };
 
 export default config;

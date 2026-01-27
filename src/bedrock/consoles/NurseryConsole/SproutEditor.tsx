@@ -6,7 +6,7 @@
 // using the standard onEdit mechanism with patch operations, allowing this
 // component to work within the createBedrockConsole factory pattern.
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
 import type { SproutPayload } from './useNurseryData';
 import type { PatchOperation } from '../../types/copilot.types';
@@ -18,6 +18,8 @@ import {
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
 import { SproutSignalsPanel } from './SproutSignalsPanel';
+import { GenerateDocumentSection } from './GenerateDocumentSection';
+import { DocumentContentModal } from '../GardenConsole/DocumentContentModal';
 
 // =============================================================================
 // Helper Components
@@ -166,7 +168,9 @@ export function SproutEditor({
   hasChanges,
 }: ObjectEditorProps<SproutPayload>) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
   // Helper to create patch operation
   const patchPayload = (field: keyof SproutPayload, value: unknown) => {
@@ -229,6 +233,56 @@ export function SproutEditor({
       setActionLoading(false);
     }
   };
+
+  // Sprint: research-template-wiring-v1 - US-RL006 Document Generation
+  const handleGenerateDocument = useCallback(async (templateId: string) => {
+    setActionLoading(true);
+    setGenerateError(null);
+
+    try {
+      // Import document generator dynamically to avoid circular deps
+      const { generateDocument } = await import('@explore/services/document-generator');
+
+      // Build evidence bundle from sprout synthesis
+      // Note: Full evidence bundle would come from sprout.evidence if available
+      const evidenceBundle = {
+        sproutId: sprout.meta.id,
+        totalSources: 0,
+        branches: [],
+        confidenceScore: sprout.payload.synthesis?.confidence ?? 0.5,
+        createdAt: new Date().toISOString(),
+      };
+
+      const result = await generateDocument({
+        evidenceBundle,
+        query: sprout.payload.spark,
+        writerTemplateId: templateId,
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Document generation failed');
+      }
+
+      // Save the generated document to the sprout
+      const ops: PatchOperation[] = [
+        { op: 'replace', path: '/payload/researchDocument', value: result.document },
+      ];
+      await onEdit(ops);
+      onSave();
+
+      console.log('[SproutEditor] Document generated successfully', {
+        templateUsed: result.templateUsed,
+        duration: result.execution.durationMs,
+      });
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Generation failed';
+      setGenerateError(errorMessage);
+      console.error('[SproutEditor] Document generation failed:', e);
+      throw e; // Re-throw so GenerateDocumentSection can handle it
+    } finally {
+      setActionLoading(false);
+    }
+  }, [sprout.meta.id, sprout.payload.spark, sprout.payload.synthesis, onEdit, onSave]);
 
   const isArchived = sprout.payload.status === 'archived';
   const isReady = sprout.payload.status === 'completed';
@@ -446,6 +500,19 @@ export function SproutEditor({
           </>
         )}
 
+        {/* === GENERATE DOCUMENT (Sprint: research-template-wiring-v1) === */}
+        {/* US-RL006: User-triggered document generation with Writer Template selection */}
+        <GenerateDocumentSection
+          sproutId={sprout.meta.id}
+          hasResearchResults={!!sprout.payload.synthesis}
+          hasDocument={!!sprout.payload.researchDocument}
+          onGenerate={handleGenerateDocument}
+          onViewDocument={sprout.payload.researchDocument ? () => setShowDocumentModal(true) : undefined}
+          disabled={loading || actionLoading}
+        />
+
+        {sprout.payload.synthesis && !sprout.payload.researchDocument && <InspectorDivider />}
+
         {/* === PROVENANCE === */}
         <InspectorSection title="Provenance" collapsible defaultCollapsed={true}>
           <dl className="space-y-3">
@@ -558,6 +625,17 @@ export function SproutEditor({
         onConfirm={handleArchive}
         loading={actionLoading}
       />
+
+      {/* S25-SFR: Document content modal */}
+      {showDocumentModal && sprout.payload.researchDocument && (
+        <DocumentContentModal
+          title={sprout.payload.researchDocument.position || sprout.meta.title}
+          content={sprout.payload.researchDocument.analysis}
+          tier={sprout.payload.researchDocument.status || 'complete'}
+          createdAt={sprout.payload.researchDocument.createdAt}
+          onClose={() => setShowDocumentModal(false)}
+        />
+      )}
     </div>
   );
 }

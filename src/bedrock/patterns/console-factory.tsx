@@ -124,11 +124,23 @@ export function createBedrockConsole<T>(
 
     // Collection view state
     // Sprint: extraction-pipeline-integration-v1 - Pass external filters from props
+    // Sprint: experience-console-cleanup-v1 - Pass custom filter match functions
+    const customFilterFns = useMemo(() => {
+      const fns: Record<string, (obj: unknown, filterValue: string) => boolean> = {};
+      for (const opt of config.collectionView.filterOptions) {
+        if (opt.matchFn) {
+          fns[opt.field] = opt.matchFn;
+        }
+      }
+      return Object.keys(fns).length > 0 ? fns : undefined;
+    }, [config.collectionView.filterOptions]);
+
     const collectionState = useCollectionView(objects, {
       searchFields: config.collectionView.searchFields,
       defaultSort: config.collectionView.defaultSort,
       favoritesStorageKey: config.collectionView.favoritesKey,
       externalFilters,
+      customFilterFns,
     });
 
     const {
@@ -190,13 +202,14 @@ export function createBedrockConsole<T>(
           value = objects.length;
         } else if (metric.query.startsWith('count(where:')) {
           // Extract field and expected value: count(where: field=value) or count(where: !field)
-          const match = metric.query.match(/count\(where:\s*(\!?)(\w+)(?:=(\w+))?\)/);
+          // Sprint: experience-console-cleanup-v1 — support dotted paths (e.g., meta.status)
+          const match = metric.query.match(/count\(where:\s*(\!?)([\w.]+)(?:=([\w-]+))?\)/);
           if (match) {
             const negate = match[1] === '!';
             const field = match[2];
-            const expectedValue = match[3]; // e.g., 'pending', 'complete'
+            const expectedValue = match[3]; // e.g., 'pending', 'complete', 'active'
             value = objects.filter((o) => {
-              const fieldValue = (o.payload as Record<string, unknown>)[field];
+              const fieldValue = getNestedValue(o, field);
               if (expectedValue) {
                 // Check equality against expected value
                 const matches = fieldValue === expectedValue;

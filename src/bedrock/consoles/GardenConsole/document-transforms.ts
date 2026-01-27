@@ -69,6 +69,7 @@ export function documentToGroveObject(doc: APIDocument): GroveObject<DocumentPay
     payload: {
       // Core document fields
       tier: (doc.tier as DocumentPayload['tier']) || 'seed',
+      content: doc.content || '',
       source_url: doc.sourceUrl || (doc as unknown as { source_url?: string }).source_url || '',
       file_type: doc.fileType || (doc as unknown as { file_type?: string }).file_type || '',
       content_length: doc.content?.length || 0,

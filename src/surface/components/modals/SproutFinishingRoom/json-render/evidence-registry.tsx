@@ -1,13 +1,16 @@
 // src/surface/components/modals/SproutFinishingRoom/json-render/evidence-registry.tsx
 // Sprint: S22-WP research-writer-panel-v1
+// S23-SFR: Migrated to GroveSkins CSS variables for unified theming
+// S25-SFR: Full GroveSkins binding - CSS variables, font families, ReactMarkdown overrides
 // Pattern: json-render registry for RAW research evidence display
 //
 // These components render the FULL research results.
-// Grove design system: paper/ink colors, serif typography, forest/clay accents.
+// Design system: GroveSkins (quantum-glass.json) - neon accents, glass panels, adaptive theming.
 
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import type { RenderElement } from '@core/json-render';
 import type {
   EvidenceHeaderProps,
@@ -19,6 +22,159 @@ import type {
   ConfidenceNoteProps,
   LimitationsListProps,
 } from './evidence-catalog';
+
+// ============================================================================
+// MARKDOWN COMPONENT OVERRIDES (GroveSkins self-contained styling)
+// Shared between SynthesisBlock and SourceCard for consistent rendering
+// Ported from ResearchRegistry for full GroveSkins compliance
+// ============================================================================
+
+const markdownComponents = {
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h1
+      style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-display)' }}
+      className="text-xl font-semibold mt-6 mb-3"
+      {...props}
+    />
+  ),
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h2
+      style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-display)' }}
+      className="text-lg font-semibold mt-5 mb-2"
+      {...props}
+    />
+  ),
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3
+      style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-heading)' }}
+      className="text-base font-semibold mt-4 mb-2"
+      {...props}
+    />
+  ),
+  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h4
+      style={{ color: 'var(--glass-text-secondary)', fontFamily: 'var(--font-heading)' }}
+      className="text-sm font-semibold mt-3 mb-1 uppercase tracking-wide"
+      {...props}
+    />
+  ),
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p
+      style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }}
+      className="mb-3 leading-relaxed"
+      {...props}
+    />
+  ),
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-body)' }} className="font-semibold" {...props} />
+  ),
+  em: (props: React.HTMLAttributes<HTMLElement>) => (
+    <em style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }} {...props} />
+  ),
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+    <ul
+      style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }}
+      className="mb-3 ml-5 list-disc space-y-1"
+      {...props}
+    />
+  ),
+  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
+    <ol
+      style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }}
+      className="mb-3 ml-5 list-decimal space-y-1"
+      {...props}
+    />
+  ),
+  table: (props: React.HTMLAttributes<HTMLTableElement>) => (
+    <div className="overflow-x-auto my-4">
+      <table
+        style={{ borderColor: 'var(--glass-border)' }}
+        className="w-full text-sm border-collapse"
+        {...props}
+      />
+    </div>
+  ),
+  thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+    <thead style={{ background: 'var(--glass-elevated)' }} {...props} />
+  ),
+  th: (props: React.HTMLAttributes<HTMLTableCellElement>) => (
+    <th
+      style={{ color: 'var(--glass-text-primary)', borderColor: 'var(--glass-border)', fontFamily: 'var(--font-body)' }}
+      className="px-3 py-2 text-left font-semibold border-b"
+      {...props}
+    />
+  ),
+  td: (props: React.HTMLAttributes<HTMLTableCellElement>) => (
+    <td
+      style={{ color: 'var(--glass-text-body)', borderColor: 'var(--glass-border)', fontFamily: 'var(--font-body)' }}
+      className="px-3 py-2 border-b"
+      {...props}
+    />
+  ),
+  blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
+    <blockquote
+      style={{ borderColor: 'var(--neon-cyan)', background: 'var(--glass-elevated)', fontFamily: 'var(--font-body)' }}
+      className="border-l-4 pl-4 py-2 my-4 rounded-r"
+      {...props}
+    />
+  ),
+  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+    <pre
+      style={{ background: 'var(--glass-elevated)', color: 'var(--glass-text-secondary)', fontFamily: 'var(--font-mono)' }}
+      className="p-4 rounded-lg overflow-x-auto my-4 text-sm"
+      {...props}
+    />
+  ),
+  code: ({
+    className,
+    children,
+    ...props
+  }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) => {
+    const isBlock = className?.includes('hljs') || className?.includes('language-');
+    if (isBlock) {
+      return <code className={className} style={{ fontFamily: 'var(--font-mono)' }} {...props}>{children}</code>;
+    }
+    return (
+      <code
+        style={{ color: 'var(--neon-cyan)', background: 'var(--glass-elevated)', fontFamily: 'var(--font-mono)' }}
+        className="px-1.5 py-0.5 rounded text-sm"
+        {...props}
+      >
+        {children}
+      </code>
+    );
+  },
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a
+      style={{ color: 'var(--neon-cyan)' }}
+      className="hover:underline"
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    />
+  ),
+  hr: () => <hr style={{ borderColor: 'var(--glass-border)' }} className="my-6" />,
+  // Inline citation rendering for <cite> tags from research output
+  cite: ({ node, ...props }: { node?: { properties?: { index?: string } }; children?: React.ReactNode } & React.HTMLAttributes<HTMLElement>) => {
+    const indexAttr = (node?.properties?.index as string) || '';
+    const indices = indexAttr?.split(',').map(i => i.trim().split('-')[0]).filter(Boolean) || [];
+    const uniqueIndices = [...new Set(indices)];
+    return (
+      <span className="citation-inline">
+        <span style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }}>{props.children}</span>
+        {uniqueIndices.length > 0 && (
+          <sup
+            className="text-[10px] ml-0.5 cursor-help"
+            style={{ color: 'var(--neon-cyan)', fontFamily: 'var(--font-mono)' }}
+            title={`Source: ${uniqueIndices.join(', ')}`}
+          >
+            [{uniqueIndices.join(',')}]
+          </sup>
+        )}
+      </span>
+    );
+  },
+};
 
 /**
  * Component registry interface (same as ResearchRegistry)
@@ -57,25 +213,42 @@ function formatDate(isoString: string): string {
 }
 
 /**
- * Get source type badge styles
+ * Get source type badge styles - GroveSkins native
+ * Uses CSS variables with color-mix for transparent backgrounds
  */
-function getSourceTypeBadge(sourceType?: string): { bg: string; text: string } {
+function getSourceTypeBadge(sourceType?: string): React.CSSProperties {
   switch (sourceType) {
     case 'academic':
-      return { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' };
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--neon-cyan) 15%, transparent)',
+        color: 'var(--neon-cyan)',
+      };
     case 'practitioner':
-      return { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400' };
+      return {
+        backgroundColor: 'color-mix(in srgb, #8b5cf6 15%, transparent)',
+        color: '#8b5cf6',
+      };
     case 'news':
-      return { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' };
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--semantic-warning) 15%, transparent)',
+        color: 'var(--semantic-warning)',
+      };
     case 'primary':
-      return { bg: 'bg-grove-forest/10 dark:bg-grove-forest/20', text: 'text-grove-forest' };
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--semantic-success) 15%, transparent)',
+        color: 'var(--semantic-success)',
+      };
     default:
-      return { bg: 'bg-ink/5 dark:bg-white/10', text: 'text-ink-muted dark:text-paper/60' };
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--glass-text-muted) 15%, transparent)',
+        color: 'var(--glass-text-muted)',
+      };
   }
 }
 
 /**
  * EvidenceRegistry - Maps evidence catalog components to React implementations
+ * S25-SFR: All components use GroveSkins CSS variables and font bindings
  */
 export const EvidenceRegistry: ComponentRegistry = {
   /**
@@ -86,9 +259,12 @@ export const EvidenceRegistry: ComponentRegistry = {
     const confidencePercent = Math.round(props.confidenceScore * 100);
 
     return (
-      <header className="mb-6 pb-4 border-b border-ink/10 dark:border-white/10">
+      <header className="mb-6 pb-4 border-b" style={{ borderColor: 'var(--glass-border)' }}>
         {/* Query */}
-        <h1 className="text-lg font-serif font-semibold text-ink dark:text-paper mb-3">
+        <h1
+          className="text-lg font-semibold mb-3"
+          style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-display)' }}
+        >
           {props.query}
         </h1>
 
@@ -96,36 +272,50 @@ export const EvidenceRegistry: ComponentRegistry = {
         <div className="flex flex-wrap items-center gap-3 text-xs">
           {/* Template badge */}
           {props.templateName && (
-            <span className="px-2 py-1 rounded bg-grove-forest/10 dark:bg-grove-forest/20 text-grove-forest font-mono">
+            <span
+              className="px-2 py-1 rounded"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--semantic-success) 15%, transparent)',
+                color: 'var(--semantic-success)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
               {props.templateName}
             </span>
           )}
 
           {/* Confidence badge */}
           <span
-            className={`px-2 py-1 rounded font-mono ${
-              confidencePercent >= 70
-                ? 'bg-grove-forest/10 text-grove-forest dark:bg-grove-forest/20'
+            className="px-2 py-1 rounded"
+            style={{
+              backgroundColor: confidencePercent >= 70
+                ? 'color-mix(in srgb, var(--semantic-success) 15%, transparent)'
                 : confidencePercent >= 40
-                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-            }`}
+                ? 'color-mix(in srgb, var(--semantic-warning) 15%, transparent)'
+                : 'color-mix(in srgb, var(--semantic-error) 15%, transparent)',
+              color: confidencePercent >= 70
+                ? 'var(--semantic-success)'
+                : confidencePercent >= 40
+                ? 'var(--semantic-warning)'
+                : 'var(--semantic-error)',
+              fontFamily: 'var(--font-mono)',
+            }}
           >
             {confidencePercent}% confidence
           </span>
 
           {/* Sources count */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}>
             {props.totalSources} sources
           </span>
 
           {/* Duration */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}>
             {formatDuration(props.executionTime)}
           </span>
 
           {/* Timestamp */}
-          <span className="text-ink-muted dark:text-paper/60">
+          <span style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}>
             {formatDate(props.createdAt)}
           </span>
         </div>
@@ -140,27 +330,36 @@ export const EvidenceRegistry: ComponentRegistry = {
     const props = element.props as BranchHeaderProps;
     const relevancePercent = Math.round(props.relevanceScore * 100);
 
-    const statusColors = {
-      complete: 'text-grove-forest',
-      pending: 'text-amber-600 dark:text-amber-400',
-      failed: 'text-red-600 dark:text-red-400',
-      'budget-exceeded': 'text-amber-600 dark:text-amber-400',
+    const statusColorMap: Record<string, string> = {
+      complete: 'var(--semantic-success)',
+      pending: 'var(--semantic-warning)',
+      failed: 'var(--semantic-error)',
+      'budget-exceeded': 'var(--semantic-warning)',
     };
 
     return (
-      <div className="mt-6 mb-4 pb-2 border-b border-ink/5 dark:border-white/5">
+      <div className="mt-6 mb-4 pb-2 border-b" style={{ borderColor: 'var(--glass-border)' }}>
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-mono text-ink dark:text-paper font-medium">
+          <h2
+            className="text-sm font-medium"
+            style={{ color: 'var(--glass-text-primary)', fontFamily: 'var(--font-mono)' }}
+          >
             {props.branchQuery}
           </h2>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-ink-muted dark:text-paper/50">
+            <span style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}>
               {props.sourceCount} sources
             </span>
-            <span className="text-ink-muted dark:text-paper/50">
+            <span style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}>
               {relevancePercent}% relevant
             </span>
-            <span className={`font-mono uppercase ${statusColors[props.status]}`}>
+            <span
+              className="uppercase"
+              style={{
+                color: statusColorMap[props.status] || 'var(--glass-text-muted)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
               {props.status}
             </span>
           </div>
@@ -174,14 +373,24 @@ export const EvidenceRegistry: ComponentRegistry = {
    */
   SourceCard: ({ element }) => {
     const props = element.props as SourceCardProps;
-    const badge = getSourceTypeBadge(props.sourceType);
+    const badgeStyle = getSourceTypeBadge(props.sourceType);
 
     return (
-      <div className="mb-4 p-3 rounded-lg bg-paper dark:bg-ink/50 border border-ink/5 dark:border-white/10">
+      <div
+        className="mb-4 p-3 rounded-lg border"
+        style={{ background: 'var(--glass-elevated)', borderColor: 'var(--glass-border)' }}
+      >
         {/* Header row */}
         <div className="flex items-start gap-2 mb-2">
           {/* Citation index */}
-          <span className="flex-shrink-0 w-6 h-6 rounded bg-grove-forest/10 dark:bg-grove-forest/20 text-grove-forest text-xs font-mono font-semibold flex items-center justify-center">
+          <span
+            className="flex-shrink-0 w-6 h-6 rounded text-xs font-semibold flex items-center justify-center"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--neon-cyan) 15%, transparent)',
+              color: 'var(--neon-cyan)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
             {props.index}
           </span>
 
@@ -191,31 +400,50 @@ export const EvidenceRegistry: ComponentRegistry = {
               href={props.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-grove-forest hover:underline line-clamp-1"
+              className="text-sm font-medium hover:underline line-clamp-1"
+              style={{ color: 'var(--neon-cyan)', fontFamily: 'var(--font-body)' }}
               title={props.title}
             >
               {props.title}
             </a>
-            <p className="text-xs text-ink-muted dark:text-paper/50 truncate">
+            <p
+              className="text-xs truncate"
+              style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}
+            >
               {props.url}
             </p>
           </div>
 
           {/* Source type badge */}
           {props.sourceType && (
-            <span className={`px-2 py-0.5 rounded text-xs font-mono ${badge.bg} ${badge.text}`}>
+            <span
+              className="px-2 py-0.5 rounded text-xs"
+              style={{ ...badgeStyle, fontFamily: 'var(--font-mono)' }}
+            >
               {props.sourceType}
             </span>
           )}
         </div>
 
-        {/* Snippet - S22-WP: Show FULL content with proper markdown rendering */}
-        <div className="text-sm text-ink/80 dark:text-paper/80 border-l-2 border-grove-forest/30 pl-3 ml-8 prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0.5 prose-blockquote:my-2 prose-blockquote:border-grove-forest/50 prose-a:text-grove-forest prose-a:no-underline hover:prose-a:underline">
-          <ReactMarkdown>{props.snippet}</ReactMarkdown>
+        {/* Snippet - rendered with full GroveSkins markdown overrides */}
+        <div
+          className="text-sm border-l-2 pl-3 ml-8"
+          style={{ borderColor: 'color-mix(in srgb, var(--neon-cyan) 30%, transparent)' }}
+        >
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw]}
+            components={markdownComponents}
+          >
+            {props.snippet}
+          </ReactMarkdown>
         </div>
 
         {/* Access timestamp */}
-        <p className="text-xs text-ink-muted dark:text-paper/40 mt-2 ml-8">
+        <p
+          className="text-xs mt-2 ml-8"
+          style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
           Accessed {formatDate(props.accessedAt)}
         </p>
       </div>
@@ -227,21 +455,27 @@ export const EvidenceRegistry: ComponentRegistry = {
    */
   FindingsList: ({ element }) => {
     const props = element.props as FindingsListProps;
+    const findings = Array.isArray(props.findings) ? props.findings : [];
 
-    if (!props.findings || props.findings.length === 0) {
+    if (findings.length === 0) {
       return null;
     }
 
     return (
       <div className="mb-4 ml-8">
-        <h4 className="text-xs font-mono text-ink-muted dark:text-paper/50 uppercase mb-2">
+        <h4
+          className="text-xs uppercase mb-2"
+          style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
           Key Findings
         </h4>
         <ul className="space-y-1">
-          {props.findings.map((finding, idx) => (
-            <li key={idx} className="flex gap-2 text-sm text-ink dark:text-paper">
-              <span className="text-grove-forest flex-shrink-0">•</span>
-              <span>{finding}</span>
+          {findings.map((finding, idx) => (
+            <li key={idx} className="flex gap-2 text-sm">
+              <span className="flex-shrink-0" style={{ color: 'var(--neon-cyan)' }}>•</span>
+              <span style={{ color: 'var(--glass-text-body)', fontFamily: 'var(--font-body)' }}>
+                {typeof finding === 'string' ? finding : String(finding)}
+              </span>
             </li>
           ))}
         </ul>
@@ -256,16 +490,19 @@ export const EvidenceRegistry: ComponentRegistry = {
     const props = element.props as EvidenceSummaryProps;
 
     return (
-      <footer className="mt-6 pt-4 border-t border-ink/10 dark:border-white/10 flex items-center justify-between text-xs text-ink-muted dark:text-paper/50">
+      <footer
+        className="mt-6 pt-4 border-t flex items-center justify-between text-xs"
+        style={{ borderColor: 'var(--glass-border)', color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}
+      >
         <div className="flex items-center gap-4">
           <span>
-            <strong className="text-ink dark:text-paper">{props.branchCount}</strong> research branches
+            <strong style={{ color: 'var(--glass-text-primary)' }}>{props.branchCount}</strong> research branches
           </span>
           <span>
-            <strong className="text-ink dark:text-paper">{props.totalFindings}</strong> findings
+            <strong style={{ color: 'var(--glass-text-primary)' }}>{props.totalFindings}</strong> findings
           </span>
         </div>
-        <span className="font-mono">
+        <span>
           {props.apiCallsUsed} API calls
         </span>
       </footer>
@@ -275,84 +512,22 @@ export const EvidenceRegistry: ComponentRegistry = {
   /**
    * S22-WP: Synthesis Block - Main research narrative with inline citations
    * Displays the full research synthesis as formatted prose
-   * Handles <cite index="..."> tags for INLINE citation rendering (not blockquotes)
+   * S25-SFR: Full GroveSkins markdownComponents for consistent rendering
    *
    * Design principle: Citations should be small superscript numbers, NOT italicized blockquotes.
    * Content should read like a normal research report with proper headings and body text.
    */
   SynthesisBlock: ({ element }) => {
     const props = element.props as SynthesisBlockProps;
-    const confidencePercent = Math.round(props.confidence * 100);
-
-    // Custom component to render <cite> tags as INLINE citation numbers
-    // NOT as italicized blockquotes - that makes content unreadable
-    const CitationRenderer = ({ index, children }: { index?: string; children?: React.ReactNode }) => {
-      // Parse index like "20-3,20-4,20-5" into source references
-      const indices = index?.split(',').map(i => i.trim().split('-')[0]).filter(Boolean) || [];
-      const uniqueIndices = [...new Set(indices)];
-
-      // Render the content as normal text with a small superscript citation number
-      return (
-        <span className="citation-inline">
-          {/* Content rendered as normal text - NO italics, NO blockquote styling */}
-          <span className="text-ink dark:text-paper">{children}</span>
-          {/* Citation number as small superscript */}
-          {uniqueIndices.length > 0 && (
-            <sup className="text-[10px] text-grove-forest font-mono ml-0.5 cursor-help" title={`Source: ${uniqueIndices.join(', ')}`}>
-              [{uniqueIndices.join(',')}]
-            </sup>
-          )}
-        </span>
-      );
-    };
 
     return (
       <article className="mb-6">
-        {/* Research content - proper document styling with CLEAR heading hierarchy */}
-        <div className="prose dark:prose-invert max-w-none
-          text-ink dark:text-paper text-[15px] leading-relaxed
-          prose-p:my-4 prose-p:text-ink dark:prose-p:text-paper/90
-          prose-ul:my-4 prose-ul:text-ink dark:prose-ul:text-paper/90
-          prose-ol:my-4
-          prose-li:my-1
-          prose-strong:text-ink dark:prose-strong:text-paper prose-strong:font-semibold
-          prose-em:text-ink dark:prose-em:text-paper/90
-          prose-blockquote:border-l-4 prose-blockquote:border-grove-forest/50
-          prose-blockquote:bg-grove-forest/5 dark:prose-blockquote:bg-grove-forest/10
-          prose-blockquote:pl-4 prose-blockquote:py-3 prose-blockquote:my-6 prose-blockquote:rounded-r
-          prose-blockquote:text-ink/90 dark:prose-blockquote:text-paper/80
-          prose-a:text-grove-forest hover:prose-a:underline
-          prose-code:text-sm prose-code:bg-ink/5 dark:prose-code:bg-white/10 prose-code:px-1 prose-code:rounded">
+        {/* Research content - full GroveSkins via markdownComponents */}
+        <div className="text-[15px] leading-relaxed">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
-            components={{
-              // Handle custom <cite> tags as inline citations
-              cite: ({ node, ...props }) => {
-                const indexAttr = (node?.properties?.index as string) || '';
-                return <CitationRenderer index={indexAttr}>{props.children}</CitationRenderer>;
-              },
-              // S22-WP: Custom heading components for CLEAR visual hierarchy
-              h1: ({ children }) => (
-                <h1 className="text-2xl font-serif font-bold text-ink dark:text-paper mt-8 mb-4 pb-3 border-b-2 border-grove-forest/30">
-                  {children}
-                </h1>
-              ),
-              h2: ({ children }) => (
-                <h2 className="text-xl font-serif font-semibold text-ink dark:text-paper mt-8 mb-3 pb-2 border-b border-ink/10 dark:border-white/10">
-                  {children}
-                </h2>
-              ),
-              h3: ({ children }) => (
-                <h3 className="text-lg font-serif font-semibold text-grove-forest dark:text-grove-forest mt-6 mb-2">
-                  {children}
-                </h3>
-              ),
-              h4: ({ children }) => (
-                <h4 className="text-base font-sans font-semibold text-ink dark:text-paper mt-4 mb-2">
-                  {children}
-                </h4>
-              ),
-            }}
+            components={markdownComponents}
           >
             {props.content}
           </ReactMarkdown>
@@ -363,15 +538,26 @@ export const EvidenceRegistry: ComponentRegistry = {
 
   /**
    * S22-WP: Confidence Note - Displays AI confidence assessment with rationale
-   * Shows the model's confidence level and explanation
    */
   ConfidenceNote: ({ element }) => {
     const props = element.props as ConfidenceNoteProps;
 
-    const levelColors = {
-      high: 'bg-grove-forest/10 text-grove-forest dark:bg-grove-forest/20 border-grove-forest/30',
-      medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-300',
-      low: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-300',
+    const levelStyles: Record<string, React.CSSProperties> = {
+      high: {
+        backgroundColor: 'color-mix(in srgb, var(--semantic-success) 15%, transparent)',
+        color: 'var(--semantic-success)',
+        borderColor: 'color-mix(in srgb, var(--semantic-success) 30%, transparent)',
+      },
+      medium: {
+        backgroundColor: 'color-mix(in srgb, var(--semantic-warning) 15%, transparent)',
+        color: 'var(--semantic-warning)',
+        borderColor: 'color-mix(in srgb, var(--semantic-warning) 30%, transparent)',
+      },
+      low: {
+        backgroundColor: 'color-mix(in srgb, var(--semantic-error) 15%, transparent)',
+        color: 'var(--semantic-error)',
+        borderColor: 'color-mix(in srgb, var(--semantic-error) 30%, transparent)',
+      },
     };
 
     const levelLabels = {
@@ -381,13 +567,19 @@ export const EvidenceRegistry: ComponentRegistry = {
     };
 
     return (
-      <div className={`mb-4 p-3 rounded-lg border ${levelColors[props.level]}`}>
+      <div
+        className="mb-4 p-3 rounded-lg border"
+        style={levelStyles[props.level] || levelStyles.medium}
+      >
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-mono font-semibold uppercase">
+          <span
+            className="text-xs font-semibold uppercase"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
             {levelLabels[props.level]}
           </span>
         </div>
-        <p className="text-sm opacity-90">
+        <p className="text-sm opacity-90" style={{ fontFamily: 'var(--font-body)' }}>
           {props.rationale}
         </p>
       </div>
@@ -401,20 +593,33 @@ export const EvidenceRegistry: ComponentRegistry = {
   LimitationsList: ({ element }) => {
     const props = element.props as LimitationsListProps;
 
-    if (!props.limitations || props.limitations.length === 0) {
+    // S22-WP: Defensive check - ensure limitations is actually an array
+    const limitations = Array.isArray(props.limitations) ? props.limitations : [];
+
+    if (limitations.length === 0) {
       return null;
     }
 
     return (
-      <div className="mb-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
-        <h4 className="text-xs font-mono text-amber-700 dark:text-amber-400 uppercase mb-2 font-semibold">
+      <div
+        className="mb-4 p-4 rounded-lg border"
+        style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning)' }}
+      >
+        <h4
+          className="text-xs uppercase mb-2 font-semibold"
+          style={{ color: 'var(--semantic-warning)', fontFamily: 'var(--font-mono)' }}
+        >
           Research Limitations
         </h4>
         <ul className="space-y-1">
-          {props.limitations.map((limitation, idx) => (
-            <li key={idx} className="flex gap-2 text-sm text-amber-800 dark:text-amber-300">
+          {limitations.map((limitation, idx) => (
+            <li
+              key={idx}
+              className="flex gap-2 text-sm"
+              style={{ color: 'var(--semantic-warning)', fontFamily: 'var(--font-body)' }}
+            >
               <span className="flex-shrink-0">⚠️</span>
-              <span>{limitation}</span>
+              <span>{typeof limitation === 'string' ? limitation : String(limitation)}</span>
             </li>
           ))}
         </ul>

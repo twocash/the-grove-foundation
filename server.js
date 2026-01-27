@@ -2536,7 +2536,14 @@ For each major claim:
 DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
 Your audience expects comprehensive, professional-grade research output.`;
 
-        const effectiveSystemPrompt = systemPrompt || defaultSystemPrompt;
+        // S25-SFR: Custom templates have short behavioral prompts (e.g. "Conduct exhaustive research")
+        // that lack formatting instructions. Append rendering rules ONLY to custom templates.
+        // The defaultSystemPrompt already works well — don't bloat it.
+        // TODO (PM): renderingRules should be a configurable field on output_templates
+        const renderingRulesDeep = `\n\nIMPORTANT: Use rich markdown formatting in all output — ## headers for sections, ### for subsections, bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Use <cite index="N">claim</cite> HTML tags for inline citations where N matches the source index. Your output will be rendered with a markdown engine.`;
+        const effectiveSystemPrompt = systemPrompt
+            ? systemPrompt + renderingRulesDeep
+            : defaultSystemPrompt;
 
         // ============================================================
         // S22-WP: STRUCTURED OUTPUT VIA TOOL USE
@@ -2642,7 +2649,7 @@ RESEARCH REQUIREMENTS:
         //
         // S22-WP: Added deliver_research_results tool for STRUCTURED OUTPUT
         // This enforces schema at API level - no regex cleanup needed!
-        const response = await anthropic.messages.create({
+        let response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: maxTokens,
             system: effectiveSystemPrompt,
@@ -2662,30 +2669,103 @@ RESEARCH REQUIREMENTS:
 
         console.log('[Research Deep] Response received, stop_reason:', response.stop_reason);
 
+        // S25-SFR: Handle pause_turn — Claude ran out of API turns doing web searches
+        // without calling deliver_research_results. Extract findings from the paused
+        // response and send a fresh synthesis request.
+        //
+        // WHY NOT multi-turn continuation? The paused response.content contains
+        // web_search tool_use blocks. Passing these as an assistant message requires
+        // matching web_search_tool_result blocks in a user message, but web_search is
+        // a server-side tool — results come back inline, not as separate tool_result
+        // turns. The API rejects the mismatch with a 400 error.
+        //
+        // SOLUTION: Extract text + search results as plain text context, then send a
+        // fresh single-turn request with only the deliver_research_results tool.
+        const allResponseContents = [response.content];
+
+        if (response.stop_reason === 'pause_turn') {
+            console.log('[Research Deep] pause_turn received — extracting findings for synthesis');
+
+            // Extract text content and web search results from the paused response
+            const textFindings = [];
+            const searchSources = [];
+
+            for (const block of response.content) {
+                if (block.type === 'text' && block.text) {
+                    textFindings.push(block.text);
+                } else if (block.type === 'web_search_tool_result' && block.content) {
+                    for (const result of block.content) {
+                        if (result.type === 'web_search_result') {
+                            searchSources.push(`- ${result.title} (${result.url})`);
+                        }
+                    }
+                }
+            }
+
+            console.log(`[Research Deep] Extracted ${textFindings.length} text blocks, ${searchSources.length} search sources`);
+
+            // Build a synthesis context from what Claude found so far
+            const synthesisContext = [
+                `RESEARCH FINDINGS SO FAR:\n${textFindings.join('\n\n')}`,
+                searchSources.length > 0
+                    ? `\nSOURCES FOUND:\n${searchSources.join('\n')}`
+                    : '',
+            ].filter(Boolean).join('\n');
+
+            // Fresh single-turn request: synthesize findings into structured output
+            // Only deliver_research_results tool — no more web searching needed
+            const synthesisResponse = await anthropic.messages.create({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: maxTokens,
+                system: effectiveSystemPrompt,
+                messages: [{
+                    role: 'user',
+                    content: `${userPrompt}\n\nYou have already completed your web research. Here are your findings:\n\n${synthesisContext}\n\nNow synthesize ALL of these findings into a comprehensive research report. Call the deliver_research_results tool with your structured output. Include ALL sources you found.`,
+                }],
+                tools: [deliverResearchResultsTool],
+                tool_choice: { type: 'tool', name: 'deliver_research_results' },
+            });
+
+            console.log('[Research Deep] Synthesis response stop_reason:', synthesisResponse.stop_reason);
+            allResponseContents.push(synthesisResponse.content);
+        }
+
         // ============================================================
         // S22-WP: STRUCTURED OUTPUT PARSING
         // Look for deliver_research_results tool call - no regex needed!
+        // S25-SFR: Collect from ALL responses (initial + continuations)
         // ============================================================
 
         let structuredResult = null;
         const webSearchResults = [];
 
-        for (const block of response.content) {
-            if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
-                // Found our structured output!
-                structuredResult = block.input;
-                console.log('[Research Deep] Structured output received:', structuredResult.title);
-            } else if (block.type === 'web_search_tool_result') {
-                // Collect web search results for reference
-                console.log('[Research Deep] Web search results found');
-                if (block.content && Array.isArray(block.content)) {
-                    for (const result of block.content) {
-                        if (result.type === 'web_search_result') {
-                            webSearchResults.push({
-                                url: result.url,
-                                title: result.title,
-                                page_age: result.page_age,
-                            });
+        for (const contentBlocks of allResponseContents) {
+            for (const block of contentBlocks) {
+                if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
+                    structuredResult = block.input;
+                    console.log('[Research Deep] Structured output received:', structuredResult.title);
+                    // S25-SFR: Diagnostic logging - capture actual types to debug string-vs-array issues
+                    console.log('[Research Deep] Structured output field types:', {
+                        title: typeof structuredResult.title,
+                        executive_summary: typeof structuredResult.executive_summary,
+                        sections: Array.isArray(structuredResult.sections) ? `array[${structuredResult.sections.length}]` : typeof structuredResult.sections,
+                        sources: Array.isArray(structuredResult.sources) ? `array[${structuredResult.sources.length}]` : typeof structuredResult.sources,
+                        key_findings: Array.isArray(structuredResult.key_findings) ? `array[${structuredResult.key_findings.length}]` : typeof structuredResult.key_findings,
+                        limitations: Array.isArray(structuredResult.limitations) ? `array[${structuredResult.limitations.length}]` : typeof structuredResult.limitations,
+                        sectionsLength: typeof structuredResult.sections === 'string' ? structuredResult.sections.length : 'N/A',
+                        sourcesLength: typeof structuredResult.sources === 'string' ? structuredResult.sources.length : 'N/A',
+                    });
+                } else if (block.type === 'web_search_tool_result') {
+                    console.log('[Research Deep] Web search results found');
+                    if (block.content && Array.isArray(block.content)) {
+                        for (const result of block.content) {
+                            if (result.type === 'web_search_result') {
+                                webSearchResults.push({
+                                    url: result.url,
+                                    title: result.title,
+                                    page_age: result.page_age,
+                                });
+                            }
                         }
                     }
                 }
@@ -2695,19 +2775,68 @@ RESEARCH REQUIREMENTS:
         // Build result from structured output
         if (structuredResult) {
             // S22-WP: Validate that sections and sources are arrays
-            // The API sometimes returns malformed data (string instead of array)
-            const sectionsArray = Array.isArray(structuredResult.sections) ? structuredResult.sections : [];
-            const sourcesArray = Array.isArray(structuredResult.sources) ? structuredResult.sources : [];
+            // S25-SFR: Claude sometimes returns strings instead of arrays.
+            // Try JSON.parse recovery, then content-aware wrapping, before falling back.
+            const recoverArray = (value, fieldName) => {
+                if (Array.isArray(value)) return value;
+                if (typeof value === 'string' && value.trim().length > 0) {
+                    // Attempt 1: Try JSON.parse (stringified JSON array)
+                    try {
+                        const parsed = JSON.parse(value);
+                        if (Array.isArray(parsed)) {
+                            console.log(`[Research Deep] Recovered ${fieldName} from JSON string (${parsed.length} items)`);
+                            return parsed;
+                        }
+                        // Parsed as object (not array) — wrap it
+                        if (parsed && typeof parsed === 'object') {
+                            console.log(`[Research Deep] Recovered ${fieldName} from JSON object, wrapping in array`);
+                            return [parsed];
+                        }
+                    } catch (e) {
+                        // Not valid JSON — try content-aware recovery
+                    }
+
+                    // Attempt 2: Content-aware wrapping for sections
+                    // Claude sometimes dumps markdown content as a flat string instead of [{heading, content}]
+                    if (fieldName === 'sections') {
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} was plain string (${value.length} chars), wrapping as single section`);
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} preview:`, value.substring(0, 200));
+                        return [{
+                            heading: 'Research Findings',
+                            content: value,
+                        }];
+                    }
+
+                    // Attempt 3: Content-aware wrapping for sources
+                    // Claude sometimes returns sources as descriptive text
+                    if (fieldName === 'sources') {
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} was plain string (${value.length} chars), attempting URL extraction`);
+                        console.warn(`[Research Deep] RECOVERY: ${fieldName} preview:`, value.substring(0, 200));
+                        // Try to extract URLs from the string
+                        const urlMatches = value.match(/https?:\/\/[^\s,)}\]"']+/g);
+                        if (urlMatches && urlMatches.length > 0) {
+                            console.log(`[Research Deep] RECOVERY: Extracted ${urlMatches.length} URLs from ${fieldName} string`);
+                            return urlMatches.map((url, idx) => ({
+                                index: idx + 1,
+                                title: url.split('/').pop()?.replace(/[-_]/g, ' ')?.slice(0, 60) || 'Source',
+                                url: url,
+                            }));
+                        }
+                        // No URLs found - return empty
+                        return [];
+                    }
+
+                    console.warn(`[Research Deep] WARNING: ${fieldName} was a non-JSON string (${value.length} chars), preview:`, value.substring(0, 200));
+                } else if (value != null && typeof value !== 'string') {
+                    console.warn(`[Research Deep] WARNING: ${fieldName} was unexpected type:`, typeof value);
+                }
+                return [];
+            };
+
+            const sectionsArray = recoverArray(structuredResult.sections, 'sections');
+            const sourcesArray = recoverArray(structuredResult.sources, 'sources');
 
             console.log('[Research Deep] Using structured output - sections:', sectionsArray.length, 'sources:', sourcesArray.length);
-
-            // Log a warning if we had to fix malformed data
-            if (!Array.isArray(structuredResult.sections)) {
-                console.warn('[Research Deep] WARNING: sections was not an array, type:', typeof structuredResult.sections);
-            }
-            if (!Array.isArray(structuredResult.sources)) {
-                console.warn('[Research Deep] WARNING: sources was not an array, type:', typeof structuredResult.sources);
-            }
 
             // S22-WP: CANONICAL STORAGE - Store 100% of what Claude returned
             // User requirement: "capture and cache 100% of what is returned from deep research"
@@ -2794,7 +2923,8 @@ RESEARCH REQUIREMENTS:
 
     } catch (error) {
         console.error('[Research Deep] Error:', error.message);
-        res.status(500).json({ error: error.message });
+        const statusCode = error.status || error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
@@ -2817,37 +2947,80 @@ app.post('/api/research/write', async (req, res) => {
         console.log('[Research Write] Query:', query.substring(0, 100) + '...');
         console.log('[Research Write] Voice config:', voiceConfig);
 
-        const writePrompt = `You are a writing agent. Transform research evidence into a polished document.
+        // ============================================================
+        // S25-SFR: Writer prompt architecture
+        //
+        // TWO LAYERS (will become configurable objects — PM follow-up):
+        //   1. APPROACH PROMPT  — from output_templates.systemPrompt (received as `query`)
+        //      Controls: research angle, voice, structure, what to focus on
+        //   2. RENDERING RULES  — appended formatting instructions
+        //      Controls: how the LLM formats output for our ReactMarkdown renderer
+        //
+        // TODO (PM): Both layers should be configurable per template type.
+        //   - Approach = output_templates.systemPrompt (already configurable)
+        //   - Rendering = new `renderingInstructions` field on output_templates
+        //   - Voice config = already in WriterAgentConfigPayload schema
+        //   See: src/core/schema/writer-agent-config.ts
+        //   See: src/core/schema/research-agent-config.ts
+        //   See: data/seeds/output-templates.json
+        // ============================================================
 
-VOICE STYLE:
-- Formality: ${voiceConfig?.formality || 'professional'}
-- Perspective: ${voiceConfig?.perspective || 'neutral'}
-- Citation style: ${voiceConfig?.citationStyle || 'inline'}
+        // Layer 1: Approach prompt — the template's systemPrompt drives research approach
+        // (received as `query` from writer-agent.ts callLLMForWriting)
+        const approachPrompt = query;
 
-ORIGINAL QUESTION: ${query}
+        // Layer 2: Rendering rules — how output should be formatted for GroveSkins
+        const renderingRules = `
 
-RESEARCH EVIDENCE:
-${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}
+## Rendering Rules (ReactMarkdown + GFM)
+Your output will be rendered by a markdown engine. Use rich formatting:
 
-Write a cohesive document that:
-1. Opens with a clear position/thesis
-2. Synthesizes the evidence naturally
-3. Uses the specified voice throughout
-4. Includes proper citations with [n] notation
-5. Notes limitations honestly
+- **Section headers**: Use ## for major sections, ### for subsections
+- **Bold key terms**: Wrap important concepts in **bold**
+- **Bullet lists**: Use - for unordered lists of key findings
+- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
+- **Tables**: Use GFM markdown tables for comparisons or structured data
+- **Blockquotes**: Use > for notable quotes from sources
+- **Inline citations**: Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index. Example: <cite index="1">GPU inference improved 10x</cite>
 
-Format your response as JSON:
+## Document Structure
+1. Open with a clear thesis/position (2-3 sentences)
+2. Use ## headers to organize analysis into 3-5 logical sections
+3. Each section should have substantive content with specific data and evidence
+4. Close with a synthesis or forward-looking conclusion
+5. Note limitations honestly
+
+## Output Format
+Return valid JSON:
 {
   "position": "1-3 sentence thesis statement",
-  "analysis": "Full markdown document with [n] citations inline",
+  "analysis": "Full markdown document with ## sections, **bold**, lists, tables, and <cite index=\\"N\\">...</cite> tags",
   "limitations": "Honest limitations of this analysis",
   "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
 }`;
 
+        // Compose: approach + voice + rendering rules
+        const writerSystemPrompt = `You are a senior research writer.
+
+## Approach
+${approachPrompt}
+
+## Voice
+- Formality: ${voiceConfig?.formality || 'professional'}
+- Perspective: ${voiceConfig?.perspective || 'neutral'}
+- Citation style: ${voiceConfig?.citationStyle || 'inline'}
+${renderingRules}`;
+
+        const userPrompt = `## Evidence
+${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}
+
+Transform this evidence into a structured research document following your approach and rendering guidelines. Return valid JSON.`;
+
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
-            messages: [{ role: 'user', content: writePrompt }],
+            max_tokens: 8192,
+            system: writerSystemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
         });
 
         const text = response.content[0].text;

@@ -1,0 +1,75 @@
+{
+  "id": "elegant-modern-v1",
+  "name": "Elegant Modern",
+  "colorScheme": "light",
+  "provenance": {
+    "authorId": "system",
+    "authorType": "system",
+    "createdAt": "2026-01-24T00:00:00Z",
+    "source": "S24-EMT",
+    "version": "1.0.0"
+  },
+  "tokens": {
+    "colors": {
+      "void": "#F9F8F6",
+      "panel": "#FCFCFA",
+      "solid": "#FFFFFF",
+      "elevated": "#FFFFFF",
+      "border": "rgba(0, 0, 0, 0.08)",
+      "foreground": "#111111",
+      "muted": "#595959",
+      "accent": "#C66B3D",
+      "primary": "#0F4C5C",
+      "semantic": {
+        "success": "#2E7D32",
+        "successBg": "#E8F5E9",
+        "successBorder": "#C8E6C9",
+        "warning": "#ED6C02",
+        "warningBg": "#FFF3E0",
+        "warningBorder": "#FFE0B2",
+        "error": "#D32F2F",
+        "errorBg": "#FFEBEE",
+        "errorBorder": "#FFCDD2",
+        "info": "#0288D1",
+        "infoBg": "#E1F5FE",
+        "infoBorder": "#B3E5FC",
+        "accentSecondary": "#C66B3D",
+        "accentSecondaryBg": "rgba(198, 107, 61, 0.08)",
+        "accentSecondaryBorder": "rgba(198, 107, 61, 0.2)"
+      }
+    },
+    "effects": {
+      "blur": "0px",
+      "radius": "8px",
+      "glow": "0 2px 8px rgba(0, 0, 0, 0.04)"
+    },
+    "typography": {
+      "display": {
+        "family": "'Playfair Display', Georgia, serif",
+        "weight": "700",
+        "tracking": "-0.02em"
+      },
+      "heading": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "600",
+        "tracking": "-0.01em"
+      },
+      "body": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "400"
+      },
+      "mono": {
+        "family": "'Fira Code', monospace",
+        "weight": "400"
+      },
+      "ui": {
+        "family": "'Inter', -apple-system, sans-serif",
+        "weight": "500"
+      }
+    }
+  },
+  "layout": {
+    "density": "comfortable",
+    "spacingScale": 1.0
+  }
+}

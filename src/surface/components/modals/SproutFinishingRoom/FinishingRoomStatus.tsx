@@ -46,32 +46,32 @@ export const FinishingRoomStatus: React.FC<FinishingRoomStatusProps> = ({
   );
 
   return (
-    <footer className="flex items-center justify-between px-4 py-2 border-t border-ink/10 dark:border-white/10 bg-paper/30 dark:bg-ink/30 text-xs font-mono">
+    <footer className="flex items-center justify-between px-4 py-2 border-t border-[var(--glass-border)] text-xs font-mono" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>
       {/* Left: Version tag */}
-      <span className="text-ink-muted dark:text-paper/50">
+      <span className="text-[var(--glass-text-muted)]">
         SPROUT.FINISHING.v1
       </span>
 
       {/* Center: Status and timestamp */}
-      <div className="flex items-center gap-4 text-ink-muted dark:text-paper/60">
+      <div className="flex items-center gap-4 text-[var(--glass-text-muted)]">
         <span>
-          Status: <span className="text-ink dark:text-paper font-medium">{displayStatus}</span>
+          Status: <span className="text-[var(--glass-text-primary)] font-medium">{displayStatus}</span>
         </span>
         <span>
-          Created: <span className="text-ink dark:text-paper font-medium">{relativeTime}</span>
+          Created: <span className="text-[var(--glass-text-primary)] font-medium">{relativeTime}</span>
         </span>
       </div>
 
-      {/* Right: Health indicator (green pulse) */}
+      {/* Right: Health indicator (semantic success pulse) */}
       <div
         className="relative w-3 h-3"
         aria-label="System healthy"
         role="status"
       >
         {/* Pulse ring animation */}
-        <span className="absolute inset-0 rounded-full bg-green-500/30 animate-ping" />
+        <span className="absolute inset-0 rounded-full animate-ping opacity-30" style={{ backgroundColor: 'var(--semantic-success)' }} />
         {/* Solid dot */}
-        <span className="absolute inset-0 rounded-full bg-green-500" />
+        <span className="absolute inset-0 rounded-full" style={{ backgroundColor: 'var(--semantic-success)' }} />
       </div>
     </footer>
   );
