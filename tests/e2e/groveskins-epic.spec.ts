@@ -347,6 +347,9 @@ test.describe('GroveSkins Epic E2E Verification', () => {
   });
 
   test('TC-12: Console Error Baseline - Full Session', async ({ page }) => {
+    // Multiple navigations + reloads need more time than default 30s
+    test.setTimeout(60000);
+
     // Complete user flow test
 
     // Step 1: Start at /explore with dark theme

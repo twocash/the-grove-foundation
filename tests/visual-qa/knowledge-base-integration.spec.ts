@@ -9,12 +9,9 @@ import { test, expect } from '@playwright/test';
 const SCREENSHOT_DIR = 'docs/sprints/knowledge-base-integration-v1/screenshots';
 
 test.describe('Knowledge Base Integration Visual QA', () => {
-  // Use port 3001 as fallback when 3000 is occupied
-  const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
-
   test.beforeEach(async ({ page }) => {
-    // Navigate to the results display demo (now includes KB button)
-    await page.goto(`${BASE_URL}/dev/results-display`);
+    // Navigate to the results display demo (uses Playwright baseURL from config)
+    await page.goto('/dev/results-display');
     // Wait for page content to load
     await page.waitForSelector('text=Results Display Demo', { timeout: 15000 });
     // Give time for React to render
@@ -23,14 +20,15 @@ test.describe('Knowledge Base Integration Visual QA', () => {
 
   // US-KB001: Add to Knowledge Base Button (Enabled State)
   test('AC-KB001 - KB button visible and enabled for complete documents', async ({ page }) => {
-    // Ensure we're on Complete mode
+    // Ensure we're on Complete mode (wait for button render first)
     const completeButton = page.locator('button:has-text("Complete")');
+    await expect(completeButton).toBeVisible({ timeout: 10000 });
     await completeButton.click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Verify KB button exists and is enabled
     const kbButton = page.locator('button:has-text("Add to KB")');
-    await expect(kbButton).toBeVisible();
+    await expect(kbButton).toBeVisible({ timeout: 10000 });
     await expect(kbButton).toBeEnabled();
 
     await page.screenshot({

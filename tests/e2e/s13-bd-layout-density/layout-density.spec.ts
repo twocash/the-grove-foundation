@@ -219,8 +219,9 @@ test.describe('S13-BD-LayoutDensity: Visual Density Comparison', () => {
     await expect(jsonRenderRoot).toBeVisible({ timeout: 10000 });
 
     // Take screenshot showing spacing consistency
-    await jsonRenderRoot.screenshot({
+    await page.screenshot({
       path: path.join(SCREENSHOT_DIR, '10-renderer-consistent-spacing.png'),
+      fullPage: true,
     });
   });
 });

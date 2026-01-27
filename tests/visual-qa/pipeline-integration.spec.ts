@@ -59,17 +59,16 @@ test.describe('Pipeline Integration v1 - Visual Verification', () => {
   test('03 - KineticHeader context pills present', async ({ page }) => {
     console.log('Testing header context elements...');
 
-    // Look for header with lens/journey context pills
-    const header = page.locator('header, [class*="header"], [class*="Header"]').first();
-    const hasHeader = await header.count() > 0;
+    // Look for header element (KineticHeader renders <header> tag)
+    const header = page.locator('header').first();
+    await expect(header).toBeVisible({ timeout: 10000 });
 
     await page.screenshot({
       path: `${SCREENSHOT_DIR}/03-progress-area.png`,
       fullPage: false,
     });
 
-    console.log(`Header present: ${hasHeader}`);
-    expect(hasHeader).toBe(true);
+    console.log('Header present: true');
   });
 
   test('04 - Stream area ready for pipeline output', async ({ page }) => {

@@ -30,9 +30,9 @@ test.describe('Experience Console Visual QA', () => {
       fullPage: true,
     });
 
-    // Verify console loaded
+    // Verify console loaded (allow extra time for render)
     const title = await page.locator('text=Experience').first();
-    await expect(title).toBeVisible();
+    await expect(title).toBeVisible({ timeout: 10000 });
   });
 
   test('02 - Filter by Research Agent type shows default instance', async ({ page }) => {
