@@ -2537,10 +2537,12 @@ DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
 Your audience expects comprehensive, professional-grade research output.`;
 
         // S25-SFR: Custom templates have short behavioral prompts (e.g. "Conduct exhaustive research")
-        // that lack formatting instructions. Append formatting rules ONLY to custom templates.
+        // that lack formatting instructions. Append rendering rules ONLY to custom templates.
         // The defaultSystemPrompt already works well — don't bloat it.
+        // TODO (PM): renderingRules should be a configurable field on output_templates
+        const renderingRulesDeep = `\n\nIMPORTANT: Use rich markdown formatting in all output — ## headers for sections, ### for subsections, bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Use <cite index="N">claim</cite> HTML tags for inline citations where N matches the source index. Your output will be rendered with a markdown engine.`;
         const effectiveSystemPrompt = systemPrompt
-            ? systemPrompt + `\n\nIMPORTANT: Use rich markdown formatting in all output — bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Your output will be rendered with a markdown engine.`
+            ? systemPrompt + renderingRulesDeep
             : defaultSystemPrompt;
 
         // ============================================================
@@ -2945,37 +2947,80 @@ app.post('/api/research/write', async (req, res) => {
         console.log('[Research Write] Query:', query.substring(0, 100) + '...');
         console.log('[Research Write] Voice config:', voiceConfig);
 
-        const writePrompt = `You are a writing agent. Transform research evidence into a polished document.
+        // ============================================================
+        // S25-SFR: Writer prompt architecture
+        //
+        // TWO LAYERS (will become configurable objects — PM follow-up):
+        //   1. APPROACH PROMPT  — from output_templates.systemPrompt (received as `query`)
+        //      Controls: research angle, voice, structure, what to focus on
+        //   2. RENDERING RULES  — appended formatting instructions
+        //      Controls: how the LLM formats output for our ReactMarkdown renderer
+        //
+        // TODO (PM): Both layers should be configurable per template type.
+        //   - Approach = output_templates.systemPrompt (already configurable)
+        //   - Rendering = new `renderingInstructions` field on output_templates
+        //   - Voice config = already in WriterAgentConfigPayload schema
+        //   See: src/core/schema/writer-agent-config.ts
+        //   See: src/core/schema/research-agent-config.ts
+        //   See: data/seeds/output-templates.json
+        // ============================================================
 
-VOICE STYLE:
-- Formality: ${voiceConfig?.formality || 'professional'}
-- Perspective: ${voiceConfig?.perspective || 'neutral'}
-- Citation style: ${voiceConfig?.citationStyle || 'inline'}
+        // Layer 1: Approach prompt — the template's systemPrompt drives research approach
+        // (received as `query` from writer-agent.ts callLLMForWriting)
+        const approachPrompt = query;
 
-ORIGINAL QUESTION: ${query}
+        // Layer 2: Rendering rules — how output should be formatted for GroveSkins
+        const renderingRules = `
 
-RESEARCH EVIDENCE:
-${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}
+## Rendering Rules (ReactMarkdown + GFM)
+Your output will be rendered by a markdown engine. Use rich formatting:
 
-Write a cohesive document that:
-1. Opens with a clear position/thesis
-2. Synthesizes the evidence naturally
-3. Uses the specified voice throughout
-4. Includes proper citations with [n] notation
-5. Notes limitations honestly
+- **Section headers**: Use ## for major sections, ### for subsections
+- **Bold key terms**: Wrap important concepts in **bold**
+- **Bullet lists**: Use - for unordered lists of key findings
+- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
+- **Tables**: Use GFM markdown tables for comparisons or structured data
+- **Blockquotes**: Use > for notable quotes from sources
+- **Inline citations**: Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index. Example: <cite index="1">GPU inference improved 10x</cite>
 
-Format your response as JSON:
+## Document Structure
+1. Open with a clear thesis/position (2-3 sentences)
+2. Use ## headers to organize analysis into 3-5 logical sections
+3. Each section should have substantive content with specific data and evidence
+4. Close with a synthesis or forward-looking conclusion
+5. Note limitations honestly
+
+## Output Format
+Return valid JSON:
 {
   "position": "1-3 sentence thesis statement",
-  "analysis": "Full markdown document with [n] citations inline",
+  "analysis": "Full markdown document with ## sections, **bold**, lists, tables, and <cite index=\\"N\\">...</cite> tags",
   "limitations": "Honest limitations of this analysis",
   "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
 }`;
 
+        // Compose: approach + voice + rendering rules
+        const writerSystemPrompt = `You are a senior research writer.
+
+## Approach
+${approachPrompt}
+
+## Voice
+- Formality: ${voiceConfig?.formality || 'professional'}
+- Perspective: ${voiceConfig?.perspective || 'neutral'}
+- Citation style: ${voiceConfig?.citationStyle || 'inline'}
+${renderingRules}`;
+
+        const userPrompt = `## Evidence
+${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}
+
+Transform this evidence into a structured research document following your approach and rendering guidelines. Return valid JSON.`;
+
         const response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
-            max_tokens: 4096,
-            messages: [{ role: 'user', content: writePrompt }],
+            max_tokens: 8192,
+            system: writerSystemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
         });
 
         const text = response.content[0].text;
