@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
 import type { RenderElement } from '@core/json-render';
 import type {
   EvidenceHeaderProps,
@@ -326,6 +327,7 @@ export const EvidenceRegistry: ComponentRegistry = {
         {/* S23-SFR: Removed broken Tailwind prose modifiers, using CSS rules instead */}
         <div className="prose max-w-none text-[15px] leading-relaxed">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw]}
             components={{
               // Handle custom <cite> tags as inline citations

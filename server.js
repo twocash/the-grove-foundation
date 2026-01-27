@@ -2536,7 +2536,12 @@ For each major claim:
 DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
 Your audience expects comprehensive, professional-grade research output.`;
 
-        const effectiveSystemPrompt = systemPrompt || defaultSystemPrompt;
+        // S25-SFR: Custom templates have short behavioral prompts (e.g. "Conduct exhaustive research")
+        // that lack formatting instructions. Append formatting rules ONLY to custom templates.
+        // The defaultSystemPrompt already works well — don't bloat it.
+        const effectiveSystemPrompt = systemPrompt
+            ? systemPrompt + `\n\nIMPORTANT: Use rich markdown formatting in all output — bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Your output will be rendered with a markdown engine.`
+            : defaultSystemPrompt;
 
         // ============================================================
         // S22-WP: STRUCTURED OUTPUT VIA TOOL USE
@@ -2642,7 +2647,7 @@ RESEARCH REQUIREMENTS:
         //
         // S22-WP: Added deliver_research_results tool for STRUCTURED OUTPUT
         // This enforces schema at API level - no regex cleanup needed!
-        const response = await anthropic.messages.create({
+        let response = await anthropic.messages.create({
             model: 'claude-sonnet-4-20250514',
             max_tokens: maxTokens,
             system: effectiveSystemPrompt,
@@ -2662,30 +2667,92 @@ RESEARCH REQUIREMENTS:
 
         console.log('[Research Deep] Response received, stop_reason:', response.stop_reason);
 
+        // S25-SFR: Handle pause_turn — Claude ran out of API turns doing web searches
+        // without calling deliver_research_results. Extract findings from the paused
+        // response and send a fresh synthesis request.
+        //
+        // WHY NOT multi-turn continuation? The paused response.content contains
+        // web_search tool_use blocks. Passing these as an assistant message requires
+        // matching web_search_tool_result blocks in a user message, but web_search is
+        // a server-side tool — results come back inline, not as separate tool_result
+        // turns. The API rejects the mismatch with a 400 error.
+        //
+        // SOLUTION: Extract text + search results as plain text context, then send a
+        // fresh single-turn request with only the deliver_research_results tool.
+        const allResponseContents = [response.content];
+
+        if (response.stop_reason === 'pause_turn') {
+            console.log('[Research Deep] pause_turn received — extracting findings for synthesis');
+
+            // Extract text content and web search results from the paused response
+            const textFindings = [];
+            const searchSources = [];
+
+            for (const block of response.content) {
+                if (block.type === 'text' && block.text) {
+                    textFindings.push(block.text);
+                } else if (block.type === 'web_search_tool_result' && block.content) {
+                    for (const result of block.content) {
+                        if (result.type === 'web_search_result') {
+                            searchSources.push(`- ${result.title} (${result.url})`);
+                        }
+                    }
+                }
+            }
+
+            console.log(`[Research Deep] Extracted ${textFindings.length} text blocks, ${searchSources.length} search sources`);
+
+            // Build a synthesis context from what Claude found so far
+            const synthesisContext = [
+                `RESEARCH FINDINGS SO FAR:\n${textFindings.join('\n\n')}`,
+                searchSources.length > 0
+                    ? `\nSOURCES FOUND:\n${searchSources.join('\n')}`
+                    : '',
+            ].filter(Boolean).join('\n');
+
+            // Fresh single-turn request: synthesize findings into structured output
+            // Only deliver_research_results tool — no more web searching needed
+            const synthesisResponse = await anthropic.messages.create({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: maxTokens,
+                system: effectiveSystemPrompt,
+                messages: [{
+                    role: 'user',
+                    content: `${userPrompt}\n\nYou have already completed your web research. Here are your findings:\n\n${synthesisContext}\n\nNow synthesize ALL of these findings into a comprehensive research report. Call the deliver_research_results tool with your structured output. Include ALL sources you found.`,
+                }],
+                tools: [deliverResearchResultsTool],
+                tool_choice: { type: 'tool', name: 'deliver_research_results' },
+            });
+
+            console.log('[Research Deep] Synthesis response stop_reason:', synthesisResponse.stop_reason);
+            allResponseContents.push(synthesisResponse.content);
+        }
+
         // ============================================================
         // S22-WP: STRUCTURED OUTPUT PARSING
         // Look for deliver_research_results tool call - no regex needed!
+        // S25-SFR: Collect from ALL responses (initial + continuations)
         // ============================================================
 
         let structuredResult = null;
         const webSearchResults = [];
 
-        for (const block of response.content) {
-            if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
-                // Found our structured output!
-                structuredResult = block.input;
-                console.log('[Research Deep] Structured output received:', structuredResult.title);
-            } else if (block.type === 'web_search_tool_result') {
-                // Collect web search results for reference
-                console.log('[Research Deep] Web search results found');
-                if (block.content && Array.isArray(block.content)) {
-                    for (const result of block.content) {
-                        if (result.type === 'web_search_result') {
-                            webSearchResults.push({
-                                url: result.url,
-                                title: result.title,
-                                page_age: result.page_age,
-                            });
+        for (const contentBlocks of allResponseContents) {
+            for (const block of contentBlocks) {
+                if (block.type === 'tool_use' && block.name === 'deliver_research_results') {
+                    structuredResult = block.input;
+                    console.log('[Research Deep] Structured output received:', structuredResult.title);
+                } else if (block.type === 'web_search_tool_result') {
+                    console.log('[Research Deep] Web search results found');
+                    if (block.content && Array.isArray(block.content)) {
+                        for (const result of block.content) {
+                            if (result.type === 'web_search_result') {
+                                webSearchResults.push({
+                                    url: result.url,
+                                    title: result.title,
+                                    page_age: result.page_age,
+                                });
+                            }
                         }
                     }
                 }
@@ -2695,19 +2762,31 @@ RESEARCH REQUIREMENTS:
         // Build result from structured output
         if (structuredResult) {
             // S22-WP: Validate that sections and sources are arrays
-            // The API sometimes returns malformed data (string instead of array)
-            const sectionsArray = Array.isArray(structuredResult.sections) ? structuredResult.sections : [];
-            const sourcesArray = Array.isArray(structuredResult.sources) ? structuredResult.sources : [];
+            // S25-SFR: Claude sometimes returns strings instead of arrays.
+            // Try JSON.parse recovery before falling back to empty array.
+            const recoverArray = (value, fieldName) => {
+                if (Array.isArray(value)) return value;
+                if (typeof value === 'string') {
+                    try {
+                        const parsed = JSON.parse(value);
+                        if (Array.isArray(parsed)) {
+                            console.log(`[Research Deep] Recovered ${fieldName} from JSON string (${parsed.length} items)`);
+                            return parsed;
+                        }
+                    } catch (e) {
+                        // Not valid JSON — fall through
+                    }
+                    console.warn(`[Research Deep] WARNING: ${fieldName} was a non-JSON string, type:`, typeof value);
+                } else if (value != null) {
+                    console.warn(`[Research Deep] WARNING: ${fieldName} was unexpected type:`, typeof value);
+                }
+                return [];
+            };
+
+            const sectionsArray = recoverArray(structuredResult.sections, 'sections');
+            const sourcesArray = recoverArray(structuredResult.sources, 'sources');
 
             console.log('[Research Deep] Using structured output - sections:', sectionsArray.length, 'sources:', sourcesArray.length);
-
-            // Log a warning if we had to fix malformed data
-            if (!Array.isArray(structuredResult.sections)) {
-                console.warn('[Research Deep] WARNING: sections was not an array, type:', typeof structuredResult.sections);
-            }
-            if (!Array.isArray(structuredResult.sources)) {
-                console.warn('[Research Deep] WARNING: sources was not an array, type:', typeof structuredResult.sources);
-            }
 
             // S22-WP: CANONICAL STORAGE - Store 100% of what Claude returned
             // User requirement: "capture and cache 100% of what is returned from deep research"
@@ -2794,7 +2873,8 @@ RESEARCH REQUIREMENTS:
 
     } catch (error) {
         console.error('[Research Deep] Error:', error.message);
-        res.status(500).json({ error: error.message });
+        const statusCode = error.status || error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 

@@ -303,7 +303,12 @@ export function createResearchAgent(
               });
 
               if (!response.ok) {
-                throw new Error(`API error: ${response.status} ${response.statusText}`);
+                let serverMsg = response.statusText;
+                try {
+                  const errBody = await response.json();
+                  if (errBody?.error) serverMsg = errBody.error;
+                } catch { /* ignore parse failures */ }
+                throw new Error(`API error: ${response.status} — ${serverMsg}`);
               }
 
               const result = await response.json();

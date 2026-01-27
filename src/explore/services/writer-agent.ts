@@ -260,7 +260,7 @@ async function callLLMForWriting(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('[WriterAgent] API error:', errorData);
-      throw new Error(errorData.message || `API error: ${response.status}`);
+      throw new Error(errorData.error || errorData.message || `API error: ${response.status}`);
     }
 
     const result = await response.json();
