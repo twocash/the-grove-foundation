@@ -2,7 +2,7 @@
 // Three-column modal workspace for inspecting and refining research artifacts
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import type { Sprout } from '@core/schema/sprout';
+import type { Sprout, GeneratedArtifact } from '@core/schema/sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
 import { useEngagementEmit } from '../../../../../hooks/useEngagementBus';
 import { useSproutStorage } from '../../../../../hooks/useSproutStorage';
@@ -16,16 +16,8 @@ import { ActionPanel } from './ActionPanel';
 import { promoteToGarden } from './garden-bridge';
 import type { PromotionResult, PromotionError } from './garden-bridge';
 
-/**
- * S23-SFR v1.0: Generated artifact tracked in local state
- * Each generation creates a new version tab in DocumentViewer
- */
-export interface GeneratedArtifact {
-  document: ResearchDocument;
-  templateId: string;
-  templateName: string;
-  generatedAt: string;
-}
+// Re-export GeneratedArtifact from schema for consumers that imported from here
+export type { GeneratedArtifact } from '@core/schema/sprout';
 
 export interface SproutFinishingRoomProps {
   sprout: Sprout;
@@ -57,15 +49,19 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   const signals = useSproutSignals();
   const toast = useToast();
 
-  // S23-SFR v1.0: Track generated artifacts for version tabs
-  const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
+  // S25-GSE: Restore persisted artifacts from sprout, track in state for version tabs
+  const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>(
+    () => sprout.generatedArtifacts || []
+  );
   // null = show research, number = show that artifact's version tab
-  const [activeArtifactIndex, setActiveArtifactIndex] = useState<number | null>(null);
+  const [activeArtifactIndex, setActiveArtifactIndex] = useState<number | null>(
+    () => (sprout.generatedArtifacts?.length ?? 0) > 0 ? 0 : null
+  );
   // S24-SFR: Garden promotion state
   const [promotionResult, setPromotionResult] = useState<PromotionResult | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
 
-  // S23-SFR v1.0: Called when ActionPanel generates a new document
+  // S25-GSE: Called when ActionPanel generates a new document — persist to sprout
   const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
     const artifact: GeneratedArtifact = {
       document,
@@ -77,9 +73,11 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
       const next = [...prev, artifact];
       // Auto-switch to the newly generated version tab
       setActiveArtifactIndex(next.length - 1);
+      // Persist full artifact history to sprout (survives modal close + page refresh)
+      updateSprout(sprout.id, { generatedArtifacts: next });
       return next;
     });
-  }, []);
+  }, [sprout.id, updateSprout]);
 
   // S24-SFR: Promote artifact to Garden (two-step: upload + provenance patch)
   const handlePromoteToGarden = useCallback(async (document: ResearchDocument) => {

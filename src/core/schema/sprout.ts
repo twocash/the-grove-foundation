@@ -4,9 +4,30 @@
 // v3: Adds 8-stage botanical lifecycle and ResearchManifest support
 // v3.1: Adds optional ResearchDocument for structured research display (S2-SFR-Display)
 // v3.2: Adds CanonicalResearch for 100% structured output capture (S22-WP)
+// v3.3: Adds generatedArtifacts[] for persistent artifact history (S25-GSE)
 
 import type { ResearchDocument } from './research-document';
 import type { ResearchBranch, Evidence } from './research-strategy';
+
+// ─────────────────────────────────────────────────────────────
+// Generated Artifacts (S25-GSE: Persistent artifact history)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * A generated artifact from the Writer agent, persisted on the sprout.
+ * Each generation (Blog Post, Vision Paper, etc.) creates one entry.
+ * Survives modal close and page refresh via localStorage.
+ */
+export interface GeneratedArtifact {
+  /** The full research document output */
+  document: ResearchDocument;
+  /** Writer template ID used to generate this artifact */
+  templateId: string;
+  /** Human-readable template name */
+  templateName: string;
+  /** ISO timestamp of generation */
+  generatedAt: string;
+}
 
 // ─────────────────────────────────────────────────────────────
 // Canonical Research (S22-WP: Structured Output Architecture)
@@ -198,6 +219,9 @@ export interface Sprout {
 
   /** Structured research document for json-render display (S2-SFR-Display) */
   researchDocument?: ResearchDocument;
+
+  /** All generated artifacts, persisted across modal sessions (S25-GSE) */
+  generatedArtifacts?: GeneratedArtifact[];
 
   // ─────────────────────────────────────────────────────────────
   // Canonical Research (S22-WP: Structured Output Architecture)
