@@ -336,7 +336,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
             style={{
               backgroundColor: isPromoting ? 'var(--glass-elevated)' : 'var(--semantic-success, #10b981)',
-              color: isPromoting ? 'var(--glass-text-muted)' : 'var(--glass-text-primary, #ffffff)',
+              color: isPromoting ? 'var(--glass-text-muted)' : '#ffffff',
             }}
           >
             {isPromoting ? 'Promoting...' : 'Promote to Garden'}
