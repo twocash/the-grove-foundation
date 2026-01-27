@@ -307,8 +307,8 @@
 
   --color-grove-cream: #F9F8F4;
   --color-grove-dark: #1A2421;
-  --color-grove-forest: #355E3B;
-  --color-grove-accent: #355E3B;
+  --color-grove-forest: #2F5C3B;
+  --color-grove-accent: #2F5C3B;
   --color-grove-clay: #D95D39;
   --color-grove-light: #E5E5E0;
 
@@ -1136,8 +1136,7 @@ body {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   border-radius: 4px;
 }
 
@@ -1328,8 +1327,7 @@ body {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.05em;
   color: var(--glass-text-subtle);
 }
 

@@ -4,6 +4,7 @@
 
 import type { ConsoleConfig } from '../../types/console.types';
 import { getExperienceTypeDefinition } from '../../types/experience.types';
+import { themeColor } from '../../config/themeColors';
 
 // Get definition from registry (DEX: Organic Scalability)
 const featureFlagDef = getExperienceTypeDefinition('feature-flag');
@@ -75,10 +76,10 @@ export const featureFlagConsoleConfig: ConsoleConfig = {
 
 // Category configuration for display
 export const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  experience: { label: 'Experience', icon: 'explore', color: '#2F5C3B' },
-  research: { label: 'Research', icon: 'science', color: '#7E57C2' },
-  experimental: { label: 'Experimental', icon: 'labs', color: '#D95D39' },
-  internal: { label: 'Internal', icon: 'settings', color: '#526F8A' },
+  experience: { label: 'Experience', icon: 'explore', color: themeColor.experience },
+  research: { label: 'Research', icon: 'science', color: themeColor.research },
+  experimental: { label: 'Experimental', icon: 'labs', color: themeColor.experimental },
+  internal: { label: 'Internal', icon: 'settings', color: themeColor.internal },
 };
 
 export default featureFlagConsoleConfig;

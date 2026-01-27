@@ -46,7 +46,7 @@ const markdownComponents = {
   h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h4
       style={{ color: 'var(--glass-text-secondary)', fontFamily: 'var(--font-heading)' }}
-      className="text-sm font-semibold mt-3 mb-1 uppercase tracking-wide"
+      className="text-sm font-semibold mt-3 mb-1 tracking-wide"
       {...props}
     />
   ),
@@ -190,7 +190,7 @@ export const ResearchRegistry: ComponentRegistry = {
           {props.position}
         </h1>
         <p className="text-sm text-[var(--glass-text-muted)]">
-          <span className="font-mono text-xs uppercase mr-2">Query:</span>
+          <span className="font-mono text-xs mr-2">Query:</span>
           {props.query}
         </p>
       </header>
@@ -218,7 +218,7 @@ export const ResearchRegistry: ComponentRegistry = {
     const props = element.props as SourceListProps;
     return (
       <section className="mb-6">
-        <h3 className="text-sm font-mono text-[var(--glass-text-muted)] uppercase mb-3">
+        <h3 className="text-sm font-mono text-[var(--glass-text-muted)] mb-3">
           Sources
         </h3>
         <ul className="space-y-2">
@@ -253,7 +253,7 @@ export const ResearchRegistry: ComponentRegistry = {
     const props = element.props as LimitationsBlockProps;
     return (
       <aside className="mb-6 p-3 rounded border-l-2" style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning)' }}>
-        <h3 className="text-sm font-mono uppercase mb-2" style={{ color: 'var(--semantic-warning)' }}>
+        <h3 className="text-sm font-mono mb-2" style={{ color: 'var(--semantic-warning)' }}>
           Limitations
         </h3>
         <p className="text-sm text-[var(--glass-text-muted)]">

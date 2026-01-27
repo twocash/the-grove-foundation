@@ -172,28 +172,29 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
 
   return (
     <div
-      className={`
-        pointer-events-auto
-        max-w-sm w-full p-4 rounded-lg shadow-lg
-        border backdrop-blur-sm
-        animate-in slide-in-from-right-5 fade-in duration-200
-        ${config.bg} ${config.border}
-      `}
+      className="pointer-events-auto max-w-sm w-full p-4 rounded-lg shadow-lg border backdrop-blur-sm animate-in slide-in-from-right-5 fade-in duration-200"
+      style={{
+        backgroundColor: config.bg,
+        borderColor: config.border,
+      }}
       role="alert"
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <span className={`material-symbols-outlined text-lg shrink-0 ${config.icon}`}>
+        <span
+          className="material-symbols-outlined text-lg shrink-0"
+          style={{ color: config.color }}
+        >
           {config.iconName}
         </span>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-medium ${config.text}`}>
+          <p className="text-sm font-medium" style={{ color: config.color }}>
             {toast.message}
           </p>
           {toast.description && (
-            <p className={`text-xs mt-1 ${config.description}`}>
+            <p className="text-xs mt-1" style={{ color: config.color, opacity: 0.8 }}>
               {toast.description}
             </p>
           )}
@@ -203,7 +204,8 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
                 toast.action?.onClick();
                 onDismiss();
               }}
-              className={`text-xs mt-2 font-medium hover:underline ${config.action}`}
+              className="text-xs mt-2 font-medium hover:underline"
+              style={{ color: config.color }}
             >
               {toast.action.label}
             </button>
@@ -213,7 +215,8 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         {/* Dismiss */}
         <button
           onClick={onDismiss}
-          className={`p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${config.dismiss}`}
+          className="p-1 rounded hover:opacity-70 transition-opacity"
+          style={{ color: config.color }}
           aria-label="Dismiss"
         >
           <span className="material-symbols-outlined text-base">close</span>
@@ -243,62 +246,46 @@ function getDefaultDuration(type: ToastType): number {
 }
 
 interface ToastConfig {
+  /** Background color (CSS variable value) */
   bg: string;
+  /** Border color (CSS variable value) */
   border: string;
-  icon: string;
+  /** Text/icon color (CSS variable value) */
+  color: string;
+  /** Material Symbols icon name */
   iconName: string;
-  text: string;
-  description: string;
-  action: string;
-  dismiss: string;
 }
 
 function getToastConfig(type: ToastType): ToastConfig {
   switch (type) {
     case 'success':
       return {
-        bg: 'bg-green-50 dark:bg-green-900/20',
-        border: 'border-green-200 dark:border-green-800/50',
-        icon: 'text-green-600 dark:text-green-400',
+        bg: 'var(--semantic-success-bg)',
+        border: 'var(--semantic-success-border)',
+        color: 'var(--semantic-success)',
         iconName: 'check_circle',
-        text: 'text-green-800 dark:text-green-200',
-        description: 'text-green-700 dark:text-green-300',
-        action: 'text-green-700 dark:text-green-400',
-        dismiss: 'text-green-500 dark:text-green-500',
       };
     case 'error':
       return {
-        bg: 'bg-red-50 dark:bg-red-900/20',
-        border: 'border-red-200 dark:border-red-800/50',
-        icon: 'text-red-600 dark:text-red-400',
+        bg: 'var(--semantic-error-bg)',
+        border: 'var(--semantic-error-border)',
+        color: 'var(--semantic-error)',
         iconName: 'error',
-        text: 'text-red-800 dark:text-red-200',
-        description: 'text-red-700 dark:text-red-300',
-        action: 'text-red-700 dark:text-red-400',
-        dismiss: 'text-red-500 dark:text-red-500',
       };
     case 'warning':
       return {
-        bg: 'bg-amber-50 dark:bg-amber-900/20',
-        border: 'border-amber-200 dark:border-amber-800/50',
-        icon: 'text-amber-600 dark:text-amber-400',
+        bg: 'var(--semantic-warning-bg)',
+        border: 'var(--semantic-warning-border)',
+        color: 'var(--semantic-warning)',
         iconName: 'warning',
-        text: 'text-amber-800 dark:text-amber-200',
-        description: 'text-amber-700 dark:text-amber-300',
-        action: 'text-amber-700 dark:text-amber-400',
-        dismiss: 'text-amber-500 dark:text-amber-500',
       };
     case 'info':
     default:
       return {
-        bg: 'bg-blue-50 dark:bg-blue-900/20',
-        border: 'border-blue-200 dark:border-blue-800/50',
-        icon: 'text-blue-600 dark:text-blue-400',
+        bg: 'var(--semantic-info-bg)',
+        border: 'var(--semantic-info-border)',
+        color: 'var(--semantic-info)',
         iconName: 'info',
-        text: 'text-blue-800 dark:text-blue-200',
-        description: 'text-blue-700 dark:text-blue-300',
-        action: 'text-blue-700 dark:text-blue-400',
-        dismiss: 'text-blue-500 dark:text-blue-500',
       };
   }
 }

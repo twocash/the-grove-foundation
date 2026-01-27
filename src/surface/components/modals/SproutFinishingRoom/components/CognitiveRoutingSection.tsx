@@ -55,26 +55,26 @@ export const CognitiveRoutingSection: React.FC<CognitiveRoutingSectionProps> = (
           className="mt-3 ml-7 space-y-2 text-sm"
         >
           <div>
-            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs">
               Path
             </dt>
             <dd className="font-mono text-[var(--glass-text-primary)]">{routing.path}</dd>
           </div>
           <div>
-            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs">
               Prompt
             </dt>
             <dd className="text-[var(--glass-text-primary)]">{routing.prompt}</dd>
           </div>
           <div>
-            <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
+            <dt className="text-[var(--glass-text-muted)] text-xs">
               Inspiration
             </dt>
             <dd className="text-[var(--glass-text-primary)]">{routing.inspiration}</dd>
           </div>
           {routing.domain && (
             <div>
-              <dt className="text-[var(--glass-text-muted)] text-xs uppercase">
+              <dt className="text-[var(--glass-text-muted)] text-xs">
                 Domain
               </dt>
               <dd className="text-[var(--glass-text-primary)]">{routing.domain}</dd>

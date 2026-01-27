@@ -159,7 +159,7 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
   // Skin state (S1-SKIN-HybridEngine)
   // ==========================================================================
 
-  // S24-EMT: Initialize skin from localStorage or route-aware default
+  // S25-GSE: Initialize skin from localStorage, system preference, or route-aware default
   const [skin, setSkinState] = useState<GroveSkin>(() => {
     if (typeof window === 'undefined') return elegantModernTheme as unknown as GroveSkin;
     try {
@@ -170,7 +170,16 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
     } catch {
       // Ignore localStorage errors
     }
-    // S24-EMT: Default to Elegant Modern for v1.0 routes
+    // S25-GSE: Detect system color scheme preference as default
+    // When no stored preference exists, respect OS dark/light mode setting
+    try {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark
+        ? (elegantDarkTheme as unknown as GroveSkin)
+        : (elegantModernTheme as unknown as GroveSkin);
+    } catch {
+      // matchMedia not supported, fall back to light
+    }
     return elegantModernTheme as unknown as GroveSkin;
   });
 
@@ -246,6 +255,63 @@ export function BedrockUIProvider({ children }: BedrockUIProviderProps) {
           if (typedValue.transform) root.style.setProperty(extendedVars.transform, typedValue.transform);
         }
       });
+    }
+
+    // S25-GSE: Derive missing text-scale + border variables per colorScheme.
+    // The :root defaults in globals.css are dark-theme values (light text on dark bg).
+    // Light themes need the inverse, and switching back to dark must restore defaults
+    // since inline styles override CSS custom properties from stylesheets.
+    if (skin.colorScheme === 'light') {
+      root.style.setProperty('--glass-text-secondary', '#333333');
+      root.style.setProperty('--glass-text-body', '#444444');
+      root.style.setProperty('--glass-text-subtle', '#888888');
+      root.style.setProperty('--glass-text-faint', '#aaaaaa');
+      root.style.setProperty('--glass-border-bright', 'rgba(0, 0, 0, 0.15)');
+      root.style.setProperty('--glass-border-active', 'rgba(0, 0, 0, 0.2)');
+      root.style.setProperty('--neon-green', '#2F5C3B');
+      root.style.setProperty('--neon-amber', '#d97706');
+      // Semantic colors: darker values for readability on light backgrounds
+      root.style.setProperty('--semantic-success', '#166534');
+      root.style.setProperty('--semantic-success-bg', 'rgba(22, 163, 74, 0.1)');
+      root.style.setProperty('--semantic-success-border', 'rgba(22, 163, 74, 0.25)');
+      root.style.setProperty('--semantic-warning', '#92400e');
+      root.style.setProperty('--semantic-warning-bg', 'rgba(217, 119, 6, 0.1)');
+      root.style.setProperty('--semantic-warning-border', 'rgba(217, 119, 6, 0.25)');
+      root.style.setProperty('--semantic-error', '#991b1b');
+      root.style.setProperty('--semantic-error-bg', 'rgba(220, 38, 38, 0.1)');
+      root.style.setProperty('--semantic-error-border', 'rgba(220, 38, 38, 0.25)');
+      root.style.setProperty('--semantic-info', '#1e40af');
+      root.style.setProperty('--semantic-info-bg', 'rgba(37, 99, 235, 0.1)');
+      root.style.setProperty('--semantic-info-border', 'rgba(37, 99, 235, 0.25)');
+      root.style.setProperty('--semantic-accent-secondary', '#6d28d9');
+      root.style.setProperty('--semantic-accent-secondary-bg', 'rgba(109, 40, 217, 0.1)');
+      root.style.setProperty('--semantic-accent-secondary-border', 'rgba(109, 40, 217, 0.25)');
+    } else {
+      // Restore dark-theme defaults (inline styles override :root stylesheet)
+      root.style.setProperty('--glass-text-secondary', '#e2e8f0');
+      root.style.setProperty('--glass-text-body', '#cbd5e1');
+      root.style.setProperty('--glass-text-subtle', '#64748b');
+      root.style.setProperty('--glass-text-faint', '#475569');
+      root.style.setProperty('--glass-border-bright', 'rgba(255, 255, 255, 0.15)');
+      root.style.setProperty('--glass-border-active', 'rgba(255, 255, 255, 0.2)');
+      root.style.setProperty('--neon-green', '#10b981');
+      root.style.setProperty('--neon-amber', '#f59e0b');
+      // Restore dark-theme semantic defaults (bright on dark)
+      root.style.setProperty('--semantic-success', '#34D399');
+      root.style.setProperty('--semantic-success-bg', 'rgba(52, 211, 153, 0.1)');
+      root.style.setProperty('--semantic-success-border', 'rgba(52, 211, 153, 0.3)');
+      root.style.setProperty('--semantic-warning', '#FBBF24');
+      root.style.setProperty('--semantic-warning-bg', 'rgba(251, 191, 36, 0.1)');
+      root.style.setProperty('--semantic-warning-border', 'rgba(251, 191, 36, 0.3)');
+      root.style.setProperty('--semantic-error', '#F87171');
+      root.style.setProperty('--semantic-error-bg', 'rgba(248, 113, 113, 0.1)');
+      root.style.setProperty('--semantic-error-border', 'rgba(248, 113, 113, 0.3)');
+      root.style.setProperty('--semantic-info', '#22D3EE');
+      root.style.setProperty('--semantic-info-bg', 'rgba(34, 211, 238, 0.1)');
+      root.style.setProperty('--semantic-info-border', 'rgba(34, 211, 238, 0.3)');
+      root.style.setProperty('--semantic-accent-secondary', '#A78BFA');
+      root.style.setProperty('--semantic-accent-secondary-bg', 'rgba(167, 139, 250, 0.1)');
+      root.style.setProperty('--semantic-accent-secondary-border', 'rgba(167, 139, 250, 0.3)');
     }
 
     // S24-EMT: FROZEN ZONE PROTECTION

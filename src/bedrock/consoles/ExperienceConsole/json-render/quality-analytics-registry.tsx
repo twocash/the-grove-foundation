@@ -291,7 +291,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
             {/* Grove line */}
             <polyline
               fill="none"
-              stroke="#2F5C3B"
+              stroke="var(--neon-green, #2F5C3B)"
               strokeWidth="2"
               points={props.data.map((d, i) => {
                 const x = (i / (props.data.length - 1 || 1)) * 100;
@@ -304,7 +304,7 @@ export const QualityAnalyticsRegistry: QualityAnalyticsComponentRegistry = {
             {props.showNetworkLine && props.data.some(d => d.networkAvg !== undefined) && (
               <polyline
                 fill="none"
-                stroke="#60a5fa"
+                stroke="var(--semantic-info, #60a5fa)"
                 strokeWidth="1.5"
                 strokeDasharray="4 2"
                 points={props.data.map((d, i) => {

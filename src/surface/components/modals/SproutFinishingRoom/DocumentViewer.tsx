@@ -216,7 +216,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       <article className="prose prose-sm max-w-none text-[var(--glass-text-body)]">
         <div className="mb-6 pb-4 border-b border-[var(--glass-border)]">
           <p className="text-sm text-[var(--glass-text-muted)]">
-            <span className="font-mono text-xs uppercase mr-2">Query:</span>
+            <span className="font-mono text-xs mr-2">Query:</span>
             {sprout.query}
           </p>
         </div>
@@ -296,7 +296,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               </button>
             </div>
           ) : (
-            <span className="text-xs font-mono text-[var(--glass-text-muted)] uppercase">
+            <span className="text-xs font-mono text-[var(--glass-text-muted)]">
               {displayMode === 'document' ? 'Styled Document' : 'Response'}
             </span>
           )}
@@ -335,8 +335,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             disabled={isPromoting}
             className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
             style={{
-              backgroundColor: isPromoting ? 'var(--glass-elevated)' : '#10b981',
-              color: isPromoting ? 'var(--glass-text-muted)' : '#ffffff',
+              backgroundColor: isPromoting ? 'var(--glass-elevated)' : 'var(--semantic-success, #10b981)',
+              color: isPromoting ? 'var(--glass-text-muted)' : 'var(--glass-text-primary, #ffffff)',
             }}
           >
             {isPromoting ? 'Promoting...' : 'Promote to Garden'}

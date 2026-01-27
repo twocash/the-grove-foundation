@@ -3,6 +3,7 @@
 // Migration: MIGRATION-001-lens
 
 import type { ConsoleConfig } from '../../types/console.types';
+import { themeColor } from '../../config/themeColors';
 
 export const lensWorkshopConfig: ConsoleConfig = {
   id: 'lenses',
@@ -58,13 +59,13 @@ export const LENS_CATEGORY_CONFIG = {
 };
 
 export const DEFAULT_LENS_COLORS = [
-  '#2F5C3B', // forest
-  '#7EA16B', // moss
-  '#E0A83B', // amber
-  '#D95D39', // clay
-  '#526F8A', // slate
-  '#6B4B56', // fig
-  '#9C9285', // stone
+  themeColor.forest,
+  themeColor.moss,
+  themeColor.amber,
+  themeColor.clay,
+  themeColor.slate,
+  themeColor.fig,
+  themeColor.stone,
 ];
 
 export default lensWorkshopConfig;

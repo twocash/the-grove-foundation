@@ -231,7 +231,7 @@ export const ResearchManifestCard: React.FC<ResearchManifestCardProps> = ({
 
         {/* Seed Preview */}
         <div className="px-4 py-3 border-b border-[var(--glass-border)]">
-          <div className="text-[10px] uppercase tracking-wide text-[var(--glass-text-muted)] mb-1">
+          <div className="text-[10px] tracking-wide text-[var(--glass-text-muted)] mb-1">
             Seed Insight
           </div>
           <p className="text-sm text-[var(--glass-text-body)] italic leading-relaxed line-clamp-3">
@@ -259,7 +259,7 @@ export const ResearchManifestCard: React.FC<ResearchManifestCardProps> = ({
 
         {/* Purpose Selector */}
         <div ref={purposeRef} className="px-4 py-3 border-b border-[var(--glass-border)]">
-          <div className="text-[10px] uppercase tracking-wide text-[var(--glass-text-muted)] mb-2">
+          <div className="text-[10px] tracking-wide text-[var(--glass-text-muted)] mb-2">
             Research Purpose
           </div>
           <div className="space-y-2">
@@ -296,7 +296,7 @@ export const ResearchManifestCard: React.FC<ResearchManifestCardProps> = ({
         {/* Clues Section */}
         <div className="px-4 py-3 border-b border-[var(--glass-border)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-wide text-[var(--glass-text-muted)]">
+            <span className="text-[10px] tracking-wide text-[var(--glass-text-muted)]">
               Research Clues ({clues.length})
             </span>
             <button
@@ -406,7 +406,7 @@ export const ResearchManifestCard: React.FC<ResearchManifestCardProps> = ({
 
         {/* Directions Section */}
         <div className="px-4 py-3 border-b border-[var(--glass-border)]">
-          <div className="text-[10px] uppercase tracking-wide text-[var(--glass-text-muted)] mb-2">
+          <div className="text-[10px] tracking-wide text-[var(--glass-text-muted)] mb-2">
             Research Directions ({directions.length})
           </div>
 
@@ -457,7 +457,7 @@ export const ResearchManifestCard: React.FC<ResearchManifestCardProps> = ({
 
         {/* Tags Section */}
         <div className="px-4 py-3 border-b border-[var(--glass-border)]">
-          <div className="text-[10px] uppercase tracking-wide text-[var(--glass-text-muted)] mb-2">
+          <div className="text-[10px] tracking-wide text-[var(--glass-text-muted)] mb-2">
             Tags
           </div>
           <div className="flex flex-wrap gap-2 mb-2 min-h-[24px]">

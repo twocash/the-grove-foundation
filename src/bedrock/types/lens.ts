@@ -121,17 +121,20 @@ export const EMOTIONAL_REGISTERS: { value: EmotionalRegister; label: string }[] 
 ];
 
 // =============================================================================
-// Color config with hex values for UI
+// Color config — theme-aware CSS variable references
+// S25-GSE: Migrated from hardcoded hex to centralized themeColor registry
 // =============================================================================
 
+import { themeColor } from '../config/themeColors';
+
 export const LENS_COLOR_CONFIG: Record<PersonaColor, { hex: string; label: string }> = {
-  forest: { hex: '#2F5C3B', label: 'Forest' },
-  moss: { hex: '#7EA16B', label: 'Moss' },
-  amber: { hex: '#E0A83B', label: 'Amber' },
-  clay: { hex: '#D95D39', label: 'Clay' },
-  slate: { hex: '#526F8A', label: 'Slate' },
-  fig: { hex: '#6B4B56', label: 'Fig' },
-  stone: { hex: '#9C9285', label: 'Stone' },
+  forest: { hex: themeColor.forest, label: 'Forest' },
+  moss: { hex: themeColor.moss, label: 'Moss' },
+  amber: { hex: themeColor.amber, label: 'Amber' },
+  clay: { hex: themeColor.clay, label: 'Clay' },
+  slate: { hex: themeColor.slate, label: 'Slate' },
+  fig: { hex: themeColor.fig, label: 'Fig' },
+  stone: { hex: themeColor.stone, label: 'Stone' },
 };
 
 // =============================================================================

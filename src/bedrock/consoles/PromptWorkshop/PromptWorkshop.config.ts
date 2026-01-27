@@ -3,6 +3,7 @@
 // Sprint: prompt-unification-v1
 
 import type { ConsoleConfig } from '../../types/console.types';
+import { themeColor } from '../../config/themeColors';
 
 export const promptWorkshopConfig: ConsoleConfig = {
   id: 'prompts',
@@ -90,19 +91,19 @@ export const promptWorkshopConfig: ConsoleConfig = {
 
 // Sequence type configuration
 export const SEQUENCE_TYPE_CONFIG = {
-  journey: { label: 'Journey', icon: 'route', color: '#2F5C3B' },
-  briefing: { label: 'Briefing', icon: 'article', color: '#526F8A' },
-  wizard: { label: 'Wizard', icon: 'auto_fix', color: '#E0A83B' },
-  tour: { label: 'Tour', icon: 'map', color: '#7EA16B' },
-  research: { label: 'Research', icon: 'science', color: '#6B4B56' },
-  faq: { label: 'FAQ', icon: 'help', color: '#9C9285' },
+  journey: { label: 'Journey', icon: 'route', color: themeColor.experience },
+  briefing: { label: 'Briefing', icon: 'article', color: themeColor.internal },
+  wizard: { label: 'Wizard', icon: 'auto_fix', color: themeColor.amber },
+  tour: { label: 'Tour', icon: 'map', color: themeColor.moss },
+  research: { label: 'Research', icon: 'science', color: themeColor.fig },
+  faq: { label: 'FAQ', icon: 'help', color: themeColor.stone },
 };
 
 // Source configuration
 export const PROMPT_SOURCE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  library: { label: 'Library', icon: 'local_library', color: '#526F8A' },
-  generated: { label: 'AI Generated', icon: 'auto_awesome', color: '#E0A83B' },
-  user: { label: 'User Created', icon: 'person', color: '#7EA16B' },
+  library: { label: 'Library', icon: 'local_library', color: themeColor.internal },
+  generated: { label: 'AI Generated', icon: 'auto_awesome', color: themeColor.amber },
+  user: { label: 'User Created', icon: 'person', color: themeColor.moss },
 };
 
 export default promptWorkshopConfig;

@@ -69,8 +69,11 @@ export function SystemPromptCard({
 
       {/* Icon and title */}
       <div className="flex items-start gap-3 mb-3 pr-8 mt-2">
-        <div className="w-10 h-10 rounded-lg bg-[#2F5C3B]/20 flex items-center justify-center">
-          <span className="material-symbols-outlined text-xl text-[#2F5C3B]">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: 'color-mix(in srgb, var(--neon-green, #2F5C3B) 20%, transparent)' }}
+        >
+          <span className="material-symbols-outlined text-xl" style={{ color: 'var(--neon-green, #2F5C3B)' }}>
             smart_toy
           </span>
         </div>

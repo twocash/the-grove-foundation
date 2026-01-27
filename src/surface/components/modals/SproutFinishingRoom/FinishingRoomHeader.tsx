@@ -42,7 +42,7 @@ export const FinishingRoomHeader: React.FC<FinishingRoomHeaderProps> = ({
         />
         <h1
           id={headerId}
-          className="text-sm font-mono font-semibold text-[var(--glass-text-primary)] uppercase tracking-wider"
+          className="text-sm font-mono font-semibold text-[var(--glass-text-primary)] tracking-wide"
         >
           Sprout Finishing Room
         </h1>

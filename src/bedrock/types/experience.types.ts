@@ -9,6 +9,7 @@
 
 import type { SystemPromptPayload } from '@core/schema/system-prompt';
 import { DEFAULT_SYSTEM_PROMPT_PAYLOAD } from '@core/schema/system-prompt';
+import { themeColor } from '../config/themeColors';
 import type { PromptArchitectConfigPayload } from '@core/schema/prompt-architect-config';
 import { DEFAULT_PROMPT_ARCHITECT_CONFIG_PAYLOAD } from '@core/schema/prompt-architect-config';
 import type { FeatureFlagPayload } from '@core/schema/feature-flag';
@@ -165,7 +166,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'SystemPromptEditor',
     allowMultipleActive: false, // Single-active model
     routePath: '/bedrock/experience',
-    color: '#2F5C3B', // grove-forest
+    color: themeColor.experience,
     // Polymorphic console support (unified-experience-console-v1)
     cardComponent: 'SystemPromptCard',
     dataHookName: 'useExperienceData',
@@ -193,7 +194,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'PromptArchitectConfigEditor', // Phase 4+
     allowMultipleActive: false, // SINGLETON: One active per grove
     routePath: '/bedrock/research-config',
-    color: '#7E57C2', // Purple for research
+    color: themeColor.research,
     // Polymorphic console support (unified-experience-console-v1)
     // Note: This type has its own console for now, not unified
     cardComponent: 'PromptArchitectConfigCard',
@@ -214,7 +215,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'FeatureFlagEditor',
     allowMultipleActive: true, // INSTANCE: Many active simultaneously
     routePath: '/bedrock/experience', // CHANGED: Consolidated into unified console
-    color: '#D95D39', // grove-clay (orange accent)
+    color: themeColor.experimental,
     // Polymorphic console support (unified-experience-console-v1)
     cardComponent: 'FeatureFlagCard',
     dataHookName: 'useFeatureFlagsData',
@@ -247,7 +248,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'ResearchAgentConfigEditor',
     allowMultipleActive: false, // SINGLETON: One active config
     routePath: '/bedrock/experience',
-    color: '#7E57C2', // Purple for research
+    color: themeColor.research,
     // Polymorphic console support
     cardComponent: 'ResearchAgentConfigCard',
     dataHookName: 'useResearchAgentConfigData',
@@ -269,7 +270,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'WriterAgentConfigEditor',
     allowMultipleActive: false, // SINGLETON: One active config
     routePath: '/bedrock/experience',
-    color: '#26A69A', // Teal for writing
+    color: themeColor.writing,
     // Polymorphic console support
     cardComponent: 'WriterAgentConfigCard',
     dataHookName: 'useWriterAgentConfigData',
@@ -291,7 +292,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'CopilotStyleEditor',
     allowMultipleActive: false, // SINGLETON: One active style
     routePath: '/bedrock/experience',
-    color: '#00ff00', // Terminal green
+    color: themeColor.terminal,
     // Polymorphic console support
     cardComponent: 'CopilotStyleCard',
     dataHookName: 'useCopilotStyleData',
@@ -316,7 +317,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'LifecycleConfigEditor',
     allowMultipleActive: false, // SINGLETON: One active config
     routePath: '/bedrock/experience',
-    color: '#8BC34A', // Light green for lifecycle/growth
+    color: themeColor.lifecycle,
     // Polymorphic console support
     cardComponent: 'LifecycleConfigCard',
     dataHookName: 'useLifecycleConfigData',
@@ -338,7 +339,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'AdvancementRuleEditor',
     allowMultipleActive: true, // INSTANCE: Many rules active simultaneously
     routePath: '/bedrock/experience',
-    color: '#4CAF50', // Green for advancement/growth
+    color: themeColor.advancement,
     // Polymorphic console support
     cardComponent: 'AdvancementRuleCard',
     dataHookName: 'useAdvancementRuleData',
@@ -370,7 +371,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'JobConfigEditor',
     allowMultipleActive: true, // INSTANCE: Many job configs active simultaneously
     routePath: '/bedrock/experience',
-    color: '#2196F3', // Blue for jobs/automation
+    color: themeColor.automation,
     // Polymorphic console support
     cardComponent: 'JobConfigCard',
     dataHookName: 'useJobConfigData',
@@ -403,7 +404,7 @@ export const EXPERIENCE_TYPE_REGISTRY = {
     editorComponent: 'OutputTemplateEditor',
     allowMultipleActive: true, // INSTANCE: Many templates, one default per agent type
     routePath: '/bedrock/experience',
-    color: '#FF9800', // Orange for templates
+    color: themeColor.template,
     // Polymorphic console support
     cardComponent: 'OutputTemplateCard',
     dataHookName: 'useOutputTemplateData',

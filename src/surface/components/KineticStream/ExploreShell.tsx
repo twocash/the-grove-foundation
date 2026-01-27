@@ -735,12 +735,6 @@ export const ExploreShell: React.FC<ExploreShellProps> = ({
         onJourneyClick={() => setOverlay({ type: 'journey-picker' })}
         stage={stage}
         exchangeCount={exchangeCount}
-        useHybridSearch={useHybridSearch}
-        onHybridSearchToggle={handleHybridSearchToggle}
-        journeyMode={journeyMode}
-        onJourneyModeToggle={handleJourneyModeToggle}
-        headerFlags={headerFlags}
-        onFlagToggle={handleFlagToggle}
       />
 
       {/* Stream area - attach scrollRef and capture ref */}

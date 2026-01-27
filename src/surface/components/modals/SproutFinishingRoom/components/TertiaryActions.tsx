@@ -73,7 +73,7 @@ ${sprout.response}
   return (
     <div className="p-4 mt-auto">
       {/* Section header */}
-      <h3 className="text-xs font-mono text-[var(--glass-text-muted)] uppercase mb-3">
+      <h3 className="text-xs font-mono text-[var(--glass-text-muted)] mb-3">
         More Actions
       </h3>
 

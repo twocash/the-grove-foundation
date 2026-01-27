@@ -62,7 +62,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         aria-expanded={expanded}
         aria-controls={sectionId}
       >
-        <h3 className="text-xs font-mono text-[var(--glass-text-muted)] uppercase flex items-center gap-2">
+        <h3 className="text-xs font-mono text-[var(--glass-text-muted)] flex items-center gap-2">
           <span role="img" aria-label={iconLabel}>
             {icon}
           </span>

@@ -79,6 +79,40 @@ const THEME_INFO: Record<string, ThemeInfo> = {
       accent: '#2F5C3B',
     },
   },
+  // S25-GSE: Complete THEME_INFO for remaining themes
+  'living-glass-v2': {
+    id: 'living-glass-v2',
+    name: 'Living Glass v2',
+    description: 'Dark theme with sky-blue glass',
+    icon: 'dark_mode',
+    preview: {
+      bg: '#0A0F14',
+      fg: '#F1F5F9',
+      accent: '#38BDF8',
+    },
+  },
+  'nebula-flux-v1': {
+    id: 'nebula-flux-v1',
+    name: 'Nebula Flux',
+    description: 'Dark theme with purple nebula glow',
+    icon: 'dark_mode',
+    preview: {
+      bg: '#0F0518',
+      fg: '#F3E8FF',
+      accent: '#E879F9',
+    },
+  },
+  'quantum-grove-v1': {
+    id: 'quantum-grove-v1',
+    name: 'Quantum Grove',
+    description: 'Dark theme with living green system',
+    icon: 'dark_mode',
+    preview: {
+      bg: '#030712',
+      fg: '#E2E8F0',
+      accent: '#10B981',
+    },
+  },
 };
 
 // =============================================================================
@@ -107,7 +141,7 @@ export function ThemeSwitcher({
 
   if (variant === 'compact') {
     return (
-      <div className={`flex items-center gap-1 ${className}`}>
+      <div className={`flex flex-col gap-1 ${className}`}>
         {availableThemes.map((themeId) => {
           const info = THEME_INFO[themeId];
           if (!info) return null;
@@ -119,17 +153,36 @@ export function ThemeSwitcher({
               key={themeId}
               onClick={() => loadTheme(themeId)}
               className={`
-                p-2 rounded-lg transition-all duration-200
+                flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-all duration-200 text-left
                 ${isActive
-                  ? 'bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]'
-                  : 'bg-white/5 text-[var(--glass-text-secondary)] hover:bg-white/10'
+                  ? 'bg-[var(--neon-cyan)]/15 ring-1 ring-[var(--neon-cyan)]/40'
+                  : 'hover:bg-[var(--glass-elevated)]'
                 }
               `}
-              title={info.name}
+              title={info.description}
             >
-              <span className="material-symbols-outlined text-lg">
-                {info.icon}
+              {/* Color swatch: bg + accent */}
+              <div
+                className="w-6 h-6 rounded-md border border-black/20 flex items-center justify-center shrink-0"
+                style={{ backgroundColor: info.preview.bg }}
+              >
+                <div
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: info.preview.accent }}
+                />
+              </div>
+              {/* Name */}
+              <span className={`text-xs font-medium flex-1 ${
+                isActive ? 'text-[var(--neon-cyan)]' : 'text-[var(--glass-text-secondary)]'
+              }`}>
+                {info.name}
               </span>
+              {/* Active check */}
+              {isActive && (
+                <span className="material-symbols-outlined text-sm text-[var(--neon-cyan)]">
+                  check
+                </span>
+              )}
             </button>
           );
         })}

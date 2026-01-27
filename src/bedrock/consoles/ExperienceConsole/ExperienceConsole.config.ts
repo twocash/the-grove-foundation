@@ -5,6 +5,7 @@
 // DEX: Declarative Sovereignty - config generated from registry, not hardcoded
 
 import type { ConsoleConfig, FilterOption } from '../../types/console.types';
+import { themeColor } from '../../config/themeColors';
 import {
   getAllExperienceTypes,
   type MetricDefinition,
@@ -239,9 +240,9 @@ export const experienceConsoleConfig: ConsoleConfig = {
  * Response mode configuration for system prompts
  */
 export const RESPONSE_MODE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  architect: { label: 'Architect', icon: 'architecture', color: '#2F5C3B' },
-  librarian: { label: 'Librarian', icon: 'local_library', color: '#526F8A' },
-  contemplative: { label: 'Contemplative', icon: 'psychology', color: '#7E57C2' },
+  architect: { label: 'Architect', icon: 'architecture', color: themeColor.experience },
+  librarian: { label: 'Librarian', icon: 'local_library', color: themeColor.internal },
+  contemplative: { label: 'Contemplative', icon: 'psychology', color: themeColor.research },
 };
 
 /**

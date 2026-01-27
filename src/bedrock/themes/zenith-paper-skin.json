@@ -7,17 +7,17 @@
     "authorType": "system",
     "createdAt": "2026-01-19T00:00:00Z",
     "source": "zenith-paper-v1",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "tokens": {
     "colors": {
-      "void": "#FBFBF9",
-      "panel": "rgba(255, 255, 255, 0.85)",
-      "solid": "#FFFFFF",
-      "elevated": "rgba(255, 255, 255, 0.95)",
-      "border": "#E5E5E5",
+      "void": "#F5F2EB",
+      "panel": "rgba(250, 247, 240, 0.88)",
+      "solid": "#FAF8F3",
+      "elevated": "rgba(253, 251, 246, 0.95)",
+      "border": "#DED9CF",
       "foreground": "#1C1C1C",
-      "muted": "#575757",
+      "muted": "#6B635A",
       "accent": "#2F5C3B",
       "primary": "#1C1C1C",
       "semantic": {

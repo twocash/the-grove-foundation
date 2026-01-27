@@ -54,8 +54,8 @@ const config: Config = {
         grove: {
           cream: '#F9F8F4',
           dark: '#1A2421',
-          forest: '#355E3B',
-          accent: '#355E3B',
+          forest: '#2F5C3B',
+          accent: '#2F5C3B',
           clay: '#D95D39',
           light: '#E5E5E0',
         },

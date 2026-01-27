@@ -54,7 +54,7 @@ const markdownComponents = {
   h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h4
       style={{ color: 'var(--glass-text-secondary)', fontFamily: 'var(--font-heading)' }}
-      className="text-sm font-semibold mt-3 mb-1 uppercase tracking-wide"
+      className="text-sm font-semibold mt-3 mb-1 tracking-wide"
       {...props}
     />
   ),
@@ -354,7 +354,7 @@ export const EvidenceRegistry: ComponentRegistry = {
               {relevancePercent}% relevant
             </span>
             <span
-              className="uppercase"
+              className=""
               style={{
                 color: statusColorMap[props.status] || 'var(--glass-text-muted)',
                 fontFamily: 'var(--font-mono)',
@@ -464,7 +464,7 @@ export const EvidenceRegistry: ComponentRegistry = {
     return (
       <div className="mb-4 ml-8">
         <h4
-          className="text-xs uppercase mb-2"
+          className="text-xs mb-2"
           style={{ color: 'var(--glass-text-muted)', fontFamily: 'var(--font-mono)' }}
         >
           Key Findings
@@ -573,7 +573,7 @@ export const EvidenceRegistry: ComponentRegistry = {
       >
         <div className="flex items-center gap-2 mb-2">
           <span
-            className="text-xs font-semibold uppercase"
+            className="text-xs font-semibold"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             {levelLabels[props.level]}
@@ -606,7 +606,7 @@ export const EvidenceRegistry: ComponentRegistry = {
         style={{ backgroundColor: 'var(--semantic-warning-bg)', borderColor: 'var(--semantic-warning)' }}
       >
         <h4
-          className="text-xs uppercase mb-2 font-semibold"
+          className="text-xs mb-2 font-semibold"
           style={{ color: 'var(--semantic-warning)', fontFamily: 'var(--font-mono)' }}
         >
           Research Limitations

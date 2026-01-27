@@ -4,6 +4,7 @@
 // Pattern: Animated dismissible banner
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { themeColor } from '../../config/themeColors';
 
 // =============================================================================
 // Types
@@ -101,7 +102,7 @@ function Confetti() {
             left: `${Math.random() * 100}%`,
             animationDelay: `${Math.random() * 0.5}s`,
             animationDuration: `${1 + Math.random()}s`,
-            backgroundColor: ['#2F5C3B', '#D95D39', '#FFB800', '#60A5FA', '#A78BFA'][i % 5],
+            backgroundColor: themeColor.confetti[i % 5],
           }}
         />
       ))}
