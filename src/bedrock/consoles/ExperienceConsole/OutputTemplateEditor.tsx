@@ -375,6 +375,32 @@ export function OutputTemplateEditor({
           </div>
         </InspectorSection>
 
+        {/* S27-OT: Rendering Instructions */}
+        <InspectorDivider />
+        <InspectorSection title="Rendering Instructions" collapsible defaultCollapsed={true}>
+          <div className="space-y-2">
+            <p className="text-xs text-[var(--glass-text-muted)]">
+              Controls how the agent formats output (markdown rules, cite tags, JSON structure).
+              When empty, the server uses built-in defaults for this agent type.
+              {isSystemSeed && ' Fork this template to customize.'}
+            </p>
+            <BufferedTextarea
+              value={template.payload.renderingInstructions || ''}
+              onChange={(val) => patchPayload('renderingInstructions', val || undefined)}
+              debounceMs={400}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50 font-mono"
+              placeholder="Markdown rendering rules, cite tag format, JSON output structure..."
+              rows={8}
+              disabled={loading || isSystemSeed}
+            />
+            {!template.payload.renderingInstructions && (
+              <p className="text-xs text-[var(--glass-text-muted)] italic">
+                No custom instructions — server will use default {template.payload.agentType === 'writer' ? 'writer' : 'research'} rendering rules.
+              </p>
+            )}
+          </div>
+        </InspectorSection>
+
         {/* Citation Config (for writer templates) */}
         {template.payload.agentType === 'writer' && (
           <>

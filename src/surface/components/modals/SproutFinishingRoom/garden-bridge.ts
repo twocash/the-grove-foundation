@@ -24,6 +24,8 @@ export interface TemplateInfo {
   templateId: string;
   templateName: string;
   generatedAt: string;
+  /** S27-OT: Which rendering instructions shaped this artifact */
+  renderingSource?: 'template' | 'default-writer' | 'default-research';
 }
 
 /**
@@ -54,6 +56,8 @@ export interface GardenProvenancePayload {
     generatedAt: string;
     sproutQuery: string;
     confidenceScore: number;
+    /** S27-OT: Which rendering instructions shaped this artifact */
+    renderingSource?: 'template' | 'default-writer' | 'default-research';
   };
 }
 
@@ -140,6 +144,7 @@ export function buildProvenancePayload(
       generatedAt: templateInfo.generatedAt,
       sproutQuery: sprout.query,
       confidenceScore: document.confidenceScore,
+      renderingSource: templateInfo.renderingSource, // S27-OT
     },
   };
 }

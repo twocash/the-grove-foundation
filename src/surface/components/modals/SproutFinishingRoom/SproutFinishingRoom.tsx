@@ -66,12 +66,13 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   // S25-GSE: Called when ActionPanel generates a new document — persist to sprout
   // Side effects (localStorage write, Supabase sync) run OUTSIDE the state updater
   // to avoid React strict mode double-invocation issues.
-  const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
+  const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string, renderingSource?: 'template' | 'default-writer' | 'default-research') => {
     const artifact: GeneratedArtifact = {
       document,
       templateId,
       templateName,
       generatedAt: new Date().toISOString(),
+      renderingSource, // S27-OT: provenance tracking
     };
     const next = [...artifacts, artifact];
 
@@ -148,6 +149,7 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
         templateId: artifact.templateId,
         templateName: artifact.templateName,
         generatedAt: artifact.generatedAt,
+        renderingSource: artifact.renderingSource, // S27-OT
       });
 
       if (!result.success) {

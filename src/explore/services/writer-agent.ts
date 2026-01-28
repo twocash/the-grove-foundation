@@ -37,6 +37,8 @@ interface LLMWriterOutput {
     snippet: string;
     domain: string;
   }>;
+  /** S27-OT: Which rendering instructions shaped this output */
+  renderingSource?: 'template' | 'default-writer' | 'default-research';
 }
 
 // =============================================================================
@@ -75,6 +77,13 @@ export interface WriterOptions {
    * Template defines behavior, not hardcoded prompt builder.
    */
   systemPromptOverride?: string;
+
+  /**
+   * S27-OT: Rendering instructions from Output Template.
+   * Passed through to the server endpoint for format control.
+   * When absent, server uses named constant defaults.
+   */
+  renderingInstructions?: string;
 }
 
 /**
@@ -133,7 +142,9 @@ export async function writeResearchDocument(
     perspective: config.voice.perspective,
     citationStyle: config.documentStructure.citationStyle,
   };
-  const llmOutput = await callLLMForWriting(systemPrompt, userPrompt, voiceConfig);
+  const llmOutput = await callLLMForWriting(
+    systemPrompt, userPrompt, voiceConfig, options?.renderingInstructions
+  );
 
   onProgress?.({ type: 'formatting', message: 'Formatting citations...' });
 
@@ -142,7 +153,7 @@ export async function writeResearchDocument(
 
   onProgress?.({ type: 'complete' });
 
-  return createResearchDocument(
+  const doc = createResearchDocument(
     documentId,
     evidenceBundle.sproutId,
     query,
@@ -152,6 +163,9 @@ export async function writeResearchDocument(
     evidenceBundle.confidenceScore,
     llmOutput.limitations
   );
+
+  // S27-OT: Attach renderingSource for provenance tracking
+  return Object.assign(doc, { renderingSource: llmOutput.renderingSource });
 }
 
 // =============================================================================
@@ -239,12 +253,16 @@ function mapSourcesToCitations(
 async function callLLMForWriting(
   systemPrompt: string,
   userPrompt: string,
-  voiceConfig?: { formality?: string; perspective?: string; citationStyle?: string }
+  voiceConfig?: { formality?: string; perspective?: string; citationStyle?: string },
+  renderingInstructions?: string
 ): Promise<LLMWriterOutput> {
   console.log('[WriterAgent] Calling Claude for writing...');
   console.log('[WriterAgent] System prompt length:', systemPrompt.length);
   console.log('[WriterAgent] User prompt length:', userPrompt.length);
   console.log('[WriterAgent] Voice config:', voiceConfig);
+  if (renderingInstructions) {
+    console.log('[WriterAgent] Using custom renderingInstructions from template');
+  }
 
   try {
     const response = await fetch('/api/research/write', {
@@ -254,6 +272,7 @@ async function callLLMForWriting(
         evidence: userPrompt,
         query: systemPrompt,
         voiceConfig,
+        renderingInstructions, // S27-OT: Pass template rendering instructions to server
       }),
     });
 
@@ -278,6 +297,7 @@ async function callLLMForWriting(
         snippet: c.snippet || '',
         domain: c.domain || extractDomain(c.url),
       })),
+      renderingSource: result.renderingSource, // S27-OT: Provenance from server
     };
 
   } catch (error) {

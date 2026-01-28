@@ -61,6 +61,9 @@ export interface GenerateDocumentResult {
     source: 'system-seed' | 'user-created' | 'forked' | 'imported';
   };
 
+  /** S27-OT: Which rendering instructions shaped this document */
+  renderingSource?: 'template' | 'default-writer' | 'default-research';
+
   /** Error message (if failed) */
   error?: string;
 
@@ -131,13 +134,16 @@ export async function generateDocument(
       ...request.configOverrides,
     };
 
-    // Call writer agent with template's systemPrompt
+    // Call writer agent with template's systemPrompt and rendering instructions
     const document = await writeResearchDocument(
       request.evidenceBundle,
       request.query,
       config,
       onProgress,
-      template ? { systemPromptOverride: template.systemPrompt } : undefined
+      template ? {
+        systemPromptOverride: template.systemPrompt,
+        renderingInstructions: template.renderingInstructions, // S27-OT
+      } : undefined
     );
 
     const completedAt = new Date().toISOString();
@@ -154,6 +160,7 @@ export async function generateDocument(
         version: template.version,
         source: template.source,
       } : undefined,
+      renderingSource: (document as Record<string, unknown>).renderingSource as GenerateDocumentResult['renderingSource'], // S27-OT
       execution: {
         startedAt,
         completedAt,

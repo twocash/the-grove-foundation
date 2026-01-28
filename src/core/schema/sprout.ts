@@ -29,6 +29,8 @@ export interface GeneratedArtifact {
   generatedAt: string;
   /** ISO timestamp when grafted (saved) to Nursery — absent means draft/unsaved */
   savedAt?: string;
+  /** Which rendering instructions shaped this artifact (S27-OT provenance) */
+  renderingSource?: 'template' | 'default-writer' | 'default-research';
 }
 
 // ─────────────────────────────────────────────────────────────

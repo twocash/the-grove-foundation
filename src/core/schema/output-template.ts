@@ -145,6 +145,12 @@ export const OutputTemplatePayloadSchema = z.object({
 
   /** ID of template this was forked from (if source === 'forked') */
   forkedFromId: z.string().optional(),
+
+  // === RENDERING (S27-OT) ===
+  /** Optional rendering instructions for document formatting.
+   *  Controls how the agent formats output (markdown rules, cite tags, JSON structure).
+   *  When absent, server falls back to DEFAULT_WRITER/RESEARCH_RENDERING_RULES. */
+  renderingInstructions: z.string().optional(),
 });
 
 export type OutputTemplatePayload = z.infer<typeof OutputTemplatePayloadSchema>;

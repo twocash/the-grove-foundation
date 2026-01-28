@@ -31,6 +31,8 @@ export interface LoadedTemplate {
   systemPrompt: string;
   /** Agent type this template is for */
   agentType: AgentType;
+  /** S27-OT: Optional rendering instructions for document formatting */
+  renderingInstructions?: string;
 }
 
 // =============================================================================
@@ -139,5 +141,6 @@ function groveObjectToLoadedTemplate(
     source: obj.payload.source,
     systemPrompt: obj.payload.systemPrompt,
     agentType: obj.payload.agentType,
+    renderingInstructions: obj.payload.renderingInstructions, // S27-OT
   };
 }

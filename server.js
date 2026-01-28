@@ -50,6 +50,43 @@ console.log('GitHub Sync:', GITHUB_SYNC_ENABLED ?
   'Disabled (missing env vars)');
 
 // =============================================================================
+// S27-OT: Named rendering instruction defaults
+// IMPORTANT: These are duplicated from src/core/config/rendering-defaults.ts
+// because server.js cannot import from src/core/. Keep them in sync.
+// =============================================================================
+
+const DEFAULT_WRITER_RENDERING_RULES = `
+
+## Rendering Rules (ReactMarkdown + GFM)
+Your output will be rendered by a markdown engine. Use rich formatting:
+
+- **Section headers**: Use ## for major sections, ### for subsections
+- **Bold key terms**: Wrap important concepts in **bold**
+- **Bullet lists**: Use - for unordered lists of key findings
+- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
+- **Tables**: Use GFM markdown tables for comparisons or structured data
+- **Blockquotes**: Use > for notable quotes from sources
+- **Inline citations**: Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index. Example: <cite index="1">GPU inference improved 10x</cite>
+
+## Document Structure
+1. Open with a clear thesis/position (2-3 sentences)
+2. Use ## headers to organize analysis into 3-5 logical sections
+3. Each section should have substantive content with specific data and evidence
+4. Close with a synthesis or forward-looking conclusion
+5. Note limitations honestly
+
+## Output Format
+Return valid JSON:
+{
+  "position": "1-3 sentence thesis statement",
+  "analysis": "Full markdown document with ## sections, **bold**, lists, tables, and <cite index=\\"N\\">...</cite> tags",
+  "limitations": "Honest limitations of this analysis",
+  "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
+}`;
+
+const DEFAULT_RESEARCH_RENDERING_RULES = `\n\nIMPORTANT: Use rich markdown formatting in all output — ## headers for sections, ### for subsections, bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Use <cite index="N">claim</cite> HTML tags for inline citations where N matches the source index. Your output will be rendered with a markdown engine.`;
+
+// =============================================================================
 // Async Job System - Sprint: upload-pipeline-unification-v1
 // =============================================================================
 
@@ -2505,7 +2542,8 @@ app.post('/api/research/deep', async (req, res) => {
 
         // Sprint: research-template-wiring-v1 - Added systemPrompt parameter
         // S22-WP: Increased maxTokens from 4096 to 16384 for professional research depth
-        const { query, context, systemPrompt, maxTokens = 16384 } = req.body;
+        // S27-OT: Added renderingInstructions for per-template formatting
+        const { query, context, systemPrompt, renderingInstructions, maxTokens = 16384 } = req.body;
 
         if (!query) {
             return res.status(400).json({ error: 'Missing required field: query' });
@@ -2536,13 +2574,16 @@ For each major claim:
 DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
 Your audience expects comprehensive, professional-grade research output.`;
 
-        // S25-SFR: Custom templates have short behavioral prompts (e.g. "Conduct exhaustive research")
-        // that lack formatting instructions. Append rendering rules ONLY to custom templates.
+        // S27-OT: Template-first rendering instructions with named constant fallback
+        // Custom templates have short behavioral prompts that lack formatting instructions.
+        // Append rendering rules ONLY to custom templates.
         // The defaultSystemPrompt already works well — don't bloat it.
-        // TODO (PM): renderingRules should be a configurable field on output_templates
-        const renderingRulesDeep = `\n\nIMPORTANT: Use rich markdown formatting in all output — ## headers for sections, ### for subsections, bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Use <cite index="N">claim</cite> HTML tags for inline citations where N matches the source index. Your output will be rendered with a markdown engine.`;
+        const renderingRules = renderingInstructions?.trim()
+            || DEFAULT_RESEARCH_RENDERING_RULES;
+        const renderingSource = renderingInstructions?.trim()
+            ? 'template' : 'default-research';
         const effectiveSystemPrompt = systemPrompt
-            ? systemPrompt + renderingRulesDeep
+            ? systemPrompt + renderingRules
             : defaultSystemPrompt;
 
         // ============================================================
@@ -2864,6 +2905,9 @@ RESEARCH REQUIREMENTS:
                 // Flag indicating structured output was received
                 structured: true,
 
+                // S27-OT: Rendering source provenance
+                renderingSource,
+
                 // ================================================================
                 // LEGACY COMPATIBILITY FIELDS
                 // These exist only for backward compatibility with older code.
@@ -2938,7 +2982,8 @@ app.post('/api/research/write', async (req, res) => {
             });
         }
 
-        const { evidence, query, voiceConfig } = req.body;
+        // S27-OT: Added renderingInstructions for per-template formatting
+        const { evidence, query, voiceConfig, renderingInstructions } = req.body;
 
         if (!evidence || !query) {
             return res.status(400).json({ error: 'Missing required fields: evidence, query' });
@@ -2948,56 +2993,24 @@ app.post('/api/research/write', async (req, res) => {
         console.log('[Research Write] Voice config:', voiceConfig);
 
         // ============================================================
-        // S25-SFR: Writer prompt architecture
-        //
-        // TWO LAYERS (will become configurable objects — PM follow-up):
+        // S25-SFR → S27-OT: Writer prompt architecture (TWO LAYERS)
         //   1. APPROACH PROMPT  — from output_templates.systemPrompt (received as `query`)
         //      Controls: research angle, voice, structure, what to focus on
-        //   2. RENDERING RULES  — appended formatting instructions
+        //   2. RENDERING RULES  — from output_templates.renderingInstructions (S27-OT)
         //      Controls: how the LLM formats output for our ReactMarkdown renderer
-        //
-        // TODO (PM): Both layers should be configurable per template type.
-        //   - Approach = output_templates.systemPrompt (already configurable)
-        //   - Rendering = new `renderingInstructions` field on output_templates
         //   - Voice config = already in WriterAgentConfigPayload schema
-        //   See: src/core/schema/writer-agent-config.ts
-        //   See: src/core/schema/research-agent-config.ts
-        //   See: data/seeds/output-templates.json
         // ============================================================
 
         // Layer 1: Approach prompt — the template's systemPrompt drives research approach
         // (received as `query` from writer-agent.ts callLLMForWriting)
         const approachPrompt = query;
 
-        // Layer 2: Rendering rules — how output should be formatted for GroveSkins
-        const renderingRules = `
-
-## Rendering Rules (ReactMarkdown + GFM)
-Your output will be rendered by a markdown engine. Use rich formatting:
-
-- **Section headers**: Use ## for major sections, ### for subsections
-- **Bold key terms**: Wrap important concepts in **bold**
-- **Bullet lists**: Use - for unordered lists of key findings
-- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
-- **Tables**: Use GFM markdown tables for comparisons or structured data
-- **Blockquotes**: Use > for notable quotes from sources
-- **Inline citations**: Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index. Example: <cite index="1">GPU inference improved 10x</cite>
-
-## Document Structure
-1. Open with a clear thesis/position (2-3 sentences)
-2. Use ## headers to organize analysis into 3-5 logical sections
-3. Each section should have substantive content with specific data and evidence
-4. Close with a synthesis or forward-looking conclusion
-5. Note limitations honestly
-
-## Output Format
-Return valid JSON:
-{
-  "position": "1-3 sentence thesis statement",
-  "analysis": "Full markdown document with ## sections, **bold**, lists, tables, and <cite index=\\"N\\">...</cite> tags",
-  "limitations": "Honest limitations of this analysis",
-  "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
-}`;
+        // S27-OT: Template-first rendering instructions with named constant fallback
+        // Layer 2: Rendering rules — from template or default
+        const renderingRules = renderingInstructions?.trim()
+            || DEFAULT_WRITER_RENDERING_RULES;
+        const renderingSource = renderingInstructions?.trim()
+            ? 'template' : 'default-writer';
 
         // Compose: approach + voice + rendering rules
         const writerSystemPrompt = `You are a senior research writer.
@@ -3036,7 +3049,8 @@ Transform this evidence into a structured research document following your appro
             result = { analysis: text, position: '', limitations: '', citations: [] };
         }
 
-        res.json(result);
+        // S27-OT: Include rendering source provenance in response
+        res.json({ ...result, renderingSource });
 
     } catch (error) {
         console.error('[Research Write] Error:', error.message);

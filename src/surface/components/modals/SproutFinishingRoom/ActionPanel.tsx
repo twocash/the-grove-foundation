@@ -51,7 +51,7 @@ export interface ActionPanelProps {
   onClose?: () => void; // Optional - kept for interface compatibility
   onSproutUpdate?: (sprout: Sprout) => void;
   /** S23-SFR v1.0: Route generated document to center column as artifact tab */
-  onDocumentGenerated?: (document: ResearchDocument, templateId: string, templateName: string) => void;
+  onDocumentGenerated?: (document: ResearchDocument, templateId: string, templateName: string, renderingSource?: 'template' | 'default-writer' | 'default-research') => void;
 }
 
 /**
@@ -226,7 +226,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         const templateName = typeof result.templateUsed === 'string'
           ? result.templateUsed
           : result.templateUsed?.name || templateId;
-        onDocumentGenerated(result.document, templateId, templateName);
+        onDocumentGenerated(result.document, templateId, templateName, result.renderingSource);
       }
 
       toast.success('Document generated successfully!');
