@@ -9,7 +9,8 @@ import type { CollectionDataResult } from '../../patterns/console-factory.types'
 import type { PatchOperation } from '../../types/copilot.types';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
-import type { GeneratedArtifact } from '@core/schema/sprout';
+import type { ResearchBranch, Evidence } from '@core/schema/research-strategy';
+import type { GeneratedArtifact, CanonicalResearch } from '@core/schema/sprout';
 import { RESEARCH_SPROUTS_TABLE } from '@core/schema/research-sprout-registry';
 
 // =============================================================================
@@ -118,6 +119,19 @@ export interface SproutPayload {
   qualityError?: string;
 
   // ─────────────────────────────────────────────────────────────
+  // Research Data (for SFR Bridge)
+  // ─────────────────────────────────────────────────────────────
+
+  /** S22-WP: Canonical research output from deep research API */
+  canonicalResearch?: CanonicalResearch;
+
+  /** Research branches with per-branch evidence */
+  branches?: ResearchBranch[];
+
+  /** Aggregated evidence from all branches */
+  evidence?: Evidence[];
+
+  // ─────────────────────────────────────────────────────────────
   // Document Generation (Sprint: research-template-wiring-v1)
   // ─────────────────────────────────────────────────────────────
 
@@ -198,6 +212,10 @@ function rowToGroveObject(row: Record<string, unknown>): GroveObject<SproutPaylo
       qualityStatus,
       qualityScore: qualityScore || undefined,
       qualityError,
+      // Research data (for SFR bridge)
+      canonicalResearch: row.canonical_research as CanonicalResearch | undefined,
+      branches: (row.branches as ResearchBranch[]) || undefined,
+      evidence: (row.evidence as Evidence[]) || undefined,
       // Document generation (Sprint: research-template-wiring-v1)
       researchDocument,
       // S26-NUR: Generated artifacts + promotion fields

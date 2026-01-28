@@ -27,6 +27,8 @@ export interface GeneratedArtifact {
   templateName: string;
   /** ISO timestamp of generation */
   generatedAt: string;
+  /** ISO timestamp when grafted (saved) to Nursery — absent means draft/unsaved */
+  savedAt?: string;
 }
 
 // ─────────────────────────────────────────────────────────────

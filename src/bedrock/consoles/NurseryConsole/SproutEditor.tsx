@@ -22,6 +22,7 @@ import { GenerateDocumentSection } from './GenerateDocumentSection';
 import { DocumentContentModal } from '../GardenConsole/DocumentContentModal';
 // S26-NUR: SFR Bridge — view artifacts and promote via SproutFinishingRoom
 import { SproutFinishingRoom } from '@surface/components/modals/SproutFinishingRoom/SproutFinishingRoom';
+import { ToastProvider } from '@explore/context/ToastContext';
 import { nurseryToSprout } from '@core/adapters/nurseryToSprout';
 import type { NurseryBridgeInput } from '@core/adapters/nurseryToSprout';
 import type { Sprout } from '@core/schema/sprout';
@@ -194,6 +195,9 @@ export function SproutEditor({
         tags: sprout.payload.tags,
         notes: sprout.payload.notes,
         synthesis: sprout.payload.synthesis,
+        canonicalResearch: sprout.payload.canonicalResearch,
+        branches: sprout.payload.branches,
+        evidence: sprout.payload.evidence,
         researchDocument: sprout.payload.researchDocument,
         generatedArtifacts: sprout.payload.generatedArtifacts,
         promotedAt: sprout.payload.promotedAt,
@@ -221,11 +225,16 @@ export function SproutEditor({
     setShowSFRModal(true);
   };
 
-  // S26-NUR Phase 3a: When SFR completes promotion, sync the result back to
-  // the Nursery sprout via patch operations. The updatedSprout carries
-  // promotionGardenDocId and promotionTier injected by SFR after garden-bridge
-  // succeeds (see SproutFinishingRoom.tsx handlePromoteToGarden).
+  // S26-NUR Phase 3a: When SFR updates the sprout (artifacts generated OR promotion),
+  // sync the result back to Nursery via patch operations.
   const handleSFRSproutUpdate = useCallback((updatedSprout: Sprout) => {
+    const ops: PatchOperation[] = [];
+
+    // S26-NUR: Sync generated artifacts to Supabase
+    if (updatedSprout.generatedArtifacts && updatedSprout.generatedArtifacts.length > 0) {
+      ops.push({ op: 'replace', path: '/payload/generatedArtifacts', value: updatedSprout.generatedArtifacts });
+    }
+
     // S26-NUR Phase 3a: Extract promotion data injected by SFR's handlePromoteToGarden.
     // These fields are added to the Sprout object at runtime after garden-bridge succeeds.
     const promoted = updatedSprout as Sprout & {
@@ -233,20 +242,21 @@ export function SproutEditor({
       promotionTier?: string;
     };
 
-    const ops: PatchOperation[] = [
-      { op: 'replace', path: '/payload/status', value: 'promoted' },
-      { op: 'replace', path: '/payload/promotedAt', value: promoted.promotedAt ?? new Date().toISOString() },
-    ];
-
-    if (promoted.promotionGardenDocId) {
-      ops.push({ op: 'replace', path: '/payload/promotionGardenDocId', value: promoted.promotionGardenDocId });
+    if (promoted.promotionGardenDocId || promoted.promotedAt) {
+      ops.push({ op: 'replace', path: '/payload/status', value: 'promoted' });
+      ops.push({ op: 'replace', path: '/payload/promotedAt', value: promoted.promotedAt ?? new Date().toISOString() });
+      if (promoted.promotionGardenDocId) {
+        ops.push({ op: 'replace', path: '/payload/promotionGardenDocId', value: promoted.promotionGardenDocId });
+      }
+      if (promoted.promotionTier) {
+        ops.push({ op: 'replace', path: '/payload/promotionTier', value: promoted.promotionTier });
+      }
     }
-    if (promoted.promotionTier) {
-      ops.push({ op: 'replace', path: '/payload/promotionTier', value: promoted.promotionTier });
-    }
 
-    onEdit(ops);
-    onSave();
+    if (ops.length > 0) {
+      onEdit(ops);
+      onSave();
+    }
   }, [onEdit, onSave]);
 
   const handleArchive = async (reason: string, customReason?: string) => {
@@ -733,12 +743,16 @@ export function SproutEditor({
       )}
 
       {/* S26-NUR: SproutFinishingRoom modal — launched from Promote or View Artifacts */}
-      <SproutFinishingRoom
-        sprout={sfrSprout}
-        isOpen={showSFRModal}
-        onClose={() => setShowSFRModal(false)}
-        onSproutUpdate={handleSFRSproutUpdate}
-      />
+      {showSFRModal && (
+        <ToastProvider>
+          <SproutFinishingRoom
+            sprout={sfrSprout}
+            isOpen={showSFRModal}
+            onClose={() => setShowSFRModal(false)}
+            onSproutUpdate={handleSFRSproutUpdate}
+          />
+        </ToastProvider>
+      )}
     </div>
   );
 }

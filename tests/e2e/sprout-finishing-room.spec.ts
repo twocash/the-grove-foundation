@@ -102,17 +102,18 @@ test.describe('S1-SFR-Shell: Finishing Room Foundation', () => {
       return;
     }
 
-    // Verify three columns exist with placeholder content
-    await expect(page.getByText('Provenance Panel (S2)')).toBeVisible();
-    await expect(page.getByText('Document Viewer (S2)')).toBeVisible();
-    await expect(page.getByText('Action Panel (S3)')).toBeVisible();
+    // Verify three columns exist as structural elements
+    // Left column: Provenance panel (280px aside)
+    const leftColumn = page.locator('aside.w-\\[280px\\]').first();
+    await expect(leftColumn).toBeVisible();
 
-    // Verify column widths (left: 280px, right: 320px)
-    const provenancePanel = page.locator('.w-\\[280px\\]').first();
-    const actionPanel = page.locator('.w-\\[320px\\]').first();
+    // Center column: Document viewer (flex-1 main element, always present)
+    const centerColumn = page.locator('main.flex-1').first();
+    await expect(centerColumn).toBeVisible();
 
-    await expect(provenancePanel).toBeVisible();
-    await expect(actionPanel).toBeVisible();
+    // Right column: Action panel (320px aside)
+    const rightColumn = page.locator('aside.w-\\[320px\\]').first();
+    await expect(rightColumn).toBeVisible();
   });
 
   test('US-A003: Close via button and Escape', async ({ page }) => {

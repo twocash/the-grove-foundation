@@ -137,6 +137,22 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           relevanceScore: aggregatedEvidence.reduce((sum, ev) => sum + (ev.relevance || 0), 0) / aggregatedEvidence.length,
           status: 'complete' as const,
         }];
+      } else if (sprout.canonicalResearch) {
+        // S26-NUR: Use canonical research (modern format) as evidence source
+        const cr = sprout.canonicalResearch;
+        branches = [{
+          branchQuery: sprout.query,
+          sources: (cr.sources || []).map(src => ({
+            url: src.url,
+            title: src.title,
+            snippet: src.snippet || '',
+            accessedAt: cr._meta?.capturedAt || new Date().toISOString(),
+            sourceType: 'academic' as const,
+          })),
+          findings: cr.key_findings || [],
+          relevanceScore: cr.confidence_assessment?.score || 0.85,
+          status: 'complete' as const,
+        }];
       } else if (sprout.researchSynthesis) {
         // Fallback: Use synthesis summary as pseudo-evidence
         // This allows document generation even without structured evidence
@@ -159,7 +175,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       }
 
       const totalSources = branches.reduce((sum, b) => sum + b.sources.length, 0);
-      const confidenceScore = sprout.researchSynthesis?.confidence || 0.7;
+      const confidenceScore = sprout.researchSynthesis?.confidence
+        || sprout.canonicalResearch?.confidence_assessment?.score
+        || 0.7;
 
       const evidenceBundle = {
         sproutId: sprout.id,
@@ -256,49 +274,13 @@ ${sprout.response}
     toast.success('Document exported');
   }, [sprout.id, sprout.query, sprout.capturedAt, sprout.provenance, sprout.response, signals, emit, toast, provenance]);
 
-  // S22-WP: Save to Nursery handler
-  const handleSaveToNursery = useCallback(async (document: ResearchDocument) => {
-    try {
-      // Save document to sprout
-      updateSprout(sprout.id, {
-        researchDocument: document,
-        stage: 'captured'
-      });
-
-      // Notify parent of update
-      if (onSproutUpdate) {
-        const updated = getSprout(sprout.id);
-        if (updated) onSproutUpdate(updated);
-      }
-
-      // Emit signal
-      signals.emitRefined(
-        sprout.id,
-        { refinementType: 'save-to-nursery', charsDelta: document.analysis?.length || 0 },
-        provenance
-      );
-
-      emit.custom('sproutSavedToNursery', {
-        sproutId: sprout.id,
-        documentTitle: document.title,
-      });
-
-      toast.success('Saved to Nursery!');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Save failed';
-      toast.error(message);
-    }
-  }, [sprout.id, updateSprout, getSprout, onSproutUpdate, signals, emit, toast, provenance]);
-
   return (
     <aside className="w-[320px] flex-shrink-0 border-l border-[var(--glass-border)] overflow-y-auto overflow-x-hidden flex flex-col" style={{ backgroundColor: 'var(--glass-elevated, transparent)' }}>
       {/* S22-WP: Primary Workflow - Writer Panel */}
       <WriterPanel
         sprout={sprout}
         onGenerate={handleGenerateDocument}
-        onSaveToNursery={handleSaveToNursery}
         isGenerating={isGenerating}
-        generatedDocument={sprout.researchDocument}
       />
 
       {/* S22-WP: Export actions - simplified for v1.0 */}

@@ -14,14 +14,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useOutputTemplateData } from '@bedrock/consoles/ExperienceConsole/useOutputTemplateData';
 import type { Sprout } from '@core/schema/sprout';
-import type { ResearchDocument } from '@core/schema/research-document';
 
 export interface WriterPanelProps {
   sprout: Sprout;
   onGenerate: (templateId: string, userNotes: string) => Promise<void>;
-  onSaveToNursery?: (document: ResearchDocument) => Promise<void>;
   isGenerating: boolean;
-  generatedDocument?: ResearchDocument | null;
 }
 
 /**
@@ -31,19 +28,17 @@ export interface WriterPanelProps {
  * 1. User selects Writer template from visual grid
  * 2. User adds optional notes for context
  * 3. User clicks Generate → Writer Agent runs
- * 4. Preview shows generated document
- * 5. User can Save to Nursery
+ *
+ * S24-SFR: "Save to Nursery" and "Promote to Garden" actions moved to
+ * DocumentViewer center column bottom bar.
  */
 export const WriterPanel: React.FC<WriterPanelProps> = ({
   sprout,
   onGenerate,
-  onSaveToNursery,
   isGenerating,
-  generatedDocument,
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [userNotes, setUserNotes] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   // Get writer templates from output template data
   const { objects: templates, loading: templatesLoading } = useOutputTemplateData();
@@ -70,6 +65,7 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
   // Check if research evidence exists
   const hasResearchEvidence = useMemo(() => {
     return (
+      !!sprout.canonicalResearch ||
       (sprout.researchBranches && sprout.researchBranches.length > 0) ||
       (sprout.researchEvidence && sprout.researchEvidence.length > 0) ||
       !!sprout.researchSynthesis
@@ -80,16 +76,6 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
     if (!selectedTemplateId) return;
     await onGenerate(selectedTemplateId, userNotes);
   }, [selectedTemplateId, userNotes, onGenerate]);
-
-  const handleSave = useCallback(async () => {
-    if (!generatedDocument || !onSaveToNursery) return;
-    setIsSaving(true);
-    try {
-      await onSaveToNursery(generatedDocument);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [generatedDocument, onSaveToNursery]);
 
   // Get selected template details
   const selectedTemplate = useMemo(() => {
@@ -194,8 +180,6 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Generating Artifact...
             </span>
-          ) : generatedDocument ? (
-            'Regenerate Artifact'
           ) : (
             'Generate Artifact'
           )}
@@ -207,39 +191,6 @@ export const WriterPanel: React.FC<WriterPanelProps> = ({
           </p>
         )}
       </div>
-
-      {/* Section: Generated Document Preview (if exists) */}
-      {generatedDocument && (
-        <div className="p-4 border-b border-[var(--glass-border)]">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="w-1 h-4 bg-cyan-500 rounded-full" />
-            <h3 className="text-sm font-medium text-[var(--glass-text-primary)]">
-              Document Generated
-            </h3>
-          </div>
-
-          <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 mb-3">
-            <p className="text-sm text-[var(--glass-text-primary)] font-medium">
-              {generatedDocument.title || 'Research Document'}
-            </p>
-            {generatedDocument.positionStatement && (
-              <p className="mt-1 text-xs text-[var(--glass-text-muted)] line-clamp-3">
-                {generatedDocument.positionStatement}
-              </p>
-            )}
-          </div>
-
-          {onSaveToNursery && (
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="w-full py-2 px-4 bg-cyan-500 text-white rounded-lg font-medium text-sm hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSaving ? 'Saving...' : 'Save to Nursery'}
-            </button>
-          )}
-        </div>
-      )}
 
       {/* Section: Metadata */}
       <div className="p-4 mt-auto">

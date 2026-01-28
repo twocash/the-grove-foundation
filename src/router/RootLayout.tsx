@@ -10,7 +10,7 @@ import { ThemeProvider } from '../theme';
 import { GroveDataProviderComponent, SupabaseAdapter } from '@core/data';
 import { SproutFinishingRoom } from '@surface/components/modals/SproutFinishingRoom';
 import { ToastProvider } from '../explore/context/ToastContext';
-import type { Sprout, SproutStage, SproutProvenance, CanonicalResearch } from '@core/schema/sprout';
+import type { Sprout, SproutStage, SproutProvenance, CanonicalResearch, GeneratedArtifact } from '@core/schema/sprout';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
 import { RESEARCH_SPROUTS_TABLE } from '@core/schema/research-sprout-registry';
 
@@ -102,6 +102,8 @@ function researchSproutToSprout(rs: ResearchSprout): Sprout {
     notes: rs.notes,
     sessionId: rs.sessionId || 'unknown',
     creatorId: rs.creatorId,
+    // S26-NUR: Map generated artifacts from ResearchSprout
+    generatedArtifacts: rs.generatedArtifacts,
   };
 }
 
@@ -141,6 +143,8 @@ function rowToResearchSprout(row: Record<string, unknown>): ResearchSprout {
     rating: row.rating as number | undefined,
     // S23-SFR: Add gateDecisions to fix TypeScript error
     gateDecisions: (row.gate_decisions as ResearchSprout['gateDecisions']) || [],
+    // S26-NUR: Map generated_artifacts from Supabase row
+    generatedArtifacts: (row.generated_artifacts as GeneratedArtifact[]) || undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -253,7 +257,17 @@ function FinishingRoomGlobal() {
         sourcesCount: foundSprout.canonicalResearch?.sources?.length || 0,
         execSummaryLength: foundSprout.canonicalResearch?.executive_summary?.length || 0,
       });
-      console.log('[FinishingRoomGlobal] Using sprout data from event (no network request needed)');
+      console.log('[FinishingRoomGlobal] Using sprout data from event');
+
+      // S26-NUR: Event data may be stale (cached context). Merge latest artifacts from Supabase
+      // so that artifacts generated in a previous SFR session are not lost on reopen.
+      if (!foundSprout.generatedArtifacts?.length) {
+        const fresh = await fetchSproutFromSupabase(sproutId);
+        if (fresh?.generatedArtifacts?.length) {
+          foundSprout = { ...foundSprout, generatedArtifacts: fresh.generatedArtifacts };
+          console.log('[FinishingRoomGlobal] Merged artifacts from Supabase:', fresh.generatedArtifacts.length);
+        }
+      }
     }
 
     // 1. First check test sprout (used by E2E tests) - localStorage takes priority for tests
@@ -314,7 +328,7 @@ function FinishingRoomGlobal() {
   }, []);
 
   // Handle sprout updates (from action panel)
-  const handleSproutUpdate = useCallback((updated: Sprout) => {
+  const handleSproutUpdate = useCallback(async (updated: Sprout) => {
     setSprout(updated);
     // Update in localStorage
     const sproutsJson = localStorage.getItem('grove-sprouts');
@@ -328,6 +342,43 @@ function FinishingRoomGlobal() {
         }
       } catch (e) {
         console.warn('[FinishingRoomGlobal] Failed to update sprout:', e);
+      }
+    }
+
+    // S26-NUR: Persist generated artifacts to Supabase
+    if (updated.generatedArtifacts && updated.generatedArtifacts.length > 0) {
+      console.log('[FinishingRoomGlobal] Persisting artifacts to Supabase:', {
+        sproutId: updated.id,
+        artifactCount: updated.generatedArtifacts.length,
+      });
+      const client = getFinishingRoomSupabaseClient();
+      if (client) {
+        try {
+          const { error: writeError, status, statusText } = await client
+            .from(RESEARCH_SPROUTS_TABLE)
+            .update({
+              generated_artifacts: updated.generatedArtifacts,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', updated.id);
+
+          if (writeError) {
+            console.error('[FinishingRoomGlobal] Supabase artifact write error:', {
+              code: writeError.code,
+              message: writeError.message,
+              details: writeError.details,
+              hint: writeError.hint,
+              status,
+              statusText,
+            });
+          } else {
+            console.log('[FinishingRoomGlobal] Artifacts persisted to Supabase successfully');
+          }
+        } catch (e) {
+          console.error('[FinishingRoomGlobal] Failed to persist artifacts to Supabase:', e);
+        }
+      } else {
+        console.warn('[FinishingRoomGlobal] No Supabase client — artifacts only in memory');
       }
     }
   }, []);

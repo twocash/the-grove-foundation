@@ -17,7 +17,8 @@ import type { ResearchStrategy, ResearchBranch, Evidence } from './research-stra
 import type { ConfirmationMode } from './prompt-architect-config';
 import type { ResearchDocument } from './research-document';
 // S22-WP: Import canonical research for 100% lossless structured output storage
-import type { CanonicalResearch } from './sprout';
+// S26-NUR: Import GeneratedArtifact for persistent artifact history
+import type { CanonicalResearch, GeneratedArtifact } from './sprout';
 
 // =============================================================================
 // Status Lifecycle
@@ -302,6 +303,13 @@ export interface ResearchSprout {
    * @see CanonicalResearch type in sprout.ts for full structure
    */
   canonicalResearch?: CanonicalResearch;
+
+  /**
+   * S26-NUR: Generated artifacts from Writer agent, persisted to Supabase.
+   * Each artifact is a document generated via a Writer template.
+   * Mapped from `generated_artifacts` column in research_sprouts table.
+   */
+  generatedArtifacts?: GeneratedArtifact[];
 
   /**
    * IDs of child sprouts spawned during research

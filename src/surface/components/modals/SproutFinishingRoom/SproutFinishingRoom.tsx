@@ -60,8 +60,12 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
   // S24-SFR: Garden promotion state
   const [promotionResult, setPromotionResult] = useState<PromotionResult | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
+  // S26-NUR: Save-to-nursery state (distinct from promote-to-garden)
+  const [isSaving, setIsSaving] = useState(false);
 
   // S25-GSE: Called when ActionPanel generates a new document — persist to sprout
+  // Side effects (localStorage write, Supabase sync) run OUTSIDE the state updater
+  // to avoid React strict mode double-invocation issues.
   const handleDocumentGenerated = useCallback((document: ResearchDocument, templateId: string, templateName: string) => {
     const artifact: GeneratedArtifact = {
       document,
@@ -69,15 +73,65 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
       templateName,
       generatedAt: new Date().toISOString(),
     };
-    setArtifacts(prev => {
-      const next = [...prev, artifact];
-      // Auto-switch to the newly generated version tab
-      setActiveArtifactIndex(next.length - 1);
-      // Persist full artifact history to sprout (survives modal close + page refresh)
-      updateSprout(sprout.id, { generatedArtifacts: next });
-      return next;
-    });
-  }, [sprout.id, updateSprout]);
+    const next = [...artifacts, artifact];
+
+    // Update React state
+    setArtifacts(next);
+    setActiveArtifactIndex(next.length - 1);
+
+    // Persist to localStorage (may silently fail for Supabase-sourced sprouts)
+    updateSprout(sprout.id, { generatedArtifacts: next });
+
+    // S26-NUR: Notify parent (Nursery/Explore) so artifacts persist to Supabase
+    if (onSproutUpdate) {
+      const base = getSprout(sprout.id) ?? sprout;
+      console.log('[SFR] Calling onSproutUpdate with artifacts:', next.length, 'base from:', getSprout(sprout.id) ? 'localStorage' : 'prop');
+      onSproutUpdate({ ...base, generatedArtifacts: next });
+    } else {
+      console.warn('[SFR] No onSproutUpdate callback — artifacts only in localStorage');
+    }
+  }, [artifacts, sprout, updateSprout, onSproutUpdate, getSprout]);
+
+  // S26-NUR: Graft artifact to Nursery — stamps savedAt, persists to sprout.
+  // Sequential lifecycle: Generate → Save to Nursery → Promote to Garden.
+  const handleSaveToNursery = useCallback(async (document: ResearchDocument) => {
+    if (activeArtifactIndex === null) return;
+
+    setIsSaving(true);
+    try {
+      // Stamp savedAt on the active artifact
+      const now = new Date().toISOString();
+      const updated = artifacts.map((a, i) =>
+        i === activeArtifactIndex ? { ...a, savedAt: now } : a
+      );
+
+      // Update React state
+      setArtifacts(updated);
+
+      // Persist document + updated artifacts to sprout
+      updateSprout(sprout.id, {
+        researchDocument: document,
+        generatedArtifacts: updated,
+      });
+
+      // Notify parent so Supabase sync happens
+      if (onSproutUpdate) {
+        const base = getSprout(sprout.id) ?? sprout;
+        onSproutUpdate({
+          ...base,
+          researchDocument: document,
+          generatedArtifacts: updated,
+        });
+      }
+
+      toast.success('Saved to Nursery!');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Save failed';
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [activeArtifactIndex, artifacts, sprout, updateSprout, getSprout, onSproutUpdate, toast]);
 
   // S24-SFR: Promote artifact to Garden (two-step: upload + provenance patch)
   const handlePromoteToGarden = useCallback(async (document: ResearchDocument) => {
@@ -290,6 +344,8 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
             generatedArtifacts={artifacts}
             activeArtifactIndex={activeArtifactIndex}
             onArtifactSelect={setActiveArtifactIndex}
+            onSaveToNursery={handleSaveToNursery}
+            isSaving={isSaving}
             onPromoteToGarden={handlePromoteToGarden}
             isPromoting={isPromoting}
             promotionResult={promotionResult}

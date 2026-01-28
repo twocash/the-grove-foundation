@@ -21,9 +21,10 @@
 //   payload.tags        → Sprout.tags
 //   payload.notes       → Sprout.notes
 
-import type { Sprout, SproutStatus, SproutStage, SproutProvenance, GeneratedArtifact } from '../schema/sprout';
+import type { Sprout, SproutStatus, SproutStage, SproutProvenance, GeneratedArtifact, CanonicalResearch } from '../schema/sprout';
 import type { ResearchSproutStatus } from '../schema/research-sprout';
 import type { ResearchDocument } from '../schema/research-document';
+import type { ResearchBranch, Evidence } from '../schema/research-strategy';
 
 /**
  * Minimal input shape for the adapter.
@@ -48,6 +49,9 @@ export interface NurseryBridgeInput {
       confidence: number;
       synthesizedAt: string;
     } | null;
+    canonicalResearch?: CanonicalResearch;
+    branches?: ResearchBranch[];
+    evidence?: Evidence[];
     researchDocument?: ResearchDocument;
     generatedArtifacts?: GeneratedArtifact[];
     promotedAt?: string;
@@ -142,6 +146,9 @@ export function nurseryToSprout(input: NurseryBridgeInput): Sprout {
     // Research data
     researchDocument: payload.researchDocument,
     generatedArtifacts: payload.generatedArtifacts,
+    canonicalResearch: payload.canonicalResearch,
+    researchBranches: payload.branches,
+    researchEvidence: payload.evidence,
 
     // Research synthesis → legacy fields for SFR compatibility
     researchSynthesis: payload.synthesis ? {

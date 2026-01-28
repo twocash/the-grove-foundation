@@ -29,6 +29,10 @@ export interface DocumentViewerProps {
   activeArtifactIndex?: number | null;
   /** S23-SFR v1.0: Callback when user selects an artifact tab (null = back to research) */
   onArtifactSelect?: (index: number | null) => void;
+  /** S26-NUR: Save current artifact to Nursery (persist to sprout) */
+  onSaveToNursery?: (document: ResearchDocument) => void;
+  /** S26-NUR: Whether a save-to-nursery call is in flight */
+  isSaving?: boolean;
   /** S24-SFR: Promote current artifact to Garden (seed tier) */
   onPromoteToGarden?: (document: ResearchDocument) => void;
   /** S24-SFR: Whether promotion API call is in flight */
@@ -56,6 +60,8 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   generatedArtifacts = [],
   activeArtifactIndex = null,
   onArtifactSelect,
+  onSaveToNursery,
+  isSaving = false,
   onPromoteToGarden,
   isPromoting = false,
   promotionResult = null,
@@ -324,23 +330,49 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         </div>
       )}
 
-      {/* S24-SFR: Promote to Garden action bar - visible when viewing artifact, before promotion */}
-      {isViewingArtifact && activeArtifact && onPromoteToGarden && !promotionResult && (
+      {/* S26-NUR: Artifact action bar — sequential lifecycle:
+           1. Unsaved artifact → "Save to Nursery" (graft to sprout)
+           2. Saved artifact   → "Promote to Garden" (publish to Garden) */}
+      {isViewingArtifact && activeArtifact && !promotionResult && (
         <div className="flex-shrink-0 px-6 py-3 border-t border-[var(--glass-border)] flex items-center justify-between" style={{ backgroundColor: 'var(--glass-elevated)' }}>
           <span className="text-sm text-[var(--glass-text-muted)]">
             V{(activeArtifactIndex ?? 0) + 1}: {activeArtifact.templateName}
           </span>
-          <button
-            onClick={() => onPromoteToGarden(activeArtifact.document)}
-            disabled={isPromoting}
-            className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
-            style={{
-              backgroundColor: isPromoting ? 'var(--glass-elevated)' : 'var(--semantic-success, #10b981)',
-              color: isPromoting ? 'var(--glass-text-muted)' : '#ffffff',
-            }}
-          >
-            {isPromoting ? 'Promoting...' : 'Promote to Garden'}
-          </button>
+          {/* Step 1: Save to Nursery (artifact not yet grafted) */}
+          {!activeArtifact.savedAt && onSaveToNursery && (
+            <button
+              onClick={() => onSaveToNursery(activeArtifact.document)}
+              disabled={isSaving}
+              className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+              style={{
+                backgroundColor: isSaving ? 'var(--glass-elevated)' : 'var(--neon-cyan, #06b6d4)',
+                color: isSaving ? 'var(--glass-text-muted)' : '#ffffff',
+              }}
+            >
+              {isSaving ? 'Saving...' : 'Save to Nursery'}
+            </button>
+          )}
+          {/* Step 2: Promote to Garden (artifact already grafted) */}
+          {activeArtifact.savedAt && (
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[var(--glass-text-muted)]">
+                Saved to {sprout.id.slice(0, 8)}
+              </span>
+              {onPromoteToGarden && (
+                <button
+                  onClick={() => onPromoteToGarden(activeArtifact.document)}
+                  disabled={isPromoting}
+                  className="py-2 px-6 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+                  style={{
+                    backgroundColor: isPromoting ? 'var(--glass-elevated)' : 'var(--semantic-success, #10b981)',
+                    color: isPromoting ? 'var(--glass-text-muted)' : '#ffffff',
+                  }}
+                >
+                  {isPromoting ? 'Promoting...' : 'Promote to Garden'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </main>
