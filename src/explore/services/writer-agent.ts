@@ -182,10 +182,9 @@ function formatEvidenceForPrompt(
   for (const branch of bundle.branches) {
     if (branch.status !== 'complete') continue;
 
-    // Filter by confidence if required
-    const filteredSources = branch.sources.filter(
-      s => branch.relevanceScore >= config.qualityRules.minConfidenceToInclude
-    );
+    // S28-PIPE: No confidence filtering (text-based config handles quality via instructions)
+    // All sources passed to writer - prompt instructions control what gets used
+    const filteredSources = branch.sources;
 
     if (filteredSources.length === 0) continue;
 

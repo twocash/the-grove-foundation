@@ -527,11 +527,7 @@ export {
   // Status
   type OutputTemplateStatus,
   OutputTemplateStatusSchema,
-  // Citation
-  type CitationStyle,
-  CitationStyleSchema,
-  type CitationFormat,
-  CitationFormatSchema,
+  // S28-PIPE: Citation enums removed (text-based citationsStyle now)
   // Config
   type OutputTemplateConfig,
   OutputTemplateConfigSchema,

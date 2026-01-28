@@ -53,10 +53,10 @@ export async function loadResearchAgentConfig(
     const supabase = getSupabaseClient();
 
     // Query Supabase for active config (singleton pattern)
+    // S28-PIPE: No grove_id column yet - just query for active status
     const { data, error } = await supabase
       .from('research_agent_configs')
       .select('payload')
-      .eq('grove_id', groveId)
       .eq("meta->>'status'", 'active')
       .single();
 
@@ -99,10 +99,10 @@ export async function loadWriterAgentConfig(
     const supabase = getSupabaseClient();
 
     // Query Supabase for active config (singleton pattern)
+    // S28-PIPE: No grove_id column yet - just query for active status
     const { data, error } = await supabase
       .from('writer_agent_configs')
       .select('payload')
-      .eq('grove_id', groveId)
       .eq("meta->>'status'", 'active')
       .single();
 
