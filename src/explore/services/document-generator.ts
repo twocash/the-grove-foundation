@@ -175,7 +175,7 @@ export async function generateDocument(
     let template: LoadedTemplate | undefined;
 
     if (request.writerTemplateId) {
-      template = loadTemplateById(request.writerTemplateId);
+      template = await loadTemplateById(request.writerTemplateId);
       if (template) {
         console.log(`[DocumentGenerator] Using template: ${template.name} (${template.id})`);
       } else {
@@ -185,7 +185,7 @@ export async function generateDocument(
 
     // Fall back to default writer template
     if (!template) {
-      template = loadDefaultTemplate('writer');
+      template = await loadDefaultTemplate('writer');
       if (template) {
         console.log(`[DocumentGenerator] Using default writer template: ${template.name}`);
       }
