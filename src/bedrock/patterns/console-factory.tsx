@@ -183,6 +183,20 @@ export function createBedrockConsole<T>(
       }
     }, [externalSelectedId]);
 
+    // S27-OT-FIX: Reset hasChanges when selection changes programmatically
+    // This covers the fork flow where onSelectObject(id) calls setSelectedId directly
+    // without going through handleSelect (which already resets hasChanges)
+    const prevSelectedIdRef = useRef<string | null>(null);
+    useEffect(() => {
+      if (selectedId !== prevSelectedIdRef.current) {
+        // Only reset if we're switching to a DIFFERENT object (not initial mount)
+        if (prevSelectedIdRef.current !== null) {
+          setHasChanges(false);
+        }
+        prevSelectedIdRef.current = selectedId;
+      }
+    }, [selectedId]);
+
     // Patch history for undo/redo
     const patchHistory = usePatchHistory({ objectId: selectedId || undefined });
 
