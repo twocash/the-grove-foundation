@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Config Loading & Merge Strategy</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    .section {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+      border-radius: 2px;
+    }
+
+    /* Layer Stack Visualization */
+    .layer-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .layer {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid;
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      margin-bottom: -8px;
+      z-index: 1;
+    }
+    .layer:nth-child(1) { border-color: #22c55e; z-index: 4; }
+    .layer:nth-child(2) { border-color: #f59e0b; z-index: 3; margin-top: 0; }
+    .layer:nth-child(3) { border-color: #8b5cf6; z-index: 2; }
+    .layer:nth-child(4) { border-color: #3b82f6; z-index: 1; }
+
+    .layer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .layer-name {
+      font-weight: 600;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .layer-priority {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .layer:nth-child(1) .layer-priority { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .layer:nth-child(2) .layer-priority { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .layer:nth-child(3) .layer-priority { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+    .layer:nth-child(4) .layer-priority { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+
+    .layer-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .field {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+    .field-name {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+    .field-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+    .field-value.overridden {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+    .field-value.active { color: #22c55e; }
+    .field-value.inherited { color: #94a3b8; }
+
+    /* Merge Algorithm */
+    .merge-algo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .code-panel {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: rgba(30, 41, 59, 0.8);
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .code-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .code-dot.red { background: #ef4444; }
+    .code-dot.yellow { background: #f59e0b; }
+    .code-dot.green { background: #22c55e; }
+    .code-filename {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-left: 0.5rem;
+    }
+    .code-body {
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+    .code-body .comment { color: #64748b; }
+    .code-body .keyword { color: #c084fc; }
+    .code-body .string { color: #22c55e; }
+    .code-body .function { color: #60a5fa; }
+    .code-body .number { color: #f59e0b; }
+    .code-body .type { color: #38bdf8; }
+    .code-body .highlight-line {
+      background: rgba(34, 197, 94, 0.1);
+      display: block;
+      margin: 0 -1rem;
+      padding: 0 1rem;
+    }
+
+    /* Result Panel */
+    .result-panel {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .result-title {
+      color: #22c55e;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    .result-field {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+    .result-field-name {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .result-field-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #22c55e;
+    }
+    .result-field-source {
+      font-size: 0.65rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    /* Explanation boxes */
+    .explanation-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .explanation-box p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .explanation-box strong { color: #60a5fa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Config Loading & Merge Strategy</h1>
+    <p class="subtitle">S28-PIPE: How configuration layers compose from database to document</p>
+
+    <!-- Layer Stack Visualization -->
+    <div class="section">
+      <div class="section-title">Configuration Layer Stack (Priority: Top Wins)</div>
+
+      <div class="layer-stack">
+        <!-- Layer 1: Template Overrides (Highest Priority) -->
+        <div class="layer">
+          <div class="layer-header">
+            <div class="layer-name">📄 Template Overrides</div>
+            <span class="layer-priority">Priority: 1 (Highest)</span>
+          </div>
+          <div class="layer-fields">
+            <div class="field">
+              <div class="field-name">systemPrompt</div>
+              <div class="field-value active">"Write as academic..."</div>
+            </div>
+            <div class="field">
+              <div class="field-name">renderingInstructions</div>
+              <div class="field-value active">"Use APA citations..."</div>
+            </div>
+            <div class="field">
+              <div class="field-name">config.formality</div>
+              <div class="field-value active">"academic"</div>
+            </div>
+            <div class="field">
+              <div class="field-name">config.citationFormat</div>
+              <div class="field-value inherited">(not set — inherit)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 2: Writer Agent Config -->
+        <div class="layer">
+          <div class="layer-header">
+            <div class="layer-name">✍️ Writer Agent Config (Active v3)</div>
+            <span class="layer-priority">Priority: 2</span>
+          </div>
+          <div class="layer-fields">
+            <div class="field">
+              <div class="field-name">voice.formality</div>
+              <div class="field-value overridden">"professional"</div>
+            </div>
+            <div class="field">
+              <div class="field-name">voice.perspective</div>
+              <div class="field-value active">"neutral"</div>
+            </div>
+            <div class="field">
+              <div class="field-name">documentStructure.citationStyle</div>
+              <div class="field-value active">"inline"</div>
+            </div>
+            <div class="field">
+              <div class="field-name">documentStructure.citationFormat</div>
+              <div class="field-value active">"apa"</div>
+            </div>
+            <div class="field">
+              <div class="field-name">qualityRules.requireCitations</div>
+              <div class="field-value active">true</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 3: Research Agent Config -->
+        <div class="layer">
+          <div class="layer-header">
+            <div class="layer-name">📊 Research Agent Config (Active v2)</div>
+            <span class="layer-priority">Priority: 3</span>
+          </div>
+          <div class="layer-fields">
+            <div class="field">
+              <div class="field-name">searchDepth</div>
+              <div class="field-value active">3</div>
+            </div>
+            <div class="field">
+              <div class="field-name">sourcePreferences</div>
+              <div class="field-value active">["academic", "practitioner"]</div>
+            </div>
+            <div class="field">
+              <div class="field-name">confidenceThreshold</div>
+              <div class="field-value active">0.6</div>
+            </div>
+            <div class="field">
+              <div class="field-name">maxApiCalls</div>
+              <div class="field-value active">10</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 4: Hardcoded Defaults (Lowest Priority) -->
+        <div class="layer">
+          <div class="layer-header">
+            <div class="layer-name">⚙️ Hardcoded Defaults (Fallback)</div>
+            <span class="layer-priority">Priority: 4 (Lowest)</span>
+          </div>
+          <div class="layer-fields">
+            <div class="field">
+              <div class="field-name">all fields</div>
+              <div class="field-value inherited">DEFAULT_*_CONFIG_PAYLOAD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation-box">
+        <p>
+          <strong>Merge Rule:</strong> Higher priority layers override lower layers.
+          If a field is <strong>not set</strong> in a higher layer, the value is <strong>inherited</strong>
+          from the next layer down. This allows templates to override only specific fields while
+          inheriting grove-wide defaults for everything else.
+        </p>
+      </div>
+    </div>
+
+    <!-- Implementation -->
+    <div class="section">
+      <div class="section-title">Implementation: config-loader.ts (Fixed)</div>
+
+      <div class="merge-algo">
+        <div class="code-panel">
+          <div class="code-header">
+            <span class="code-dot red"></span>
+            <span class="code-dot yellow"></span>
+            <span class="code-dot green"></span>
+            <span class="code-filename">src/explore/services/config-loader.ts</span>
+          </div>
+          <div class="code-body">
+<span class="comment">// Load research config from Supabase (FIXED)</span>
+<span class="keyword">export async function</span> <span class="function">loadResearchAgentConfig</span>(
+  groveId: <span class="type">string</span>
+): <span class="type">Promise</span>&lt;<span class="type">ResearchAgentConfigPayload</span>&gt; {
+  <span class="keyword">const</span> supabase = getSupabaseClient();
+
+<span class="highlight-line">  <span class="comment">// Query active config from database</span></span>
+<span class="highlight-line">  <span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase</span>
+<span class="highlight-line">    .from(<span class="string">'research_agent_configs'</span>)</span>
+<span class="highlight-line">    .select(<span class="string">'payload'</span>)</span>
+<span class="highlight-line">    .eq(<span class="string">'grove_id'</span>, groveId)</span>
+<span class="highlight-line">    .eq(<span class="string">"meta->>'status'"</span>, <span class="string">'active'</span>)</span>
+<span class="highlight-line">    .single();</span>
+
+  <span class="comment">// Return loaded config or fall back to defaults</span>
+  <span class="keyword">if</span> (data?.payload) {
+    <span class="keyword">return</span> data.payload;
+  }
+
+  console.warn(<span class="string">'[ConfigLoader] No active research config, using defaults'</span>);
+  <span class="keyword">return</span> DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD;
+}
+
+<span class="comment">// Load writer config from Supabase (FIXED)</span>
+<span class="keyword">export async function</span> <span class="function">loadWriterAgentConfig</span>(
+  groveId: <span class="type">string</span>
+): <span class="type">Promise</span>&lt;<span class="type">WriterAgentConfigPayload</span>&gt; {
+  <span class="keyword">const</span> supabase = getSupabaseClient();
+
+<span class="highlight-line">  <span class="keyword">const</span> { data } = <span class="keyword">await</span> supabase</span>
+<span class="highlight-line">    .from(<span class="string">'writer_agent_configs'</span>)</span>
+<span class="highlight-line">    .select(<span class="string">'payload'</span>)</span>
+<span class="highlight-line">    .eq(<span class="string">'grove_id'</span>, groveId)</span>
+<span class="highlight-line">    .eq(<span class="string">"meta->>'status'"</span>, <span class="string">'active'</span>)</span>
+<span class="highlight-line">    .single();</span>
+
+  <span class="keyword">if</span> (data?.payload) {
+    <span class="keyword">return</span> data.payload;
+  }
+
+  console.warn(<span class="string">'[ConfigLoader] No active writer config, using defaults'</span>);
+  <span class="keyword">return</span> DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD;
+}
+
+<span class="comment">// Merge configs with template overrides</span>
+<span class="keyword">export function</span> <span class="function">mergeConfigs</span>(
+  writerConfig: <span class="type">WriterAgentConfigPayload</span>,
+  templateOverrides?: <span class="type">Partial</span>&lt;<span class="type">WriterAgentConfigPayload</span>&gt;
+): <span class="type">WriterAgentConfigPayload</span> {
+<span class="highlight-line">  <span class="comment">// Template overrides win over grove-wide config</span></span>
+<span class="highlight-line">  <span class="keyword">return</span> {</span>
+<span class="highlight-line">    ...writerConfig,</span>
+<span class="highlight-line">    ...templateOverrides,</span>
+<span class="highlight-line">    voice: { ...writerConfig.voice, ...templateOverrides?.voice },</span>
+<span class="highlight-line">    documentStructure: { ...writerConfig.documentStructure, ...templateOverrides?.documentStructure },</span>
+<span class="highlight-line">    qualityRules: { ...writerConfig.qualityRules, ...templateOverrides?.qualityRules },</span>
+<span class="highlight-line">  };</span>
+}
+          </div>
+        </div>
+
+        <div class="result-panel">
+          <div class="result-title">✓ Effective Configuration (After Merge)</div>
+          <div class="result-grid">
+            <div class="result-field">
+              <div class="result-field-name">systemPrompt</div>
+              <div class="result-field-value">"Write as academic..."</div>
+              <div class="result-field-source">← Template (Academic Paper)</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">voice.formality</div>
+              <div class="result-field-value">"academic"</div>
+              <div class="result-field-source">← Template override</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">voice.perspective</div>
+              <div class="result-field-value">"neutral"</div>
+              <div class="result-field-source">← Writer Config v3</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">documentStructure.citationFormat</div>
+              <div class="result-field-value">"apa"</div>
+              <div class="result-field-source">← Writer Config v3</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">qualityRules.requireCitations</div>
+              <div class="result-field-value">true</div>
+              <div class="result-field-source">← Writer Config v3</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">research.searchDepth</div>
+              <div class="result-field-value">3</div>
+              <div class="result-field-source">← Research Config v2</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">research.maxApiCalls</div>
+              <div class="result-field-value">10</div>
+              <div class="result-field-source">← Research Config v2</div>
+            </div>
+            <div class="result-field">
+              <div class="result-field-name">renderingInstructions</div>
+              <div class="result-field-value">"Use APA citations..."</div>
+              <div class="result-field-source">← Template (Academic Paper)</div>
+            </div>
+          </div>
+
+          <div class="explanation-box" style="margin-top: 1.5rem; background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3);">
+            <p style="color: #22c55e;">
+              <strong>Provenance Tracking:</strong> The effective config is logged with version info:
+              <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                { researchConfigVersion: 2, writerConfigVersion: 3, templateId: "academic-paper-v1" }
+              </code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

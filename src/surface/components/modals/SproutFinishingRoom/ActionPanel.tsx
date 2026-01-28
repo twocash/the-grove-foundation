@@ -51,7 +51,13 @@ export interface ActionPanelProps {
   onClose?: () => void; // Optional - kept for interface compatibility
   onSproutUpdate?: (sprout: Sprout) => void;
   /** S23-SFR v1.0: Route generated document to center column as artifact tab */
-  onDocumentGenerated?: (document: ResearchDocument, templateId: string, templateName: string, renderingSource?: 'template' | 'default-writer' | 'default-research') => void;
+  onDocumentGenerated?: (
+    document: ResearchDocument,
+    templateId: string,
+    templateName: string,
+    renderingSource?: 'template' | 'default-writer' | 'default-research',
+    writerConfigVersion?: number  // S28-PIPE: Config provenance
+  ) => void;
 }
 
 /**
@@ -189,9 +195,14 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         apiCallsUsed: 0, // Not tracked in Sprout, use 0
       };
 
+      // S28-PIPE: Pass groveId for config loading
+      // TODO: Get from grove context when available
+      const groveId = 'main'; // Default grove for now
+
       const result = await generateDocument({
         evidenceBundle,
         query: sprout.query,
+        groveId,
         writerTemplateId: templateId,
       });
 
@@ -226,7 +237,13 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         const templateName = typeof result.templateUsed === 'string'
           ? result.templateUsed
           : result.templateUsed?.name || templateId;
-        onDocumentGenerated(result.document, templateId, templateName, result.renderingSource);
+        onDocumentGenerated(
+          result.document,
+          templateId,
+          templateName,
+          result.renderingSource,
+          result.writerConfigVersion  // S28-PIPE: Config provenance
+        );
       }
 
       toast.success('Document generated successfully!');

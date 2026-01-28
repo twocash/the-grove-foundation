@@ -31,6 +31,12 @@ export interface GeneratedArtifact {
   savedAt?: string;
   /** Which rendering instructions shaped this artifact (S27-OT provenance) */
   renderingSource?: 'template' | 'default-writer' | 'default-research';
+
+  // S28-PIPE: Config provenance (which versions produced this document)
+  /** Research Agent Config version used (if research was performed) */
+  researchConfigVersion?: number;
+  /** Writer Agent Config version used for writing */
+  writerConfigVersion?: number;
 }
 
 // ─────────────────────────────────────────────────────────────

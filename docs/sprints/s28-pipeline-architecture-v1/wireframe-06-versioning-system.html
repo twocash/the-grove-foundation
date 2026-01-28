@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Config Versioning System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    .section {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #8b5cf6, #6d28d9);
+      border-radius: 2px;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding: 2rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(139, 92, 246, 0.3), rgba(139, 92, 246, 0));
+      transform: translateX(-50%);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .timeline-item:nth-child(odd) { flex-direction: row; }
+    .timeline-item:nth-child(even) { flex-direction: row-reverse; }
+
+    .timeline-content {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .timeline-item:nth-child(odd) .timeline-content {
+      text-align: right;
+    }
+    .timeline-item:nth-child(even) .timeline-content {
+      text-align: left;
+    }
+
+    .timeline-marker {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 10;
+    }
+    .timeline-marker.draft {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+    .timeline-marker.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+      animation: pulse 2s infinite;
+    }
+    .timeline-marker.archived {
+      background: rgba(148, 163, 184, 0.2);
+      color: #64748b;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.5); }
+    }
+
+    .version-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .version-number {
+      font-weight: 700;
+      color: #f8fafc;
+      font-size: 1.1rem;
+    }
+    .version-status {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .version-status.draft { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .version-status.active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .version-status.archived { background: rgba(148, 163, 184, 0.2); color: #64748b; }
+
+    .version-changes {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+    .version-meta {
+      font-size: 0.75rem;
+      color: #64748b;
+      display: flex;
+      gap: 1rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+
+    .change-diff {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+    .change-diff .removed { color: #ef4444; }
+    .change-diff .added { color: #22c55e; }
+
+    /* Activation Flow */
+    .activation-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .flow-step {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: relative;
+    }
+    .flow-step::after {
+      content: '→';
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: #64748b;
+    }
+    .flow-step:last-child::after { content: none; }
+
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(139, 92, 246, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #8b5cf6;
+      margin-bottom: 0.75rem;
+    }
+    .flow-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .flow-description {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Singleton Logic */
+    .singleton-diagram {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .singleton-title {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .singleton-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .singleton-state {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 1rem;
+      border: 2px solid;
+    }
+    .singleton-state.before { border-color: rgba(245, 158, 11, 0.3); }
+    .singleton-state.action { border-color: rgba(139, 92, 246, 0.3); }
+    .singleton-state.after { border-color: rgba(34, 197, 94, 0.3); }
+
+    .state-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    .singleton-state.before .state-label { color: #f59e0b; }
+    .singleton-state.action .state-label { color: #8b5cf6; }
+    .singleton-state.after .state-label { color: #22c55e; }
+
+    .config-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      font-size: 0.8rem;
+    }
+    .config-row:not(:last-child) {
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+    .config-version { font-family: 'JetBrains Mono', monospace; }
+    .config-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 0.5rem;
+    }
+    .config-status-dot.active { background: #22c55e; }
+    .config-status-dot.draft { background: #f59e0b; }
+    .config-status-dot.archived { background: #64748b; }
+
+    /* Warning Box */
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .warning-title {
+      color: #ef4444;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .warning-content {
+      font-size: 0.8rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .info-title {
+      color: #60a5fa;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .info-content {
+      font-size: 0.8rem;
+      color: #93c5fd;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Config Versioning System</h1>
+    <p class="subtitle">S28-PIPE: How configuration versions are created, activated, and archived</p>
+
+    <!-- Version History Timeline -->
+    <div class="section">
+      <div class="section-title">Writer Config Version History</div>
+
+      <div class="timeline">
+        <!-- Version 1 (Archived) -->
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <div class="version-header">
+              <span class="version-number">Version 1</span>
+              <span class="version-status archived">Archived</span>
+            </div>
+            <div class="version-changes">
+              Initial configuration with professional defaults
+            </div>
+            <div class="version-meta">
+              <span>Created: 2025-12-15</span>
+              <span>Archived: 2026-01-10</span>
+            </div>
+          </div>
+          <div class="timeline-marker archived">v1</div>
+        </div>
+
+        <!-- Version 2 (Archived) -->
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <div class="version-header">
+              <span class="version-number">Version 2</span>
+              <span class="version-status archived">Archived</span>
+            </div>
+            <div class="version-changes">
+              Added citation format enforcement, increased confidence threshold
+            </div>
+            <div class="change-diff">
+              <div class="removed">- citationFormat: "simple"</div>
+              <div class="added">+ citationFormat: "apa"</div>
+              <div class="removed">- minConfidenceToInclude: 0.4</div>
+              <div class="added">+ minConfidenceToInclude: 0.5</div>
+            </div>
+            <div class="version-meta">
+              <span>Created: 2026-01-10</span>
+              <span>Archived: 2026-01-27</span>
+            </div>
+          </div>
+          <div class="timeline-marker archived">v2</div>
+        </div>
+
+        <!-- Version 3 (Active) -->
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <div class="version-header">
+              <span class="version-number">Version 3</span>
+              <span class="version-status active">Active</span>
+            </div>
+            <div class="version-changes">
+              Enabled uncertainty flagging, refined voice personality
+            </div>
+            <div class="change-diff">
+              <div class="added">+ qualityRules.flagUncertainty: true</div>
+              <div class="added">+ voice.personality: "Authoritative but approachable"</div>
+            </div>
+            <div class="version-meta">
+              <span>Created: 2026-01-27</span>
+              <span>Activated: 2026-01-27</span>
+              <span>Documents using this: 42</span>
+            </div>
+          </div>
+          <div class="timeline-marker active">v3</div>
+        </div>
+
+        <!-- Version 4 (Draft) -->
+        <div class="timeline-item">
+          <div class="timeline-content">
+            <div class="version-header">
+              <span class="version-number">Version 4</span>
+              <span class="version-status draft">Draft</span>
+            </div>
+            <div class="version-changes">
+              Experimental: Testing narrative voice for storytelling templates
+            </div>
+            <div class="change-diff">
+              <div class="added">+ voice.personality: "Engaging storyteller"</div>
+              <div class="added">+ documentStructure.maxLength: 3000</div>
+            </div>
+            <div class="version-meta">
+              <span>Created: 2026-01-28 (today)</span>
+              <span>Status: Not yet activated</span>
+            </div>
+          </div>
+          <div class="timeline-marker draft">v4</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-title">ℹ️ Version Provenance</div>
+        <div class="info-content">
+          Every document generated records which config version was active at generation time.
+          This enables reproducibility and troubleshooting: "Why does this document look different?"
+          → "It used v2, which had different citation rules."
+        </div>
+      </div>
+    </div>
+
+    <!-- Activation Flow -->
+    <div class="section">
+      <div class="section-title">Activation Flow: Draft → Active</div>
+
+      <div class="activation-flow">
+        <div class="flow-step">
+          <div class="flow-number">1</div>
+          <div class="flow-title">Edit Draft</div>
+          <div class="flow-description">
+            Admin modifies config settings in the inspector panel. Changes are saved as draft.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-number">2</div>
+          <div class="flow-title">Save & Activate</div>
+          <div class="flow-description">
+            Admin clicks "Save & Activate". Backend validates config and increments version number.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-number">3</div>
+          <div class="flow-title">Archive Previous</div>
+          <div class="flow-description">
+            Current active config (v3) is automatically set to status="archived". Only one active config per grove.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-number">4</div>
+          <div class="flow-title">Pipeline Uses New</div>
+          <div class="flow-description">
+            All future document generations immediately use v4. Existing documents retain v3 in provenance.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Singleton Logic -->
+    <div class="section">
+      <div class="section-title">Singleton Pattern: Exactly 1 Active Config</div>
+
+      <div class="singleton-diagram">
+        <div class="singleton-title">🔒 Automatic Archival on Activation</div>
+
+        <div class="singleton-grid">
+          <!-- Before State -->
+          <div class="singleton-state before">
+            <div class="state-label">Before Activation</div>
+            <div class="config-row">
+              <span>Writer Config v2</span>
+              <span class="config-version">
+                archived
+                <span class="config-status-dot archived"></span>
+              </span>
+            </div>
+            <div class="config-row">
+              <span>Writer Config v3</span>
+              <span class="config-version">
+                active
+                <span class="config-status-dot active"></span>
+              </span>
+            </div>
+            <div class="config-row">
+              <span>Writer Config v4</span>
+              <span class="config-version">
+                draft
+                <span class="config-status-dot draft"></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Action -->
+          <div class="singleton-state action">
+            <div class="state-label">Action: Activate v4</div>
+            <div style="padding: 2rem 0; text-align: center; color: #8b5cf6; font-size: 1.25rem;">
+              Admin clicks<br>"Save & Activate"<br>on v4
+            </div>
+          </div>
+
+          <!-- After State -->
+          <div class="singleton-state after">
+            <div class="state-label">After Activation</div>
+            <div class="config-row">
+              <span>Writer Config v2</span>
+              <span class="config-version">
+                archived
+                <span class="config-status-dot archived"></span>
+              </span>
+            </div>
+            <div class="config-row">
+              <span>Writer Config v3</span>
+              <span class="config-version">
+                archived
+                <span class="config-status-dot archived"></span>
+              </span>
+            </div>
+            <div class="config-row">
+              <span>Writer Config v4</span>
+              <span class="config-version">
+                active
+                <span class="config-status-dot active"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; padding: 1rem; background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+          <div style="font-size: 0.8rem; color: #86efac; line-height: 1.5;">
+            <strong style="color: #22c55e;">✓ Singleton Constraint Enforced:</strong>
+            When v4 is activated, v3 is automatically set to "archived" status.
+            The database query <code style="background: rgba(0,0,0,0.3); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">eq("meta->>'status'", 'active')</code>
+            will always return exactly 1 row per grove.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rollback Scenario -->
+    <div class="section">
+      <div class="section-title">Rollback: Reactivate Old Version</div>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border-radius: 12px; padding: 1.5rem;">
+        <p style="color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
+          If a config change causes issues (e.g., all documents suddenly have wrong citation format),
+          admins can <strong style="color: #f8fafc;">reactivate a previous version</strong> to instantly
+          restore known-good behavior.
+        </p>
+
+        <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+          <div style="font-weight: 600; color: #f8fafc; margin-bottom: 0.75rem; font-size: 0.9rem;">
+            Rollback Steps:
+          </div>
+          <ol style="color: #94a3b8; font-size: 0.85rem; line-height: 2; padding-left: 1.5rem;">
+            <li>Navigate to Writer Config inspector</li>
+            <li>Select archived version (e.g., v3) from sidebar</li>
+            <li>Click "Duplicate" to create v5 (copy of v3)</li>
+            <li>Click "Save & Activate" on v5</li>
+            <li>Pipeline immediately uses v5 (same settings as v3)</li>
+          </ol>
+        </div>
+
+        <div class="warning-box">
+          <div class="warning-title">⚠️ Version Immutability</div>
+          <div class="warning-content">
+            Once a config version is used by any document, it becomes <strong>immutable</strong>.
+            You cannot edit v3 if any documents reference it — instead, create a new version (v5)
+            with the desired changes. This preserves reproducibility: old documents still reference
+            their original config version.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Pipeline Flow Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    /* Pipeline Diagram */
+    .pipeline-diagram {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .pipeline-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pipeline-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      border-radius: 2px;
+    }
+
+    /* Flow Stages */
+    .flow-container {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 1rem 0;
+    }
+    .flow-stage {
+      flex: 0 0 280px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .flow-stage.active {
+      border-color: #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+    }
+    .flow-stage.broken {
+      border-color: #ef4444;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+    }
+    .flow-stage.partial {
+      border-color: #f59e0b;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+    }
+    .stage-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .stage-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .stage-icon.research { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .stage-icon.writer { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .stage-icon.template { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stage-icon.server { background: linear-gradient(135deg, #10b981, #059669); }
+    .stage-icon.output { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+    .stage-title { font-weight: 600; color: #f8fafc; }
+    .stage-subtitle { font-size: 0.75rem; color: #64748b; }
+
+    .stage-content { margin-top: 1rem; }
+    .config-item {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .config-item code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #22c55e;
+    }
+    .config-item .label { color: #94a3b8; margin-bottom: 0.25rem; }
+    .config-item .value { color: #e2e8f0; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-badge.working { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-badge.broken { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .status-badge.partial { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+    /* Arrow connectors */
+    .arrow-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 40px;
+      color: #64748b;
+      font-size: 1.5rem;
+    }
+    .arrow-connector.broken { color: #ef4444; }
+    .arrow-connector.broken::after {
+      content: '✗';
+      position: absolute;
+      font-size: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    /* Explanation Panel */
+    .explanation-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    .explanation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .explanation-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .explanation-card h3 {
+      color: #f8fafc;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .explanation-card p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .explanation-card .highlight {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+    .explanation-card .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+    .explanation-card .code-block .comment { color: #64748b; }
+    .explanation-card .code-block .keyword { color: #c084fc; }
+    .explanation-card .code-block .string { color: #22c55e; }
+    .explanation-card .code-block .function { color: #60a5fa; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .legend-dot.working { background: #22c55e; }
+    .legend-dot.broken { background: #ef4444; }
+    .legend-dot.partial { background: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pipeline Flow Architecture</h1>
+    <p class="subtitle">S28-PIPE: How configuration flows from admin settings to document output</p>
+
+    <!-- Current State Diagram -->
+    <div class="pipeline-diagram">
+      <div class="pipeline-title">Current State (BROKEN)</div>
+
+      <div class="flow-container">
+        <!-- Stage 1: Research Config -->
+        <div class="flow-stage broken">
+          <div class="stage-header">
+            <div class="stage-icon research">📊</div>
+            <div>
+              <div class="stage-title">Research Agent Config</div>
+              <div class="stage-subtitle">Supabase: research_agent_configs</div>
+            </div>
+          </div>
+          <span class="status-badge broken">Not Read</span>
+          <div class="stage-content">
+            <div class="config-item">
+              <div class="label">Active Config</div>
+              <div class="value"><code>v2</code> searchDepth: 3, maxApiCalls: 10</div>
+            </div>
+            <div class="config-item">
+              <div class="label">Status</div>
+              <div class="value" style="color: #ef4444;">
+                ✗ Stored but NEVER queried by pipeline
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-connector broken">→</div>
+
+        <!-- Stage 2: Template Selection -->
+        <div class="flow-stage partial">
+          <div class="stage-header">
+            <div class="stage-icon template">📄</div>
+            <div>
+              <div class="stage-title">Output Template</div>
+              <div class="stage-subtitle">User selection in SFR</div>
+            </div>
+          </div>
+          <span class="status-badge partial">Partial</span>
+          <div class="stage-content">
+            <div class="config-item">
+              <div class="label">Used Fields</div>
+              <div class="value" style="color: #22c55e;">
+                ✓ systemPrompt, renderingInstructions
+              </div>
+            </div>
+            <div class="config-item">
+              <div class="label">Ignored Fields</div>
+              <div class="value" style="color: #ef4444;">
+                ✗ config.overrides (never applied)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-connector">→</div>
+
+        <!-- Stage 3: Writer Config -->
+        <div class="flow-stage broken">
+          <div class="stage-header">
+            <div class="stage-icon writer">✍️</div>
+            <div>
+              <div class="stage-title">Writer Agent Config</div>
+              <div class="stage-subtitle">Supabase: writer_agent_configs</div>
+            </div>
+          </div>
+          <span class="status-badge broken">Not Read</span>
+          <div class="stage-content">
+            <div class="config-item">
+              <div class="label">Active Config</div>
+              <div class="value"><code>v3</code> formality: professional, citations: inline</div>
+            </div>
+            <div class="config-item">
+              <div class="label">Status</div>
+              <div class="value" style="color: #ef4444;">
+                ✗ Uses DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-connector">→</div>
+
+        <!-- Stage 4: Server -->
+        <div class="flow-stage partial">
+          <div class="stage-header">
+            <div class="stage-icon server">🖥️</div>
+            <div>
+              <div class="stage-title">Server Endpoint</div>
+              <div class="stage-subtitle">/api/research/write</div>
+            </div>
+          </div>
+          <span class="status-badge partial">Hardcoded</span>
+          <div class="stage-content">
+            <div class="config-item">
+              <div class="label">Receives</div>
+              <div class="value">voiceConfig from frontend (not DB)</div>
+            </div>
+            <div class="config-item">
+              <div class="label">Fallback</div>
+              <div class="value" style="color: #ef4444;">
+                ✗ DEFAULT_WRITER_RENDERING_RULES in server.js
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow-connector">→</div>
+
+        <!-- Stage 5: Output -->
+        <div class="flow-stage active">
+          <div class="stage-header">
+            <div class="stage-icon output">📑</div>
+            <div>
+              <div class="stage-title">Generated Document</div>
+              <div class="stage-subtitle">ResearchDocument</div>
+            </div>
+          </div>
+          <span class="status-badge working">Generated</span>
+          <div class="stage-content">
+            <div class="config-item">
+              <div class="label">Provenance</div>
+              <div class="value" style="color: #f59e0b;">
+                ⚠ Missing config versions used
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot working"></div>
+          <span>Working</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot partial"></div>
+          <span>Partially Working</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot broken"></div>
+          <span>Broken / Not Wired</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation-panel">
+      <div class="pipeline-title">The Problem Explained</div>
+
+      <div class="explanation-grid">
+        <div class="explanation-card">
+          <h3>🔴 Gap 1: Config Loader Never Called</h3>
+          <p>
+            The <span class="highlight">config-loader.ts</span> file has functions to load configs from Supabase,
+            but they're <span class="highlight">TODO stubs</span> that just return defaults. Even if implemented,
+            they're <span class="highlight">never imported or called</span> anywhere in the pipeline.
+          </p>
+          <div class="code-block">
+<span class="comment">// config-loader.ts:31-47 — NEVER CALLED</span>
+<span class="keyword">export async function</span> <span class="function">loadResearchAgentConfig</span>(groveId) {
+  <span class="comment">// TODO: Supabase lookup (commented out)</span>
+  <span class="keyword">return</span> DEFAULT_RESEARCH_AGENT_CONFIG_PAYLOAD;
+}
+          </div>
+        </div>
+
+        <div class="explanation-card">
+          <h3>🔴 Gap 2: Template.config Ignored</h3>
+          <p>
+            The <span class="highlight">OutputTemplate</span> schema has a <span class="highlight">config</span>
+            field designed for template-specific overrides (like formality or citation style), but
+            <span class="highlight">document-generator.ts</span> never reads this field.
+          </p>
+          <div class="code-block">
+<span class="comment">// output-template.ts — Field exists but unused</span>
+<span class="keyword">interface</span> OutputTemplatePayload {
+  systemPrompt: <span class="keyword">string</span>;     <span class="comment">// ✓ Used</span>
+  renderingInstructions: <span class="keyword">string</span>; <span class="comment">// ✓ Used</span>
+  config?: OutputTemplateConfig;  <span class="comment">// ✗ IGNORED</span>
+}
+          </div>
+        </div>
+
+        <div class="explanation-card">
+          <h3>🔴 Gap 3: Server Uses Hardcoded Defaults</h3>
+          <p>
+            Even if the frontend sent the right config, <span class="highlight">server.js</span> has
+            hardcoded fallback prompts and defaults that override everything. Line 2560-2575 defines
+            <span class="highlight">defaultSystemPrompt</span> used when systemPrompt is missing.
+          </p>
+          <div class="code-block">
+<span class="comment">// server.js:2560-2575 — HARDCODED DEFAULT</span>
+<span class="keyword">const</span> defaultSystemPrompt = `You are a SENIOR
+  RESEARCH ANALYST performing deep research...`;
+
+<span class="comment">// This OVERRIDES any database config!</span>
+          </div>
+        </div>
+
+        <div class="explanation-card">
+          <h3>🔴 Gap 4: No Provenance for Config Versions</h3>
+          <p>
+            When a document is generated, the <span class="highlight">GeneratedArtifact</span> records
+            template info but <span class="highlight">NOT which config versions</span> were active.
+            This breaks reproducibility — you can't recreate the same output.
+          </p>
+          <div class="code-block">
+<span class="comment">// Current GeneratedArtifact — Missing config versions</span>
+{
+  templateId: <span class="string">"blog-post-v1"</span>,
+  templateName: <span class="string">"Blog Post"</span>,
+  generatedAt: <span class="string">"2026-01-28T..."</span>,
+  <span class="comment">// ✗ Missing: researchConfigVersion, writerConfigVersion</span>
+}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Writer Agent Config Inspector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    /* Inspector Layout */
+    .inspector-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      gap: 1.5rem;
+      min-height: 800px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .config-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .config-item {
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .config-item:hover { background: rgba(148, 163, 184, 0.1); }
+    .config-item.active {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-item-name { font-size: 0.85rem; color: #e2e8f0; }
+    .config-item-version {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.1);
+      color: #94a3b8;
+    }
+    .config-item.active .config-item-version {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    .status-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .status-badge.active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-badge.draft { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .status-badge.archived { background: rgba(148, 163, 184, 0.2); color: #64748b; }
+
+    /* Main Panel */
+    .main-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 0.25rem;
+    }
+    .panel-subtitle { font-size: 0.85rem; color: #64748b; }
+    .panel-actions { display: flex; gap: 0.5rem; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+    }
+    .btn-secondary {
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #e2e8f0;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    /* Form Sections */
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+    .form-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .form-input, .form-select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+    .form-select {
+      cursor: pointer;
+    }
+    .form-select option {
+      background: #1e293b;
+      color: #e2e8f0;
+    }
+    .form-textarea {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+    }
+    .toggle-switch.on { background: rgba(34, 197, 94, 0.3); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #64748b;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all 0.2s;
+    }
+    .toggle-switch.on::after {
+      background: #22c55e;
+      left: 22px;
+    }
+    .toggle-label { font-size: 0.85rem; color: #e2e8f0; }
+
+    /* Inheritance Indicator */
+    .inheritance-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+    .inheritance-indicator.can-override {
+      color: #f59e0b;
+    }
+
+    /* Pipeline Impact Panel */
+    .impact-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .impact-header {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .impact-section {
+      margin-bottom: 1.5rem;
+    }
+    .impact-section-title {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .impact-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .impact-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .impact-card-title {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+    }
+    .impact-card-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .impact-card-badge.base { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .impact-card-badge.overridable { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .impact-card-content {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Template Override Preview */
+    .override-preview {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .override-preview-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #f59e0b;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    .override-table {
+      width: 100%;
+      font-size: 0.8rem;
+    }
+    .override-table td {
+      padding: 0.35rem 0;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+    .override-table td:first-child {
+      color: #94a3b8;
+      width: 40%;
+    }
+    .override-table td:nth-child(2) {
+      color: #64748b;
+      text-decoration: line-through;
+    }
+    .override-table td:last-child {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+
+    /* Success Box */
+    .success-box {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: auto;
+    }
+    .success-box-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .success-box-content {
+      font-size: 0.8rem;
+      color: #86efac;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Writer Agent Config Inspector</h1>
+    <p class="subtitle">S28-PIPE: Configure grove-wide writing defaults — templates can override specific values</p>
+
+    <div class="inspector-layout">
+      <!-- Sidebar: Config List -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">Writer Configs</div>
+          <div class="sidebar-subtitle">Singleton: 1 active per grove</div>
+        </div>
+
+        <div class="config-list">
+          <div class="config-item active">
+            <div>
+              <div class="config-item-name">Main Writer Config</div>
+              <span class="status-badge active">Active</span>
+            </div>
+            <span class="config-item-version">v3</span>
+          </div>
+          <div class="config-item">
+            <div>
+              <div class="config-item-name">Main Writer Config</div>
+              <span class="status-badge archived">Archived</span>
+            </div>
+            <span class="config-item-version">v2</span>
+          </div>
+          <div class="config-item">
+            <div>
+              <div class="config-item-name">Main Writer Config</div>
+              <span class="status-badge archived">Archived</span>
+            </div>
+            <span class="config-item-version">v1</span>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+          + New Config Version
+        </button>
+      </div>
+
+      <!-- Main Panel: Editor -->
+      <div class="main-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Main Writer Config</div>
+            <div class="panel-subtitle">Version 3 • Active • Last modified 1 day ago</div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-secondary">Duplicate</button>
+            <button class="btn btn-success">✓ Save & Activate</button>
+          </div>
+        </div>
+
+        <!-- Voice Settings -->
+        <div class="form-section">
+          <div class="form-section-title">🎤 Voice Settings</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Formality</label>
+              <select class="form-select">
+                <option value="casual">Casual</option>
+                <option value="professional" selected>Professional</option>
+                <option value="academic">Academic</option>
+                <option value="technical">Technical</option>
+              </select>
+              <div class="inheritance-indicator can-override">
+                ⚠️ Templates can override this value
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Perspective</label>
+              <select class="form-select">
+                <option value="first-person">First Person</option>
+                <option value="third-person">Third Person</option>
+                <option value="neutral" selected>Neutral</option>
+              </select>
+              <div class="inheritance-indicator can-override">
+                ⚠️ Templates can override this value
+              </div>
+            </div>
+          </div>
+          <div class="form-field" style="margin-top: 1rem;">
+            <label class="form-label">Personality (Optional)</label>
+            <textarea class="form-textarea" placeholder="e.g., 'Authoritative but approachable, with occasional dry humor'"></textarea>
+            <div class="inheritance-indicator">
+              ℹ️ Optional: Adds character to the writing voice
+            </div>
+          </div>
+        </div>
+
+        <!-- Document Structure -->
+        <div class="form-section">
+          <div class="form-section-title">📄 Document Structure</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Citation Style</label>
+              <select class="form-select">
+                <option value="inline" selected>Inline</option>
+                <option value="endnote">Endnote</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Citation Format</label>
+              <select class="form-select">
+                <option value="simple">Simple (Author, Year)</option>
+                <option value="apa" selected>APA</option>
+                <option value="chicago">Chicago</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top: 1rem;">
+            <div class="form-field">
+              <label class="form-label">Max Length (optional)</label>
+              <input type="number" class="form-input" placeholder="No limit" min="100">
+              <div class="inheritance-indicator">
+                ℹ️ Leave empty for no length limit
+              </div>
+            </div>
+            <div class="form-field">
+              <div class="form-toggle" style="margin-top: 1.5rem;">
+                <div class="toggle-switch on"></div>
+                <span class="toggle-label">Include Position Statement</span>
+              </div>
+              <div class="form-toggle" style="margin-top: 0.5rem;">
+                <div class="toggle-switch on"></div>
+                <span class="toggle-label">Include Limitations</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Rules -->
+        <div class="form-section">
+          <div class="form-section-title">⚖️ Quality Rules</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <div class="form-toggle">
+                <div class="toggle-switch on"></div>
+                <span class="toggle-label">Require Citations</span>
+              </div>
+              <div class="inheritance-indicator">
+                ℹ️ Enforces citation for all claims
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Min Confidence to Include (0-1)</label>
+              <input type="number" class="form-input" value="0.5" min="0" max="1" step="0.1">
+              <div class="inheritance-indicator">
+                ℹ️ Sources below this are excluded from document
+              </div>
+            </div>
+          </div>
+          <div class="form-toggle" style="margin-top: 1rem;">
+            <div class="toggle-switch on"></div>
+            <span class="toggle-label">Flag Uncertainty (adds caveats for low-confidence claims)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Impact Panel -->
+      <div class="impact-panel">
+        <div class="impact-header">
+          ⚡ Pipeline Impact
+        </div>
+
+        <div class="impact-section">
+          <div class="impact-section-title">Base vs Overridable Values</div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">voice.formality</span>
+              <span class="impact-card-badge overridable">Overridable</span>
+            </div>
+            <div class="impact-card-content">
+              Base value: <strong>professional</strong><br>
+              Templates like "Academic Paper" or "Casual Blog" can override this to match their tone.
+            </div>
+          </div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">documentStructure.citationFormat</span>
+              <span class="impact-card-badge overridable">Overridable</span>
+            </div>
+            <div class="impact-card-content">
+              Base value: <strong>apa</strong><br>
+              Academic templates might enforce APA while blog templates use simple format.
+            </div>
+          </div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">qualityRules.requireCitations</span>
+              <span class="impact-card-badge base">Base Only</span>
+            </div>
+            <div class="impact-card-content">
+              Value: <strong>true</strong><br>
+              This grove-wide setting cannot be overridden by templates (enforces quality floor).
+            </div>
+          </div>
+        </div>
+
+        <div class="impact-section">
+          <div class="impact-section-title">Example: Template Override</div>
+
+          <div class="override-preview">
+            <div class="override-preview-header">
+              📄 When "Academic Paper" template selected:
+            </div>
+            <table class="override-table">
+              <tr>
+                <td>formality</td>
+                <td>professional</td>
+                <td>→ academic</td>
+              </tr>
+              <tr>
+                <td>citationFormat</td>
+                <td>apa</td>
+                <td>→ (same)</td>
+              </tr>
+              <tr>
+                <td>systemPrompt</td>
+                <td>(base)</td>
+                <td>→ "Write formal academic prose..."</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Success Box -->
+        <div class="success-box">
+          <div class="success-box-header">
+            ✓ Config Wired to Pipeline
+          </div>
+          <div class="success-box-content">
+            This config provides base values for all documents.
+            Templates override specific fields while inheriting the rest.
+            Config version is recorded in document provenance.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

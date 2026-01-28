@@ -1,7 +1,7 @@
 # S3||SFR-Actions Visual Verification Report
 
-**Generated:** 2026-01-15T21:11:42.241Z
-**Status:** ✅ PASSED
+**Generated:** 2026-01-28T15:54:48.821Z
+**Status:** ❌ FAILED
 
 ---
 
@@ -9,155 +9,35 @@
 
 | Metric | Count |
 |--------|-------|
-| ✅ Passed | 9 |
-| ❌ Failed | 0 |
+| ✅ Passed | 0 |
+| ❌ Failed | 1 |
 | ⏭️ Skipped | 0 |
-| **Total** | 9 |
+| **Total** | 1 |
 
 ---
 
 ## Test Results by User Story
 
-### US-D001
-
-#### ✅ Revise & Resubmit form renders
-
-![Revise & Resubmit form renders](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d001-revise-form-filled.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:10:50.081Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-#### ✅ Revision submission shows toast
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:10:56.614Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-### US-D005
-
-#### ✅ Promotion checklist renders with defaults
-
-![Promotion checklist renders with defaults](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d005-checklist-defaults.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:03.440Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-#### ✅ Checklist items toggle correctly
-
-![Checklist items toggle correctly](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d005-checklist-toggled.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:09.390Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-### US-D002
-
-#### ✅ Archive button visible
-
-![Archive button visible](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d002-archive-button.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:14.887Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-### US-D003
-
-#### ✅ Note input appears on click
-
-![Note input appears on click](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d003-note-input.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:20.278Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-### US-D004
-
-#### ✅ Export button visible
-
-![Export button visible](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d004-export-button.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:26.143Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
 ### US-E001
 
-#### ✅ Full Action Panel renders all sections
-
-![Full Action Panel renders all sections](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-e001-full-modal.png)
-
-**Console Report:**
-```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:31.705Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
-  2. [SproutStorage] Invalid storage format, resetting
-  3. [SproutStorage] Invalid storage format, resetting
-
-```
-
----
-
-#### ✅ Action Panel layout verified
+#### ❌ Action Panel layout verified
 
 ![Action Panel layout verified](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-e001-action-panel-isolated.png)
 
 **Console Report:**
 ```
-⚠️ 3 Console Warnings:
-  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.90.1) 2026-01-15T21:11:37.708Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
+❌ 2 Console Errors:
+  1. [error] Failed to load resource: the server responded with a status of 400 ()
+     at https://cntzzxqgqsjzsvscunsp.supabase.co/rest/v1/document_signal_aggregations?select=*&document_id=eq.test-sprout-s3-001&period=eq.all_time
+  2. [error] Failed to fetch signal aggregation: {code: 22P02, details: null, hint: null, message: invalid input syntax for type uuid: "test-sprout-s3-001"}
+     at http://localhost:3000/src/bedrock/consoles/NurseryConsole/useSproutAggregations.ts
+⚠️ 6 Console Warnings:
+  1. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:1 (2.91.1) 2026-01-28T15:54:45.969Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
   2. [SproutStorage] Invalid storage format, resetting
   3. [SproutStorage] Invalid storage format, resetting
+  4. [SproutStorage] Invalid storage format, resetting
+  5. [SproutStorage] Invalid storage format, resetting
+  6. GoTrueClient@sb-cntzzxqgqsjzsvscunsp-auth-token:2 (2.91.1) 2026-01-28T15:54:48.457Z Multiple GoTrueClient instances detected in the same browser context. It is not an error, but this should be avoided as it may produce undefined behavior when used concurrently under the same storage key.
 
 ```
 
@@ -167,15 +47,7 @@
 
 | Story | Screenshot | Status |
 |-------|------------|--------|
-| US-D001 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d001-revise-form-filled.png) | ✅ |
-| US-D001 | N/A | ✅ |
-| US-D005 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d005-checklist-defaults.png) | ✅ |
-| US-D005 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d005-checklist-toggled.png) | ✅ |
-| US-D002 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d002-archive-button.png) | ✅ |
-| US-D003 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d003-note-input.png) | ✅ |
-| US-D004 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-d004-export-button.png) | ✅ |
-| US-E001 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-e001-full-modal.png) | ✅ |
-| US-E001 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-e001-action-panel-isolated.png) | ✅ |
+| US-E001 | [View](docs/sprints/sprout-finishing-room-v1/screenshots/s3/us-e001-action-panel-isolated.png) | ❌ |
 
 ---
 

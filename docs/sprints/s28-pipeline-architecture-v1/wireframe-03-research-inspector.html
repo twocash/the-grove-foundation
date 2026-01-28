@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Research Agent Config Inspector</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    /* Inspector Layout */
+    .inspector-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr 350px;
+      gap: 1.5rem;
+      min-height: 700px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .config-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .config-item {
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .config-item:hover { background: rgba(148, 163, 184, 0.1); }
+    .config-item.active {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .config-item-name { font-size: 0.85rem; color: #e2e8f0; }
+    .config-item-version {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.1);
+      color: #94a3b8;
+    }
+    .config-item.active .config-item-version {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    .status-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .status-badge.active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .status-badge.draft { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .status-badge.archived { background: rgba(148, 163, 184, 0.2); color: #64748b; }
+
+    /* Main Panel */
+    .main-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 0.25rem;
+    }
+    .panel-subtitle { font-size: 0.85rem; color: #64748b; }
+    .panel-actions { display: flex; gap: 0.5rem; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+    .btn-secondary {
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #e2e8f0;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    /* Form Fields */
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+    .form-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .form-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .form-slider {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(148, 163, 184, 0.2);
+      appearance: none;
+    }
+    .form-slider::-webkit-slider-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #3b82f6;
+      cursor: pointer;
+      appearance: none;
+    }
+    .form-checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .form-checkbox.checked {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* Pipeline Impact Panel */
+    .impact-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .impact-header {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .impact-section {
+      margin-bottom: 1.5rem;
+    }
+    .impact-section-title {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .impact-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .impact-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .impact-card-title {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+    }
+    .impact-card-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+    .impact-card-badge.connected {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    .impact-card-badge.overridden {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+    .impact-card-content {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .impact-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      color: #22c55e;
+    }
+
+    .flow-diagram {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+    }
+    .flow-step:not(:last-child) {
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+    .flow-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .flow-icon.config { background: rgba(59, 130, 246, 0.2); }
+    .flow-icon.server { background: rgba(16, 185, 129, 0.2); }
+    .flow-icon.output { background: rgba(236, 72, 153, 0.2); }
+    .flow-text {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .flow-text strong { color: #e2e8f0; }
+
+    /* Warning Box */
+    .warning-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: auto;
+    }
+    .warning-box-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ef4444;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .warning-box-content {
+      font-size: 0.8rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    /* Success Box */
+    .success-box {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: auto;
+    }
+    .success-box-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .success-box-content {
+      font-size: 0.8rem;
+      color: #86efac;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Research Agent Config Inspector</h1>
+    <p class="subtitle">S28-PIPE: Configure how the research agent gathers evidence — with pipeline impact visibility</p>
+
+    <div class="inspector-layout">
+      <!-- Sidebar: Config List -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">Research Configs</div>
+          <div class="sidebar-subtitle">Singleton: 1 active per grove</div>
+        </div>
+
+        <div class="config-list">
+          <div class="config-item active">
+            <div>
+              <div class="config-item-name">Main Research Config</div>
+              <span class="status-badge active">Active</span>
+            </div>
+            <span class="config-item-version">v2</span>
+          </div>
+          <div class="config-item">
+            <div>
+              <div class="config-item-name">Main Research Config</div>
+              <span class="status-badge archived">Archived</span>
+            </div>
+            <span class="config-item-version">v1</span>
+          </div>
+          <div class="config-item">
+            <div>
+              <div class="config-item-name">Deep Research Preset</div>
+              <span class="status-badge draft">Draft</span>
+            </div>
+            <span class="config-item-version">v1</span>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">
+          + New Config Version
+        </button>
+      </div>
+
+      <!-- Main Panel: Editor -->
+      <div class="main-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Main Research Config</div>
+            <div class="panel-subtitle">Version 2 • Active • Last modified 2 hours ago</div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-secondary">Duplicate</button>
+            <button class="btn btn-success">✓ Save & Activate</button>
+          </div>
+        </div>
+
+        <!-- Search Behavior -->
+        <div class="form-section">
+          <div class="form-section-title">📊 Search Behavior</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Search Depth (max branches)</label>
+              <input type="range" class="form-slider" min="1" max="10" value="3">
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
+                <span>1 (Quick)</span>
+                <span style="color: #3b82f6; font-weight: 600;">3</span>
+                <span>10 (Exhaustive)</span>
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Max API Calls</label>
+              <input type="number" class="form-input" value="10" min="1" max="50">
+            </div>
+          </div>
+        </div>
+
+        <!-- Source Preferences -->
+        <div class="form-section">
+          <div class="form-section-title">📚 Source Preferences</div>
+          <div class="form-checkbox-group">
+            <label class="form-checkbox checked">
+              <input type="checkbox" checked style="display: none;">
+              <span>📖 Academic</span>
+            </label>
+            <label class="form-checkbox checked">
+              <input type="checkbox" checked style="display: none;">
+              <span>👔 Practitioner</span>
+            </label>
+            <label class="form-checkbox">
+              <input type="checkbox" style="display: none;">
+              <span>📰 News</span>
+            </label>
+            <label class="form-checkbox">
+              <input type="checkbox" style="display: none;">
+              <span>🌐 General Web</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Quality Thresholds -->
+        <div class="form-section">
+          <div class="form-section-title">⚖️ Quality Thresholds</div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Confidence Floor (0-1)</label>
+              <input type="number" class="form-input" value="0.6" min="0" max="1" step="0.1">
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                Sources below this confidence are excluded
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Branch Delay (ms)</label>
+              <input type="number" class="form-input" value="500" min="0" max="5000" step="100">
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                Rate limiting between API calls
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Impact Panel -->
+      <div class="impact-panel">
+        <div class="impact-header">
+          ⚡ Pipeline Impact
+        </div>
+
+        <div class="impact-section">
+          <div class="impact-section-title">How This Config Is Used</div>
+          <div class="flow-diagram">
+            <div class="flow-step">
+              <div class="flow-icon config">📊</div>
+              <div class="flow-text">
+                <strong>1. Config Loaded</strong><br>
+                loadResearchAgentConfig(groveId)
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-icon server">🖥️</div>
+              <div class="flow-text">
+                <strong>2. Passed to Server</strong><br>
+                POST /api/research/deep
+              </div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-icon output">📑</div>
+              <div class="flow-text">
+                <strong>3. Controls Research</strong><br>
+                Affects evidence gathering
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="impact-section">
+          <div class="impact-section-title">Downstream Effects</div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">searchDepth: 3</span>
+              <span class="impact-card-badge connected">Connected</span>
+            </div>
+            <div class="impact-card-content">
+              Research agent will explore up to 3 branches per query, producing more comprehensive evidence.
+            </div>
+            <div class="impact-code">
+              max_uses = searchDepth × 5 = 15 searches
+            </div>
+          </div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">confidenceThreshold: 0.6</span>
+              <span class="impact-card-badge connected">Connected</span>
+            </div>
+            <div class="impact-card-content">
+              Sources with confidence below 60% will be excluded from the evidence collection.
+            </div>
+          </div>
+
+          <div class="impact-card">
+            <div class="impact-card-header">
+              <span class="impact-card-title">sourcePreferences</span>
+              <span class="impact-card-badge connected">Connected</span>
+            </div>
+            <div class="impact-card-content">
+              Search prioritizes academic and practitioner sources over general web content.
+            </div>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div class="success-box">
+          <div class="success-box-header">
+            ✓ Config Wired to Pipeline
+          </div>
+          <div class="success-box-content">
+            Changes to this config will affect all future research operations.
+            The active config version is recorded in document provenance.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

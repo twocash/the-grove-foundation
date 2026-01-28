@@ -15,13 +15,7 @@ import { GlassButton } from '../../primitives/GlassButton';
 import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
 import { useResearchAgentConfigData } from './useResearchAgentConfigData';
 
-// Source type options
-const SOURCE_OPTIONS = [
-  { value: 'academic', label: 'Academic', description: 'Peer-reviewed papers and journals' },
-  { value: 'practitioner', label: 'Practitioner', description: 'Industry blogs and case studies' },
-  { value: 'news', label: 'News', description: 'News articles and press releases' },
-  { value: 'primary', label: 'Primary', description: 'Official documentation and specs' },
-] as const;
+// S28-PIPE: Simplified to text-only config (removed SOURCE_OPTIONS)
 
 /**
  * Editor component for ResearchAgentConfig objects
@@ -65,9 +59,7 @@ export function ResearchAgentConfigEditor({
   // Track which payload fields have been modified for version creation
   const [modifiedFields, setModifiedFields] = useState<Set<string>>(new Set());
 
-  // v1.0 UI simplification: Show only essential fields by default
-  // Sprint: agents-go-live-v1
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // S28-PIPE: showAdvanced removed (only 2 text fields now, no advanced section)
 
   // Snapshot of original state for discard functionality
   const originalSnapshotRef = useRef<{ meta: typeof config.meta; payload: typeof config.payload } | null>(null);
@@ -84,7 +76,8 @@ export function ResearchAgentConfigEditor({
     }
   }, [config.meta.id, hasChanges]);
 
-  const { searchDepth, sourcePreferences, confidenceThreshold, maxApiCalls, branchDelay } = config.payload;
+  // S28-PIPE: Simplified payload (text fields only)
+  const { searchInstructions, qualityGuidance } = config.payload;
 
   // Handle activation
   const handleActivate = useCallback(async () => {
@@ -205,16 +198,7 @@ export function ResearchAgentConfigEditor({
     [onEdit]
   );
 
-  // Toggle source preference
-  const toggleSource = useCallback(
-    (source: string) => {
-      const newPrefs = sourcePreferences.includes(source as any)
-        ? sourcePreferences.filter((s) => s !== source)
-        : [...sourcePreferences, source as any];
-      patchPayload('sourcePreferences', newPrefs);
-    },
-    [sourcePreferences, patchPayload]
-  );
+  // S28-PIPE: toggleSource removed (no longer needed for text-only config)
 
   return (
     <div className="flex flex-col h-full">
@@ -347,148 +331,44 @@ export function ResearchAgentConfigEditor({
         <InspectorDivider />
 
         {/* Essential Research Settings (v1.0 simplified UI) */}
-        <InspectorSection title="Research Settings" collapsible defaultCollapsed={false}>
+        {/* S28-PIPE: Simplified to 2 text fields */}
+        <InspectorSection title="Research Prompt Configuration" collapsible defaultCollapsed={false}>
           <div className="space-y-4">
-            {/* Essential Field 1: Research Depth */}
+            {/* Field 1: Search Instructions */}
             <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                Research Depth
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
+                Search Instructions
               </label>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={searchDepth}
-                onChange={(e) => patchPayload('searchDepth', parseInt(e.target.value))}
-                className="w-full accent-purple-500"
+              <BufferedTextarea
+                value={searchInstructions}
+                onChange={(v) => patchPayload('searchInstructions', v)}
+                rows={12}
+                className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none font-mono"
+                placeholder="e.g., You are a SENIOR RESEARCH ANALYST. Focus on academic sources..."
               />
-              <div className="flex justify-between text-xs text-[var(--glass-text-muted)] mt-1">
-                <span>Quick (1)</span>
-                <span className="text-purple-400 font-medium">{searchDepth}</span>
-                <span>Deep (10)</span>
-              </div>
+              <p className="text-xs text-[var(--glass-text-muted)] mt-2 italic">
+                Free-form instructions for how the research agent should search and gather evidence.
+              </p>
             </div>
 
-            {/* Essential Field 2: API Budget */}
+            {/* Field 2: Quality Guidance */}
             <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                API Budget
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
+                Quality Guidance
               </label>
-              <input
-                type="range"
-                min={5}
-                max={20}
-                value={Math.min(Math.max(maxApiCalls, 5), 20)}
-                onChange={(e) => patchPayload('maxApiCalls', parseInt(e.target.value))}
-                className="w-full"
-                style={{ accentColor: 'var(--semantic-info)' }}
+              <BufferedTextarea
+                value={qualityGuidance}
+                onChange={(v) => patchPayload('qualityGuidance', v)}
+                rows={8}
+                className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none font-mono"
+                placeholder="e.g., Use rich markdown. Cite sources with confidence scores..."
               />
-              <div className="flex justify-between text-xs text-[var(--glass-text-muted)] mt-1">
-                <span>5</span>
-                <span className="font-medium" style={{ color: 'var(--semantic-info)' }}>{maxApiCalls} calls</span>
-                <span>20</span>
-              </div>
-            </div>
-
-            {/* Essential Field 3: Quality Floor */}
-            <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                Quality Floor
-              </label>
-              <input
-                type="range"
-                min={50}
-                max={90}
-                value={Math.round(confidenceThreshold * 100)}
-                onChange={(e) => patchPayload('confidenceThreshold', parseInt(e.target.value) / 100)}
-                className="w-full accent-[var(--semantic-success)]"
-              />
-              <div className="flex justify-between text-xs text-[var(--glass-text-muted)] mt-1">
-                <span>50%</span>
-                <span className="font-medium" style={{ color: 'var(--semantic-success)' }}>{Math.round(confidenceThreshold * 100)}%</span>
-                <span>90%</span>
-              </div>
-              <p className="text-xs text-[var(--glass-text-muted)] mt-1">
-                Minimum confidence to include in results
+              <p className="text-xs text-[var(--glass-text-muted)] mt-2 italic">
+                Quality standards and output formatting guidance.
               </p>
             </div>
           </div>
         </InspectorSection>
-
-        <InspectorDivider />
-
-        {/* Advanced Settings Toggle (v1.0 simplified UI) */}
-        <div className="px-4 py-2">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-sm text-[var(--glass-text-muted)] hover:text-[var(--glass-text-secondary)] transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">
-              {showAdvanced ? 'expand_less' : 'expand_more'}
-            </span>
-            {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-          </button>
-        </div>
-
-        {/* Advanced Settings (hidden by default) */}
-        {showAdvanced && (
-          <>
-            <InspectorDivider />
-
-            {/* Advanced: Source Preferences */}
-            <InspectorSection title="Source Preferences" collapsible defaultCollapsed={false}>
-              <p className="text-xs text-[var(--glass-text-muted)] mb-3 italic">
-                v2 stub — source filtering not yet functional
-              </p>
-              <div className="space-y-2">
-                {SOURCE_OPTIONS.map((source) => (
-                  <label
-                    key={source.value}
-                    className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-[var(--glass-surface)] transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={sourcePreferences.includes(source.value as any)}
-                      onChange={() => toggleSource(source.value)}
-                      className="w-5 h-5 rounded accent-purple-500"
-                    />
-                    <div>
-                      <span className="text-sm text-[var(--glass-text-primary)]">
-                        {source.label}
-                      </span>
-                      <p className="text-xs text-[var(--glass-text-muted)]">
-                        {source.description}
-                      </p>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </InspectorSection>
-
-            <InspectorDivider />
-
-            {/* Advanced: Branch Delay */}
-            <InspectorSection title="Rate Limiting" collapsible defaultCollapsed={false}>
-              <div>
-                <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                  Branch Delay (ms between searches)
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={5000}
-                  step={100}
-                  value={branchDelay}
-                  onChange={(e) => patchPayload('branchDelay', parseInt(e.target.value) || 0)}
-                  className="w-24 bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none"
-                />
-                <p className="text-xs text-[var(--glass-text-muted)] mt-1">
-                  Rate limiting delay between API calls
-                </p>
-              </div>
-            </InspectorSection>
-          </>
-        )}
 
         <InspectorDivider />
 

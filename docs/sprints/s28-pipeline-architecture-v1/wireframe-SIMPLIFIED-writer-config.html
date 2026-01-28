@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Simplified Writer Config (Text Inputs Only)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    .inspector-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr 400px;
+      gap: 1.5rem;
+      min-height: 700px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1rem;
+    }
+    .sidebar-header {
+      padding: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    .config-item {
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .config-item.active {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .config-item-name { font-size: 0.85rem; color: #e2e8f0; }
+    .config-item-version {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    /* Main Panel */
+    .main-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 0.25rem;
+    }
+    .panel-subtitle { font-size: 0.85rem; color: #64748b; }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    /* SIMPLIFIED FORM - TEXT ONLY */
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+    .form-section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 0.75rem;
+    }
+    .form-field {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .form-textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+    .form-textarea:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+    .form-hint {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    /* Impact Panel */
+    .impact-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    .impact-header {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    .merge-preview {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .merge-title {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .merge-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      padding: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .merge-code .section { color: #f59e0b; font-weight: 600; }
+    .merge-code .text { color: #e2e8f0; }
+    .merge-code .override { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+    .merge-code .inherited { color: #8b5cf6; }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .info-title {
+      color: #60a5fa;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .info-content {
+      font-size: 0.8rem;
+      color: #93c5fd;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Writer Config (SIMPLIFIED)</h1>
+    <p class="subtitle">S28-PIPE: Just TEXT INPUTS — let admins figure out what matters through experimentation</p>
+
+    <div class="inspector-layout">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">Writer Configs</div>
+        </div>
+        <div class="config-item active">
+          <div class="config-item-name">Main Writer Config</div>
+          <span class="config-item-version">v3</span>
+        </div>
+      </div>
+
+      <!-- Main Panel: SIMPLE TEXT INPUTS -->
+      <div class="main-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Main Writer Config</div>
+            <div class="panel-subtitle">Version 3 • Active</div>
+          </div>
+          <button class="btn btn-success">✓ Save & Activate</button>
+        </div>
+
+        <!-- SIMPLIFIED CONFIG - 3 TEXT FIELDS -->
+        <div class="form-section">
+          <div class="form-section-title">Writer Prompt Configuration</div>
+
+          <div class="form-field">
+            <label class="form-label">Writing Style Instructions</label>
+            <textarea class="form-textarea" rows="4">Write in a professional but accessible tone. Use clear, direct language. Avoid jargon unless necessary. Maintain neutral perspective throughout.</textarea>
+            <div class="form-hint">
+              Free-form instructions for the writer agent's voice and tone. Experiment to find what works.
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Results Formatting Instructions</label>
+            <textarea class="form-textarea" rows="5">Structure the document with:
+- Executive summary at the top
+- Clear section headings
+- Use bullet points for lists
+- Include a limitations section
+- Keep paragraphs concise (3-5 sentences)</textarea>
+            <div class="form-hint">
+              How to structure and format the output document. Templates can override this.
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Citations Style Instructions</label>
+            <textarea class="form-textarea" rows="3">Use inline citations with (Author, Year) format. Include a Sources section at the end with full references. Cite all factual claims.</textarea>
+            <div class="form-hint">
+              Citation format and requirements. Be specific about what you want to see.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Impact Panel: How Prompts Merge -->
+      <div class="impact-panel">
+        <div class="impact-header">
+          ⚡ How Prompts Merge in Pipeline
+        </div>
+
+        <div class="merge-preview">
+          <div class="merge-title">Base Config (Grove-Wide)</div>
+          <div class="merge-code">
+<span class="section">## Writing Style</span>
+<span class="inherited">Write in a professional but accessible tone.
+Use clear, direct language. Avoid jargon
+unless necessary...</span>
+
+<span class="section">## Results Formatting</span>
+<span class="inherited">Structure the document with:
+- Executive summary at the top
+- Clear section headings...</span>
+
+<span class="section">## Citations</span>
+<span class="inherited">Use inline citations with (Author, Year)
+format. Include a Sources section...</span>
+          </div>
+        </div>
+
+        <div class="merge-preview">
+          <div class="merge-title">+ Template Overrides</div>
+          <div class="merge-code">
+<span class="section">## Writing Style</span>
+<span class="override">Write in formal academic prose.
+Use third-person perspective only.
+Maintain scholarly objectivity.</span>
+
+<span class="section">## Citations</span>
+<span class="override">Use APA 7th edition format with full
+bibliographic entries. Include DOIs.</span>
+          </div>
+        </div>
+
+        <div class="merge-preview">
+          <div class="merge-title">= Effective Prompt (Sent to Writer Agent)</div>
+          <div class="merge-code">
+<span class="section">## Writing Style</span>
+<span class="override">Write in formal academic prose.  ← Template</span>
+
+<span class="section">## Results Formatting</span>
+<span class="inherited">Structure the document with:...  ← Base</span>
+
+<span class="section">## Citations</span>
+<span class="override">Use APA 7th edition format...  ← Template</span>
+          </div>
+        </div>
+
+        <div class="info-box" style="margin-top: 1.5rem;">
+          <div class="info-title">✓ Simple Merge Strategy</div>
+          <div class="info-content">
+            Templates can override any of the three sections. If a section isn't overridden,
+            the base config value is used. All three are concatenated into the final system prompt.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

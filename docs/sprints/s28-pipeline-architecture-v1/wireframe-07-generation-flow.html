@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: End-to-End Document Generation Flow</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1600px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    /* Flow Diagram */
+    .flow-diagram {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .flow-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .flow-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      border-radius: 2px;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .flow-stage {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+      padding: 1.25rem;
+      position: relative;
+    }
+    .flow-stage::after {
+      content: '→';
+      position: absolute;
+      right: -1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      color: #64748b;
+      z-index: 1;
+    }
+    .flow-stage:last-child::after { content: none; }
+
+    .stage-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .stage-icon.user { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .stage-icon.frontend { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .stage-icon.loader { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stage-icon.server { background: linear-gradient(135deg, #10b981, #059669); }
+    .stage-icon.output { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+    .stage-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .stage-description {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* Detailed Steps */
+    .detailed-section {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .detailed-header {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .step-card {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid;
+    }
+    .step-card.load { border-color: #f59e0b; }
+    .step-card.merge { border-color: #8b5cf6; }
+    .step-card.send { border-color: #10b981; }
+    .step-card.receive { border-color: #ec4899; }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .step-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+    .step-badge {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .step-badge.load { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .step-badge.merge { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+    .step-badge.send { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .step-badge.receive { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+
+    .step-content {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .step-code {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-top: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      overflow-x: auto;
+    }
+    .step-code .comment { color: #64748b; }
+    .step-code .keyword { color: #c084fc; }
+    .step-code .function { color: #60a5fa; }
+    .step-code .string { color: #22c55e; }
+    .step-code .number { color: #f59e0b; }
+    .step-code .highlight { background: rgba(34, 197, 94, 0.1); display: block; margin: 0 -0.75rem; padding: 0 0.75rem; }
+
+    .step-data-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .data-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+    .data-card-title {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .data-card-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #22c55e;
+    }
+
+    /* Provenance Tracking */
+    .provenance-section {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+    }
+    .provenance-header {
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .provenance-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .provenance-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .provenance-card-title {
+      font-size: 0.8rem;
+      color: #86efac;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .provenance-card-content {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #d1fae5;
+      line-height: 1.6;
+    }
+
+    /* Comparison: Before vs After */
+    .comparison-section {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .comparison-column {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .comparison-column.before {
+      border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+    .comparison-column.after {
+      border: 2px solid rgba(34, 197, 94, 0.3);
+    }
+    .comparison-header {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .comparison-column.before .comparison-header { color: #ef4444; }
+    .comparison-column.after .comparison-header { color: #22c55e; }
+
+    .comparison-issue {
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .comparison-issue-title {
+      color: #ef4444;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .comparison-issue-content {
+      font-size: 0.8rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .comparison-fix {
+      background: rgba(34, 197, 94, 0.1);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .comparison-fix-title {
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .comparison-fix-content {
+      font-size: 0.8rem;
+      color: #86efac;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>End-to-End Document Generation Flow</h1>
+    <p class="subtitle">S28-PIPE: Complete data flow from user action to generated document with config provenance</p>
+
+    <!-- High-Level Flow -->
+    <div class="flow-diagram">
+      <div class="flow-title">High-Level Flow (After S28-PIPE)</div>
+
+      <div class="flow-grid">
+        <div class="flow-stage">
+          <div class="stage-icon user">👤</div>
+          <div class="stage-title">User Action</div>
+          <div class="stage-description">
+            User selects template ("Academic Paper") and clicks "Generate Document"
+          </div>
+        </div>
+
+        <div class="flow-stage">
+          <div class="stage-icon frontend">⚛️</div>
+          <div class="stage-title">Frontend</div>
+          <div class="stage-description">
+            ActionPanel triggers document generation with sprout ID and template ID
+          </div>
+        </div>
+
+        <div class="flow-stage">
+          <div class="stage-icon loader">📦</div>
+          <div class="stage-title">Config Loading</div>
+          <div class="stage-description">
+            Loads active research config, writer config, and selected template from Supabase
+          </div>
+        </div>
+
+        <div class="flow-stage">
+          <div class="stage-icon server">🖥️</div>
+          <div class="stage-title">Server</div>
+          <div class="stage-description">
+            Merges configs, sends to Claude API with effective systemPrompt and config
+          </div>
+        </div>
+
+        <div class="flow-stage">
+          <div class="stage-icon output">📑</div>
+          <div class="stage-title">Output</div>
+          <div class="stage-description">
+            ResearchDocument generated with provenance tracking which config versions used
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Steps -->
+    <div class="detailed-section">
+      <div class="detailed-header">🔍 Detailed Step-by-Step Execution</div>
+
+      <!-- Step 1: Load Research Config -->
+      <div class="step-card load">
+        <div class="step-header">
+          <div class="step-title">Step 1: Load Research Config (Grove-Wide)</div>
+          <span class="step-badge load">Config Load</span>
+        </div>
+        <div class="step-content">
+          The <code>config-loader.ts</code> queries Supabase for the active research_agent_config
+          belonging to this grove. Returns version 2 with searchDepth=3, maxApiCalls=10, etc.
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> researchConfig = <span class="keyword">await</span> <span class="function">loadResearchAgentConfig</span>(groveId);
+
+<span class="comment">// Queries Supabase:</span>
+<span class="highlight"><span class="keyword">await</span> supabase.from(<span class="string">'research_agent_configs'</span>)</span>
+<span class="highlight">  .select(<span class="string">'payload'</span>)</span>
+<span class="highlight">  .eq(<span class="string">'grove_id'</span>, groveId)</span>
+<span class="highlight">  .eq(<span class="string">"meta->>'status'"</span>, <span class="string">'active'</span>)  <span class="comment">// Singleton query</span></span>
+<span class="highlight">  .single();</span>
+
+<span class="comment">// Returns: { version: 2, searchDepth: 3, maxApiCalls: 10, ... }</span>
+        </div>
+        <div class="step-data-flow">
+          <div class="data-card">
+            <div class="data-card-title">Source</div>
+            <div class="data-card-value">research_agent_configs table</div>
+          </div>
+          <div class="data-card">
+            <div class="data-card-title">Status Filter</div>
+            <div class="data-card-value">status = 'active'</div>
+          </div>
+          <div class="data-card">
+            <div class="data-card-title">Result</div>
+            <div class="data-card-value">v2 (searchDepth: 3)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Load Writer Config -->
+      <div class="step-card load">
+        <div class="step-header">
+          <div class="step-title">Step 2: Load Writer Config (Grove-Wide Base)</div>
+          <span class="step-badge load">Config Load</span>
+        </div>
+        <div class="step-content">
+          Similarly, loads the active writer_agent_config. This provides base values that
+          templates can override (formality, citationFormat, qualityRules, etc.).
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> writerConfig = <span class="keyword">await</span> <span class="function">loadWriterAgentConfig</span>(groveId);
+
+<span class="comment">// Returns: {</span>
+<span class="comment">//   version: 3,</span>
+<span class="comment">//   voice: { formality: "professional", perspective: "neutral" },</span>
+<span class="comment">//   documentStructure: { citationFormat: "apa", ... },</span>
+<span class="comment">//   qualityRules: { requireCitations: true, ... }</span>
+<span class="comment">// }</span>
+        </div>
+        <div class="step-data-flow">
+          <div class="data-card">
+            <div class="data-card-title">Source</div>
+            <div class="data-card-value">writer_agent_configs table</div>
+          </div>
+          <div class="data-card">
+            <div class="data-card-title">Singleton Result</div>
+            <div class="data-card-value">v3 (exactly 1 active)</div>
+          </div>
+          <div class="data-card">
+            <div class="data-card-title">Overridable</div>
+            <div class="data-card-value">Yes (by templates)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Load Template -->
+      <div class="step-card load">
+        <div class="step-header">
+          <div class="step-title">Step 3: Load Selected Template</div>
+          <span class="step-badge load">Config Load</span>
+        </div>
+        <div class="step-content">
+          Loads the user-selected output template (e.g., "Academic Paper"). Template contains
+          systemPrompt, renderingInstructions, and optional config overrides.
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> template = <span class="keyword">await</span> <span class="function">loadTemplateById</span>(templateId);
+
+<span class="comment">// Returns: {</span>
+<span class="comment">//   id: "academic-paper-v1",</span>
+<span class="comment">//   name: "Academic Paper",</span>
+<span class="comment">//   systemPrompt: "Write formal academic prose...",</span>
+<span class="comment">//   renderingInstructions: "Use APA citations...",</span>
+<span class="comment">//   config: {</span>
+<span class="comment">//     overrides: {</span>
+<span class="comment">//       voice: { formality: "academic" },  // Override base</span>
+<span class="comment">//       documentStructure: { includePosition: true }</span>
+<span class="comment">//     }</span>
+<span class="comment">//   }</span>
+<span class="comment">// }</span>
+        </div>
+      </div>
+
+      <!-- Step 4: Merge Configs -->
+      <div class="step-card merge">
+        <div class="step-header">
+          <div class="step-title">Step 4: Merge Configs (Template Overrides Win)</div>
+          <span class="step-badge merge">Config Merge</span>
+        </div>
+        <div class="step-content">
+          The <code>mergeConfigs()</code> function applies template overrides to the writer config base.
+          Fields not overridden by the template inherit from the base.
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> effectiveConfig = <span class="function">mergeConfigs</span>(
+  writerConfig,            <span class="comment">// Base (v3)</span>
+  template.config?.overrides  <span class="comment">// Template overrides</span>
+);
+
+<span class="comment">// Result: {</span>
+<span class="highlight"><span class="comment">//   voice: { formality: "academic", perspective: "neutral" },  // formality overridden, perspective inherited</span></span>
+<span class="comment">//   documentStructure: { citationFormat: "apa", includePosition: true },  // includePosition overridden</span>
+<span class="comment">//   qualityRules: { requireCitations: true, ... }  // All inherited (no overrides)</span>
+<span class="comment">// }</span>
+        </div>
+      </div>
+
+      <!-- Step 5: Send to Server -->
+      <div class="step-card send">
+        <div class="step-header">
+          <div class="step-title">Step 5: Send to Server with Complete Config</div>
+          <span class="step-badge send">API Call</span>
+        </div>
+        <div class="step-content">
+          The document-generator sends the merged config, systemPrompt, and renderingInstructions
+          to the server endpoint. NO hardcoded defaults are used.
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/research/write'</span>, {
+  method: <span class="string">'POST'</span>,
+  body: JSON.stringify({
+<span class="highlight">    systemPrompt: template.systemPrompt,  <span class="comment">// Template-specific prompt</span></span>
+<span class="highlight">    renderingInstructions: template.renderingInstructions,  <span class="comment">// S27-OT</span></span>
+<span class="highlight">    voiceConfig: effectiveConfig.voice,  <span class="comment">// Merged config</span></span>
+<span class="highlight">    documentStructure: effectiveConfig.documentStructure,</span>
+<span class="highlight">    qualityRules: effectiveConfig.qualityRules,</span>
+    evidence: sprout.research,
+    query: sprout.query,
+  })
+});
+        </div>
+      </div>
+
+      <!-- Step 6: Generate & Return -->
+      <div class="step-card receive">
+        <div class="step-header">
+          <div class="step-title">Step 6: Generate Document & Record Provenance</div>
+          <span class="step-badge receive">Output</span>
+        </div>
+        <div class="step-content">
+          Server sends effective config to Claude API. Generated document is returned with
+          provenance metadata recording which config versions were used.
+        </div>
+        <div class="step-code">
+<span class="keyword">const</span> document: ResearchDocument = {
+  title: <span class="string">"..."</span>,
+  content: <span class="string">"..."</span>,
+  sources: [...],
+
+  <span class="comment">// S28-PIPE: Config provenance added to GeneratedArtifact</span>
+<span class="highlight">  metadata: {</span>
+<span class="highlight">    researchConfigVersion: <span class="number">2</span>,  <span class="comment">// Which research config was active</span></span>
+<span class="highlight">    writerConfigVersion: <span class="number">3</span>,     <span class="comment">// Which writer config was active</span></span>
+<span class="highlight">    templateId: <span class="string">"academic-paper-v1"</span>,</span>
+<span class="highlight">    effectiveFormality: <span class="string">"academic"</span>,  <span class="comment">// What was actually used (after merge)</span></span>
+<span class="highlight">    effectiveCitationFormat: <span class="string">"apa"</span>,</span>
+<span class="highlight">    generatedAt: <span class="string">"2026-01-28T..."</span></span>
+<span class="highlight">  }</span>
+};
+        </div>
+      </div>
+    </div>
+
+    <!-- Provenance Tracking -->
+    <div class="provenance-section">
+      <div class="provenance-header">
+        📋 Provenance Tracking: Reproducibility & Debugging
+      </div>
+
+      <div class="provenance-grid">
+        <div class="provenance-card">
+          <div class="provenance-card-title">Config Versions Used</div>
+          <div class="provenance-card-content">
+researchConfigVersion: 2<br>
+writerConfigVersion: 3<br>
+templateId: "academic-paper-v1"
+          </div>
+        </div>
+
+        <div class="provenance-card">
+          <div class="provenance-card-title">Effective Values (After Merge)</div>
+          <div class="provenance-card-content">
+voice.formality: "academic"<br>
+voice.perspective: "neutral"<br>
+documentStructure.citationFormat: "apa"<br>
+qualityRules.requireCitations: true
+          </div>
+        </div>
+
+        <div class="provenance-card">
+          <div class="provenance-card-title">Why This Matters</div>
+          <div class="provenance-card-content">
+✓ Reproducibility: Re-run with same configs → same output<br>
+✓ Debugging: "Why different?" → Check config versions<br>
+✓ A/B Testing: Compare outputs from different configs
+          </div>
+        </div>
+
+        <div class="provenance-card">
+          <div class="provenance-card-title">Future Query</div>
+          <div class="provenance-card-content">
+"Show all documents generated with<br>
+writerConfigVersion: 3 AND<br>
+effectiveFormality: 'academic'"<br>
+→ Enables analytics on config impact
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Before vs After Comparison -->
+    <div class="comparison-section">
+      <div class="flow-title">Before S28-PIPE vs After S28-PIPE</div>
+
+      <div class="comparison-grid">
+        <!-- Before -->
+        <div class="comparison-column before">
+          <div class="comparison-header">❌ Before: Broken Wiring</div>
+
+          <div class="comparison-issue">
+            <div class="comparison-issue-title">Issue 1: Configs Never Read</div>
+            <div class="comparison-issue-content">
+              Admin edits research/writer configs in UI, but pipeline uses hardcoded
+              DEFAULT_* constants. Database values are decorative.
+            </div>
+          </div>
+
+          <div class="comparison-issue">
+            <div class="comparison-issue-title">Issue 2: Template.config Ignored</div>
+            <div class="comparison-issue-content">
+              OutputTemplate schema has a <code>config</code> field for overrides, but
+              document-generator.ts never reads it.
+            </div>
+          </div>
+
+          <div class="comparison-issue">
+            <div class="comparison-issue-title">Issue 3: No Provenance</div>
+            <div class="comparison-issue-content">
+              Generated documents have no record of which config versions produced them.
+              Impossible to reproduce or debug.
+            </div>
+          </div>
+
+          <div class="comparison-issue">
+            <div class="comparison-issue-title">Issue 4: Server Fallbacks</div>
+            <div class="comparison-issue-content">
+              server.js has hardcoded <code>defaultSystemPrompt</code> that overrides
+              all configuration when systemPrompt is missing.
+            </div>
+          </div>
+        </div>
+
+        <!-- After -->
+        <div class="comparison-column after">
+          <div class="comparison-header">✅ After: DEX Compliant</div>
+
+          <div class="comparison-fix">
+            <div class="comparison-fix-title">Fix 1: Configs Loaded from DB</div>
+            <div class="comparison-fix-content">
+              config-loader.ts queries Supabase for active configs. Pipeline uses these
+              values instead of defaults. Admin changes immediately affect output.
+            </div>
+          </div>
+
+          <div class="comparison-fix">
+            <div class="comparison-fix-title">Fix 2: Template Overrides Work</div>
+            <div class="comparison-fix-content">
+              Templates can override specific fields (formality, citationFormat, etc.).
+              Merge function applies overrides correctly. Inheritance works.
+            </div>
+          </div>
+
+          <div class="comparison-fix">
+            <div class="comparison-fix-title">Fix 3: Full Provenance</div>
+            <div class="comparison-fix-content">
+              Every GeneratedArtifact records config versions used. Documents are
+              reproducible. Debugging is straightforward.
+            </div>
+          </div>
+
+          <div class="comparison-fix">
+            <div class="comparison-fix-title">Fix 4: No Hardcoded Defaults</div>
+            <div class="comparison-fix-content">
+              Server requires all config in request body. No fallback prompts.
+              Frontend must always load and send complete config.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

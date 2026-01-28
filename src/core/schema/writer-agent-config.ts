@@ -1,71 +1,20 @@
 // src/core/schema/writer-agent-config.ts
-// Writer Agent Configuration - Experience type variant
-// Sprint: writer-agent-v1
+// Writer Agent Configuration - SIMPLIFIED (S28-PIPE)
+// Sprint: s28-pipeline-architecture-v1
 //
 // DEX: Declarative Sovereignty
 // Writing behavior is controlled via config, not code changes.
+//
+// SIMPLIFIED APPROACH:
+// - Configs are TEXT INSTRUCTIONS (prompt fragments)
+// - No enums, no nested objects, no rigid structure
+// - Admins write free-form text, experiment to find what works
+// - Prompts concatenate in pipeline: writingStyle + resultsFormatting + citationsStyle
 
 import { z } from 'zod';
 
 // =============================================================================
-// Voice Configuration
-// =============================================================================
-
-export const VoiceConfigSchema = z.object({
-  /** Writing formality level */
-  formality: z.enum(['casual', 'professional', 'academic', 'technical']).default('professional'),
-
-  /** Narrative perspective */
-  perspective: z.enum(['first-person', 'third-person', 'neutral']).default('neutral'),
-
-  /** Optional personality descriptor */
-  personality: z.string().optional(),
-});
-
-export type VoiceConfig = z.infer<typeof VoiceConfigSchema>;
-
-// =============================================================================
-// Document Structure Configuration
-// =============================================================================
-
-export const DocumentStructureConfigSchema = z.object({
-  /** Include position/thesis section */
-  includePosition: z.boolean().default(true),
-
-  /** Include limitations section */
-  includeLimitations: z.boolean().default(true),
-
-  /** Citation style */
-  citationStyle: z.enum(['inline', 'endnote']).default('inline'),
-
-  /** Citation format */
-  citationFormat: z.enum(['simple', 'apa', 'chicago']).default('simple'),
-
-  /** Maximum document length in words (optional) */
-  maxLength: z.number().min(100).max(10000).optional(),
-});
-
-export type DocumentStructureConfig = z.infer<typeof DocumentStructureConfigSchema>;
-
-// =============================================================================
-// Quality Rules Configuration
-// =============================================================================
-
-export const QualityRulesConfigSchema = z.object({
-  /** Require citations for all claims */
-  requireCitations: z.boolean().default(true),
-
-  /** Minimum confidence score to include evidence (0-1) */
-  minConfidenceToInclude: z.number().min(0).max(1).default(0.5),
-
-  /** Flag uncertain claims in output */
-  flagUncertainty: z.boolean().default(true),
-});
-
-export type QualityRulesConfig = z.infer<typeof QualityRulesConfigSchema>;
-
-// =============================================================================
-// Main Schema
+// Schema Definition (SIMPLIFIED)
 // =============================================================================
 
 export const WriterAgentConfigPayloadSchema = z.object({
@@ -79,40 +28,76 @@ export const WriterAgentConfigPayloadSchema = z.object({
   /** Changelog for this version */
   changelog: z.string().optional(),
 
-  // === WRITER SETTINGS ===
-  /** Voice and tone settings */
-  voice: VoiceConfigSchema,
+  // === WRITER PROMPT CONFIGURATION (TEXT ONLY) ===
 
-  /** Document structure settings */
-  documentStructure: DocumentStructureConfigSchema,
+  /**
+   * Free-form instructions for writing style, voice, tone, perspective.
+   * This text is inserted into the system prompt.
+   *
+   * @example "Write professionally but accessibly. Use neutral perspective. Be authoritative."
+   */
+  writingStyle: z.string().min(1).max(10000),
 
-  /** Quality control rules */
-  qualityRules: QualityRulesConfigSchema,
+  /**
+   * Free-form instructions for document structure and formatting.
+   * This text guides how the output is organized.
+   *
+   * @example "Open with thesis. Use ## headers for sections. Include limitations."
+   */
+  resultsFormatting: z.string().min(1).max(10000),
+
+  /**
+   * Free-form instructions for citation format and requirements.
+   * This text specifies how sources should be cited.
+   *
+   * @example "Use inline (Author, Year) citations. Sources section at end. Cite all claims."
+   */
+  citationsStyle: z.string().min(1).max(5000),
 });
 
 export type WriterAgentConfigPayload = z.infer<typeof WriterAgentConfigPayloadSchema>;
 
 // =============================================================================
-// Defaults
+// Defaults (Extracted from server.js:3016-3025, 58-85)
 // =============================================================================
 
 export const DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD: WriterAgentConfigPayload = {
   version: 1,
-  voice: {
-    formality: 'professional',
-    perspective: 'neutral',
-  },
-  documentStructure: {
-    includePosition: true,
-    includeLimitations: true,
-    citationStyle: 'inline',
-    citationFormat: 'simple',
-  },
-  qualityRules: {
-    requireCitations: true,
-    minConfidenceToInclude: 0.5,
-    flagUncertainty: true,
-  },
+
+  // Extracted from server.js:3016-3025 (writerSystemPrompt voice section)
+  writingStyle: `You are a senior research writer.
+
+Write with:
+- Formality: professional
+- Perspective: neutral
+- Citation style: inline
+
+Your output should be authoritative but accessible. Use clear, direct language while maintaining analytical rigor.`,
+
+  // Extracted from server.js:71-76 (DEFAULT_WRITER_RENDERING_RULES document structure)
+  resultsFormatting: `## Document Structure
+1. Open with a clear thesis/position (2-3 sentences)
+2. Use ## headers to organize analysis into 3-5 logical sections
+3. Each section should have substantive content with specific data and evidence
+4. Close with a synthesis or forward-looking conclusion
+5. Note limitations honestly
+
+## Rendering Rules (ReactMarkdown + GFM)
+Your output will be rendered by a markdown engine. Use rich formatting:
+- **Section headers**: Use ## for major sections, ### for subsections
+- **Bold key terms**: Wrap important concepts in **bold**
+- **Bullet lists**: Use - for unordered lists of key findings
+- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
+- **Tables**: Use GFM markdown tables for comparisons or structured data
+- **Blockquotes**: Use > for notable quotes from sources`,
+
+  // Extracted from server.js:69 (DEFAULT_WRITER_RENDERING_RULES citations section)
+  citationsStyle: `## Inline Citations
+Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index.
+
+Example: <cite index="1">GPU inference improved 10x</cite>
+
+Include a Sources section at the end with full references.`,
 };
 
 // =============================================================================
@@ -125,17 +110,5 @@ export function createWriterAgentConfigPayload(
   return {
     ...DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD,
     ...overrides,
-    voice: {
-      ...DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD.voice,
-      ...overrides?.voice,
-    },
-    documentStructure: {
-      ...DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD.documentStructure,
-      ...overrides?.documentStructure,
-    },
-    qualityRules: {
-      ...DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD.qualityRules,
-      ...overrides?.qualityRules,
-    },
   };
 }

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: SIMPLIFIED Config Schema (Text-Only Prompts)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1600px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+    .panel.rejected {
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .panel.approved {
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+    .panel-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .panel.rejected .panel-header { color: #ef4444; }
+    .panel.approved .panel-header { color: #22c55e; }
+
+    .schema-block {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .schema-title {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .schema-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+    .schema-code .keyword { color: #c084fc; }
+    .schema-code .type { color: #38bdf8; }
+    .schema-code .field { color: #e2e8f0; }
+    .schema-code .string { color: #22c55e; }
+    .schema-code .comment { color: #64748b; }
+    .schema-code .rejected { color: #ef4444; text-decoration: line-through; }
+    .schema-code .approved { color: #22c55e; }
+
+    .ui-preview {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .ui-preview-title {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .form-field {
+      margin-bottom: 1rem;
+    }
+    .form-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.85rem;
+    }
+    .form-textarea {
+      width: 100%;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+    .form-hint {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 0.35rem;
+      font-style: italic;
+    }
+
+    .issue-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .issue-title {
+      color: #ef4444;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .issue-content {
+      font-size: 0.8rem;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .approval-box {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .approval-title {
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .approval-content {
+      font-size: 0.8rem;
+      color: #86efac;
+      line-height: 1.5;
+    }
+
+    .principle {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid #3b82f6;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+    .principle-title {
+      color: #60a5fa;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .principle-content {
+      font-size: 0.8rem;
+      color: #93c5fd;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SIMPLIFIED Config Schemas (Text-Only)</h1>
+    <p class="subtitle">S28-PIPE: Remove rigid structure, add free-form prompt configuration</p>
+
+    <div class="comparison-grid">
+      <!-- REJECTED: Complex Schemas -->
+      <div class="panel rejected">
+        <div class="panel-header">
+          ❌ REJECTED: Over-Engineered Schemas
+        </div>
+
+        <div class="schema-block">
+          <div class="schema-title">ResearchAgentConfigPayload (OLD)</div>
+          <div class="schema-code">
+<span class="keyword">interface</span> <span class="type">ResearchAgentConfigPayload</span> {
+  <span class="field">version</span>: <span class="type">number</span>;
+  <span class="rejected">searchDepth: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;</span>
+  <span class="rejected">sourcePreferences: Array<'academic' | 'practitioner' | 'news' | 'general'>;</span>
+  <span class="rejected">confidenceThreshold: number;  // 0-1</span>
+  <span class="rejected">maxApiCalls: number;  // 1-50</span>
+  <span class="rejected">branchDelay: number;  // 0-5000ms</span>
+}
+
+<span class="comment">// 56 lines of validation code...</span>
+          </div>
+          <div class="issue-box">
+            <div class="issue-title">Why This Is Wrong</div>
+            <div class="issue-content">
+              • Rigid enums limit admin experimentation<br>
+              • Assumes we know what matters (searchDepth? branchDelay?)<br>
+              • Forces configuration into predefined buckets<br>
+              • Can't express "focus on recent sources" without new enum
+            </div>
+          </div>
+        </div>
+
+        <div class="schema-block">
+          <div class="schema-title">WriterAgentConfigPayload (OLD)</div>
+          <div class="schema-code">
+<span class="keyword">interface</span> <span class="type">WriterAgentConfigPayload</span> {
+  <span class="field">version</span>: <span class="type">number</span>;
+  <span class="rejected">voice: {</span>
+    <span class="rejected">formality: 'casual' | 'professional' | 'academic' | 'technical';</span>
+    <span class="rejected">perspective: 'first-person' | 'third-person' | 'neutral';</span>
+    <span class="rejected">personality?: string;</span>
+  <span class="rejected">};</span>
+  <span class="rejected">documentStructure: {</span>
+    <span class="rejected">includePosition: boolean;</span>
+    <span class="rejected">includeLimitations: boolean;</span>
+    <span class="rejected">citationStyle: 'inline' | 'endnote';</span>
+    <span class="rejected">citationFormat: 'simple' | 'apa' | 'chicago';</span>
+    <span class="rejected">maxLength?: number;</span>
+  <span class="rejected">};</span>
+  <span class="rejected">qualityRules: {</span>
+    <span class="rejected">requireCitations: boolean;</span>
+    <span class="rejected">minConfidenceToInclude: number;</span>
+    <span class="rejected">flagUncertainty: boolean;</span>
+  <span class="rejected">};</span>
+}
+          </div>
+          <div class="issue-box">
+            <div class="issue-title">Why This Is Wrong</div>
+            <div class="issue-content">
+              • Forces admin into dropdowns and toggles<br>
+              • Can't say "write like a tech blogger" without new enum<br>
+              • Can't experiment with custom citation styles<br>
+              • Nested structure is over-engineered
+            </div>
+          </div>
+        </div>
+
+        <div class="ui-preview">
+          <div class="ui-preview-title">UI Pattern (REJECTED)</div>
+          <div class="form-field">
+            <label class="form-label">Formality</label>
+            <select class="form-select">
+              <option>Casual</option>
+              <option>Professional</option>
+              <option>Academic</option>
+            </select>
+            <div class="form-hint">❌ Forces predefined choices</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPROVED: Simple Schemas -->
+      <div class="panel approved">
+        <div class="panel-header">
+          ✅ APPROVED: Simple Text-Based Schemas
+        </div>
+
+        <div class="schema-block">
+          <div class="schema-title">ResearchAgentConfigPayload (NEW)</div>
+          <div class="schema-code">
+<span class="keyword">interface</span> <span class="type">ResearchAgentConfigPayload</span> {
+  <span class="field">version</span>: <span class="type">number</span>;
+  <span class="approved">searchInstructions: string;</span>
+  <span class="approved">qualityGuidance: string;</span>
+}
+
+<span class="comment">// That's it. Just text.</span>
+          </div>
+          <div class="approval-box">
+            <div class="approval-title">Why This Works</div>
+            <div class="approval-content">
+              • Admin can write ANY instruction<br>
+              • "Focus on academic sources from 2020 onward"<br>
+              • "Prioritize practitioner blogs over news"<br>
+              • Experimentation reveals what matters<br>
+              • No predefined constraints
+            </div>
+          </div>
+        </div>
+
+        <div class="schema-block">
+          <div class="schema-title">WriterAgentConfigPayload (NEW)</div>
+          <div class="schema-code">
+<span class="keyword">interface</span> <span class="type">WriterAgentConfigPayload</span> {
+  <span class="field">version</span>: <span class="type">number</span>;
+  <span class="approved">writingStyle: string;</span>
+  <span class="approved">resultsFormatting: string;</span>
+  <span class="approved">citationsStyle: string;</span>
+}
+
+<span class="comment">// Three text fields. Done.</span>
+          </div>
+          <div class="approval-box">
+            <div class="approval-title">Why This Works</div>
+            <div class="approval-content">
+              • Admin writes instructions in plain English<br>
+              • "Write like a tech blogger, conversational"<br>
+              • "Use APA 7th with DOIs when available"<br>
+              • Easy to A/B test different prompts<br>
+              • No rigid structure to fight against
+            </div>
+          </div>
+        </div>
+
+        <div class="ui-preview">
+          <div class="ui-preview-title">UI Pattern (APPROVED - Matches Existing Inspectors)</div>
+
+          <div class="form-field">
+            <label class="form-label">Writing Style Instructions</label>
+            <textarea class="form-textarea" rows="4">Write in a professional but accessible tone. Use clear, direct language. Avoid jargon unless necessary. Maintain neutral perspective.</textarea>
+            <div class="form-hint">✓ Free-form text — experiment to find what works</div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Results Formatting Instructions</label>
+            <textarea class="form-textarea" rows="4">Structure with executive summary, clear headings, bullet points for lists. Include limitations section.</textarea>
+            <div class="form-hint">✓ Admin controls exactly how output is structured</div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Citations Style Instructions</label>
+            <textarea class="form-textarea" rows="3">Use inline citations (Author, Year). Include Sources section at end. Cite all factual claims.</textarea>
+            <div class="form-hint">✓ No dropdown — write the citation rules you want</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How They Merge -->
+    <div class="panel" style="border-color: rgba(245, 158, 11, 0.3);">
+      <div class="panel-header" style="color: #f59e0b;">
+        ⚡ How Text Configs Merge in Pipeline
+      </div>
+
+      <div class="schema-block">
+        <div class="schema-title">Example: "Academic Paper" Template Overrides Base</div>
+        <div class="schema-code">
+<span class="comment">// 1. Load Writer Config v3 (Grove-Wide Base)</span>
+<span class="keyword">const</span> baseConfig = {
+  writingStyle: <span class="string">"Write professionally but accessibly."</span>,
+  resultsFormatting: <span class="string">"Executive summary, sections, bullets."</span>,
+  citationsStyle: <span class="string">"Inline (Author, Year) format."</span>
+};
+
+<span class="comment">// 2. Load Template "Academic Paper"</span>
+<span class="keyword">const</span> template = {
+  systemPrompt: <span class="string">"You are writing a formal academic paper..."</span>,
+  renderingInstructions: <span class="string">"Use LaTeX formatting for equations..."</span>,
+  configOverrides: {
+    writingStyle: <span class="string">"Write in formal academic prose. Use third-person only."</span>,
+    citationsStyle: <span class="string">"Use APA 7th edition with DOIs."</span>
+    <span class="comment">// resultsFormatting not overridden → inherit from base</span>
+  }
+};
+
+<span class="comment">// 3. Merge (Template Wins for Overridden Fields)</span>
+<span class="keyword">const</span> effectiveConfig = {
+  writingStyle: template.configOverrides.writingStyle,  <span class="comment">// ← Template override</span>
+  resultsFormatting: baseConfig.resultsFormatting,      <span class="comment">// ← Inherited from base</span>
+  citationsStyle: template.configOverrides.citationsStyle  <span class="comment">// ← Template override</span>
+};
+
+<span class="comment">// 4. Build Final System Prompt (String Concatenation)</span>
+<span class="keyword">const</span> finalPrompt = `
+${template.systemPrompt}
+
+## Writing Style
+${effectiveConfig.writingStyle}
+
+## Results Formatting
+${effectiveConfig.resultsFormatting}
+
+## Citations
+${effectiveConfig.citationsStyle}
+
+## Rendering Instructions
+${template.renderingInstructions}
+`;
+
+<span class="comment">// Send to Claude API with finalPrompt</span>
+        </div>
+      </div>
+
+      <div class="principle">
+        <div class="principle-title">Core Principle: Prompt Fragments, Not Structured Data</div>
+        <div class="principle-content">
+          Configs are TEXT INSTRUCTIONS that get merged into prompts. Admins write what they want to see,
+          system concatenates it. No enums, no validation beyond "is it a string?"
+        </div>
+      </div>
+    </div>
+
+    <!-- Inspector Pattern -->
+    <div class="panel" style="border-color: rgba(34, 197, 94, 0.3); margin-top: 2rem;">
+      <div class="panel-header" style="color: #22c55e;">
+        ✅ Inspector UI Pattern (Matches Existing console-factory)
+      </div>
+
+      <div class="schema-block">
+        <div class="schema-title">Use Existing Primitives (No New Patterns)</div>
+        <div class="schema-code">
+<span class="comment">// WriterAgentConfigEditor.tsx - SIMPLIFIED</span>
+<span class="keyword">import</span> { InspectorSection, InspectorDivider } <span class="keyword">from</span> <span class="string">'../../primitives/BedrockInspector'</span>;
+<span class="keyword">import</span> { BufferedTextarea } <span class="keyword">from</span> <span class="string">'../../primitives/BufferedInput'</span>;
+<span class="keyword">import</span> { useWriterAgentConfigData } <span class="keyword">from</span> <span class="string">'./useWriterAgentConfigData'</span>;
+
+<span class="keyword">export function</span> <span class="function">WriterAgentConfigEditor</span>({ object: config, onEdit, ... }) {
+  <span class="comment">// Same console-factory pattern, just simpler fields</span>
+
+  <span class="keyword">return</span> (
+    &lt;&gt;
+      &lt;<span class="type">InspectorSection</span> title=<span class="string">"Writer Prompt Configuration"</span>&gt;
+
+        <span class="comment">// FIELD 1: Writing Style (was nested voice.formality enum)</span>
+        &lt;<span class="type">BufferedTextarea</span>
+          value={config.payload.writingStyle}
+          onChange={(v) =&gt; patchPayload(<span class="string">'writingStyle'</span>, v)}
+          rows={4}
+          placeholder=<span class="string">"e.g., Write professionally but accessibly..."</span>
+        /&gt;
+
+        <span class="comment">// FIELD 2: Results Formatting (was nested documentStructure.*)</span>
+        &lt;<span class="type">BufferedTextarea</span>
+          value={config.payload.resultsFormatting}
+          onChange={(v) =&gt; patchPayload(<span class="string">'resultsFormatting'</span>, v)}
+          rows={4}
+          placeholder=<span class="string">"e.g., Executive summary, sections, bullets..."</span>
+        /&gt;
+
+        <span class="comment">// FIELD 3: Citations Style (was nested documentStructure.citation*)</span>
+        &lt;<span class="type">BufferedTextarea</span>
+          value={config.payload.citationsStyle}
+          onChange={(v) =&gt; patchPayload(<span class="string">'citationsStyle'</span>, v)}
+          rows={3}
+          placeholder=<span class="string">"e.g., Inline (Author, Year), Sources section at end..."</span>
+        /&gt;
+
+      &lt;/<span class="type">InspectorSection</span>&gt;
+    &lt;/&gt;
+  );
+}
+          </div>
+        </div>
+
+        <div class="approval-box">
+          <div class="approval-title">✓ Follows Established Patterns</div>
+          <div class="approval-content">
+            • Uses existing console-factory ObjectEditorProps<br>
+            • Uses existing InspectorSection primitive<br>
+            • Uses existing BufferedTextarea (prevents race conditions)<br>
+            • Same layout as other inspectors (no new patterns)<br>
+            • Just simplified the schema — everything else same
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schema Comparison Table -->
+    <div class="panel" style="margin-top: 2rem;">
+      <div class="panel-header" style="color: #f8fafc;">
+        📊 Complete Schema Comparison
+      </div>
+
+      <table style="width: 100%; font-size: 0.85rem; color: #e2e8f0;">
+        <thead>
+          <tr style="border-bottom: 2px solid rgba(148, 163, 184, 0.2);">
+            <th style="text-align: left; padding: 0.75rem; color: #94a3b8;">Config Type</th>
+            <th style="text-align: left; padding: 0.75rem; color: #ef4444;">OLD (Rejected)</th>
+            <th style="text-align: left; padding: 0.75rem; color: #22c55e;">NEW (Approved)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+            <td style="padding: 0.75rem; font-weight: 600;">Research Agent</td>
+            <td style="padding: 0.75rem; color: #fca5a5;">
+              6 fields, enums, numbers, validation
+            </td>
+            <td style="padding: 0.75rem; color: #86efac;">
+              2 text fields: searchInstructions, qualityGuidance
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(148, 163, 184, 0.1);">
+            <td style="padding: 0.75rem; font-weight: 600;">Writer Agent</td>
+            <td style="padding: 0.75rem; color: #fca5a5;">
+              3 nested objects, 10 fields, enums, booleans
+            </td>
+            <td style="padding: 0.75rem; color: #86efac;">
+              3 text fields: writingStyle, resultsFormatting, citationsStyle
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem; font-weight: 600;">Output Template</td>
+            <td style="padding: 0.75rem; color: #fca5a5;">
+              Structured config.overrides object
+            </td>
+            <td style="padding: 0.75rem; color: #86efac;">
+              Same 3 fields, can override base text (already works)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="principle" style="margin-top: 1.5rem;">
+        <div class="principle-title">Design Principle: Configurability Through Text, Not Structure</div>
+        <div class="principle-content">
+          Give admins TEXT INPUT FIELDS to write prompt instructions. Let them discover through experimentation
+          what parameters matter. Don't force them into your predetermined structure. The configs are
+          <strong>prompt fragments</strong> that merge into the pipeline — not rigid data schemas.
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

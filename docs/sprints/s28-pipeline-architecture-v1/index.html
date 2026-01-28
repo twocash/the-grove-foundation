@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Pipeline Architecture Rationalization - Wireframe Index</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #f8fafc;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+    .sprint-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    .sprint-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .overview {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .overview h2 {
+      color: #f8fafc;
+      margin-bottom: 1rem;
+    }
+    .overview p {
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .overview ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .overview li {
+      padding: 0.5rem 0;
+      color: #94a3b8;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .overview li::before {
+      content: '✓';
+      color: #22c55e;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .wireframe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .wireframe-card {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+    .wireframe-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border-color: rgba(34, 197, 94, 0.5);
+    }
+    .wireframe-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .wireframe-number.n1 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .wireframe-number.n2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .wireframe-number.n3 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .wireframe-number.n4 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .wireframe-number.n5 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .wireframe-number.n6 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .wireframe-number.n7 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+    .wireframe-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 0.5rem;
+    }
+    .wireframe-description {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .action-panel {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+    .action-panel h2 {
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
+    }
+    .btn-secondary {
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #e2e8f0;
+    }
+    .btn-secondary:hover {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: rgba(148, 163, 184, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>S28-PIPE: Pipeline Architecture Rationalization</h1>
+      <p class="subtitle">Wire the DEX pipeline so research-agent-config, writer-agent-config, and output-templates work together</p>
+      <div class="sprint-meta">
+        <span>📅 Sprint: S28-PIPE</span>
+        <span>🎯 Phase: Planning</span>
+        <span>📊 Status: Wireframes Complete</span>
+      </div>
+    </header>
+
+    <div class="overview">
+      <h2>Sprint Overview</h2>
+      <p>
+        The Grove pipeline has three configuration layers (research-agent-config, writer-agent-config, output-templates)
+        that were designed to compose declaratively, but currently they're disconnected. The UI allows editing
+        these configs, but the pipeline never reads them — everything uses hardcoded defaults.
+      </p>
+      <p><strong>Critical Gaps Identified:</strong></p>
+      <ul>
+        <li><strong>config-loader.ts</strong> has TODO stubs that return hardcoded defaults instead of querying Supabase</li>
+        <li><strong>research-agent-config</strong> is stored but never read during evidence gathering</li>
+        <li><strong>writer-agent-config</strong> is stored but never read during document writing</li>
+        <li><strong>OutputTemplate.config</strong> field exists but is completely ignored</li>
+        <li><strong>server.js</strong> has fallback defaults that override all configuration</li>
+        <li><strong>Provenance tracking</strong> doesn't record which config versions produced a document</li>
+      </ul>
+    </div>
+
+    <h2 style="color: #f8fafc; margin-bottom: 1.5rem; text-align: center;">Interactive Wireframes</h2>
+
+    <div class="wireframe-grid">
+      <a href="wireframe-01-pipeline-flow.html" class="wireframe-card">
+        <div class="wireframe-number n1">01</div>
+        <div class="wireframe-title">Pipeline Flow (Broken State)</div>
+        <div class="wireframe-description">
+          Complete visual breakdown of the current broken pipeline showing where configs are
+          stored, where they should be loaded, and where the wiring breaks.
+        </div>
+      </a>
+
+      <a href="wireframe-02-config-loading.html" class="wireframe-card">
+        <div class="wireframe-number n2">02</div>
+        <div class="wireframe-title">Config Loading & Merge Strategy</div>
+        <div class="wireframe-description">
+          How configuration layers stack (research → writer → template overrides) and merge
+          to produce effective config. Shows priority order and inheritance rules.
+        </div>
+      </a>
+
+      <a href="wireframe-03-research-inspector.html" class="wireframe-card">
+        <div class="wireframe-number n3">03</div>
+        <div class="wireframe-title">Research Agent Config Inspector</div>
+        <div class="wireframe-description">
+          Full UI mockup of the ResearchAgentConfig editor with pipeline impact panel showing
+          how changes affect research behavior and downstream evidence quality.
+        </div>
+      </a>
+
+      <a href="wireframe-04-writer-inspector.html" class="wireframe-card">
+        <div class="wireframe-number n4">04</div>
+        <div class="wireframe-title">Writer Agent Config Inspector</div>
+        <div class="wireframe-description">
+          WriterAgentConfig editor showing grove-wide base values, which fields templates can
+          override, and how inheritance works between layers.
+        </div>
+      </a>
+
+      <a href="wireframe-05-template-selector.html" class="wireframe-card">
+        <div class="wireframe-number n5">05</div>
+        <div class="wireframe-title">Template Selector with Config Inheritance</div>
+        <div class="wireframe-description">
+          Template selection UI showing how each template overrides specific config fields
+          while inheriting others. Visualizes the merge result and provenance tracking.
+        </div>
+      </a>
+
+      <a href="wireframe-06-versioning-system.html" class="wireframe-card">
+        <div class="wireframe-number n6">06</div>
+        <div class="wireframe-title">Config Versioning System</div>
+        <div class="wireframe-description">
+          Timeline view of config versions, activation flow, singleton pattern enforcement,
+          and rollback scenarios. Shows how versioning enables reproducibility.
+        </div>
+      </a>
+
+      <a href="wireframe-07-generation-flow.html" class="wireframe-card">
+        <div class="wireframe-number n7">07</div>
+        <div class="wireframe-title">End-to-End Document Generation</div>
+        <div class="wireframe-description">
+          Complete step-by-step flow from user action to generated document, showing exactly
+          where each config is loaded, how they merge, and how provenance is recorded.
+        </div>
+      </a>
+    </div>
+
+    <div class="action-panel">
+      <h2>Next Steps</h2>
+      <div class="action-buttons">
+        <a href="SPEC.md" class="btn btn-primary">📄 Read Full Spec</a>
+        <a href="../" class="btn btn-secondary">← Back to Sprints</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

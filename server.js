@@ -50,41 +50,18 @@ console.log('GitHub Sync:', GITHUB_SYNC_ENABLED ?
   'Disabled (missing env vars)');
 
 // =============================================================================
-// S27-OT: Named rendering instruction defaults
-// IMPORTANT: These are duplicated from src/core/config/rendering-defaults.ts
-// because server.js cannot import from src/core/. Keep them in sync.
+// S28-PIPE: Prompt defaults MIGRATED to editable configs
 // =============================================================================
-
-const DEFAULT_WRITER_RENDERING_RULES = `
-
-## Rendering Rules (ReactMarkdown + GFM)
-Your output will be rendered by a markdown engine. Use rich formatting:
-
-- **Section headers**: Use ## for major sections, ### for subsections
-- **Bold key terms**: Wrap important concepts in **bold**
-- **Bullet lists**: Use - for unordered lists of key findings
-- **Numbered lists**: Use 1. 2. 3. for sequential steps or ranked items
-- **Tables**: Use GFM markdown tables for comparisons or structured data
-- **Blockquotes**: Use > for notable quotes from sources
-- **Inline citations**: Use <cite index="N">cited claim</cite> HTML tags where N is the 1-based source index. Example: <cite index="1">GPU inference improved 10x</cite>
-
-## Document Structure
-1. Open with a clear thesis/position (2-3 sentences)
-2. Use ## headers to organize analysis into 3-5 logical sections
-3. Each section should have substantive content with specific data and evidence
-4. Close with a synthesis or forward-looking conclusion
-5. Note limitations honestly
-
-## Output Format
-Return valid JSON:
-{
-  "position": "1-3 sentence thesis statement",
-  "analysis": "Full markdown document with ## sections, **bold**, lists, tables, and <cite index=\\"N\\">...</cite> tags",
-  "limitations": "Honest limitations of this analysis",
-  "citations": [{ "index": 1, "title": "Source title", "url": "https://...", "snippet": "relevant quote", "domain": "example.com" }]
-}`;
-
-const DEFAULT_RESEARCH_RENDERING_RULES = `\n\nIMPORTANT: Use rich markdown formatting in all output — ## headers for sections, ### for subsections, bullet lists, numbered lists, tables for comparisons, blockquotes for quotes, **bold** for key terms, and paragraph breaks. Use <cite index="N">claim</cite> HTML tags for inline citations where N matches the source index. Your output will be rendered with a markdown engine.`;
+//
+// DEPRECATED (S28-PIPE): Rendering defaults have been extracted into:
+// - ResearchAgentConfigPayload.searchInstructions + qualityGuidance
+// - WriterAgentConfigPayload.writingStyle + resultsFormatting + citationsStyle
+//
+// These are now editable via Bedrock inspector UIs and loaded from Supabase.
+// Server endpoints now require finalPrompt in request body (no fallbacks).
+//
+// Migration complete: server.js no longer defines prompt defaults.
+// =============================================================================
 
 // =============================================================================
 // Async Job System - Sprint: upload-pipeline-unification-v1
@@ -2555,36 +2532,18 @@ app.post('/api/research/deep', async (req, res) => {
         }
 
         // Use systemPrompt from template if provided, otherwise use default
-        // Sprint: research-template-wiring-v1 - DEX Declarative Sovereignty
-        // S22-WP: Strengthened default prompt for professional research depth
-        const defaultSystemPrompt = `You are a SENIOR RESEARCH ANALYST conducting professional-grade investigation.
+        // S28-PIPE: No fallback prompts — frontend MUST send complete merged prompt
+        // Prompt is built from: ResearchAgentConfig (loaded from Supabase) + Template
+        if (!systemPrompt || systemPrompt.trim() === '') {
+            return res.status(400).json({
+                error: 'systemPrompt is required (S28-PIPE: no server-side defaults)'
+            });
+        }
 
-Your research must be:
-- EXHAUSTIVE: Explore every relevant angle, follow citation chains, verify claims across sources
-- RIGOROUS: Distinguish between primary sources, expert analysis, and speculation
-- NUANCED: Present conflicting evidence, methodological debates, and uncertainty
-- ACTIONABLE: Connect findings to practical implications and next steps
+        const effectiveSystemPrompt = systemPrompt;
+        const renderingSource = renderingInstructions?.trim() ? 'template' : 'config';
 
-For each major claim:
-1. Cite the source with full attribution
-2. Assess source credibility (academic, industry, journalistic, etc.)
-3. Note corroborating or contradicting evidence
-4. Assign confidence level (0.0-1.0) with justification
-
-DO NOT summarize prematurely. DO NOT omit relevant details for brevity.
-Your audience expects comprehensive, professional-grade research output.`;
-
-        // S27-OT: Template-first rendering instructions with named constant fallback
-        // Custom templates have short behavioral prompts that lack formatting instructions.
-        // Append rendering rules ONLY to custom templates.
-        // The defaultSystemPrompt already works well — don't bloat it.
-        const renderingRules = renderingInstructions?.trim()
-            || DEFAULT_RESEARCH_RENDERING_RULES;
-        const renderingSource = renderingInstructions?.trim()
-            ? 'template' : 'default-research';
-        const effectiveSystemPrompt = systemPrompt
-            ? systemPrompt + renderingRules
-            : defaultSystemPrompt;
+        console.log('[Research Deep] Using systemPrompt from request (no server defaults)');
 
         // ============================================================
         // S22-WP: STRUCTURED OUTPUT VIA TOOL USE
@@ -3001,28 +2960,23 @@ app.post('/api/research/write', async (req, res) => {
         //   - Voice config = already in WriterAgentConfigPayload schema
         // ============================================================
 
-        // Layer 1: Approach prompt — the template's systemPrompt drives research approach
-        // (received as `query` from writer-agent.ts callLLMForWriting)
-        const approachPrompt = query;
+        // S28-PIPE: Receive merged prompt from frontend (no server-side defaults)
+        // Frontend builds finalPrompt from: WriterAgentConfig + Template overrides
+        // See: document-generator.ts buildWriterPrompt()
 
-        // S27-OT: Template-first rendering instructions with named constant fallback
-        // Layer 2: Rendering rules — from template or default
-        const renderingRules = renderingInstructions?.trim()
-            || DEFAULT_WRITER_RENDERING_RULES;
-        const renderingSource = renderingInstructions?.trim()
-            ? 'template' : 'default-writer';
+        // Expect finalPrompt from request body (built by document-generator)
+        const finalPrompt = query; // writer-agent.ts passes systemPromptOverride as query parameter
 
-        // Compose: approach + voice + rendering rules
-        const writerSystemPrompt = `You are a senior research writer.
+        if (!finalPrompt || finalPrompt.trim() === '') {
+            return res.status(400).json({
+                error: 'Final prompt is required (S28-PIPE: no server-side defaults)'
+            });
+        }
 
-## Approach
-${approachPrompt}
+        const writerSystemPrompt = finalPrompt;
+        const renderingSource = 'config'; // S28-PIPE: Always from config (merged in frontend)
 
-## Voice
-- Formality: ${voiceConfig?.formality || 'professional'}
-- Perspective: ${voiceConfig?.perspective || 'neutral'}
-- Citation style: ${voiceConfig?.citationStyle || 'inline'}
-${renderingRules}`;
+        console.log('[Research Write] Using merged prompt from frontend (no server defaults)');
 
         const userPrompt = `## Evidence
 ${typeof evidence === 'string' ? evidence : JSON.stringify(evidence, null, 2)}

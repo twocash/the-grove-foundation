@@ -312,9 +312,13 @@ export function SproutEditor({
         createdAt: new Date().toISOString(),
       };
 
+      // S28-PIPE: Pass groveId for config loading
+      const groveId = 'main'; // Default grove for now
+
       const result = await generateDocument({
         evidenceBundle,
         query: sprout.payload.spark,
+        groveId,
         writerTemplateId: templateId,
       });
 

@@ -14,13 +14,14 @@
 import type { EvidenceBundle } from '@core/schema/evidence-bundle';
 import type { ResearchDocument } from '@core/schema/research-document';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
-import { DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD } from '@core/schema/writer-agent-config';
+import type { OutputTemplatePayload } from '@core/schema/output-template';
 
 import {
   writeResearchDocument,
   type WriterProgress,
 } from './writer-agent';
 import { loadTemplateById, loadDefaultTemplate, type LoadedTemplate } from './template-loader';
+import { loadWriterAgentConfig } from './config-loader';
 
 // =============================================================================
 // Types
@@ -36,10 +37,13 @@ export interface GenerateDocumentRequest {
   /** Original research query/spark */
   query: string;
 
+  /** Grove ID (for loading active configs) */
+  groveId: string;
+
   /** Writer template ID (from output_templates) */
   writerTemplateId?: string;
 
-  /** Optional config overrides */
+  /** Optional config overrides (deprecated — use template configOverrides instead) */
   configOverrides?: Partial<WriterAgentConfigPayload>;
 }
 
@@ -64,6 +68,9 @@ export interface GenerateDocumentResult {
   /** S27-OT: Which rendering instructions shaped this document */
   renderingSource?: 'template' | 'default-writer' | 'default-research';
 
+  /** S28-PIPE: Config provenance (which versions produced this document) */
+  writerConfigVersion?: number;
+
   /** Error message (if failed) */
   error?: string;
 
@@ -79,6 +86,62 @@ export interface GenerateDocumentResult {
  * Progress callback type
  */
 export type OnGenerateProgressFn = (progress: WriterProgress) => void;
+
+// =============================================================================
+// Prompt Merge Helpers (S28-PIPE)
+// =============================================================================
+
+/**
+ * Merge writer config with template overrides to build final system prompt.
+ *
+ * Template overrides win for fields that are set. Unset fields inherit from base config.
+ *
+ * @param writerConfig - Grove-wide writer config (loaded from Supabase)
+ * @param template - Selected output template
+ * @param query - Research query (approach)
+ * @returns Final system prompt for writer agent
+ */
+function buildWriterPrompt(
+  writerConfig: WriterAgentConfigPayload,
+  template: LoadedTemplate | undefined,
+  query: string
+): string {
+  if (!template) {
+    // No template: use writer config directly
+    return `${writerConfig.writingStyle}
+
+${writerConfig.resultsFormatting}
+
+${writerConfig.citationsStyle}`;
+  }
+
+  // Get template config overrides (if defined in OutputTemplatePayload.config.overrides)
+  const templatePayload = template as unknown as OutputTemplatePayload;
+  const overrides = (templatePayload.config as any)?.overrides as Partial<WriterAgentConfigPayload> | undefined;
+
+  // Merge: template overrides win, otherwise inherit from base config
+  const effectiveWritingStyle = overrides?.writingStyle ?? writerConfig.writingStyle;
+  const effectiveFormatting = overrides?.resultsFormatting ?? writerConfig.resultsFormatting;
+  const effectiveCitations = overrides?.citationsStyle ?? writerConfig.citationsStyle;
+
+  // Build final prompt via string concatenation
+  return `${template.systemPrompt}
+
+## Approach
+${query}
+
+## Writing Style
+${effectiveWritingStyle}
+
+## Results Formatting
+${effectiveFormatting}
+
+## Citations
+${effectiveCitations}
+
+## Rendering Instructions
+${template.renderingInstructions || ''}`;
+}
 
 // =============================================================================
 // Main Function
@@ -128,22 +191,24 @@ export async function generateDocument(
       }
     }
 
-    // Build config with overrides
-    const config: WriterAgentConfigPayload = {
-      ...DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD,
-      ...request.configOverrides,
-    };
+    // S28-PIPE: Load active writer config from database
+    const writerConfig = await loadWriterAgentConfig(request.groveId);
+    console.log(`[DocumentGenerator] Loaded writer config v${writerConfig.version}`);
 
-    // Call writer agent with template's systemPrompt and rendering instructions
+    // S28-PIPE: Build merged system prompt (config + template overrides)
+    const finalPrompt = buildWriterPrompt(writerConfig, template, request.query);
+    console.log('[DocumentGenerator] Built merged prompt from config + template');
+
+    // Call writer agent with merged prompt
     const document = await writeResearchDocument(
       request.evidenceBundle,
       request.query,
-      config,
+      writerConfig, // Pass config for non-prompt settings (if any)
       onProgress,
-      template ? {
-        systemPromptOverride: template.systemPrompt,
-        renderingInstructions: template.renderingInstructions, // S27-OT
-      } : undefined
+      {
+        systemPromptOverride: finalPrompt, // S28-PIPE: Use merged prompt
+        renderingInstructions: '', // Already included in finalPrompt
+      }
     );
 
     const completedAt = new Date().toISOString();
@@ -161,6 +226,7 @@ export async function generateDocument(
         source: template.source,
       } : undefined,
       renderingSource: (document as Record<string, unknown>).renderingSource as GenerateDocumentResult['renderingSource'], // S27-OT
+      writerConfigVersion: writerConfig.version, // S28-PIPE: Provenance tracking
       execution: {
         startedAt,
         completedAt,

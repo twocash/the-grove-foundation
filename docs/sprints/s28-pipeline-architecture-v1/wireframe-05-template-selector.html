@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S28-PIPE: Template Selector with Config Inheritance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .subtitle { color: #94a3b8; margin-bottom: 2rem; font-size: 1.1rem; }
+
+    .section {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      font-size: 1.25rem;
+      color: #f8fafc;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #f59e0b, #d97706);
+      border-radius: 2px;
+    }
+
+    /* Template Grid */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .template-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 2px solid rgba(148, 163, 184, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .template-card:hover {
+      border-color: rgba(148, 163, 184, 0.3);
+      transform: translateY(-2px);
+    }
+    .template-card.selected {
+      border-color: #f59e0b;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+    }
+    .template-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .template-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .template-title {
+      font-weight: 600;
+      color: #f8fafc;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .template-subtitle {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    .template-description {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    /* Overrides List */
+    .overrides-section {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+    .overrides-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #64748b;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .override-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0;
+      font-size: 0.8rem;
+    }
+    .override-item:not(:last-child) {
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+    .override-key { color: #94a3b8; }
+    .override-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+    .override-inherited {
+      background: rgba(148, 163, 184, 0.1);
+      color: #64748b;
+    }
+
+    /* Effective Config Preview */
+    .effective-config {
+      margin-top: 2rem;
+    }
+    .effective-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .config-comparison {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+    .config-column {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .config-column-header {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .config-column.base .config-column-header { color: #8b5cf6; }
+    .config-column.template .config-column-header { color: #f59e0b; }
+    .config-column.result .config-column-header { color: #22c55e; }
+
+    .config-field {
+      padding: 0.5rem 0;
+      font-size: 0.85rem;
+    }
+    .config-field:not(:last-child) {
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+    .config-field-name {
+      color: #64748b;
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    .config-field-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+    .config-field-value.overridden {
+      color: #64748b;
+      text-decoration: line-through;
+    }
+    .config-field-value.override { color: #f59e0b; }
+    .config-field-value.final { color: #22c55e; }
+    .config-field-value.inherited { color: #8b5cf6; }
+    .config-field-value.not-set { color: #64748b; font-style: italic; }
+
+    .merge-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #64748b;
+      padding-top: 3rem;
+    }
+
+    /* Source Badges */
+    .source-badge {
+      font-size: 0.6rem;
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .source-badge.base { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .source-badge.template { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+
+    /* Provenance Preview */
+    .provenance-preview {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+    .provenance-title {
+      color: #22c55e;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .provenance-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .provenance-code .key { color: #94a3b8; }
+    .provenance-code .string { color: #22c55e; }
+    .provenance-code .number { color: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Template Selector with Config Inheritance</h1>
+    <p class="subtitle">S28-PIPE: How template selection overrides grove-wide writer config defaults</p>
+
+    <!-- Template Selection -->
+    <div class="section">
+      <div class="section-title">Select Output Template</div>
+
+      <div class="template-grid">
+        <!-- Blog Post Template -->
+        <div class="template-card">
+          <div class="template-header">
+            <div class="template-icon">📝</div>
+            <div>
+              <div class="template-title">Blog Post</div>
+              <div class="template-subtitle">Conversational, engaging</div>
+            </div>
+          </div>
+          <div class="template-description">
+            Write an accessible blog post that explains research findings in an engaging, conversational style.
+          </div>
+          <div class="overrides-section">
+            <div class="overrides-title">Config Overrides</div>
+            <div class="override-item">
+              <span class="override-key">formality</span>
+              <span class="override-value">casual</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">perspective</span>
+              <span class="override-value">first-person</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">citationFormat</span>
+              <span class="override-value override-inherited">inherited</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Paper Template (Selected) -->
+        <div class="template-card selected">
+          <div class="template-header">
+            <div class="template-icon">🎓</div>
+            <div>
+              <div class="template-title">Academic Paper</div>
+              <div class="template-subtitle">Formal, rigorous</div>
+            </div>
+          </div>
+          <div class="template-description">
+            Write a formal academic paper with proper citations, methodology discussion, and structured arguments.
+          </div>
+          <div class="overrides-section">
+            <div class="overrides-title">Config Overrides</div>
+            <div class="override-item">
+              <span class="override-key">formality</span>
+              <span class="override-value">academic</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">citationFormat</span>
+              <span class="override-value">apa</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">includePosition</span>
+              <span class="override-value">true</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Executive Summary Template -->
+        <div class="template-card">
+          <div class="template-header">
+            <div class="template-icon">📊</div>
+            <div>
+              <div class="template-title">Executive Summary</div>
+              <div class="template-subtitle">Concise, actionable</div>
+            </div>
+          </div>
+          <div class="template-description">
+            Create a concise executive summary focusing on key findings and actionable recommendations.
+          </div>
+          <div class="overrides-section">
+            <div class="overrides-title">Config Overrides</div>
+            <div class="override-item">
+              <span class="override-key">formality</span>
+              <span class="override-value">professional</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">maxLength</span>
+              <span class="override-value">2000</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">citationStyle</span>
+              <span class="override-value">endnote</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vision Paper Template -->
+        <div class="template-card">
+          <div class="template-header">
+            <div class="template-icon">🔮</div>
+            <div>
+              <div class="template-title">Vision Paper</div>
+              <div class="template-subtitle">Forward-looking, inspiring</div>
+            </div>
+          </div>
+          <div class="template-description">
+            Write a forward-looking vision paper that synthesizes research into a compelling narrative about the future.
+          </div>
+          <div class="overrides-section">
+            <div class="overrides-title">Config Overrides</div>
+            <div class="override-item">
+              <span class="override-key">formality</span>
+              <span class="override-value">professional</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">perspective</span>
+              <span class="override-value override-inherited">inherited</span>
+            </div>
+            <div class="override-item">
+              <span class="override-key">personality</span>
+              <span class="override-value">visionary</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Effective Config Comparison -->
+    <div class="section">
+      <div class="effective-title">
+        ⚡ Effective Configuration for "Academic Paper"
+      </div>
+
+      <div class="config-comparison">
+        <!-- Base Config -->
+        <div class="config-column base">
+          <div class="config-column-header">
+            ✍️ Writer Config v3 (Base)
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">voice.formality</div>
+            <div class="config-field-value overridden">professional</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">voice.perspective</div>
+            <div class="config-field-value inherited">neutral</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationStyle</div>
+            <div class="config-field-value inherited">inline</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationFormat</div>
+            <div class="config-field-value overridden">apa</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.includePosition</div>
+            <div class="config-field-value overridden">false</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">qualityRules.requireCitations</div>
+            <div class="config-field-value inherited">true</div>
+          </div>
+        </div>
+
+        <!-- Merge Arrow -->
+        <div class="merge-arrow">+</div>
+
+        <!-- Template Overrides -->
+        <div class="config-column template">
+          <div class="config-column-header">
+            📄 Template Overrides
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">voice.formality</div>
+            <div class="config-field-value override">academic</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">voice.perspective</div>
+            <div class="config-field-value not-set">(not set)</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationStyle</div>
+            <div class="config-field-value not-set">(not set)</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationFormat</div>
+            <div class="config-field-value override">apa</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.includePosition</div>
+            <div class="config-field-value override">true</div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">qualityRules.requireCitations</div>
+            <div class="config-field-value not-set">(not set)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="config-column result" style="margin-top: 1.5rem;">
+        <div class="config-column-header">
+          ✓ Effective Config (Sent to Writer Agent)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          <div class="config-field">
+            <div class="config-field-name">voice.formality</div>
+            <div class="config-field-value final">academic <span class="source-badge template">template</span></div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">voice.perspective</div>
+            <div class="config-field-value final">neutral <span class="source-badge base">base</span></div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationStyle</div>
+            <div class="config-field-value final">inline <span class="source-badge base">base</span></div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.citationFormat</div>
+            <div class="config-field-value final">apa <span class="source-badge template">template</span></div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">documentStructure.includePosition</div>
+            <div class="config-field-value final">true <span class="source-badge template">template</span></div>
+          </div>
+          <div class="config-field">
+            <div class="config-field-name">qualityRules.requireCitations</div>
+            <div class="config-field-value final">true <span class="source-badge base">base</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Provenance Preview -->
+      <div class="provenance-preview">
+        <div class="provenance-title">
+          📋 Document Provenance (Recorded on Generation)
+        </div>
+        <div class="provenance-code">
+{
+  <span class="key">"templateId"</span>: <span class="string">"academic-paper-v1"</span>,
+  <span class="key">"templateName"</span>: <span class="string">"Academic Paper"</span>,
+  <span class="key">"writerConfigVersion"</span>: <span class="number">3</span>,
+  <span class="key">"researchConfigVersion"</span>: <span class="number">2</span>,
+  <span class="key">"generatedAt"</span>: <span class="string">"2026-01-28T14:30:00Z"</span>,
+  <span class="key">"renderingSource"</span>: <span class="string">"template"</span>,
+  <span class="key">"effectiveFormality"</span>: <span class="string">"academic"</span>,
+  <span class="key">"effectiveCitationFormat"</span>: <span class="string">"apa"</span>
+}
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

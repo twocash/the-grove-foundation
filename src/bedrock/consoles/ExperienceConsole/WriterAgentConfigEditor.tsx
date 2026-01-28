@@ -15,33 +15,7 @@ import { GlassButton } from '../../primitives/GlassButton';
 import { BufferedInput, BufferedTextarea } from '../../primitives/BufferedInput';
 import { useWriterAgentConfigData } from './useWriterAgentConfigData';
 
-// Voice formality options
-const FORMALITY_OPTIONS = [
-  { value: 'casual', label: 'Casual', description: 'Conversational and approachable' },
-  { value: 'professional', label: 'Professional', description: 'Business-appropriate tone' },
-  { value: 'academic', label: 'Academic', description: 'Scholarly and formal' },
-  { value: 'technical', label: 'Technical', description: 'Precise and detailed' },
-] as const;
-
-// Perspective options
-const PERSPECTIVE_OPTIONS = [
-  { value: 'first-person', label: 'First Person', description: 'Uses "I" and "we"' },
-  { value: 'third-person', label: 'Third Person', description: 'Uses "they" and "it"' },
-  { value: 'neutral', label: 'Neutral', description: 'Avoids personal pronouns' },
-] as const;
-
-// Citation style options
-const CITATION_STYLE_OPTIONS = [
-  { value: 'inline', label: 'Inline', description: 'Citations appear in text' },
-  { value: 'endnote', label: 'Endnote', description: 'Citations at document end' },
-] as const;
-
-// Citation format options
-const CITATION_FORMAT_OPTIONS = [
-  { value: 'simple', label: 'Simple', description: 'Basic source attribution' },
-  { value: 'apa', label: 'APA', description: 'American Psychological Association' },
-  { value: 'chicago', label: 'Chicago', description: 'Chicago Manual of Style' },
-] as const;
+// S28-PIPE: Removed option constants (text-only config, no enums)
 
 /**
  * Editor component for WriterAgentConfig objects
@@ -65,7 +39,7 @@ export function WriterAgentConfigEditor({
 
   // v1.0 UI simplification: Show only essential fields by default
   // Sprint: agents-go-live-v1
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // S28-PIPE: showAdvanced removed (only 3 text fields now, no advanced section)
 
   // Optimistic UI: track if we just activated (before props update)
   const [justActivated, setJustActivated] = useState(false);
@@ -109,7 +83,8 @@ export function WriterAgentConfigEditor({
     }
   }, [config.meta.id, hasChanges]);
 
-  const { voice, documentStructure, qualityRules } = config.payload;
+  // S28-PIPE: Simplified payload (text fields only)
+  const { writingStyle, resultsFormatting, citationsStyle } = config.payload;
 
   // Handle activation
   const handleActivate = useCallback(async () => {
@@ -221,43 +196,8 @@ export function WriterAgentConfigEditor({
   );
 
   // Helper to patch nested voice fields
-  const patchVoice = useCallback(
-    (field: string, value: unknown) => {
-      // Track that voice section was modified
-      setModifiedFields(prev => new Set(prev).add('voice'));
-      const ops: PatchOperation[] = [
-        { op: 'replace', path: `/payload/voice/${field}`, value },
-      ];
-      onEdit(ops);
-    },
-    [onEdit]
-  );
-
-  // Helper to patch nested documentStructure fields
-  const patchDocStructure = useCallback(
-    (field: string, value: unknown) => {
-      // Track that documentStructure section was modified
-      setModifiedFields(prev => new Set(prev).add('documentStructure'));
-      const ops: PatchOperation[] = [
-        { op: 'replace', path: `/payload/documentStructure/${field}`, value },
-      ];
-      onEdit(ops);
-    },
-    [onEdit]
-  );
-
-  // Helper to patch nested qualityRules fields
-  const patchQualityRules = useCallback(
-    (field: string, value: unknown) => {
-      // Track that qualityRules section was modified
-      setModifiedFields(prev => new Set(prev).add('qualityRules'));
-      const ops: PatchOperation[] = [
-        { op: 'replace', path: `/payload/qualityRules/${field}`, value },
-      ];
-      onEdit(ops);
-    },
-    [onEdit]
-  );
+  // S28-PIPE: Removed patchVoice, patchDocStructure, patchQualityRules
+  // (no longer needed with flat text-only schema — patchPayload handles all fields)
 
   return (
     <div className="flex flex-col h-full">
@@ -400,265 +340,64 @@ export function WriterAgentConfigEditor({
             2. Require Citations toggle
             3. Quality Floor slider
             ============================================================ */}
-        <InspectorSection title="Essential Settings" collapsible={false}>
-          <div className="space-y-5">
-            {/* Writing Style (Formality) */}
+        {/* S28-PIPE: Simplified to 3 text fields */}
+        <InspectorSection title="Writer Prompt Configuration" collapsible defaultCollapsed={false}>
+          <div className="space-y-4">
+            {/* Field 1: Writing Style */}
             <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Writing Style</label>
-              <div className="grid grid-cols-2 gap-2">
-                {FORMALITY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => patchVoice('formality', opt.value)}
-                    className={`
-                      p-2 rounded-lg border text-left transition-colors
-                      ${voice.formality === opt.value
-                        ? 'border-[var(--semantic-success)] bg-[var(--semantic-success-bg)] text-[var(--semantic-success)]'
-                        : 'border-[var(--glass-border)] hover:border-[var(--glass-border-bright)]'
-                      }
-                    `}
-                  >
-                    <span className="text-sm font-medium block">{opt.label}</span>
-                    <span className="text-xs text-[var(--glass-text-muted)]">{opt.description}</span>
-                  </button>
-                ))}
-              </div>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
+                Writing Style Instructions
+              </label>
+              <BufferedTextarea
+                value={writingStyle}
+                onChange={(v) => patchPayload('writingStyle', v)}
+                rows={8}
+                className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none font-mono"
+                placeholder="e.g., Write professionally but accessibly. Use neutral perspective..."
+                disabled={loading}
+              />
+              <p className="text-xs text-[var(--glass-text-muted)] mt-2 italic">
+                Free-form instructions for voice, tone, formality, perspective. Templates can override.
+              </p>
             </div>
 
-            {/* Require Citations */}
-            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-[var(--glass-border)] hover:border-[var(--glass-border-bright)] transition-colors">
-              <input
-                type="checkbox"
-                checked={qualityRules.requireCitations}
-                onChange={(e) => patchQualityRules('requireCitations', e.target.checked)}
-                className="w-5 h-5 rounded accent-[var(--semantic-success)]"
-              />
-              <div className="flex-1">
-                <span className="text-sm text-[var(--glass-text-primary)] font-medium">Require Citations</span>
-                <p className="text-xs text-[var(--glass-text-muted)]">All claims must have sources</p>
-              </div>
-            </label>
-
-            {/* Quality Floor */}
-            <div className="p-3 rounded-lg border border-[var(--glass-border)]">
+            {/* Field 2: Results Formatting */}
+            <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
-                Quality Floor — minimum confidence to include evidence
+                Results Formatting Instructions
               </label>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={Math.round(qualityRules.minConfidenceToInclude * 100)}
-                onChange={(e) => patchQualityRules('minConfidenceToInclude', parseInt(e.target.value) / 100)}
-                className="w-full accent-[var(--semantic-success)]"
+              <BufferedTextarea
+                value={resultsFormatting}
+                onChange={(v) => patchPayload('resultsFormatting', v)}
+                rows={10}
+                className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none font-mono"
+                placeholder="e.g., Use ## headers, include executive summary, bullet lists..."
+                disabled={loading}
               />
-              <div className="flex justify-between text-xs text-[var(--glass-text-muted)] mt-1">
-                <span>0% (all)</span>
-                <span className="font-medium text-sm" style={{ color: 'var(--semantic-success)' }}>
-                  {Math.round(qualityRules.minConfidenceToInclude * 100)}%
-                </span>
-                <span>100% (strict)</span>
-              </div>
+              <p className="text-xs text-[var(--glass-text-muted)] mt-2 italic">
+                Document structure and markdown formatting guidelines.
+              </p>
+            </div>
+
+            {/* Field 3: Citations Style */}
+            <div>
+              <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
+                Citations Style Instructions
+              </label>
+              <BufferedTextarea
+                value={citationsStyle}
+                onChange={(v) => patchPayload('citationsStyle', v)}
+                rows={6}
+                className="w-full bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] border border-[var(--glass-border)] focus:border-purple-500 focus:outline-none font-mono"
+                placeholder="e.g., Use inline (Author, Year). Include Sources section at end..."
+                disabled={loading}
+              />
+              <p className="text-xs text-[var(--glass-text-muted)] mt-2 italic">
+                Citation format and requirements. Experiment to find what works.
+              </p>
             </div>
           </div>
         </InspectorSection>
-
-        <InspectorDivider />
-
-        {/* ============================================================
-            ADVANCED SETTINGS TOGGLE
-            ============================================================ */}
-        <div className="px-4 py-2">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-sm text-[var(--glass-text-muted)] hover:text-[var(--glass-text-secondary)] transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">
-              {showAdvanced ? 'expand_less' : 'expand_more'}
-            </span>
-            {showAdvanced ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-            <span className="text-xs text-[var(--glass-text-muted)]">(v2 stubs)</span>
-          </button>
-        </div>
-
-        {/* ============================================================
-            ADVANCED SETTINGS (collapsed by default)
-            Sprint: agents-go-live-v1
-            These fields are v2 stubs - not yet fully functional
-            ============================================================ */}
-        {showAdvanced && (
-          <>
-            {/* Voice & Tone Advanced */}
-            <InspectorSection title="Voice & Tone (Advanced)" collapsible defaultCollapsed={false}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Perspective</label>
-                  <div className="flex gap-2">
-                    {PERSPECTIVE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => patchVoice('perspective', opt.value)}
-                        className={`
-                          flex-1 p-2 rounded-lg border text-center transition-colors
-                          ${voice.perspective === opt.value
-                            ? 'border-[var(--semantic-success)] bg-[var(--semantic-success-bg)] text-[var(--semantic-success)]'
-                            : 'border-[var(--glass-border)] hover:border-[var(--glass-border-bright)]'
-                          }
-                        `}
-                      >
-                        <span className="text-sm font-medium">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                    Personality (optional)
-                  </label>
-                  <BufferedInput
-                    value={voice.personality || ''}
-                    onChange={(val) => patchVoice('personality', val || undefined)}
-                    debounceMs={400}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--semantic-success)]/50"
-                    placeholder="e.g., 'thoughtful and nuanced'"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-            </InspectorSection>
-
-            <InspectorDivider />
-
-            {/* Document Structure */}
-            <InspectorSection title="Document Structure" collapsible defaultCollapsed={false}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={documentStructure.includePosition}
-                      onChange={(e) => patchDocStructure('includePosition', e.target.checked)}
-                      className="w-5 h-5 rounded accent-[var(--semantic-success)]"
-                    />
-                    <div>
-                      <span className="text-sm text-[var(--glass-text-primary)]">Include Position</span>
-                      <p className="text-xs text-[var(--glass-text-muted)]">Add thesis/position section</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={documentStructure.includeLimitations}
-                      onChange={(e) => patchDocStructure('includeLimitations', e.target.checked)}
-                      className="w-5 h-5 rounded accent-[var(--semantic-success)]"
-                    />
-                    <div>
-                      <span className="text-sm text-[var(--glass-text-primary)]">Include Limitations</span>
-                      <p className="text-xs text-[var(--glass-text-muted)]">Add limitations section</p>
-                    </div>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Citation Style</label>
-                  <div className="flex gap-2">
-                    {CITATION_STYLE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => patchDocStructure('citationStyle', opt.value)}
-                        className="flex-1 p-2 rounded-lg border text-center transition-colors"
-                        style={documentStructure.citationStyle === opt.value
-                          ? { borderColor: 'var(--neon-amber)', backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }
-                          : { borderColor: 'var(--glass-border)' }
-                        }
-                        onMouseEnter={(e) => {
-                          if (documentStructure.citationStyle !== opt.value) {
-                            e.currentTarget.style.borderColor = 'var(--glass-border-bright)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (documentStructure.citationStyle !== opt.value) {
-                            e.currentTarget.style.borderColor = 'var(--glass-border)';
-                          }
-                        }}
-                      >
-                        <span className="text-sm font-medium">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Citation Format</label>
-                  <div className="flex gap-2">
-                    {CITATION_FORMAT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => patchDocStructure('citationFormat', opt.value)}
-                        className="flex-1 p-2 rounded-lg border text-center transition-colors"
-                        style={documentStructure.citationFormat === opt.value
-                          ? { borderColor: 'var(--neon-amber)', backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }
-                          : { borderColor: 'var(--glass-border)' }
-                        }
-                        onMouseEnter={(e) => {
-                          if (documentStructure.citationFormat !== opt.value) {
-                            e.currentTarget.style.borderColor = 'var(--glass-border-bright)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (documentStructure.citationFormat !== opt.value) {
-                            e.currentTarget.style.borderColor = 'var(--glass-border)';
-                          }
-                        }}
-                      >
-                        <span className="text-sm font-medium">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                    Max Length (words, optional)
-                  </label>
-                  <input
-                    type="number"
-                    min={100}
-                    max={10000}
-                    step={100}
-                    value={documentStructure.maxLength || ''}
-                    onChange={(e) => patchDocStructure('maxLength', e.target.value ? parseInt(e.target.value) : undefined)}
-                    className="w-32 bg-[var(--glass-solid)] rounded-lg px-3 py-2 text-sm text-[var(--glass-text-primary)] placeholder:text-[var(--glass-text-muted)] border border-[var(--glass-border)] focus:border-[var(--semantic-success)] focus:outline-none"
-                    placeholder="No limit"
-                  />
-                </div>
-              </div>
-            </InspectorSection>
-
-            <InspectorDivider />
-
-            {/* Quality Rules Advanced */}
-            <InspectorSection title="Quality Rules (Advanced)" collapsible defaultCollapsed={true}>
-              <div className="space-y-4">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={qualityRules.flagUncertainty}
-                    onChange={(e) => patchQualityRules('flagUncertainty', e.target.checked)}
-                    className="w-5 h-5 rounded"
-                    style={{ accentColor: 'var(--neon-amber)' }}
-                  />
-                  <div>
-                    <span className="text-sm text-[var(--glass-text-primary)]">Flag Uncertainty</span>
-                    <p className="text-xs text-[var(--glass-text-muted)]">Mark uncertain claims in output</p>
-                  </div>
-                </label>
-              </div>
-            </InspectorSection>
-          </>
-        )}
 
         <InspectorDivider />
 
