@@ -63,12 +63,22 @@ function useBufferedInput(
   const [isFocused, setIsFocused] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncedRef = useRef(value);
+  // S27-OT-FIX: Guard to prevent race condition on blur
+  // When we sync on blur, parent prop hasn't updated yet - don't overwrite localValue
+  const justSyncedOnBlurRef = useRef(false);
 
   // Sync from parent when:
   // 1. Not focused (user isn't editing)
   // 2. Value changed externally (not from our own onChange)
+  // 3. Not immediately after we synced on blur (race condition guard)
   useEffect(() => {
     if (!isFocused && value !== lastSyncedRef.current) {
+      // S27-OT-FIX: Skip this effect cycle if we just synced on blur
+      // The parent prop is stale - it will catch up on next render
+      if (justSyncedOnBlurRef.current) {
+        justSyncedOnBlurRef.current = false;
+        return;
+      }
       setLocalValue(value);
       lastSyncedRef.current = value;
     }
@@ -120,6 +130,9 @@ function useBufferedInput(
     if (localValue !== lastSyncedRef.current) {
       onChange(localValue);
       lastSyncedRef.current = localValue;
+      // S27-OT-FIX: Mark that we just synced - prevents race condition
+      // where the effect sees stale parent prop and overwrites our change
+      justSyncedOnBlurRef.current = true;
     }
   }, [localValue, onChange]);
 
