@@ -59,19 +59,7 @@ export type OutputTemplateStatus = z.infer<typeof OutputTemplateStatusSchema>;
 // Agent-Specific Configuration
 // =============================================================================
 
-/**
- * Citation style options for writer templates.
- */
-export const CitationStyleSchema = z.enum(['chicago', 'apa', 'mla']);
-
-export type CitationStyle = z.infer<typeof CitationStyleSchema>;
-
-/**
- * Citation format options for writer templates.
- */
-export const CitationFormatSchema = z.enum(['endnotes', 'inline']);
-
-export type CitationFormat = z.infer<typeof CitationFormatSchema>;
+// S28-PIPE: CitationStyle and CitationFormat removed (replaced with text-based citationsStyle in WriterAgentConfig)
 
 /**
  * Template-specific configuration overrides (S28-PIPE: text-based).

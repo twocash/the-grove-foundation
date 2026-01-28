@@ -12,7 +12,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
-import type { OutputTemplatePayload, AgentType, CitationStyle, CitationFormat } from '@core/schema/output-template';
+import type { OutputTemplatePayload, AgentType } from '@core/schema/output-template';
 import type { PatchOperation } from '../../types/copilot.types';
 import { InspectorSection, InspectorDivider } from '../../primitives/BedrockInspector';
 import { GlassButton } from '../../primitives/GlassButton';
@@ -29,16 +29,7 @@ const AGENT_TYPE_OPTIONS: Array<{ value: AgentType; label: string; icon: string;
   { value: 'code', label: 'Code', icon: 'code', description: 'Code generation (future)' },
 ];
 
-const CITATION_STYLE_OPTIONS: Array<{ value: CitationStyle; label: string }> = [
-  { value: 'chicago', label: 'Chicago' },
-  { value: 'apa', label: 'APA' },
-  { value: 'mla', label: 'MLA' },
-];
-
-const CITATION_FORMAT_OPTIONS: Array<{ value: CitationFormat; label: string }> = [
-  { value: 'endnotes', label: 'Endnotes' },
-  { value: 'inline', label: 'Inline' },
-];
+// S28-PIPE: Citation options removed (no longer using enum-based citation config)
 
 const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   'system-seed': { label: 'System Template', color: 'var(--glass-text-muted)' },
@@ -392,61 +383,7 @@ export function OutputTemplateEditor({
           </div>
         </InspectorSection>
 
-        {/* Citation Config (for writer templates) */}
-        {template.payload.agentType === 'writer' && (
-          <>
-            <InspectorDivider />
-            <InspectorSection title="Citation Settings" collapsible defaultCollapsed={true}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Citation Style</label>
-                  <div className="flex gap-2">
-                    {CITATION_STYLE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => !isSystemSeed && patchConfig('citationStyle', opt.value)}
-                        disabled={isSystemSeed}
-                        className={`
-                          flex-1 p-2 rounded-lg border text-center transition-colors
-                          ${template.payload.config.citationStyle === opt.value
-                            ? 'border-[var(--neon-amber)] bg-[var(--neon-amber-bg)] text-[var(--neon-amber)]'
-                            : 'border-[var(--glass-border)] hover:border-[var(--glass-border-bright)]'
-                          }
-                          ${isSystemSeed ? 'opacity-60 cursor-not-allowed' : ''}
-                        `}
-                      >
-                        <span className="text-sm font-medium">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs text-[var(--glass-text-muted)] mb-2">Citation Format</label>
-                  <div className="flex gap-2">
-                    {CITATION_FORMAT_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        onClick={() => !isSystemSeed && patchConfig('citationFormat', opt.value)}
-                        disabled={isSystemSeed}
-                        className={`
-                          flex-1 p-2 rounded-lg border text-center transition-colors
-                          ${template.payload.config.citationFormat === opt.value
-                            ? 'border-[var(--neon-amber)] bg-[var(--neon-amber-bg)] text-[var(--neon-amber)]'
-                            : 'border-[var(--glass-border)] hover:border-[var(--glass-border-bright)]'
-                          }
-                          ${isSystemSeed ? 'opacity-60 cursor-not-allowed' : ''}
-                        `}
-                      >
-                        <span className="text-sm font-medium">{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </InspectorSection>
-          </>
-        )}
+        {/* S28-PIPE: Citation Settings section removed (now handled via text-based citationsStyle in WriterAgentConfig) */}
 
         <InspectorDivider />
 
