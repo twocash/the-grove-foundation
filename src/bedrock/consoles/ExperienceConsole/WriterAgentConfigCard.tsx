@@ -6,24 +6,7 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
 
-// Display labels for voice settings
-const FORMALITY_LABELS: Record<string, string> = {
-  casual: 'Casual',
-  professional: 'Professional',
-  academic: 'Academic',
-  technical: 'Technical',
-};
-
-const PERSPECTIVE_LABELS: Record<string, string> = {
-  'first-person': '1st Person',
-  'third-person': '3rd Person',
-  neutral: 'Neutral',
-};
-
-const CITATION_LABELS: Record<string, string> = {
-  inline: 'Inline',
-  endnote: 'Endnote',
-};
+// S28-PIPE: Removed label constants (no longer needed for text-only schema)
 
 /**
  * Card component for displaying a Writer Agent Config in grid/list view
@@ -38,7 +21,13 @@ export function WriterAgentConfigCard({
   className = '',
 }: ObjectCardProps<WriterAgentConfigPayload>) {
   const isActive = config.meta.status === 'active';
-  const { voice, documentStructure, qualityRules } = config.payload;
+  // S28-PIPE: Simplified payload (text fields only)
+  const { writingStyle, resultsFormatting, citationsStyle } = config.payload;
+
+  // Guard: Old archived configs may not have new schema fields
+  if (!writingStyle || !resultsFormatting || !citationsStyle) {
+    return null; // Don't render old schema configs
+  }
 
   return (
     <div
@@ -106,56 +95,31 @@ export function WriterAgentConfigCard({
         </p>
       )}
 
-      {/* Voice config summary */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        {/* Formality */}
-        <span
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-          style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
-        >
-          <span className="material-symbols-outlined text-xs">tune</span>
-          {FORMALITY_LABELS[voice.formality] || voice.formality}
-        </span>
+      {/* S28-PIPE: Simplified preview of text config fields */}
+      <div className="space-y-2 mb-3">
+        {/* Writing Style preview */}
+        <div>
+          <div className="text-xs text-[var(--glass-text-muted)] mb-0.5">Writing Style</div>
+          <p className="text-xs text-[var(--glass-text-secondary)] line-clamp-2">
+            {writingStyle.substring(0, 100)}...
+          </p>
+        </div>
 
-        {/* Perspective */}
-        <span
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-          style={{ backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }}
-        >
-          <span className="material-symbols-outlined text-xs">person</span>
-          {PERSPECTIVE_LABELS[voice.perspective] || voice.perspective}
-        </span>
+        {/* Results Formatting preview */}
+        <div>
+          <div className="text-xs text-[var(--glass-text-muted)] mb-0.5">Results Formatting</div>
+          <p className="text-xs text-[var(--glass-text-secondary)] line-clamp-1">
+            {resultsFormatting.substring(0, 60)}...
+          </p>
+        </div>
 
-        {/* Citation style */}
-        <span
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-          style={{ backgroundColor: 'var(--neon-amber-bg)', color: 'var(--neon-amber)' }}
-        >
-          <span className="material-symbols-outlined text-xs">format_quote</span>
-          {CITATION_LABELS[documentStructure.citationStyle]}
-        </span>
-      </div>
-
-      {/* Quality indicators */}
-      <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
-        {qualityRules.requireCitations && (
-          <span className="flex items-center gap-1" style={{ color: 'var(--semantic-success)' }}>
-            <span className="material-symbols-outlined text-xs">check_circle</span>
-            Citations
-          </span>
-        )}
-        {qualityRules.flagUncertainty && (
-          <span className="flex items-center gap-1" style={{ color: 'var(--semantic-warning)' }}>
-            <span className="material-symbols-outlined text-xs">warning</span>
-            Flags uncertainty
-          </span>
-        )}
-        {documentStructure.includeLimitations && (
-          <span className="flex items-center gap-1" style={{ color: 'var(--glass-text-muted)' }}>
-            <span className="material-symbols-outlined text-xs">info</span>
-            Limitations
-          </span>
-        )}
+        {/* Citations Style preview */}
+        <div>
+          <div className="text-xs text-[var(--glass-text-muted)] mb-0.5">Citations</div>
+          <p className="text-xs text-[var(--glass-text-secondary)] line-clamp-1">
+            {citationsStyle.substring(0, 60)}...
+          </p>
+        </div>
       </div>
 
       {/* Footer */}

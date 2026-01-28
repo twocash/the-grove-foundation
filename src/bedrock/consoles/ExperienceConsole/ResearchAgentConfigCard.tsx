@@ -6,13 +6,7 @@ import React from 'react';
 import type { ObjectCardProps } from '../../patterns/console-factory.types';
 import type { ResearchAgentConfigPayload } from '@core/schema/research-agent-config';
 
-// Source type display config
-const SOURCE_LABELS: Record<string, string> = {
-  academic: 'Academic',
-  practitioner: 'Practitioner',
-  news: 'News',
-  primary: 'Primary',
-};
+// S28-PIPE: Removed SOURCE_LABELS (text-only schema, no enums)
 
 /**
  * Card component for displaying a Research Agent Config in grid/list view
@@ -27,7 +21,13 @@ export function ResearchAgentConfigCard({
   className = '',
 }: ObjectCardProps<ResearchAgentConfigPayload>) {
   const isActive = config.meta.status === 'active';
-  const { searchDepth, sourcePreferences, confidenceThreshold, maxApiCalls } = config.payload;
+  // S28-PIPE: Simplified payload (text fields only)
+  const { searchInstructions, qualityGuidance } = config.payload;
+
+  // Guard: Old archived configs may not have new schema fields
+  if (!searchInstructions || !qualityGuidance) {
+    return null; // Don't render old schema configs
+  }
 
   return (
     <div
@@ -92,36 +92,23 @@ export function ResearchAgentConfigCard({
         </p>
       )}
 
-      {/* Config summary */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        {/* Search depth */}
-        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-400">
-          <span className="material-symbols-outlined text-xs">layers</span>
-          Depth: {searchDepth}
-        </span>
+      {/* S28-PIPE: Simplified preview of text config fields */}
+      <div className="space-y-2 mb-3">
+        {/* Search Instructions preview */}
+        <div>
+          <div className="text-xs text-[var(--glass-text-muted)] mb-0.5">Search Instructions</div>
+          <p className="text-xs text-[var(--glass-text-secondary)] line-clamp-2">
+            {searchInstructions.substring(0, 100)}...
+          </p>
+        </div>
 
-        {/* API limit */}
-        <span
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-          style={{ backgroundColor: 'var(--semantic-info-bg)', color: 'var(--semantic-info)' }}
-        >
-          <span className="material-symbols-outlined text-xs">api</span>
-          Max: {maxApiCalls}
-        </span>
-
-        {/* Confidence */}
-        <span
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
-          style={{ backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)' }}
-        >
-          <span className="material-symbols-outlined text-xs">verified</span>
-          {Math.round(confidenceThreshold * 100)}%
-        </span>
-      </div>
-
-      {/* Source preferences */}
-      <div className="text-xs text-[var(--glass-text-muted)] mb-3">
-        Sources: {sourcePreferences.map(s => SOURCE_LABELS[s] || s).join(', ')}
+        {/* Quality Guidance preview */}
+        <div>
+          <div className="text-xs text-[var(--glass-text-muted)] mb-0.5">Quality Guidance</div>
+          <p className="text-xs text-[var(--glass-text-secondary)] line-clamp-1">
+            {qualityGuidance.substring(0, 80)}...
+          </p>
+        </div>
       </div>
 
       {/* Footer */}

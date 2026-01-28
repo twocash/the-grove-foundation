@@ -13,14 +13,7 @@ import type { OutputTemplatePayload, OutputTemplateSource, AgentType } from '@co
 // =============================================================================
 
 // Category colors for top bar
-const CATEGORY_COLORS: Record<string, string> = {
-  technical: 'var(--semantic-info)',
-  strategy: 'var(--neon-violet)',
-  policy: 'var(--neon-amber)',
-  content: 'var(--semantic-success)',
-  research: 'var(--neon-cyan)',
-  default: 'var(--glass-text-muted)',
-};
+// S28-PIPE: CATEGORY_COLORS removed (category field no longer exists)
 
 // Source badge configuration
 const SOURCE_CONFIG: Record<OutputTemplateSource, { label: string; color: string; bg: string } | null> = {
@@ -107,10 +100,9 @@ export function OutputTemplateCard({
   onFavoriteToggle,
   className = '',
 }: ObjectCardProps<OutputTemplatePayload>) {
-  const { name, description, agentType, source, status, isDefault, version, config } = template.payload;
+  const { name, description, agentType, source, status, isDefault, version } = template.payload;
 
-  // Get category color for top bar
-  const categoryColor = CATEGORY_COLORS[config.category || ''] || CATEGORY_COLORS.default;
+  // S28-PIPE: categoryColor removed (no longer using category field)
 
   // Get source badge config (null for user-created)
   const sourceBadge = SOURCE_CONFIG[source];
@@ -215,26 +207,9 @@ export function OutputTemplateCard({
           {agentConfig.label}
         </span>
 
-        {/* Category badge (if set) */}
-        {config.category && (
-          <span
-            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs capitalize"
-            style={{ backgroundColor: 'var(--glass-panel)', color: categoryColor }}
-          >
-            {config.category}
-          </span>
-        )}
+        {/* S28-PIPE: Category badge removed (field no longer exists) */}
 
-        {/* Citation info (for writer templates) */}
-        {agentType === 'writer' && config.citationStyle && (
-          <span
-            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs uppercase"
-            style={{ backgroundColor: 'var(--glass-panel)', color: 'var(--glass-text-muted)' }}
-          >
-            <span className="material-symbols-outlined text-xs">format_quote</span>
-            {config.citationStyle}
-          </span>
-        )}
+        {/* S28-PIPE: Citation badge removed (now in text-based citationsStyle field) */}
       </div>
 
       {/* Footer: Status + Updated date */}

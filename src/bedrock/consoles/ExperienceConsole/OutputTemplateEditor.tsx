@@ -314,7 +314,10 @@ export function OutputTemplateEditor({
 
             <div>
               <label className="block text-xs text-[var(--glass-text-muted)] mb-2">
-                Agent Type {isSystemSeed && <span className="material-symbols-outlined text-xs align-middle">lock</span>}
+                Executes On {isSystemSeed && <span className="material-symbols-outlined text-xs align-middle">lock</span>}
+                <span className="text-[var(--glass-text-muted)] ml-2 font-normal italic">
+                  (which agent runs this template)
+                </span>
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {AGENT_TYPE_OPTIONS.map((opt) => (
@@ -338,19 +341,7 @@ export function OutputTemplateEditor({
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs text-[var(--glass-text-muted)] mb-1">
-                Category {isSystemSeed && <span className="material-symbols-outlined text-xs align-middle">lock</span>}
-              </label>
-              <BufferedInput
-                value={template.payload.config.category || ''}
-                onChange={(val) => patchConfig('category', val || undefined)}
-                debounceMs={400}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[var(--glass-solid)] text-[var(--glass-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-cyan)]/50"
-                placeholder="e.g., technical, strategy, policy"
-                disabled={loading || isSystemSeed}
-              />
-            </div>
+            {/* S28-PIPE: Category removed (not functional, just visual cruft) */}
           </div>
         </InspectorSection>
 

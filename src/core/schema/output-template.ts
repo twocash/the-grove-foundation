@@ -74,21 +74,23 @@ export const CitationFormatSchema = z.enum(['endnotes', 'inline']);
 export type CitationFormat = z.infer<typeof CitationFormatSchema>;
 
 /**
- * Agent-specific configuration options.
- * Varies by agentType:
- * - Writer: category, citationStyle, citationFormat
- * - Research: category (future: maxDepth, sourcePreferences)
- * - Code: category (future: language, lintRules)
+ * Template-specific configuration overrides (S28-PIPE: text-based).
+ *
+ * Templates can override specific WriterAgentConfig text fields.
+ * Unset fields inherit from the active WriterAgentConfig.
+ *
+ * Example: "Blog Post" template overrides writingStyle to be casual,
+ * but inherits resultsFormatting and citationsStyle from base config.
  */
 export const OutputTemplateConfigSchema = z.object({
-  /** User-extensible category (e.g., 'technical', 'vision', 'policy') */
-  category: z.string().optional(),
+  /** Override WriterAgentConfig.writingStyle for this template */
+  writingStyle: z.string().optional(),
 
-  /** Citation style for writer templates */
-  citationStyle: CitationStyleSchema.optional(),
+  /** Override WriterAgentConfig.resultsFormatting for this template */
+  resultsFormatting: z.string().optional(),
 
-  /** Citation format for writer templates */
-  citationFormat: CitationFormatSchema.optional(),
+  /** Override WriterAgentConfig.citationsStyle for this template */
+  citationsStyle: z.string().optional(),
 });
 
 export type OutputTemplateConfig = z.infer<typeof OutputTemplateConfigSchema>;
