@@ -126,10 +126,10 @@ export function OutputTemplateCard({
       `}
       data-testid="output-template-card"
     >
-      {/* Category color bar at top */}
+      {/* S28-PIPE: Status color bar at top (was category, now shows active/draft) */}
       <div
         className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
-        style={{ backgroundColor: categoryColor }}
+        style={{ backgroundColor: status === 'active' ? 'var(--neon-cyan)' : 'var(--glass-border)' }}
       />
 
       {/* Source badge (top-left, inside card) */}
