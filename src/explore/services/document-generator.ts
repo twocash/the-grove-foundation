@@ -115,9 +115,9 @@ ${writerConfig.resultsFormatting}
 ${writerConfig.citationsStyle}`;
   }
 
-  // Get template config overrides (if defined in OutputTemplatePayload.config.overrides)
+  // Get template config overrides (S28-PIPE: config field IS the overrides, no nested .overrides)
   const templatePayload = template as unknown as OutputTemplatePayload;
-  const overrides = (templatePayload.config as any)?.overrides as Partial<WriterAgentConfigPayload> | undefined;
+  const overrides = templatePayload.config as Partial<WriterAgentConfigPayload> | undefined;
 
   // Merge: template overrides win, otherwise inherit from base config
   const effectiveWritingStyle = overrides?.writingStyle ?? writerConfig.writingStyle;
