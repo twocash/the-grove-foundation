@@ -89,48 +89,20 @@ const PERSPECTIVE_MODIFIERS: Record<string, string> = {
 // Structure Modifiers
 // =============================================================================
 
+// S28-PIPE: getStructureInstructions DEPRECATED (old nested schema)
+// Kept for legacy compatibility but not used with new text-based configs
 function getStructureInstructions(config: WriterAgentConfigPayload): string {
-  const parts: string[] = ['## Document Structure'];
-
-  if (config.documentStructure.includePosition) {
-    parts.push('- Start with a clear position/thesis section');
-  }
-
-  if (config.documentStructure.includeLimitations) {
-    parts.push('- End with a limitations section noting gaps or uncertainties');
-  }
-
-  if (config.documentStructure.citationStyle === 'inline') {
-    parts.push('- Use inline citations: [1], [2], etc.');
-  } else {
-    parts.push('- Place all citations as endnotes at the end');
-  }
-
-  if (config.documentStructure.maxLength) {
-    parts.push(`- Keep analysis under ${config.documentStructure.maxLength} words`);
-  }
-
-  return parts.join('\n');
+  return ''; // No-op for new schema
 }
 
 // =============================================================================
 // Quality Modifiers
 // =============================================================================
 
+// S28-PIPE: getQualityInstructions DEPRECATED (old nested schema)
+// Kept for legacy compatibility but not used with new text-based configs
 function getQualityInstructions(config: WriterAgentConfigPayload): string {
-  const parts: string[] = ['## Quality Rules'];
-
-  if (config.qualityRules.requireCitations) {
-    parts.push('- Every factual claim MUST have a citation');
-  }
-
-  if (config.qualityRules.flagUncertainty) {
-    parts.push('- Explicitly flag uncertain or contested claims');
-  }
-
-  parts.push(`- Only include evidence with confidence >= ${config.qualityRules.minConfidenceToInclude}`);
-
-  return parts.join('\n');
+  return ''; // No-op for new schema
 }
 
 // =============================================================================
@@ -138,21 +110,37 @@ function getQualityInstructions(config: WriterAgentConfigPayload): string {
 // =============================================================================
 
 export function buildWriterSystemPrompt(config: WriterAgentConfigPayload): string {
-  const parts: string[] = [BASE_SYSTEM_PROMPT];
+  // S28-PIPE: Simplified schema (text-based, no nested objects)
+  // This function is DEPRECATED - document-generator now builds merged finalPrompt
+  // Keeping as fallback for backward compatibility
 
-  // Add voice modifiers
-  parts.push(VOICE_MODIFIERS[config.voice.formality] || VOICE_MODIFIERS.professional);
-  parts.push(PERSPECTIVE_MODIFIERS[config.voice.perspective] || PERSPECTIVE_MODIFIERS.neutral);
+  // Check if new schema (text fields) or old schema (nested objects)
+  const hasNewSchema = 'writingStyle' in config && typeof config.writingStyle === 'string';
 
-  if (config.voice.personality) {
-    parts.push(`\nAdditional personality: ${config.voice.personality}`);
+  if (hasNewSchema) {
+    // New schema: Just concatenate text fields
+    return [
+      config.writingStyle || '',
+      config.resultsFormatting || '',
+      config.citationsStyle || '',
+    ].filter(Boolean).join('\n\n');
   }
 
-  // Add structure instructions
-  parts.push(getStructureInstructions(config));
+  // Old schema: Build from nested objects (legacy support)
+  const parts: string[] = [BASE_SYSTEM_PROMPT];
 
-  // Add quality instructions
-  parts.push(getQualityInstructions(config));
+  const oldConfig = config as any;
+  if (oldConfig.voice?.formality) {
+    parts.push(VOICE_MODIFIERS[oldConfig.voice.formality] || VOICE_MODIFIERS.professional);
+  }
+  if (oldConfig.voice?.perspective) {
+    parts.push(PERSPECTIVE_MODIFIERS[oldConfig.voice.perspective] || PERSPECTIVE_MODIFIERS.neutral);
+  }
+  if (oldConfig.voice?.personality) {
+    parts.push(`\nAdditional personality: ${oldConfig.voice.personality}`);
+  }
+
+  // Skip structure/quality instructions for old configs (would crash)
 
   return parts.join('\n\n');
 }

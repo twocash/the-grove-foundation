@@ -137,13 +137,9 @@ export async function writeResearchDocument(
   onProgress?.({ type: 'writing', message: 'Generating research document...' });
 
   // Call Claude API for document writing
-  const voiceConfig = {
-    formality: config.voice.formality,
-    perspective: config.voice.perspective,
-    citationStyle: config.documentStructure.citationStyle,
-  };
+  // S28-PIPE: voiceConfig removed (config is now text-based, merged in systemPrompt)
   const llmOutput = await callLLMForWriting(
-    systemPrompt, userPrompt, voiceConfig, options?.renderingInstructions
+    systemPrompt, userPrompt, undefined, options?.renderingInstructions
   );
 
   onProgress?.({ type: 'formatting', message: 'Formatting citations...' });
