@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S26-NUR Wireframe: Nursery Inspector + SFR Bridge</title>
+<style>
+  :root {
+    --glass-void: #0a0f1a;
+    --glass-solid: #111827;
+    --glass-elevated: #1e293b;
+    --glass-panel: #0f172a;
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-text-primary: #f1f5f9;
+    --glass-text-secondary: #94a3b8;
+    --glass-text-muted: #64748b;
+    --glass-text-body: #cbd5e1;
+    --neon-cyan: #00e5ff;
+    --neon-green: #39ff14;
+    --neon-amber: #fbbf24;
+    --neon-violet: #a78bfa;
+    --semantic-success: #10b981;
+    --semantic-success-bg: rgba(16,185,129,0.1);
+    --semantic-success-border: rgba(16,185,129,0.3);
+    --semantic-warning: #f59e0b;
+    --semantic-warning-bg: rgba(245,158,11,0.1);
+    --semantic-info: #3b82f6;
+    --semantic-info-bg: rgba(59,130,246,0.1);
+    --semantic-error: #ef4444;
+    --semantic-error-bg: rgba(239,68,68,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--glass-void); color: var(--glass-text-primary); line-height: 1.5; }
+
+  /* === Layout === */
+  .page { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+  .page-title { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .page-subtitle { font-size: 14px; color: var(--glass-text-muted); margin-bottom: 32px; }
+
+  /* === Wireframe Sections === */
+  .wireframe-section { margin-bottom: 48px; }
+  .section-title { font-size: 18px; font-weight: 600; color: var(--neon-cyan); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--neon-cyan); color: #000; font-size: 14px; font-weight: 700; }
+  .section-desc { font-size: 13px; color: var(--glass-text-muted); margin-bottom: 20px; max-width: 700px; }
+
+  /* === State Toggle === */
+  .state-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .state-btn { padding: 6px 16px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass-solid); color: var(--glass-text-secondary); cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.2s; }
+  .state-btn.active { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
+  .state-btn:hover:not(.active) { border-color: var(--neon-cyan); color: var(--glass-text-primary); }
+
+  /* === Inspector Panel Mock === */
+  .inspector { width: 360px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-panel); overflow: hidden; }
+  .inspector-header { padding: 12px 16px; border-bottom: 1px solid var(--glass-border); background: var(--glass-elevated); display: flex; justify-content: space-between; align-items: center; }
+  .inspector-header h3 { font-size: 14px; font-weight: 600; }
+  .inspector-close { width: 24px; height: 24px; border-radius: 4px; border: none; background: transparent; color: var(--glass-text-muted); cursor: pointer; font-size: 16px; }
+  .inspector-body { padding: 0; }
+  .inspector-footer { padding: 12px 16px; border-top: 1px solid var(--glass-border); background: var(--glass-panel); display: flex; gap: 8px; }
+
+  /* === Inspector Section === */
+  .insp-section { padding: 16px; }
+  .insp-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--glass-text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .insp-divider { border-top: 1px solid var(--glass-border); }
+
+  /* === Status Badge === */
+  .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .status-ready { background: var(--semantic-success-bg); color: var(--semantic-success); border: 1px solid var(--semantic-success-border); }
+  .status-promoted { background: rgba(167,139,250,0.1); color: var(--neon-violet); border: 1px solid rgba(167,139,250,0.3); }
+  .status-archived { background: rgba(100,116,139,0.15); color: var(--glass-text-muted); border: 1px solid rgba(100,116,139,0.3); }
+
+  /* === Buttons === */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+  .btn-primary { background: var(--neon-cyan); color: #000; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-ghost { background: transparent; color: var(--glass-text-secondary); border-color: var(--glass-border); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--glass-text-primary); }
+  .btn-success { background: var(--semantic-success); color: #fff; }
+  .btn-success:hover { opacity: 0.9; }
+  .btn-violet { background: rgba(167,139,250,0.15); color: var(--neon-violet); border: 1px solid rgba(167,139,250,0.3); }
+  .btn-violet:hover { background: rgba(167,139,250,0.25); }
+  .btn-disabled { opacity: 0.5; pointer-events: none; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* === Badge === */
+  .count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; border-radius: 999px; font-size: 10px; font-weight: 700; padding: 0 5px; }
+  .count-badge-cyan { background: var(--neon-cyan); color: #000; }
+  .count-badge-muted { background: var(--glass-elevated); color: var(--glass-text-muted); border: 1px solid var(--glass-border); }
+
+  /* === Modal Indicator === */
+  .modal-indicator { font-size: 10px; color: var(--glass-text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .modal-indicator .icon { font-size: 12px; }
+
+  /* === Annotation === */
+  .annotation { background: rgba(0,229,255,0.08); border: 1px dashed rgba(0,229,255,0.3); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 11px; color: var(--neon-cyan); }
+  .annotation strong { color: var(--glass-text-primary); }
+  .annotation-warn { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); color: var(--semantic-warning); }
+
+  /* === Comparison Layout === */
+  .compare { display: flex; gap: 24px; flex-wrap: wrap; }
+  .compare-col { flex: 0 0 auto; }
+  .compare-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--glass-text-muted); margin-bottom: 8px; }
+
+  /* === SFR Modal Mock === */
+  .sfr-modal { width: 900px; max-width: 100%; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-solid); overflow: hidden; }
+  .sfr-header { padding: 12px 16px; border-bottom: 1px solid var(--glass-border); background: var(--glass-elevated); display: flex; justify-content: space-between; align-items: center; }
+  .sfr-badge { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; }
+  .sfr-badge-tender { background: var(--semantic-success-bg); color: var(--semantic-success); }
+  .sfr-columns { display: flex; height: 400px; }
+  .sfr-left { width: 200px; border-right: 1px solid var(--glass-border); padding: 16px; background: var(--glass-panel); }
+  .sfr-center { flex: 1; padding: 16px; overflow-y: auto; }
+  .sfr-right { width: 240px; border-left: 1px solid var(--glass-border); padding: 16px; background: var(--glass-panel); }
+  .sfr-footer { padding: 8px 16px; border-top: 1px solid var(--glass-border); background: var(--glass-elevated); font-size: 11px; color: var(--glass-text-muted); }
+
+  /* === Placeholder blocks === */
+  .placeholder { background: var(--glass-elevated); border: 1px dashed var(--glass-border); border-radius: 6px; padding: 12px; font-size: 11px; color: var(--glass-text-muted); text-align: center; }
+
+  /* === Tag === */
+  .tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 500; background: var(--glass-elevated); color: var(--glass-text-secondary); border: 1px solid var(--glass-border); }
+
+  /* === Promoted Card === */
+  .promoted-card { background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); border-radius: 8px; padding: 12px; }
+  .promoted-card .label { font-size: 10px; color: var(--glass-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .promoted-card .value { font-size: 13px; color: var(--glass-text-primary); }
+  .promoted-card .sub { font-size: 11px; color: var(--glass-text-muted); margin-top: 2px; }
+
+  /* === Nav Sidebar Mock === */
+  .nav-sidebar { width: 220px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass-panel); overflow: hidden; }
+  .nav-header { padding: 10px 14px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--glass-text-muted); font-weight: 600; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: var(--glass-text-secondary); cursor: pointer; transition: background 0.15s; }
+  .nav-item:hover { background: rgba(255,255,255,0.03); }
+  .nav-item.active { background: rgba(0,229,255,0.08); color: var(--glass-text-primary); }
+  .nav-item .icon { font-size: 18px; }
+  .nav-item .badge { margin-left: auto; }
+  .nav-divider { border-top: 1px solid var(--glass-border); margin: 4px 0; }
+  .nav-new { border: 2px dashed rgba(167,139,250,0.4); background: rgba(167,139,250,0.05); }
+
+  /* === Responsive === */
+  @media (max-width: 900px) {
+    .compare { flex-direction: column; }
+    .sfr-modal { width: 100%; }
+    .sfr-columns { flex-direction: column; height: auto; }
+    .sfr-left, .sfr-right { width: 100%; border-right: none; border-left: none; border-bottom: 1px solid var(--glass-border); }
+  }
+
+  /* === Utility === */
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-2 { margin-bottom: 8px; }
+  .gap-2 { gap: 8px; }
+  .flex { display: flex; }
+  .flex-wrap { flex-wrap: wrap; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .text-xs { font-size: 11px; }
+  .text-sm { font-size: 13px; }
+  .text-muted { color: var(--glass-text-muted); }
+  .text-secondary { color: var(--glass-text-secondary); }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .hidden { display: none !important; }
+  .space-y-3 > * + * { margin-top: 12px; }
+  .space-y-2 > * + * { margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ============================================================= -->
+  <!-- PAGE HEADER                                                     -->
+  <!-- ============================================================= -->
+  <h1 class="page-title">S26-NUR Wireframe</h1>
+  <p class="page-subtitle">
+    Nursery Inspector Rationalization + SFR Bridge &mdash; UI/UX Designer Output
+    <br>Scope: Phase 1 (SFR Bridge) + Phase 3 (Garden Promotion Pipeline) &mdash; Phase 2 UI Rationalization deferred
+  </p>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 1: View Artifacts Button                              -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf1">
+    <div class="section-title"><span class="num">1</span> View Artifacts Button &mdash; Placement in Inspector</div>
+    <p class="section-desc">
+      The "View Artifacts" button lives in the <strong>Document</strong> section (after GenerateDocumentSection).
+      It adapts between zero-state (no artifacts yet) and populated state (1+ artifacts generated).
+      The button includes a count badge when artifacts exist.
+    </p>
+
+    <div class="state-bar">
+      <button class="state-btn active" onclick="showState('wf1', 'zero')">Zero Artifacts</button>
+      <button class="state-btn" onclick="showState('wf1', 'populated')">2 Artifacts</button>
+      <button class="state-btn" onclick="showState('wf1', 'no-doc')">No Document Yet</button>
+    </div>
+
+    <div class="compare">
+      <!-- Inspector Column -->
+      <div class="compare-col">
+        <div class="compare-label">Inspector Panel &mdash; Document Section</div>
+        <div class="inspector">
+          <div class="inspector-header">
+            <h3>Sprout Inspector</h3>
+            <button class="inspector-close">&times;</button>
+          </div>
+          <div class="inspector-body">
+
+            <!-- Status Section (collapsed for context) -->
+            <div class="insp-section">
+              <div class="insp-section-title">Status</div>
+              <div class="flex items-center justify-between">
+                <span class="status-badge status-ready">Completed</span>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-primary" id="wf1-promote-btn">
+                  <span>&#x1F332;</span> Promote to Garden
+                </button>
+                <button class="btn btn-ghost">Archive</button>
+              </div>
+            </div>
+
+            <div class="insp-divider"></div>
+
+            <!-- ... Identity, Synthesis collapsed for brevity ... -->
+            <div class="insp-section">
+              <div class="insp-section-title" style="color: var(--glass-text-muted); opacity: 0.5;">Identity &bull; Synthesis (collapsed)</div>
+            </div>
+
+            <div class="insp-divider"></div>
+
+            <!-- DOCUMENT SECTION - The key wireframe area -->
+            <div class="insp-section" id="wf1-doc-section">
+
+              <!-- State: Zero Artifacts -->
+              <div data-state="zero" class="wf1-state">
+                <div class="insp-section-title">Document</div>
+                <div class="flex items-center gap-2 text-sm" style="color: var(--neon-green);">
+                  <span>&#10003;</span> Document generated
+                </div>
+                <button class="btn btn-ghost btn-full mt-3">
+                  <span>&#128196;</span> View Document
+                </button>
+                <p class="text-xs text-muted mt-2">Use "Promote to Garden" to publish this research.</p>
+
+                <div class="annotation mt-3">
+                  <strong>Zero-state:</strong> No generated artifacts exist yet.
+                  "View Artifacts" button is <em>hidden</em> &mdash; the user hasn't generated any Writer artifacts.
+                  The section shows only the existing "View Document" button for the base research document.
+                </div>
+              </div>
+
+              <!-- State: Populated (2 artifacts) -->
+              <div data-state="populated" class="wf1-state hidden">
+                <div class="insp-section-title">Document</div>
+                <div class="flex items-center gap-2 text-sm" style="color: var(--neon-green);">
+                  <span>&#10003;</span> Document generated
+                </div>
+                <button class="btn btn-ghost btn-full mt-3">
+                  <span>&#128196;</span> View Document
+                </button>
+
+                <!-- NEW: View Artifacts button with badge -->
+                <button class="btn btn-violet btn-full mt-2">
+                  <span>&#9997;</span> View Artifacts
+                  <span class="count-badge count-badge-cyan" style="margin-left: auto;">2</span>
+                </button>
+                <div class="modal-indicator">
+                  <span class="icon">&#8599;</span> Opens Sprout Finishing Room
+                </div>
+
+                <p class="text-xs text-muted mt-2">Use "Promote to Garden" to publish this research.</p>
+
+                <div class="annotation mt-3">
+                  <strong>Populated state:</strong> 2 Writer artifacts exist on <code>sprout.generatedArtifacts[]</code>.
+                  <br>&bull; Button uses <code>btn-violet</code> to visually distinguish from ghost buttons
+                  <br>&bull; Count badge shows artifact count in cyan
+                  <br>&bull; Hint text clarifies it opens a modal (not inline)
+                  <br>&bull; Clicking opens SproutFinishingRoom with artifacts pre-loaded
+                </div>
+              </div>
+
+              <!-- State: No Document -->
+              <div data-state="no-doc" class="wf1-state hidden">
+                <div class="insp-section-title">Generate Document</div>
+                <p class="text-sm text-secondary">
+                  Research evidence is ready. Select an output template and generate your document.
+                </p>
+                <div class="mt-3">
+                  <div class="text-xs text-muted mb-1">Output Template</div>
+                  <select style="width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass-solid); color: var(--glass-text-primary); font-size: 12px;">
+                    <option>Blog Post (Default)</option>
+                    <option>Vision Paper</option>
+                    <option>Engineering Report</option>
+                  </select>
+                  <div class="text-xs text-muted mt-1" style="font-style: italic;">
+                    Templates loaded from <code>useOutputTemplateData()</code> &mdash; declarative, not hardcoded.
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-full mt-3">
+                  <span>&#10024;</span> Generate Document
+                </button>
+
+                <div class="annotation mt-3">
+                  <strong>Pre-generation:</strong> No document exists yet, so no artifacts either.
+                  "View Artifacts" button does not appear. Standard GenerateDocumentSection shown.
+                  <br><br>
+                  <strong>Note:</strong> The <code>&lt;select&gt;</code> shown here is a simplified wireframe representation
+                  of GenerateDocumentSection.tsx's template selector. Template names and options are loaded
+                  declaratively from Supabase via <code>useOutputTemplateData()</code>, not hardcoded.
+                  The label reads "Output Template" to match the system's general-purpose vocabulary.
+                </div>
+              </div>
+
+            </div>
+
+            <div class="insp-divider"></div>
+            <div class="insp-section">
+              <div class="insp-section-title" style="color: var(--glass-text-muted); opacity: 0.5;">Provenance &bull; Signals &bull; Metadata (collapsed)</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Design Notes Column -->
+      <div class="compare-col" style="max-width: 360px;">
+        <div class="compare-label">Design Rationale</div>
+        <div class="space-y-3">
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Placement Decision</strong>
+            <p class="mt-2 text-sm text-secondary">"View Artifacts" sits inside the Document section, directly below the existing "View Document" button. This groups all document-related actions together.</p>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Visual Hierarchy</strong>
+            <p class="mt-2 text-sm text-secondary">
+              <span style="color: var(--neon-green);">&#11044;</span> "View Document" = ghost (secondary) &mdash; read-only view<br>
+              <span style="color: var(--neon-violet);">&#11044;</span> "View Artifacts" = violet (distinctive) &mdash; opens modal<br>
+              <span style="color: var(--neon-cyan);">&#11044;</span> Badge = cyan count &mdash; signals content exists
+            </p>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Visibility Logic</strong>
+            <p class="mt-2 text-sm text-secondary">
+              <code>generatedArtifacts?.length > 0</code> &rarr; show button<br>
+              <code>!generatedArtifacts?.length</code> &rarr; hide button<br>
+              Badge shows <code>generatedArtifacts.length</code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 2: Promote Button Behavior Change                     -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf2">
+    <div class="section-title"><span class="num">2</span> Promote Button &mdash; Modal Interception Pattern</div>
+    <p class="section-desc">
+      The "Promote to Garden" button changes from an immediate archive action to a <strong>modal launcher</strong>.
+      Visual cues indicate it opens the SproutFinishingRoom modal where the real promotion pipeline runs.
+      The button icon changes from "park" to "open_in_new" to signal modal behavior.
+    </p>
+
+    <div class="state-bar">
+      <button class="state-btn active" onclick="showState('wf2', 'before')">Before (Current)</button>
+      <button class="state-btn" onclick="showState('wf2', 'after')">After (S26-NUR)</button>
+    </div>
+
+    <div class="compare">
+      <!-- BEFORE -->
+      <div class="compare-col">
+        <div class="compare-label" id="wf2-before-label">Current Behavior</div>
+        <div class="inspector" style="width: 320px;">
+          <div class="inspector-body">
+            <div class="insp-section">
+              <div class="insp-section-title">Status</div>
+              <div class="flex items-center justify-between">
+                <span class="status-badge status-ready">Completed</span>
+              </div>
+
+              <!-- BEFORE state -->
+              <div data-state="before" class="wf2-state">
+                <div class="flex flex-wrap gap-2 mt-3">
+                  <button class="btn btn-primary">
+                    <span>&#127794;</span> Promote to Garden
+                  </button>
+                  <button class="btn btn-ghost">Archive</button>
+                </div>
+                <div class="annotation mt-3">
+                  <strong>Current:</strong> Clicking "Promote" immediately archives the sprout with
+                  <code>archiveReason: 'promoted'</code>. No modal, no real promotion pipeline.
+                  <br><br>
+                  <strong>Problem:</strong> The actual <code>garden-bridge.ts</code> promotion pipeline
+                  (upload doc + patch provenance) never runs.
+                </div>
+              </div>
+
+              <!-- AFTER state -->
+              <div data-state="after" class="wf2-state hidden">
+                <div class="flex flex-wrap gap-2 mt-3">
+                  <button class="btn btn-success">
+                    <span>&#8599;</span> Promote to Garden
+                  </button>
+                  <button class="btn btn-ghost">Archive</button>
+                </div>
+                <div class="modal-indicator">
+                  <span class="icon">&#8599;</span> Opens Finishing Room for review + promotion
+                </div>
+                <div class="annotation mt-3">
+                  <strong>After S26-NUR:</strong> Clicking "Promote" opens SproutFinishingRoom modal.
+                  <br><br>
+                  <strong>Visual changes:</strong>
+                  <br>&bull; Icon: <code>park</code> &rarr; <code>open_in_new</code> (arrow icon signals modal)
+                  <br>&bull; Color: <code>btn-primary</code> (cyan) &rarr; <code>btn-success</code> (green) to signal positive action
+                  <br>&bull; Hint text: "Opens Finishing Room for review + promotion"
+                  <br>&bull; On click: <code>handlePromote()</code> &rarr; <code>setShowSFR(true)</code>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flow Diagram -->
+      <div class="compare-col" style="max-width: 400px;">
+        <div class="compare-label">Interaction Flow</div>
+        <div class="space-y-2">
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-style: solid;">
+            <strong style="color: var(--semantic-error);">BEFORE (Broken)</strong>
+            <div class="mt-2 text-sm font-mono text-secondary" style="line-height: 1.8;">
+              Click "Promote"<br>
+              &nbsp;&nbsp;&darr;<br>
+              handlePromote()<br>
+              &nbsp;&nbsp;&darr;<br>
+              PatchOperation: status='archived'<br>
+              &nbsp;&nbsp;&darr;<br>
+              Sprout disappears from "Ready" list<br>
+              <span style="color: var(--semantic-error);">&nbsp;&nbsp;&times; garden-bridge.ts never called</span><br>
+              <span style="color: var(--semantic-error);">&nbsp;&nbsp;&times; No upload to Garden API</span>
+            </div>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-color: var(--semantic-success); border-style: solid;">
+            <strong style="color: var(--semantic-success);">AFTER (S26-NUR)</strong>
+            <div class="mt-2 text-sm font-mono text-secondary" style="line-height: 1.8;">
+              Click "Promote"<br>
+              &nbsp;&nbsp;&darr;<br>
+              setShowSFR(true)<br>
+              &nbsp;&nbsp;&darr;<br>
+              SproutFinishingRoom modal opens<br>
+              &nbsp;&nbsp;&darr;<br>
+              User reviews artifacts + evidence<br>
+              &nbsp;&nbsp;&darr;<br>
+              Click "Promote to Garden" in SFR<br>
+              &nbsp;&nbsp;&darr;<br>
+              <span style="color: var(--semantic-success);">garden-bridge.ts executes</span><br>
+              <span style="color: var(--semantic-success);">&nbsp;&nbsp;1. POST /api/knowledge/upload</span><br>
+              <span style="color: var(--semantic-success);">&nbsp;&nbsp;2. PATCH provenance</span><br>
+              &nbsp;&nbsp;&darr;<br>
+              Status badge updates to "Promoted"<br>
+              Toast: "Promoted to Garden!"
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 3: SFR Modal from Nursery Context                     -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf3">
+    <div class="section-title"><span class="num">3</span> SFR Modal &mdash; Nursery Context Adaptations</div>
+    <p class="section-desc">
+      SproutFinishingRoom modal launches identically from Nursery or /explore.
+      The <strong>only difference</strong> is the <code>onSproutUpdate</code> callback &mdash; Nursery passes a
+      callback that patches the sprout via Console Factory's edit mechanism, while /explore patches localStorage.
+      No visual differences in the modal itself.
+    </p>
+
+    <div class="sfr-modal">
+      <div class="sfr-header">
+        <div class="flex items-center gap-2">
+          <div class="sfr-badge sfr-badge-tender">&#127793;</div>
+          <span style="font-size: 13px; font-weight: 600;">Sprout Finishing Room</span>
+        </div>
+        <div style="font-size: 12px; color: var(--glass-text-muted); font-style: italic;">
+          "What are the long-term implications of decentralized AI..."
+        </div>
+        <button class="inspector-close">&times;</button>
+      </div>
+      <div class="sfr-columns">
+        <div class="sfr-left">
+          <div class="text-xs text-muted mb-2" style="text-transform: uppercase; letter-spacing: 0.5px;">Provenance</div>
+          <div class="space-y-3">
+            <div>
+              <div class="text-xs text-muted">Lens</div>
+              <div class="text-sm">Researcher</div>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Hub</div>
+              <div class="text-sm">AI Governance</div>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Confidence</div>
+              <div class="text-sm">87%</div>
+            </div>
+            <div>
+              <div class="text-xs text-muted">Model</div>
+              <div class="text-sm font-mono" style="font-size: 10px;">gemini-2.5-flash</div>
+            </div>
+          </div>
+        </div>
+        <div class="sfr-center">
+          <!-- Version Tabs (tab labels derived from artifact template names, not hardcoded) -->
+          <div class="flex gap-2 mb-3" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
+            <button class="btn btn-ghost" style="font-size: 11px; padding: 4px 10px;">Research</button>
+            <button class="btn" style="font-size: 11px; padding: 4px 10px; background: rgba(0,229,255,0.15); color: var(--neon-cyan); border: 1px solid rgba(0,229,255,0.3);">V1: Blog Post</button>
+            <button class="btn btn-ghost" style="font-size: 11px; padding: 4px 10px;">V2: Vision Paper</button>
+          </div>
+          <!-- Content Area -->
+          <div class="placeholder" style="height: 280px;">
+            Rendered artifact content (ResearchRegistry)<br><br>
+            <span class="text-xs">Tabs switch between research evidence and generated Writer artifacts.</span>
+          </div>
+          <!-- Promote Bar -->
+          <div class="flex items-center justify-between mt-3" style="background: var(--glass-elevated); padding: 10px 14px; border-radius: 8px;">
+            <span class="text-xs text-muted">V1: Blog Post</span>
+            <button class="btn btn-success">Promote to Garden</button>
+          </div>
+        </div>
+        <div class="sfr-right">
+          <!-- WriterPanel: Full right rail (320px in code) -->
+          <!-- Actual component: WriterPanel.tsx via ActionPanel.tsx -->
+
+          <!-- Section 1: Output Style (template selection grid) -->
+          <div style="padding-bottom: 12px; border-bottom: 1px solid var(--glass-border);">
+            <div class="flex items-center gap-2 mb-2">
+              <span style="width: 3px; height: 14px; background: var(--neon-cyan); border-radius: 2px; display: inline-block;"></span>
+              <div class="text-xs" style="font-weight: 500; color: var(--glass-text-primary); text-transform: none; letter-spacing: 0;">Output Style</div>
+            </div>
+            <!-- Visual template grid (NOT a dropdown) -->
+            <!-- Templates loaded from useOutputTemplateData() / Supabase -->
+            <div class="space-y-2">
+              <button style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--neon-cyan); background: var(--glass-elevated); text-align: left; cursor: pointer;">
+                <div class="flex items-center justify-between">
+                  <span style="font-size: 11px; font-weight: 500; color: var(--glass-text-primary);">Blog Post</span>
+                  <span style="font-size: 9px; padding: 1px 5px; border-radius: 4px; background: var(--glass-elevated); color: var(--neon-cyan);">Default</span>
+                </div>
+                <div style="font-size: 9px; color: var(--glass-text-muted); margin-top: 2px;">Accessible, narrative-driven</div>
+              </button>
+              <button style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--glass-border); background: transparent; text-align: left; cursor: pointer;">
+                <span style="font-size: 11px; font-weight: 500; color: var(--glass-text-primary);">Vision Paper</span>
+                <div style="font-size: 9px; color: var(--glass-text-muted); margin-top: 2px;">Strategic, forward-looking</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: Additional Context (user notes) -->
+          <div style="padding: 12px 0; border-bottom: 1px solid var(--glass-border);">
+            <div class="flex items-center gap-2 mb-2">
+              <span style="width: 3px; height: 14px; background: var(--semantic-info); border-radius: 2px; display: inline-block;"></span>
+              <div class="text-xs" style="font-weight: 500; color: var(--glass-text-primary);">Additional Context</div>
+            </div>
+            <textarea style="width: 100%; height: 50px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--glass-panel); color: var(--glass-text-primary); font-size: 10px; resize: none;" placeholder="Optional: audience, focus areas, tone..."></textarea>
+          </div>
+
+          <!-- Section 3: Generate Artifact button -->
+          <div style="padding: 12px 0; border-bottom: 1px solid var(--glass-border);">
+            <button class="btn btn-primary btn-full" style="font-size: 11px; padding: 8px;">
+              Generate Artifact
+            </button>
+            <div style="font-size: 9px; color: var(--glass-text-muted); text-align: center; margin-top: 4px;">Using: Blog Post</div>
+          </div>
+
+          <!-- Section 4: Metadata -->
+          <div style="padding-top: 8px;">
+            <div style="font-size: 9px; color: var(--glass-text-muted); line-height: 1.6;">
+              <strong>Query:</strong> Decentralized AI...<br>
+              <strong>Status:</strong> completed<br>
+              <strong>Branches:</strong> 3
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sfr-footer">
+        Captured 3 days ago &bull; 2 artifacts &bull; Tier: tender &bull; ID: spr_abc123
+      </div>
+    </div>
+
+    <div class="annotation mt-3" style="max-width: 900px;">
+      <strong>Nursery vs /explore launch &mdash; identical modal, different callback:</strong>
+      <br><br>
+      <strong>From /explore:</strong> <code>onSproutUpdate</code> calls <code>useSproutStorage().updateSprout()</code> &rarr; persists to localStorage
+      <br><strong>From Nursery:</strong> <code>onSproutUpdate</code> calls <code>onEdit(patchOps)</code> + <code>onSave()</code> &rarr; persists via Console Factory mechanism (Supabase)
+      <br><br>
+      <strong>Type bridge:</strong> Nursery holds <code>GroveObject&lt;SproutPayload&gt;</code>. SFR expects <code>Sprout</code> (from <code>@core/schema/sprout</code>).
+      A thin adapter <code>nurseryToSprout(groveObject)</code> maps between them before passing to SFR.
+    </div>
+    <div class="annotation mt-3" style="max-width: 900px;">
+      <strong>Right rail = WriterPanel (ActionPanel.tsx &rarr; WriterPanel.tsx):</strong>
+      <br><br>
+      The right column is NOT a simple dropdown + button. It is the full <code>WriterPanel</code> component with these sections:
+      <br>&bull; <strong>"Output Style"</strong> &mdash; Visual template selection grid (clickable cards, NOT a <code>&lt;select&gt;</code> dropdown)
+      <br>&bull; <strong>"Additional Context"</strong> &mdash; Textarea for user notes (audience, focus, tone)
+      <br>&bull; <strong>"Generate Artifact"</strong> &mdash; Primary action button (not "Generate Document")
+      <br>&bull; <strong>Document preview</strong> &mdash; Shows after generation with "Save to Nursery" option
+      <br>&bull; <strong>Metadata</strong> &mdash; Query, status, branch count
+      <br><br>
+      <strong style="color: var(--semantic-warning);">Declarative label sourcing:</strong> All template names (Blog Post, Vision Paper, etc.) are loaded
+      at runtime from Supabase via <code>useOutputTemplateData()</code>. They are NOT hardcoded.
+      The system is <em>general-purpose</em> &mdash; new output template types can be added via the
+      ExperienceConsole without code changes. Wireframe labels shown here are representative examples only.
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 4: Post-Promotion State                               -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf4">
+    <div class="section-title"><span class="num">4</span> Post-Promotion State &mdash; Inspector Display</div>
+    <p class="section-desc">
+      After successful promotion via SFR's garden-bridge pipeline, the inspector updates to show a
+      "Promoted" status badge and a promotion card with Garden metadata.
+      The Promote button disappears. The NurseryConsole navigation gains a "Promoted" tab.
+    </p>
+
+    <div class="state-bar">
+      <button class="state-btn active" onclick="showState('wf4', 'inspector')">Inspector View</button>
+      <button class="state-btn" onclick="showState('wf4', 'navigation')">Navigation Tab</button>
+    </div>
+
+    <div class="compare">
+      <!-- Inspector with promoted state -->
+      <div class="compare-col">
+        <div data-state="inspector" class="wf4-state">
+          <div class="compare-label">Inspector &mdash; Promoted Sprout</div>
+          <div class="inspector" style="width: 340px;">
+            <div class="inspector-header">
+              <h3>Sprout Inspector</h3>
+              <button class="inspector-close">&times;</button>
+            </div>
+            <div class="inspector-body">
+
+              <!-- Status Section: Promoted -->
+              <div class="insp-section">
+                <div class="insp-section-title">Status</div>
+                <div class="flex items-center justify-between">
+                  <span class="status-badge status-promoted">
+                    <span>&#127793;</span> Promoted
+                  </span>
+                  <span class="text-xs text-muted">Jan 27, 2026</span>
+                </div>
+
+                <!-- No Promote button - already promoted -->
+                <!-- Only Archive available -->
+                <div class="flex flex-wrap gap-2 mt-3">
+                  <button class="btn btn-ghost">Archive</button>
+                </div>
+              </div>
+
+              <div class="insp-divider"></div>
+
+              <!-- NEW: Garden Promotion Card -->
+              <div class="insp-section">
+                <div class="insp-section-title">
+                  <span style="color: var(--neon-violet);">&#127793;</span>
+                  Garden
+                </div>
+                <div class="promoted-card">
+                  <div class="space-y-3">
+                    <div>
+                      <div class="label">Garden Document</div>
+                      <div class="value">gdn_a7f2c9...</div>
+                    </div>
+                    <div>
+                      <div class="label">Tier</div>
+                      <div class="value flex items-center gap-2">
+                        <span style="color: var(--semantic-success);">&#9679;</span> Seed
+                      </div>
+                    </div>
+                    <div>
+                      <div class="label">Promoted Via</div>
+                      <div class="value">V1: Blog Post</div>
+                      <div class="sub">Template: blog-post-v1</div>
+                    </div>
+                    <div>
+                      <div class="label">Promoted At</div>
+                      <div class="value">Jan 27, 2026, 2:34 PM</div>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-violet btn-full mt-3" style="font-size: 11px;">
+                  <span>&#8599;</span> View in Finishing Room
+                </button>
+              </div>
+
+              <div class="insp-divider"></div>
+
+              <div class="insp-section">
+                <div class="insp-section-title" style="opacity: 0.5;">Identity &bull; Synthesis &bull; Provenance (below)</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tab -->
+        <div data-state="navigation" class="wf4-state hidden">
+          <div class="compare-label">NurseryConsole Navigation Sidebar</div>
+          <div class="nav-sidebar">
+            <div class="nav-header">Status</div>
+            <div class="nav-item">
+              <span class="icon">&#9989;</span> Ready
+              <span class="badge"><span class="count-badge count-badge-muted">12</span></span>
+            </div>
+            <div class="nav-item">
+              <span class="icon">&#9888;</span> Failed
+              <span class="badge"><span class="count-badge count-badge-muted">3</span></span>
+            </div>
+            <div class="nav-item nav-new" style="border-width: 1px;">
+              <span class="icon" style="color: var(--neon-violet);">&#127793;</span>
+              <span style="color: var(--neon-violet);">Promoted</span>
+              <span class="badge"><span class="count-badge" style="background: var(--neon-violet); color: #fff;">5</span></span>
+            </div>
+            <div class="nav-item">
+              <span class="icon">&#128230;</span> Archived
+              <span class="badge"><span class="count-badge count-badge-muted">28</span></span>
+            </div>
+            <div class="nav-divider"></div>
+            <div class="nav-header">Review</div>
+            <div class="nav-item">
+              <span class="icon">&#128221;</span> Needs Review
+              <span class="badge"><span class="count-badge count-badge-muted">2</span></span>
+            </div>
+          </div>
+          <div class="annotation mt-3">
+            <strong>New "Promoted" navigation item:</strong>
+            <br>&bull; Filter: <code>{'payload.status': 'promoted'}</code>
+            <br>&bull; Icon: <code>park</code> (tree/garden icon)
+            <br>&bull; Highlighted with violet to distinguish from other statuses
+            <br>&bull; Added to NurseryConsole.config.ts navigation array
+            <br><br>
+            <strong>Config change:</strong>
+            <code style="display: block; margin-top: 4px; padding: 6px; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 10px;">
+              { id: 'promoted', label: 'Promoted',<br>
+              &nbsp;&nbsp;icon: 'park', filter: { 'payload.status': 'promoted' } }
+            </code>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design Notes -->
+      <div class="compare-col" style="max-width: 380px;">
+        <div class="compare-label">Design Rationale</div>
+        <div class="space-y-3">
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Status Transition</strong>
+            <p class="mt-2 text-sm text-secondary">
+              After SFR's <code>promoteToGarden()</code> succeeds, the callback patches:
+              <br>&bull; <code>status: 'promoted'</code> (new value, not 'archived')
+              <br>&bull; <code>promotedAt: ISO timestamp</code>
+              <br>&bull; <code>gardenDocId: result.gardenDocId</code>
+              <br>&bull; <code>gardenTier: result.tier</code>
+              <br>&bull; <code>promotedArtifact: { templateId, templateName }</code>
+            </p>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Garden Section</strong>
+            <p class="mt-2 text-sm text-secondary">
+              New InspectorSection appears after Status, before Identity.
+              Only visible when <code>status === 'promoted'</code>.
+              Shows Garden document ID, tier, artifact used, and timestamp.
+              "View in Finishing Room" button re-opens SFR.
+            </p>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Button State Changes</strong>
+            <p class="mt-2 text-sm text-secondary">
+              <span style="color: var(--semantic-error);">&#10005;</span> "Promote" button hidden (already promoted)
+              <br><span style="color: var(--semantic-success);">&#10003;</span> "Archive" still available
+              <br><span style="color: var(--semantic-success);">&#10003;</span> "View in Finishing Room" added
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 5: Artifact Count Badge                               -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf5">
+    <div class="section-title"><span class="num">5</span> Artifact Count Badge &mdash; Component Spec</div>
+    <p class="section-desc">
+      Badge component showing the number of generated artifacts. Used on "View Artifacts" button
+      and potentially on the list card in the Nursery console grid.
+    </p>
+
+    <div class="compare">
+      <div class="compare-col">
+        <div class="compare-label">Badge Variants</div>
+        <div class="space-y-3">
+
+          <!-- Variant: On button -->
+          <div style="background: var(--glass-panel); padding: 16px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <div class="text-xs text-muted mb-2">On "View Artifacts" Button</div>
+            <button class="btn btn-violet">
+              <span>&#9997;</span> View Artifacts
+              <span class="count-badge count-badge-cyan" style="margin-left: 8px;">3</span>
+            </button>
+          </div>
+
+          <!-- Variant: On list card -->
+          <div style="background: var(--glass-panel); padding: 16px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <div class="text-xs text-muted mb-2">On Nursery List Card (optional enhancement)</div>
+            <div class="flex items-center gap-2" style="padding: 8px 12px; background: var(--glass-elevated); border-radius: 8px;">
+              <span style="font-size: 14px;">&#127793;</span>
+              <div style="flex: 1;">
+                <div class="text-sm" style="color: var(--glass-text-primary);">Decentralized AI Ownership</div>
+                <div class="text-xs text-muted">3 days ago</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="tag"><span>&#9997;</span> 3</span>
+                <span class="status-badge status-ready" style="font-size: 10px;">Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Badge States -->
+          <div style="background: var(--glass-panel); padding: 16px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <div class="text-xs text-muted mb-2">Badge States</div>
+            <div class="flex items-center gap-3">
+              <div class="text-xs text-muted" style="width: 80px;">0 artifacts:</div>
+              <span class="text-xs text-muted">Badge hidden (no button shown)</span>
+            </div>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="text-xs text-muted" style="width: 80px;">1 artifact:</div>
+              <span class="count-badge count-badge-cyan">1</span>
+            </div>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="text-xs text-muted" style="width: 80px;">5 artifacts:</div>
+              <span class="count-badge count-badge-cyan">5</span>
+            </div>
+            <div class="flex items-center gap-3 mt-2">
+              <div class="text-xs text-muted" style="width: 80px;">9+ artifacts:</div>
+              <span class="count-badge count-badge-cyan">9+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-col" style="max-width: 360px;">
+        <div class="compare-label">Implementation Notes</div>
+        <div class="space-y-3">
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Badge Rules</strong>
+            <p class="mt-2 text-sm text-secondary">
+              &bull; <code>count === 0</code>: entire button hidden<br>
+              &bull; <code>count >= 1 && count <= 9</code>: show exact count<br>
+              &bull; <code>count > 9</code>: show "9+"<br>
+              &bull; Uses cyan accent from GroveSkins<br>
+              &bull; Minimum width: 18px (pill shape)
+            </p>
+          </div>
+          <div class="placeholder" style="text-align: left; background: var(--glass-panel);">
+            <strong style="color: var(--glass-text-primary);">Data Source</strong>
+            <p class="mt-2 text-sm text-secondary">
+              <code>sprout.payload.generatedArtifacts?.length ?? 0</code>
+              <br><br>
+              The array is persisted on the Sprout schema (S25-GSE).
+              It survives modal close and page refresh via the storage mechanism
+              (localStorage in /explore, Supabase in Nursery).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- WIREFRAME 6: Full Flow Summary                                  -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf6">
+    <div class="section-title"><span class="num">6</span> Complete User Flow &mdash; Nursery to Garden</div>
+    <p class="section-desc">
+      End-to-end journey from research completion to Garden promotion, showing all touchpoints.
+    </p>
+
+    <div style="background: var(--glass-panel); border: 1px solid var(--glass-border); border-radius: 12px; padding: 24px; max-width: 900px;">
+      <div style="display: grid; grid-template-columns: 40px 1fr; gap: 0; row-gap: 0;">
+
+        <!-- Step 1 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--semantic-success-bg); color: var(--semantic-success); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid var(--semantic-success-border);">1</div>
+          <div style="width: 2px; flex: 1; background: var(--glass-border);"></div>
+        </div>
+        <div style="padding-bottom: 20px;">
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Research Completes</div>
+          <div class="text-xs text-secondary mt-1">Sprout moves to "Ready" in Nursery. Synthesis available. Status: <code>completed</code></div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--semantic-info-bg); color: var(--semantic-info); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid rgba(59,130,246,0.3);">2</div>
+          <div style="width: 2px; flex: 1; background: var(--glass-border);"></div>
+        </div>
+        <div style="padding-bottom: 20px;">
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Generate Document (Inspector)</div>
+          <div class="text-xs text-secondary mt-1">User selects an output template in GenerateDocumentSection (loaded declaratively via <code>useOutputTemplateData()</code>). Document generated and saved to sprout.</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--semantic-info-bg); color: var(--semantic-info); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid rgba(59,130,246,0.3);">3</div>
+          <div style="width: 2px; flex: 1; background: var(--glass-border);"></div>
+        </div>
+        <div style="padding-bottom: 20px;">
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Click "Promote to Garden" <span style="color: var(--neon-cyan); font-size: 10px;">(CHANGED)</span></div>
+          <div class="text-xs text-secondary mt-1">Instead of archiving, opens SproutFinishingRoom modal. User can review evidence, artifacts, and choose which artifact to promote.</div>
+        </div>
+
+        <!-- Step 4 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(167,139,250,0.15); color: var(--neon-violet); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid rgba(167,139,250,0.3);">4</div>
+          <div style="width: 2px; flex: 1; background: var(--glass-border);"></div>
+        </div>
+        <div style="padding-bottom: 20px;">
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Review in SFR</div>
+          <div class="text-xs text-secondary mt-1">Three-column modal: Provenance (left), Document/Artifacts with version tabs (center), Actions (right). User can generate additional artifacts if needed.</div>
+        </div>
+
+        <!-- Step 5 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(167,139,250,0.15); color: var(--neon-violet); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid rgba(167,139,250,0.3);">5</div>
+          <div style="width: 2px; flex: 1; background: var(--glass-border);"></div>
+        </div>
+        <div style="padding-bottom: 20px;">
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Promote via SFR <span style="color: var(--neon-cyan); font-size: 10px;">(REAL PIPELINE)</span></div>
+          <div class="text-xs text-secondary mt-1">Click "Promote to Garden" button in SFR's document viewer bar. Triggers <code>garden-bridge.ts</code>: (1) Upload document via <code>POST /api/knowledge/upload</code>, (2) Patch provenance.</div>
+        </div>
+
+        <!-- Step 6 -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--semantic-success-bg); color: var(--semantic-success); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 1px solid var(--semantic-success-border);">&#10003;</div>
+        </div>
+        <div>
+          <div class="text-sm" style="font-weight: 600; color: var(--glass-text-primary);">Post-Promotion State</div>
+          <div class="text-xs text-secondary mt-1">
+            SFR closes. Inspector updates: status badge = "Promoted" (violet), Garden section appears with doc ID + tier.
+            Sprout moves to "Promoted" tab in navigation. Toast: "Promoted to Garden!"
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- IMPLEMENTATION NOTES                                            -->
+  <!-- ============================================================= -->
+  <div class="wireframe-section" id="wf-impl">
+    <div class="section-title" style="color: var(--semantic-warning);"><span class="num" style="background: var(--semantic-warning);">!</span> Implementation Notes</div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 900px;">
+
+      <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-style: solid;">
+        <strong style="color: var(--glass-text-primary);">Type Bridge Required</strong>
+        <p class="mt-2 text-sm text-secondary">
+          SFR expects <code>Sprout</code> from <code>@core/schema/sprout</code>.
+          Nursery has <code>GroveObject&lt;SproutPayload&gt;</code>.
+          <br><br>
+          Create: <code>nurseryToSprout(obj: GroveObject&lt;SproutPayload&gt;): Sprout</code>
+          <br><br>
+          This adapter maps payload fields to Sprout fields. Lives in <code>src/bedrock/consoles/NurseryConsole/utils.ts</code> or similar.
+        </p>
+      </div>
+
+      <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-style: solid;">
+        <strong style="color: var(--glass-text-primary);">Cross-Boundary Import</strong>
+        <p class="mt-2 text-sm text-secondary">
+          SFR lives in <code>/surface</code>, Nursery in <code>/bedrock</code>.
+          <br><br>
+          Options (per executive direction):
+          <br>1. Move SFR to <code>src/shared/components/modals/</code>
+          <br>2. Use ModalContext registry string
+          <br>3. Direct import (pragmatic, may need path alias)
+        </p>
+      </div>
+
+      <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-style: solid;">
+        <strong style="color: var(--glass-text-primary);">New SproutPayload Fields</strong>
+        <p class="mt-2 text-sm text-secondary">
+          <code>status: 'promoted'</code> (new status value)<br>
+          <code>promotedAt: string</code> (ISO timestamp)<br>
+          <code>gardenDocId: string</code> (from API response)<br>
+          <code>gardenTier: string</code> ('seed')<br>
+          <code>promotedArtifact: { templateId, templateName }</code>
+        </p>
+      </div>
+
+      <div class="placeholder" style="text-align: left; background: var(--glass-panel); border-style: solid;">
+        <strong style="color: var(--glass-text-primary);">Config Changes</strong>
+        <p class="mt-2 text-sm text-secondary">
+          <code>NurseryConsole.config.ts</code>:<br>
+          Add navigation item:<br>
+          <code>{ id: 'promoted', label: 'Promoted',<br>
+          &nbsp;&nbsp;icon: 'park',<br>
+          &nbsp;&nbsp;filter: { 'payload.status': 'promoted' } }</code>
+          <br><br>
+          Position: after "Failed", before "Archived"
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================= -->
+<!-- JavaScript for State Toggle                                     -->
+<!-- ============================================================= -->
+<script>
+function showState(wireframeId, stateName) {
+  // Toggle state buttons
+  const buttons = document.querySelectorAll(`#${wireframeId} .state-btn`);
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(stateName.replace('-', ' ')) ||
+      (stateName === 'zero' && btn.textContent.includes('Zero')) ||
+      (stateName === 'populated' && btn.textContent.includes('2 Artifact')) ||
+      (stateName === 'no-doc' && btn.textContent.includes('No Doc')) ||
+      (stateName === 'before' && btn.textContent.includes('Before')) ||
+      (stateName === 'after' && btn.textContent.includes('After')) ||
+      (stateName === 'inspector' && btn.textContent.includes('Inspector')) ||
+      (stateName === 'navigation' && btn.textContent.includes('Navigation'))
+    );
+  });
+
+  // Toggle content states
+  const states = document.querySelectorAll(`.${wireframeId}-state`);
+  states.forEach(el => {
+    const elState = el.getAttribute('data-state');
+    el.classList.toggle('hidden', elState !== stateName);
+  });
+
+  // Update comparison labels
+  if (wireframeId === 'wf2') {
+    const label = document.getElementById('wf2-before-label');
+    if (label) label.textContent = stateName === 'before' ? 'Current Behavior' : 'After S26-NUR';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -9,6 +9,7 @@ import type { CollectionDataResult } from '../../patterns/console-factory.types'
 import type { PatchOperation } from '../../types/copilot.types';
 import type { ResearchSprout, ResearchSproutStatus } from '@core/schema/research-sprout';
 import type { ResearchDocument } from '@core/schema/research-document';
+import type { GeneratedArtifact } from '@core/schema/sprout';
 import { RESEARCH_SPROUTS_TABLE } from '@core/schema/research-sprout-registry';
 
 // =============================================================================
@@ -126,6 +127,26 @@ export interface SproutPayload {
    * Decoupled from auto-chained pipeline per US-RL006.
    */
   researchDocument?: ResearchDocument;
+
+  // ─────────────────────────────────────────────────────────────
+  // Generated Artifacts (S26-NUR: SFR Bridge)
+  // ─────────────────────────────────────────────────────────────
+
+  /** All generated artifacts from Writer agent, persisted across sessions */
+  generatedArtifacts?: GeneratedArtifact[];
+
+  // ─────────────────────────────────────────────────────────────
+  // Garden Promotion (S26-NUR: Promote Workflow)
+  // ─────────────────────────────────────────────────────────────
+
+  /** ISO timestamp when promoted to Garden */
+  promotedAt?: string;
+
+  /** Garden tier assigned at promotion (currently always 'seed') */
+  promotionTier?: string;
+
+  /** Garden document ID created during promotion */
+  promotionGardenDocId?: string;
 }
 
 // =============================================================================
@@ -179,6 +200,11 @@ function rowToGroveObject(row: Record<string, unknown>): GroveObject<SproutPaylo
       qualityError,
       // Document generation (Sprint: research-template-wiring-v1)
       researchDocument,
+      // S26-NUR: Generated artifacts + promotion fields
+      generatedArtifacts: row.generated_artifacts as GeneratedArtifact[] | undefined,
+      promotedAt: row.promoted_at as string | undefined,
+      promotionTier: row.promotion_tier as string | undefined,
+      promotionGardenDocId: row.promotion_garden_doc_id as string | undefined,
     },
   };
 }

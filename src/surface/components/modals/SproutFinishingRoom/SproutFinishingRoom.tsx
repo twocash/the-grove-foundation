@@ -107,8 +107,18 @@ export const SproutFinishingRoom: React.FC<SproutFinishingRoomProps> = ({
       // Also save the document locally to the sprout
       updateSprout(sprout.id, { researchDocument: document });
       if (onSproutUpdate) {
-        const updated = getSprout(sprout.id);
-        if (updated) onSproutUpdate(updated);
+        // S26-NUR: Fall back to sprout prop if not in localStorage (Nursery context).
+        // Nursery sprouts live in Supabase, not localStorage, so getSprout() returns undefined.
+        // Enrich with promotion data so parent can persist gardenDocId.
+        const base = getSprout(sprout.id) ?? sprout;
+        const updated = {
+          ...base,
+          researchDocument: document,
+          promotedAt: result.promotedAt,
+          promotionGardenDocId: result.gardenDocId,
+          promotionTier: result.tier,
+        };
+        onSproutUpdate(updated);
       }
 
       emit.custom('sproutPromotedToGarden', {

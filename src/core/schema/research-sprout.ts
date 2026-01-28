@@ -50,6 +50,7 @@ export type ResearchSproutStatus =
   | 'paused'     // User paused (resumable)
   | 'blocked'    // Quality gate failed
   | 'completed'  // Research finished
+  | 'promoted'   // Promoted to Garden (S26-NUR)
   | 'archived';  // Soft-deleted
 
 /**
@@ -528,7 +529,7 @@ function generateTitle(spark: string): string {
  * Valid status values for type guard
  */
 const VALID_STATUSES: ResearchSproutStatus[] = [
-  'pending', 'active', 'paused', 'blocked', 'completed', 'archived'
+  'pending', 'active', 'paused', 'blocked', 'completed', 'promoted', 'archived'
 ];
 
 /**
@@ -567,7 +568,8 @@ export function canTransitionTo(
     active: ['paused', 'blocked', 'completed', 'archived'],
     paused: ['active', 'archived'],
     blocked: ['archived'],
-    completed: ['archived'],
+    completed: ['promoted', 'archived'],
+    promoted: ['archived'],
     archived: [], // Terminal state
   };
 

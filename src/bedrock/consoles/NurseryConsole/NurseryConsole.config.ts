@@ -13,6 +13,7 @@ import type { ConsoleConfig } from '../../types/console.types';
  * Status mapping:
  * - 'ready' = ResearchSprout.status === 'completed'
  * - 'failed' = ResearchSprout.status === 'blocked'
+ * - 'promoted' = ResearchSprout.status === 'promoted' (S26-NUR)
  * - 'archived' = ResearchSprout.status === 'archived'
  */
 export const nurseryConsoleConfig: ConsoleConfig = {
@@ -35,7 +36,7 @@ export const nurseryConsoleConfig: ConsoleConfig = {
         field: 'payload.status',
         label: 'Status',
         type: 'select',
-        options: ['completed', 'blocked', 'archived'],
+        options: ['completed', 'blocked', 'promoted', 'archived'],
       },
       {
         field: 'payload.requiresReview',
@@ -73,6 +74,7 @@ export const nurseryConsoleConfig: ConsoleConfig = {
     { type: 'header', label: 'Status' },
     { id: 'ready', label: 'Ready', icon: 'check_circle', filter: { 'payload.status': 'completed' } },
     { id: 'failed', label: 'Failed', icon: 'warning', filter: { 'payload.status': 'blocked' } },
+    { id: 'promoted', label: 'Promoted', icon: 'park', filter: { 'payload.status': 'promoted' } },
     { id: 'archived', label: 'Archived', icon: 'archive', filter: { 'payload.status': 'archived' } },
     { type: 'divider' },
     { type: 'header', label: 'Review' },
@@ -161,6 +163,12 @@ export const NURSERY_STATUS_CONFIG = {
     icon: 'warning',
     color: 'red',
     description: 'Quality gate failed - needs intervention',
+  },
+  promoted: {
+    label: 'Promoted',
+    icon: 'park',
+    color: 'cyan',
+    description: 'Promoted to Garden',
   },
   archived: {
     label: 'Archived',

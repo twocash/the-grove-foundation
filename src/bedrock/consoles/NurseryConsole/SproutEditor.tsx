@@ -6,7 +6,7 @@
 // using the standard onEdit mechanism with patch operations, allowing this
 // component to work within the createBedrockConsole factory pattern.
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { ObjectEditorProps } from '../../patterns/console-factory.types';
 import type { SproutPayload } from './useNurseryData';
 import type { PatchOperation } from '../../types/copilot.types';
@@ -20,6 +20,11 @@ import { GlassButton } from '../../primitives/GlassButton';
 import { SproutSignalsPanel } from './SproutSignalsPanel';
 import { GenerateDocumentSection } from './GenerateDocumentSection';
 import { DocumentContentModal } from '../GardenConsole/DocumentContentModal';
+// S26-NUR: SFR Bridge — view artifacts and promote via SproutFinishingRoom
+import { SproutFinishingRoom } from '@surface/components/modals/SproutFinishingRoom/SproutFinishingRoom';
+import { nurseryToSprout } from '@core/adapters/nurseryToSprout';
+import type { NurseryBridgeInput } from '@core/adapters/nurseryToSprout';
+import type { Sprout } from '@core/schema/sprout';
 
 // =============================================================================
 // Helper Components
@@ -131,15 +136,17 @@ function StatusBadge({ status }: { status: string }) {
   const getDisplayStatus = (s: string): NurseryDisplayStatus => {
     if (s === 'completed') return 'ready';
     if (s === 'blocked') return 'failed';
+    if (s === 'promoted') return 'promoted';
     return 'archived';
   };
 
   const displayStatus = getDisplayStatus(status);
   const config = NURSERY_STATUS_CONFIG[displayStatus];
 
-  const colorStyles = {
+  const colorStyles: Record<NurseryDisplayStatus, React.CSSProperties> = {
     ready: { backgroundColor: 'var(--semantic-success-bg)', color: 'var(--semantic-success)', borderColor: 'var(--semantic-success-border)' },
     failed: { backgroundColor: 'var(--semantic-error-bg)', color: 'var(--semantic-error)', borderColor: 'var(--semantic-error-border)' },
+    promoted: { backgroundColor: 'var(--semantic-info-bg, rgba(6,182,212,0.1))', color: 'var(--semantic-info, #06b6d4)', borderColor: 'var(--semantic-info-border, rgba(6,182,212,0.3))' },
     archived: { backgroundColor: 'var(--glass-surface)', color: 'var(--glass-text-muted)', borderColor: 'var(--glass-border)' },
   };
 
@@ -169,8 +176,32 @@ export function SproutEditor({
 }: ObjectEditorProps<SproutPayload>) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showSFRModal, setShowSFRModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+
+  // S26-NUR: Convert Nursery sprout → SFR Sprout type via adapter
+  const sfrSprout = useMemo(() => {
+    const bridgeInput: NurseryBridgeInput = {
+      meta: {
+        id: sprout.meta.id,
+        createdAt: sprout.meta.createdAt,
+      },
+      payload: {
+        spark: sprout.payload.spark,
+        status: sprout.payload.status,
+        inferenceModel: sprout.payload.inferenceModel,
+        tags: sprout.payload.tags,
+        notes: sprout.payload.notes,
+        synthesis: sprout.payload.synthesis,
+        researchDocument: sprout.payload.researchDocument,
+        generatedArtifacts: sprout.payload.generatedArtifacts,
+        promotedAt: sprout.payload.promotedAt,
+        promotedToGardenId: sprout.payload.promotionGardenDocId,
+      },
+    };
+    return nurseryToSprout(bridgeInput);
+  }, [sprout]);
 
   // Helper to create patch operation
   const patchPayload = (field: keyof SproutPayload, value: unknown) => {
@@ -183,22 +214,40 @@ export function SproutEditor({
     onEdit([op]);
   };
 
-  // Nursery-specific action handlers using standard onEdit mechanism
-  const handlePromote = async () => {
-    setActionLoading(true);
-    try {
-      const now = new Date().toISOString();
-      const ops: PatchOperation[] = [
-        { op: 'replace', path: '/payload/status', value: 'archived' },
-        { op: 'replace', path: '/payload/archiveReason', value: 'promoted' },
-        { op: 'replace', path: '/payload/archivedAt', value: now },
-      ];
-      await onEdit(ops);
-      onSave();
-    } finally {
-      setActionLoading(false);
-    }
+  // S26-NUR: "Promote to Garden" opens the SproutFinishingRoom modal
+  // instead of directly archiving. The SFR modal handles artifact selection
+  // and garden-bridge promotion pipeline.
+  const handlePromote = () => {
+    setShowSFRModal(true);
   };
+
+  // S26-NUR Phase 3a: When SFR completes promotion, sync the result back to
+  // the Nursery sprout via patch operations. The updatedSprout carries
+  // promotionGardenDocId and promotionTier injected by SFR after garden-bridge
+  // succeeds (see SproutFinishingRoom.tsx handlePromoteToGarden).
+  const handleSFRSproutUpdate = useCallback((updatedSprout: Sprout) => {
+    // S26-NUR Phase 3a: Extract promotion data injected by SFR's handlePromoteToGarden.
+    // These fields are added to the Sprout object at runtime after garden-bridge succeeds.
+    const promoted = updatedSprout as Sprout & {
+      promotionGardenDocId?: string;
+      promotionTier?: string;
+    };
+
+    const ops: PatchOperation[] = [
+      { op: 'replace', path: '/payload/status', value: 'promoted' },
+      { op: 'replace', path: '/payload/promotedAt', value: promoted.promotedAt ?? new Date().toISOString() },
+    ];
+
+    if (promoted.promotionGardenDocId) {
+      ops.push({ op: 'replace', path: '/payload/promotionGardenDocId', value: promoted.promotionGardenDocId });
+    }
+    if (promoted.promotionTier) {
+      ops.push({ op: 'replace', path: '/payload/promotionTier', value: promoted.promotionTier });
+    }
+
+    onEdit(ops);
+    onSave();
+  }, [onEdit, onSave]);
 
   const handleArchive = async (reason: string, customReason?: string) => {
     setActionLoading(true);
@@ -323,9 +372,32 @@ export function SproutEditor({
                   size="sm"
                   onClick={handlePromote}
                   disabled={loading || actionLoading}
+                  aria-haspopup="dialog"
                 >
                   <span className="material-symbols-outlined text-base mr-1">park</span>
                   Promote to Garden
+                </GlassButton>
+              )}
+
+              {/* S26-NUR: View Artifacts button — opens SFR modal to inspect generated documents */}
+              {(sprout.payload.generatedArtifacts?.length ?? 0) > 0 && (
+                <GlassButton
+                  variant="primary"
+                  accent="violet"
+                  size="sm"
+                  onClick={() => setShowSFRModal(true)}
+                  disabled={loading || actionLoading}
+                  aria-haspopup="dialog"
+                >
+                  <span className="material-symbols-outlined text-base mr-1">description</span>
+                  View Artifacts
+                  <span
+                    className="ml-1.5 inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-medium"
+                    style={{ backgroundColor: 'var(--neon-violet)', color: 'var(--glass-void)' }}
+                    aria-label={`${sprout.payload.generatedArtifacts!.length} artifact${sprout.payload.generatedArtifacts!.length !== 1 ? 's' : ''}`}
+                  >
+                    {sprout.payload.generatedArtifacts!.length}
+                  </span>
                 </GlassButton>
               )}
 
@@ -353,6 +425,29 @@ export function SproutEditor({
                 </GlassButton>
               )}
             </div>
+
+            {/* S26-NUR: Post-promotion status display */}
+            {sprout.payload.status === 'promoted' && sprout.payload.promotedAt && (
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--semantic-success-bg)' }}>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base" style={{ color: 'var(--semantic-success)' }}>
+                    check_circle
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--semantic-success)' }}>
+                    Promoted to Garden
+                  </span>
+                </div>
+                <div className="text-xs mt-1" style={{ color: 'var(--glass-text-muted)' }}>
+                  {new Date(sprout.payload.promotedAt).toLocaleString()}
+                  {sprout.payload.promotionTier && ` · Tier: ${sprout.payload.promotionTier}`}
+                  {sprout.payload.promotionGardenDocId && (
+                    <span className="ml-1">
+                      · Doc: <span className="font-mono">{sprout.payload.promotionGardenDocId.slice(0, 8)}...</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Archive reason if archived */}
             {isArchived && sprout.payload.archiveReason && (
@@ -636,6 +731,14 @@ export function SproutEditor({
           onClose={() => setShowDocumentModal(false)}
         />
       )}
+
+      {/* S26-NUR: SproutFinishingRoom modal — launched from Promote or View Artifacts */}
+      <SproutFinishingRoom
+        sprout={sfrSprout}
+        isOpen={showSFRModal}
+        onClose={() => setShowSFRModal(false)}
+        onSproutUpdate={handleSFRSproutUpdate}
+      />
     </div>
   );
 }
