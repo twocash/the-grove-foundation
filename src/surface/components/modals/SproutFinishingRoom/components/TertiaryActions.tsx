@@ -8,6 +8,7 @@ import {
   downloadMarkdown,
   type ProvenanceInfo,
 } from '@explore/utils/markdown-export';
+import { documentToNotionMarkdown } from '@explore/utils/notion-export';
 
 export type TertiaryAction = 'archive' | 'annotate' | 'export';
 
@@ -183,6 +184,42 @@ ${sprout.response}
             </span>
             <p className="text-xs text-[var(--glass-text-muted)]">
               Download as Markdown
+            </p>
+          </div>
+        </button>
+
+        {/* S28-PIPE: Copy for Notion */}
+        <button
+          onClick={() => {
+            const latestArtifact = sprout.generatedArtifacts?.[sprout.generatedArtifacts.length - 1];
+            const doc = latestArtifact?.document || sprout.researchDocument;
+
+            if (doc) {
+              const exportProvenance: ProvenanceInfo = {
+                lensName: sprout.provenance?.lens?.name,
+                journeyName: sprout.provenance?.journey?.name,
+                hubName: sprout.provenance?.hub?.name,
+                templateName: latestArtifact?.templateName,
+                writerConfigVersion: latestArtifact?.writerConfigVersion,
+                generatedAt: latestArtifact?.generatedAt || doc.createdAt,
+              };
+
+              const notionContent = documentToNotionMarkdown(doc, exportProvenance);
+              navigator.clipboard.writeText(notionContent.content);
+              onAction('export', { format: 'notion' });
+            }
+          }}
+          className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-[var(--glass-elevated)] transition-colors text-left"
+        >
+          <span className="text-lg" role="img" aria-label="Notion">
+            📓
+          </span>
+          <div>
+            <span className="text-sm font-medium text-[var(--glass-text-primary)]">
+              Copy for Notion
+            </span>
+            <p className="text-xs text-[var(--glass-text-muted)]">
+              Notion-formatted clipboard
             </p>
           </div>
         </button>

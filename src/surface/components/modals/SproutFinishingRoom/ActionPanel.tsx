@@ -15,6 +15,7 @@ import {
   documentToMarkdown,
   type ProvenanceInfo,
 } from '@explore/utils/markdown-export';
+import { documentToNotionMarkdown } from '@explore/utils/notion-export';
 
 /**
  * Extract a human-readable title from a URL or reference string.
@@ -224,10 +225,10 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         if (updated) onSproutUpdate(updated);
       }
 
-      // Emit signal
+      // Emit signal (using 'extend' as document generation extends sprout with new content)
       signals.emitRefined(
         sprout.id,
-        { refinementType: 'generate-document', charsDelta: result.document?.analysis?.length || 0 },
+        { refinementType: 'extend', charsDelta: result.document?.analysis?.length || 0 },
         provenance
       );
 
@@ -344,15 +345,42 @@ ${sprout.response}
           Export to Markdown
         </button>
 
-        {/* S22-WP: Save to Notion stub - requires API key integration */}
+        {/* S28-PIPE: Copy for Notion - formats document in Notion-flavored markdown */}
         <button
-          onClick={() => toast.info('Notion integration coming soon! Configure API key in settings.')}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[var(--glass-panel)] hover:bg-[var(--glass-elevated)] text-[var(--glass-text-body)] rounded-lg font-medium text-sm transition-colors opacity-70"
+          onClick={() => {
+            const latestArtifact = sprout.generatedArtifacts?.[sprout.generatedArtifacts.length - 1];
+            const doc = latestArtifact?.document || sprout.researchDocument;
+
+            if (doc) {
+              const exportProvenance: ProvenanceInfo = {
+                lensName: sprout.provenance?.lens?.name,
+                journeyName: sprout.provenance?.journey?.name,
+                hubName: sprout.provenance?.hub?.name,
+                templateName: latestArtifact?.templateName,
+                writerConfigVersion: latestArtifact?.writerConfigVersion,
+                generatedAt: latestArtifact?.generatedAt || doc.createdAt,
+              };
+
+              const notionContent = documentToNotionMarkdown(doc, exportProvenance);
+              navigator.clipboard.writeText(notionContent.content);
+              toast.success('Copied to clipboard in Notion format!');
+
+              signals.emitExported(
+                sprout.id,
+                { format: 'notion' },
+                provenance
+              );
+              emit.custom('sproutExported', { sproutId: sprout.id, format: 'notion-markdown' });
+            } else {
+              toast.error('No document available to copy');
+            }
+          }}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[var(--glass-panel)] hover:bg-[var(--glass-elevated)] text-[var(--glass-text-body)] rounded-lg font-medium text-sm transition-colors"
         >
           <span className="text-lg" role="img" aria-label="Notion">
             📓
           </span>
-          Save to Notion
+          Copy for Notion
         </button>
       </div>
     </aside>
