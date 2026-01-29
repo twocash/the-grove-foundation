@@ -4,6 +4,10 @@
 import React, { useState } from 'react';
 import type { Sprout } from '@core/schema/sprout';
 import { buildCognitiveRouting } from '@core/schema/cognitive-routing';
+import {
+  downloadMarkdown,
+  type ProvenanceInfo,
+} from '@explore/utils/markdown-export';
 
 export type TertiaryAction = 'archive' | 'annotate' | 'export';
 
@@ -41,30 +45,49 @@ export const TertiaryActions: React.FC<TertiaryActionsProps> = ({
     }
   };
 
-  // US-D004: Export to markdown
+  // US-D004: Export to markdown (S28-PIPE enhanced)
   const handleExport = () => {
-    const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
+    // Get the best available document source
+    const latestArtifact = sprout.generatedArtifacts?.[sprout.generatedArtifacts.length - 1];
+    const doc = latestArtifact?.document || sprout.researchDocument;
 
-    // Build markdown content with provenance header
-    const content = `# ${sprout.query}
+    if (doc) {
+      // Full professional export with ResearchDocument
+      const exportProvenance: ProvenanceInfo = {
+        lensName: sprout.provenance?.lens?.name,
+        journeyName: sprout.provenance?.journey?.name,
+        hubName: sprout.provenance?.hub?.name,
+        templateName: latestArtifact?.templateName,
+        writerConfigVersion: latestArtifact?.writerConfigVersion,
+        generatedAt: latestArtifact?.generatedAt || doc.createdAt,
+      };
+
+      downloadMarkdown(doc, exportProvenance);
+    } else {
+      // Fallback: Export raw sprout response
+      const cognitiveRouting = buildCognitiveRouting(sprout.provenance);
+      const content = `# ${sprout.query}
 
 ---
-**Generated:** ${new Date(sprout.capturedAt).toLocaleDateString()}
-**Lens:** ${sprout.provenance?.lens?.name || 'Default'}
-**Cognitive Path:** ${cognitiveRouting.path}
+generated: ${new Date(sprout.capturedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+lens: ${sprout.provenance?.lens?.name || 'Default'}
+cognitive_path: ${cognitiveRouting.path}
 ---
 
 ${sprout.response}
+
+---
+*Exported from Grove Research Platform*
 `;
 
-    // Create and trigger download
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `sprout-${sprout.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `grove-research-${sprout.id.slice(0, 8)}-${new Date().toISOString().split('T')[0]}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
     // Notify parent
     onAction('export');
