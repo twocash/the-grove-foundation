@@ -92,79 +92,154 @@ export const DOMAIN_NAMES: Record<string, string> = {
 /**
  * Full provenance structure for document frontmatter.
  * Follows 4D Experience Model terminology.
+ *
+ * Designed for reverse-engineering knowledge routes from embedded documents.
+ * All IDs enable complete traceability through the system.
  */
 export interface DocumentProvenance {
-  // === Identity ===
-  id: string;
-  sproutId?: string;
+  // === Identity (Primary Keys) ===
+  id: string;                              // Document ID
+  sproutId?: string;                       // Source sprout that generated this
+  groveId?: string;                        // Grove context (multi-tenancy)
+  evidenceBundleId?: string;               // Research evidence bundle ID
 
   // === Authorship ===
   author: string;
   copyright: string;
 
   // === Timestamps ===
-  date: string;
-  generatedAt: string;
-  capturedAt?: string;
+  date: string;                            // YYYY-MM-DD
+  generatedAt: string;                     // ISO timestamp
+  capturedAt?: string;                     // When original query was captured
+  researchCompletedAt?: string;            // When research phase completed
 
   // === Document Classification ===
-  type: string;
-  typeCode: string;
+  type: string;                            // Full type name (vision, spec, etc.)
+  typeCode: string;                        // Short code (v, s, r, etc.)
   status: 'complete' | 'partial' | 'insufficient-evidence';
 
-  // === 4D Experience Provenance ===
-  cognitiveDomain?: string;
-  cognitiveDomainId?: string;
-  experiencePath?: string;
-  experiencePathId?: string;
-  experienceMomentId?: string;
+  // === 4D Experience Provenance (with IDs for routing) ===
+  cognitiveDomain?: string;                // Domain name
+  cognitiveDomainId?: string;              // Domain ID for routing
+  experiencePath?: string;                 // Path name
+  experiencePathId?: string;               // Path ID for routing
+  experienceMomentId?: string;             // Moment ID (if from sequence)
 
-  // === Lens ===
-  lens?: string;
-  lensId?: string;
+  // === Lens (with ID) ===
+  lens?: string;                           // Lens name
+  lensId?: string;                         // Lens ID for lookup
 
   // === Cognitive Routing (4-field model) ===
   routing: {
-    path?: string;
-    prompt: string;
-    inspiration?: string;
-    domain?: string;
+    path?: string;                         // Experience path taken
+    prompt: string;                        // Original query/prompt
+    inspiration?: string;                  // Triggering context
+    domain?: string;                       // Cognitive domain
   };
 
-  // === Writer Pipeline ===
-  template?: string;
-  templateId?: string;
-  templateVersion?: number;
+  // === Writer Pipeline (with config IDs) ===
+  template?: string;                       // Template name
+  templateId?: string;                     // Template row ID
+  templateVersion?: number;                // Template version
   templateSource?: 'system-seed' | 'user-created' | 'forked' | 'imported';
-  writerConfigVersion?: number;
+  writerConfigId?: string;                 // Writer config row ID
+  writerConfigVersion?: number;            // Writer config version
   renderingSource?: 'template' | 'default-writer' | 'default-research';
+
+  // === Research Pipeline (optional, for research-based docs) ===
+  researchConfigId?: string;               // Research agent config row ID
+  researchConfigVersion?: number;          // Research agent config version
 
   // === Evidence Quality ===
   confidenceScore: number;
   sourceCount: number;
   wordCount: number;
 
+  // === Source References (for citation traceability) ===
+  sourceIds?: string[];                    // IDs of source documents used
+  sourceUrls?: string[];                   // URLs of external sources
+
   // === Tags ===
   tags: string[];
+
+  // === Embedding Metadata (for knowledge indexing) ===
+  embeddingModel?: string;                 // Model used for embedding
+  embeddedAt?: string;                     // When document was embedded
+  chunkCount?: number;                     // Number of chunks created
 }
 
 /**
  * Minimal provenance info passed from UI components
  */
 export interface ProvenanceInput {
+  // Grove context
+  groveId?: string;
+
+  // Lens
   lensName?: string;
   lensId?: string;
+
+  // 4D Experience
   cognitiveDomain?: string;
   cognitiveDomainId?: string;
   experiencePath?: string;
   experiencePathId?: string;
+  experienceMomentId?: string;
+
+  // Template
   templateName?: string;
   templateId?: string;
   templateVersion?: number;
   templateSource?: 'system-seed' | 'user-created' | 'forked' | 'imported';
+
+  // Writer config
+  writerConfigId?: string;
   writerConfigVersion?: number;
   renderingSource?: 'template' | 'default-writer' | 'default-research';
+
+  // Research config (if applicable)
+  researchConfigId?: string;
+  researchConfigVersion?: number;
+  evidenceBundleId?: string;
+  researchCompletedAt?: string;
+
+  // Timestamps
   generatedAt?: string;
+
+  // Source references
+  sourceIds?: string[];
+  sourceUrls?: string[];
+}
+
+/**
+ * Flat metadata for embedding/indexing.
+ * All IDs concatenated for semantic searchability.
+ */
+export interface EmbeddingMetadata {
+  // Concatenated ID chain for routing reconstruction
+  idChain: string;  // Format: grove:lens:domain:path:template:config
+
+  // Individual IDs (for filtering)
+  groveId?: string;
+  lensId?: string;
+  cognitiveDomainId?: string;
+  experiencePathId?: string;
+  templateId?: string;
+  writerConfigId?: string;
+  researchConfigId?: string;
+
+  // Classification (for filtering)
+  type: string;
+  typeCode: string;
+  status: string;
+  confidenceScore: number;
+
+  // Tags (for filtering)
+  tags: string[];
+
+  // Timestamps (for temporal queries)
+  generatedAt: string;
+  date: string;
 }
 
 // =============================================================================
@@ -296,10 +371,15 @@ export function buildFullProvenance(
   const now = new Date();
   const year = (input.generatedAt ? new Date(input.generatedAt) : now).getFullYear();
 
+  // Extract source URLs from citations
+  const sourceUrls = doc.citations?.map(c => c.url).filter(Boolean) || [];
+
   return {
-    // === Identity ===
+    // === Identity (Primary Keys) ===
     id: doc.id,
     sproutId: sprout?.id,
+    groveId: input.groveId || 'main',  // Default grove
+    evidenceBundleId: input.evidenceBundleId,
 
     // === Authorship ===
     author: DEFAULT_AUTHOR,
@@ -309,6 +389,7 @@ export function buildFullProvenance(
     date: doc.createdAt.split('T')[0],
     generatedAt: input.generatedAt || doc.createdAt,
     capturedAt: sprout?.capturedAt,
+    researchCompletedAt: input.researchCompletedAt,
 
     // === Document Classification ===
     type: TYPE_NAMES[getTypeCode(input.templateName || 'research')] || 'research',
@@ -320,7 +401,7 @@ export function buildFullProvenance(
     cognitiveDomainId: input.cognitiveDomainId || sprout?.provenance?.hub?.id,
     experiencePath: input.experiencePath || sprout?.provenance?.journey?.name,
     experiencePathId: input.experiencePathId || sprout?.provenance?.journey?.id,
-    experienceMomentId: undefined, // Not typically available at document level
+    experienceMomentId: input.experienceMomentId,
 
     // === Lens ===
     lens: input.lensName || sprout?.provenance?.lens?.name,
@@ -339,13 +420,22 @@ export function buildFullProvenance(
     templateId: input.templateId,
     templateVersion: input.templateVersion,
     templateSource: input.templateSource,
+    writerConfigId: input.writerConfigId,
     writerConfigVersion: input.writerConfigVersion,
     renderingSource: input.renderingSource,
+
+    // === Research Pipeline ===
+    researchConfigId: input.researchConfigId,
+    researchConfigVersion: input.researchConfigVersion,
 
     // === Evidence Quality ===
     confidenceScore: doc.confidenceScore,
     sourceCount: doc.citations.length,
     wordCount: doc.wordCount,
+
+    // === Source References ===
+    sourceIds: input.sourceIds,
+    sourceUrls: sourceUrls.length > 0 ? sourceUrls : undefined,
 
     // === Tags ===
     tags: inferTags(input, doc.query),
@@ -353,16 +443,90 @@ export function buildFullProvenance(
 }
 
 /**
+ * Build embedding metadata for knowledge indexing.
+ * Creates a flat structure optimized for vector DB metadata filtering.
+ */
+export function buildEmbeddingMetadata(provenance: DocumentProvenance): EmbeddingMetadata {
+  // Build ID chain for routing reconstruction
+  // Format: grove:lens:domain:path:template:writerConfig
+  const idParts = [
+    provenance.groveId || '_',
+    provenance.lensId || '_',
+    provenance.cognitiveDomainId || '_',
+    provenance.experiencePathId || '_',
+    provenance.templateId || '_',
+    provenance.writerConfigId || '_',
+  ];
+  const idChain = idParts.join(':');
+
+  return {
+    idChain,
+
+    // Individual IDs
+    groveId: provenance.groveId,
+    lensId: provenance.lensId,
+    cognitiveDomainId: provenance.cognitiveDomainId,
+    experiencePathId: provenance.experiencePathId,
+    templateId: provenance.templateId,
+    writerConfigId: provenance.writerConfigId,
+    researchConfigId: provenance.researchConfigId,
+
+    // Classification
+    type: provenance.type,
+    typeCode: provenance.typeCode,
+    status: provenance.status,
+    confidenceScore: provenance.confidenceScore,
+
+    // Tags
+    tags: provenance.tags,
+
+    // Timestamps
+    generatedAt: provenance.generatedAt,
+    date: provenance.date,
+  };
+}
+
+/**
+ * Parse an ID chain back to individual IDs.
+ * Inverse of buildEmbeddingMetadata's idChain.
+ */
+export function parseIdChain(idChain: string): {
+  groveId?: string;
+  lensId?: string;
+  cognitiveDomainId?: string;
+  experiencePathId?: string;
+  templateId?: string;
+  writerConfigId?: string;
+} {
+  const parts = idChain.split(':');
+  return {
+    groveId: parts[0] !== '_' ? parts[0] : undefined,
+    lensId: parts[1] !== '_' ? parts[1] : undefined,
+    cognitiveDomainId: parts[2] !== '_' ? parts[2] : undefined,
+    experiencePathId: parts[3] !== '_' ? parts[3] : undefined,
+    templateId: parts[4] !== '_' ? parts[4] : undefined,
+    writerConfigId: parts[5] !== '_' ? parts[5] : undefined,
+  };
+}
+
+/**
  * Generate YAML frontmatter string from provenance.
+ * Includes full ID chain for reverse-engineering knowledge routes.
  */
 export function generateFrontmatter(provenance: DocumentProvenance): string {
   const lines: string[] = ['---'];
 
-  // === Identity ===
+  // === Identity (Primary Keys) ===
   lines.push(`title: "${provenance.routing.prompt.replace(/"/g, '\\"')}"`);
   lines.push(`id: "${provenance.id}"`);
   if (provenance.sproutId) {
     lines.push(`sprout_id: "${provenance.sproutId}"`);
+  }
+  if (provenance.groveId) {
+    lines.push(`grove_id: "${provenance.groveId}"`);
+  }
+  if (provenance.evidenceBundleId) {
+    lines.push(`evidence_bundle_id: "${provenance.evidenceBundleId}"`);
   }
   lines.push('');
 
@@ -377,6 +541,9 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   if (provenance.capturedAt) {
     lines.push(`captured_at: "${provenance.capturedAt}"`);
   }
+  if (provenance.researchCompletedAt) {
+    lines.push(`research_completed_at: "${provenance.researchCompletedAt}"`);
+  }
   lines.push('');
 
   // === Document Classification ===
@@ -385,7 +552,7 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   lines.push(`status: "${provenance.status}"`);
   lines.push('');
 
-  // === 4D Experience Provenance ===
+  // === 4D Experience Provenance (with IDs) ===
   if (provenance.cognitiveDomain) {
     lines.push(`cognitive_domain: "${provenance.cognitiveDomain}"`);
   }
@@ -398,9 +565,12 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   if (provenance.experiencePathId) {
     lines.push(`experience_path_id: "${provenance.experiencePathId}"`);
   }
+  if (provenance.experienceMomentId) {
+    lines.push(`experience_moment_id: "${provenance.experienceMomentId}"`);
+  }
   lines.push('');
 
-  // === Lens ===
+  // === Lens (with ID) ===
   if (provenance.lens) {
     lines.push(`lens: "${provenance.lens}"`);
   }
@@ -423,7 +593,7 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   }
   lines.push('');
 
-  // === Writer Pipeline ===
+  // === Writer Pipeline (with config IDs) ===
   if (provenance.template) {
     lines.push(`template: "${provenance.template}"`);
   }
@@ -436,6 +606,9 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   if (provenance.templateSource) {
     lines.push(`template_source: "${provenance.templateSource}"`);
   }
+  if (provenance.writerConfigId) {
+    lines.push(`writer_config_id: "${provenance.writerConfigId}"`);
+  }
   if (provenance.writerConfigVersion !== undefined) {
     lines.push(`writer_config_version: ${provenance.writerConfigVersion}`);
   }
@@ -444,11 +617,34 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
   }
   lines.push('');
 
+  // === Research Pipeline (if applicable) ===
+  if (provenance.researchConfigId || provenance.researchConfigVersion !== undefined) {
+    if (provenance.researchConfigId) {
+      lines.push(`research_config_id: "${provenance.researchConfigId}"`);
+    }
+    if (provenance.researchConfigVersion !== undefined) {
+      lines.push(`research_config_version: ${provenance.researchConfigVersion}`);
+    }
+    lines.push('');
+  }
+
   // === Evidence Quality ===
   lines.push(`confidence_score: ${provenance.confidenceScore}`);
   lines.push(`source_count: ${provenance.sourceCount}`);
   lines.push(`word_count: ${provenance.wordCount}`);
   lines.push('');
+
+  // === Source References ===
+  if (provenance.sourceUrls && provenance.sourceUrls.length > 0) {
+    lines.push('source_urls:');
+    for (const url of provenance.sourceUrls.slice(0, 10)) { // Limit to 10 for readability
+      lines.push(`  - "${url}"`);
+    }
+    if (provenance.sourceUrls.length > 10) {
+      lines.push(`  # ... and ${provenance.sourceUrls.length - 10} more`);
+    }
+    lines.push('');
+  }
 
   // === Tags ===
   if (provenance.tags.length > 0) {
@@ -457,6 +653,12 @@ export function generateFrontmatter(provenance: DocumentProvenance): string {
       lines.push(`  - "${tag}"`);
     }
   }
+
+  // === ID Chain (for embedding metadata) ===
+  const embeddingMeta = buildEmbeddingMetadata(provenance);
+  lines.push('');
+  lines.push(`# Routing ID Chain (grove:lens:domain:path:template:config)`);
+  lines.push(`id_chain: "${embeddingMeta.idChain}"`);
 
   lines.push('---');
 
