@@ -2,7 +2,8 @@
 // Notion Export Utility - Export research documents to Notion pages
 // Sprint: S28-PIPE - Notion integration
 //
-// Uses Notion-flavored markdown format with proper escaping and structure.
+// Produces clean markdown that renders correctly when pasted into Notion.
+// Uses blockquotes with emoji for callout-like sections.
 // Uses canonical naming conventions with 4D Experience Model terminology.
 
 import type { ResearchDocument, Citation } from '@core/schema/research-document';
@@ -18,10 +19,10 @@ export interface NotionExportOptions {
   parentPageId?: string;
   /** Include metadata table */
   includeMetadata?: boolean;
-  /** Include provenance callout */
+  /** Include provenance section */
   includeProvenance?: boolean;
-  /** Use collapsible toggle for references */
-  collapsibleReferences?: boolean;
+  /** Format provenance as code block (true) or blockquote (false) */
+  provenanceAsCode?: boolean;
 }
 
 export interface NotionPageContent {
@@ -36,7 +37,7 @@ export interface NotionPageContent {
 const DEFAULT_OPTIONS: NotionExportOptions = {
   includeMetadata: true,
   includeProvenance: true,
-  collapsibleReferences: true,
+  provenanceAsCode: true,
 };
 
 // =============================================================================
@@ -44,14 +45,15 @@ const DEFAULT_OPTIONS: NotionExportOptions = {
 // =============================================================================
 
 /**
- * Convert a ResearchDocument to Notion-flavored markdown format.
+ * Convert a ResearchDocument to clean markdown that renders in Notion.
  *
  * Structure:
- * 1. Executive Summary (callout)
- * 2. Full Analysis (with proper headings)
- * 3. Limitations (if present)
- * 4. References (toggle)
- * 5. Metadata (collapsible)
+ * 1. Provenance (code block or blockquote)
+ * 2. Executive Summary (blockquote with 💡)
+ * 3. Full Analysis (standard markdown)
+ * 4. Limitations (blockquote with ⚠️)
+ * 5. References (numbered list)
+ * 6. Metadata (markdown table)
  */
 export function documentToNotionMarkdown(
   doc: ResearchDocument,
@@ -61,56 +63,59 @@ export function documentToNotionMarkdown(
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const sections: string[] = [];
 
-  // 1. Provenance callout (if enabled)
+  // 1. Provenance section (if enabled)
   if (opts.includeProvenance && provenance) {
-    sections.push(formatProvenanceCallout(provenance, doc.createdAt));
-    sections.push('<empty-block/>');
+    sections.push(formatProvenanceSection(provenance, doc.createdAt, opts.provenanceAsCode));
+    sections.push('');
   }
 
-  // 2. Executive Summary (as highlighted callout)
+  // 2. Executive Summary (blockquote with emoji)
   if (doc.position && doc.position !== 'Insufficient evidence to form a position.') {
-    sections.push(`<callout icon="💡" color="blue_bg">`);
-    sections.push(`\t**Executive Summary**`);
-    sections.push(`\t${escapeNotionText(doc.position)}`);
-    sections.push(`</callout>`);
-    sections.push('<empty-block/>');
+    sections.push('> 💡 **Executive Summary**');
+    sections.push('>');
+    // Split position into blockquote lines
+    const positionLines = doc.position.split('\n');
+    for (const line of positionLines) {
+      sections.push(`> ${line}`);
+    }
+    sections.push('');
   }
 
-  // 3. Full Analysis (convert markdown to Notion format)
+  // 3. Full Analysis (clean markdown)
   if (doc.analysis) {
-    const notionAnalysis = convertAnalysisToNotion(doc.analysis);
-    sections.push(notionAnalysis);
+    const cleanAnalysis = convertAnalysisToCleanMarkdown(doc.analysis);
+    sections.push(cleanAnalysis);
   }
 
   // 4. Limitations (if present)
   if (doc.limitations) {
-    sections.push('<empty-block/>');
-    sections.push(`<callout icon="⚠️" color="yellow_bg">`);
-    sections.push(`\t**Limitations**`);
-    sections.push(`\t${escapeNotionText(doc.limitations)}`);
-    sections.push(`</callout>`);
+    sections.push('');
+    sections.push('> ⚠️ **Limitations**');
+    sections.push('>');
+    const limitationLines = doc.limitations.split('\n');
+    for (const line of limitationLines) {
+      sections.push(`> ${line}`);
+    }
   }
 
   // 5. References
   if (doc.citations && doc.citations.length > 0) {
-    sections.push('<empty-block/>');
+    sections.push('');
     sections.push('---');
-    sections.push('<empty-block/>');
-
-    if (opts.collapsibleReferences) {
-      sections.push(`▶## References {color="gray"}`);
-      sections.push(formatReferencesForNotion(doc.citations, true));
-    } else {
-      sections.push(`## References`);
-      sections.push(formatReferencesForNotion(doc.citations, false));
-    }
+    sections.push('');
+    sections.push('## References');
+    sections.push('');
+    sections.push(formatReferencesAsMarkdown(doc.citations));
   }
 
-  // 6. Metadata (collapsible)
+  // 6. Metadata (markdown table)
   if (opts.includeMetadata) {
-    sections.push('<empty-block/>');
-    sections.push(`▶ Document Metadata {color="gray"}`);
-    sections.push(formatMetadataForNotion(doc));
+    sections.push('');
+    sections.push('---');
+    sections.push('');
+    sections.push('### Document Metadata');
+    sections.push('');
+    sections.push(formatMetadataAsTable(doc));
   }
 
   // Generate canonical Notion title
@@ -141,64 +146,39 @@ export function documentToNotionMarkdown(
 // =============================================================================
 
 /**
- * Escape special characters for Notion markdown.
- * Characters that need escaping: \ * ~ ` $ [ ] < > { } | ^
+ * Convert analysis markdown to clean format.
+ * Removes custom HTML tags and ensures proper spacing.
  */
-function escapeNotionText(text: string): string {
-  // Don't escape inside code blocks - handled separately
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/\*/g, '\\*')
-    .replace(/~/g, '\\~')
-    .replace(/`/g, '\\`')
-    .replace(/\$/g, '\\$')
-    .replace(/\[/g, '\\[')
-    .replace(/\]/g, '\\]')
-    .replace(/</g, '\\<')
-    .replace(/>/g, '\\>')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\|/g, '\\|')
-    .replace(/\^/g, '\\^');
-}
-
-/**
- * Convert standard markdown to Notion-flavored markdown.
- */
-function convertAnalysisToNotion(analysis: string): string {
+function convertAnalysisToCleanMarkdown(analysis: string): string {
   let result = analysis;
 
-  // Convert <cite index="N">text</cite> to Notion format
-  // Use footnote-style citations: text[^N]
+  // Convert <cite index="N">text</cite> to footnote style: text[^N]
   result = result.replace(
     /<cite\s+index="(\d+)"[^>]*>([^<]+)<\/cite>/gi,
-    '$2[^$1]'
+    '$2 [^$1]'
   );
 
-  // Remove any HTML spans (we'll handle colors differently in Notion)
+  // Remove any HTML spans
   result = result.replace(/<\/?span[^>]*>/gi, '');
 
-  // Convert blockquotes with multiple lines to use <br>
-  result = result.replace(/^> (.+)$/gm, (match, content) => {
-    // If there are newlines in the content, replace with <br>
-    return `> ${content.replace(/\n/g, '<br>')}`;
-  });
+  // Ensure proper spacing around headers
+  result = result.replace(/\n(#{1,4})\s/g, '\n\n$1 ');
 
-  // Ensure proper spacing around headers (Notion needs this)
-  result = result.replace(/\n(#{1,4})\s/g, '\n<empty-block/>\n$1 ');
-
-  // Convert --- to Notion divider (needs empty lines)
-  result = result.replace(/\n---\n/g, '\n<empty-block/>\n---\n<empty-block/>\n');
+  // Ensure dividers have spacing
+  result = result.replace(/\n---\n/g, '\n\n---\n\n');
 
   return result;
 }
 
 /**
- * Format provenance as a callout with 4D Experience Model terminology.
+ * Format provenance as code block or blockquote.
+ * Code blocks preserve YAML-like structure nicely in Notion.
  */
-function formatProvenanceCallout(provenance: ProvenanceInfo, createdAt: string): string {
-  const lines: string[] = [`<callout icon="📋" color="gray_bg">`];
-
+function formatProvenanceSection(
+  provenance: ProvenanceInfo,
+  createdAt: string,
+  asCodeBlock: boolean = true
+): string {
   const date = new Date(provenance.generatedAt || createdAt);
   const dateStr = date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -206,42 +186,57 @@ function formatProvenanceCallout(provenance: ProvenanceInfo, createdAt: string):
     day: 'numeric',
   });
 
-  lines.push(`\t**Generated:** ${dateStr}`);
+  const fields: string[] = [];
+  fields.push(`Generated: ${dateStr}`);
 
   if (provenance.lensName) {
-    lines.push(`\t**Lens:** ${provenance.lensName}`);
+    fields.push(`Lens: ${provenance.lensName}`);
   }
 
   // 4D Experience Model fields
   const domain = provenance.cognitiveDomain || provenance.hubName;
   if (domain) {
-    lines.push(`\t**Cognitive Domain:** ${domain}`);
+    fields.push(`Cognitive Domain: ${domain}`);
   }
 
   const path = provenance.experiencePath || provenance.journeyName;
   if (path) {
-    lines.push(`\t**Experience Path:** ${path}`);
+    fields.push(`Experience Path: ${path}`);
   }
 
   if (provenance.templateName) {
-    lines.push(`\t**Template:** ${provenance.templateName}`);
+    fields.push(`Template: ${provenance.templateName}`);
   }
 
   if (provenance.writerConfigVersion) {
-    lines.push(`\t**Writer Config:** v${provenance.writerConfigVersion}`);
+    fields.push(`Writer Config: v${provenance.writerConfigVersion}`);
   }
 
-  lines.push(`</callout>`);
-
-  return lines.join('\n');
+  if (asCodeBlock) {
+    // Format as YAML code block - renders nicely in Notion
+    const lines: string[] = ['```yaml', '# Document Provenance'];
+    for (const field of fields) {
+      const [key, ...valueParts] = field.split(': ');
+      const value = valueParts.join(': ');
+      lines.push(`${key.toLowerCase().replace(/ /g, '_')}: "${value}"`);
+    }
+    lines.push('```');
+    return lines.join('\n');
+  } else {
+    // Format as blockquote with emoji
+    const lines: string[] = ['> 📋 **Document Provenance**', '>'];
+    for (const field of fields) {
+      lines.push(`> **${field.split(': ')[0]}:** ${field.split(': ').slice(1).join(': ')}`);
+    }
+    return lines.join('\n');
+  }
 }
 
 /**
- * Format citations as Notion-style references.
+ * Format citations as a clean numbered list.
  */
-function formatReferencesForNotion(citations: Citation[], indented: boolean): string {
+function formatReferencesAsMarkdown(citations: Citation[]): string {
   const lines: string[] = [];
-  const indent = indented ? '\t' : '';
 
   // Sort by index
   const sorted = [...citations].sort((a, b) => a.index - b.index);
@@ -256,55 +251,38 @@ function formatReferencesForNotion(citations: Citation[], indented: boolean): st
       : 'n.d.';
 
     // Format as numbered list with link
-    lines.push(`${indent}1. **\\[${cite.index}\\]** [${escapeNotionText(cite.title)}](${cite.url})`);
-    lines.push(`${indent}\t*${cite.domain}* · Accessed: ${accessDate}`);
+    lines.push(`${cite.index}. **[${cite.title}](${cite.url})**`);
+    lines.push(`   *${cite.domain}* · Accessed: ${accessDate}`);
 
     if (cite.snippet) {
-      const snippet = cite.snippet.slice(0, 120);
-      lines.push(`${indent}\t> ${escapeNotionText(snippet)}${cite.snippet.length > 120 ? '...' : ''}`);
+      const snippet = cite.snippet.slice(0, 150);
+      lines.push(`   > ${snippet}${cite.snippet.length > 150 ? '...' : ''}`);
     }
+    lines.push('');
   }
 
   return lines.join('\n');
 }
 
 /**
- * Format metadata as a Notion table inside a toggle.
+ * Format metadata as a standard markdown table.
  */
-function formatMetadataForNotion(doc: ResearchDocument): string {
+function formatMetadataAsTable(doc: ResearchDocument): string {
   const confidencePercent = Math.round(doc.confidenceScore * 100);
-  const statusLabel = doc.status === 'complete' ? 'Complete'
-    : doc.status === 'partial' ? 'Partial'
-    : 'Insufficient Evidence';
+  const statusLabel = doc.status === 'complete' ? '✅ Complete'
+    : doc.status === 'partial' ? '⚠️ Partial'
+    : '❌ Insufficient Evidence';
 
   const lines: string[] = [];
 
-  lines.push(`\t<table header-column="true">`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Document ID</td>`);
-  lines.push(`\t\t\t<td>\`${doc.id}\`</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Status</td>`);
-  lines.push(`\t\t\t<td>${statusLabel}</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Confidence</td>`);
-  lines.push(`\t\t\t<td>${confidencePercent}%</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Word Count</td>`);
-  lines.push(`\t\t\t<td>${doc.wordCount.toLocaleString()}</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Sources</td>`);
-  lines.push(`\t\t\t<td>${doc.citations.length}</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t\t<tr>`);
-  lines.push(`\t\t\t<td>Created</td>`);
-  lines.push(`\t\t\t<td>${new Date(doc.createdAt).toISOString()}</td>`);
-  lines.push(`\t\t</tr>`);
-  lines.push(`\t</table>`);
+  lines.push('| Property | Value |');
+  lines.push('|----------|-------|');
+  lines.push(`| Document ID | \`${doc.id}\` |`);
+  lines.push(`| Status | ${statusLabel} |`);
+  lines.push(`| Confidence | ${confidencePercent}% |`);
+  lines.push(`| Word Count | ${doc.wordCount.toLocaleString()} |`);
+  lines.push(`| Sources | ${doc.citations.length} |`);
+  lines.push(`| Created | ${new Date(doc.createdAt).toISOString().split('T')[0]} |`);
 
   return lines.join('\n');
 }
