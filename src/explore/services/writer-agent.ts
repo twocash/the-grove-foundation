@@ -278,6 +278,21 @@ async function callLLMForWriting(
     }
 
     const result = await response.json();
+    // === DEBUG S28-PIPE: Full response inspection ===
+    console.log('=== WRITER AGENT RESPONSE DEBUG ===');
+    console.log('result keys:', Object.keys(result));
+    console.log('result.position:', result.position?.substring(0, 100));
+    console.log('result.analysis type:', typeof result.analysis);
+    console.log('result.analysis length:', result.analysis?.length);
+    console.log('result.analysis preview:', result.analysis?.substring(0, 200));
+    console.log('result.citations:', result.citations);
+    console.log('result.citations.length:', result.citations?.length);
+    console.log('result.renderingSource:', result.renderingSource);
+    // Check for alternative field names Claude might use
+    console.log('result.content:', result.content?.substring?.(0, 100));
+    console.log('result.text:', result.text?.substring?.(0, 100));
+    console.log('result.response:', result.response?.substring?.(0, 100));
+    console.log('=== END RESPONSE DEBUG ===');
     console.log('[WriterAgent] Claude response received, position:', result.position?.substring(0, 50));
 
     // Map response to expected format

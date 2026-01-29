@@ -14,7 +14,6 @@
 import type { EvidenceBundle } from '@core/schema/evidence-bundle';
 import type { ResearchDocument } from '@core/schema/research-document';
 import type { WriterAgentConfigPayload } from '@core/schema/writer-agent-config';
-import type { OutputTemplatePayload } from '@core/schema/output-template';
 
 import {
   writeResearchDocument,
@@ -106,6 +105,18 @@ function buildWriterPrompt(
   template: LoadedTemplate | undefined,
   query: string
 ): string {
+  // === DEBUG S28-PIPE: Log prompt building inputs ===
+  console.log('=== PROMPT BUILD DEBUG ===');
+  console.log('writerConfig.version:', writerConfig.version);
+  console.log('template?.name:', template?.name);
+  console.log('template?.id:', template?.id);
+  if (template) {
+    console.log('template.config:', template.config);
+    console.log('template.systemPrompt length:', template.systemPrompt?.length);
+    console.log('template.renderingInstructions length:', template.renderingInstructions?.length);
+  }
+  // === END DEBUG ===
+
   if (!template) {
     // No template: use writer config directly
     return `${writerConfig.writingStyle}
@@ -116,13 +127,18 @@ ${writerConfig.citationsStyle}`;
   }
 
   // Get template config overrides (S28-PIPE: config field IS the overrides, no nested .overrides)
-  const templatePayload = template as unknown as OutputTemplatePayload;
-  const overrides = templatePayload.config as Partial<WriterAgentConfigPayload> | undefined;
+  // LoadedTemplate now includes config field directly
+  const overrides = template.config as Partial<WriterAgentConfigPayload> | undefined;
 
   // Merge: template overrides win, otherwise inherit from base config
   const effectiveWritingStyle = overrides?.writingStyle ?? writerConfig.writingStyle;
   const effectiveFormatting = overrides?.resultsFormatting ?? writerConfig.resultsFormatting;
   const effectiveCitations = overrides?.citationsStyle ?? writerConfig.citationsStyle;
+
+  // === DEBUG S28-PIPE: Log merge result ===
+  console.log('effectiveWritingStyle source:', overrides?.writingStyle ? 'template-override' : 'base-config');
+  console.log('effectiveWritingStyle preview:', effectiveWritingStyle?.substring(0, 100));
+  // === END DEBUG ===
 
   // Build final prompt via string concatenation
   return `${template.systemPrompt}
@@ -198,6 +214,8 @@ export async function generateDocument(
     // S28-PIPE: Build merged system prompt (config + template overrides)
     const finalPrompt = buildWriterPrompt(writerConfig, template, request.query);
     console.log('[DocumentGenerator] Built merged prompt from config + template');
+    console.log('[DocumentGenerator] finalPrompt length:', finalPrompt.length);
+    console.log('[DocumentGenerator] finalPrompt preview:', finalPrompt.substring(0, 300) + '...');
 
     // Call writer agent with merged prompt
     const document = await writeResearchDocument(

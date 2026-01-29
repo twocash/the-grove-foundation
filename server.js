@@ -2993,13 +2993,34 @@ Transform this evidence into a structured research document following your appro
         const text = response.content[0].text;
         console.log('[Research Write] Response received, length:', text.length);
 
+        // === DEBUG S28-PIPE: Full Claude response ===
+        console.log('=== CLAUDE RESPONSE DEBUG ===');
+        console.log('Raw response preview (first 500 chars):', text.substring(0, 500));
+        console.log('Raw response preview (last 500 chars):', text.substring(text.length - 500));
+        // === END DEBUG ===
+
         // Try to parse JSON from response
         let result;
         try {
             const jsonMatch = text.match(/\{[\s\S]*\}/);
+            console.log('[Research Write] JSON match found:', !!jsonMatch);
+            if (jsonMatch) {
+                console.log('[Research Write] JSON match length:', jsonMatch[0].length);
+            }
             result = jsonMatch ? JSON.parse(jsonMatch[0]) : { analysis: text, position: '', limitations: '', citations: [] };
+            // === DEBUG S28-PIPE: Parsed result structure ===
+            console.log('=== PARSED RESULT DEBUG ===');
+            console.log('result keys:', Object.keys(result));
+            console.log('result.position:', result.position?.substring?.(0, 100));
+            console.log('result.analysis length:', result.analysis?.length);
+            console.log('result.citations count:', result.citations?.length);
+            // Check for alternative fields
+            console.log('result.content:', result.content?.substring?.(0, 100));
+            console.log('result.body:', result.body?.substring?.(0, 100));
+            console.log('=== END PARSED RESULT DEBUG ===');
         } catch (parseErr) {
             console.warn('[Research Write] JSON parse failed, returning raw text');
+            console.warn('[Research Write] Parse error:', parseErr.message);
             result = { analysis: text, position: '', limitations: '', citations: [] };
         }
 

@@ -113,6 +113,14 @@ export async function loadWriterAgentConfig(
 
     if (data?.payload) {
       console.log(`[ConfigLoader] Loaded Writer Agent config v${data.payload.version} from database`);
+      // === DEBUG S28-PIPE: Show loaded config fields ===
+      console.log('=== WRITER CONFIG DEBUG ===');
+      console.log('version:', data.payload.version);
+      console.log('writingStyle length:', data.payload.writingStyle?.length);
+      console.log('writingStyle preview:', data.payload.writingStyle?.substring(0, 100));
+      console.log('resultsFormatting length:', data.payload.resultsFormatting?.length);
+      console.log('citationsStyle length:', data.payload.citationsStyle?.length);
+      console.log('=== END WRITER CONFIG DEBUG ===');
       return data.payload;
     }
   } catch (error) {
@@ -121,6 +129,7 @@ export async function loadWriterAgentConfig(
 
   // Fall back to defaults if no active config or query failed
   console.log('[ConfigLoader] Using default Writer Agent config (no active config in database)');
+  console.log('[ConfigLoader] DEFAULT version:', DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD.version);
   return DEFAULT_WRITER_AGENT_CONFIG_PAYLOAD;
 }
 

@@ -50,6 +50,8 @@ export interface LoadedTemplate {
   agentType: AgentType;
   /** S27-OT: Optional rendering instructions for document formatting */
   renderingInstructions?: string;
+  /** S28-PIPE: Config overrides for writer agent (writingStyle, citationsStyle, resultsFormatting) */
+  config?: Record<string, unknown>;
 }
 
 // =============================================================================
@@ -64,8 +66,11 @@ export interface LoadedTemplate {
  * @returns LoadedTemplate or undefined if not found
  */
 export async function loadTemplateById(templateId: string): Promise<LoadedTemplate | undefined> {
+  console.log('[TemplateLoader] loadTemplateById called with:', templateId);
+
   // Try Supabase first
   const supabase = getSupabaseClient();
+  console.log('[TemplateLoader] Supabase client available:', !!supabase);
   if (supabase) {
     try {
       // Try by table ID first
@@ -88,7 +93,17 @@ export async function loadTemplateById(templateId: string): Promise<LoadedTempla
 
       if (data && !error) {
         console.log(`[TemplateLoader] Loaded from Supabase: ${data.meta.title} (source: ${data.payload.source})`);
+        // === DEBUG S28-PIPE: Full template data ===
+        console.log('=== TEMPLATE DATA DEBUG ===');
+        console.log('data.meta.id:', data.meta.id);
+        console.log('data.payload.name:', data.payload.name);
+        console.log('data.payload.systemPrompt length:', data.payload.systemPrompt?.length);
+        console.log('data.payload.config:', data.payload.config);
+        console.log('data.payload.renderingInstructions length:', data.payload.renderingInstructions?.length);
+        console.log('=== END TEMPLATE DATA DEBUG ===');
         return groveObjectToLoadedTemplate(data as GroveObject<OutputTemplatePayload>);
+      } else {
+        console.log('[TemplateLoader] Supabase query returned no data or error:', error);
       }
     } catch (error) {
       console.error('[TemplateLoader] Supabase query failed:', error);
@@ -96,6 +111,7 @@ export async function loadTemplateById(templateId: string): Promise<LoadedTempla
   }
 
   // Fall back to seed defaults
+  console.log('[TemplateLoader] Falling back to seed defaults...');
   const templates = getDefaults<OutputTemplatePayload>('output-template');
   const template = templates.find(t => t.meta.id === templateId);
 
@@ -236,5 +252,6 @@ function groveObjectToLoadedTemplate(
     systemPrompt: obj.payload.systemPrompt,
     agentType: obj.payload.agentType,
     renderingInstructions: obj.payload.renderingInstructions, // S27-OT
+    config: obj.payload.config, // S28-PIPE: Config overrides for writer agent
   };
 }
