@@ -6516,6 +6516,59 @@ app.post('/api/knowledge/documents/:id/embed', async (req, res) => {
   }
 });
 
+// Set chunk metadata for knowledge route reconstruction
+// Sprint: S28-PIPE - Embedding metadata for provenance
+app.post('/api/knowledge/documents/:id/metadata', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const { metadata } = req.body;
+    if (!metadata) {
+      return res.status(400).json({ error: 'metadata is required' });
+    }
+
+    // Build embedding metadata from input
+    const embeddingMetadata = knowledge.buildEmbeddingMetadata(metadata);
+
+    // Set metadata on all chunks for this document
+    const result = await knowledge.setDocumentChunkMetadata(req.params.id, embeddingMetadata);
+
+    if (result.error) {
+      return res.status(500).json({ error: result.error });
+    }
+
+    res.json({
+      success: true,
+      message: `Updated ${result.updated} chunks with metadata`,
+      idChain: embeddingMetadata.idChain,
+      updated: result.updated,
+    });
+  } catch (error) {
+    console.error('[Knowledge] Set metadata error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get chunk metadata statistics
+// Sprint: S28-PIPE - Embedding metadata for provenance
+app.get('/api/knowledge/metadata/stats', async (req, res) => {
+  try {
+    const knowledge = await getKnowledgeModule();
+    if (!knowledge) {
+      return res.status(503).json({ error: 'Knowledge module not available' });
+    }
+
+    const stats = await knowledge.getMetadataStats();
+    res.json(stats);
+  } catch (error) {
+    console.error('[Knowledge] Metadata stats error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Reprocess document - run all enrichment and save immediately
 // Sprint: upload-pipeline-unification-v1 - Copilot reprocess command
 app.post('/api/knowledge/documents/:id/reprocess', async (req, res) => {
