@@ -3,9 +3,11 @@
 // Sprint: S28-PIPE - Notion integration
 //
 // Uses Notion-flavored markdown format with proper escaping and structure.
+// Uses canonical naming conventions with 4D Experience Model terminology.
 
 import type { ResearchDocument, Citation } from '@core/schema/research-document';
 import type { ProvenanceInfo } from './markdown-export';
+import { generateNotionTitle, type ProvenanceInput } from '@core/config/naming-conventions';
 
 // =============================================================================
 // Types
@@ -111,11 +113,25 @@ export function documentToNotionMarkdown(
     sections.push(formatMetadataForNotion(doc));
   }
 
+  // Generate canonical Notion title
+  const provenanceInput: ProvenanceInput = provenance ? {
+    lensName: provenance.lensName,
+    templateName: provenance.templateName,
+    templateId: provenance.templateId,
+    templateVersion: provenance.templateVersion,
+    writerConfigVersion: provenance.writerConfigVersion,
+    generatedAt: provenance.generatedAt,
+    cognitiveDomain: provenance.cognitiveDomain || provenance.hubName,
+    experiencePath: provenance.experiencePath || provenance.journeyName,
+  } : {};
+
+  const title = generateNotionTitle(doc, provenanceInput);
+
   return {
-    title: doc.query,
+    title,
     content: sections.join('\n'),
     properties: {
-      title: doc.query,
+      title,
     },
   };
 }
@@ -178,7 +194,7 @@ function convertAnalysisToNotion(analysis: string): string {
 }
 
 /**
- * Format provenance as a callout.
+ * Format provenance as a callout with 4D Experience Model terminology.
  */
 function formatProvenanceCallout(provenance: ProvenanceInfo, createdAt: string): string {
   const lines: string[] = [`<callout icon="📋" color="gray_bg">`];
@@ -196,12 +212,23 @@ function formatProvenanceCallout(provenance: ProvenanceInfo, createdAt: string):
     lines.push(`\t**Lens:** ${provenance.lensName}`);
   }
 
+  // 4D Experience Model fields
+  const domain = provenance.cognitiveDomain || provenance.hubName;
+  if (domain) {
+    lines.push(`\t**Cognitive Domain:** ${domain}`);
+  }
+
+  const path = provenance.experiencePath || provenance.journeyName;
+  if (path) {
+    lines.push(`\t**Experience Path:** ${path}`);
+  }
+
   if (provenance.templateName) {
     lines.push(`\t**Template:** ${provenance.templateName}`);
   }
 
   if (provenance.writerConfigVersion) {
-    lines.push(`\t**Config Version:** v${provenance.writerConfigVersion}`);
+    lines.push(`\t**Writer Config:** v${provenance.writerConfigVersion}`);
   }
 
   lines.push(`</callout>`);

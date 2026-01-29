@@ -4,9 +4,17 @@
 //
 // DEX: Provenance as Infrastructure
 // All exports include full provenance chain and citations.
+// Uses canonical naming conventions with 4D Experience Model terminology.
 
 import type { ResearchDocument, Citation } from '@core/schema/research-document';
-import type { GeneratedArtifact } from '@core/schema/sprout';
+import type { GeneratedArtifact, Sprout } from '@core/schema/sprout';
+import {
+  generateCanonicalFilename,
+  buildFullProvenance,
+  generateFrontmatter,
+  type ProvenanceInput,
+  type DocumentProvenance,
+} from '@core/config/naming-conventions';
 
 // =============================================================================
 // Types
@@ -23,15 +31,42 @@ export interface ExportOptions {
   includeToc?: boolean;
   /** Custom title override */
   title?: string;
+  /** Use canonical YAML frontmatter (new format) */
+  useCanonicalFrontmatter?: boolean;
+  /** Sprout for full provenance (optional) */
+  sprout?: Sprout;
 }
 
+/**
+ * Provenance info for exports.
+ * Extended to support 4D Experience Model terminology.
+ */
 export interface ProvenanceInfo {
+  // Lens
   lensName?: string;
+  lensId?: string;
+
+  // 4D Experience Model (replaces journey/hub)
+  cognitiveDomain?: string;
+  cognitiveDomainId?: string;
+  experiencePath?: string;
+  experiencePathId?: string;
+
+  // Legacy aliases (for backward compatibility)
+  /** @deprecated Use experiencePath instead */
   journeyName?: string;
+  /** @deprecated Use cognitiveDomain instead */
   hubName?: string;
+
+  // Template/Writer provenance
   templateName?: string;
+  templateId?: string;
   templateVersion?: number;
+  templateSource?: 'system-seed' | 'user-created' | 'forked' | 'imported';
   writerConfigVersion?: number;
+  renderingSource?: 'template' | 'default-writer' | 'default-research';
+
+  // Timestamps
   generatedAt?: string;
 }
 
@@ -40,6 +75,7 @@ const DEFAULT_OPTIONS: ExportOptions = {
   includeProvenance: true,
   citationStyle: 'endnotes',
   includeToc: false,
+  useCanonicalFrontmatter: true,
 };
 
 // =============================================================================
@@ -47,11 +83,34 @@ const DEFAULT_OPTIONS: ExportOptions = {
 // =============================================================================
 
 /**
+ * Convert ProvenanceInfo to ProvenanceInput for naming conventions.
+ */
+function toProvenanceInput(info?: ProvenanceInfo): ProvenanceInput {
+  if (!info) return {};
+
+  return {
+    lensName: info.lensName,
+    lensId: info.lensId,
+    cognitiveDomain: info.cognitiveDomain || info.hubName,
+    cognitiveDomainId: info.cognitiveDomainId,
+    experiencePath: info.experiencePath || info.journeyName,
+    experiencePathId: info.experiencePathId,
+    templateName: info.templateName,
+    templateId: info.templateId,
+    templateVersion: info.templateVersion,
+    templateSource: info.templateSource,
+    writerConfigVersion: info.writerConfigVersion,
+    renderingSource: info.renderingSource,
+    generatedAt: info.generatedAt,
+  };
+}
+
+/**
  * Convert a ResearchDocument to professional markdown format.
  *
  * Structure:
- * 1. Title
- * 2. Provenance header (optional)
+ * 1. Canonical YAML Frontmatter (if enabled)
+ * 2. Title
  * 3. Executive Summary (position)
  * 4. Full Analysis
  * 5. Limitations (if present)
@@ -66,14 +125,20 @@ export function documentToMarkdown(
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const sections: string[] = [];
 
-  // 1. Title
-  const title = opts.title || doc.query;
-  sections.push(`# ${title}\n`);
-
-  // 2. Provenance header
-  if (opts.includeProvenance && provenance) {
+  // 1. Canonical YAML Frontmatter (new format with full provenance)
+  if (opts.useCanonicalFrontmatter && opts.includeProvenance) {
+    const input = toProvenanceInput(provenance);
+    const fullProvenance = buildFullProvenance(doc, opts.sprout, input);
+    sections.push(generateFrontmatter(fullProvenance));
+    sections.push('');
+  } else if (opts.includeProvenance && provenance) {
+    // Legacy provenance header
     sections.push(formatProvenanceHeader(provenance, doc.createdAt));
   }
+
+  // 2. Title
+  const title = opts.title || doc.query;
+  sections.push(`# ${title}\n`);
 
   // 3. Executive Summary (position)
   if (doc.position && doc.position !== 'Insufficient evidence to form a position.') {
@@ -267,9 +332,22 @@ function formatMetadataFooter(doc: ResearchDocument): string {
 
 /**
  * Generate a filename for the exported document.
+ *
+ * @param doc - The research document
+ * @param provenance - Optional provenance info for canonical naming
+ * @param useCanonical - Use canonical naming pattern (YYMMDD-{type}-{domain}-{slug}.md)
  */
-export function generateFilename(doc: ResearchDocument, prefix = 'grove-research'): string {
-  // Create a slug from the query
+export function generateFilename(
+  doc: ResearchDocument,
+  provenance?: ProvenanceInfo,
+  useCanonical = true
+): string {
+  if (useCanonical && provenance) {
+    const input = toProvenanceInput(provenance);
+    return generateCanonicalFilename(doc, input);
+  }
+
+  // Legacy fallback: grove-research-{slug}-{date}-{shortId}.md
   const slug = doc.query
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -279,7 +357,7 @@ export function generateFilename(doc: ResearchDocument, prefix = 'grove-research
   const date = new Date(doc.createdAt).toISOString().split('T')[0];
   const shortId = doc.id.slice(0, 8);
 
-  return `${prefix}-${slug}-${date}-${shortId}.md`;
+  return `grove-research-${slug}-${date}-${shortId}.md`;
 }
 
 /**
@@ -291,7 +369,7 @@ export function downloadMarkdown(
   options?: ExportOptions
 ): void {
   const markdown = documentToMarkdown(doc, provenance, options);
-  const filename = generateFilename(doc);
+  const filename = generateFilename(doc, provenance, true);
 
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
