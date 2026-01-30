@@ -55,7 +55,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --update-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest \
+            --update-secrets GEMINI_API_KEY=GEMINI_API_KEY:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest \
             --set-env-vars "GCS_BUCKET_NAME=grove-assets,GITHUB_TOKEN=${{ secrets.GH_PAT_FOR_SYNC }},GITHUB_REPO_OWNER=twocash,GITHUB_REPO_NAME=the-grove-foundation"
       - name: Verify deployment
         run: |
