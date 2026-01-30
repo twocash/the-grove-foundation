@@ -296,7 +296,7 @@ export async function executeResearchPipeline(
   console.log(`[Pipeline] sprout.templateId = "${sprout.templateId ?? 'undefined'}"`);
 
   // Sprint: research-template-wiring-v1 - Load template for systemPrompt
-  const template = loadResearchTemplate(sprout.templateId);
+  const template = await loadResearchTemplate(sprout.templateId);
   if (template) {
     console.log(`[Pipeline] Using template: ${template.name} (${template.id})`);
   } else {
