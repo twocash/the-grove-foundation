@@ -262,6 +262,53 @@ After warmup, respond to these commands:
 | `sync` | Run Notion sync ceremony |
 | `sync --dry-run` | Show sync plan without executing |
 | `sync --force` | Re-sync already-synced entries |
+| `production-qa` | **CRITICAL** Run production E2E validation after deploy |
+| `production-qa --smoke` | Quick smoke test (template loading + API) |
+
+---
+
+## Production QA Protocol (CRITICAL)
+
+**After EVERY production deployment, remind user to run Production E2E Validation.**
+
+When a deploy completes or user asks about production status, display:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              🚀 PRODUCTION QA REMINDER                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Deploy detected. Run production validation:                │
+│                                                             │
+│  FULL TEST (recommended after significant changes):         │
+│  BASE_URL=https://the-grove.ai npx playwright test \        │
+│    production-e2e-validation.spec.ts --project=e2e          │
+│                                                             │
+│  SMOKE TEST (quick check):                                  │
+│  BASE_URL=https://the-grove.ai npx playwright test \        │
+│    production-e2e-validation.spec.ts --grep "Smoke"         │
+│                                                             │
+│  Test file: tests/e2e/production-e2e-validation.spec.ts     │
+│                                                             │
+│  [Run Full]  [Run Smoke]  [Skip]                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### What Production Tests Validate
+
+| Test | What It Checks |
+|------|----------------|
+| Template Loading | No 406 errors, RPC functions work |
+| Research API | Endpoint reachable, correct error handling |
+| Full Pipeline | Create sprout → Research → Artifact generation |
+
+### When to Run
+
+- **ALWAYS** after GitHub Actions deploy succeeds
+- After applying Supabase migrations manually
+- When debugging "systemPrompt is required" errors
+- Before announcing features as ready
 
 ---
 
