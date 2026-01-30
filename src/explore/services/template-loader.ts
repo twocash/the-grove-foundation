@@ -80,13 +80,11 @@ export async function loadTemplateById(templateId: string): Promise<LoadedTempla
         .eq('id', templateId)
         .single();
 
-      // If not found, try by meta.id
+      // If not found, try by meta.id using RPC
+      // S28-PIPE: Arrow operators don't work with Supabase JS client
       if (!data && error?.code === 'PGRST116') {
         const result = await supabase
-          .from('output_templates')
-          .select('*')
-          .eq("meta->>'id'", templateId)
-          .single();
+          .rpc('get_output_template_by_meta_id', { p_meta_id: templateId });
         data = result.data;
         error = result.error;
       }
@@ -136,13 +134,9 @@ export async function loadDefaultTemplate(agentType: AgentType): Promise<LoadedT
   const supabase = getSupabaseClient();
   if (supabase) {
     try {
+      // S28-PIPE: Use RPC function for JSONB queries (arrow operators don't work with Supabase JS client)
       const { data, error } = await supabase
-        .from('output_templates')
-        .select('*')
-        .eq("payload->>'agentType'", agentType)
-        .eq("payload->>'isDefault'", 'true')
-        .eq("payload->>'status'", 'active')
-        .single();
+        .rpc('get_default_output_template', { p_agent_type: agentType });
 
       if (data && !error) {
         console.log(`[TemplateLoader] Loaded default ${agentType} template from Supabase: ${data.meta.title}`);
@@ -180,15 +174,13 @@ export async function loadActiveTemplates(agentType: AgentType): Promise<LoadedT
   const supabase = getSupabaseClient();
   if (supabase) {
     try {
+      // S28-PIPE: Use RPC function for JSONB queries (arrow operators don't work with Supabase JS client)
       const { data, error } = await supabase
-        .from('output_templates')
-        .select('*')
-        .eq("payload->>'agentType'", agentType)
-        .eq("payload->>'status'", 'active');
+        .rpc('get_output_templates_by_agent', { p_agent_type: agentType });
 
       if (data && !error && data.length > 0) {
         console.log(`[TemplateLoader] Loaded ${data.length} ${agentType} templates from Supabase`);
-        return data.map(t => groveObjectToLoadedTemplate(t as GroveObject<OutputTemplatePayload>));
+        return data.map((t: GroveObject<OutputTemplatePayload>) => groveObjectToLoadedTemplate(t));
       }
     } catch (error) {
       console.error('[TemplateLoader] Supabase query failed:', error);
