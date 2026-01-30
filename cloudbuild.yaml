@@ -1,5 +1,6 @@
 steps:
   # Step 1: Build the Docker image (--no-cache forces fresh build)
+  # VITE_* variables must be passed at build time for frontend
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -8,6 +9,10 @@ steps:
       - 'gcr.io/$PROJECT_ID/grove-foundation'
       - '--build-arg'
       - 'GEMINI_API_KEY=$_GEMINI_API_KEY'
+      - '--build-arg'
+      - 'VITE_SUPABASE_URL=$_VITE_SUPABASE_URL'
+      - '--build-arg'
+      - 'VITE_SUPABASE_ANON_KEY=$_VITE_SUPABASE_ANON_KEY'
       - '.'
 
   # Step 2: Push to Container Registry
@@ -29,7 +34,7 @@ steps:
       - 'us-central1'
       - '--allow-unauthenticated'
       - '--update-secrets'
-      - 'GEMINI_API_KEY=GEMINI_API_KEY:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest'
+      - 'GEMINI_API_KEY=GEMINI_API_KEY:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_SERVICE_ROLE_KEY=SUPABASE_SERVICE_ROLE_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest'
       - '--set-env-vars'
       - 'GCS_BUCKET_NAME=grove-assets'
 
@@ -71,6 +76,8 @@ images:
 
 substitutions:
   _GEMINI_API_KEY: ''  # Passed from trigger or command line
+  _VITE_SUPABASE_URL: ''  # Supabase URL for frontend
+  _VITE_SUPABASE_ANON_KEY: ''  # Supabase anon key for frontend
 
 options:
   logging: CLOUD_LOGGING_ONLY
