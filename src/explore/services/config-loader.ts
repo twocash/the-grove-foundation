@@ -52,17 +52,13 @@ export async function loadResearchAgentConfig(
   try {
     const supabase = getSupabaseClient();
 
-    // Query Supabase for active config (singleton pattern)
-    // S28-PIPE: No grove_id column yet - just query for active status
+    // Query Supabase for active config using RPC function
+    // S28-PIPE: Uses get_active_research_agent_config() defined in migration 012
     const { data, error } = await supabase
-      .from('research_agent_configs')
-      .select('payload')
-      .eq("meta->>'status'", 'active')
-      .single();
+      .rpc('get_active_research_agent_config');
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows returned (expected if no active config)
-      console.error('[ConfigLoader] Supabase query error:', error);
+    if (error) {
+      console.error('[ConfigLoader] Supabase RPC error:', error);
     }
 
     if (data?.payload) {
@@ -98,29 +94,17 @@ export async function loadWriterAgentConfig(
   try {
     const supabase = getSupabaseClient();
 
-    // Query Supabase for active config (singleton pattern)
-    // S28-PIPE: No grove_id column yet - just query for active status
+    // Query Supabase for active config using RPC function
+    // S28-PIPE: Uses get_active_writer_agent_config() defined in migration 012
     const { data, error } = await supabase
-      .from('writer_agent_configs')
-      .select('payload')
-      .eq("meta->>'status'", 'active')
-      .single();
+      .rpc('get_active_writer_agent_config');
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows returned (expected if no active config)
-      console.error('[ConfigLoader] Supabase query error:', error);
+    if (error) {
+      console.error('[ConfigLoader] Supabase RPC error:', error);
     }
 
     if (data?.payload) {
       console.log(`[ConfigLoader] Loaded Writer Agent config v${data.payload.version} from database`);
-      // === DEBUG S28-PIPE: Show loaded config fields ===
-      console.log('=== WRITER CONFIG DEBUG ===');
-      console.log('version:', data.payload.version);
-      console.log('writingStyle length:', data.payload.writingStyle?.length);
-      console.log('writingStyle preview:', data.payload.writingStyle?.substring(0, 100));
-      console.log('resultsFormatting length:', data.payload.resultsFormatting?.length);
-      console.log('citationsStyle length:', data.payload.citationsStyle?.length);
-      console.log('=== END WRITER CONFIG DEBUG ===');
       return data.payload;
     }
   } catch (error) {
