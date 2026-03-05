@@ -32,6 +32,8 @@ WORKDIR /app
 
 # Copy dist from builder
 COPY --from=builder /app/dist ./dist
+# Copy pre-built autonomaton demo (subpath SPA)
+COPY --from=builder /app/autonomaton ./autonomaton
 COPY package.json ./
 
 # Install ONLY production dependencies (express, google libs)
