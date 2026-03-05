@@ -314,6 +314,7 @@ async function ensurePR(octokit, owner, repo, head, base, configName) {
 app.use(express.json({ limit: '10mb' }));
 
 // Serve static files
+app.use('/autonomaton', express.static(path.join(__dirname, 'autonomaton')));
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // --- Admin API ---
@@ -6838,6 +6839,11 @@ Return ONLY the single word classification.`;
   const response = await callGeminiForEnrichment(prompt);
   return response.trim().toLowerCase();
 }
+
+// Autonomaton SPA Fallback (must come before main catch-all)
+app.get('/autonomaton/*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'autonomaton', 'index.html'));
+});
 
 // SPA Fallback
 app.get('*', (req, res) => {
