@@ -679,7 +679,7 @@ Identify 2 specific areas where a junior dev would instinctively hardcode logic 
       <span style="color: #B0A898;">Prompt Schema:</span>
       <a href="https://github.com/twocash/grove-autonomaton-example/blob/main/src/config/prompts.schema.ts" target="_blank" style="color: #4CAF72; text-decoration: none; border-bottom: 1px dotted #4CAF72;">v1.0 (View Source)</a><br/>
       <span style="color: #D4621A; font-size: 14px; font-weight: bold;">
-        PIPELINE HASH: ${`<a href="https://github.com/twocash/grove-autonomaton-example" target="_blank" style="color: #D4621A; text-decoration: none;">#${Ei(i)}</a>`}
+        PIPELINE HASH: <a href="https://github.com/twocash/grove-autonomaton-example" target="_blank" style="color: #D4621A; text-decoration: none;">#${Ei(i)}</a>
       </span>
     </div>
   </div>
